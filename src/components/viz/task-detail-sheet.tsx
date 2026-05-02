@@ -1,7 +1,7 @@
 import type { Task } from "@/lib/task-types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { StatusBadge } from "./status-badge";
-import { ExternalLink, GitBranch, FileCode, MessageSquare, Bot, User } from "lucide-react";
+import { ExternalLink, GitBranch, FileCode, MessageSquare, Bot, User, Siren } from "lucide-react";
 
 interface Props {
   task: Task | null;
