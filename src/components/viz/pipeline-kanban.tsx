@@ -52,6 +52,11 @@ export function PipelineKanban({ tasks, onSelect }: Props) {
                           ⚠ {fixRounds} fix
                         </span>
                       )}
+                      {incidents > 0 && (
+                        <span className="flex items-center gap-0.5 text-[color:var(--color-status-fix)]">
+                          <Siren className="h-3 w-3" /> {incidents}
+                        </span>
+                      )}
                     </div>
                   </button>
                 );
