@@ -1,5 +1,5 @@
 import type { ComputedMetrics } from "@/lib/task-metrics";
-import { GitMerge, Loader2, AlertTriangle, RotateCw, Clock, GitCommit, Bot, User } from "lucide-react";
+import { GitMerge, Loader2, AlertTriangle, RotateCw, Clock, GitCommit, Bot, User, Siren } from "lucide-react";
 
 interface Props {
   m: ComputedMetrics;
