@@ -1,5 +1,5 @@
 import type { ComputedMetrics } from "@/lib/task-metrics";
-import { GitMerge, Loader2, AlertTriangle, RotateCw, Clock, GitCommit, Bot, User } from "lucide-react";
+import { GitMerge, Loader2, AlertTriangle, RotateCw, Clock, GitCommit, Bot, User, Siren } from "lucide-react";
 
 interface Props {
   m: ComputedMetrics;
@@ -44,7 +44,7 @@ function Card({
 
 export function MetricsGrid({ m }: Props) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
       <Card label="Total tasks" value={String(m.total)} icon={<Database />} />
       <Card label="Merged" value={String(m.merged)} icon={<GitMerge className="h-4 w-4" />} accent="var(--color-status-merged)" />
       <Card label="In flight" value={String(m.inFlight)} icon={<Loader2 className="h-4 w-4" />} accent="var(--color-status-progress)" />
@@ -78,6 +78,13 @@ export function MetricsGrid({ m }: Props) {
           </span>
         }
         accent="var(--color-status-approved)"
+      />
+      <Card
+        label="Incidents"
+        value={String(m.totalIncidents)}
+        hint={`${m.openIncidents} open`}
+        icon={<Siren className="h-4 w-4" />}
+        accent="var(--color-status-fix)"
       />
     </div>
   );

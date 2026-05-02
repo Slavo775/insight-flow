@@ -41,6 +41,33 @@ export interface Push {
   commitMessage: string;
 }
 
+export interface IncidentStatusEntry {
+  status: string;
+  at: string;
+  by?: string;
+}
+
+export interface Incident {
+  id: string;
+  title: string;
+  severity: "critical" | "high" | "medium" | "low" | string;
+  status:
+    | "reported"
+    | "investigating"
+    | "production-fix"
+    | "fixed"
+    | "verified"
+    | "closed"
+    | string;
+  reportedAt: string;
+  resolvedAt?: string | null;
+  branch?: string;
+  description?: string;
+  rootCause?: string | null;
+  fix?: string | null;
+  statusHistory?: IncidentStatusEntry[];
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -64,10 +91,30 @@ export interface Task {
   branch?: string;
   mrUrl?: string;
   mergedAt?: string | null;
+  incidents?: Incident[];
+}
+
+export interface ShardFile {
+  range?: { from: number; to: number };
+  tasks: Task[];
+}
+
+export interface MasterFile {
+  meta: {
+    nextId: number;
+    currentTaskId?: string;
+    nextIncidentId?: number;
+    shards: string[];
+  };
 }
 
 export interface TaskDataset {
-  meta?: { nextId: number; currentTaskId?: string };
+  meta?: {
+    nextId: number;
+    currentTaskId?: string;
+    nextIncidentId?: number;
+    shards?: string[];
+  };
   tasks: Task[];
 }
 

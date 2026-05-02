@@ -11,6 +11,8 @@ export interface ComputedMetrics {
   totalCommits: number;
   aiApprovals: number;
   humanApprovals: number;
+  totalIncidents: number;
+  openIncidents: number;
 }
 
 export function computeMetrics(tasks: Task[]): ComputedMetrics {
@@ -24,6 +26,8 @@ export function computeMetrics(tasks: Task[]): ComputedMetrics {
   let commits = 0;
   let aiApprovals = 0;
   let humanApprovals = 0;
+  let totalIncidents = 0;
+  let openIncidents = 0;
   for (const t of tasks) {
     reviewRounds += t.reviews.length;
     fixCount += t.reviews.filter((r) => r.verdict === "fix-needed").length;
@@ -35,6 +39,10 @@ export function computeMetrics(tasks: Task[]): ComputedMetrics {
     if (t.mergedAt && t.createdAt) {
       cycleSum += (new Date(t.mergedAt).getTime() - new Date(t.createdAt).getTime()) / 36e5;
       cycleN++;
+    }
+    for (const inc of t.incidents ?? []) {
+      totalIncidents++;
+      if (inc.status !== "closed" && inc.status !== "verified") openIncidents++;
     }
   }
   return {
@@ -48,6 +56,8 @@ export function computeMetrics(tasks: Task[]): ComputedMetrics {
     totalCommits: commits,
     aiApprovals,
     humanApprovals,
+    totalIncidents,
+    openIncidents,
   };
 }
 

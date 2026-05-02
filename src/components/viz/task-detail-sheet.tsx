@@ -1,7 +1,7 @@
 import type { Task } from "@/lib/task-types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { StatusBadge } from "./status-badge";
-import { ExternalLink, GitBranch, FileCode, MessageSquare, Bot, User } from "lucide-react";
+import { ExternalLink, GitBranch, FileCode, MessageSquare, Bot, User, Siren } from "lucide-react";
 
 interface Props {
   task: Task | null;
@@ -192,6 +192,58 @@ export function TaskDetailSheet({ task, onClose }: Props) {
                       </li>
                     ))}
                   </ul>
+                </section>
+              )}
+              {task.incidents && task.incidents.length > 0 && (
+                <section>
+                  <h4 className="mb-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-[color:var(--color-status-fix)]">
+                    <Siren className="h-3 w-3" /> Incidents ({task.incidents.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {task.incidents.map((inc) => (
+                      <div
+                        key={inc.id}
+                        className="rounded-md border border-border bg-card p-3"
+                        style={{
+                          borderLeft: "3px solid var(--color-status-fix)",
+                        }}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] text-primary">{inc.id}</span>
+                            <span className="rounded border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase text-[color:var(--color-status-fix)]">
+                              {inc.severity}
+                            </span>
+                            <StatusBadge status={inc.status} />
+                          </div>
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {fmt(inc.reportedAt)}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-[12px] text-foreground">{inc.title}</p>
+                        {inc.description && (
+                          <p className="mt-1 text-[11px] text-muted-foreground">
+                            {inc.description}
+                          </p>
+                        )}
+                        {inc.rootCause && (
+                          <div className="mt-2 font-mono text-[10px] text-muted-foreground">
+                            <span className="text-foreground">root cause:</span> {inc.rootCause}
+                          </div>
+                        )}
+                        {inc.fix && (
+                          <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+                            <span className="text-foreground">fix:</span> {inc.fix}
+                          </div>
+                        )}
+                        {inc.branch && (
+                          <div className="mt-1 flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
+                            <GitBranch className="h-3 w-3" /> {inc.branch}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </section>
               )}
             </div>

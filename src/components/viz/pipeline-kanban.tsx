@@ -1,7 +1,7 @@
 import type { Task } from "@/lib/task-types";
 import { KANBAN_COLUMNS } from "@/lib/task-types";
 import { StatusBadge } from "./status-badge";
-import { GitBranch, FileCode } from "lucide-react";
+import { GitBranch, FileCode, Siren } from "lucide-react";
 
 interface Props {
   tasks: Task[];
@@ -24,6 +24,7 @@ export function PipelineKanban({ tasks, onSelect }: Props) {
             <div className="flex flex-col gap-2 p-2">
               {items.map((t) => {
                 const fixRounds = t.reviews.filter((r) => r.verdict === "fix-needed").length;
+                const incidents = t.incidents?.length ?? 0;
                 return (
                   <button
                     key={t.id}
@@ -49,6 +50,11 @@ export function PipelineKanban({ tasks, onSelect }: Props) {
                       {fixRounds > 0 && (
                         <span className="text-[color:var(--color-status-fix)]">
                           ⚠ {fixRounds} fix
+                        </span>
+                      )}
+                      {incidents > 0 && (
+                        <span className="flex items-center gap-0.5 text-[color:var(--color-status-fix)]">
+                          <Siren className="h-3 w-3" /> {incidents}
                         </span>
                       )}
                     </div>
