@@ -11,6 +11,8 @@ export interface ComputedMetrics {
   totalCommits: number;
   aiApprovals: number;
   humanApprovals: number;
+  totalIncidents: number;
+  openIncidents: number;
 }
 
 export function computeMetrics(tasks: Task[]): ComputedMetrics {
