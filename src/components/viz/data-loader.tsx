@@ -21,7 +21,7 @@ function mergeFiles(parsed: unknown[]): TaskDataset {
       for (const t of j.tasks as Task[]) taskMap.set(t.id, t);
     }
     if (j.meta && typeof j.meta === "object") {
-      meta = { ...meta, ...(j.meta as TaskDataset["meta"]) };
+      meta = { ...(meta ?? { nextId: 0 }), ...(j.meta as TaskDataset["meta"]) };
     }
   }
   const tasks = [...taskMap.values()].sort((a, b) => a.id.localeCompare(b.id));
