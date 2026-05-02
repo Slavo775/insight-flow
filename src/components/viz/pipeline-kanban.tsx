@@ -24,6 +24,7 @@ export function PipelineKanban({ tasks, onSelect }: Props) {
             <div className="flex flex-col gap-2 p-2">
               {items.map((t) => {
                 const fixRounds = t.reviews.filter((r) => r.verdict === "fix-needed").length;
+                const incidents = t.incidents?.length ?? 0;
                 return (
                   <button
                     key={t.id}
