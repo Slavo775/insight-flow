@@ -1,7 +1,7 @@
 import type { Task } from "@/lib/task-types";
 import { KANBAN_COLUMNS } from "@/lib/task-types";
 import { StatusBadge } from "./status-badge";
-import { GitBranch, FileCode } from "lucide-react";
+import { GitBranch, FileCode, Siren } from "lucide-react";
 
 interface Props {
   tasks: Task[];
