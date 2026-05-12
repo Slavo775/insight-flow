@@ -9,7 +9,7 @@
       "title": "API fetch with TanStack Query + paginated shards",
       "type": "feat",
       "priority": "high",
-      "status": "changes-implemented",
+      "status": "approved",
       "folder": "workTasks/N00-api-fetch-with-tanstack-query-paginated-shards",
       "createdAt": "2026-05-12T20:30:14.686Z",
       "statusHistory": [
@@ -62,6 +62,21 @@
           "status": "changes-implemented",
           "at": "2026-05-12T20:41:41.785Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T20:42:15.535Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-12T20:56:50.961Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-12T20:57:30.824Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -83,6 +98,15 @@
           "comment": "Fix: (1) reset should also reset dataMode to fetch, (2) shard nav direction labels are swapped, (3) rename isFetch constant, (4) add loading toast on initial fetch",
           "type": "ai",
           "by": "task-human-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-12T20:56:50.966Z",
+          "endedAt": "2026-05-12T20:57:30.819Z",
+          "verdict": "approved",
+          "comment": "All checklist items pass. Prior review fixes verified. No blockers.",
+          "type": "ai",
+          "by": "task-review",
           "fix": null
         }
       ],
@@ -119,6 +143,11 @@
           "at": "2026-05-12T20:37:40.807Z",
           "commitHash": "80db88e",
           "commitMessage": "feat(web): wire up TanStack Query for API-based shard fetching with pagination"
+        },
+        {
+          "at": "2026-05-12T20:42:15.535Z",
+          "commitHash": "599bd52",
+          "commitMessage": "fix(web): address review feedback on data-loader and task-store"
         }
       ],
       "branch": "feat/N00-api-fetch-tanstack-query-paginated-shards",
