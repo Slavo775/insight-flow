@@ -9,7 +9,7 @@
       "title": "API fetch with TanStack Query + paginated shards",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N00-api-fetch-with-tanstack-query-paginated-shards",
       "createdAt": "2026-05-12T20:30:14.686Z",
       "statusHistory": [
@@ -17,12 +17,32 @@
           "status": "ready",
           "at": "2026-05-12T20:30:14.690Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T20:31:42.652Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-12T20:35:17.664Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-12T20:36:58.328Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-12T20:35:17.659Z",
+        "completedAt": "2026-05-12T20:36:58.327Z",
+        "filesChanged": [
+          "src/lib/api.ts",
+          "src/lib/task-store.ts",
+          "src/routes/__root.tsx",
+          "src/components/viz/data-loader.tsx"
+        ],
         "tokensUsed": null
       },
       "reviews": [],
@@ -34,7 +54,16 @@
         "data-loading",
         "tanstack-query",
         "pagination"
-      ]
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-12T20:31:42.649Z",
+          "commitHash": "22e10f2",
+          "commitMessage": "feat(tasks): add N00 task spec for API fetch with TanStack Query + paginated shards"
+        }
+      ],
+      "branch": "feat/N00-api-fetch-tanstack-query-paginated-shards",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/1"
     }
   ]
 }
