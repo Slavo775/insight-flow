@@ -32,13 +32,14 @@ function Dashboard() {
   const meta = useTaskStore((s) => s.meta);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
-  const [tag, setTag] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [group, setGroup] = useState<StatusGroup>("all");
   const [type, setType] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filtered = useMemo(
-    () => filterTasks(tasks, query, status, tag, type),
-    [tasks, query, status, tag, type],
+    () => filterTasks(tasks, query, status, group, tags, type),
+    [tasks, query, status, group, tags, type],
   );
   const metrics = useMemo(() => computeMetrics(filtered), [filtered]);
   const selected = useMemo(
