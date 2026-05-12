@@ -9,7 +9,7 @@ import { LifecycleTimeline } from "@/components/viz/lifecycle-timeline";
 import { PipelineKanban } from "@/components/viz/pipeline-kanban";
 import { HotspotsCharts } from "@/components/viz/hotspots-charts";
 import { TaskDetailSheet } from "@/components/viz/task-detail-sheet";
-import { FilterBar, filterTasks } from "@/components/viz/filter-bar";
+import { FilterBar, filterTasks, type StatusGroup } from "@/components/viz/filter-bar";
 import { CurrentJobBanner } from "@/components/viz/current-job-banner";
 import { Activity } from "lucide-react";
 
