@@ -9,7 +9,7 @@ import { LifecycleTimeline } from "@/components/viz/lifecycle-timeline";
 import { PipelineKanban } from "@/components/viz/pipeline-kanban";
 import { HotspotsCharts } from "@/components/viz/hotspots-charts";
 import { TaskDetailSheet } from "@/components/viz/task-detail-sheet";
-import { FilterBar, filterTasks } from "@/components/viz/filter-bar";
+import { FilterBar, filterTasks, type StatusGroup } from "@/components/viz/filter-bar";
 import { CurrentJobBanner } from "@/components/viz/current-job-banner";
 import { Activity } from "lucide-react";
 
@@ -32,13 +32,14 @@ function Dashboard() {
   const meta = useTaskStore((s) => s.meta);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
-  const [tag, setTag] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [group, setGroup] = useState<StatusGroup>("all");
   const [type, setType] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filtered = useMemo(
-    () => filterTasks(tasks, query, status, tag, type),
-    [tasks, query, status, tag, type],
+    () => filterTasks(tasks, query, status, group, tags, type),
+    [tasks, query, status, group, tags, type],
   );
   const metrics = useMemo(() => computeMetrics(filtered), [filtered]);
   const selected = useMemo(
@@ -84,7 +85,8 @@ function Dashboard() {
           tasks={tasks}
           query={query} setQuery={setQuery}
           status={status} setStatus={setStatus}
-          tag={tag} setTag={setTag}
+          group={group} setGroup={setGroup}
+          tags={tags} setTags={setTags}
           type={type} setType={setType}
         />
         <MetricsGrid m={metrics} />
