@@ -10,6 +10,7 @@ import { PipelineKanban } from "@/components/viz/pipeline-kanban";
 import { HotspotsCharts } from "@/components/viz/hotspots-charts";
 import { TaskDetailSheet } from "@/components/viz/task-detail-sheet";
 import { FilterBar, filterTasks } from "@/components/viz/filter-bar";
+import { CurrentJobBanner } from "@/components/viz/current-job-banner";
 import { Activity } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const tasks = useTaskStore((s) => s.tasks);
+  const meta = useTaskStore((s) => s.meta);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [tag, setTag] = useState("");
@@ -73,6 +75,11 @@ function Dashboard() {
       </header>
 
       <main className="mx-auto max-w-[1600px] space-y-5 px-5 py-5">
+        <CurrentJobBanner
+          currentTaskId={meta?.currentTaskId}
+          tasks={tasks}
+          onOpen={setSelectedId}
+        />
         <FilterBar
           tasks={tasks}
           query={query} setQuery={setQuery}
