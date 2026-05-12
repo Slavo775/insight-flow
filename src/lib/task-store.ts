@@ -53,6 +53,7 @@ export const useTaskStore = create<TaskStoreState>()(
           meta: SAMPLE_DATASET.meta ?? null,
           loadedAt: new Date().toISOString(),
           source: "sample",
+          dataMode: "fetch",
           currentShard: null,
           shardList: [],
         }),

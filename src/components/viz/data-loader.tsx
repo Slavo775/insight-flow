@@ -41,14 +41,13 @@ function mergeFiles(parsed: unknown[]): TaskDataset {
 function FetchMode() {
   const { setShardTasks, setShardList, shardList, currentShard, setCurrentShard } = useTaskStore();
 
-  const isFetch = true;
-  const { data: shards, isLoading: indexLoading, error: indexError } = useShardIndex(isFetch);
-  const { data: masterData } = useMasterData(isFetch);
+  const { data: shards, isLoading: indexLoading, error: indexError } = useShardIndex(true);
+  const { data: masterData } = useMasterData(true);
   const {
     data: shardData,
     isLoading: shardLoading,
     error: shardError,
-  } = useShardData(currentShard, isFetch);
+  } = useShardData(currentShard, true);
 
   // When shard index arrives, set list and default to first (highest) shard
   useEffect(() => {
@@ -68,6 +67,8 @@ function FetchMode() {
       const merged = mergeFiles(sources);
       if (merged.tasks.length > 0) {
         setShardTasks(merged.tasks, merged.meta, currentShard);
+        const label = currentShard.replace("tasks-", "").replace(".json", "");
+        toast.success(`Fetched ${merged.tasks.length} tasks from ${label}`);
       }
     }
   }, [shardData, masterData, currentShard, setShardTasks]);
@@ -109,7 +110,7 @@ function FetchMode() {
             onClick={goPrev}
             disabled={!hasPrev || shardLoading}
             className="inline-flex items-center justify-center rounded-md border border-border bg-card p-1 text-foreground transition hover:bg-accent disabled:opacity-30 disabled:hover:bg-card"
-            title="Previous shard (older)"
+            title="Newer shard"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
@@ -120,7 +121,7 @@ function FetchMode() {
             onClick={goNext}
             disabled={!hasNext || shardLoading}
             className="inline-flex items-center justify-center rounded-md border border-border bg-card p-1 text-foreground transition hover:bg-accent disabled:opacity-30 disabled:hover:bg-card"
-            title="Next shard (newer)"
+            title="Older shard"
           >
             <ChevronRight className="h-3.5 w-3.5" />
           </button>

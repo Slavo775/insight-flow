@@ -9,7 +9,7 @@
       "title": "API fetch with TanStack Query + paginated shards",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "changes-implemented",
       "folder": "workTasks/N00-api-fetch-with-tanstack-query-paginated-shards",
       "createdAt": "2026-05-12T20:30:14.686Z",
       "statusHistory": [
@@ -32,6 +32,36 @@
           "status": "implemented",
           "at": "2026-05-12T20:36:58.328Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T20:37:40.807Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-12T20:40:10.223Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "request-changes",
+          "at": "2026-05-12T20:40:10.271Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-12T20:40:51.505Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-12T20:40:57.079Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-12T20:41:41.785Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -45,8 +75,32 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
-      "changesAfterImplementation": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-12T20:40:10.226Z",
+          "endedAt": "2026-05-12T20:40:10.270Z",
+          "verdict": "request-changes",
+          "comment": "Fix: (1) reset should also reset dataMode to fetch, (2) shard nav direction labels are swapped, (3) rename isFetch constant, (4) add loading toast on initial fetch",
+          "type": "ai",
+          "by": "task-human-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-12T20:40:51.504Z",
+          "description": "Fix: (1) reset should also reset dataMode to fetch, (2) shard nav direction labels are swapped, (3) rename isFetch constant, (4) add loading toast on initial fetch",
+          "requestedBy": "task-human-review",
+          "status": "implemented",
+          "implementedAt": "2026-05-12T20:41:41.785Z",
+          "filesChanged": [
+            "src/lib/task-store.ts",
+            "src/components/viz/data-loader.tsx"
+          ],
+          "comment": "Fixed: reset includes dataMode, nav labels corrected, removed isFetch const, added fetch toast",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "incidents": [],
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -60,6 +114,11 @@
           "at": "2026-05-12T20:31:42.649Z",
           "commitHash": "22e10f2",
           "commitMessage": "feat(tasks): add N00 task spec for API fetch with TanStack Query + paginated shards"
+        },
+        {
+          "at": "2026-05-12T20:37:40.807Z",
+          "commitHash": "80db88e",
+          "commitMessage": "feat(web): wire up TanStack Query for API-based shard fetching with pagination"
         }
       ],
       "branch": "feat/N00-api-fetch-tanstack-query-paginated-shards",
