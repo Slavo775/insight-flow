@@ -85,7 +85,8 @@ function Dashboard() {
           tasks={tasks}
           query={query} setQuery={setQuery}
           status={status} setStatus={setStatus}
-          tag={tag} setTag={setTag}
+          group={group} setGroup={setGroup}
+          tags={tags} setTags={setTags}
           type={type} setType={setType}
         />
         <MetricsGrid m={metrics} />
