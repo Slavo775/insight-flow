@@ -1,0 +1,167 @@
+{
+  "range": {
+    "from": 0,
+    "to": 9
+  },
+  "tasks": [
+    {
+      "id": "N00",
+      "title": "API fetch with TanStack Query + paginated shards",
+      "type": "feat",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "workTasks/N00-api-fetch-with-tanstack-query-paginated-shards",
+      "createdAt": "2026-05-12T20:30:14.686Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-12T20:30:14.690Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T20:31:42.652Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-12T20:35:17.664Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-12T20:36:58.328Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T20:37:40.807Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-12T20:40:10.223Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "request-changes",
+          "at": "2026-05-12T20:40:10.271Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-12T20:40:51.505Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-12T20:40:57.079Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-12T20:41:41.785Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T20:42:15.535Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-12T20:56:50.961Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-12T20:57:30.824Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T20:58:02.649Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-12T20:35:17.659Z",
+        "completedAt": "2026-05-12T20:36:58.327Z",
+        "filesChanged": [
+          "src/lib/api.ts",
+          "src/lib/task-store.ts",
+          "src/routes/__root.tsx",
+          "src/components/viz/data-loader.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-12T20:40:10.226Z",
+          "endedAt": "2026-05-12T20:40:10.270Z",
+          "verdict": "request-changes",
+          "comment": "Fix: (1) reset should also reset dataMode to fetch, (2) shard nav direction labels are swapped, (3) rename isFetch constant, (4) add loading toast on initial fetch",
+          "type": "ai",
+          "by": "task-human-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-12T20:56:50.966Z",
+          "endedAt": "2026-05-12T20:57:30.819Z",
+          "verdict": "approved",
+          "comment": "All checklist items pass. Prior review fixes verified. No blockers.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-12T20:40:51.504Z",
+          "description": "Fix: (1) reset should also reset dataMode to fetch, (2) shard nav direction labels are swapped, (3) rename isFetch constant, (4) add loading toast on initial fetch",
+          "requestedBy": "task-human-review",
+          "status": "implemented",
+          "implementedAt": "2026-05-12T20:41:41.785Z",
+          "filesChanged": [
+            "src/lib/task-store.ts",
+            "src/components/viz/data-loader.tsx"
+          ],
+          "comment": "Fixed: reset includes dataMode, nav labels corrected, removed isFetch const, added fetch toast",
+          "implementedBy": "task-review-fix"
+        }
+      ],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "data-loading",
+        "tanstack-query",
+        "pagination"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-12T20:31:42.649Z",
+          "commitHash": "22e10f2",
+          "commitMessage": "feat(tasks): add N00 task spec for API fetch with TanStack Query + paginated shards"
+        },
+        {
+          "at": "2026-05-12T20:37:40.807Z",
+          "commitHash": "80db88e",
+          "commitMessage": "feat(web): wire up TanStack Query for API-based shard fetching with pagination"
+        },
+        {
+          "at": "2026-05-12T20:42:15.535Z",
+          "commitHash": "599bd52",
+          "commitMessage": "fix(web): address review feedback on data-loader and task-store"
+        },
+        {
+          "at": "2026-05-12T20:58:02.649Z",
+          "commitHash": "aff02ca",
+          "commitMessage": "docs(tasks): add N00 review — approved after fixes"
+        }
+      ],
+      "branch": "feat/N00-api-fetch-tanstack-query-paginated-shards",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/1"
+    }
+  ]
+}
