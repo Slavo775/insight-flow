@@ -174,7 +174,7 @@
       "title": "Extract task-tracker CLI as standalone taskflow package",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "implemented",
       "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
       "createdAt": "2026-05-12T21:35:55.223Z",
       "statusHistory": [
@@ -197,12 +197,51 @@
           "status": "pushed",
           "at": "2026-05-13T05:35:45.098Z",
           "by": "task-git"
+        },
+        {
+          "status": "ready",
+          "at": "2026-05-13T05:37:04.128Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-13T05:37:09.252Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-13T06:17:19.894Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-13T05:37:09.251Z",
+        "completedAt": "2026-05-13T06:17:19.893Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/tsconfig.json",
+          "packages/taskflow/tsup.config.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/config.ts",
+          "packages/taskflow/src/storage.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/commands/create.ts",
+          "packages/taskflow/src/commands/status.ts",
+          "packages/taskflow/src/commands/implement.ts",
+          "packages/taskflow/src/commands/review.ts",
+          "packages/taskflow/src/commands/fix.ts",
+          "packages/taskflow/src/commands/push.ts",
+          "packages/taskflow/src/commands/query.ts",
+          "packages/taskflow/src/commands/change.ts",
+          "packages/taskflow/src/commands/incident.ts",
+          "packages/taskflow/src/commands/migrate.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/schema/task.schema.json",
+          "packages/taskflow/schema/shard.schema.json",
+          "packages/taskflow/schema/master.schema.json"
+        ],
         "tokensUsed": null
       },
       "reviews": [],
