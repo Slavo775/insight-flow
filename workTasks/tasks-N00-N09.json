@@ -174,7 +174,7 @@
       "title": "Extract task-tracker CLI as standalone taskflow package",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "approved",
       "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
       "createdAt": "2026-05-12T21:35:55.223Z",
       "statusHistory": [
@@ -272,6 +272,16 @@
           "status": "pushed",
           "at": "2026-05-13T07:19:43.363Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-13T07:25:41.466Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-13T07:28:58.149Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -322,6 +332,15 @@
             "comment": "Added Claude Code setup to taskflow init: 9 skill commands in .claude/commands/ + CLAUDE.md with taskflow context",
             "by": "task-review-fix"
           }
+        },
+        {
+          "startedAt": "2026-05-13T07:25:41.467Z",
+          "endedAt": "2026-05-13T07:28:58.149Z",
+          "verdict": "approved",
+          "comment": "Core framework complete and working. Minor issues: unused extname import, dead templates/roles code, redundant CLAUDE.md heading. Deferred items (npm publish, webhooks, external sync) acknowledged as later phases.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [
