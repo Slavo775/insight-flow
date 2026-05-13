@@ -174,7 +174,7 @@
       "title": "Extract task-tracker CLI as standalone taskflow package",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
       "createdAt": "2026-05-12T21:35:55.223Z",
       "statusHistory": [
@@ -282,6 +282,11 @@
           "status": "approved",
           "at": "2026-05-13T07:28:58.149Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T08:32:56.278Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -401,6 +406,11 @@
           "at": "2026-05-13T07:19:43.362Z",
           "commitHash": "8e613a5",
           "commitMessage": "fix(taskflow): add Claude Code setup to taskflow init"
+        },
+        {
+          "at": "2026-05-13T08:32:56.278Z",
+          "commitHash": "6250196",
+          "commitMessage": "docs(tasks): add N01 AI review — approved with minor notes"
         }
       ],
       "branch": "feat/N01-extract-taskflow-cli-package",
