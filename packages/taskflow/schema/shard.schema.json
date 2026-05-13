@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taskflow.dev/schema/shard.json",
+  "title": "Taskflow Shard File",
+  "type": "object",
+  "required": ["range", "tasks"],
+  "properties": {
+    "range": {
+      "type": "object",
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "type": "integer", "minimum": 0 },
+        "to": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "task.schema.json" }
+    }
+  }
+}

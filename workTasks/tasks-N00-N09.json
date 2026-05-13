@@ -168,6 +168,253 @@
       "branch": "feat/N00-api-fetch-tanstack-query-paginated-shards",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/1",
       "mergedAt": "2026-05-12T21:04:05.994Z"
+    },
+    {
+      "id": "N01",
+      "title": "Extract task-tracker CLI as standalone taskflow package",
+      "type": "feat",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
+      "createdAt": "2026-05-12T21:35:55.223Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-12T21:35:55.223Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-12T21:37:11.134Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T05:26:19.052Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T05:35:45.098Z",
+          "by": "task-git"
+        },
+        {
+          "status": "ready",
+          "at": "2026-05-13T05:37:04.128Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-13T05:37:09.252Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-13T06:17:19.894Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T06:17:55.934Z",
+          "by": "task-git"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-13T06:24:58.261Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-13T06:25:02.929Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-13T06:25:48.589Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T06:26:11.792Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-13T06:39:31.962Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-13T06:39:47.335Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T06:40:15.590Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-13T07:17:38.868Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-13T07:17:38.907Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-13T07:19:24.930Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T07:19:43.363Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-13T07:25:41.466Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-13T07:28:58.149Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T08:32:56.278Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-13T05:37:09.251Z",
+        "completedAt": "2026-05-13T06:17:19.893Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/tsconfig.json",
+          "packages/taskflow/tsup.config.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/config.ts",
+          "packages/taskflow/src/storage.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/commands/create.ts",
+          "packages/taskflow/src/commands/status.ts",
+          "packages/taskflow/src/commands/implement.ts",
+          "packages/taskflow/src/commands/review.ts",
+          "packages/taskflow/src/commands/fix.ts",
+          "packages/taskflow/src/commands/push.ts",
+          "packages/taskflow/src/commands/query.ts",
+          "packages/taskflow/src/commands/change.ts",
+          "packages/taskflow/src/commands/incident.ts",
+          "packages/taskflow/src/commands/migrate.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/schema/task.schema.json",
+          "packages/taskflow/schema/shard.schema.json",
+          "packages/taskflow/schema/master.schema.json"
+        ],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-13T06:39:31.963Z",
+          "endedAt": "2026-05-13T06:39:47.334Z",
+          "verdict": "fix-needed",
+          "comment": "taskflow init should also set up Claude Code config: global skills in .claude/settings.json + local CLAUDE.md with taskflow context",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": {
+            "startedAt": "2026-05-13T07:17:38.907Z",
+            "endedAt": "2026-05-13T07:19:24.929Z",
+            "status": "fixed",
+            "filesChanged": [
+              "packages/taskflow/src/init/index.ts"
+            ],
+            "comment": "Added Claude Code setup to taskflow init: 9 skill commands in .claude/commands/ + CLAUDE.md with taskflow context",
+            "by": "task-review-fix"
+          }
+        },
+        {
+          "startedAt": "2026-05-13T07:25:41.467Z",
+          "endedAt": "2026-05-13T07:28:58.149Z",
+          "verdict": "approved",
+          "comment": "Core framework complete and working. Minor issues: unused extname import, dead templates/roles code, redundant CLAUDE.md heading. Deferred items (npm publish, webhooks, external sync) acknowledged as later phases.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-13T06:24:58.260Z",
+          "description": "Add comprehensive README.md to packages/taskflow/ covering CLI usage, init guide, dashboard/dev server, config reference, JSON schema, and role templates",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-05-13T06:25:48.588Z",
+          "filesChanged": [
+            "packages/taskflow/README.md"
+          ],
+          "comment": "Added comprehensive README with quick start, CLI reference, config, data model, status flow, Claude Code integration, and programmatic API",
+          "implementedBy": "task-request-changes"
+        }
+      ],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "framework",
+        "npm-package",
+        "taskflow"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-12T21:37:11.133Z",
+          "commitHash": "173c13b",
+          "commitMessage": "feat(tasks): add N01 task spec for extracting taskflow CLI as standalone package"
+        },
+        {
+          "at": "2026-05-13T05:26:19.051Z",
+          "commitHash": "2a3ad99",
+          "commitMessage": "docs(tasks): expand N01 scope to include dashboard, npm publish, CI/CD, and external sync"
+        },
+        {
+          "at": "2026-05-13T05:35:45.098Z",
+          "commitHash": "2cabbde",
+          "commitMessage": "docs(tasks): add built-in dev server to N01 spec — Storybook-style taskflow ui"
+        },
+        {
+          "at": "2026-05-13T06:17:55.934Z",
+          "commitHash": "1d2b529",
+          "commitMessage": "feat(taskflow): implement standalone taskflow CLI package with dev server"
+        },
+        {
+          "at": "2026-05-13T06:26:11.792Z",
+          "commitHash": "da28194",
+          "commitMessage": "docs(taskflow): add comprehensive README with CLI reference and dashboard guide"
+        },
+        {
+          "at": "2026-05-13T06:40:15.589Z",
+          "commitHash": "eac6f6e",
+          "commitMessage": "docs(tasks): add N01 human review — fix needed: Claude Code setup in taskflow init"
+        },
+        {
+          "at": "2026-05-13T07:19:43.362Z",
+          "commitHash": "8e613a5",
+          "commitMessage": "fix(taskflow): add Claude Code setup to taskflow init"
+        },
+        {
+          "at": "2026-05-13T08:32:56.278Z",
+          "commitHash": "6250196",
+          "commitMessage": "docs(tasks): add N01 AI review — approved with minor notes"
+        }
+      ],
+      "branch": "feat/N01-extract-taskflow-cli-package",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/2"
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taskflow.dev/schema/master.json",
+  "title": "Taskflow Master File",
+  "type": "object",
+  "required": ["meta"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["nextId", "shards"],
+      "properties": {
+        "nextId": { "type": "integer", "minimum": 0 },
+        "currentTaskId": { "type": ["string", "null"] },
+        "nextIncidentId": { "type": "integer", "minimum": 1 },
+        "shards": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^tasks-N\\d{2,}-N\\d{2,}\\.json$" }
+        }
+      }
+    }
+  }
+}

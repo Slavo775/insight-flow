@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://taskflow.dev/schema/task.json",
+  "title": "Taskflow Task",
+  "type": "object",
+  "required": ["id", "title", "type", "priority", "status", "createdAt", "statusHistory"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^N\\d{2,}$" },
+    "title": { "type": "string" },
+    "type": { "type": "string", "enum": ["fix", "feat", "rework"] },
+    "priority": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+    "status": { "type": "string" },
+    "folder": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "statusHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["status", "at", "by"],
+        "properties": {
+          "status": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" },
+          "by": { "type": "string" }
+        }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "properties": {
+        "startedAt": { "type": ["string", "null"], "format": "date-time" },
+        "completedAt": { "type": ["string", "null"], "format": "date-time" },
+        "filesChanged": { "type": "array", "items": { "type": "string" } },
+        "tokensUsed": { "type": ["integer", "null"] }
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "startedAt": { "type": "string", "format": "date-time" },
+          "endedAt": { "type": ["string", "null"], "format": "date-time" },
+          "verdict": { "type": ["string", "null"] },
+          "comment": { "type": ["string", "null"] },
+          "type": { "type": "string", "enum": ["ai", "human"] },
+          "by": { "type": "string" },
+          "fix": {
+            "type": ["object", "null"],
+            "properties": {
+              "startedAt": { "type": ["string", "null"] },
+              "endedAt": { "type": ["string", "null"] },
+              "status": { "type": "string" },
+              "filesChanged": { "type": "array", "items": { "type": "string" } },
+              "comment": { "type": ["string", "null"] },
+              "by": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "changesAfterImplementation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestedAt": { "type": "string", "format": "date-time" },
+          "description": { "type": "string" },
+          "requestedBy": { "type": "string" },
+          "status": { "type": "string" },
+          "implementedAt": { "type": ["string", "null"] },
+          "filesChanged": { "type": "array", "items": { "type": "string" } },
+          "comment": { "type": ["string", "null"] },
+          "implementedBy": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "incidents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "severity", "status", "reportedAt"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^INC-\\d{3,}$" },
+          "title": { "type": "string" },
+          "severity": { "type": "string" },
+          "status": { "type": "string" },
+          "reportedAt": { "type": "string", "format": "date-time" },
+          "resolvedAt": { "type": ["string", "null"] },
+          "branch": { "type": "string" },
+          "description": { "type": ["string", "null"] },
+          "rootCause": { "type": ["string", "null"] },
+          "fix": { "type": ["string", "null"] },
+          "statusHistory": { "type": "array" }
+        }
+      }
+    },
+    "committedAt": { "type": ["string", "null"] },
+    "totalDurationMinutes": { "type": ["integer", "null"] },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "pushes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "commitHash", "commitMessage"],
+        "properties": {
+          "at": { "type": "string", "format": "date-time" },
+          "commitHash": { "type": "string" },
+          "commitMessage": { "type": "string" }
+        }
+      }
+    },
+    "branch": { "type": ["string", "null"] },
+    "mrUrl": { "type": ["string", "null"] },
+    "mergedAt": { "type": ["string", "null"] }
+  }
+}
