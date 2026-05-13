@@ -3,6 +3,7 @@
 **Type:** feat
 **Priority:** high
 **Created:** 2026-05-12
+**Modified:** 2026-05-13
 
 ## Problem
 - The task lifecycle system (CLI, agent roles, JSON schema, dashboard) is tightly coupled to the insight-flow repo. It has standalone value as a reusable framework — "Storybook for tasking" — but cannot be adopted by other projects without copy-pasting.
@@ -14,6 +15,10 @@
 3. All existing `task-tracker.mjs` commands work via `taskflow <command>`.
 4. Project-agnostic config (`taskflow.config.json`) replaces hardcoded paths.
 5. JSON Schema files formalize the task/shard/master data model.
+6. Dashboard extracted as a companion package (`@taskflow/dashboard` or embedded mode).
+7. Published to npm so `npx taskflow init` works globally.
+8. CI/CD integration, webhook support, and plugin system for custom lifecycle hooks.
+9. External tracker sync (Jira, Linear, GitHub Issues) via importers/exporters.
 
 ## Scope
 ### In scope
@@ -24,12 +29,13 @@
 - JSON Schema files for task, shard, master (derived from `src/lib/task-types.ts`).
 - Template the agent role `.md` files so project name/paths are parameterizable.
 - Keep backward compat: `node scripts/task-tracker.mjs` still works in insight-flow (thin wrapper that delegates to the package).
+- Extract dashboard as `@taskflow/dashboard` package (standalone `taskflow ui` command + embeddable React component).
+- Publish to npm with proper package naming, README, and `npx taskflow` support.
+- CI/CD integration: GitHub Actions workflow templates, webhook triggers on status transitions, plugin system for custom lifecycle hooks.
+- External tracker sync: importers/exporters for Jira, Linear, and GitHub Issues (bidirectional where feasible).
 
 ### Out of scope
-- Dashboard extraction (separate task — N02+).
-- Publishing to npm (just make it publishable; actual publish is a follow-up).
-- CI/CD integration, webhooks, plugin system.
-- Jira/Linear/GitHub Issues sync.
+- None — this task covers the full framework extraction.
 
 ## Implementation plan
 1. **Monorepo structure** — Add `packages/taskflow/` with `package.json` (bin: `taskflow`), `tsconfig.json`. Keep insight-flow app at root.
@@ -49,6 +55,16 @@
 6. **Role templates** — Convert existing `TASKMASTER_ROLE.md`, `TASK_IMPLEMENTER_ROLE.md`, etc. into Handlebars-style templates with `{{projectName}}`, `{{workDir}}`, `{{scriptCmd}}` placeholders.
 7. **Backward-compat wrapper** — Replace `scripts/task-tracker.mjs` with a thin shim that imports from `packages/taskflow` and runs the CLI.
 8. **Build & test** — Use `tsup` or `unbuild` for the package build. Add basic tests for config resolution, init scaffolding, and core commands.
+9. **Dashboard package** — Extract insight-flow viz components into `packages/dashboard/`:
+   - `taskflow ui` command serves the dashboard locally, reading from `workTasks/`.
+   - Static report generation mode for CI (HTML output from task JSON).
+   - Embeddable React component export for integration into existing admin panels.
+10. **npm publish** — Set up package naming (`taskflow` or scoped `@taskflow/cli` + `@taskflow/dashboard`), write README, configure `prepublishOnly` build script, publish to npm.
+11. **CI/CD & webhooks** — GitHub Actions workflow templates (`.github/workflows/taskflow.yml`) for task status checks. Webhook system: configurable HTTP callbacks on status transitions (e.g., notify Slack on `approved`). Plugin interface: `taskflow.config.json` `plugins` array for custom lifecycle hooks.
+12. **External sync** — Importer/exporter modules in `packages/taskflow/src/sync/`:
+    - `jira.ts` — map Jira issues to/from taskflow JSON format.
+    - `linear.ts` — Linear API integration for bidirectional sync.
+    - `github-issues.ts` — sync with GitHub Issues (labels map to task types/statuses).
 
 ## Verification
 - `cd /tmp/test-project && npx taskflow init` creates expected structure.
@@ -59,7 +75,7 @@
 - JSON schema validates existing N00 task data.
 
 ## Notes
-- This is the foundational task — dashboard extraction, npm publish, plugin system are follow-ups.
-- The dashboard (insight-flow app) already reads the same JSON format, so once the schema is formalized, the dashboard becomes a natural companion package.
-- Related: The role `.md` files are the "addon" equivalent — each role is a specialized agent behavior that plugs into the lifecycle.
+- The dashboard already reads the same JSON format, so extraction is mostly packaging work.
+- The role `.md` files are the "addon" equivalent — each role is a specialized agent behavior that plugs into the lifecycle.
 - Consider naming: `taskflow`, `@taskflow/cli`, `ai-taskflow`, `claude-taskflow` — check npm availability before publish.
+- Phased delivery recommended: CLI core first (steps 1-8), then dashboard (9-10), then integrations (11-12).
