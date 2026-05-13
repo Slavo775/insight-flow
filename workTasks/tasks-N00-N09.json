@@ -174,7 +174,7 @@
       "title": "Extract task-tracker CLI as standalone taskflow package",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "changes-implemented",
       "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
       "createdAt": "2026-05-12T21:35:55.223Z",
       "statusHistory": [
@@ -217,6 +217,21 @@
           "status": "pushed",
           "at": "2026-05-13T06:17:55.934Z",
           "by": "task-git"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-13T06:24:58.261Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-13T06:25:02.929Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-13T06:25:48.589Z",
+          "by": "task-request-changes"
         }
       ],
       "implementation": {
@@ -250,7 +265,20 @@
         "tokensUsed": null
       },
       "reviews": [],
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-13T06:24:58.260Z",
+          "description": "Add comprehensive README.md to packages/taskflow/ covering CLI usage, init guide, dashboard/dev server, config reference, JSON schema, and role templates",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-05-13T06:25:48.588Z",
+          "filesChanged": [
+            "packages/taskflow/README.md"
+          ],
+          "comment": "Added comprehensive README with quick start, CLI reference, config, data model, status flow, Claude Code integration, and programmatic API",
+          "implementedBy": "task-request-changes"
+        }
+      ],
       "incidents": [],
       "committedAt": null,
       "totalDurationMinutes": null,
