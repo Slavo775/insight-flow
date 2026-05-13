@@ -174,7 +174,7 @@
       "title": "Extract task-tracker CLI as standalone taskflow package",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "fixed",
       "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
       "createdAt": "2026-05-12T21:35:55.223Z",
       "statusHistory": [
@@ -252,6 +252,21 @@
           "status": "pushed",
           "at": "2026-05-13T06:40:15.590Z",
           "by": "task-git"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-13T07:17:38.868Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-13T07:17:38.907Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-13T07:19:24.930Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -292,7 +307,16 @@
           "comment": "taskflow init should also set up Claude Code config: global skills in .claude/settings.json + local CLAUDE.md with taskflow context",
           "type": "human",
           "by": "task-human-review",
-          "fix": null
+          "fix": {
+            "startedAt": "2026-05-13T07:17:38.907Z",
+            "endedAt": "2026-05-13T07:19:24.929Z",
+            "status": "fixed",
+            "filesChanged": [
+              "packages/taskflow/src/init/index.ts"
+            ],
+            "comment": "Added Claude Code setup to taskflow init: 9 skill commands in .claude/commands/ + CLAUDE.md with taskflow context",
+            "by": "task-review-fix"
+          }
         }
       ],
       "changesAfterImplementation": [
