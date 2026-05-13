@@ -174,7 +174,7 @@
       "title": "Extract task-tracker CLI as standalone taskflow package",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "fix-needed",
       "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
       "createdAt": "2026-05-12T21:35:55.223Z",
       "statusHistory": [
@@ -237,6 +237,16 @@
           "status": "pushed",
           "at": "2026-05-13T06:26:11.792Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-13T06:39:31.962Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-13T06:39:47.335Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -269,7 +279,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-13T06:39:31.963Z",
+          "endedAt": "2026-05-13T06:39:47.334Z",
+          "verdict": "fix-needed",
+          "comment": "taskflow init should also set up Claude Code config: global skills in .claude/settings.json + local CLAUDE.md with taskflow context",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [
         {
           "requestedAt": "2026-05-13T06:24:58.260Z",
