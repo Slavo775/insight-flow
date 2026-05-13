@@ -15,7 +15,7 @@
 3. All existing `task-tracker.mjs` commands work via `taskflow <command>`.
 4. Project-agnostic config (`taskflow.config.json`) replaces hardcoded paths.
 5. JSON Schema files formalize the task/shard/master data model.
-6. Dashboard extracted as a companion package (`@taskflow/dashboard` or embedded mode).
+6. `taskflow` (or `taskflow ui`) launches a built-in dev server + dashboard — like `storybook dev` but for tasks.
 7. Published to npm so `npx taskflow init` works globally.
 8. CI/CD integration, webhook support, and plugin system for custom lifecycle hooks.
 9. External tracker sync (Jira, Linear, GitHub Issues) via importers/exporters.
@@ -29,7 +29,8 @@
 - JSON Schema files for task, shard, master (derived from `src/lib/task-types.ts`).
 - Template the agent role `.md` files so project name/paths are parameterizable.
 - Keep backward compat: `node scripts/task-tracker.mjs` still works in insight-flow (thin wrapper that delegates to the package).
-- Extract dashboard as `@taskflow/dashboard` package (standalone `taskflow ui` command + embeddable React component).
+- Built-in dev server: `taskflow` (or `taskflow ui`) serves `workTasks/` JSON as API + bundled dashboard SPA. File watcher pushes live updates via WebSocket/SSE. Like running `storybook dev` — one command, browser opens, done.
+- Extract dashboard as `@taskflow/dashboard` package (pre-built SPA served by dev server + embeddable React component).
 - Publish to npm with proper package naming, README, and `npx taskflow` support.
 - CI/CD integration: GitHub Actions workflow templates, webhook triggers on status transitions, plugin system for custom lifecycle hooks.
 - External tracker sync: importers/exporters for Jira, Linear, and GitHub Issues (bidirectional where feasible).
@@ -55,9 +56,16 @@
 6. **Role templates** — Convert existing `TASKMASTER_ROLE.md`, `TASK_IMPLEMENTER_ROLE.md`, etc. into Handlebars-style templates with `{{projectName}}`, `{{workDir}}`, `{{scriptCmd}}` placeholders.
 7. **Backward-compat wrapper** — Replace `scripts/task-tracker.mjs` with a thin shim that imports from `packages/taskflow` and runs the CLI.
 8. **Build & test** — Use `tsup` or `unbuild` for the package build. Add basic tests for config resolution, init scaffolding, and core commands.
-9. **Dashboard package** — Extract insight-flow viz components into `packages/dashboard/`:
-   - `taskflow ui` command serves the dashboard locally, reading from `workTasks/`.
-   - Static report generation mode for CI (HTML output from task JSON).
+9. **Built-in dev server** — Like Storybook's `storybook dev`, `taskflow` (or `taskflow ui`) spins up a lightweight HTTP server:
+   - Serves `workTasks/*.json` files as a REST API (`/api/work-tasks`, `/api/work-tasks/:file`).
+   - Serves the bundled dashboard SPA on the root route.
+   - Auto-opens the browser. Default port `6006` (configurable via `--port`).
+   - File watcher: watches `workTasks/` for changes and pushes updates via WebSocket/SSE so the dashboard live-reloads when tasks change (e.g., after running `taskflow create`).
+   - Zero config: reads `taskflow.config.json` for `workDir`, otherwise defaults to `workTasks/`.
+   - Implementation: lightweight Node server (e.g., `node:http` or `hono`) bundled into the CLI — no separate install needed.
+10. **Dashboard package** — Extract insight-flow viz components into `packages/dashboard/`:
+   - Pre-built SPA bundle shipped with the CLI (served by the dev server).
+   - Static report generation mode for CI (`taskflow report` → HTML output).
    - Embeddable React component export for integration into existing admin panels.
 10. **npm publish** — Set up package naming (`taskflow` or scoped `@taskflow/cli` + `@taskflow/dashboard`), write README, configure `prepublishOnly` build script, publish to npm.
 11. **CI/CD & webhooks** — GitHub Actions workflow templates (`.github/workflows/taskflow.yml`) for task status checks. Webhook system: configurable HTTP callbacks on status transitions (e.g., notify Slack on `approved`). Plugin interface: `taskflow.config.json` `plugins` array for custom lifecycle hooks.

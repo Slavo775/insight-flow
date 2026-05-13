@@ -10,8 +10,10 @@
 - [ ] Role `.md` files templated with replaceable placeholders
 - [ ] `scripts/task-tracker.mjs` replaced with thin wrapper delegating to package
 - [ ] Package builds successfully with tsup/unbuild
-- [ ] Dashboard extracted into `packages/dashboard/` with standalone + embeddable modes
-- [ ] `taskflow ui` serves the dashboard locally reading from `workTasks/`
+- [ ] Built-in dev server: `taskflow` / `taskflow ui` starts HTTP server serving JSON API + dashboard SPA
+- [ ] Dev server auto-opens browser, default port 6006
+- [ ] File watcher on `workTasks/` pushes live updates to dashboard (WebSocket or SSE)
+- [ ] Dashboard extracted into `packages/dashboard/` as pre-built SPA bundle + embeddable React component
 - [ ] Package published to npm (`npx taskflow init` works)
 - [ ] CI/CD workflow templates exist in `packages/taskflow/templates/`
 - [ ] Webhook system fires HTTP callbacks on configurable status transitions
@@ -32,7 +34,8 @@
 - [ ] `taskflow current` returns expected output
 - [ ] Existing N00 task data validates against JSON schema
 - [ ] `node scripts/task-tracker.mjs current` still works in insight-flow repo
-- [ ] `taskflow ui` launches dashboard and displays task data
+- [ ] `taskflow` in a project with tasks → browser opens, dashboard shows real task data
+- [ ] Changing a task file (e.g., `taskflow create`) triggers live update in the open dashboard
 - [ ] `npm publish --dry-run` succeeds for all packages
 - [ ] Webhook fires on status transition in test setup
 - [ ] At least one external sync (Jira/Linear/GitHub) round-trips task data
