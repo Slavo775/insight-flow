@@ -174,7 +174,7 @@
       "title": "Extract task-tracker CLI as standalone taskflow package",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N01-extract-task-tracker-cli-as-standalone-taskflow-pa",
       "createdAt": "2026-05-12T21:35:55.223Z",
       "statusHistory": [
@@ -212,6 +212,11 @@
           "status": "implemented",
           "at": "2026-05-13T06:17:19.894Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-13T06:17:55.934Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -270,6 +275,11 @@
           "at": "2026-05-13T05:35:45.098Z",
           "commitHash": "2cabbde",
           "commitMessage": "docs(tasks): add built-in dev server to N01 spec — Storybook-style taskflow ui"
+        },
+        {
+          "at": "2026-05-13T06:17:55.934Z",
+          "commitHash": "1d2b529",
+          "commitMessage": "feat(taskflow): implement standalone taskflow CLI package with dev server"
         }
       ],
       "branch": "feat/N01-extract-taskflow-cli-package",
