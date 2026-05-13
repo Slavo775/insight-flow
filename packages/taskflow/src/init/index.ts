@@ -96,13 +96,29 @@ export function initProject(cwd: string = process.cwd()): void {
     console.log("Claude Code skill commands already exist, skipping.");
   }
 
-  // 5. Generate project CLAUDE.md
+  // 5. Generate or append to CLAUDE.md
   const claudeMdPath = resolve(cwd, "CLAUDE.md");
+  const taskflowSection = generateClaudeMd(config);
+  const MARKER = "<!-- taskflow:start -->";
+  const MARKER_END = "<!-- taskflow:end -->";
+
   if (!existsSync(claudeMdPath)) {
-    writeFileSync(claudeMdPath, generateClaudeMd(config));
+    writeFileSync(claudeMdPath, MARKER + "\n" + taskflowSection + MARKER_END + "\n");
     console.log("Created CLAUDE.md with taskflow context");
   } else {
-    console.log("CLAUDE.md already exists, skipping.");
+    const existing = readFileSync(claudeMdPath, "utf-8");
+    if (existing.includes(MARKER)) {
+      // Replace existing taskflow section
+      const before = existing.substring(0, existing.indexOf(MARKER));
+      const afterIdx = existing.indexOf(MARKER_END);
+      const after = afterIdx >= 0 ? existing.substring(afterIdx + MARKER_END.length) : "";
+      writeFileSync(claudeMdPath, before + MARKER + "\n" + taskflowSection + MARKER_END + after);
+      console.log("Updated taskflow section in existing CLAUDE.md");
+    } else {
+      // Append taskflow section
+      writeFileSync(claudeMdPath, existing.trimEnd() + "\n\n" + MARKER + "\n" + taskflowSection + MARKER_END + "\n");
+      console.log("Appended taskflow section to existing CLAUDE.md");
+    }
   }
 
   console.log("\nTaskflow initialized! Run 'taskflow create --title \"My task\" --type feat' to create your first task.");
