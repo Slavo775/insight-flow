@@ -427,7 +427,7 @@
       "title": "Real-time activity engine with WebSocket dashboard",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "approved",
       "folder": "workTasks/N02-real-time-activity-engine-with-websocket-dashboard",
       "createdAt": "2026-05-14T09:10:55.125Z",
       "statusHistory": [
@@ -475,6 +475,16 @@
           "status": "pushed",
           "at": "2026-05-14T18:14:15.294Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-14T18:18:06.974Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-14T18:19:15.035Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -511,6 +521,15 @@
             "comment": "Applied 3 non-blocking fixes: removed duplicate CSS display:flex on .activity-panel base rule, guarded addActivityEvent calls with typeof check for disabled case, removed unused ActivityEngineConfig import. Blocker (untracked ws.ts/activity.ts/dashboard.ts) will be resolved by task-git.",
             "by": "task-review-fix"
           }
+        },
+        {
+          "startedAt": "2026-05-14T18:18:06.974Z",
+          "endedAt": "2026-05-14T18:19:15.034Z",
+          "verdict": "approved",
+          "comment": "Round 2: all 4 prior issues resolved (blocker staging + 3 non-blockers). Typecheck and build still green. Approved.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [],
