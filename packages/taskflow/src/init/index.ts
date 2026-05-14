@@ -15,6 +15,7 @@ export function initProject(cwd: string = process.cwd()): void {
     projectName: inferName(cwd),
     rolesDir: ".claude/roles",
     server: { port: 6006 },
+    activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
   };
 
   if (existsSync(configPath)) {
@@ -121,12 +122,31 @@ export function initProject(cwd: string = process.cwd()): void {
     }
   }
 
+  // 6. Generate Claude Code hook for activity engine
+  if (config.activityEngine?.enabled !== false) {
+    generateActivityHook(cwd, config);
+  }
+
+  // 7. Add .taskflow-activity.jsonl to .gitignore
+  const gitignorePath = resolve(cwd, ".gitignore");
+  const activityLogEntry = ".taskflow-activity.jsonl";
+  if (existsSync(gitignorePath)) {
+    const gitignore = readFileSync(gitignorePath, "utf-8");
+    if (!gitignore.includes(activityLogEntry)) {
+      writeFileSync(gitignorePath, gitignore.trimEnd() + "\n" + activityLogEntry + "\n");
+      console.log("Added " + activityLogEntry + " to .gitignore");
+    }
+  } else {
+    writeFileSync(gitignorePath, activityLogEntry + "\n");
+    console.log("Created .gitignore with " + activityLogEntry);
+  }
+
   console.log("\nTaskflow initialized! Run 'taskflow create --title \"My task\" --type feat' to create your first task.");
   console.log("Run 'taskflow' to launch the dashboard.\n");
 }
 
 function generateClaudeMd(config: TaskflowConfig): string {
-  return `# CLAUDE.md
+  return `## Taskflow
 
 This project uses **taskflow** for AI-assisted task lifecycle management.
 
@@ -321,6 +341,81 @@ WORKFLOW:
 4. Call /task-git to push updated docs
 
 $ARGUMENTS
+`;
+
+function generateActivityHook(cwd: string, config: TaskflowConfig): void {
+  const logFile = config.activityEngine?.logFile || ".taskflow-activity.jsonl";
+
+  // 1. Create hook script
+  const hooksDir = resolve(cwd, ".claude", "hooks");
+  if (!existsSync(hooksDir)) {
+    mkdirSync(hooksDir, { recursive: true });
+  }
+
+  const hookScript = ACTIVITY_HOOK_SCRIPT.replace("__LOG_FILE__", logFile);
+  const hookPath = resolve(hooksDir, "taskflow-activity.sh");
+  writeFileSync(hookPath, hookScript, { mode: 0o755 });
+
+  // 2. Update .claude/settings.local.json with hook config
+  const settingsPath = resolve(cwd, ".claude", "settings.local.json");
+  let settings: Record<string, unknown> = {};
+
+  if (existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    } catch {
+      // If malformed, start fresh
+    }
+  }
+
+  // Merge hooks — don't overwrite existing ones
+  const hooks = (settings.hooks ?? {}) as Record<string, unknown[]>;
+  const postToolUse = (hooks.PostToolUse ?? []) as Array<Record<string, unknown>>;
+
+  // Check if our hook already exists
+  const hookExists = postToolUse.some(
+    (h) => typeof h === "object" && h !== null && (h.command as string || "").includes("taskflow-activity.sh"),
+  );
+
+  if (!hookExists) {
+    postToolUse.push({
+      command: ".claude/hooks/taskflow-activity.sh",
+      timeout: 5000,
+    });
+    hooks.PostToolUse = postToolUse;
+    settings.hooks = hooks;
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+    console.log("Generated activity hook in .claude/hooks/ and registered in settings.local.json");
+  } else {
+    console.log("Activity hook already registered, skipping.");
+  }
+}
+
+const ACTIVITY_HOOK_SCRIPT = `#!/bin/bash
+# Taskflow Activity Hook — appends Claude Code tool events to activity log
+# This runs automatically on PostToolUse — zero token cost to Claude.
+LOG_FILE="__LOG_FILE__"
+
+# Read the hook event JSON from stdin
+INPUT=$(cat)
+
+# Extract tool name and file path using lightweight parsing
+TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+FILE=$(echo "$INPUT" | grep -o '"file_path":"[^"]*"' | head -1 | cut -d'"' -f4)
+if [ -z "$FILE" ]; then
+  FILE=$(echo "$INPUT" | grep -o '"command":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+
+# Skip if no tool name captured
+[ -z "$TOOL" ] && exit 0
+
+# Append JSONL line
+TS=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+if [ -n "$FILE" ]; then
+  echo "{\\"ts\\":\\"$TS\\",\\"tool\\":\\"$TOOL\\",\\"action\\":\\"use\\",\\"file\\":\\"$FILE\\"}" >> "$LOG_FILE"
+else
+  echo "{\\"ts\\":\\"$TS\\",\\"tool\\":\\"$TOOL\\",\\"action\\":\\"use\\"}" >> "$LOG_FILE"
+fi
 `;
 
 function inferName(cwd: string): string {
