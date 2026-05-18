@@ -588,7 +588,7 @@
       "title": "Publish taskflow as npm package with bundled React UI and local playground",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N03-publish-taskflow-as-npm-package-with-bundled-react",
       "createdAt": "2026-05-18T11:30:42.938Z",
       "statusHistory": [
@@ -616,6 +616,21 @@
           "status": "implemented",
           "at": "2026-05-18T11:46:44.481Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T11:47:52.095Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-18T11:51:05.492Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-18T11:53:22.210Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -644,7 +659,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-18T11:51:05.493Z",
+          "endedAt": "2026-05-18T11:53:22.209Z",
+          "verdict": "approved",
+          "comment": "Approved. Spec satisfied: SPA bundled into dist/ui, server serves it with runtime config injection, API base is same-origin, publishing metadata complete, playground works end-to-end. One checklist item (pnpm-workspace.yaml) intentionally skipped in favor of pnpm link: protocol — documented. Five non-blocking suggestions noted in REVIEW.md.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -660,6 +685,11 @@
           "at": "2026-05-18T11:32:56.931Z",
           "commitHash": "daf69b6",
           "commitMessage": "docs(tasks): add N03 spec — publish taskflow as npm package with bundled React UI + playground"
+        },
+        {
+          "at": "2026-05-18T11:47:52.094Z",
+          "commitHash": "c2be7e1",
+          "commitMessage": "feat(package): bundle React dashboard into taskflow npm package + add playground"
         }
       ],
       "branch": "feat/N03-publish-taskflow-npm"
