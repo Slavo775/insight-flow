@@ -1,4 +1,6 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { resolveConfig, getMasterPath } from "./config.js";
 import { loadMaster } from "./storage.js";
 import { initProject } from "./init/index.js";
@@ -9,9 +11,26 @@ import { cmdImplementStart, cmdImplementEnd } from "./commands/implement.js";
 import { cmdReviewStart, cmdReviewEnd } from "./commands/review.js";
 import { cmdFixStart, cmdFixEnd } from "./commands/fix.js";
 import { cmdPush, cmdMrUpdate, cmdMerge, cmdDone } from "./commands/push.js";
-import { cmdCurrent, cmdList, cmdStats, cmdNext, cmdNextReview, cmdNextFix } from "./commands/query.js";
-import { cmdChangeRequest, cmdChangeStart, cmdChangeEnd, cmdNextChange } from "./commands/change.js";
-import { cmdIncidentCreate, cmdIncidentStatus, cmdIncidentResolve, cmdIncidentList } from "./commands/incident.js";
+import {
+  cmdCurrent,
+  cmdList,
+  cmdStats,
+  cmdNext,
+  cmdNextReview,
+  cmdNextFix,
+} from "./commands/query.js";
+import {
+  cmdChangeRequest,
+  cmdChangeStart,
+  cmdChangeEnd,
+  cmdNextChange,
+} from "./commands/change.js";
+import {
+  cmdIncidentCreate,
+  cmdIncidentStatus,
+  cmdIncidentResolve,
+  cmdIncidentList,
+} from "./commands/incident.js";
 import { cmdMigrate } from "./commands/migrate.js";
 import type { ParsedArgs } from "./types.js";
 
@@ -36,15 +55,15 @@ function parseArgs(args: string[]): ParsedArgs {
 
 function printHelp(): void {
   console.log(`
-  taskflow — Workbench for AI task workflows
+  insight-flow — Workbench for AI task workflows
 
   USAGE
-    taskflow                          Launch dashboard (dev server)
-    taskflow <command> [options]      Run a task command
+    insight-flow                          Launch dashboard (dev server)
+    insight-flow <command> [options]      Run a task command
 
   COMMANDS
-    init                              Initialize taskflow in current project
-    ui [--port 6006]                  Launch dashboard server
+    init                                  Initialize insight-flow in current project
+    ui [--port 6006]                      Launch dashboard server
 
     create --title "..." [--type feat] [--priority high] [--tags a,b]
     status --id Nxx --status <status> [--by agent]
@@ -79,10 +98,10 @@ function printHelp(): void {
     incident-resolve --id Nxx --incident INC-001 --rootCause "..." --fix "..."
     incident-list [--id Nxx]
 
-    migrate                           Migrate from legacy tracker.json
+    migrate                               Migrate from legacy tracker.json
 
-    help                              Show this help
-    version                           Show version
+    help                                  Show this help
+    version                               Show version
 `);
 }
 
@@ -100,7 +119,9 @@ if (!command || command === "ui") {
 } else if (command === "help" || command === "--help" || command === "-h") {
   printHelp();
 } else if (command === "version" || command === "--version" || command === "-v") {
-  console.log("taskflow 0.1.0");
+  const pkgPath = resolve(dirname(fileURLToPath(import.meta.url)), "..", "package.json");
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as { version: string };
+  console.log(`insight-flow ${pkg.version}`);
 } else if (command === "migrate") {
   const config = resolveConfig();
   cmdMigrate(config);
@@ -110,7 +131,7 @@ if (!command || command === "ui") {
   const masterPath = getMasterPath(config);
 
   if (!existsSync(masterPath)) {
-    console.error("No taskflow project found. Run 'taskflow init' first.");
+    console.error("No insight-flow project found. Run 'insight-flow init' first.");
     process.exit(1);
   }
 
@@ -197,7 +218,7 @@ if (!command || command === "ui") {
       break;
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Run 'taskflow help' for usage.");
+      console.error("Run 'insight-flow help' for usage.");
       process.exit(1);
   }
 }

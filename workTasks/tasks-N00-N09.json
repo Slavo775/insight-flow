@@ -760,6 +760,108 @@
       "branch": "feat/N03-publish-taskflow-npm",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/4",
       "mergedAt": "2026-05-18T12:15:07.997Z"
+    },
+    {
+      "id": "N04",
+      "title": "Publish package to npm as insight-flow under sslavo account",
+      "type": "feat",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "workTasks/N04-publish-package-to-npm-as-insight-flow-under-sslav",
+      "createdAt": "2026-05-18T12:33:17.843Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-18T12:33:17.844Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:35:07.108Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-18T12:39:37.088Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-18T12:46:26.341Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:47:43.637Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-18T12:55:38.089Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-18T12:57:18.224Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:58:01.363Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-18T12:39:37.088Z",
+        "completedAt": "2026-05-18T12:46:26.340Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/init/index.ts",
+          "README.md"
+        ],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-18T12:55:38.090Z",
+          "endedAt": "2026-05-18T12:57:18.223Z",
+          "verdict": "approved",
+          "comment": "Approved with two non-blocking notes: (1) console.log strings in insight-flow init still say 'taskflow context/section' — UX wart, not a functional issue; (2) version string hardcoded in cli.ts will drift on future bumps. Recommend a local install-from-tarball smoke test before the manual npm publish post-merge step.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "publish",
+        "npm",
+        "release"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-18T12:35:07.108Z",
+          "commitHash": "7ae3fa2",
+          "commitMessage": "docs(tasks): add N04 spec — publish package to npm as insight-flow"
+        },
+        {
+          "at": "2026-05-18T12:47:43.637Z",
+          "commitHash": "d55a04a",
+          "commitMessage": "feat(package): rename publishable artifact from taskflow to insight-flow"
+        },
+        {
+          "at": "2026-05-18T12:58:01.363Z",
+          "commitHash": "a88966a",
+          "commitMessage": "docs(tasks): add N04 review — approved with two non-blocking notes"
+        }
+      ],
+      "branch": "feat/N04-publish-insight-flow-npm",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/5"
     }
   ]
 }
