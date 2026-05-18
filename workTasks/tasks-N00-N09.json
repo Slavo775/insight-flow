@@ -766,7 +766,7 @@
       "title": "Publish package to npm as insight-flow under sslavo account",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N04-publish-package-to-npm-as-insight-flow-under-sslav",
       "createdAt": "2026-05-18T12:33:17.843Z",
       "statusHistory": [
@@ -809,6 +809,16 @@
           "status": "pushed",
           "at": "2026-05-18T12:58:01.363Z",
           "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T19:37:35.622Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-18T19:38:23.482Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -837,7 +847,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 425,
       "tags": [
         "publish",
         "npm",
@@ -858,10 +868,16 @@
           "at": "2026-05-18T12:58:01.363Z",
           "commitHash": "a88966a",
           "commitMessage": "docs(tasks): add N04 review — approved with two non-blocking notes"
+        },
+        {
+          "at": "2026-05-18T19:37:35.621Z",
+          "commitHash": "5c4fecc",
+          "commitMessage": "fix(taskflow): address N04 non-blocking review notes"
         }
       ],
       "branch": "feat/N04-publish-insight-flow-npm",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/5"
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/5",
+      "mergedAt": "2026-05-18T19:38:23.481Z"
     }
   ]
 }
