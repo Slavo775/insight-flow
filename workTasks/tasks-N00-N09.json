@@ -588,7 +588,7 @@
       "title": "Publish taskflow as npm package with bundled React UI and local playground",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N03-publish-taskflow-as-npm-package-with-bundled-react",
       "createdAt": "2026-05-18T11:30:42.938Z",
       "statusHistory": [
@@ -596,12 +596,52 @@
           "status": "ready",
           "at": "2026-05-18T11:30:42.939Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T11:32:56.932Z",
+          "by": "task-git"
+        },
+        {
+          "status": "ready",
+          "at": "2026-05-18T11:34:26.911Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-18T11:34:26.955Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-18T11:46:44.481Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-18T11:34:26.954Z",
+        "completedAt": "2026-05-18T11:46:44.480Z",
+        "filesChanged": [
+          "src/routes/index.tsx",
+          "src/lib/api.ts",
+          "src/main.spa.tsx",
+          "index.package.html",
+          "vite.package.config.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md",
+          "packages/taskflow/LICENSE",
+          "scripts/build-taskflow-ui.mjs",
+          "playground/package.json",
+          "playground/taskflow.config.json",
+          "playground/workTasks/master.json",
+          "playground/workTasks/tasks-N00-N09.json",
+          "playground/README.md",
+          "playground/.gitignore",
+          "package.json",
+          ".gitignore",
+          "tsconfig.json"
+        ],
         "tokensUsed": null
       },
       "reviews": [],
@@ -614,7 +654,15 @@
         "publishing",
         "ui",
         "playground"
-      ]
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-18T11:32:56.931Z",
+          "commitHash": "daf69b6",
+          "commitMessage": "docs(tasks): add N03 spec — publish taskflow as npm package with bundled React UI + playground"
+        }
+      ],
+      "branch": "feat/N03-publish-taskflow-npm"
     }
   ]
 }
