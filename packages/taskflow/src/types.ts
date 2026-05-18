@@ -118,6 +118,23 @@ export interface MasterFile {
   };
 }
 
+export interface ActivityEvent {
+  ts: string;
+  tool: string;
+  action: string;
+  file?: string;
+  taskId?: string;
+  duration?: number;
+  status?: string;
+  session?: string;
+}
+
+export interface ActivityEngineConfig {
+  enabled: boolean;
+  logFile: string;
+  maxEvents: number;
+}
+
 export interface TaskflowConfig {
   workDir: string;
   shardSize: number;
@@ -126,6 +143,7 @@ export interface TaskflowConfig {
   server: {
     port: number;
   };
+  activityEngine?: ActivityEngineConfig;
 }
 
 export interface ParsedArgs {

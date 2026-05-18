@@ -11,6 +11,8 @@ export type {
   ShardFile,
   MasterFile,
   TaskflowConfig,
+  ActivityEvent,
+  ActivityEngineConfig,
 } from "./types.js";
 
 export { resolveConfig, getWorkDir, getMasterPath } from "./config.js";

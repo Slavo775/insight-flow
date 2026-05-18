@@ -1,8 +1,14 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, basename } from "node:path";
-import type { TaskflowConfig } from "./types.js";
+import type { TaskflowConfig, ActivityEngineConfig } from "./types.js";
 
 const CONFIG_FILENAME = "taskflow.config.json";
+
+const ACTIVITY_DEFAULTS: ActivityEngineConfig = {
+  enabled: true,
+  logFile: ".taskflow-activity.jsonl",
+  maxEvents: 200,
+};
 
 const DEFAULTS: TaskflowConfig = {
   workDir: "workTasks",
@@ -12,6 +18,7 @@ const DEFAULTS: TaskflowConfig = {
   server: {
     port: 6006,
   },
+  activityEngine: ACTIVITY_DEFAULTS,
 };
 
 export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
@@ -32,6 +39,10 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
     server: {
       ...DEFAULTS.server,
       ...(userConfig.server ?? {}),
+    },
+    activityEngine: {
+      ...ACTIVITY_DEFAULTS,
+      ...(userConfig.activityEngine ?? {}),
     },
   };
 }
