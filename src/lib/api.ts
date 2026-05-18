@@ -63,18 +63,21 @@ export function useMasterData(enabled: boolean) {
 
 /**
  * Subscribe to the taskflow server WebSocket and invalidate shard queries
- * whenever the server broadcasts a file-change event. No-op outside the
- * bundled SPA (i.e., when API_BASE_URL points at a different origin and
- * window.location is not the taskflow server).
+ * whenever the server broadcasts a file-change event.
+ *
+ * Same-origin only by design: when API_BASE_URL is "" the SPA is served by
+ * the taskflow server and window.location is the WS host. For a remote /
+ * cross-origin API_BASE_URL (e.g. VITE_API_BASE_URL pointing at a different
+ * host), this hook becomes a no-op — extending it would require deriving
+ * the WS origin from API_BASE_URL rather than window.location, and CORS /
+ * authentication considerations for cross-origin WS would need handling.
+ * Wire that up when/if a remote API base becomes a real use case.
  */
 export function useTaskflowLiveSync(enabled = true) {
   const qc = useQueryClient();
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
-
-    // Same-origin SPA: API_BASE_URL is "" and window.location is the server.
-    // Cross-origin (dev mode hitting a remote API) is not supported here.
     if (API_BASE_URL !== "") return;
 
     let ws: WebSocket | null = null;

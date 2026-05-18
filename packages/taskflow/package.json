@@ -17,7 +17,6 @@
   "files": [
     "dist",
     "schema",
-    "templates",
     "README.md",
     "LICENSE"
   ],
@@ -27,7 +26,7 @@
     "build": "pnpm run build:cli && pnpm run build:ui",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm run build && pnpm run typecheck"
+    "prepublishOnly": "npm run build && npm run typecheck"
   },
   "devDependencies": {
     "tsup": "^8.4.0",

@@ -588,7 +588,7 @@
       "title": "Publish taskflow as npm package with bundled React UI and local playground",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "changes-implemented",
       "folder": "workTasks/N03-publish-taskflow-as-npm-package-with-bundled-react",
       "createdAt": "2026-05-18T11:30:42.938Z",
       "statusHistory": [
@@ -631,6 +631,26 @@
           "status": "approved",
           "at": "2026-05-18T11:53:22.210Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T11:54:02.651Z",
+          "by": "task-git"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-18T11:55:52.499Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-18T11:55:57.649Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-18T12:02:35.797Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -670,7 +690,22 @@
           "fix": null
         }
       ],
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-18T11:55:52.499Z",
+          "description": "Apply 5 non-blocking suggestions from AI review round 1: 1) make prepublishOnly portable (pnpm -> npm), 2) drop redundant @ alias in vite.package.config.ts, 3) split heavy vendor chunks (recharts) via manualChunks, 4) remove unused templates/ from files array, 5) add cross-origin documentation note to useTaskflowLiveSync",
+          "requestedBy": "task-review-fix",
+          "status": "implemented",
+          "implementedAt": "2026-05-18T12:02:35.796Z",
+          "filesChanged": [
+            "packages/taskflow/package.json",
+            "vite.package.config.ts",
+            "src/lib/api.ts"
+          ],
+          "comment": "Applied 5 non-blocking suggestions: (1) prepublishOnly now uses npm not pnpm for portability, (2) dropped redundant @ alias from vite.package.config.ts (vite-tsconfig-paths handles it), (3) added manualChunks splitting recharts (386KB) and radix (32KB) into separate vendor bundles — main chunk now 352KB raw / 107KB gzip vs prior 773KB / 226KB monolith, (4) dropped empty templates/ from package files array, (5) expanded useTaskflowLiveSync JSDoc to document the cross-origin limitation. Verified: typecheck + lint clean, rebuild produces 4 chunks, playground server serves them with 200 and runtime config still injected.",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "incidents": [],
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -690,6 +725,11 @@
           "at": "2026-05-18T11:47:52.094Z",
           "commitHash": "c2be7e1",
           "commitMessage": "feat(package): bundle React dashboard into taskflow npm package + add playground"
+        },
+        {
+          "at": "2026-05-18T11:54:02.651Z",
+          "commitHash": "f52a1a1",
+          "commitMessage": "docs(tasks): add N03 review — approved with 5 non-blocking suggestions"
         }
       ],
       "branch": "feat/N03-publish-taskflow-npm"

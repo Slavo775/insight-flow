@@ -16,11 +16,18 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: resolve(repoRoot, "index.package.html"),
-    },
-  },
-  resolve: {
-    alias: {
-      "@": resolve(repoRoot, "src"),
+      output: {
+        manualChunks: {
+          recharts: ["recharts"],
+          radix: [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-tooltip",
+          ],
+        },
+      },
     },
   },
 });
