@@ -105,7 +105,7 @@ export function initProject(cwd: string = process.cwd()): void {
 
   if (!existsSync(claudeMdPath)) {
     writeFileSync(claudeMdPath, MARKER + "\n" + taskflowSection + MARKER_END + "\n");
-    console.log("Created CLAUDE.md with taskflow context");
+    console.log("Created CLAUDE.md with insight-flow context");
   } else {
     const existing = readFileSync(claudeMdPath, "utf-8");
     if (existing.includes(MARKER)) {
@@ -114,14 +114,14 @@ export function initProject(cwd: string = process.cwd()): void {
       const afterIdx = existing.indexOf(MARKER_END);
       const after = afterIdx >= 0 ? existing.substring(afterIdx + MARKER_END.length) : "";
       writeFileSync(claudeMdPath, before + MARKER + "\n" + taskflowSection + MARKER_END + after);
-      console.log("Updated taskflow section in existing CLAUDE.md");
+      console.log("Updated insight-flow section in existing CLAUDE.md");
     } else {
       // Append taskflow section
       writeFileSync(
         claudeMdPath,
         existing.trimEnd() + "\n\n" + MARKER + "\n" + taskflowSection + MARKER_END + "\n",
       );
-      console.log("Appended taskflow section to existing CLAUDE.md");
+      console.log("Appended insight-flow section to existing CLAUDE.md");
     }
   }
 

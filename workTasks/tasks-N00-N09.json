@@ -766,7 +766,7 @@
       "title": "Publish package to npm as insight-flow under sslavo account",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N04-publish-package-to-npm-as-insight-flow-under-sslav",
       "createdAt": "2026-05-18T12:33:17.843Z",
       "statusHistory": [
@@ -804,6 +804,11 @@
           "status": "approved",
           "at": "2026-05-18T12:57:18.224Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:58:01.363Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -848,6 +853,11 @@
           "at": "2026-05-18T12:47:43.637Z",
           "commitHash": "d55a04a",
           "commitMessage": "feat(package): rename publishable artifact from taskflow to insight-flow"
+        },
+        {
+          "at": "2026-05-18T12:58:01.363Z",
+          "commitHash": "a88966a",
+          "commitMessage": "docs(tasks): add N04 review — approved with two non-blocking notes"
         }
       ],
       "branch": "feat/N04-publish-insight-flow-npm",

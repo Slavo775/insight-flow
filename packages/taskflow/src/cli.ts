@@ -1,4 +1,6 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { resolveConfig, getMasterPath } from "./config.js";
 import { loadMaster } from "./storage.js";
 import { initProject } from "./init/index.js";
@@ -117,7 +119,9 @@ if (!command || command === "ui") {
 } else if (command === "help" || command === "--help" || command === "-h") {
   printHelp();
 } else if (command === "version" || command === "--version" || command === "-v") {
-  console.log("insight-flow 0.3.0");
+  const pkgPath = resolve(dirname(fileURLToPath(import.meta.url)), "..", "package.json");
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as { version: string };
+  console.log(`insight-flow ${pkg.version}`);
 } else if (command === "migrate") {
   const config = resolveConfig();
   cmdMigrate(config);
