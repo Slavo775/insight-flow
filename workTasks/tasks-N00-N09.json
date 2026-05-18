@@ -766,7 +766,7 @@
       "title": "Publish package to npm as insight-flow under sslavo account",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N04-publish-package-to-npm-as-insight-flow-under-sslav",
       "createdAt": "2026-05-18T12:33:17.843Z",
       "statusHistory": [
@@ -789,6 +789,21 @@
           "status": "implemented",
           "at": "2026-05-18T12:46:26.341Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:47:43.637Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-18T12:55:38.089Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-18T12:57:18.224Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -803,7 +818,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-18T12:55:38.090Z",
+          "endedAt": "2026-05-18T12:57:18.223Z",
+          "verdict": "approved",
+          "comment": "Approved with two non-blocking notes: (1) console.log strings in insight-flow init still say 'taskflow context/section' — UX wart, not a functional issue; (2) version string hardcoded in cli.ts will drift on future bumps. Recommend a local install-from-tarball smoke test before the manual npm publish post-merge step.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -818,6 +843,11 @@
           "at": "2026-05-18T12:35:07.108Z",
           "commitHash": "7ae3fa2",
           "commitMessage": "docs(tasks): add N04 spec — publish package to npm as insight-flow"
+        },
+        {
+          "at": "2026-05-18T12:47:43.637Z",
+          "commitHash": "d55a04a",
+          "commitMessage": "feat(package): rename publishable artifact from taskflow to insight-flow"
         }
       ],
       "branch": "feat/N04-publish-insight-flow-npm",
