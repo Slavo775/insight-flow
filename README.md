@@ -1,20 +1,20 @@
-# taskflow
+# insight-flow
 
 A workbench for AI-assisted task lifecycle management — CLI plus a built-in live dashboard.
 
-`taskflow` gives any project structured, auditable, visualizable task execution. One command to init, one command to launch the dashboard. Designed for Claude Code workflows but works standalone.
+`insight-flow` gives any project structured, auditable, visualizable task execution. One command to init, one command to launch the dashboard. Designed for Claude Code workflows but works standalone.
 
 ## Quick Start
 
 ```bash
 # Initialize in your project
-npx taskflow init
+npx insight-flow init
 
 # Create your first task
-taskflow create --title "Add user auth" --type feat --priority high --tags auth,api
+insight-flow create --title "Add user auth" --type feat --priority high --tags auth,api
 
 # Launch the dashboard
-taskflow
+insight-flow
 ```
 
 The dashboard opens at `http://localhost:6006` with live-reload — create tasks in one terminal, see them appear instantly in the browser.
@@ -23,18 +23,18 @@ The dashboard opens at `http://localhost:6006` with live-reload — create tasks
 
 ```bash
 # Global
-npm install -g taskflow
+npm install -g insight-flow
 
 # Project dev dependency
-npm install -D taskflow
+npm install -D insight-flow
 
 # Or just use npx
-npx taskflow init
+npx insight-flow init
 ```
 
 ## What You Get
 
-After `taskflow init`, your project has:
+After `insight-flow init`, your project has:
 
 ```
 your-project/
@@ -50,9 +50,9 @@ your-project/
 ## Dashboard
 
 ```bash
-taskflow              # Launch dashboard (default)
-taskflow ui           # Same thing
-taskflow ui --port 8080  # Custom port
+insight-flow              # Launch dashboard (default)
+insight-flow ui           # Same thing
+insight-flow ui --port 8080  # Custom port
 ```
 
 The built-in dev server:
@@ -67,67 +67,67 @@ The built-in dev server:
 
 ```bash
 # Create
-taskflow create --title "..." --type feat|fix|rework --priority critical|high|medium|low --tags a,b
+insight-flow create --title "..." --type feat|fix|rework --priority critical|high|medium|low --tags a,b
 
 # Status transitions
-taskflow status --id N00 --status ready|in-progress|implemented|... [--by agent-name]
+insight-flow status --id N00 --status ready|in-progress|implemented|... [--by agent-name]
 
 # Implementation tracking
-taskflow implement-start --id N00
-taskflow implement-end --id N00 --files "src/a.ts,src/b.ts"
+insight-flow implement-start --id N00
+insight-flow implement-end --id N00 --files "src/a.ts,src/b.ts"
 
 # Code review
-taskflow review-start --id N00 [--type ai|human] [--by reviewer]
-taskflow review-end --id N00 --verdict approved|fix-needed [--comment "..."]
+insight-flow review-start --id N00 [--type ai|human] [--by reviewer]
+insight-flow review-end --id N00 --verdict approved|fix-needed [--comment "..."]
 
 # Fix cycle
-taskflow fix-start --id N00
-taskflow fix-end --id N00 --files "src/a.ts" [--comment "..."]
+insight-flow fix-start --id N00
+insight-flow fix-end --id N00 --files "src/a.ts" [--comment "..."]
 
 # Git integration
-taskflow push --id N00 --commit abc123 --message "feat: ..." [--branch name]
-taskflow mr-update --id N00 --url "https://github.com/.../pull/1"
-taskflow merge --id N00
-taskflow done --id N00
+insight-flow push --id N00 --commit abc123 --message "feat: ..." [--branch name]
+insight-flow mr-update --id N00 --url "https://github.com/.../pull/1"
+insight-flow merge --id N00
+insight-flow done --id N00
 ```
 
 ### Change Requests (post-implementation)
 
 ```bash
-taskflow change-request --id N00 --description "Fix the button color"
-taskflow change-start --id N00
-taskflow change-end --id N00 --files "src/button.tsx" [--comment "..."]
-taskflow next-change
+insight-flow change-request --id N00 --description "Fix the button color"
+insight-flow change-start --id N00
+insight-flow change-end --id N00 --files "src/button.tsx" [--comment "..."]
+insight-flow next-change
 ```
 
 ### Incidents
 
 ```bash
-taskflow incident-create --id N00 --title "API 500 on login" --severity critical
-taskflow incident-status --id N00 --incident INC-001 --status investigating
-taskflow incident-resolve --id N00 --incident INC-001 --rootCause "..." --fix "..."
-taskflow incident-list [--id N00]
+insight-flow incident-create --id N00 --title "API 500 on login" --severity critical
+insight-flow incident-status --id N00 --incident INC-001 --status investigating
+insight-flow incident-resolve --id N00 --incident INC-001 --rootCause "..." --fix "..."
+insight-flow incident-list [--id N00]
 ```
 
 ### Queries
 
 ```bash
-taskflow current          # Show active task
-taskflow list             # List all tasks
-taskflow list --status ready  # Filter by status
-taskflow stats            # Aggregate statistics
-taskflow next             # Pick next actionable task (smart priority)
-taskflow next-review      # Pick next task awaiting review
-taskflow next-fix         # Pick next task needing fixes
+insight-flow current          # Show active task
+insight-flow list             # List all tasks
+insight-flow list --status ready  # Filter by status
+insight-flow stats            # Aggregate statistics
+insight-flow next             # Pick next actionable task (smart priority)
+insight-flow next-review      # Pick next task awaiting review
+insight-flow next-fix         # Pick next task needing fixes
 ```
 
 ### Other
 
 ```bash
-taskflow init             # Initialize taskflow in current project
-taskflow migrate          # Migrate from legacy tracker.json format
-taskflow help             # Show help
-taskflow version          # Show version
+insight-flow init             # Initialize insight-flow in current project
+insight-flow migrate          # Migrate from legacy tracker.json format
+insight-flow help             # Show help
+insight-flow version          # Show version
 ```
 
 ## Configuration
@@ -193,7 +193,7 @@ JSON Schema files are included at `schema/task.schema.json`, `schema/shard.schem
 
 ## Claude Code Integration
 
-Taskflow was designed for AI-assisted development with Claude Code. The role templates (`.claude/roles/`) define specialized agent behaviors:
+insight-flow was designed for AI-assisted development with Claude Code. The role templates (`.claude/roles/`) define specialized agent behaviors:
 
 | Role | Skill | Purpose |
 |------|-------|---------|
@@ -217,7 +217,7 @@ import {
   loadTaskById,
   startServer,
   initProject,
-} from "taskflow";
+} from "insight-flow";
 
 const config = resolveConfig();
 const master = loadMaster(config);

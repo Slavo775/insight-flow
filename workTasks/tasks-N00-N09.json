@@ -766,7 +766,7 @@
       "title": "Publish package to npm as insight-flow under sslavo account",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N04-publish-package-to-npm-as-insight-flow-under-sslav",
       "createdAt": "2026-05-18T12:33:17.843Z",
       "statusHistory": [
@@ -774,12 +774,33 @@
           "status": "ready",
           "at": "2026-05-18T12:33:17.844Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:35:07.108Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-18T12:39:37.088Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-18T12:46:26.341Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-18T12:39:37.088Z",
+        "completedAt": "2026-05-18T12:46:26.340Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/init/index.ts",
+          "README.md"
+        ],
         "tokensUsed": null
       },
       "reviews": [],
@@ -791,7 +812,16 @@
         "publish",
         "npm",
         "release"
-      ]
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-18T12:35:07.108Z",
+          "commitHash": "7ae3fa2",
+          "commitMessage": "docs(tasks): add N04 spec — publish package to npm as insight-flow"
+        }
+      ],
+      "branch": "feat/N04-publish-insight-flow-npm",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/5"
     }
   ]
 }
