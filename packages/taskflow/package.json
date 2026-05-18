@@ -1,7 +1,7 @@
 {
   "name": "taskflow",
-  "version": "0.1.0",
-  "description": "Storybook for tasking — AI-assisted task lifecycle management with built-in dashboard",
+  "version": "0.2.0",
+  "description": "A workbench for AI-assisted task lifecycle management — CLI plus a bundled React dashboard",
   "type": "module",
   "bin": {
     "taskflow": "./dist/cli.js"
@@ -17,12 +17,16 @@
   "files": [
     "dist",
     "schema",
-    "templates"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "build": "tsup",
+    "build:cli": "tsup",
+    "build:ui": "node ../../scripts/build-taskflow-ui.mjs",
+    "build": "pnpm run build:cli && pnpm run build:ui",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run typecheck"
   },
   "devDependencies": {
     "tsup": "^8.4.0",
@@ -32,12 +36,26 @@
     "node": ">=18"
   },
   "license": "MIT",
+  "author": "Slavo Sedlak <slavomir.sedlak.webdev@gmail.com>",
+  "homepage": "https://github.com/Slavo775/insight-flow#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Slavo775/insight-flow.git",
+    "directory": "packages/taskflow"
+  },
+  "bugs": {
+    "url": "https://github.com/Slavo775/insight-flow/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "taskflow",
     "task-management",
     "claude-code",
     "ai-tasks",
-    "storybook-for-tasks",
+    "task-workbench",
+    "dashboard",
     "cli"
   ]
 }

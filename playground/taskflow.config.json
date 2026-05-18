@@ -1,0 +1,14 @@
+{
+  "workDir": "workTasks",
+  "shardSize": 10,
+  "projectName": "taskflow-playground",
+  "rolesDir": ".claude/roles",
+  "server": {
+    "port": 6007
+  },
+  "activityEngine": {
+    "enabled": false,
+    "logFile": ".taskflow-activity.jsonl",
+    "maxEvents": 200
+  }
+}

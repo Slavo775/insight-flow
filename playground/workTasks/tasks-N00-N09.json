@@ -1,0 +1,286 @@
+{
+  "range": { "from": 0, "to": 9 },
+  "tasks": [
+    {
+      "id": "N00",
+      "title": "Document Upload Missing Success/Error Feedback",
+      "type": "fix",
+      "priority": "high",
+      "status": "merged",
+      "folder": "workTasks/N00-document-upload-feedback",
+      "createdAt": "2026-05-01T19:58:00Z",
+      "statusHistory": [
+        { "status": "ready", "at": "2026-05-01T19:58:00Z", "by": "taskmaster" },
+        { "status": "in-progress", "at": "2026-05-01T18:31:28.187Z", "by": "task-implement" },
+        { "status": "reviewing", "at": "2026-05-01T18:59:03.482Z", "by": "task-review" },
+        { "status": "approved", "at": "2026-05-01T19:01:39.663Z", "by": "task-review" },
+        { "status": "pushed", "at": "2026-05-01T19:15:29.935Z", "by": "task-git" },
+        { "status": "merged", "at": "2026-05-01T19:17:55.563Z", "by": "task-git" }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-01T18:31:28.186Z",
+        "completedAt": "2026-05-01T18:33:43.184Z",
+        "filesChanged": ["apps/web/src/components/documents/document-list-client.tsx"],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-01T18:59:03.483Z",
+          "endedAt": "2026-05-01T19:01:39.663Z",
+          "verdict": "approved",
+          "comment": "Clean implementation. All checklist items pass. Quality gates green.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": -40,
+      "tags": ["web", "ux", "documents"],
+      "pushes": [
+        {
+          "at": "2026-05-01T19:15:29.935Z",
+          "commitHash": "43f0a79",
+          "commitMessage": "fix(web): add toast feedback for document upload success and error"
+        }
+      ],
+      "branch": "fix/N00-document-upload-feedback",
+      "mrUrl": "https://github.com/example/repo/pull/35",
+      "mergedAt": "2026-05-01T19:17:55.562Z"
+    },
+    {
+      "id": "N01",
+      "title": "Fix S3/MinIO presigned URL and CORS issues",
+      "type": "fix",
+      "priority": "high",
+      "status": "merged",
+      "folder": "workTasks/N01-fix-s3-minio-presigned-url-and-cors-issues",
+      "createdAt": "2026-05-01T19:36:11.346Z",
+      "statusHistory": [
+        { "status": "ready", "at": "2026-05-01T19:36:11.346Z", "by": "taskmaster" },
+        { "status": "in-progress", "at": "2026-05-01T19:38:59.023Z", "by": "task-implement" },
+        { "status": "implemented", "at": "2026-05-01T19:43:39.578Z", "by": "task-implement" },
+        { "status": "reviewing", "at": "2026-05-01T19:49:45.284Z", "by": "task-review" },
+        { "status": "approved", "at": "2026-05-01T19:51:13.987Z", "by": "task-review" },
+        { "status": "fix-needed", "at": "2026-05-01T20:11:18.370Z", "by": "task-review" },
+        { "status": "fixing", "at": "2026-05-01T20:17:18.574Z", "by": "task-review-fix" },
+        { "status": "fixed", "at": "2026-05-01T20:19:40.568Z", "by": "task-review-fix" },
+        { "status": "approved", "at": "2026-05-01T20:28:55.555Z", "by": "task-human-review" },
+        { "status": "merged", "at": "2026-05-01T20:34:01.223Z", "by": "task-git" }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-01T19:38:59.022Z",
+        "completedAt": "2026-05-01T19:43:39.578Z",
+        "filesChanged": [
+          "apps/api/src/storage/storage.service.ts",
+          "apps/api/src/document/document.service.ts",
+          "docker-compose.yaml",
+          "infra/caddy/Caddyfile"
+        ],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-01T19:49:45.285Z",
+          "endedAt": "2026-05-01T19:51:13.986Z",
+          "verdict": "approved",
+          "comment": "Clean implementation. Two non-blocking suggestions on dual-client tests and Caddy hardening.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-01T20:10:42.978Z",
+          "endedAt": "2026-05-01T20:11:18.370Z",
+          "verdict": "fix-needed",
+          "comment": "Upload still broken on dev: S3 PUT fails silently, modal stays open on 201",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": {
+            "startedAt": "2026-05-01T20:17:18.574Z",
+            "endedAt": "2026-05-01T20:19:40.567Z",
+            "status": "fixed",
+            "filesChanged": [
+              "apps/web/src/hooks/use-documents.ts",
+              "apps/web/src/components/documents/document-list-client.tsx"
+            ],
+            "comment": "Modal closes on 201 regardless of S3 PUT outcome; S3 PUT failure shows warning toast",
+            "by": "task-review-fix"
+          }
+        },
+        {
+          "startedAt": "2026-05-01T20:28:34.747Z",
+          "endedAt": "2026-05-01T20:28:55.554Z",
+          "verdict": "approved",
+          "comment": "Approved by project owner",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": 58,
+      "tags": ["storage", "minio", "s3", "documents"],
+      "pushes": [
+        {
+          "at": "2026-05-01T19:44:38.083Z",
+          "commitHash": "03b1e0f",
+          "commitMessage": "fix(api,infra): use public S3 endpoint for presigned URLs and add dev CORS"
+        },
+        {
+          "at": "2026-05-01T20:20:26.811Z",
+          "commitHash": "5112c4f",
+          "commitMessage": "fix(web): close upload modal on 201 even if S3 PUT fails"
+        }
+      ],
+      "branch": "fix/N01-s3-minio-presigned-url-cors",
+      "mrUrl": "https://github.com/example/repo/pull/36",
+      "mergedAt": "2026-05-01T20:34:01.222Z"
+    },
+    {
+      "id": "N02",
+      "title": "Fix Socket.IO WebSocket proxy and reconnect toast spam",
+      "type": "fix",
+      "priority": "high",
+      "status": "merged",
+      "folder": "workTasks/N02-fix-socket-io-websocket-proxy-and-reconnect-toast",
+      "createdAt": "2026-05-01T20:40:53.825Z",
+      "statusHistory": [
+        { "status": "ready", "at": "2026-05-01T20:40:53.826Z", "by": "taskmaster" },
+        { "status": "in-progress", "at": "2026-05-01T20:44:32.275Z", "by": "task-implement" },
+        { "status": "implemented", "at": "2026-05-01T20:45:49.206Z", "by": "task-implement" },
+        { "status": "reviewing", "at": "2026-05-01T20:47:52.734Z", "by": "task-review" },
+        { "status": "approved", "at": "2026-05-01T20:56:08.716Z", "by": "task-review" },
+        { "status": "merged", "at": "2026-05-01T20:58:00.718Z", "by": "task-git" }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-01T20:44:32.274Z",
+        "completedAt": "2026-05-01T20:45:49.205Z",
+        "filesChanged": ["infra/caddy/Caddyfile", "apps/web/src/hooks/useRealTimeNotifications.ts"],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-01T20:47:52.735Z",
+          "endedAt": "2026-05-01T20:49:07.211Z",
+          "verdict": "approved",
+          "comment": "Clean two-file fix. One non-blocking suggestion on toast ref reset.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-01T20:55:25.392Z",
+          "endedAt": "2026-05-01T20:56:08.715Z",
+          "verdict": "approved",
+          "comment": "Round 2: non-blocking toast ref fix applied correctly.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": 17,
+      "tags": ["caddy", "socket.io", "websocket", "web"],
+      "pushes": [
+        {
+          "at": "2026-05-01T20:46:31.731Z",
+          "commitHash": "0cb7fcb",
+          "commitMessage": "fix(web,caddy): add Socket.IO proxy route and debounce reconnect toast"
+        }
+      ],
+      "branch": "fix/N02-socket-io-proxy-toast-spam",
+      "mrUrl": "https://github.com/example/repo/pull/37",
+      "mergedAt": "2026-05-01T20:58:00.718Z"
+    },
+    {
+      "id": "N03",
+      "title": "Add multi-file attachment upload to expense detail page",
+      "type": "feat",
+      "priority": "medium",
+      "status": "fix-needed",
+      "folder": "workTasks/N03-add-multi-file-attachment-upload-to-expense-detail",
+      "createdAt": "2026-05-01T21:08:47.381Z",
+      "statusHistory": [
+        { "status": "ready", "at": "2026-05-01T21:08:47.382Z", "by": "taskmaster" },
+        { "status": "in-progress", "at": "2026-05-01T21:16:51.257Z", "by": "task-implement" },
+        { "status": "implemented", "at": "2026-05-01T21:24:22.878Z", "by": "task-implement" },
+        { "status": "reviewing", "at": "2026-05-01T21:38:20.201Z", "by": "task-human-review" },
+        { "status": "fix-needed", "at": "2026-05-01T21:38:37.824Z", "by": "task-human-review" },
+        { "status": "fixing", "at": "2026-05-01T22:01:00.490Z", "by": "task-review-fix" },
+        { "status": "fixed", "at": "2026-05-02T08:15:20.011Z", "by": "task-review-fix" },
+        { "status": "fix-needed", "at": "2026-05-02T08:19:35.281Z", "by": "task-human-review" }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-01T21:16:51.256Z",
+        "completedAt": "2026-05-01T21:24:22.877Z",
+        "filesChanged": [
+          "apps/api/src/expense/expense.controller.ts",
+          "apps/web/src/components/expenses/ExpenseDetailClient.tsx",
+          "apps/web/src/hooks/use-expense-attachments.ts"
+        ],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-01T21:38:20.201Z",
+          "endedAt": "2026-05-01T21:38:37.823Z",
+          "verdict": "fix-needed",
+          "comment": "S3 upload fails: hook reads uploadUrl from wrong level of API response envelope",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-02T08:19:03.344Z",
+          "endedAt": "2026-05-02T08:19:35.281Z",
+          "verdict": "fix-needed",
+          "comment": "File picker still broken on create page; extract shared AttachmentUploadSection",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [],
+      "incidents": [
+        {
+          "id": "INC-001",
+          "title": "File picker selection does nothing on /expenses/new",
+          "severity": "high",
+          "status": "investigating",
+          "reportedAt": "2026-05-02T08:09:00Z",
+          "resolvedAt": null,
+          "branch": "fix/incident/N03-file-picker-create-page",
+          "description": "Selecting a file on the create page produces no UI update, no console log, no network request.",
+          "rootCause": null,
+          "fix": null,
+          "statusHistory": []
+        }
+      ],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": ["web", "api", "s3", "expenses"],
+      "pushes": [
+        {
+          "at": "2026-05-01T21:25:18.275Z",
+          "commitHash": "cbbe2d3",
+          "commitMessage": "feat(api,web): add multi-file attachment upload/delete for expenses"
+        },
+        {
+          "at": "2026-05-02T08:15:48.296Z",
+          "commitHash": "1758e4e",
+          "commitMessage": "fix(web): use native hidden attribute on file inputs for reliable onChange"
+        }
+      ],
+      "branch": "feat/N03-expense-attachment-upload",
+      "mrUrl": "https://github.com/example/repo/pull/38",
+      "mergedAt": null
+    }
+  ]
+}

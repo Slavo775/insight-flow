@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-function Dashboard() {
+export function Dashboard() {
   const tasks = useTaskStore((s) => s.tasks);
   const meta = useTaskStore((s) => s.meta);
   const [query, setQuery] = useState("");
@@ -83,11 +83,16 @@ function Dashboard() {
         />
         <FilterBar
           tasks={tasks}
-          query={query} setQuery={setQuery}
-          status={status} setStatus={setStatus}
-          group={group} setGroup={setGroup}
-          tags={tags} setTags={setTags}
-          type={type} setType={setType}
+          query={query}
+          setQuery={setQuery}
+          status={status}
+          setStatus={setStatus}
+          group={group}
+          setGroup={setGroup}
+          tags={tags}
+          setTags={setTags}
+          type={type}
+          setType={setType}
         />
         <MetricsGrid m={metrics} />
         <LifecycleTimeline tasks={filtered} onSelect={setSelectedId} />

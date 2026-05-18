@@ -582,6 +582,178 @@
       "branch": "feat/N02-realtime-activity-engine",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/3",
       "mergedAt": "2026-05-18T11:22:35.200Z"
+    },
+    {
+      "id": "N03",
+      "title": "Publish taskflow as npm package with bundled React UI and local playground",
+      "type": "feat",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "workTasks/N03-publish-taskflow-as-npm-package-with-bundled-react",
+      "createdAt": "2026-05-18T11:30:42.938Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-18T11:30:42.939Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T11:32:56.932Z",
+          "by": "task-git"
+        },
+        {
+          "status": "ready",
+          "at": "2026-05-18T11:34:26.911Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-18T11:34:26.955Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-18T11:46:44.481Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T11:47:52.095Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-18T11:51:05.492Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-18T11:53:22.210Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T11:54:02.651Z",
+          "by": "task-git"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-18T11:55:52.499Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-18T11:55:57.649Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-18T12:02:35.797Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:03:43.029Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:10:29.109Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-18T11:34:26.954Z",
+        "completedAt": "2026-05-18T11:46:44.480Z",
+        "filesChanged": [
+          "src/routes/index.tsx",
+          "src/lib/api.ts",
+          "src/main.spa.tsx",
+          "index.package.html",
+          "vite.package.config.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md",
+          "packages/taskflow/LICENSE",
+          "scripts/build-taskflow-ui.mjs",
+          "playground/package.json",
+          "playground/taskflow.config.json",
+          "playground/workTasks/master.json",
+          "playground/workTasks/tasks-N00-N09.json",
+          "playground/README.md",
+          "playground/.gitignore",
+          "package.json",
+          ".gitignore",
+          "tsconfig.json"
+        ],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-18T11:51:05.493Z",
+          "endedAt": "2026-05-18T11:53:22.209Z",
+          "verdict": "approved",
+          "comment": "Approved. Spec satisfied: SPA bundled into dist/ui, server serves it with runtime config injection, API base is same-origin, publishing metadata complete, playground works end-to-end. One checklist item (pnpm-workspace.yaml) intentionally skipped in favor of pnpm link: protocol — documented. Five non-blocking suggestions noted in REVIEW.md.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-18T11:55:52.499Z",
+          "description": "Apply 5 non-blocking suggestions from AI review round 1: 1) make prepublishOnly portable (pnpm -> npm), 2) drop redundant @ alias in vite.package.config.ts, 3) split heavy vendor chunks (recharts) via manualChunks, 4) remove unused templates/ from files array, 5) add cross-origin documentation note to useTaskflowLiveSync",
+          "requestedBy": "task-review-fix",
+          "status": "implemented",
+          "implementedAt": "2026-05-18T12:02:35.796Z",
+          "filesChanged": [
+            "packages/taskflow/package.json",
+            "vite.package.config.ts",
+            "src/lib/api.ts"
+          ],
+          "comment": "Applied 5 non-blocking suggestions: (1) prepublishOnly now uses npm not pnpm for portability, (2) dropped redundant @ alias from vite.package.config.ts (vite-tsconfig-paths handles it), (3) added manualChunks splitting recharts (386KB) and radix (32KB) into separate vendor bundles — main chunk now 352KB raw / 107KB gzip vs prior 773KB / 226KB monolith, (4) dropped empty templates/ from package files array, (5) expanded useTaskflowLiveSync JSDoc to document the cross-origin limitation. Verified: typecheck + lint clean, rebuild produces 4 chunks, playground server serves them with 200 and runtime config still injected.",
+          "implementedBy": "task-review-fix"
+        }
+      ],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "package",
+        "publishing",
+        "ui",
+        "playground"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-18T11:32:56.931Z",
+          "commitHash": "daf69b6",
+          "commitMessage": "docs(tasks): add N03 spec — publish taskflow as npm package with bundled React UI + playground"
+        },
+        {
+          "at": "2026-05-18T11:47:52.094Z",
+          "commitHash": "c2be7e1",
+          "commitMessage": "feat(package): bundle React dashboard into taskflow npm package + add playground"
+        },
+        {
+          "at": "2026-05-18T11:54:02.651Z",
+          "commitHash": "f52a1a1",
+          "commitMessage": "docs(tasks): add N03 review — approved with 5 non-blocking suggestions"
+        },
+        {
+          "at": "2026-05-18T12:03:43.029Z",
+          "commitHash": "661464e",
+          "commitMessage": "refactor(package): apply N03 review polish — chunk vendors, portable prepublish, drop dead config"
+        },
+        {
+          "at": "2026-05-18T12:10:29.108Z",
+          "commitHash": "8f50157",
+          "commitMessage": "docs(package): rebrand from Storybook to Workbench tagline"
+        }
+      ],
+      "branch": "feat/N03-publish-taskflow-npm",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/4"
     }
   ]
 }

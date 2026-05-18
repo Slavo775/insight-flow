@@ -1,0 +1,15 @@
+{
+  "name": "taskflow-playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ui": "taskflow ui",
+    "init": "taskflow init",
+    "current": "taskflow current",
+    "stats": "taskflow stats"
+  },
+  "dependencies": {
+    "taskflow": "link:../packages/taskflow"
+  }
+}
