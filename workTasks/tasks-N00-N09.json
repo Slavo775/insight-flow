@@ -588,7 +588,7 @@
       "title": "Publish taskflow as npm package with bundled React UI and local playground",
       "type": "feat",
       "priority": "high",
-      "status": "changes-implemented",
+      "status": "pushed",
       "folder": "workTasks/N03-publish-taskflow-as-npm-package-with-bundled-react",
       "createdAt": "2026-05-18T11:30:42.938Z",
       "statusHistory": [
@@ -651,6 +651,11 @@
           "status": "changes-implemented",
           "at": "2026-05-18T12:02:35.797Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-18T12:03:43.029Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -730,6 +735,11 @@
           "at": "2026-05-18T11:54:02.651Z",
           "commitHash": "f52a1a1",
           "commitMessage": "docs(tasks): add N03 review — approved with 5 non-blocking suggestions"
+        },
+        {
+          "at": "2026-05-18T12:03:43.029Z",
+          "commitHash": "661464e",
+          "commitMessage": "refactor(package): apply N03 review polish — chunk vendors, portable prepublish, drop dead config"
         }
       ],
       "branch": "feat/N03-publish-taskflow-npm"

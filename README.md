@@ -1,6 +1,6 @@
 # taskflow
 
-Storybook for tasking — AI-assisted task lifecycle management with a built-in dashboard.
+A workbench for AI-assisted task lifecycle management — CLI plus a built-in live dashboard.
 
 `taskflow` gives any project structured, auditable, visualizable task execution. One command to init, one command to launch the dashboard. Designed for Claude Code workflows but works standalone.
 

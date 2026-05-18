@@ -36,7 +36,7 @@ function parseArgs(args: string[]): ParsedArgs {
 
 function printHelp(): void {
   console.log(`
-  taskflow — Storybook for tasking
+  taskflow — Workbench for AI task workflows
 
   USAGE
     taskflow                          Launch dashboard (dev server)

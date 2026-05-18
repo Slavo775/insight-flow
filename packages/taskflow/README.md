@@ -1,6 +1,6 @@
 # taskflow
 
-> Storybook for tasking — AI-assisted task lifecycle management with a bundled React dashboard.
+> A workbench for AI-assisted task lifecycle management — CLI plus a bundled React dashboard.
 
 Taskflow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live React dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
