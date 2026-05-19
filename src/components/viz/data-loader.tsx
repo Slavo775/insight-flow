@@ -65,8 +65,8 @@ function FetchMode() {
       const sources: unknown[] = [shardData];
       if (masterData) sources.unshift(masterData);
       const merged = mergeFiles(sources);
+      setShardTasks(merged.tasks, merged.meta, currentShard);
       if (merged.tasks.length > 0) {
-        setShardTasks(merged.tasks, merged.meta, currentShard);
         const label = currentShard.replace("tasks-", "").replace(".json", "");
         toast.success(`Fetched ${merged.tasks.length} tasks from ${label}`);
       }
