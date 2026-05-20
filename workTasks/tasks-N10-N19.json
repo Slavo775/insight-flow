@@ -9,7 +9,7 @@
       "title": "Refactor taskflow binary path resolution to be project-root relative",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N10-refactor-taskflow-binary-path-resolution-to-be-pro",
       "createdAt": "2026-05-20T18:33:18.013Z",
       "statusHistory": [
@@ -17,12 +17,29 @@
           "status": "ready",
           "at": "2026-05-20T18:33:18.014Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-20T19:22:53.549Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-20T19:25:54.401Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-20T19:22:53.548Z",
+        "completedAt": "2026-05-20T19:25:54.400Z",
+        "filesChanged": [
+          "packages/taskflow/src/paths.ts",
+          "packages/taskflow/src/config.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/index.ts"
+        ],
         "tokensUsed": null
       },
       "reviews": [],

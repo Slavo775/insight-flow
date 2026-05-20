@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, basename } from "node:path";
 import type { TaskflowConfig, ActivityEngineConfig } from "./types.js";
+import { resolveProjectRoot } from "./paths.js";
 
 const CONFIG_FILENAME = "taskflow.config.json";
 
@@ -22,7 +23,9 @@ const DEFAULTS: TaskflowConfig = {
 };
 
 export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
-  const configPath = resolve(cwd, CONFIG_FILENAME);
+  const projectRoot = safeResolveProjectRoot(cwd);
+  const anchor = projectRoot ?? cwd;
+  const configPath = resolve(anchor, CONFIG_FILENAME);
   let userConfig: Partial<TaskflowConfig> = {};
 
   if (existsSync(configPath)) {
@@ -30,7 +33,7 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
   }
 
   const projectName =
-    userConfig.projectName || inferProjectName(cwd) || "project";
+    userConfig.projectName || inferProjectName(anchor) || "project";
 
   return {
     ...DEFAULTS,
@@ -48,11 +51,20 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
 }
 
 export function getWorkDir(config: TaskflowConfig, cwd: string = process.cwd()): string {
-  return resolve(cwd, config.workDir);
+  const anchor = safeResolveProjectRoot(cwd) ?? cwd;
+  return resolve(anchor, config.workDir);
 }
 
 export function getMasterPath(config: TaskflowConfig, cwd: string = process.cwd()): string {
   return resolve(getWorkDir(config, cwd), "master.json");
+}
+
+function safeResolveProjectRoot(cwd: string): string | null {
+  try {
+    return resolveProjectRoot(cwd);
+  } catch {
+    return null;
+  }
 }
 
 function inferProjectName(cwd: string): string {
