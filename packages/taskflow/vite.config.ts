@@ -1,3 +1,4 @@
+import { existsSync, renameSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -5,14 +6,30 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-const repoRoot = dirname(fileURLToPath(import.meta.url));
+const packageRoot = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(packageRoot, "..", "..");
+const outDir = resolve(packageRoot, "dist", "ui");
 
 export default defineConfig({
   root: repoRoot,
   base: "./",
-  plugins: [react(), tailwindcss(), tsconfigPaths()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    tsconfigPaths(),
+    {
+      name: "taskflow-rename-package-html",
+      closeBundle() {
+        const from = resolve(outDir, "index.package.html");
+        const to = resolve(outDir, "index.html");
+        if (existsSync(from)) {
+          renameSync(from, to);
+        }
+      },
+    },
+  ],
   build: {
-    outDir: resolve(repoRoot, "packages/taskflow/dist/ui"),
+    outDir,
     emptyOutDir: true,
     rollupOptions: {
       input: resolve(repoRoot, "index.package.html"),

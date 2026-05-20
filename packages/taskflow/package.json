@@ -23,9 +23,10 @@
   ],
   "scripts": {
     "build:cli": "tsup",
-    "build:ui": "node ../../scripts/build-taskflow-ui.mjs",
+    "build:ui": "node ../../node_modules/vite/bin/vite.js build --config vite.config.ts",
     "build": "pnpm run build:cli && pnpm run build:ui",
     "dev": "tsup --watch",
+    "dev:ui": "node ../../node_modules/vite/bin/vite.js --config vite.config.ts",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm run typecheck"
   },
