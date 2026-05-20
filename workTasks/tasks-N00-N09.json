@@ -945,7 +945,7 @@
       "title": "Centralize CLI logic — make packages/taskflow the single source of truth",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "merged",
       "folder": "workTasks/N06-centralize-cli-logic-make-packages-taskflow-the-si",
       "createdAt": "2026-05-20T18:32:59.724Z",
       "statusHistory": [
@@ -963,6 +963,11 @@
           "status": "implemented",
           "at": "2026-05-20T19:22:05.119Z",
           "by": "task-implement"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-20T19:22:29.851Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -978,12 +983,13 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 50,
       "tags": [
         "cli",
         "refactor",
         "taskflow"
-      ]
+      ],
+      "mergedAt": "2026-05-20T19:22:29.850Z"
     },
     {
       "id": "N07",
