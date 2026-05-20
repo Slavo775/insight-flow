@@ -56,33 +56,56 @@ When you run `insight-flow` (or `insight-flow ui`):
 
 ## CLI
 
+The `insight-flow` binary is the **single canonical entry point** for all task tracking. Run it from any project root that has a `workTasks/` directory (or run `insight-flow init` first).
+
 ```
 insight-flow                                    # Launch dashboard
 insight-flow ui [--port N]                      # Same, with optional port override
 insight-flow init                               # Initialize project
 
-insight-flow create --title "..." --type feat|fix|rework [--priority high] [--tags a,b]
+# Discovery
 insight-flow current                            # Show active task
-insight-flow next                               # Pick next actionable task
-insight-flow list [--status ready]
+insight-flow next                               # Pick next actionable task by priority
+insight-flow next-review                        # Pick next task needing review
+insight-flow next-fix                           # Pick next fix-needed task
+insight-flow next-change                        # Pick next changes-requested task
+insight-flow list [--status ready]              # List tasks (optionally filtered)
 insight-flow stats                              # Aggregate stats
+
+# Task lifecycle
+insight-flow create --title "..." --type feat|fix|rework [--priority high] [--tags a,b]
+insight-flow status --id N00 --status <status> [--by agent-name]
 
 insight-flow implement-start --id N00
 insight-flow implement-end --id N00 --files "a.ts,b.ts"
 
 insight-flow review-start --id N00 [--type ai|human]
-insight-flow review-end --id N00 --verdict approved|fix-needed [--comment "..."]
+insight-flow review-end --id N00 --verdict approved|fix-needed [--type ai|human] [--comment "..."]
 
 insight-flow fix-start --id N00
 insight-flow fix-end --id N00 --files "..." [--comment "..."]
 
-insight-flow push --id N00 --commit abc123 --message "..."
+# Post-implementation change requests
+insight-flow change-request --id N00 --description "..."
+insight-flow change-start --id N00
+insight-flow change-end --id N00 --files "..." [--comment "..."]
+
+# Git lifecycle
+insight-flow push --id N00 --commit abc123 --message "..." [--branch name]
 insight-flow mr-update --id N00 --url "https://..."
 insight-flow merge --id N00
 insight-flow done --id N00
 
-insight-flow incident-create --id N03 --title "..." --severity critical
+# Incidents
+insight-flow incident-create --id N03 --title "..." --severity critical|high|medium|low
+insight-flow incident-status --id N03 --incident INC-001 --status investigating|production-fix|verified|closed
 insight-flow incident-resolve --id N03 --incident INC-001 --rootCause "..." --fix "..."
+insight-flow incident-list [--id N03]
+
+# Migration / utility
+insight-flow migrate                            # Migrate from legacy tracker.json
+insight-flow help
+insight-flow version
 ```
 
 Run `insight-flow help` for the full list.
