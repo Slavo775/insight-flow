@@ -1,10 +1,10 @@
 import { createServer } from "node:http";
 import { readFileSync, existsSync, readdirSync, watch, unlinkSync, statSync } from "node:fs";
-import { resolve, dirname, normalize, sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve, normalize, sep } from "node:path";
 import { exec } from "node:child_process";
 import type { TaskflowConfig } from "../types.js";
 import { getWorkDir } from "../config.js";
+import { resolvePackageAsset } from "../paths.js";
 import { handleUpgrade, type WsClient } from "./ws.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
 import { getDashboardHtml } from "./dashboard.js";
@@ -64,9 +64,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   const activityLogPath = resolve(process.cwd(), activityConfig.logFile);
   const wsClients: Set<WsClient> = new Set();
 
-  // Locate the bundled UI directory (dist/ui), next to dist/cli.js at runtime.
-  const moduleDir = dirname(fileURLToPath(import.meta.url));
-  const uiDir = resolve(moduleDir, "ui");
+  // Locate the bundled UI directory shipped with the package (dist/ui).
+  const uiDir = resolvePackageAsset("dist/ui");
   const uiIndexPath = resolve(uiDir, "index.html");
   const hasBundledUi = existsSync(uiIndexPath);
 

@@ -1,9 +1,7 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync, cpSync } from "node:fs";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import type { TaskflowConfig } from "../types.js";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { resolvePackageAsset } from "../paths.js";
 
 export function initProject(cwd: string = process.cwd()): void {
   const configPath = resolve(cwd, "taskflow.config.json");
@@ -51,7 +49,7 @@ export function initProject(cwd: string = process.cwd()): void {
 
   // 3. Copy role templates
   const rolesDir = resolve(cwd, config.rolesDir);
-  const templateRolesDir = resolve(__dirname, "..", "templates", "roles");
+  const templateRolesDir = resolvePackageAsset("templates/roles");
 
   if (existsSync(templateRolesDir)) {
     if (!existsSync(rolesDir)) {

@@ -28,3 +28,8 @@ export {
 } from "./storage.js";
 export { startServer } from "./server/index.js";
 export { initProject } from "./init/index.js";
+export {
+  resolveProjectRoot,
+  resolvePackageAsset,
+  TaskflowProjectNotFoundError,
+} from "./paths.js";
