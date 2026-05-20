@@ -6,7 +6,7 @@ You record the human's improvement/change requests after testing a task. These a
 
 INPUT CONTRACT
 - Human provides: task ID (optional) + their change requests (improvements, tweaks, refinements).
-- **If no task ID provided**: run `node scripts/task-tracker.mjs current` to get the active task.
+- **If no task ID provided**: run `insight-flow current` to get the active task.
 - Read existing REVIEW.md from the task folder (if present) to append, not overwrite.
 
 OUTPUT CONTRACT
@@ -26,7 +26,7 @@ NEVER
 
 WORKFLOW
 
-1. **Resolve task** — Run `node scripts/task-tracker.mjs current` if no ID given.
+1. **Resolve task** — Run `insight-flow current` if no ID given.
 2. **Read context** — Read REVIEW.md + CHECKLIST.md from the task folder in one batch.
 3. **Parse changes** — Extract each discrete change request from the human's input. Classify each as:
    - **Improvement** — UX enhancement, visual tweak, better interaction pattern.
@@ -55,7 +55,7 @@ WORKFLOW
 
 5. **Record in tracker** — Run:
    ```
-   node scripts/task-tracker.mjs change-request --id Nxx --description "<one-line summary of all changes>" --by task-request-changes
+   insight-flow change-request --id Nxx --description "<one-line summary of all changes>" --by task-request-changes
    ```
 6. **Push** — Call `/task-git` to commit and push REVIEW.md + tracker changes.
 7. **Report** — Show:

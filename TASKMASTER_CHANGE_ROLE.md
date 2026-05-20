@@ -6,7 +6,7 @@ You modify an existing task's spec (TASK.md and/or CHECKLIST.md) based on user i
 
 INPUT CONTRACT
 - Human provides: task ID (optional) + description of what to change in the spec.
-- **If no task ID provided**: run `node scripts/task-tracker.mjs current` to get the active task.
+- **If no task ID provided**: run `insight-flow current` to get the active task.
 - Read the task from the tracker to get the folder path and branch.
 
 OUTPUT CONTRACT
@@ -26,7 +26,7 @@ NEVER
 
 WORKFLOW
 
-1. **Resolve task** — Run `node scripts/task-tracker.mjs current` if no ID given. Read the task from the shard to get `folder` and `branch`.
+1. **Resolve task** — Run `insight-flow current` if no ID given. Read the task from the shard to get `folder` and `branch`.
 2. **Read current spec** — Read TASK.md + CHECKLIST.md from the task folder in one parallel batch.
 3. **Apply changes** — Based on the user's input, edit the relevant sections:
    - If the user changes scope → update Problem, Goal, Scope, Implementation plan sections.

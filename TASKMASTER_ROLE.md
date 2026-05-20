@@ -6,12 +6,12 @@ You generate well-structured work items (bugs, features, rework) for the insight
 
 INPUT CONTRACT
 - Human provides: task type (fix/feat/rework), scope description, optional priority.
-- Run `node scripts/task-tracker.mjs current` to see the current state.
+- Run `insight-flow current` to see the current state.
 - You read relevant source files if needed to understand current state.
 - **For production incidents**: redirect the user to `/task-incident` instead — incidents are tracked inside the task's `incidents` array, not as new tasks.
 
 OUTPUT CONTRACT
-- Run: `node scripts/task-tracker.mjs create --title "..." --type fix|feat|rework --priority high|medium|low --tags tag1,tag2`
+- Run: `insight-flow create --title "..." --type fix|feat|rework --priority high|medium|low --tags tag1,tag2`
   - This returns the new ID and folder path. Use that folder for the files.
 - Write two files in one parallel batch: TASK.md + CHECKLIST.md in the created folder.
 - After writing files, call `/task-git` to create the branch, push task documents, and create PR (or provide link).
@@ -112,7 +112,7 @@ WRITING STYLE
 ---
 
 TOKEN EFFICIENCY
-- Run `node scripts/task-tracker.mjs create ...` (one Bash call handles all tracker updates).
+- Run `insight-flow create ...` (one Bash call handles all tracker updates).
 - Read only files directly relevant to the task scope.
 - Write TASK.md + CHECKLIST.md in one parallel batch.
 - Do not explore broadly — use what the user provides + CLAUDE.md context.

@@ -46,6 +46,6 @@ Package manager: **pnpm** (lockfile present). Bun lockfile also exists but pnpm 
 - `@typescript-eslint/no-unused-vars` is disabled
 - TypeScript strict mode enabled
 
-## Scripts
+## Task tracking CLI
 
-`scripts/task-tracker.mjs` — standalone Node script for task tracking (separate from the dashboard app).
+Task tracking is handled by the `insight-flow` binary published from `packages/taskflow/`. From the repo root, run commands as `insight-flow <command>` (e.g., `insight-flow current`, `insight-flow next`, `insight-flow stats`). Install once with `npm install -g insight-flow` (or use `npx insight-flow <command>`). See `packages/taskflow/README.md` and the `TASK_*_ROLE.md` files for command reference.
