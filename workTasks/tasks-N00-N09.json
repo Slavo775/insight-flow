@@ -1029,7 +1029,7 @@
       "title": "Move role definitions into taskflow package and scaffold them via init",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N08-move-role-definitions-into-taskflow-package-and-sc",
       "createdAt": "2026-05-20T18:33:09.125Z",
       "statusHistory": [
@@ -1037,12 +1037,33 @@
           "status": "ready",
           "at": "2026-05-20T18:33:09.125Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-20T19:26:47.733Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-20T19:30:52.478Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-20T19:26:47.733Z",
+        "completedAt": "2026-05-20T19:30:52.477Z",
+        "filesChanged": [
+          "packages/taskflow/templates/roles/TASK_HUMAN_REVIEW_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_IMPLEMENTER_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_INCIDENT_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_REQUEST_CHANGES_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_REVIEW_FIXER_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_REVIEWER_ROLE.md",
+          "packages/taskflow/templates/roles/TASKMASTER_CHANGE_ROLE.md",
+          "packages/taskflow/templates/roles/TASKMASTER_ROLE.md",
+          "packages/taskflow/package.json",
+          "packages/taskflow/src/init/index.ts"
+        ],
         "tokensUsed": null
       },
       "reviews": [],

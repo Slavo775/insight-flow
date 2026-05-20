@@ -1,4 +1,11 @@
-import { mkdirSync, writeFileSync, readFileSync, existsSync, cpSync } from "node:fs";
+import {
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  copyFileSync,
+  readdirSync,
+} from "node:fs";
 import { resolve } from "node:path";
 import type { TaskflowConfig } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
@@ -47,7 +54,7 @@ export function initProject(cwd: string = process.cwd()): void {
     console.log("Created master.json + initial shard");
   }
 
-  // 3. Copy role templates
+  // 3. Copy role templates (per file, so we can report created vs skipped)
   const rolesDir = resolve(cwd, config.rolesDir);
   const templateRolesDir = resolvePackageAsset("templates/roles");
 
@@ -55,11 +62,23 @@ export function initProject(cwd: string = process.cwd()): void {
     if (!existsSync(rolesDir)) {
       mkdirSync(rolesDir, { recursive: true });
     }
-    try {
-      cpSync(templateRolesDir, rolesDir, { recursive: true, force: false });
-      console.log(`Copied role templates to ${config.rolesDir}/`);
-    } catch {
-      console.log("Role templates already exist, skipping.");
+    const entries = readdirSync(templateRolesDir).filter((f) => f.endsWith(".md"));
+    let created = 0;
+    let skipped = 0;
+    for (const file of entries) {
+      const dest = resolve(rolesDir, file);
+      if (existsSync(dest)) {
+        skipped++;
+      } else {
+        copyFileSync(resolve(templateRolesDir, file), dest);
+        created++;
+      }
+    }
+    if (created > 0) {
+      console.log(`Copied ${created} role template${created === 1 ? "" : "s"} to ${config.rolesDir}/`);
+    }
+    if (skipped > 0) {
+      console.log(`Skipped ${skipped} existing role file${skipped === 1 ? "" : "s"} in ${config.rolesDir}/`);
     }
   }
 
