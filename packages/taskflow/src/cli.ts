@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolveConfig, getMasterPath } from "./config.js";
 import { loadMaster } from "./storage.js";
 import { resolvePackageAsset, TaskflowProjectNotFoundError } from "./paths.js";
+import { TaskflowValidationError } from "./schema/index.js";
 import { initProject } from "./init/index.js";
 import { startServer } from "./server/index.js";
 import { cmdCreate } from "./commands/create.js";
@@ -108,6 +109,7 @@ const args = process.argv.slice(2);
 const command = args[0];
 const opts = parseArgs(args.slice(1));
 
+try {
 // Commands that don't need master.json
 if (!command || command === "ui") {
   const config = resolveConfig();
@@ -220,4 +222,11 @@ if (!command || command === "ui") {
       console.error("Run 'insight-flow help' for usage.");
       process.exit(1);
   }
+}
+} catch (err) {
+  if (err instanceof TaskflowValidationError || err instanceof TaskflowProjectNotFoundError) {
+    console.error(`error: ${err.message}`);
+    process.exit(1);
+  }
+  throw err;
 }

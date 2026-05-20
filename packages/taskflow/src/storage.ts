@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import type { MasterFile, ShardFile, Task, TaskflowConfig } from "./types.js";
 import { getWorkDir, getMasterPath } from "./config.js";
+import { MasterFileSchema, ShardFileSchema, TaskflowValidationError } from "./schema/index.js";
 export { getWorkDir, getMasterPath };
 
 export function getShardFileName(taskNum: number, shardSize: number = 10): string {
@@ -21,11 +22,20 @@ export function loadMaster(config: TaskflowConfig, cwd?: string): MasterFile {
       `master.json not found at ${masterPath}. Run 'taskflow init' to initialize.`,
     );
   }
-  return JSON.parse(readFileSync(masterPath, "utf-8"));
+  const raw = JSON.parse(readFileSync(masterPath, "utf-8"));
+  const parsed = MasterFileSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new TaskflowValidationError(masterPath, parsed.error);
+  }
+  return parsed.data as MasterFile;
 }
 
 export function saveMaster(config: TaskflowConfig, master: MasterFile, cwd?: string): void {
   const masterPath = getMasterPath(config, cwd);
+  const parsed = MasterFileSchema.safeParse(master);
+  if (!parsed.success) {
+    throw new TaskflowValidationError(masterPath, parsed.error);
+  }
   writeFileSync(masterPath, JSON.stringify(master, null, 2) + "\n");
 }
 
@@ -34,11 +44,21 @@ export function loadShard(workDir: string, shardFile: string): ShardFile {
   if (!existsSync(path)) {
     return { range: { from: 0, to: 9 }, tasks: [] };
   }
-  return JSON.parse(readFileSync(path, "utf-8"));
+  const raw = JSON.parse(readFileSync(path, "utf-8"));
+  const parsed = ShardFileSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new TaskflowValidationError(path, parsed.error);
+  }
+  return parsed.data as ShardFile;
 }
 
 export function saveShard(workDir: string, shardFile: string, data: ShardFile): void {
-  writeFileSync(getShardPath(workDir, shardFile), JSON.stringify(data, null, 2) + "\n");
+  const path = getShardPath(workDir, shardFile);
+  const parsed = ShardFileSchema.safeParse(data);
+  if (!parsed.success) {
+    throw new TaskflowValidationError(path, parsed.error);
+  }
+  writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
 }
 
 export function parseTaskNum(id: string): number {
