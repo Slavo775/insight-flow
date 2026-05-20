@@ -945,7 +945,7 @@
       "title": "Centralize CLI logic — make packages/taskflow the single source of truth",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N06-centralize-cli-logic-make-packages-taskflow-the-si",
       "createdAt": "2026-05-20T18:32:59.724Z",
       "statusHistory": [
@@ -953,12 +953,25 @@
           "status": "ready",
           "at": "2026-05-20T18:32:59.725Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-20T19:16:27.499Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-20T19:22:05.119Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-20T19:16:27.498Z",
+        "completedAt": "2026-05-20T19:22:05.119Z",
+        "filesChanged": [
+          "packages/taskflow/README.md",
+          "packages/taskflow/src/init/index.ts"
+        ],
         "tokensUsed": null
       },
       "reviews": [],
