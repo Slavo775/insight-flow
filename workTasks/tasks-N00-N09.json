@@ -878,6 +878,168 @@
       "branch": "feat/N04-publish-insight-flow-npm",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/5",
       "mergedAt": "2026-05-18T19:38:23.481Z"
+    },
+    {
+      "id": "N05",
+      "title": "Migrate role files to insight-flow binary and delete scripts/task-tracker.mjs",
+      "type": "rework",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N05-migrate-role-files-to-insight-flow-binary-and-dele",
+      "createdAt": "2026-05-20T18:32:55.384Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-20T18:32:55.385Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "reviews": [],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "migration",
+        "taskflow"
+      ]
+    },
+    {
+      "id": "N06",
+      "title": "Centralize CLI logic — make packages/taskflow the single source of truth",
+      "type": "rework",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N06-centralize-cli-logic-make-packages-taskflow-the-si",
+      "createdAt": "2026-05-20T18:32:59.724Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-20T18:32:59.725Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "reviews": [],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "refactor",
+        "taskflow"
+      ]
+    },
+    {
+      "id": "N07",
+      "title": "Add Zod schema validation to taskflow storage layer",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N07-add-zod-schema-validation-to-taskflow-storage-laye",
+      "createdAt": "2026-05-20T18:33:04.415Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-20T18:33:04.415Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "reviews": [],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "taskflow",
+        "validation",
+        "zod",
+        "storage"
+      ]
+    },
+    {
+      "id": "N08",
+      "title": "Move role definitions into taskflow package and scaffold them via init",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N08-move-role-definitions-into-taskflow-package-and-sc",
+      "createdAt": "2026-05-20T18:33:09.125Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-20T18:33:09.125Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "reviews": [],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "taskflow",
+        "init",
+        "templates",
+        "onboarding"
+      ]
+    },
+    {
+      "id": "N09",
+      "title": "Standardize taskflow UI build with Vite targeting dist/ui",
+      "type": "rework",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N09-standardize-taskflow-ui-build-with-vite-targeting-",
+      "createdAt": "2026-05-20T18:33:13.580Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-20T18:33:13.580Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "reviews": [],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "taskflow",
+        "build",
+        "vite"
+      ]
     }
   ]
 }
