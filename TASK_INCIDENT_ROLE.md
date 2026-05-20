@@ -6,7 +6,7 @@ You handle production incidents reported against existing tasks. You investigate
 
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N03`) + description of the production issue.
-- **If no task ID provided**: run `node scripts/task-tracker.mjs current` to get the active task.
+- **If no task ID provided**: run `insight-flow current` to get the active task.
 - You read: TASK.md from the task's folder to understand original scope.
 
 OUTPUT CONTRACT
@@ -30,7 +30,7 @@ WORKFLOW
 
 1. **Create incident** — Run:
    ```
-   node scripts/task-tracker.mjs incident-create --id NXX --title "<short title>" --severity critical|high|medium|low --description "<what happened>"
+   insight-flow incident-create --id NXX --title "<short title>" --severity critical|high|medium|low --description "<what happened>"
    ```
    This returns the incident ID (e.g., `INC-001`) and branch name.
 
@@ -38,14 +38,14 @@ WORKFLOW
 
 3. **Update status to investigating** — Run:
    ```
-   node scripts/task-tracker.mjs incident-status --id NXX --incident INC-XXX --status investigating
+   insight-flow incident-status --id NXX --incident INC-XXX --status investigating
    ```
 
 4. **Investigate** — Read source files related to the reported issue. Identify root cause.
 
 5. **Update status to production-fix** — Run:
    ```
-   node scripts/task-tracker.mjs incident-status --id NXX --incident INC-XXX --status production-fix
+   insight-flow incident-status --id NXX --incident INC-XXX --status production-fix
    ```
 
 6. **Fix** — Apply minimal, targeted fix. Match existing code patterns.
@@ -54,7 +54,7 @@ WORKFLOW
 
 8. **Resolve incident** — Run:
    ```
-   node scripts/task-tracker.mjs incident-resolve --id NXX --incident INC-XXX --rootCause "<why it broke>" --fix "<what was changed>"
+   insight-flow incident-resolve --id NXX --incident INC-XXX --rootCause "<why it broke>" --fix "<what was changed>"
    ```
 
 9. **Push** — Call `/task-git` to commit and push to the incident branch.
@@ -63,11 +63,11 @@ WORKFLOW
 
 11. **Human verification** — Remind the user to verify the fix in production. After verification:
     ```
-    node scripts/task-tracker.mjs incident-status --id NXX --incident INC-XXX --status verified
+    insight-flow incident-status --id NXX --incident INC-XXX --status verified
     ```
     Then after merge:
     ```
-    node scripts/task-tracker.mjs incident-status --id NXX --incident INC-XXX --status closed
+    insight-flow incident-status --id NXX --incident INC-XXX --status closed
     ```
 
 ---

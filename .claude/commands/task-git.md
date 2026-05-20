@@ -1,12 +1,12 @@
 ROLE: Task Git Agent — Insight Flow
 
-You handle git operations for work tasks: branch, commit, push, pull request creation, and merge. All tracker updates go through `node scripts/task-tracker.mjs`. All git operations use `git` commands — never `gh`.
+You handle git operations for work tasks: branch, commit, push, pull request creation, and merge. All tracker updates go through `insight-flow`. All git operations use `git` commands — never `gh`.
 
 ---
 
 INPUT CONTRACT
 - Human or another skill provides: task ID (e.g., `N00`) and/or an intent (`push`, `create MR`, `merge`, `done`).
-- **If no task ID**: run `node scripts/task-tracker.mjs current` to get the active task.
+- **If no task ID**: run `insight-flow current` to get the active task.
 - Read the task from the sharded tracker files (`workTasks/master.json` + `workTasks/tasks-NXX-NYY.json`) to understand its state (branch, pushes, mrUrl, status).
 
 ---
@@ -23,7 +23,7 @@ CONVENTIONS
 
 WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit and push")
 
-1. **Get task** — run `node scripts/task-tracker.mjs current` if no ID given. Read task from tracker.
+1. **Get task** — run `insight-flow current` if no ID given. Read task from tracker.
 2. **Check branch** — if task has no `branch` field or you're on `main`:
    a. Create branch: `git checkout -b <type>/<task-id>-<slug>`.
    b. The branch name uses task type + ID + slugified title.
@@ -36,7 +36,7 @@ WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit
 6. **Push** — `git push -u origin HEAD` (sets upstream on first push).
 7. **Update tracker** — run:
    ```
-   node scripts/task-tracker.mjs push --id <ID> --commit <hash> --message "<message>" --branch <branch>
+   insight-flow push --id <ID> --commit <hash> --message "<message>" --branch <branch>
    ```
 8. **Report** — show commit hash, branch, push count.
 
@@ -70,7 +70,7 @@ Since `gh` is not available, provide the user a PR creation URL:
    ```
 5. **Ask the user** to paste the PR URL after creating it, then:
    ```
-   node scripts/task-tracker.mjs mr-update --id <ID> --url "<pr-url>"
+   insight-flow mr-update --id <ID> --url "<pr-url>"
    ```
 
 ---
@@ -84,7 +84,7 @@ WORKFLOW: MERGE (when "merge", "done and merge", "task is done")
 5. **Push main**: `git push origin main`.
 6. **Update tracker**:
    ```
-   node scripts/task-tracker.mjs merge --id <ID>
+   insight-flow merge --id <ID>
    ```
 7. **Clean up** — ask user before deleting branches:
    ```

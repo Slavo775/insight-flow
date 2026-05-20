@@ -245,7 +245,7 @@ Example: `fix/incident/N03-api-500-expense-creation`
 
 ## CLI Reference
 
-All commands: `node scripts/task-tracker.mjs <command> [options]`
+All commands: `insight-flow <command> [options]`
 
 ### Task Commands
 

@@ -11,7 +11,7 @@ Follow the spec exactly — no creative decisions, no scope expansion, no extras
 
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N00`) or folder path (e.g., `workTasks/N00-document-upload-feedback/`).
-- **If no task ID provided**: run `node scripts/task-tracker.mjs next` — this picks the best task automatically:
+- **If no task ID provided**: run `insight-flow next` — this picks the best task automatically:
   1. `fix-needed` tasks first (must fix before moving on)
   2. `changes-requested` tasks (implement change requests)
   3. `changes-implementing` tasks (resume interrupted change work)
@@ -42,8 +42,8 @@ NEVER
 
 WORKFLOW — FULL IMPLEMENTATION (status: `ready`)
 
-1. **Resolve task** — Run `node scripts/task-tracker.mjs next` if no ID given. Use the returned `folder` and `next` (ID).
-2. **Mark started** — Run `node scripts/task-tracker.mjs implement-start --id Nxx`.
+1. **Resolve task** — Run `insight-flow next` if no ID given. Use the returned `folder` and `next` (ID).
+2. **Mark started** — Run `insight-flow implement-start --id Nxx`.
 3. **Read specs** — TASK.md + CHECKLIST.md from the task folder in one parallel batch.
 4. **Read source** — existing files listed in "In scope". Batch reads; use offset/limit for large files.
 5. **Plan** — list files to create or modify in dependency order. Follow "Implementation plan" step order from TASK.md.
@@ -51,7 +51,7 @@ WORKFLOW — FULL IMPLEMENTATION (status: `ready`)
 7. **Tests** — add or update tests if the task requires them. Follow the testing framework for the package.
 8. **Quality gates** — run `npx tsc --noEmit`, `npm run lint`, relevant test command. Fix any in-scope failures.
 9. **Self-verify** — check each item in CHECKLIST.md. Mark met/unmet.
-10. **Mark completed** — Run `node scripts/task-tracker.mjs implement-end --id Nxx --files "file1.ts,file2.ts"`.
+10. **Mark completed** — Run `insight-flow implement-end --id Nxx --files "file1.ts,file2.ts"`.
 11. **Push changes** — Call `/task-git` to commit and push implementation to the task's branch. If no branch/PR exists yet, `/task-git` will create them.
 12. **Report** — list: files changed, tests added, all gate results, any checklist items not met with explanation.
 
@@ -59,8 +59,8 @@ WORKFLOW — FULL IMPLEMENTATION (status: `ready`)
 
 WORKFLOW — CHANGE IMPLEMENTATION (status: `changes-requested`)
 
-1. **Resolve task** — Run `node scripts/task-tracker.mjs next` if no ID given. If the returned status is `changes-requested`, use this workflow.
-2. **Mark change started** — Run `node scripts/task-tracker.mjs change-start --id Nxx --by task-implement`.
+1. **Resolve task** — Run `insight-flow next` if no ID given. If the returned status is `changes-requested`, use this workflow.
+2. **Mark change started** — Run `insight-flow change-start --id Nxx --by task-implement`.
 3. **Read change requests** — Read REVIEW.md from the task folder. Focus on the latest "Request Changes" section(s).
 4. **Identify changes** — List all items from the request.
 5. **Read affected files** — Only files mentioned in changes or directly related. Batch reads.
@@ -68,7 +68,7 @@ WORKFLOW — CHANGE IMPLEMENTATION (status: `changes-requested`)
 7. **Quality gates** — Run `npx tsc --noEmit`, `npm run lint`, relevant test command. Fix failures caused by changes.
 8. **Mark change completed** — Run:
    ```
-   node scripts/task-tracker.mjs change-end --id Nxx --files "file1.ts,file2.ts" --comment "Implemented changes: ..." --by task-implement
+   insight-flow change-end --id Nxx --files "file1.ts,file2.ts" --comment "Implemented changes: ..." --by task-implement
    ```
 9. **Push changes** — Call `/task-git` to commit and push to the task's branch.
 10. **Report** — List: each change and how it was implemented, files changed, gate results, any changes not implementable.

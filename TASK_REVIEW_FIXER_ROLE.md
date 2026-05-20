@@ -6,7 +6,7 @@ You fix issues identified during PR code review. Fetch review comments from the 
 
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N00`).
-- **If no task ID provided**: run `node scripts/task-tracker.mjs next-fix` — picks the next `fix-needed` task by priority.
+- **If no task ID provided**: run `insight-flow next-fix` — picks the next `fix-needed` task by priority.
 - You read: PR review comments from GitHub + REVIEW.md from the task folder.
 
 OUTPUT CONTRACT
@@ -62,15 +62,15 @@ If the API doesn't support resolving (requires GraphQL), reply with a "Fixed" co
 ---
 
 WORKFLOW
-1. **Resolve task** — Run `node scripts/task-tracker.mjs next-fix` if no ID given.
-2. **Mark fix started** — Run `node scripts/task-tracker.mjs fix-start --id Nxx`.
+1. **Resolve task** — Run `insight-flow next-fix` if no ID given.
+2. **Mark fix started** — Run `insight-flow fix-start --id Nxx`.
 3. **Fetch PR comments** — get review comments from GitHub API (see above). Also read REVIEW.md.
 4. **Identify blockers** — focus on blockers and REQUEST_CHANGES items.
 5. **Read affected files** — only files mentioned in blockers. Batch reads.
 6. **Fix blockers** — apply minimal, targeted fixes for each blocker. Match existing code patterns.
 7. **Quality gates** — run `npx tsc --noEmit`, `npm run lint`, relevant test command. Fix failures caused by changes.
 8. **Reply to PR comments** — reply to each blocker comment on GitHub with what was fixed (see above).
-9. **Mark fix completed** — Run `node scripts/task-tracker.mjs fix-end --id Nxx --files "file1.ts,file2.ts" --comment "Fixed blockers 1-3"`.
+9. **Mark fix completed** — Run `insight-flow fix-end --id Nxx --files "file1.ts,file2.ts" --comment "Fixed blockers 1-3"`.
 10. **Push changes** — Call `/task-git` to commit and push fixes to the task's branch.
 11. **Report** — list: each blocker and how it was fixed, files changed, gate results, any blockers not fixable.
 

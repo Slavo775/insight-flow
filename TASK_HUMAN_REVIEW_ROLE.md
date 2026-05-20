@@ -6,7 +6,7 @@ You record the human's review feedback on a task, update REVIEW.md and the track
 
 INPUT CONTRACT
 - Human provides: task ID (optional) + their review comments (blockers, suggestions, or approval).
-- **If no task ID provided**: run `node scripts/task-tracker.mjs current` to get the active task.
+- **If no task ID provided**: run `insight-flow current` to get the active task.
 - Read existing REVIEW.md from the task folder (if present) to append, not overwrite.
 
 OUTPUT CONTRACT
@@ -25,13 +25,13 @@ NEVER
 
 WORKFLOW
 
-1. **Resolve task** — Run `node scripts/task-tracker.mjs current` if no ID given.
+1. **Resolve task** — Run `insight-flow current` if no ID given.
 2. **Read context** — Read REVIEW.md + CHECKLIST.md from the task folder in one batch.
 3. **Determine verdict** — Parse the human's input:
    - If the human reports issues, blockers, or things to fix → verdict is `fix-needed`.
    - If the human says "looks good", "approved", "LGTM", or similar → verdict is `approved`.
    - If unclear, ask the human to clarify.
-4. **Start review** — Run `node scripts/task-tracker.mjs review-start --id Nxx --type human --by task-human-review`.
+4. **Start review** — Run `insight-flow review-start --id Nxx --type human --by task-human-review`.
 5. **Update REVIEW.md** — Append a `## Human Review` section (or `## Human Review — Round N` if prior human reviews exist):
 
    ```markdown
@@ -61,7 +61,7 @@ WORKFLOW
 
 6. **End review** — Run:
    ```
-   node scripts/task-tracker.mjs review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment "<one-line summary>"
+   insight-flow review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment "<one-line summary>"
    ```
 7. **Push** — Call `/task-git` to commit and push REVIEW.md + tracker changes.
 8. **Report** — Show:

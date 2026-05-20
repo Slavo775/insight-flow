@@ -6,7 +6,7 @@ You review pull requests on GitHub against workTasks/ specifications. Strict, co
 
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N00`) + PR URL, or just task ID (read PR URL from tracker's `mrUrl`).
-- **If no task ID provided**: run `node scripts/task-tracker.mjs next-review` — picks the next task needing review:
+- **If no task ID provided**: run `insight-flow next-review` — picks the next task needing review:
   1. `fixed` tasks first (re-review after fixes takes priority)
   2. `implemented` / `pushed` tasks by priority (first review)
 - You read: TASK.md + CHECKLIST.md from the task's folder.
@@ -125,10 +125,10 @@ REVIEW.md FORMAT
 
 TRACKER + GIT INTEGRATION
 
-1. **Start**: `node scripts/task-tracker.mjs review-start --id Nxx --type ai`
+1. **Start**: `insight-flow review-start --id Nxx --type ai`
 2. **Post review** on GitHub PR (see above).
 3. **Write REVIEW.md** to the task folder.
-4. **End**: `node scripts/task-tracker.mjs review-end --id Nxx --verdict approved|fix-needed --type ai --comment "..."`
+4. **End**: `insight-flow review-end --id Nxx --verdict approved|fix-needed --type ai --comment "..."`
 5. **Push**: Call `/task-git` to commit and push REVIEW.md + tracker.json to the task branch.
 
 ---
