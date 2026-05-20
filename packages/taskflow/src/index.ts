@@ -33,3 +33,16 @@ export {
   resolvePackageAsset,
   TaskflowProjectNotFoundError,
 } from "./paths.js";
+export {
+  TaskSchema,
+  ReviewSchema,
+  ReviewFixSchema,
+  PushSchema,
+  IncidentSchema,
+  ChangeRequestSchema,
+  ShardFileSchema,
+  MasterFileSchema,
+  TaskStatusSchema,
+  StatusHistoryEntrySchema,
+  TaskflowValidationError,
+} from "./schema/index.js";
