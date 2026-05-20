@@ -884,7 +884,7 @@
       "title": "Migrate role files to insight-flow binary and delete scripts/task-tracker.mjs",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "merged",
       "folder": "workTasks/N05-migrate-role-files-to-insight-flow-binary-and-dele",
       "createdAt": "2026-05-20T18:32:55.384Z",
       "statusHistory": [
@@ -902,6 +902,11 @@
           "status": "implemented",
           "at": "2026-05-20T19:07:23.672Z",
           "by": "task-implement"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-20T19:08:00.345Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -927,12 +932,13 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 35,
       "tags": [
         "cli",
         "migration",
         "taskflow"
-      ]
+      ],
+      "mergedAt": "2026-05-20T19:08:00.345Z"
     },
     {
       "id": "N06",
