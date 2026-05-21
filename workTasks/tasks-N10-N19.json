@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -235,6 +235,11 @@
           "status": "approved",
           "at": "2026-05-21T09:51:28.339Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T09:52:25.205Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -396,6 +401,11 @@
           "at": "2026-05-21T09:38:04.679Z",
           "commitHash": "b9052dd",
           "commitMessage": "docs(tasks): add N11 AI review round 3 — approved"
+        },
+        {
+          "at": "2026-05-21T09:52:25.204Z",
+          "commitHash": "132434e",
+          "commitMessage": "docs(tasks): record N11 human approval"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
