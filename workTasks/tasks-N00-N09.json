@@ -884,7 +884,7 @@
       "title": "Migrate role files to insight-flow binary and delete scripts/task-tracker.mjs",
       "type": "rework",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N05-migrate-role-files-to-insight-flow-binary-and-dele",
       "createdAt": "2026-05-20T18:32:55.384Z",
       "statusHistory": [
@@ -922,6 +922,11 @@
           "status": "approved",
           "at": "2026-05-21T07:39:35.142Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T08:35:34.688Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -966,7 +971,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": 35,
+      "totalDurationMinutes": 843,
       "tags": [
         "cli",
         "migration",
@@ -975,14 +980,14 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-05-20T19:08:00.345Z"
+      "mergedAt": "2026-05-21T08:35:34.688Z"
     },
     {
       "id": "N06",
       "title": "Centralize CLI logic — make packages/taskflow the single source of truth",
       "type": "rework",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N06-centralize-cli-logic-make-packages-taskflow-the-si",
       "createdAt": "2026-05-20T18:32:59.724Z",
       "statusHistory": [
@@ -1015,6 +1020,11 @@
           "status": "approved",
           "at": "2026-05-21T07:41:46.048Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T08:35:34.766Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1040,7 +1050,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": 50,
+      "totalDurationMinutes": 843,
       "tags": [
         "cli",
         "refactor",
@@ -1049,14 +1059,14 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-05-20T19:22:29.850Z"
+      "mergedAt": "2026-05-21T08:35:34.765Z"
     },
     {
       "id": "N07",
       "title": "Add Zod schema validation to taskflow storage layer",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N07-add-zod-schema-validation-to-taskflow-storage-laye",
       "createdAt": "2026-05-20T18:33:04.415Z",
       "statusHistory": [
@@ -1089,6 +1099,11 @@
           "status": "approved",
           "at": "2026-05-21T07:41:46.126Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T08:35:34.841Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1117,7 +1132,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": 150,
+      "totalDurationMinutes": 843,
       "tags": [
         "taskflow",
         "validation",
@@ -1127,14 +1142,14 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-05-20T21:03:26.590Z"
+      "mergedAt": "2026-05-21T08:35:34.840Z"
     },
     {
       "id": "N08",
       "title": "Move role definitions into taskflow package and scaffold them via init",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N08-move-role-definitions-into-taskflow-package-and-sc",
       "createdAt": "2026-05-20T18:33:09.125Z",
       "statusHistory": [
@@ -1202,6 +1217,11 @@
           "status": "approved",
           "at": "2026-05-21T08:26:58.379Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T08:35:34.912Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1263,7 +1283,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": 58,
+      "totalDurationMinutes": 842,
       "tags": [
         "taskflow",
         "init",
@@ -1279,14 +1299,14 @@
       ],
       "branch": "main",
       "mrUrl": null,
-      "mergedAt": "2026-05-20T19:31:22.246Z"
+      "mergedAt": "2026-05-21T08:35:34.912Z"
     },
     {
       "id": "N09",
       "title": "Standardize taskflow UI build with Vite targeting dist/ui",
       "type": "rework",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N09-standardize-taskflow-ui-build-with-vite-targeting-",
       "createdAt": "2026-05-20T18:33:13.580Z",
       "statusHistory": [
@@ -1319,6 +1339,11 @@
           "status": "approved",
           "at": "2026-05-21T07:41:46.274Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T08:35:34.987Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1347,7 +1372,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": 87,
+      "totalDurationMinutes": 842,
       "tags": [
         "taskflow",
         "build",
@@ -1356,7 +1381,7 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-05-20T20:00:32.661Z"
+      "mergedAt": "2026-05-21T08:35:34.986Z"
     }
   ]
 }
