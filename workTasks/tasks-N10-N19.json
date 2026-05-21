@@ -9,7 +9,7 @@
       "title": "Refactor taskflow binary path resolution to be project-root relative",
       "type": "rework",
       "priority": "high",
-      "status": "merged",
+      "status": "approved",
       "folder": "workTasks/N10-refactor-taskflow-binary-path-resolution-to-be-pro",
       "createdAt": "2026-05-20T18:33:18.013Z",
       "statusHistory": [
@@ -32,6 +32,16 @@
           "status": "merged",
           "at": "2026-05-20T19:26:13.485Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T07:39:41.889Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T07:41:46.346Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -47,7 +57,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T07:39:41.890Z",
+          "endedAt": "2026-05-21T07:41:46.346Z",
+          "verdict": "approved",
+          "comment": "paths.ts with resolveProjectRoot/resolvePackageAsset clean, no __dirname/../../.. in src. Non-blocking: safeResolveProjectRoot swallows error so friendly message may not surface, cache keyed on cwd equality.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -57,6 +77,9 @@
         "paths",
         "portability"
       ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": "2026-05-20T19:26:13.485Z"
     }
   ]

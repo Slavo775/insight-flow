@@ -884,7 +884,7 @@
       "title": "Migrate role files to insight-flow binary and delete scripts/task-tracker.mjs",
       "type": "rework",
       "priority": "high",
-      "status": "merged",
+      "status": "approved",
       "folder": "workTasks/N05-migrate-role-files-to-insight-flow-binary-and-dele",
       "createdAt": "2026-05-20T18:32:55.384Z",
       "statusHistory": [
@@ -907,6 +907,21 @@
           "status": "merged",
           "at": "2026-05-20T19:08:00.345Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T07:13:57.389Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T07:32:58.916Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T07:39:35.142Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -928,7 +943,26 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T07:13:57.389Z",
+          "endedAt": null,
+          "verdict": null,
+          "comment": null,
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-21T07:32:58.916Z",
+          "endedAt": "2026-05-21T07:39:35.141Z",
+          "verdict": "approved",
+          "comment": "All role files migrated, legacy script deleted, zero live code references remain. Non-blocking: stray master.json rollback in commit (no lasting harm), parity not documented.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -948,7 +982,7 @@
       "title": "Centralize CLI logic — make packages/taskflow the single source of truth",
       "type": "rework",
       "priority": "high",
-      "status": "merged",
+      "status": "approved",
       "folder": "workTasks/N06-centralize-cli-logic-make-packages-taskflow-the-si",
       "createdAt": "2026-05-20T18:32:59.724Z",
       "statusHistory": [
@@ -971,6 +1005,16 @@
           "status": "merged",
           "at": "2026-05-20T19:22:29.851Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T07:39:41.572Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T07:41:46.048Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -982,7 +1026,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T07:39:41.572Z",
+          "endedAt": "2026-05-21T07:41:46.047Z",
+          "verdict": "approved",
+          "comment": "Narrow but correct: README expanded with all commands, stale init template fixed, no-op checklist items correctly identified. Non-blocking: internal duplication audit not documented.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -1002,7 +1056,7 @@
       "title": "Add Zod schema validation to taskflow storage layer",
       "type": "feat",
       "priority": "high",
-      "status": "merged",
+      "status": "approved",
       "folder": "workTasks/N07-add-zod-schema-validation-to-taskflow-storage-laye",
       "createdAt": "2026-05-20T18:33:04.415Z",
       "statusHistory": [
@@ -1025,6 +1079,16 @@
           "status": "merged",
           "at": "2026-05-20T21:03:26.591Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T07:39:41.651Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T07:41:46.126Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -1039,7 +1103,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T07:39:41.651Z",
+          "endedAt": "2026-05-21T07:41:46.125Z",
+          "verdict": "approved",
+          "comment": "Core Zod validation boundary solid across all reads/writes with TaskflowValidationError. Non-blocking: no tests added (follow-up task needed), types.ts still hand-rolled (drift risk), as-casts in storage.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -1060,7 +1134,7 @@
       "title": "Move role definitions into taskflow package and scaffold them via init",
       "type": "feat",
       "priority": "medium",
-      "status": "merged",
+      "status": "fix-needed",
       "folder": "workTasks/N08-move-role-definitions-into-taskflow-package-and-sc",
       "createdAt": "2026-05-20T18:33:09.125Z",
       "statusHistory": [
@@ -1083,6 +1157,16 @@
           "status": "merged",
           "at": "2026-05-20T19:31:22.246Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T07:39:41.728Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-21T07:41:46.200Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -1102,7 +1186,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T07:39:41.729Z",
+          "endedAt": "2026-05-21T07:41:46.200Z",
+          "verdict": "fix-needed",
+          "comment": "Blocker: --force flag missing (explicit checklist item). 8 role templates present, per-file copy with created/skipped reporting works. Non-blocking: .claude/skills not extended, root role files not removed.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -1123,7 +1217,7 @@
       "title": "Standardize taskflow UI build with Vite targeting dist/ui",
       "type": "rework",
       "priority": "medium",
-      "status": "merged",
+      "status": "approved",
       "folder": "workTasks/N09-standardize-taskflow-ui-build-with-vite-targeting-",
       "createdAt": "2026-05-20T18:33:13.580Z",
       "statusHistory": [
@@ -1146,6 +1240,16 @@
           "status": "merged",
           "at": "2026-05-20T20:00:32.661Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T07:39:41.808Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T07:41:46.274Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -1160,7 +1264,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T07:39:41.808Z",
+          "endedAt": "2026-05-21T07:41:46.273Z",
+          "verdict": "approved",
+          "comment": "vite.config.ts replaces custom build script, dev:ui added, scripts/ dir gone. Non-blocking: build:ui uses node ../../node_modules/vite path (fragile but only affects devs), README not updated.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
