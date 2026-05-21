@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "fixed",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -145,6 +145,21 @@
           "status": "fix-needed",
           "at": "2026-05-21T09:11:15.111Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T09:11:52.140Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-21T09:12:35.218Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-21T09:14:49.212Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -184,7 +199,25 @@
           "comment": "Blocker: centralize enforcement block into AGENT_ENFORCEMENT.md referenced via @-include. Non-blocking: extra blank line in patchRoleFile insert branch.",
           "type": "ai",
           "by": "task-review",
-          "fix": null
+          "fix": {
+            "startedAt": "2026-05-21T09:12:35.219Z",
+            "endedAt": "2026-05-21T09:14:49.211Z",
+            "status": "fixed",
+            "filesChanged": [
+              "AGENT_ENFORCEMENT.md",
+              "TASKMASTER_ROLE.md",
+              "TASK_IMPLEMENTER_ROLE.md",
+              "TASK_REVIEWER_ROLE.md",
+              "TASK_REVIEW_FIXER_ROLE.md",
+              "TASK_HUMAN_REVIEW_ROLE.md",
+              "TASK_INCIDENT_ROLE.md",
+              "TASK_REQUEST_CHANGES_ROLE.md",
+              "TASKMASTER_CHANGE_ROLE.md",
+              "packages/taskflow/src/commands/prompt-build.ts"
+            ],
+            "comment": "Created AGENT_ENFORCEMENT.md; replaced inline blocks with @AGENT_ENFORCEMENT.md in 8 role files; updated prompt-build --apply to write central file; fixed patchRoleFile blank line bug",
+            "by": "task-review-fix"
+          }
         }
       ],
       "changesAfterImplementation": [],
@@ -212,6 +245,11 @@
           "at": "2026-05-21T08:58:24.629Z",
           "commitHash": "d1c8d3b",
           "commitMessage": "docs(tasks): add N11 human review — fix-needed"
+        },
+        {
+          "at": "2026-05-21T09:11:52.139Z",
+          "commitHash": "c8a1d51",
+          "commitMessage": "docs(tasks): add N11 AI review — fix-needed"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",

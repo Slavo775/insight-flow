@@ -78,33 +78,50 @@ function buildEnforcementBlock(cfg: PromptConfig): string {
 
 const ENFORCEMENT_START = "STRICT ENFORCEMENT — TASK FILE MUTATIONS";
 const GIT_RULE_START = "GIT / GH TOOL RULE";
+const AGENT_REF = "@AGENT_ENFORCEMENT.md";
 
-function patchRoleFile(filePath: string, block: string): boolean {
+// Replace inline enforcement block (or insert @reference) with @AGENT_ENFORCEMENT.md.
+// Returns true if the file was modified.
+function patchRoleFileWithRef(filePath: string): boolean {
   if (!existsSync(filePath)) return false;
   const content = readFileSync(filePath, "utf-8");
 
-  // Already has the block — replace it
+  // Already has the @reference — nothing to do
+  if (content.includes(AGENT_REF)) return false;
+
+  // Has inline enforcement block — replace with @reference
   const strictStart = content.indexOf(ENFORCEMENT_START);
   const gitStart = content.indexOf(GIT_RULE_START);
 
   if (strictStart !== -1 && gitStart !== -1) {
-    // Find the end of the block (the next --- before INPUT CONTRACT)
     const afterBlock = content.indexOf("\n---\n", gitStart);
     if (afterBlock === -1) return false;
     const updated =
-      content.slice(0, strictStart) + block + "\n" + content.slice(afterBlock + 1);
+      content.slice(0, strictStart) + AGENT_REF + "\n" + content.slice(afterBlock + 1);
     writeFileSync(filePath, updated, "utf-8");
     return true;
   }
 
-  // Block not present — insert after the first ---
+  // Neither inline block nor @reference — insert @reference after the first ---
   const firstSep = content.indexOf("\n---\n");
   if (firstSep === -1) return false;
   const insertAt = firstSep + 5; // after "\n---\n"
-  const updated = content.slice(0, insertAt) + "\n" + block + "\n\n---\n\n" + content.slice(insertAt);
+  const rest = content.slice(insertAt).replace(/^\n/, ""); // consume the blank line that follows ---
+  const updated = content.slice(0, insertAt) + "\n" + AGENT_REF + "\n\n---\n\n" + rest;
   writeFileSync(filePath, updated, "utf-8");
   return true;
 }
+
+const ROLE_FILES = [
+  "TASKMASTER_ROLE.md",
+  "TASKMASTER_CHANGE_ROLE.md",
+  "TASK_IMPLEMENTER_ROLE.md",
+  "TASK_REVIEWER_ROLE.md",
+  "TASK_REVIEW_FIXER_ROLE.md",
+  "TASK_HUMAN_REVIEW_ROLE.md",
+  "TASK_INCIDENT_ROLE.md",
+  "TASK_REQUEST_CHANGES_ROLE.md",
+];
 
 export function cmdPromptBuild(opts: ParsedArgs): void {
   const configPath = resolve(
@@ -115,32 +132,24 @@ export function cmdPromptBuild(opts: ParsedArgs): void {
   const block = buildEnforcementBlock(cfg);
 
   if (!opts.apply) {
-    // Preview mode — print to stdout
     console.log("# Enforcement block (preview)\n");
     console.log(block);
     console.log(
-      "\nRun with --apply to patch all TASK_*_ROLE.md and TASKMASTER*.md files in cwd."
+      "\nRun with --apply to write AGENT_ENFORCEMENT.md and update all role files to reference it."
     );
     return;
   }
 
-  // Apply mode — find and patch role files
   const cwd = process.cwd();
-  const patterns = [
-    "TASKMASTER_ROLE.md",
-    "TASKMASTER_CHANGE_ROLE.md",
-    "TASK_IMPLEMENTER_ROLE.md",
-    "TASK_REVIEWER_ROLE.md",
-    "TASK_REVIEW_FIXER_ROLE.md",
-    "TASK_HUMAN_REVIEW_ROLE.md",
-    "TASK_INCIDENT_ROLE.md",
-    "TASK_REQUEST_CHANGES_ROLE.md",
-  ];
 
+  // Write the single canonical enforcement file
+  const enforcementPath = join(cwd, "AGENT_ENFORCEMENT.md");
+  writeFileSync(enforcementPath, block + "\n", "utf-8");
+
+  // Ensure each role file references AGENT_ENFORCEMENT.md (not inline)
   const results: { file: string; patched: boolean }[] = [];
-  for (const name of patterns) {
-    const filePath = join(cwd, name);
-    const patched = patchRoleFile(filePath, block);
+  for (const name of ROLE_FILES) {
+    const patched = patchRoleFileWithRef(join(cwd, name));
     results.push({ file: name, patched });
   }
 
@@ -151,6 +160,7 @@ export function cmdPromptBuild(opts: ParsedArgs): void {
     JSON.stringify(
       {
         action: "prompt-build",
+        enforcementFile: "AGENT_ENFORCEMENT.md",
         config: configPath,
         patched,
         skipped,
