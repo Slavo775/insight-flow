@@ -422,7 +422,7 @@
       "title": "Custom agent rules and extensions via project config",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N12-custom-agent-rules-and-extensions-via-project-conf",
       "createdAt": "2026-05-21T10:06:19.295Z",
       "statusHistory": [
@@ -445,6 +445,21 @@
           "status": "implemented",
           "at": "2026-05-21T10:18:54.145Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T10:19:29.257Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T10:27:31.596Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T10:29:32.595Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -462,7 +477,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T10:27:31.597Z",
+          "endedAt": "2026-05-21T10:29:32.595Z",
+          "verdict": "approved",
+          "comment": "All checklist items pass. Four non-blocking notes: spec path discrepancy (skills/ vs commands/), custom skills always overwrite by design, no path sanitization on custom name, silent skip on missing role file.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -477,6 +502,11 @@
           "at": "2026-05-21T10:07:55.897Z",
           "commitHash": "25675d8",
           "commitMessage": "feat(tasks): add N12 — custom agent rules and extensions via project config"
+        },
+        {
+          "at": "2026-05-21T10:19:29.257Z",
+          "commitHash": "76006ee",
+          "commitMessage": "feat(agents): implement custom agent rules and extensions via project config"
         }
       ],
       "branch": "feat/N12-custom-agent-rules-and-extensions-via-project-config",
