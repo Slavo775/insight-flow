@@ -601,7 +601,7 @@
       "title": "Release insight-flow v0.4.0 with changelog N05-N12",
       "type": "feat",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "merged",
       "folder": "workTasks/N13-release-insight-flow-v0-4-0-with-changelog-n05-n12",
       "createdAt": "2026-05-21T17:10:24.860Z",
       "statusHistory": [
@@ -629,11 +629,21 @@
           "status": "fix-needed",
           "at": "2026-05-21T17:39:10.621Z",
           "by": "task-review"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-21T18:08:25.292Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T18:09:18.562Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
         "startedAt": "2026-05-21T17:24:44.605Z",
-        "completedAt": null,
+        "completedAt": "2026-05-21T18:08:25.292Z",
         "filesChanged": [],
         "tokensUsed": null
       },
@@ -651,7 +661,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 59,
       "tags": [
         "release",
         "npm",
@@ -666,7 +676,7 @@
       ],
       "branch": "feat/N13-release-insight-flow-v0-4-0",
       "mrUrl": null,
-      "mergedAt": null
+      "mergedAt": "2026-05-21T18:09:18.562Z"
     }
   ]
 }
