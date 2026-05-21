@@ -76,3 +76,37 @@ Risk: **low** (role files and a new CLI command — no data model changes, no pr
 3. Update `prompt-build --apply` to target `AGENT_ENFORCEMENT.md` only.
 4. Fix the extra blank line in the insert branch of `patchRoleFile`.
 5. Push fixes and re-request review.
+
+---
+
+## AI Review — Round 2
+
+**Reviewer:** Task Reviewer (AI)
+**Commit:** `e1b6b2a`
+**Verdict:** APPROVED
+
+---
+
+## Summary
+
+Fix commit `e1b6b2a` resolves both blockers cleanly. Risk: **low**.
+
+## Checklist verification (re-review)
+
+- [x] `AGENT_ENFORCEMENT.md` created — canonical 10-line enforcement block
+- [x] All 8 role files replaced inline block with `@AGENT_ENFORCEMENT.md` (verified in diff)
+- [x] `prompt-build --apply` writes `AGENT_ENFORCEMENT.md` first, then patches role files to use `@` reference
+- [x] `patchRoleFileWithRef` correctly skips files already containing `@AGENT_ENFORCEMENT.md` (idempotent)
+- [x] Extra blank line in insert branch fixed: `content.slice(insertAt).replace(/^\n/, "")`
+- [x] `ROLE_FILES` constant extracted — no more duplication of the file list
+- [x] Typecheck passes, build succeeds
+
+## Prior blockers — resolved
+
+- **Blocker 1 (centralization)** — ✅ Resolved. One file to edit, 8 agents updated.
+- **Non-blocking (blank line)** — ✅ Fixed in `patchRoleFileWithRef` insert branch.
+
+## Notes
+
+- `patchRoleFileWithRef` returning `false` (skipped) for already-patched files is correct — re-running `--apply` is safe.
+- No new issues found.

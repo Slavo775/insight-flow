@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -160,6 +160,21 @@
           "status": "fixed",
           "at": "2026-05-21T09:14:49.212Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T09:15:21.587Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T09:20:22.315Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T09:21:02.004Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -218,6 +233,15 @@
             "comment": "Created AGENT_ENFORCEMENT.md; replaced inline blocks with @AGENT_ENFORCEMENT.md in 8 role files; updated prompt-build --apply to write central file; fixed patchRoleFile blank line bug",
             "by": "task-review-fix"
           }
+        },
+        {
+          "startedAt": "2026-05-21T09:20:22.316Z",
+          "endedAt": "2026-05-21T09:21:02.004Z",
+          "verdict": "approved",
+          "comment": "Blocker 1 resolved: AGENT_ENFORCEMENT.md centralizes enforcement, all 8 role files use @reference. Non-blocking blank line fix applied. Clean.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [],
@@ -250,6 +274,11 @@
           "at": "2026-05-21T09:11:52.139Z",
           "commitHash": "c8a1d51",
           "commitMessage": "docs(tasks): add N11 AI review — fix-needed"
+        },
+        {
+          "at": "2026-05-21T09:15:21.586Z",
+          "commitHash": "e1b6b2a",
+          "commitMessage": "fix(agents): centralize enforcement into AGENT_ENFORCEMENT.md"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
