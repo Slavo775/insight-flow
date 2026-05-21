@@ -480,6 +480,21 @@
           "status": "approved",
           "at": "2026-05-21T11:18:12.304Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T11:18:32.039Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T11:27:25.421Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T11:27:39.042Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -515,6 +530,15 @@
           "type": "ai",
           "by": "task-review",
           "fix": null
+        },
+        {
+          "startedAt": "2026-05-21T11:27:25.421Z",
+          "endedAt": "2026-05-21T11:27:39.041Z",
+          "verdict": "approved",
+          "comment": "Human approved: done!",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [],
@@ -546,6 +570,11 @@
           "at": "2026-05-21T10:42:34.250Z",
           "commitHash": "456c5f9",
           "commitMessage": "fix(agents): address non-blocking review issues in agent extension logic"
+        },
+        {
+          "at": "2026-05-21T11:18:32.038Z",
+          "commitHash": "11a346c",
+          "commitMessage": "docs(tasks): add N12 AI re-review round 2 — approved"
         }
       ],
       "branch": "feat/N12-custom-agent-rules-and-extensions-via-project-config",

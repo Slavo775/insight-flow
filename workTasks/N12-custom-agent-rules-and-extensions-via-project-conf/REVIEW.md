@@ -77,6 +77,18 @@ All three actionable non-blocking items from round 1 have been addressed:
 
 ---
 
+## Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-21
+**Verdict:** APPROVED
+
+### Notes
+
+- approved done!
+
+---
+
 ## Notes
 
 - Config re-read via shallow spread (`{ ...config, ...onDisk }`) is an improvement over the prior behavior (hardcoded defaults ignored disk), though it doesn't deep-merge `server`/`activityEngine` like `resolveConfig` does. Pre-existing inconsistency, out of scope for this task.
