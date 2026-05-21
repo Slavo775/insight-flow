@@ -1134,7 +1134,7 @@
       "title": "Move role definitions into taskflow package and scaffold them via init",
       "type": "feat",
       "priority": "medium",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N08-move-role-definitions-into-taskflow-package-and-sc",
       "createdAt": "2026-05-20T18:33:09.125Z",
       "statusHistory": [
@@ -1177,6 +1177,21 @@
           "status": "fixed",
           "at": "2026-05-21T07:55:06.585Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T07:58:11.745Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T08:25:12.911Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T08:25:42.108Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -1215,6 +1230,15 @@
             "comment": "Added --force flag to initProject(force: boolean) and wired opts.force in cli.ts; updated help text. Typecheck and build pass.",
             "by": "task-review-fix"
           }
+        },
+        {
+          "startedAt": "2026-05-21T08:25:12.912Z",
+          "endedAt": "2026-05-21T08:25:42.108Z",
+          "verdict": "approved",
+          "comment": "Round 2: --force flag blocker resolved. initProject signature extended, copy loop guards on !force, cli.ts wires opts.force. Minimal, targeted fix. Typecheck and build pass.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [],
@@ -1227,8 +1251,14 @@
         "templates",
         "onboarding"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-21T07:58:11.745Z",
+          "commitHash": "de9d15c",
+          "commitMessage": "fix(taskflow): add --force flag to insight-flow init"
+        }
+      ],
+      "branch": "main",
       "mrUrl": null,
       "mergedAt": "2026-05-20T19:31:22.246Z"
     },

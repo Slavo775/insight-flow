@@ -64,3 +64,25 @@ TASK.md says init "copies role files into the consumer repo root (or a configura
 ## Notes
 
 No GitHub PR (committed directly to main). Post-merge review.
+
+---
+
+## Round 2 — Re-review (fix commit de9d15c)
+
+**Verdict:** APPROVED
+
+### Blocker verification
+
+**Blocker 1 — `--force` flag missing:** RESOLVED.
+- `initProject(cwd, force = false)` — signature updated (`init/index.ts:13`).
+- Copy loop: `if (!force && existsSync(dest))` — existing files overwritten when `force=true` (`init/index.ts:70`).
+- `cli.ts:119`: `initProject(process.cwd(), !!opts.force)` — flag wired from parsed args.
+- `cli.ts:65`: help text updated to show `init [--force]`.
+- Change is minimal and targeted — no unrelated edits.
+
+All prior non-blocking items remain deferred (`.claude/skills/` scaffolding, root role file cleanup, README update) — none were blockers and none were touched in the fix, which is correct scope discipline.
+
+### Quality gates (re-check)
+
+- `pnpm --filter insight-flow typecheck` — passes ✓
+- `pnpm --filter insight-flow build:cli` — passes ✓
