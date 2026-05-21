@@ -28,6 +28,7 @@
     "dev": "tsup --watch",
     "dev:ui": "node ../../node_modules/vite/bin/vite.js --config vite.config.ts",
     "typecheck": "tsc --noEmit",
+    "test": "pnpm run build:cli && node test/init.test.mjs",
     "prepublishOnly": "npm run build && npm run typecheck"
   },
   "devDependencies": {

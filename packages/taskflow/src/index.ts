@@ -13,6 +13,9 @@ export type {
   TaskflowConfig,
   ActivityEvent,
   ActivityEngineConfig,
+  AgentsConfig,
+  AgentExtensions,
+  CustomAgent,
 } from "./types.js";
 
 export { resolveConfig, getWorkDir, getMasterPath } from "./config.js";
@@ -28,11 +31,7 @@ export {
 } from "./storage.js";
 export { startServer } from "./server/index.js";
 export { initProject } from "./init/index.js";
-export {
-  resolveProjectRoot,
-  resolvePackageAsset,
-  TaskflowProjectNotFoundError,
-} from "./paths.js";
+export { resolveProjectRoot, resolvePackageAsset, TaskflowProjectNotFoundError } from "./paths.js";
 export {
   TaskSchema,
   ReviewSchema,

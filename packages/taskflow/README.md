@@ -131,32 +131,84 @@ Run `insight-flow help` for the full list.
 }
 ```
 
-| Key | Default | Purpose |
-|-----|---------|---------|
-| `workDir` | `"workTasks"` | Directory (relative to your project root) where task JSON shards live. Move/rename this to put task data anywhere you want. |
-| `shardSize` | `10` | Tasks per shard file. Affects new shard rollovers, not existing files. |
-| `projectName` | inferred from `package.json` | Shown in the dashboard header. |
-| `rolesDir` | `".claude/roles"` | Where role spec markdown templates are copied on `init`. |
-| `server.port` | `6006` | HTTP/WebSocket port the dashboard listens on. |
-| `activityEngine.enabled` | `true` | Stream Claude Code tool activity into the dashboard's activity panel. |
-| `activityEngine.logFile` | `".taskflow-activity.jsonl"` | Ephemeral JSONL log file written by the activity hook. Gitignored. |
-| `activityEngine.maxEvents` | `200` | Ring-buffer size for the activity feed. |
+| Key                        | Default                      | Purpose                                                                                                                     |
+| -------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `workDir`                  | `"workTasks"`                | Directory (relative to your project root) where task JSON shards live. Move/rename this to put task data anywhere you want. |
+| `shardSize`                | `10`                         | Tasks per shard file. Affects new shard rollovers, not existing files.                                                      |
+| `projectName`              | inferred from `package.json` | Shown in the dashboard header.                                                                                              |
+| `rolesDir`                 | `".claude/roles"`            | Where role spec markdown templates are copied on `init`.                                                                    |
+| `server.port`              | `6006`                       | HTTP/WebSocket port the dashboard listens on.                                                                               |
+| `activityEngine.enabled`   | `true`                       | Stream Claude Code tool activity into the dashboard's activity panel.                                                       |
+| `activityEngine.logFile`   | `".taskflow-activity.jsonl"` | Ephemeral JSONL log file written by the activity hook. Gitignored.                                                          |
+| `activityEngine.maxEvents` | `200`                        | Ring-buffer size for the activity feed.                                                                                     |
 
 ## Slash commands (Claude Code)
 
 `insight-flow init` writes nine slash commands to `.claude/commands/`:
 
-| Command | Purpose |
-|---------|---------|
-| `/taskmaster` | Create a new task spec |
-| `/task-implement` | Implement a task |
-| `/task-review` | AI code review |
-| `/task-human-review` | Record human review feedback |
-| `/task-review-fix` | Fix issues from review |
-| `/task-git` | Branch, commit, push, PR, merge |
-| `/task-incident` | Track production incidents |
+| Command                 | Purpose                             |
+| ----------------------- | ----------------------------------- |
+| `/taskmaster`           | Create a new task spec              |
+| `/task-implement`       | Implement a task                    |
+| `/task-review`          | AI code review                      |
+| `/task-human-review`    | Record human review feedback        |
+| `/task-review-fix`      | Fix issues from review              |
+| `/task-git`             | Branch, commit, push, PR, merge     |
+| `/task-incident`        | Track production incidents          |
 | `/task-request-changes` | Post-implementation change requests |
-| `/taskmaster-change` | Edit an existing task spec |
+| `/taskmaster-change`    | Edit an existing task spec          |
+
+## Customizing agents
+
+Add an `agents` key to your `taskflow.config.json` to inject project-specific rules into built-in agents and register entirely new custom agents.
+
+### Extending built-in agents
+
+`agents.extend` is a map of built-in agent names to arrays of extra rule strings. Each rule is appended to the corresponding role file under a `## Project Extensions` section. Re-running `insight-flow init` replaces (not duplicates) the section.
+
+Valid agent names: `taskmaster`, `task-implement`, `task-review`, `task-review-fix`, `task-human-review`, `task-git`, `task-incident`, `task-request-changes`, `taskmaster-change`.
+
+```json
+{
+  "agents": {
+    "extend": {
+      "task-implement": [
+        "Only use pnpm, never npm or yarn",
+        "All new files must have a corresponding test"
+      ],
+      "task-review": ["Reject any PR that introduces console.log statements"]
+    }
+  }
+}
+```
+
+### Registering custom agents
+
+`agents.custom` is an array of agent definitions. Each entry generates a Claude Code skill file at `.claude/commands/<name>.md` and adds a row for `/<name>` to the skills table in `CLAUDE.md`.
+
+```json
+{
+  "agents": {
+    "custom": [
+      {
+        "name": "deploy-check",
+        "role": "Deploy Readiness Checker",
+        "description": "Verify the project is ready for deployment.",
+        "outputContract": "1. Run pnpm build\n2. Check env vars\n3. Run smoke tests\n4. Report READY or BLOCKED"
+      }
+    ]
+  }
+}
+```
+
+| Field            | Required | Description                                           |
+| ---------------- | -------- | ----------------------------------------------------- |
+| `name`           | yes      | Skill command name — used as `/<name>` in Claude Code |
+| `role`           | yes      | One-line role header inside the skill file            |
+| `description`    | yes      | Short description shown in CLAUDE.md                  |
+| `outputContract` | no       | Workflow steps / output contract for the skill        |
+
+After editing `taskflow.config.json`, re-run `insight-flow init` to apply changes.
 
 ## Programmatic API
 

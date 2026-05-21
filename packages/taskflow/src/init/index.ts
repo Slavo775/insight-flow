@@ -6,15 +6,30 @@ import {
   copyFileSync,
   readdirSync,
 } from "node:fs";
-import { resolve } from "node:path";
-import type { TaskflowConfig } from "../types.js";
+import { resolve, basename } from "node:path";
+import type { TaskflowConfig, AgentsConfig, CustomAgent, AgentExtensions } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
+
+const AGENT_ROLE_FILE_MAP: Record<string, string> = {
+  taskmaster: "TASKMASTER_ROLE.md",
+  "task-implement": "TASK_IMPLEMENTER_ROLE.md",
+  "task-review": "TASK_REVIEWER_ROLE.md",
+  "task-review-fix": "TASK_REVIEW_FIXER_ROLE.md",
+  "task-human-review": "TASK_HUMAN_REVIEW_ROLE.md",
+  "task-git": "TASK_GIT_ROLE.md",
+  "task-incident": "TASK_INCIDENT_ROLE.md",
+  "task-request-changes": "TASK_REQUEST_CHANGES_ROLE.md",
+  "taskmaster-change": "TASKMASTER_CHANGE_ROLE.md",
+};
+
+const EXT_START = "<!-- taskflow:extensions:start -->";
+const EXT_END = "<!-- taskflow:extensions:end -->";
 
 export function initProject(cwd: string = process.cwd(), force: boolean = false): void {
   const configPath = resolve(cwd, "taskflow.config.json");
 
   // 1. Write config
-  const config: TaskflowConfig = {
+  let config: TaskflowConfig = {
     workDir: "workTasks",
     shardSize: 10,
     projectName: inferName(cwd),
@@ -25,6 +40,12 @@ export function initProject(cwd: string = process.cwd(), force: boolean = false)
 
   if (existsSync(configPath)) {
     console.log("taskflow.config.json already exists, skipping config creation.");
+    try {
+      const onDisk = JSON.parse(readFileSync(configPath, "utf-8")) as Partial<TaskflowConfig>;
+      config = { ...config, ...onDisk };
+    } catch {
+      // ignore parse errors
+    }
   } else {
     writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
     console.log("Created taskflow.config.json");
@@ -75,10 +96,14 @@ export function initProject(cwd: string = process.cwd(), force: boolean = false)
       }
     }
     if (created > 0) {
-      console.log(`Copied ${created} role template${created === 1 ? "" : "s"} to ${config.rolesDir}/`);
+      console.log(
+        `Copied ${created} role template${created === 1 ? "" : "s"} to ${config.rolesDir}/`,
+      );
     }
     if (skipped > 0) {
-      console.log(`Skipped ${skipped} existing role file${skipped === 1 ? "" : "s"} in ${config.rolesDir}/`);
+      console.log(
+        `Skipped ${skipped} existing role file${skipped === 1 ? "" : "s"} in ${config.rolesDir}/`,
+      );
     }
   }
 
@@ -114,9 +139,21 @@ export function initProject(cwd: string = process.cwd(), force: boolean = false)
     console.log("Claude Code skill commands already exist, skipping.");
   }
 
+  // 4b. Apply agent extensions (extend built-in role files + generate custom skills)
+  const agentsConfig = config.agents;
+  const customAgents = agentsConfig?.custom ?? [];
+
+  if (agentsConfig?.extend) {
+    applyAgentExtensions(resolve(cwd, config.rolesDir), agentsConfig.extend);
+  }
+
+  if (customAgents.length > 0) {
+    generateCustomAgentSkills(commandsDir, customAgents);
+  }
+
   // 5. Generate or append to CLAUDE.md
   const claudeMdPath = resolve(cwd, "CLAUDE.md");
-  const taskflowSection = generateClaudeMd(config);
+  const taskflowSection = generateClaudeMd(config, customAgents);
   const MARKER = "<!-- taskflow:start -->";
   const MARKER_END = "<!-- taskflow:end -->";
 
@@ -167,7 +204,9 @@ export function initProject(cwd: string = process.cwd(), force: boolean = false)
   console.log("Run 'insight-flow' to launch the dashboard.\n");
 }
 
-function generateClaudeMd(config: TaskflowConfig): string {
+function generateClaudeMd(config: TaskflowConfig, customAgents: CustomAgent[] = []): string {
+  const customRows = customAgents.map((a) => `| \`/${a.name}\` | ${a.description} |`).join("\n");
+
   return `## insight-flow
 
 This project uses **insight-flow** for AI-assisted task lifecycle management.
@@ -199,7 +238,7 @@ insight-flow                            # Launch dashboard at http://localhost:$
 | \`/task-git\` | Branch, commit, push, PR, merge |
 | \`/task-incident\` | Track production incidents |
 | \`/task-request-changes\` | Request post-implementation changes |
-| \`/taskmaster-change\` | Modify an existing task spec |
+| \`/taskmaster-change\` | Modify an existing task spec |${customRows ? "\n" + customRows : ""}
 
 ## Task Lifecycle
 
@@ -442,6 +481,66 @@ else
   echo "{\\"ts\\":\\"$TS\\",\\"tool\\":\\"$TOOL\\",\\"action\\":\\"use\\"}" >> "$LOG_FILE"
 fi
 `;
+
+function applyAgentExtensions(rolesDir: string, extend: AgentExtensions): void {
+  for (const [agentName, rules] of Object.entries(extend)) {
+    if (!rules.length) continue;
+    const fileName = AGENT_ROLE_FILE_MAP[agentName];
+    if (!fileName) {
+      console.warn(`Unknown agent name '${agentName}' in agents.extend — skipping.`);
+      continue;
+    }
+    const filePath = resolve(rolesDir, fileName);
+    if (!existsSync(filePath)) {
+      console.warn(`Role file not found for '${agentName}' at ${filePath} — skipping.`);
+      continue;
+    }
+
+    let content = readFileSync(filePath, "utf-8");
+    const section =
+      EXT_START +
+      "\n## Project Extensions\n\n" +
+      rules.map((r) => `- ${r}`).join("\n") +
+      "\n" +
+      EXT_END;
+
+    if (content.includes(EXT_START)) {
+      const before = content.substring(0, content.indexOf(EXT_START));
+      const afterIdx = content.indexOf(EXT_END);
+      const after = afterIdx >= 0 ? content.substring(afterIdx + EXT_END.length) : "";
+      content = before + section + after;
+    } else {
+      content = content.trimEnd() + "\n\n" + section + "\n";
+    }
+
+    writeFileSync(filePath, content);
+    console.log(`Applied extensions to ${agentName} (${fileName})`);
+  }
+}
+
+function generateCustomAgentSkills(commandsDir: string, custom: CustomAgent[]): void {
+  for (const agent of custom) {
+    const skillPath = resolve(commandsDir, `${basename(agent.name)}.md`);
+    const lines: string[] = [
+      `ROLE: ${agent.role}`,
+      "",
+      "@AGENT_ENFORCEMENT.md",
+      "",
+      "---",
+      "",
+      "## Description",
+      "",
+      agent.description,
+      "",
+    ];
+    if (agent.outputContract) {
+      lines.push("## Output Contract", "", agent.outputContract, "");
+    }
+    lines.push("$ARGUMENTS", "");
+    writeFileSync(skillPath, lines.join("\n"));
+    console.log(`Generated custom agent skill: /${agent.name}`);
+  }
+}
 
 function inferName(cwd: string): string {
   try {

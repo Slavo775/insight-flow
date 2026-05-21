@@ -1,0 +1,27 @@
+{
+  "workDir": "workTasks",
+  "shardSize": 10,
+  "projectName": "test-project",
+  "rolesDir": ".claude/roles",
+  "server": { "port": 6006 },
+  "agents": {
+    "extend": {
+      "task-implement": [
+        "Only use pnpm, never npm or yarn",
+        "All new files must have a corresponding test"
+      ],
+      "task-review": [
+        "Reject any PR that introduces console.log statements",
+        "Check that all public functions have JSDoc comments"
+      ]
+    },
+    "custom": [
+      {
+        "name": "deploy-check",
+        "role": "Deploy Readiness Checker",
+        "description": "Verify the project is ready for deployment by checking build, env vars, and smoke tests.",
+        "outputContract": "1. Run `pnpm build`\n2. Check required env vars are set\n3. Run smoke test suite\n4. Report: READY or BLOCKED with reasons"
+      }
+    ]
+  }
+}

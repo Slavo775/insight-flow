@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -240,6 +240,11 @@
           "status": "pushed",
           "at": "2026-05-21T09:52:25.205Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T09:54:07.500Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -349,7 +354,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 74,
       "tags": [
         "agents",
         "config",
@@ -410,6 +415,170 @@
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/6",
+      "mergedAt": "2026-05-21T09:54:07.500Z"
+    },
+    {
+      "id": "N12",
+      "title": "Custom agent rules and extensions via project config",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N12-custom-agent-rules-and-extensions-via-project-conf",
+      "createdAt": "2026-05-21T10:06:19.295Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-21T10:06:19.296Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T10:07:55.897Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-21T10:14:47.098Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-21T10:18:54.145Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T10:19:29.257Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T10:27:31.596Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T10:29:32.595Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T10:30:06.593Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T10:42:34.250Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T11:17:31.607Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T11:18:12.304Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T11:18:32.039Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T11:27:25.421Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T11:27:39.042Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-21T10:14:47.097Z",
+        "completedAt": "2026-05-21T10:18:54.144Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/schema/taskflow.config.schema.json",
+          "packages/taskflow/test/fixtures/taskflow.config.json",
+          "packages/taskflow/test/init.test.mjs",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T10:27:31.597Z",
+          "endedAt": "2026-05-21T10:29:32.595Z",
+          "verdict": "approved",
+          "comment": "All checklist items pass. Four non-blocking notes: spec path discrepancy (skills/ vs commands/), custom skills always overwrite by design, no path sanitization on custom name, silent skip on missing role file.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-21T11:17:31.608Z",
+          "endedAt": "2026-05-21T11:18:12.304Z",
+          "verdict": "approved",
+          "comment": "Round 2: all three non-blocking fixes verified correct. basename guard, console.warn, and CHECKLIST path all clean. Ready to merge.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-21T11:27:25.421Z",
+          "endedAt": "2026-05-21T11:27:39.041Z",
+          "verdict": "approved",
+          "comment": "Human approved: done!",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "config",
+        "extensibility"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-21T10:07:55.897Z",
+          "commitHash": "25675d8",
+          "commitMessage": "feat(tasks): add N12 — custom agent rules and extensions via project config"
+        },
+        {
+          "at": "2026-05-21T10:19:29.257Z",
+          "commitHash": "76006ee",
+          "commitMessage": "feat(agents): implement custom agent rules and extensions via project config"
+        },
+        {
+          "at": "2026-05-21T10:30:06.593Z",
+          "commitHash": "189cf20",
+          "commitMessage": "docs(tasks): add N12 AI review — approved"
+        },
+        {
+          "at": "2026-05-21T10:42:34.250Z",
+          "commitHash": "456c5f9",
+          "commitMessage": "fix(agents): address non-blocking review issues in agent extension logic"
+        },
+        {
+          "at": "2026-05-21T11:18:32.038Z",
+          "commitHash": "11a346c",
+          "commitMessage": "docs(tasks): add N12 AI re-review round 2 — approved"
+        }
+      ],
+      "branch": "feat/N12-custom-agent-rules-and-extensions-via-project-config",
+      "mrUrl": null,
       "mergedAt": null
     }
   ]

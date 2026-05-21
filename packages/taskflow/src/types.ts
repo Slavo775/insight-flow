@@ -135,6 +135,22 @@ export interface ActivityEngineConfig {
   maxEvents: number;
 }
 
+export interface AgentExtensions {
+  [agentName: string]: string[];
+}
+
+export interface CustomAgent {
+  name: string;
+  role: string;
+  description: string;
+  outputContract?: string;
+}
+
+export interface AgentsConfig {
+  extend?: AgentExtensions;
+  custom?: CustomAgent[];
+}
+
 export interface TaskflowConfig {
   workDir: string;
   shardSize: number;
@@ -144,6 +160,7 @@ export interface TaskflowConfig {
     port: number;
   };
   activityEngine?: ActivityEngineConfig;
+  agents?: AgentsConfig;
 }
 
 export interface ParsedArgs {
