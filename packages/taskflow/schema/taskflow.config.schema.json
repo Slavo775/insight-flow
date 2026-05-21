@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Slavo775/insight-flow/packages/taskflow/schema/taskflow.config.schema.json",
+  "title": "TaskflowConfig",
+  "description": "Configuration for insight-flow task management.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "workDir": {
+      "type": "string",
+      "description": "Directory for task shard files.",
+      "default": "workTasks"
+    },
+    "shardSize": {
+      "type": "integer",
+      "description": "Number of tasks per shard file.",
+      "default": 10
+    },
+    "projectName": {
+      "type": "string",
+      "description": "Display name for the project."
+    },
+    "rolesDir": {
+      "type": "string",
+      "description": "Directory where agent role files are written by init.",
+      "default": ".claude/roles"
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "port": {
+          "type": "integer",
+          "description": "Port for the dashboard server.",
+          "default": 6006
+        }
+      }
+    },
+    "activityEngine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "logFile": {
+          "type": "string",
+          "default": ".taskflow-activity.jsonl"
+        },
+        "maxEvents": {
+          "type": "integer",
+          "default": 200
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "description": "Project-specific agent customizations.",
+      "additionalProperties": false,
+      "properties": {
+        "extend": {
+          "type": "object",
+          "description": "Extra rules to append to built-in agent role files. Keys are agent names (e.g. 'task-implement'); values are arrays of rule strings.",
+          "propertyNames": {
+            "enum": [
+              "taskmaster",
+              "task-implement",
+              "task-review",
+              "task-review-fix",
+              "task-human-review",
+              "task-git",
+              "task-incident",
+              "task-request-changes",
+              "taskmaster-change"
+            ]
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "custom": {
+          "type": "array",
+          "description": "Custom agents to generate as Claude Code skills.",
+          "items": {
+            "type": "object",
+            "required": ["name", "role", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Skill command name (e.g. 'deploy-check'). Used as /<name> in Claude Code."
+              },
+              "role": {
+                "type": "string",
+                "description": "One-line role header for the skill (e.g. 'ROLE: Deploy Checker')."
+              },
+              "description": {
+                "type": "string",
+                "description": "What this agent does — shown in CLAUDE.md."
+              },
+              "outputContract": {
+                "type": "string",
+                "description": "Optional output contract / workflow steps for the skill."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

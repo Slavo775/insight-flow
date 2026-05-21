@@ -422,7 +422,7 @@
       "title": "Custom agent rules and extensions via project config",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N12-custom-agent-rules-and-extensions-via-project-conf",
       "createdAt": "2026-05-21T10:06:19.295Z",
       "statusHistory": [
@@ -430,12 +430,36 @@
           "status": "ready",
           "at": "2026-05-21T10:06:19.296Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T10:07:55.897Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-21T10:14:47.098Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-21T10:18:54.145Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-21T10:14:47.097Z",
+        "completedAt": "2026-05-21T10:18:54.144Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/schema/taskflow.config.schema.json",
+          "packages/taskflow/test/fixtures/taskflow.config.json",
+          "packages/taskflow/test/init.test.mjs",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md"
+        ],
         "tokensUsed": null
       },
       "reviews": [],
@@ -448,8 +472,14 @@
         "config",
         "extensibility"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-21T10:07:55.897Z",
+          "commitHash": "25675d8",
+          "commitMessage": "feat(tasks): add N12 — custom agent rules and extensions via project config"
+        }
+      ],
+      "branch": "feat/N12-custom-agent-rules-and-extensions-via-project-config",
       "mrUrl": null,
       "mergedAt": null
     }
