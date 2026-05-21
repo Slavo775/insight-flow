@@ -2,7 +2,7 @@
 
 **Reviewer:** Task Reviewer (AI)
 **PR:** No PR URL recorded yet — reviewed from local diff `main...feat/N12-custom-agent-rules-and-extensions-via-project-config`
-**Verdict:** APPROVED
+**Verdict:** APPROVED (round 2 — post non-blocking fixes)
 
 ---
 
@@ -61,6 +61,19 @@ Built-in skills skip writing if the file already exists (`!existsSync`). Custom 
 ### 4 — Silent skip when role file doesn't exist for `agents.extend`
 
 `if (!existsSync(filePath)) continue` silently ignores a missing role file. A user targeting `task-implement` before running `insight-flow init` (or with a non-default `rolesDir`) gets no feedback. A `console.warn` matching the unknown-agent warning would be consistent.
+
+---
+
+## Round 2 — Post non-blocking fixes (commit 456c5f9)
+
+All three actionable non-blocking items from round 1 have been addressed:
+
+- **#1 (CHECKLIST path)** — Both `.claude/skills/` references updated to `.claude/commands/`. ✓
+- **#3 (basename guard)** — `basename(agent.name)` applied before `resolve()`. Path traversal blocked. Minor: `console.log` still uses raw `agent.name` for the display message — harmless. ✓
+- **#4 (console.warn)** — Now logs agent name + full file path when role file is missing. ✓
+- **#2 (always overwrites)** — Intentionally not changed; by design per Goal #4.
+
+**Verdict: APPROVED** — ready to merge.
 
 ---
 
