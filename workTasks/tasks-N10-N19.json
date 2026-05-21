@@ -130,6 +130,21 @@
           "status": "fix-needed",
           "at": "2026-05-21T08:57:46.922Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T08:58:24.630Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T09:09:51.418Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-21T09:11:15.111Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -161,6 +176,15 @@
           "type": "human",
           "by": "task-human-review",
           "fix": null
+        },
+        {
+          "startedAt": "2026-05-21T09:09:51.419Z",
+          "endedAt": "2026-05-21T09:11:15.111Z",
+          "verdict": "fix-needed",
+          "comment": "Blocker: centralize enforcement block into AGENT_ENFORCEMENT.md referenced via @-include. Non-blocking: extra blank line in patchRoleFile insert branch.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [],
@@ -183,6 +207,11 @@
           "at": "2026-05-21T08:55:04.657Z",
           "commitHash": "5c7232d",
           "commitMessage": "rework(agents): enforce CLI-only mutations and add prompt-build command"
+        },
+        {
+          "at": "2026-05-21T08:58:24.629Z",
+          "commitHash": "d1c8d3b",
+          "commitMessage": "docs(tasks): add N11 human review — fix-needed"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",

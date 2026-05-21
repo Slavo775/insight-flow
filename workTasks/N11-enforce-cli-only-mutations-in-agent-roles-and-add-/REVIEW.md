@@ -17,3 +17,62 @@
 ### Notes
 
 - Human asked: "maybe we can have some general STRICT ENFORCEMENTS when its all same?" — meaning: one canonical source, not N copies that can drift.
+
+---
+
+## AI Review — Round 1
+
+**Reviewer:** Task Reviewer (AI)
+**Branch:** `rework/N11-enforce-cli-only-agent-roles`
+**Verdict:** REQUEST CHANGES
+
+---
+
+## Summary
+
+17 files changed. The prompt-build command, schema, config template, and CLI registration are all correct and well-structured. The `gh *` wildcard fix is clean. The core problem is the one the human flagged: the enforcement block is copy-pasted into 8 files — any future edit requires 8 synchronized changes.
+Risk: **low** (role files and a new CLI command — no data model changes, no production code touched).
+
+## Checklist verification
+
+- [x] All 8 role files contain `STRICT ENFORCEMENT — TASK FILE MUTATIONS` block (TASKMASTER_CHANGE_ROLE.md also patched — not in original checklist but correctly included)
+- [x] All enforcement blocks include the `GIT / GH TOOL RULE` section
+- [x] `packages/taskflow/schema/prompt-config.schema.json` created with all 5 fields
+- [x] `packages/taskflow/templates/taskflow.prompt.json` created with defaults
+- [x] `packages/taskflow/src/commands/prompt-build.ts` created
+- [x] `prompt-build` registered in `packages/taskflow/src/cli.ts`
+- [x] `insight-flow prompt-build` prints enforcement block from config
+- [x] `insight-flow prompt-build --apply` can patch role files
+- [x] Typecheck passes, build succeeds
+- [ ] `settings.local.json` `gh *` — gitignored so not in diff, but confirmed applied locally
+
+## Issues found
+
+### Blocker 1 — Centralize enforcement block (echoes human review)
+
+**File:** All 8 `TASK_*_ROLE.md` + `TASKMASTER*.md`
+**Why:** Identical 13-line block is copy-pasted 8 times. The `prompt-build --apply` command exists to regenerate them, but it is not enforced as the update path — editors can still diverge. A single `AGENT_ENFORCEMENT.md` referenced via `@AGENT_ENFORCEMENT.md` at the top of each role file removes all duplication and is guaranteed consistent.
+**Fix:**
+1. Create `AGENT_ENFORCEMENT.md` containing the full enforcement block.
+2. Replace the inline block in each role file with a single line: `@AGENT_ENFORCEMENT.md`.
+3. Update `prompt-build --apply` to write `AGENT_ENFORCEMENT.md` only — not patch individual role files.
+
+### Non-blocking — `patchRoleFile` insert branch adds extra blank line
+
+**File:** `packages/taskflow/src/commands/prompt-build.ts:87`
+**Why:** When inserting into a file that has no existing block, `content.slice(insertAt)` starts with `\n` (the blank line after the first `---`), and the inserted string also ends with `\n\n---\n\n`, producing a triple newline before `INPUT CONTRACT`. Minor cosmetic issue; idempotent re-apply fixes it since the replace-branch path runs on second call.
+**Fix:** Trim the leading `\n` from `content.slice(insertAt)` in the insert branch, or consume it: `content.slice(insertAt).replace(/^\n/, "")`.
+
+## Quality gate results
+
+- TypeScript: pass
+- Build: pass
+- No regressions in existing commands
+
+## Next actions
+
+1. Create `AGENT_ENFORCEMENT.md` with the canonical block.
+2. Replace inline blocks in all 8 role files with `@AGENT_ENFORCEMENT.md`.
+3. Update `prompt-build --apply` to target `AGENT_ENFORCEMENT.md` only.
+4. Fix the extra blank line in the insert branch of `patchRoleFile`.
+5. Push fixes and re-request review.
