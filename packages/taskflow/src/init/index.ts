@@ -6,7 +6,7 @@ import {
   copyFileSync,
   readdirSync,
 } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, basename } from "node:path";
 import type { TaskflowConfig, AgentsConfig, CustomAgent, AgentExtensions } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
 
@@ -491,7 +491,10 @@ function applyAgentExtensions(rolesDir: string, extend: AgentExtensions): void {
       continue;
     }
     const filePath = resolve(rolesDir, fileName);
-    if (!existsSync(filePath)) continue;
+    if (!existsSync(filePath)) {
+      console.warn(`Role file not found for '${agentName}' at ${filePath} — skipping.`);
+      continue;
+    }
 
     let content = readFileSync(filePath, "utf-8");
     const section =
@@ -517,7 +520,7 @@ function applyAgentExtensions(rolesDir: string, extend: AgentExtensions): void {
 
 function generateCustomAgentSkills(commandsDir: string, custom: CustomAgent[]): void {
   for (const agent of custom) {
-    const skillPath = resolve(commandsDir, `${agent.name}.md`);
+    const skillPath = resolve(commandsDir, `${basename(agent.name)}.md`);
     const lines: string[] = [
       `ROLE: ${agent.role}`,
       "",
