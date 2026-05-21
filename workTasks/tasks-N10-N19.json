@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -240,6 +240,11 @@
           "status": "pushed",
           "at": "2026-05-21T09:52:25.205Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T09:54:07.500Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -349,7 +354,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 74,
       "tags": [
         "agents",
         "config",
@@ -410,6 +415,42 @@
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/6",
+      "mergedAt": "2026-05-21T09:54:07.500Z"
+    },
+    {
+      "id": "N12",
+      "title": "Custom agent rules and extensions via project config",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N12-custom-agent-rules-and-extensions-via-project-conf",
+      "createdAt": "2026-05-21T10:06:19.295Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-21T10:06:19.296Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "reviews": [],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "config",
+        "extensibility"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]
