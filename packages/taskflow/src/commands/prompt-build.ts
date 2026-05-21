@@ -51,26 +51,33 @@ function buildEnforcementBlock(cfg: PromptConfig): string {
     lines.push("");
   }
 
-  const prNote =
-    cfg.gitTool === "gh"
-      ? "Use `gh pr create` for PR creation"
-      : "Provide a compare URL for manual PR creation (no gh CLI)";
-  const prState =
-    cfg.prStrategy === "draft"
-      ? "Open PRs as drafts (`gh pr create --draft`)"
-      : "Open PRs as ready for review";
-  const branchNote = cfg.branchPrefix
-    ? `Prefix all branches with '${cfg.branchPrefix}' (e.g. '${cfg.branchPrefix}feat/N01-...')`
-    : "Branch naming: <type>/<task-id>-<slug>";
-  const checklistNote = cfg.requireChecklist
-    ? "Verify all CHECKLIST.md items are checked before marking implemented or done"
-    : "Checklist verification is optional";
+  const sectionTitle = cfg.gitTool === "gh" ? "GIT / GH TOOL RULE" : "GIT TOOL RULE";
 
-  lines.push("GIT / GH TOOL RULE");
-  lines.push(`- gitTool: "${cfg.gitTool}" — ${prNote}`);
-  lines.push(`- ${prState}`);
-  lines.push(`- ${branchNote}`);
-  lines.push(`- ${checklistNote}`);
+  const prLine =
+    cfg.gitTool === "gh"
+      ? cfg.prStrategy === "draft"
+        ? "- Use `gh pr create --draft` for PR creation"
+        : "- Use `gh pr create` for PR creation (opens ready for review)"
+      : "- Use a git compare URL for PR creation — no gh CLI";
+
+  const pushLine =
+    cfg.gitTool === "gh"
+      ? "- Use `git` for branch creation, commits, and push"
+      : "- Use `git` for all operations (branch, commit, push)";
+
+  const branchLine = cfg.branchPrefix
+    ? `- Branch naming: ${cfg.branchPrefix}<type>/<task-id>-<slug>`
+    : "- Branch naming: <type>/<task-id>-<slug>";
+
+  const checklistLine = cfg.requireChecklist
+    ? "- Verify all CHECKLIST.md items before marking implemented or done"
+    : "- Checklist verification is optional";
+
+  lines.push(sectionTitle);
+  lines.push(prLine);
+  lines.push(pushLine);
+  lines.push(branchLine);
+  lines.push(checklistLine);
   lines.push("- Never mix tools for the same operation");
 
   return lines.join("\n");

@@ -5,6 +5,8 @@ STRICT ENFORCEMENT — TASK FILE MUTATIONS
 - Violation: direct file edit bypasses validation, ID sequencing, and audit trail
 
 GIT / GH TOOL RULE
-- Use ONLY the tool configured in `taskflow.prompt.json` → `gitTool`
-- Default: `gh` for PR creation; `git` for branch/commit/push
+- Use `gh pr create` for PR creation (opens ready for review)
+- Use `git` for branch creation, commits, and push
+- Branch naming: <type>/<task-id>-<slug>
+- Verify all CHECKLIST.md items before marking implemented or done
 - Never mix tools for the same operation

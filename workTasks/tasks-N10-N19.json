@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "fixed",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -190,6 +190,21 @@
           "status": "fix-needed",
           "at": "2026-05-21T09:29:04.748Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T09:29:27.642Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-21T09:32:09.074Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-21T09:33:12.292Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -265,7 +280,17 @@
           "comment": "GIT/GH TOOL RULE references taskflow.prompt.json — extra token cost. Bake resolved gitTool value into AGENT_ENFORCEMENT.md directly so agents need no file lookup.",
           "type": "human",
           "by": "task-human-review",
-          "fix": null
+          "fix": {
+            "startedAt": "2026-05-21T09:32:09.074Z",
+            "endedAt": "2026-05-21T09:33:12.292Z",
+            "status": "fixed",
+            "filesChanged": [
+              "AGENT_ENFORCEMENT.md",
+              "packages/taskflow/src/commands/prompt-build.ts"
+            ],
+            "comment": "buildEnforcementBlock now writes clean resolved prose. prompt-build --apply regenerated AGENT_ENFORCEMENT.md with concrete git tool values, no config file reference.",
+            "by": "task-review-fix"
+          }
         }
       ],
       "changesAfterImplementation": [],
@@ -308,6 +333,11 @@
           "at": "2026-05-21T09:21:35.075Z",
           "commitHash": "c82ddc2",
           "commitMessage": "docs(tasks): add N11 AI re-review — approved"
+        },
+        {
+          "at": "2026-05-21T09:29:27.642Z",
+          "commitHash": "683d039",
+          "commitMessage": "docs(tasks): add N11 human review round 2 — fix-needed"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
