@@ -62,7 +62,7 @@ function printHelp(): void {
     insight-flow <command> [options]      Run a task command
 
   COMMANDS
-    init                                  Initialize insight-flow in current project
+    init [--force]                        Initialize insight-flow in current project (--force overwrites existing role files)
     ui [--port 6006]                      Launch dashboard server
 
     create --title "..." [--type feat] [--priority high] [--tags a,b]
@@ -116,7 +116,7 @@ if (!command || command === "ui") {
   const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
   startServer(config, port);
 } else if (command === "init") {
-  initProject();
+  initProject(process.cwd(), !!opts.force);
 } else if (command === "help" || command === "--help" || command === "-h") {
   printHelp();
 } else if (command === "version" || command === "--version" || command === "-v") {

@@ -10,7 +10,7 @@ import { resolve } from "node:path";
 import type { TaskflowConfig } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
 
-export function initProject(cwd: string = process.cwd()): void {
+export function initProject(cwd: string = process.cwd(), force: boolean = false): void {
   const configPath = resolve(cwd, "taskflow.config.json");
 
   // 1. Write config
@@ -67,7 +67,7 @@ export function initProject(cwd: string = process.cwd()): void {
     let skipped = 0;
     for (const file of entries) {
       const dest = resolve(rolesDir, file);
-      if (existsSync(dest)) {
+      if (!force && existsSync(dest)) {
         skipped++;
       } else {
         copyFileSync(resolve(templateRolesDir, file), dest);

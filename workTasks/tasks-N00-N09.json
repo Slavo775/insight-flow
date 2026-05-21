@@ -1134,7 +1134,7 @@
       "title": "Move role definitions into taskflow package and scaffold them via init",
       "type": "feat",
       "priority": "medium",
-      "status": "fix-needed",
+      "status": "fixed",
       "folder": "workTasks/N08-move-role-definitions-into-taskflow-package-and-sc",
       "createdAt": "2026-05-20T18:33:09.125Z",
       "statusHistory": [
@@ -1167,6 +1167,16 @@
           "status": "fix-needed",
           "at": "2026-05-21T07:41:46.200Z",
           "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-21T07:43:50.123Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-21T07:55:06.585Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -1194,7 +1204,17 @@
           "comment": "Blocker: --force flag missing (explicit checklist item). 8 role templates present, per-file copy with created/skipped reporting works. Non-blocking: .claude/skills not extended, root role files not removed.",
           "type": "ai",
           "by": "task-review",
-          "fix": null
+          "fix": {
+            "startedAt": "2026-05-21T07:43:50.123Z",
+            "endedAt": "2026-05-21T07:55:06.584Z",
+            "status": "fixed",
+            "filesChanged": [
+              "packages/taskflow/src/init/index.ts",
+              "packages/taskflow/src/cli.ts"
+            ],
+            "comment": "Added --force flag to initProject(force: boolean) and wired opts.force in cli.ts; updated help text. Typecheck and build pass.",
+            "by": "task-review-fix"
+          }
         }
       ],
       "changesAfterImplementation": [],
