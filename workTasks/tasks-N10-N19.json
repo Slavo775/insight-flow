@@ -422,7 +422,7 @@
       "title": "Custom agent rules and extensions via project config",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N12-custom-agent-rules-and-extensions-via-project-conf",
       "createdAt": "2026-05-21T10:06:19.295Z",
       "statusHistory": [
@@ -495,6 +495,16 @@
           "status": "approved",
           "at": "2026-05-21T11:27:39.042Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T11:28:05.085Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-21T11:30:37.809Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -544,7 +554,7 @@
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 84,
       "tags": [
         "agents",
         "config",
@@ -575,9 +585,86 @@
           "at": "2026-05-21T11:18:32.038Z",
           "commitHash": "11a346c",
           "commitMessage": "docs(tasks): add N12 AI re-review round 2 — approved"
+        },
+        {
+          "at": "2026-05-21T11:28:05.084Z",
+          "commitHash": "eb292b7",
+          "commitMessage": "docs(tasks): record N12 human approval — ready to merge"
         }
       ],
       "branch": "feat/N12-custom-agent-rules-and-extensions-via-project-config",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/7",
+      "mergedAt": "2026-05-21T11:30:37.809Z"
+    },
+    {
+      "id": "N13",
+      "title": "Release insight-flow v0.4.0 with changelog N05-N12",
+      "type": "feat",
+      "priority": "high",
+      "status": "fix-needed",
+      "folder": "workTasks/N13-release-insight-flow-v0-4-0-with-changelog-n05-n12",
+      "createdAt": "2026-05-21T17:10:24.860Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-21T17:10:24.860Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T17:11:37.386Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-21T17:24:44.605Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T17:36:39.858Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-21T17:39:10.621Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-21T17:24:44.605Z",
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T17:36:39.858Z",
+          "endedAt": "2026-05-21T17:39:10.621Z",
+          "verdict": "fix-needed",
+          "comment": "3 blockers: npm publish incomplete (2FA), git tag missing, package.json+CHANGELOG not committed to branch.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
+      "changesAfterImplementation": [],
+      "incidents": [],
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "npm",
+        "changelog"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-21T17:11:37.386Z",
+          "commitHash": "a752327",
+          "commitMessage": "feat(tasks): add N13 — release insight-flow v0.4.0 with changelog N05–N12"
+        }
+      ],
+      "branch": "feat/N13-release-insight-flow-v0-4-0",
       "mrUrl": null,
       "mergedAt": null
     }
