@@ -130,3 +130,33 @@ Fix commit `e1b6b2a` resolves both blockers cleanly. Risk: **low**.
 ### Notes
 
 - Human said: "this may cause extra token cost can we have it without AI must see into config?" — confirmed fix: write the resolved `gitTool` value directly into `AGENT_ENFORCEMENT.md`, not a reference to the config key.
+
+---
+
+## AI Review — Round 3
+
+**Reviewer:** Task Reviewer (AI)
+**Commit:** `7b34009`
+**Verdict:** APPROVED
+
+## Summary
+
+Single fix commit. `AGENT_ENFORCEMENT.md` and `buildEnforcementBlock` updated to write concrete resolved prose. Agents see the exact tool, strategy, branch pattern, and checklist rule with zero file lookups. Risk: **low**.
+
+## Prior blocker — resolved
+
+- **Human blocker (gitTool config reference)** — ✅ `AGENT_ENFORCEMENT.md` no longer contains `taskflow.prompt.json` references. The full GIT/GH TOOL RULE section is now concrete prose resolved at generation time. All four config fields (`gitTool`, `prStrategy`, `branchPrefix`, `requireChecklist`) are correctly baked in.
+
+## Checklist verification
+
+- [x] `AGENT_ENFORCEMENT.md` GIT section: no `taskflow.prompt.json` mention
+- [x] `buildEnforcementBlock` generates clean prose for all four config fields
+- [x] `prStrategy: "draft"` path handled (`gh pr create --draft`)
+- [x] `gitTool: "git"` path handled (compare URL, no gh CLI)
+- [x] `branchPrefix` path handled
+- [x] `requireChecklist: false` path handled
+- [x] Typecheck passes, build succeeds
+
+## Notes
+
+- No new issues found. Ready to merge.

@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -205,6 +205,21 @@
           "status": "fixed",
           "at": "2026-05-21T09:33:12.292Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T09:33:39.067Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T09:37:13.116Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T09:37:48.616Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -291,6 +306,15 @@
             "comment": "buildEnforcementBlock now writes clean resolved prose. prompt-build --apply regenerated AGENT_ENFORCEMENT.md with concrete git tool values, no config file reference.",
             "by": "task-review-fix"
           }
+        },
+        {
+          "startedAt": "2026-05-21T09:37:13.117Z",
+          "endedAt": "2026-05-21T09:37:48.616Z",
+          "verdict": "approved",
+          "comment": "Human blocker resolved: AGENT_ENFORCEMENT.md now contains concrete resolved prose, no config file references. All config fields baked in at generation time.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [],
@@ -338,6 +362,11 @@
           "at": "2026-05-21T09:29:27.642Z",
           "commitHash": "683d039",
           "commitMessage": "docs(tasks): add N11 human review round 2 — fix-needed"
+        },
+        {
+          "at": "2026-05-21T09:33:39.066Z",
+          "commitHash": "7b34009",
+          "commitMessage": "fix(agents): resolve gitTool value inline in AGENT_ENFORCEMENT.md"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
