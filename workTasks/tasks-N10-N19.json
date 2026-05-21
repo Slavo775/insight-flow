@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "fix-needed",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -115,6 +115,21 @@
           "status": "implemented",
           "at": "2026-05-21T08:54:14.637Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T08:55:04.657Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T08:57:31.806Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-21T08:57:46.922Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -137,7 +152,17 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T08:57:31.806Z",
+          "endedAt": "2026-05-21T08:57:46.922Z",
+          "verdict": "fix-needed",
+          "comment": "Centralize STRICT ENFORCEMENT into one shared file instead of copy-pasting into all 8 role files",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -153,6 +178,11 @@
           "at": "2026-05-21T08:42:03.749Z",
           "commitHash": "4a4f1bc",
           "commitMessage": "chore(tasks): add N11 — enforce CLI-only mutations in agent roles"
+        },
+        {
+          "at": "2026-05-21T08:55:04.657Z",
+          "commitHash": "5c7232d",
+          "commitMessage": "rework(agents): enforce CLI-only mutations and add prompt-build command"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
