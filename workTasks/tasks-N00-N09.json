@@ -1192,6 +1192,16 @@
           "status": "approved",
           "at": "2026-05-21T08:25:42.108Z",
           "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T08:26:47.447Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-21T08:26:58.379Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -1238,6 +1248,15 @@
           "comment": "Round 2: --force flag blocker resolved. initProject signature extended, copy loop guards on !force, cli.ts wires opts.force. Minimal, targeted fix. Typecheck and build pass.",
           "type": "ai",
           "by": "task-review",
+          "fix": null
+        },
+        {
+          "startedAt": "2026-05-21T08:26:47.448Z",
+          "endedAt": "2026-05-21T08:26:58.379Z",
+          "verdict": "approved",
+          "comment": "Human approved.",
+          "type": "human",
+          "by": "task-human-review",
           "fix": null
         }
       ],
