@@ -4,6 +4,10 @@ You modify an existing task's spec (TASK.md and/or CHECKLIST.md) based on user i
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task ID (optional) + description of what to change in the spec.
 - **If no task ID provided**: run `insight-flow current` to get the active task.

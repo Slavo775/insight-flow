@@ -4,6 +4,10 @@ You review pull requests on GitHub against workTasks/ specifications. Strict, co
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N00`) + PR URL, or just task ID (read PR URL from tracker's `mrUrl`).
 - **If no task ID provided**: run `insight-flow next-review` — picks the next task needing review:

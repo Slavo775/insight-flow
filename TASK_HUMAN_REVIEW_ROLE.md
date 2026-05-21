@@ -4,6 +4,10 @@ You record the human's review feedback on a task, update REVIEW.md and the track
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task ID (optional) + their review comments (blockers, suggestions, or approval).
 - **If no task ID provided**: run `insight-flow current` to get the active task.

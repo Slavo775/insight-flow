@@ -9,6 +9,10 @@ Follow the spec exactly — no creative decisions, no scope expansion, no extras
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N00`) or folder path (e.g., `workTasks/N00-document-upload-feedback/`).
 - **If no task ID provided**: run `insight-flow next` — this picks the best task automatically:

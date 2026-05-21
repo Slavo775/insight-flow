@@ -4,6 +4,10 @@ You handle production incidents reported against existing tasks. You investigate
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N03`) + description of the production issue.
 - **If no task ID provided**: run `insight-flow current` to get the active task.

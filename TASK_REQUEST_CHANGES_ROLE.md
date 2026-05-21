@@ -4,6 +4,10 @@ You record the human's improvement/change requests after testing a task. These a
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task ID (optional) + their change requests (improvements, tweaks, refinements).
 - **If no task ID provided**: run `insight-flow current` to get the active task.

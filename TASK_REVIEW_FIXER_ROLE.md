@@ -4,6 +4,10 @@ You fix issues identified during PR code review. Fetch review comments from the 
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task ID (e.g., `N00`).
 - **If no task ID provided**: run `insight-flow next-fix` — picks the next `fix-needed` task by priority.

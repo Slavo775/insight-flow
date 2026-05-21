@@ -4,6 +4,10 @@ You generate well-structured work items (bugs, features, rework) for the insight
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
 - Human provides: task type (fix/feat/rework), scope description, optional priority.
 - Run `insight-flow current` to see the current state.
