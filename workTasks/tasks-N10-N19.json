@@ -92,7 +92,7 @@
       "title": "Enforce CLI-only mutations in agent roles and add gh + git permissions",
       "type": "rework",
       "priority": "high",
-      "status": "approved",
+      "status": "fix-needed",
       "folder": "workTasks/N11-enforce-cli-only-mutations-in-agent-roles-and-add-",
       "createdAt": "2026-05-21T08:39:45.294Z",
       "statusHistory": [
@@ -175,6 +175,21 @@
           "status": "approved",
           "at": "2026-05-21T09:21:02.004Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T09:21:35.076Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T09:28:46.747Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-21T09:29:04.748Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -242,6 +257,15 @@
           "type": "ai",
           "by": "task-review",
           "fix": null
+        },
+        {
+          "startedAt": "2026-05-21T09:28:46.748Z",
+          "endedAt": "2026-05-21T09:29:04.748Z",
+          "verdict": "fix-needed",
+          "comment": "GIT/GH TOOL RULE references taskflow.prompt.json — extra token cost. Bake resolved gitTool value into AGENT_ENFORCEMENT.md directly so agents need no file lookup.",
+          "type": "human",
+          "by": "task-human-review",
+          "fix": null
         }
       ],
       "changesAfterImplementation": [],
@@ -279,10 +303,15 @@
           "at": "2026-05-21T09:15:21.586Z",
           "commitHash": "e1b6b2a",
           "commitMessage": "fix(agents): centralize enforcement into AGENT_ENFORCEMENT.md"
+        },
+        {
+          "at": "2026-05-21T09:21:35.075Z",
+          "commitHash": "c82ddc2",
+          "commitMessage": "docs(tasks): add N11 AI re-review — approved"
         }
       ],
       "branch": "rework/N11-enforce-cli-only-agent-roles",
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/6",
       "mergedAt": null
     }
   ]

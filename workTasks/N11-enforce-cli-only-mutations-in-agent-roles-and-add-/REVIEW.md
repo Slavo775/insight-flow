@@ -110,3 +110,23 @@ Fix commit `e1b6b2a` resolves both blockers cleanly. Risk: **low**.
 
 - `patchRoleFileWithRef` returning `false` (skipped) for already-patched files is correct — re-running `--apply` is safe.
 - No new issues found.
+
+---
+
+## Human Review — Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-21
+**Verdict:** FIX NEEDED
+
+### Blockers
+
+- **GIT/GH TOOL RULE references config file — extra token cost** — `AGENT_ENFORCEMENT.md` currently says `"Use ONLY the tool configured in taskflow.prompt.json → gitTool"`, which forces agents to read a file to learn which tool to use. Bake the resolved value directly into `AGENT_ENFORCEMENT.md` so agents see a concrete rule (e.g. `"Use gh for PR creation"`) with no file lookup required. The `prompt-build --apply` command already knows the config at generation time — it should write the resolved value, not a pointer to it.
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- Human said: "this may cause extra token cost can we have it without AI must see into config?" — confirmed fix: write the resolved `gitTool` value directly into `AGENT_ENFORCEMENT.md`, not a reference to the config key.
