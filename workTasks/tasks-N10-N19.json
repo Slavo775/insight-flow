@@ -601,7 +601,7 @@
       "title": "Release insight-flow v0.4.0 with changelog N05-N12",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "fix-needed",
       "folder": "workTasks/N13-release-insight-flow-v0-4-0-with-changelog-n05-n12",
       "createdAt": "2026-05-21T17:10:24.860Z",
       "statusHistory": [
@@ -609,15 +609,45 @@
           "status": "ready",
           "at": "2026-05-21T17:10:24.860Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-21T17:11:37.386Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-21T17:24:44.605Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-21T17:36:39.858Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-21T17:39:10.621Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
+        "startedAt": "2026-05-21T17:24:44.605Z",
         "completedAt": null,
         "filesChanged": [],
         "tokensUsed": null
       },
-      "reviews": [],
+      "reviews": [
+        {
+          "startedAt": "2026-05-21T17:36:39.858Z",
+          "endedAt": "2026-05-21T17:39:10.621Z",
+          "verdict": "fix-needed",
+          "comment": "3 blockers: npm publish incomplete (2FA), git tag missing, package.json+CHANGELOG not committed to branch.",
+          "type": "ai",
+          "by": "task-review",
+          "fix": null
+        }
+      ],
       "changesAfterImplementation": [],
       "incidents": [],
       "committedAt": null,
@@ -627,8 +657,14 @@
         "npm",
         "changelog"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-21T17:11:37.386Z",
+          "commitHash": "a752327",
+          "commitMessage": "feat(tasks): add N13 — release insight-flow v0.4.0 with changelog N05–N12"
+        }
+      ],
+      "branch": "feat/N13-release-insight-flow-v0-4-0",
       "mrUrl": null,
       "mergedAt": null
     }
