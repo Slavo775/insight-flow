@@ -32,6 +32,7 @@ import {
   cmdIncidentList,
 } from "./commands/incident.js";
 import { cmdMigrate } from "./commands/migrate.js";
+import { cmdPromptBuild } from "./commands/prompt-build.js";
 import type { ParsedArgs } from "./types.js";
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -99,6 +100,7 @@ function printHelp(): void {
     incident-list [--id Nxx]
 
     migrate                               Migrate from legacy tracker.json
+    prompt-build [--config path] [--apply] Print or apply enforcement block from taskflow.prompt.json
 
     help                                  Show this help
     version                               Show version
@@ -126,6 +128,8 @@ if (!command || command === "ui") {
 } else if (command === "migrate") {
   const config = resolveConfig();
   cmdMigrate(config);
+} else if (command === "prompt-build") {
+  cmdPromptBuild(opts);
 } else {
   // All other commands need master.json
   const config = resolveConfig();

@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "taskflow-prompt-config",
+  "title": "Taskflow Prompt Config",
+  "description": "User-configurable settings that control agent role enforcement blocks and behavior.",
+  "type": "object",
+  "properties": {
+    "gitTool": {
+      "type": "string",
+      "enum": ["gh", "git"],
+      "default": "gh",
+      "description": "Which tool agents use for PR creation. 'gh' uses GitHub CLI; 'git' provides compare URLs for manual PR creation."
+    },
+    "strictCLI": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, agents must use insight-flow CLI for all task mutations and may not edit workTasks/ files directly."
+    },
+    "prStrategy": {
+      "type": "string",
+      "enum": ["draft", "ready"],
+      "default": "ready",
+      "description": "PR state on creation. 'draft' opens a draft PR; 'ready' opens a ready-for-review PR."
+    },
+    "branchPrefix": {
+      "type": "string",
+      "default": "",
+      "description": "Optional prefix prepended to all branch names. E.g. 'team/' produces 'team/feat/N01-...' branches. Empty string disables prefix."
+    },
+    "requireChecklist": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, agents must verify all CHECKLIST.md items are checked before marking a task as implemented or done."
+    }
+  },
+  "additionalProperties": false
+}
