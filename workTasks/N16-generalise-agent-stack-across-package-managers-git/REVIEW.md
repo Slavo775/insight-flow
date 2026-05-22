@@ -81,3 +81,34 @@ None.
 - After this merges, N15's open PR #9 becomes implicitly approved — its three blockers are now resolved on main. Recommend a one-line note on PR #9 explaining the deletion-based resolution and closing/squashing as appropriate. (Wait — N15 was already merged in round 3 human approval. The blockers persisted in code until N16 lands, and once N16 merges they're gone. So no further action on N15 needed.)
 - The deferred items (`--examples` flag, README pointer, smoke-test init in tmpdir) total maybe 50 LOC + one paragraph. Reasonable as a "release-prep" follow-up before bumping to `0.6.0`.
 - Suggested next: open the PR; merge after this review approval; then handle the three deferred follow-ups in a small chore task before cutting `0.6.0`.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-22
+**Verdict:** FIX NEEDED
+
+The human's feedback verbatim:
+
+> Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` if i create it with sonnet or haiku? thik better should be by Claude Code
+
+### Summary
+
+Same shape as N15's three generalisation blockers but on a new axis: the canonical PR-creation guidance hardcodes a **specific Claude model** (`Claude Opus 4.7`) in the commit `Co-Authored-By:` trailer. Agents running under Sonnet, Haiku, or any future model would emit incorrect attribution. The fix is the same delegation pattern the rest of N16 already uses — remove the model-specific string from the canonical prompt and use a generic `Claude Code` attribution that's true regardless of which model is running.
+
+### Blockers
+
+- **`Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>` hardcoded in `.claude/commands/task-git.md:36`** — every commit produced by `/task-git` carries this trailer regardless of which model is actually authoring. Sonnet- or Haiku-driven sessions produce incorrect attribution; future-model sessions (Opus 5, etc.) would too. **Fix:** replace with `Co-Authored-By: Claude Code <noreply@anthropic.com>` (or `Claude <noreply@anthropic.com>`) — the generic trailer is honest regardless of model. Sync template + apply.
+
+### Suggestions (non-blocking)
+
+- The user's existing commit history on this branch (and elsewhere in the repo) already carries `Claude Opus 4.7` and `Claude Opus 4.6` co-author trailers. Those are immutable historical commit messages; no action needed on them. New commits should use the generic trailer once the fix lands.
+- Consider also documenting in `CLAUDE.md` (or `AGENT_PROTOCOL.md`) that the `Co-Authored-By` trailer is intentionally model-agnostic, so future implementers don't "helpfully" specialise it back.
+
+### Notes
+
+- This issue was missed by both the implementer and the round-1 AI reviewer. The new `no-technology-tight.test.mjs` regression test doesn't catch model-name strings — its forbidden-pattern list covers package managers, language toolchains, and git hosts but not Claude model identifiers. Worth extending the test's pattern list with `Claude (Opus|Sonnet|Haiku) [0-9]` to prevent future regressions on this axis.
+- Recommendation: keep N16 at `fix-needed`; land the trailer fix + extend the regression test in a small commit on this branch before merging PR #10.
