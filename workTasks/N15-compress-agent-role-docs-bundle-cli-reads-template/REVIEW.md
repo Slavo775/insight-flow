@@ -90,3 +90,39 @@ Two minor inconsistencies the human didn't catch, worth fixing inside N16 (cheap
 - The "manual quality-equivalence dry run" CHECKLIST item was deferred from N15 to N16 by the implementer's report. Confirmed appropriate — running it against the *generalised* roles (post-N16) is the right place to do it.
 - The implementer's substitution of `role-output-golden.test.mjs` (with mocked-LLM fixtures, originally scoped) for the simpler `scaffold-and-bundle.test.mjs` is **accepted** — the new tests cover the load-bearing deterministic plumbing, and the mocked-LLM harness was over-engineered. Flagging here so the deviation is on the record.
 - Recommend: keep N15 at `fix-needed`. After N16 lands and the substitution runs against this repo, do a final pass on N15 (verify B1/B2/B3 are byte-resolved, fix the two Non-blocking items above), then approve.
+
+
+---
+
+## Round 3 — pending verdict
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-22
+**Verdict:** APPROVED
+
+The human's feedback verbatim:
+
+> approved we can merge this and checkout to N16
+
+### Summary
+
+Round-3 human approval after the non-blocking fixes from round-2 AI review landed. The three generalisation blockers (B1 npm/npx, B2 gh/GitHub, B3 TypeScript tsc) are explicitly out of scope for this PR and are addressed by N16 (feat/N16-...). N15 is approved as the role-doc compression + read-bundling + REVIEW template work; N16 will pick up the substitution machinery.
+
+### Checklist verification
+
+- [x] All previously-flagged non-blocking inconsistencies resolved in commit `ca23044` (Round-N scaffold section names; TASK_REVIEWER_ROLE.md mandatory-structure line).
+- [x] N15 CHECKLIST.md done criteria + quality gates ticked.
+- [x] Tests 12/12 green on branch tip.
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+The three generalisation blockers (B1-B3) remain in code as confirmed by round-2 AI review. They are deliberately left in place here — N16 owns the fix.
+
+### Notes
+
+- User instruction was clear: "approved we can merge this and checkout to N16". Recording verdict + proceeding with merge per the next /task-git invocation.
+- Going forward N15's changes (AGENT_PROTOCOL.md, compressed roles, REVIEW.md template, --with-spec / --spec, stats --tokens) will be on main, which is where N16's substitution work needs them.

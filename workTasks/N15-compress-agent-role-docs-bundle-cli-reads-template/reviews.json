@@ -30,6 +30,15 @@
         "comment": "Fixed 2 non-blocking inconsistencies from round-2 AI review: (1) scaffoldReviewMd Round-N section names now mirror Round-1 template (Summary / Checklist verification / Blockers / Non-blocking / Security & edge cases / Notes) as h3 under the Round-N h2; (2) TASK_REVIEWER_ROLE.md mandatory-structure line aligned with the actual template (dropped 'Next actions', kept 'Notes'; clarified Verdict is metadata not a section). 3 blockers left untouched per user direction — those land in N16.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-22T18:32:19.067Z",
+      "endedAt": "2026-05-22T18:32:47.152Z",
+      "verdict": "approved",
+      "comment": "Round 3 human approval. Non-blocking items from round-2 fixed in ca23044; 3 generalisation blockers explicitly deferred to N16. Ready to merge.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
