@@ -7,14 +7,17 @@
 **Verdict:** FIX NEEDED
 
 ### Blockers
+
 - **Claude Code setup missing from `taskflow init`** — `taskflow init` should also generate Claude Code configuration:
   - **Global setup**: register skills/slash commands (e.g., `/taskmaster`, `/task-implement`, `/task-review`, `/task-git`, etc.) in `.claude/settings.json` so they're available as Claude Code skills.
   - **Local setup**: generate a project-level `CLAUDE.md` with taskflow context — available commands, how the task system works, conventions for using the CLI. This gives Claude Code automatic context about the task workflow when working in the project.
 
 ### Suggestions (non-blocking)
+
 - None
 
 ### Notes
+
 - The user wants the same Storybook-like experience: `taskflow init` sets everything up so Claude Code "just knows" about the task system without manual config.
 
 ---
@@ -37,6 +40,7 @@ Core implementation is solid. The package builds cleanly, both root and package 
 ### Checklist Assessment
 
 **Implemented (core scope):**
+
 - `packages/taskflow/` with valid package.json, bin, exports
 - Typed modules: storage, commands, config, cli, server, init
 - `taskflow.config.json` schema + config resolution
@@ -48,6 +52,7 @@ Core implementation is solid. The package builds cleanly, both root and package 
 - CLAUDE.md generation with `<!-- taskflow:start/end -->` markers
 
 **Deferred (later phases, per task notes):**
+
 - `scripts/task-tracker.mjs` thin wrapper replacement (original kept for safety)
 - Dashboard extraction to `packages/dashboard/`
 - npm publish

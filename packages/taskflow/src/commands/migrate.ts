@@ -1,7 +1,20 @@
 import { readFileSync, existsSync, renameSync } from "node:fs";
 import { resolve } from "node:path";
-import type { TaskflowConfig } from "../types.js";
-import { getWorkDir, getShardFileName, saveShard, saveMaster, parseTaskNum } from "../storage.js";
+import type { MasterFile, Task, TaskflowConfig } from "../types.js";
+import {
+  getWorkDir,
+  getShardFileName,
+  saveShard,
+  saveMaster,
+  parseTaskNum,
+  loadMaster,
+  loadShard,
+  loadTaskIncidentsHybrid,
+  loadTaskReviewsHybrid,
+  recomputeTaskSummary,
+  saveTaskIncidents,
+  saveTaskReviews,
+} from "../storage.js";
 import { getMasterPath } from "../config.js";
 
 export function cmdMigrate(config: TaskflowConfig): void {
@@ -47,7 +60,11 @@ export function cmdMigrate(config: TaskflowConfig): void {
 
   for (const [shardFile, shardData] of Object.entries(shardMap)) {
     master.meta.shards.push(shardFile);
-    saveShard(workDir, shardFile, shardData as { range: { from: number; to: number }; tasks: never[] });
+    saveShard(
+      workDir,
+      shardFile,
+      shardData as { range: { from: number; to: number }; tasks: never[] },
+    );
   }
 
   master.meta.shards.sort();
@@ -67,6 +84,72 @@ export function cmdMigrate(config: TaskflowConfig): void {
       shardsCreated: master.meta.shards,
       tasksMigrated: (old.tasks as unknown[]).length,
       backupAt: "workTasks/tracker.json.bak",
-    }, null, 2),
+    }),
+  );
+}
+
+/**
+ * Split inline `reviews` and `incidents` arrays in every existing shard into
+ * per-task side files. Idempotent: tasks that already have side files (or no
+ * inline arrays) are skipped. Required once after upgrading to the v2 schema.
+ */
+export function cmdMigrateReviews(config: TaskflowConfig): void {
+  const workDir = getWorkDir(config);
+  let master: MasterFile;
+  try {
+    master = loadMaster(config);
+  } catch (err) {
+    console.error((err as Error).message);
+    process.exit(1);
+  }
+
+  const tasksSplit: string[] = [];
+  const shardsTouched: string[] = [];
+
+  for (const shardFile of master.meta.shards) {
+    const shard = loadShard(workDir, shardFile);
+    let shardChanged = false;
+
+    for (const task of shard.tasks as Task[]) {
+      const hadReviews = Array.isArray(task.reviews) && task.reviews.length > 0;
+      const hadIncidents = Array.isArray(task.incidents) && task.incidents.length > 0;
+
+      if (hadReviews) saveTaskReviews(config, task, task.reviews ?? []);
+      if (hadIncidents) saveTaskIncidents(config, task, task.incidents ?? []);
+
+      // Load from side files (or the just-saved inline arrays) so re-runs
+      // recompute summary from the canonical source instead of the stripped
+      // inline arrays. This is what makes the migration truly idempotent.
+      const reviews = loadTaskReviewsHybrid(config, task);
+      const incidents = loadTaskIncidentsHybrid(config, task);
+
+      const beforeReviewCount = task.reviewCount;
+      const beforeLastVerdict = task.lastReviewVerdict;
+      const beforeOpenIncidents = task.openIncidentCount;
+      recomputeTaskSummary(task, reviews, incidents);
+
+      const summaryChanged =
+        beforeReviewCount !== task.reviewCount ||
+        beforeLastVerdict !== task.lastReviewVerdict ||
+        beforeOpenIncidents !== task.openIncidentCount;
+
+      if (hadReviews || hadIncidents || summaryChanged) {
+        shardChanged = true;
+        if (hadReviews || hadIncidents) tasksSplit.push(task.id);
+      }
+    }
+
+    if (shardChanged) {
+      saveShard(workDir, shardFile, shard);
+      shardsTouched.push(shardFile);
+    }
+  }
+
+  console.log(
+    JSON.stringify({
+      action: "migrate-reviews",
+      tasksSplit,
+      shardsTouched,
+    }),
   );
 }

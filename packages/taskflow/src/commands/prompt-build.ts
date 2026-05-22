@@ -37,17 +37,15 @@ function buildEnforcementBlock(cfg: PromptConfig): string {
   if (cfg.strictCLI) {
     lines.push("STRICT ENFORCEMENT — TASK FILE MUTATIONS");
     lines.push(
-      "- NEVER use Edit, Write, or file-creation tools on: tracker.json, TASK.md, CHECKLIST.md, or any file inside workTasks/"
+      "- NEVER use Edit, Write, or file-creation tools on: tracker.json, TASK.md, CHECKLIST.md, or any file inside workTasks/",
     );
     lines.push(
-      "- ALL task state changes MUST go through `insight-flow` CLI commands (create, update-status, set-review, etc.)"
+      "- ALL task state changes MUST go through `insight-flow` CLI commands (create, update-status, set-review, etc.)",
     );
     lines.push(
-      "- Running the script is MANDATORY — there are no exceptions, even for \"minor\" field updates"
+      '- Running the script is MANDATORY — there are no exceptions, even for "minor" field updates',
     );
-    lines.push(
-      "- Violation: direct file edit bypasses validation, ID sequencing, and audit trail"
-    );
+    lines.push("- Violation: direct file edit bypasses validation, ID sequencing, and audit trail");
     lines.push("");
   }
 
@@ -133,7 +131,7 @@ const ROLE_FILES = [
 export function cmdPromptBuild(opts: ParsedArgs): void {
   const configPath = resolve(
     process.cwd(),
-    typeof opts.config === "string" ? opts.config : "taskflow.prompt.json"
+    typeof opts.config === "string" ? opts.config : "taskflow.prompt.json",
   );
   const cfg = loadConfig(configPath);
   const block = buildEnforcementBlock(cfg);
@@ -142,7 +140,7 @@ export function cmdPromptBuild(opts: ParsedArgs): void {
     console.log("# Enforcement block (preview)\n");
     console.log(block);
     console.log(
-      "\nRun with --apply to write AGENT_ENFORCEMENT.md and update all role files to reference it."
+      "\nRun with --apply to write AGENT_ENFORCEMENT.md and update all role files to reference it.",
     );
     return;
   }
@@ -164,16 +162,12 @@ export function cmdPromptBuild(opts: ParsedArgs): void {
   const skipped = results.filter((r) => !r.patched).map((r) => r.file);
 
   console.log(
-    JSON.stringify(
-      {
-        action: "prompt-build",
-        enforcementFile: "AGENT_ENFORCEMENT.md",
-        config: configPath,
-        patched,
-        skipped,
-      },
-      null,
-      2
-    )
+    JSON.stringify({
+      action: "prompt-build",
+      enforcementFile: "AGENT_ENFORCEMENT.md",
+      config: configPath,
+      patched,
+      skipped,
+    }),
   );
 }

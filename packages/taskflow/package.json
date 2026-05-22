@@ -1,7 +1,7 @@
 {
   "name": "insight-flow",
   "version": "0.4.0",
-  "description": "A workbench for AI-assisted task lifecycle management — CLI plus a bundled React dashboard",
+  "description": "A workbench for AI-assisted task lifecycle management — CLI plus a self-contained server-rendered dashboard",
   "type": "module",
   "bin": {
     "insight-flow": "./dist/cli.js"
@@ -22,16 +22,15 @@
     "LICENSE"
   ],
   "scripts": {
-    "build:cli": "tsup",
-    "build:ui": "node ../../node_modules/vite/bin/vite.js build --config vite.config.ts",
-    "build": "pnpm run build:cli && pnpm run build:ui",
+    "build": "tsup",
     "dev": "tsup --watch",
-    "dev:ui": "node ../../node_modules/vite/bin/vite.js --config vite.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm run build:cli && node test/init.test.mjs",
-    "prepublishOnly": "npm run build && npm run typecheck"
+    "test": "pnpm run build && node test/init.test.mjs && node test/migrate-reviews.test.mjs",
+    "sync-roles": "node scripts/sync-role-templates.mjs",
+    "prepublishOnly": "npm run sync-roles && npm run build && npm run typecheck"
   },
   "devDependencies": {
+    "@types/node": "^22.16.5",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
   },

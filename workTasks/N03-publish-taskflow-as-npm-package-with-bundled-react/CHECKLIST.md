@@ -3,6 +3,7 @@
 ## Done criteria
 
 ### Package SPA build
+
 - [ ] `vite.package.config.ts` (or `mode: "package"` branch) exists, uses plain `@vitejs/plugin-react` + `@tailwindcss/vite` + `vite-tsconfig-paths` (NOT `@lovable.dev/vite-tanstack-config`)
 - [ ] `base: "./"` set so assets resolve relative to mount path
 - [ ] `build.outDir` points to `packages/taskflow/dist/ui`
@@ -10,10 +11,12 @@
 - [ ] `index.package.html` (or equivalent) loads the SPA entry
 
 ### API client
+
 - [ ] `src/lib/api.ts` resolves `API_BASE_URL` from `window.__TASKFLOW_CONFIG__?.apiBase` first, falling back to env then `""`
 - [ ] No hardcoded `http://localhost:3033` remains anywhere in built SPA assets (`grep -r "localhost:3033" packages/taskflow/dist` is empty)
 
 ### Server changes
+
 - [ ] `packages/taskflow/src/server/index.ts` serves static files from `dist/ui/` for non-`/api/*`, non-`/ws` GETs
 - [ ] SPA fallback: unknown paths return `index.html`
 - [ ] `index.html` injection replaces a placeholder with `<script>window.__TASKFLOW_CONFIG__={...}</script>` containing projectName, apiBase, activityEngine.enabled
@@ -22,6 +25,7 @@
 - [ ] WebSocket file-change broadcast still triggers UI refresh in the bundled SPA
 
 ### Publishing metadata
+
 - [ ] `packages/taskflow/package.json` version bumped (>= 0.2.0)
 - [ ] `repository`, `homepage`, `bugs`, `author`, `license` fields populated
 - [ ] `publishConfig.access: "public"` set
@@ -32,6 +36,7 @@
 - [ ] `packages/taskflow/LICENSE` exists (MIT)
 
 ### Playground
+
 - [ ] `playground/package.json` exists with `taskflow` dep (workspace: or file:)
 - [ ] `playground/taskflow.config.json` exists with custom `workDir` + `server.port`
 - [ ] `playground/workTasks/master.json` + at least one shard JSON exist, seeded from sample data
@@ -40,6 +45,7 @@
 - [ ] Root `package.json` has `build:package`, `play`, `pack:taskflow` scripts
 
 ### Config flexibility
+
 - [ ] `taskflow.config.json` `workDir` controls where JSONs are read from (verified by pointing playground at a non-default dir)
 - [ ] `server.port` from config is respected when running `taskflow` / `taskflow ui`
 

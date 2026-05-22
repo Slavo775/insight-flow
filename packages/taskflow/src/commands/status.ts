@@ -15,5 +15,5 @@ export function cmdStatus(config: TaskflowConfig, master: MasterFile, opts: Pars
   task.statusHistory.push({ status, at: now(), by: (opts.by as string) || "manual" });
   saveShard(getWorkDir(config), shardFile, shard);
 
-  console.log(JSON.stringify({ action: "status-updated", id, status }, null, 2));
+  console.log(JSON.stringify({ action: "status-updated", id, status }));
 }

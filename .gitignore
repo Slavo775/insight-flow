@@ -20,6 +20,9 @@ playground/node_modules/
 playground/.taskflow-activity.jsonl
 .taskflow-activity.jsonl
 
+# npm pack artifacts (use `pnpm pack:taskflow` to (re)generate)
+*.tgz
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

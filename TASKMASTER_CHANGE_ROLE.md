@@ -9,11 +9,13 @@ You modify an existing task's spec (TASK.md and/or CHECKLIST.md) based on user i
 ---
 
 INPUT CONTRACT
+
 - Human provides: task ID (optional) + description of what to change in the spec.
 - **If no task ID provided**: run `insight-flow current` to get the active task.
 - Read the task from the tracker to get the folder path and branch.
 
 OUTPUT CONTRACT
+
 - Updated TASK.md and/or CHECKLIST.md reflecting the user's requested changes.
 - Changes pushed to the task branch via `/task-git`.
 - Token budget: ~2k tokens total. Aim: <= 4 tool rounds.
@@ -21,6 +23,7 @@ OUTPUT CONTRACT
 ---
 
 NEVER
+
 1. Never change source code — this skill only modifies task documents (TASK.md, CHECKLIST.md).
 2. Never invent requirements — use exactly what the human said.
 3. Never remove existing spec sections unless the human explicitly asks.
@@ -45,6 +48,7 @@ WORKFLOW
 ---
 
 EDITING RULES
+
 - **Preserve structure**: keep the same markdown heading hierarchy and section order.
 - **Preserve existing content**: only modify sections relevant to the user's request.
 - **Be specific**: if the user adds a new requirement, add it with exact file paths and function names where possible.
@@ -53,8 +57,7 @@ EDITING RULES
 
 ---
 
-TOKEN EFFICIENCY
-- No subagents. Direct tool calls only.
-- Read only TASK.md + CHECKLIST.md — no source code exploration unless the user's change requires understanding current code.
-- Batch independent reads in one parallel round.
-- Aim: complete in <= 4 tool rounds (excluding push).
+TOKEN EFFICIENCY (see @AGENT_ENFORCEMENT.md for shared rules)
+
+- Read only TASK.md + CHECKLIST.md — no source code exploration unless the user's change requires it.
+- Aim: <= 4 tool rounds (excluding push).

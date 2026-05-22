@@ -100,26 +100,6 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-12T20:40:10.226Z",
-          "endedAt": "2026-05-12T20:40:10.270Z",
-          "verdict": "request-changes",
-          "comment": "Fix: (1) reset should also reset dataMode to fetch, (2) shard nav direction labels are swapped, (3) rename isFetch constant, (4) add loading toast on initial fetch",
-          "type": "ai",
-          "by": "task-human-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-12T20:56:50.966Z",
-          "endedAt": "2026-05-12T20:57:30.819Z",
-          "verdict": "approved",
-          "comment": "All checklist items pass. Prior review fixes verified. No blockers.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [
         {
           "requestedAt": "2026-05-12T20:40:51.504Z",
@@ -135,7 +115,9 @@
           "implementedBy": "task-review-fix"
         }
       ],
-      "incidents": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 34,
       "tags": [
@@ -324,35 +306,6 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-13T06:39:31.963Z",
-          "endedAt": "2026-05-13T06:39:47.334Z",
-          "verdict": "fix-needed",
-          "comment": "taskflow init should also set up Claude Code config: global skills in .claude/settings.json + local CLAUDE.md with taskflow context",
-          "type": "human",
-          "by": "task-human-review",
-          "fix": {
-            "startedAt": "2026-05-13T07:17:38.907Z",
-            "endedAt": "2026-05-13T07:19:24.929Z",
-            "status": "fixed",
-            "filesChanged": [
-              "packages/taskflow/src/init/index.ts"
-            ],
-            "comment": "Added Claude Code setup to taskflow init: 9 skill commands in .claude/commands/ + CLAUDE.md with taskflow context",
-            "by": "task-review-fix"
-          }
-        },
-        {
-          "startedAt": "2026-05-13T07:25:41.467Z",
-          "endedAt": "2026-05-13T07:28:58.149Z",
-          "verdict": "approved",
-          "comment": "Core framework complete and working. Minor issues: unused extname import, dead templates/roles code, redundant CLAUDE.md heading. Deferred items (npm publish, webhooks, external sync) acknowledged as later phases.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [
         {
           "requestedAt": "2026-05-13T06:24:58.260Z",
@@ -367,7 +320,9 @@
           "implementedBy": "task-request-changes"
         }
       ],
-      "incidents": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 658,
       "tags": [
@@ -517,38 +472,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-14T17:48:34.058Z",
-          "endedAt": "2026-05-14T17:49:52.203Z",
-          "verdict": "fix-needed",
-          "comment": "Blocker: 3 new files untracked. Non-blocking: CSS display conflict, addActivityEvent undefined when disabled, unused import.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": {
-            "startedAt": "2026-05-14T18:06:42.420Z",
-            "endedAt": "2026-05-14T18:13:28.070Z",
-            "status": "fixed",
-            "filesChanged": [
-              "packages/taskflow/src/server/dashboard.ts",
-              "packages/taskflow/src/init/index.ts"
-            ],
-            "comment": "Applied 3 non-blocking fixes: removed duplicate CSS display:flex on .activity-panel base rule, guarded addActivityEvent calls with typeof check for disabled case, removed unused ActivityEngineConfig import. Blocker (untracked ws.ts/activity.ts/dashboard.ts) will be resolved by task-git.",
-            "by": "task-review-fix"
-          }
-        },
-        {
-          "startedAt": "2026-05-14T18:18:06.974Z",
-          "endedAt": "2026-05-14T18:19:15.034Z",
-          "verdict": "approved",
-          "comment": "Round 2: all 4 prior issues resolved (blocker staging + 3 non-blockers). Typecheck and build still green. Approved.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 5892,
       "tags": [
@@ -694,17 +621,6 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-18T11:51:05.493Z",
-          "endedAt": "2026-05-18T11:53:22.209Z",
-          "verdict": "approved",
-          "comment": "Approved. Spec satisfied: SPA bundled into dist/ui, server serves it with runtime config injection, API base is same-origin, publishing metadata complete, playground works end-to-end. One checklist item (pnpm-workspace.yaml) intentionally skipped in favor of pnpm link: protocol — documented. Five non-blocking suggestions noted in REVIEW.md.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [
         {
           "requestedAt": "2026-05-18T11:55:52.499Z",
@@ -721,7 +637,9 @@
           "implementedBy": "task-review-fix"
         }
       ],
-      "incidents": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 44,
       "tags": [
@@ -833,19 +751,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-18T12:55:38.090Z",
-          "endedAt": "2026-05-18T12:57:18.223Z",
-          "verdict": "approved",
-          "comment": "Approved with two non-blocking notes: (1) console.log strings in insight-flow init still say 'taskflow context/section' — UX wart, not a functional issue; (2) version string hardcoded in cli.ts will drift on future bumps. Recommend a local install-from-tarball smoke test before the manual npm publish post-merge step.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 425,
       "tags": [
@@ -948,28 +857,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T07:13:57.389Z",
-          "endedAt": null,
-          "verdict": null,
-          "comment": null,
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-21T07:32:58.916Z",
-          "endedAt": "2026-05-21T07:39:35.141Z",
-          "verdict": "approved",
-          "comment": "All role files migrated, legacy script deleted, zero live code references remain. Non-blocking: stray master.json rollback in commit (no lasting harm), parity not documented.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 843,
       "tags": [
@@ -1036,19 +927,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T07:39:41.572Z",
-          "endedAt": "2026-05-21T07:41:46.047Z",
-          "verdict": "approved",
-          "comment": "Narrow but correct: README expanded with all commands, stale init template fixed, no-op checklist items correctly identified. Non-blocking: internal duplication audit not documented.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 843,
       "tags": [
@@ -1118,19 +1000,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T07:39:41.651Z",
-          "endedAt": "2026-05-21T07:41:46.125Z",
-          "verdict": "approved",
-          "comment": "Core Zod validation boundary solid across all reads/writes with TaskflowValidationError. Non-blocking: no tests added (follow-up task needed), types.ts still hand-rolled (drift risk), as-casts in storage.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 843,
       "tags": [
@@ -1241,47 +1114,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T07:39:41.729Z",
-          "endedAt": "2026-05-21T07:41:46.200Z",
-          "verdict": "fix-needed",
-          "comment": "Blocker: --force flag missing (explicit checklist item). 8 role templates present, per-file copy with created/skipped reporting works. Non-blocking: .claude/skills not extended, root role files not removed.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": {
-            "startedAt": "2026-05-21T07:43:50.123Z",
-            "endedAt": "2026-05-21T07:55:06.584Z",
-            "status": "fixed",
-            "filesChanged": [
-              "packages/taskflow/src/init/index.ts",
-              "packages/taskflow/src/cli.ts"
-            ],
-            "comment": "Added --force flag to initProject(force: boolean) and wired opts.force in cli.ts; updated help text. Typecheck and build pass.",
-            "by": "task-review-fix"
-          }
-        },
-        {
-          "startedAt": "2026-05-21T08:25:12.912Z",
-          "endedAt": "2026-05-21T08:25:42.108Z",
-          "verdict": "approved",
-          "comment": "Round 2: --force flag blocker resolved. initProject signature extended, copy loop guards on !force, cli.ts wires opts.force. Minimal, targeted fix. Typecheck and build pass.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-21T08:26:47.448Z",
-          "endedAt": "2026-05-21T08:26:58.379Z",
-          "verdict": "approved",
-          "comment": "Human approved.",
-          "type": "human",
-          "by": "task-human-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 842,
       "tags": [
@@ -1358,19 +1194,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T07:39:41.808Z",
-          "endedAt": "2026-05-21T07:41:46.273Z",
-          "verdict": "approved",
-          "comment": "vite.config.ts replaces custom build script, dev:ui added, scripts/ dir gone. Non-blocking: build:ui uses node ../../node_modules/vite path (fragile but only affects devs), README not updated.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 842,
       "tags": [

@@ -15,6 +15,7 @@ Risk: **low**. No new dependencies, no schema/API changes, no auth or runtime be
 ## Checklist verification
 
 ### Done criteria
+
 - [x] `packages/taskflow/package.json` has `name: "insight-flow"` — verified line 2
 - [x] `packages/taskflow/package.json` has `bin: { "insight-flow": "./dist/cli.js" }` — verified line 7
 - [x] Version bumped to `0.3.0` — verified line 3
@@ -27,6 +28,7 @@ Risk: **low**. No new dependencies, no schema/API changes, no auth or runtime be
 - [ ] `npm view insight-flow` shows the package live — same, deferred
 
 ### Quality gates
+
 - [x] `pnpm --dir packages/taskflow run typecheck` passes
 - [x] `pnpm --dir packages/taskflow run build` produces `dist/cli.js`, `dist/index.js`, and bundled UI assets
 - [x] Lint on changed files (`pnpm exec eslint packages/taskflow/src/cli.ts packages/taskflow/src/init/index.ts`) clean
@@ -34,6 +36,7 @@ Risk: **low**. No new dependencies, no schema/API changes, no auth or runtime be
 - [ ] `pnpm dev` still boots the dashboard SPA — **NOT TESTED**, but no SPA code paths were touched.
 
 ### Verification
+
 - [ ] `npm whoami` returns `sslavo` before publishing — manual pre-publish step, not part of this PR
 - [ ] `npx insight-flow@0.3.0 init` in fresh dir — deferred to post-publish
 - [x] `grep -ri "npx taskflow|npm i taskflow|npm install taskflow" packages/taskflow/ README.md` returns zero hits — confirmed
@@ -63,14 +66,14 @@ After running `insight-flow init`, the user sees mixed branding (the welcome lin
 
 ## Quality gate results
 
-| Gate | Status |
-|------|--------|
-| typecheck (package) | ✅ pass |
-| build (package + UI) | ✅ pass (`dist/cli.js` 84 kB, `dist/index.js` 51 kB, UI bundle 850 kB) |
-| eslint (changed files) | ✅ pass |
-| eslint (repo-wide) | ⚠️ pre-existing failures, none in this diff |
-| `npm pack --dry-run` | ✅ produces `insight-flow-0.3.0.tgz` with correct file allowlist |
-| CLI smoke (`--version`, `help`) | ✅ both print `insight-flow` branding |
+| Gate                            | Status                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| typecheck (package)             | ✅ pass                                                                |
+| build (package + UI)            | ✅ pass (`dist/cli.js` 84 kB, `dist/index.js` 51 kB, UI bundle 850 kB) |
+| eslint (changed files)          | ✅ pass                                                                |
+| eslint (repo-wide)              | ⚠️ pre-existing failures, none in this diff                            |
+| `npm pack --dry-run`            | ✅ produces `insight-flow-0.3.0.tgz` with correct file allowlist       |
+| CLI smoke (`--version`, `help`) | ✅ both print `insight-flow` branding                                  |
 
 ## Notes
 

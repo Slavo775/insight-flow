@@ -1,6 +1,7 @@
 # N09 — Standardize taskflow UI build with Vite targeting dist/ui — Checklist
 
 ## Done criteria
+
 - [ ] `packages/taskflow/vite.config.ts` exists and is the single source for the UI build
 - [ ] `pnpm --filter insight-flow build:ui` runs `vite build` and emits to `packages/taskflow/dist/ui/`
 - [ ] `dist/ui/` contains `index.html` plus bundled JS/CSS
@@ -11,12 +12,14 @@
 - [ ] Package README documents `build:ui` and `dev:ui`
 
 ## Quality gates
+
 - [ ] `pnpm --filter insight-flow typecheck` passes
 - [ ] `pnpm --filter insight-flow build` (full: CLI + UI) succeeds
 - [ ] `pnpm lint` passes
 - [ ] No regressions in the bundled dashboard (loads, no console errors, same features as before)
 
 ## Verification
+
 - [ ] `pnpm --filter insight-flow build:ui` exits 0 and produces `packages/taskflow/dist/ui/index.html`
 - [ ] Bundle size is comparable to or smaller than the old custom-script output (no accidental dep duplication)
 - [ ] Launching the bundled dashboard via the CLI loads the UI with no console errors

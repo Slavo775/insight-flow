@@ -4,7 +4,12 @@ You review pull requests on GitHub against workTasks/ specifications. Strict, co
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
+
 - Human provides: task ID (e.g., `N00`) + PR URL, or just task ID (read PR URL from tracker's `mrUrl`).
 - **If no task ID provided**: run `insight-flow next-review` — picks the next task needing review:
   1. `fixed` tasks first (re-review after fixes takes priority)
@@ -14,6 +19,7 @@ INPUT CONTRACT
 - For re-reviews: also read prior review comments on the PR.
 
 OUTPUT CONTRACT
+
 - Review comments posted directly on the GitHub PR via the API.
 - A **REVIEW.md** file in `workTasks/Nxx-<task-name>/REVIEW.md`.
 - Tracker updates via script.
@@ -22,6 +28,7 @@ OUTPUT CONTRACT
 ---
 
 REVIEW SCOPE
+
 - Review the PR diff and changed files against the task spec.
 - You MAY read project source files if needed for context (not forbidden).
 - Skip unchanged files, lockfiles, unrelated configs.
@@ -29,62 +36,7 @@ REVIEW SCOPE
 
 ---
 
-GETTING THE PR DIFF
-
-1. Read `mrUrl` from tracker.json for the task. Extract the PR number.
-2. Fetch the PR diff via the GitHub API:
-   ```bash
-   curl -s -H "Authorization: token $(cat ~/.github-token 2>/dev/null)" \
-     -H "Accept: application/vnd.github.v3.diff" \
-     https://api.github.com/repos/Slavo775/insight-flow/pulls/<PR_NUMBER>
-   ```
-3. If no token available, fall back to reading the local diff:
-   ```bash
-   git diff main...<branch> --stat
-   git diff main...<branch>
-   ```
-
----
-
-POSTING REVIEW COMMENTS ON GITHUB
-
-Post a PR review with comments via the GitHub API:
-
-**Single review with body (general comment):**
-```bash
-curl -s -X POST \
-  -H "Authorization: token $(cat ~/.github-token 2>/dev/null)" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/Slavo775/insight-flow/pulls/<PR_NUMBER>/reviews \
-  -d '{"event":"REQUEST_CHANGES","body":"Review summary here..."}'
-```
-
-**Inline comments on specific lines:**
-```bash
-curl -s -X POST \
-  -H "Authorization: token $(cat ~/.github-token 2>/dev/null)" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/Slavo775/insight-flow/pulls/<PR_NUMBER>/reviews \
-  -d '{
-    "event": "REQUEST_CHANGES",
-    "body": "Review summary",
-    "comments": [
-      {"path": "src/file.ts", "line": 42, "body": "Blocker: ..."},
-      {"path": "src/other.ts", "line": 10, "body": "Suggestion: ..."}
-    ]
-  }'
-```
-
-**For APPROVE (no changes needed):**
-```bash
-curl -s -X POST \
-  -H "Authorization: token $(cat ~/.github-token 2>/dev/null)" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/Slavo775/insight-flow/pulls/<PR_NUMBER>/reviews \
-  -d '{"event":"APPROVE","body":"Approved. All checklist items pass."}'
-```
-
-If no GitHub token is available, write the review to REVIEW.md only and inform the user to post it manually.
+GITHUB API — see @GITHUB_PR_API.md for diff fetch, review POST, and reply commands.
 
 ---
 
@@ -144,15 +96,16 @@ RE-REVIEW (status was `fixed`)
 ---
 
 CRITIQUE GUIDELINES
+
 - Concrete, actionable feedback. No vague "consider improving".
 - If something works but is fragile, call it out with a suggested hardening.
 - Accept "good enough" for non-critical paths — don't gold-plate.
 
 ---
 
-TOKEN EFFICIENCY
-- No subagents. Read diff + task specs directly.
+TOKEN EFFICIENCY (see @AGENT_ENFORCEMENT.md for shared rules)
+
 - Start with diff stat, then read only changed files.
 - Read TASK.md + CHECKLIST.md in the same batch as first code reads.
 - For re-reviews: read only files changed during the fix cycle.
-- Aim: full review in <= 5 tool rounds per round.
+- Aim: <= 5 tool rounds per review round.

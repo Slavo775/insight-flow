@@ -1,5 +1,15 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs, Task } from "../types.js";
-import { loadTaskById, loadAllTasks, saveMaster, parseTaskNum, getShardFileName, loadShard, getWorkDir } from "../storage.js";
+import {
+  loadTaskById,
+  loadAllTasks,
+  saveMaster,
+  parseTaskNum,
+  getShardFileName,
+  loadShard,
+  getWorkDir,
+  loadTaskReviewsHybrid,
+  loadTaskIncidentsHybrid,
+} from "../storage.js";
 
 export function cmdCurrent(config: TaskflowConfig, master: MasterFile): void {
   const id = master.meta.currentTaskId;
@@ -9,7 +19,14 @@ export function cmdCurrent(config: TaskflowConfig, master: MasterFile): void {
   }
   try {
     const { task } = loadTaskById(config, master, id);
-    console.log(JSON.stringify({ currentTaskId: id, title: task.title, status: task.status, folder: task.folder }, null, 2));
+    console.log(
+      JSON.stringify({
+        currentTaskId: id,
+        title: task.title,
+        status: task.status,
+        folder: task.folder,
+      }),
+    );
   } catch {
     console.log(JSON.stringify({ currentTaskId: id, task: null }));
   }
@@ -27,7 +44,7 @@ export function cmdList(config: TaskflowConfig, master: MasterFile, opts: Parsed
     priority: t.priority,
     status: t.status,
   }));
-  console.log(JSON.stringify(summary, null, 2));
+  console.log(JSON.stringify(summary));
 }
 
 export function cmdStats(config: TaskflowConfig, master: MasterFile): void {
@@ -57,16 +74,18 @@ export function cmdStats(config: TaskflowConfig, master: MasterFile): void {
     if (task.implementation.tokensUsed) {
       totalTokens += task.implementation.tokensUsed;
     }
-    totalReviews += task.reviews.length;
-    fixNeededCount += task.reviews.filter((r) => r.verdict === "fix-needed").length;
+    const reviews = loadTaskReviewsHybrid(config, task);
+    const incidents = loadTaskIncidentsHybrid(config, task);
+    totalReviews += reviews.length;
+    fixNeededCount += reviews.filter((r) => r.verdict === "fix-needed").length;
 
-    for (const review of task.reviews) {
+    for (const review of reviews) {
       if (review.fix) {
         fixCycles++;
         if (review.fix.status === "fixed") fixedCount++;
       }
     }
-    totalIncidents += (task.incidents || []).length;
+    totalIncidents += incidents.length;
   }
 
   const avgDuration = completedCount > 0 ? Math.round(totalDuration / completedCount) : null;
@@ -109,11 +128,18 @@ const STATUS_WEIGHT: Record<string, number> = {
 export function cmdNext(config: TaskflowConfig, master: MasterFile): void {
   const tasks = loadAllTasks(config, master);
   const actionable = tasks.filter((t) =>
-    ["fix-needed", "changes-requested", "ready", "in-progress", "changes-implementing"].includes(t.status),
+    ["fix-needed", "changes-requested", "ready", "in-progress", "changes-implementing"].includes(
+      t.status,
+    ),
   );
 
   if (actionable.length === 0) {
-    console.log(JSON.stringify({ next: null, message: "No actionable tasks. Create one with taskflow create." }));
+    console.log(
+      JSON.stringify({
+        next: null,
+        message: "No actionable tasks. Create one with taskflow create.",
+      }),
+    );
     return;
   }
 
@@ -132,28 +158,24 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile): void {
   saveMaster(config, master);
 
   console.log(
-    JSON.stringify(
-      {
-        next: pick.id,
-        title: pick.title,
-        type: pick.type,
-        priority: pick.priority,
-        status: pick.status,
-        folder: pick.folder,
-        reason:
-          pick.status === "fix-needed"
-            ? "Review requested changes — fix first"
-            : pick.status === "changes-requested"
-              ? "Change requests pending — implement changes"
-              : pick.status === "changes-implementing"
-                ? "Resume interrupted change implementation"
-                : pick.status === "in-progress"
-                  ? "Resume interrupted implementation"
-                  : `Highest priority ready task (${pick.priority})`,
-      },
-      null,
-      2,
-    ),
+    JSON.stringify({
+      next: pick.id,
+      title: pick.title,
+      type: pick.type,
+      priority: pick.priority,
+      status: pick.status,
+      folder: pick.folder,
+      reason:
+        pick.status === "fix-needed"
+          ? "Review requested changes — fix first"
+          : pick.status === "changes-requested"
+            ? "Change requests pending — implement changes"
+            : pick.status === "changes-implementing"
+              ? "Resume interrupted change implementation"
+              : pick.status === "in-progress"
+                ? "Resume interrupted implementation"
+                : `Highest priority ready task (${pick.priority})`,
+    }),
   );
 }
 
@@ -180,24 +202,21 @@ export function cmdNextReview(config: TaskflowConfig, master: MasterFile): void 
   master.meta.currentTaskId = pick.id;
   saveMaster(config, master);
 
+  const reviewCount = pick.reviewCount ?? loadTaskReviewsHybrid(config, pick).length;
   console.log(
-    JSON.stringify(
-      {
-        next: pick.id,
-        title: pick.title,
-        type: pick.type,
-        priority: pick.priority,
-        status: pick.status,
-        folder: pick.folder,
-        reviewRound: pick.reviews.length + 1,
-        reason:
-          pick.status === "fixed"
-            ? `Re-review after fixes (round ${pick.reviews.length + 1})`
-            : "First review after implementation",
-      },
-      null,
-      2,
-    ),
+    JSON.stringify({
+      next: pick.id,
+      title: pick.title,
+      type: pick.type,
+      priority: pick.priority,
+      status: pick.status,
+      folder: pick.folder,
+      reviewRound: reviewCount + 1,
+      reason:
+        pick.status === "fixed"
+          ? `Re-review after fixes (round ${reviewCount + 1})`
+          : "First review after implementation",
+    }),
   );
 }
 
@@ -221,22 +240,19 @@ export function cmdNextFix(config: TaskflowConfig, master: MasterFile): void {
   master.meta.currentTaskId = pick.id;
   saveMaster(config, master);
 
-  const lastReview = pick.reviews[pick.reviews.length - 1];
+  const reviews = loadTaskReviewsHybrid(config, pick);
+  const lastReview = reviews[reviews.length - 1];
 
   console.log(
-    JSON.stringify(
-      {
-        next: pick.id,
-        title: pick.title,
-        type: pick.type,
-        priority: pick.priority,
-        status: pick.status,
-        folder: pick.folder,
-        reviewComment: lastReview?.comment || null,
-        reason: `Fix requested by reviewer (review round ${pick.reviews.length})`,
-      },
-      null,
-      2,
-    ),
+    JSON.stringify({
+      next: pick.id,
+      title: pick.title,
+      type: pick.type,
+      priority: pick.priority,
+      status: pick.status,
+      folder: pick.folder,
+      reviewComment: lastReview?.comment || null,
+      reason: `Fix requested by reviewer (review round ${reviews.length})`,
+    }),
   );
 }

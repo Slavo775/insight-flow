@@ -35,7 +35,7 @@ export function cmdPush(config: TaskflowConfig, master: MasterFile, opts: Parsed
       branch: task.branch,
       pushCount: task.pushes.length,
       commitHash: opts.commit,
-    }, null, 2),
+    }),
   );
 }
 
@@ -50,7 +50,7 @@ export function cmdMrUpdate(config: TaskflowConfig, master: MasterFile, opts: Pa
 
   task.mrUrl = opts.url as string;
   saveShard(getWorkDir(config), shardFile, shard);
-  console.log(JSON.stringify({ action: "mr-updated", id, mrUrl: opts.url }, null, 2));
+  console.log(JSON.stringify({ action: "mr-updated", id, mrUrl: opts.url }));
 }
 
 export function cmdMerge(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
@@ -72,7 +72,7 @@ export function cmdMerge(config: TaskflowConfig, master: MasterFile, opts: Parse
       id,
       mergedAt: task.mergedAt,
       totalDurationMinutes: task.totalDurationMinutes,
-    }, null, 2),
+    }),
   );
 }
 
@@ -94,6 +94,6 @@ export function cmdDone(config: TaskflowConfig, master: MasterFile, opts: Parsed
       action: "done",
       id,
       totalDurationMinutes: task.totalDurationMinutes,
-    }, null, 2),
+    }),
   );
 }

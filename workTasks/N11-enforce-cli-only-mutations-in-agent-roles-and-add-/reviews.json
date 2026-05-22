@@ -1,0 +1,87 @@
+{
+  "taskId": "N11",
+  "reviews": [
+    {
+      "startedAt": "2026-05-21T08:57:31.806Z",
+      "endedAt": "2026-05-21T08:57:46.922Z",
+      "verdict": "fix-needed",
+      "comment": "Centralize STRICT ENFORCEMENT into one shared file instead of copy-pasting into all 8 role files",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-21T09:09:51.419Z",
+      "endedAt": "2026-05-21T09:11:15.111Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: centralize enforcement block into AGENT_ENFORCEMENT.md referenced via @-include. Non-blocking: extra blank line in patchRoleFile insert branch.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-21T09:12:35.219Z",
+        "endedAt": "2026-05-21T09:14:49.211Z",
+        "status": "fixed",
+        "filesChanged": [
+          "AGENT_ENFORCEMENT.md",
+          "TASKMASTER_ROLE.md",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md",
+          "TASKMASTER_CHANGE_ROLE.md",
+          "packages/taskflow/src/commands/prompt-build.ts"
+        ],
+        "comment": "Created AGENT_ENFORCEMENT.md; replaced inline blocks with @AGENT_ENFORCEMENT.md in 8 role files; updated prompt-build --apply to write central file; fixed patchRoleFile blank line bug",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-21T09:20:22.316Z",
+      "endedAt": "2026-05-21T09:21:02.004Z",
+      "verdict": "approved",
+      "comment": "Blocker 1 resolved: AGENT_ENFORCEMENT.md centralizes enforcement, all 8 role files use @reference. Non-blocking blank line fix applied. Clean.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-21T09:28:46.748Z",
+      "endedAt": "2026-05-21T09:29:04.748Z",
+      "verdict": "fix-needed",
+      "comment": "GIT/GH TOOL RULE references taskflow.prompt.json — extra token cost. Bake resolved gitTool value into AGENT_ENFORCEMENT.md directly so agents need no file lookup.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-21T09:32:09.074Z",
+        "endedAt": "2026-05-21T09:33:12.292Z",
+        "status": "fixed",
+        "filesChanged": [
+          "AGENT_ENFORCEMENT.md",
+          "packages/taskflow/src/commands/prompt-build.ts"
+        ],
+        "comment": "buildEnforcementBlock now writes clean resolved prose. prompt-build --apply regenerated AGENT_ENFORCEMENT.md with concrete git tool values, no config file reference.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-21T09:37:13.117Z",
+      "endedAt": "2026-05-21T09:37:48.616Z",
+      "verdict": "approved",
+      "comment": "Human blocker resolved: AGENT_ENFORCEMENT.md now contains concrete resolved prose, no config file references. All config fields baked in at generation time.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-21T09:51:15.955Z",
+      "endedAt": "2026-05-21T09:51:28.338Z",
+      "verdict": "approved",
+      "comment": "Human approved. Ready to merge.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

@@ -32,8 +32,7 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
     userConfig = JSON.parse(readFileSync(configPath, "utf-8"));
   }
 
-  const projectName =
-    userConfig.projectName || inferProjectName(anchor) || "project";
+  const projectName = userConfig.projectName || inferProjectName(anchor) || "project";
 
   return {
     ...DEFAULTS,

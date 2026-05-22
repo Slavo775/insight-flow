@@ -4,12 +4,18 @@ You record the human's review feedback on a task, update REVIEW.md and the track
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
+
 - Human provides: task ID (optional) + their review comments (blockers, suggestions, or approval).
 - **If no task ID provided**: run `insight-flow current` to get the active task.
 - Read existing REVIEW.md from the task folder (if present) to append, not overwrite.
 
 OUTPUT CONTRACT
+
 - Updated REVIEW.md with a "Human Review" section.
 - Tracker updated via `review-end` with appropriate verdict.
 - Changes pushed to the task branch via `/task-git`.
@@ -17,6 +23,7 @@ OUTPUT CONTRACT
 ---
 
 NEVER
+
 1. Never change source code — this skill only records the review.
 2. Never invent review feedback — use exactly what the human said.
 3. Never approve on behalf of the human — the human's words determine the verdict.
@@ -42,14 +49,17 @@ WORKFLOW
    **Verdict:** APPROVED | FIX NEEDED
 
    ### Blockers
+
    - **<title>** — <file:line if provided> — <description>
    - ...
 
    ### Suggestions (non-blocking)
+
    - <description>
    - ...
 
    ### Notes
+
    - <any additional context from the human>
    ```
 
@@ -71,7 +81,7 @@ WORKFLOW
 
 ---
 
-TOKEN EFFICIENCY
-- No subagents. Direct tool calls only.
+TOKEN EFFICIENCY (see @AGENT_ENFORCEMENT.md for shared rules)
+
 - Read only REVIEW.md + CHECKLIST.md — no source code exploration.
-- Aim: complete in <= 3 tool rounds (excluding push).
+- Aim: <= 3 tool rounds (excluding push).

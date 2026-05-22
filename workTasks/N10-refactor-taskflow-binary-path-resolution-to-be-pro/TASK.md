@@ -5,9 +5,11 @@
 **Created:** 2026-05-20
 
 ## Problem
+
 Per REVIEW_ANALYSIS.md § 2 ("Path Management") and § 5 Phase 3.2, the taskflow binary resolves paths using `__dirname`-relative logic with deep `../../..` traversals. This breaks when the package is installed globally (`npm i -g insight-flow`) or when the binary runs from a different working directory than the one where `workTasks/` lives. Paths to data (`workTasks/master.json`, shard files) must resolve from the **consumer's project root** (detected once at startup), and paths to bundled assets (templates, UI bundle) must resolve from the **package install location** — these are two different anchors and they're currently conflated.
 
 ## Goal
+
 1. A single `resolveProjectRoot()` helper finds the consumer's project root (the directory containing `workTasks/master.json`, walked up from `process.cwd()`).
 2. A single `resolvePackageAsset(name)` helper finds files shipped with the package (templates, dist assets) using `import.meta.url`.
 3. No `../../..` literal path segments anywhere in `packages/taskflow/src/`.
@@ -16,7 +18,9 @@ Per REVIEW_ANALYSIS.md § 2 ("Path Management") and § 5 Phase 3.2, the taskflow
 6. A clear error message when the binary is run outside any project (no `workTasks/master.json` found in any parent).
 
 ## Scope
+
 ### In scope
+
 - `packages/taskflow/src/storage.ts` — replace any `__dirname` or `../../..` path computation with `resolveProjectRoot()`.
 - `packages/taskflow/src/init/index.ts` — `resolvePackageAsset()` for templates.
 - `packages/taskflow/src/server/dashboard.ts` — `resolvePackageAsset()` for `dist/ui` (coordinate with [[N09]]).
@@ -24,12 +28,14 @@ Per REVIEW_ANALYSIS.md § 2 ("Path Management") and § 5 Phase 3.2, the taskflow
 - Custom `TaskflowProjectNotFoundError` for the "ran outside a project" case.
 
 ### Out of scope
+
 - Changing the on-disk shape of `workTasks/` (still master + shards).
 - Adding a `taskflow.config.json` (separate task if we want explicit project markers).
 - Init template content ([[N08]]).
 - UI build location ([[N09]]).
 
 ## Implementation plan
+
 1. **Audit current path logic**
    - `grep -rn "__dirname\|fileURLToPath\|\.\./\.\./" packages/taskflow/src/` to find every existing path computation.
    - Catalog: which call sites want the consumer project root, which want the package install location.
@@ -54,6 +60,7 @@ Per REVIEW_ANALYSIS.md § 2 ("Path Management") and § 5 Phase 3.2, the taskflow
    - `grep -rn "\.\./\.\./" packages/taskflow/src/` returns zero matches.
 
 ## Verification
+
 - `insight-flow current` works from repo root.
 - `insight-flow current` works from `workTasks/` subdirectory (resolves project root upward).
 - `insight-flow current` from `/tmp` (or any non-project directory) prints the "no project found" error and exits non-zero.
@@ -62,6 +69,7 @@ Per REVIEW_ANALYSIS.md § 2 ("Path Management") and § 5 Phase 3.2, the taskflow
 - `grep -rn "__dirname" packages/taskflow/src/` returns zero matches (use `import.meta.url` instead).
 
 ## Notes
+
 - Source: REVIEW_ANALYSIS.md § 2 (Path Management), § 5 Phase 3.2.
 - Pairs with [[N08]] (init templates) and [[N09]] (UI build) — both depend on `resolvePackageAsset()`. Land N10 first, or coordinate so all three converge on the same helper module.
 - Don't add a `taskflow.config.json` marker file just yet — `workTasks/master.json` is a reliable marker and avoids the extra config burden. If we add explicit config later, the marker check goes through this same helper.

@@ -31,8 +31,9 @@ import {
   cmdIncidentResolve,
   cmdIncidentList,
 } from "./commands/incident.js";
-import { cmdMigrate } from "./commands/migrate.js";
+import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
+import { cmdShow } from "./commands/show.js";
 import type { ParsedArgs } from "./types.js";
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -70,6 +71,7 @@ function printHelp(): void {
     status --id Nxx --status <status> [--by agent]
     list [--status ready]
     current
+    show --id Nxx [--summary]      Print task JSON (or compact summary)
     stats
     next
     next-review
@@ -100,6 +102,7 @@ function printHelp(): void {
     incident-list [--id Nxx]
 
     migrate                               Migrate from legacy tracker.json
+    migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
     prompt-build [--config path] [--apply] Print or apply enforcement block from taskflow.prompt.json
 
     help                                  Show this help
@@ -112,121 +115,127 @@ const command = args[0];
 const opts = parseArgs(args.slice(1));
 
 try {
-// Commands that don't need master.json
-if (!command || command === "ui") {
-  const config = resolveConfig();
-  const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
-  startServer(config, port);
-} else if (command === "init") {
-  initProject(process.cwd(), !!opts.force);
-} else if (command === "help" || command === "--help" || command === "-h") {
-  printHelp();
-} else if (command === "version" || command === "--version" || command === "-v") {
-  const pkgPath = resolvePackageAsset("package.json");
-  const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as { version: string };
-  console.log(`insight-flow ${pkg.version}`);
-} else if (command === "migrate") {
-  const config = resolveConfig();
-  cmdMigrate(config);
-} else if (command === "prompt-build") {
-  cmdPromptBuild(opts);
-} else {
-  // All other commands need master.json
-  const config = resolveConfig();
-  const masterPath = getMasterPath(config);
+  // Commands that don't need master.json
+  if (!command || command === "ui") {
+    const config = resolveConfig();
+    const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
+    startServer(config, port);
+  } else if (command === "init") {
+    initProject(process.cwd(), !!opts.force);
+  } else if (command === "help" || command === "--help" || command === "-h") {
+    printHelp();
+  } else if (command === "version" || command === "--version" || command === "-v") {
+    const pkgPath = resolvePackageAsset("package.json");
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as { version: string };
+    console.log(`insight-flow ${pkg.version}`);
+  } else if (command === "migrate") {
+    const config = resolveConfig();
+    cmdMigrate(config);
+  } else if (command === "migrate-reviews") {
+    const config = resolveConfig();
+    cmdMigrateReviews(config);
+  } else if (command === "prompt-build") {
+    cmdPromptBuild(opts);
+  } else {
+    // All other commands need master.json
+    const config = resolveConfig();
+    const masterPath = getMasterPath(config);
 
-  if (!existsSync(masterPath)) {
-    console.error("No insight-flow project found. Run 'insight-flow init' first.");
-    process.exit(1);
-  }
-
-  const master = loadMaster(config);
-
-  switch (command) {
-    case "create":
-      cmdCreate(config, master, opts);
-      break;
-    case "status":
-      cmdStatus(config, master, opts);
-      break;
-    case "implement-start":
-      cmdImplementStart(config, master, opts);
-      break;
-    case "implement-end":
-      cmdImplementEnd(config, master, opts);
-      break;
-    case "review-start":
-      cmdReviewStart(config, master, opts);
-      break;
-    case "review-end":
-      cmdReviewEnd(config, master, opts);
-      break;
-    case "fix-start":
-      cmdFixStart(config, master, opts);
-      break;
-    case "fix-end":
-      cmdFixEnd(config, master, opts);
-      break;
-    case "push":
-      cmdPush(config, master, opts);
-      break;
-    case "mr-update":
-      cmdMrUpdate(config, master, opts);
-      break;
-    case "merge":
-      cmdMerge(config, master, opts);
-      break;
-    case "done":
-      cmdDone(config, master, opts);
-      break;
-    case "current":
-      cmdCurrent(config, master);
-      break;
-    case "list":
-      cmdList(config, master, opts);
-      break;
-    case "stats":
-      cmdStats(config, master);
-      break;
-    case "next":
-      cmdNext(config, master);
-      break;
-    case "next-review":
-      cmdNextReview(config, master);
-      break;
-    case "next-fix":
-      cmdNextFix(config, master);
-      break;
-    case "change-request":
-      cmdChangeRequest(config, master, opts);
-      break;
-    case "change-start":
-      cmdChangeStart(config, master, opts);
-      break;
-    case "change-end":
-      cmdChangeEnd(config, master, opts);
-      break;
-    case "next-change":
-      cmdNextChange(config, master);
-      break;
-    case "incident-create":
-      cmdIncidentCreate(config, master, opts);
-      break;
-    case "incident-status":
-      cmdIncidentStatus(config, master, opts);
-      break;
-    case "incident-resolve":
-      cmdIncidentResolve(config, master, opts);
-      break;
-    case "incident-list":
-      cmdIncidentList(config, master, opts);
-      break;
-    default:
-      console.error(`Unknown command: ${command}`);
-      console.error("Run 'insight-flow help' for usage.");
+    if (!existsSync(masterPath)) {
+      console.error("No insight-flow project found. Run 'insight-flow init' first.");
       process.exit(1);
+    }
+
+    const master = loadMaster(config);
+
+    switch (command) {
+      case "create":
+        cmdCreate(config, master, opts);
+        break;
+      case "status":
+        cmdStatus(config, master, opts);
+        break;
+      case "implement-start":
+        cmdImplementStart(config, master, opts);
+        break;
+      case "implement-end":
+        cmdImplementEnd(config, master, opts);
+        break;
+      case "review-start":
+        cmdReviewStart(config, master, opts);
+        break;
+      case "review-end":
+        cmdReviewEnd(config, master, opts);
+        break;
+      case "fix-start":
+        cmdFixStart(config, master, opts);
+        break;
+      case "fix-end":
+        cmdFixEnd(config, master, opts);
+        break;
+      case "push":
+        cmdPush(config, master, opts);
+        break;
+      case "mr-update":
+        cmdMrUpdate(config, master, opts);
+        break;
+      case "merge":
+        cmdMerge(config, master, opts);
+        break;
+      case "done":
+        cmdDone(config, master, opts);
+        break;
+      case "current":
+        cmdCurrent(config, master);
+        break;
+      case "show":
+        cmdShow(config, master, opts);
+        break;
+      case "list":
+        cmdList(config, master, opts);
+        break;
+      case "stats":
+        cmdStats(config, master);
+        break;
+      case "next":
+        cmdNext(config, master);
+        break;
+      case "next-review":
+        cmdNextReview(config, master);
+        break;
+      case "next-fix":
+        cmdNextFix(config, master);
+        break;
+      case "change-request":
+        cmdChangeRequest(config, master, opts);
+        break;
+      case "change-start":
+        cmdChangeStart(config, master, opts);
+        break;
+      case "change-end":
+        cmdChangeEnd(config, master, opts);
+        break;
+      case "next-change":
+        cmdNextChange(config, master);
+        break;
+      case "incident-create":
+        cmdIncidentCreate(config, master, opts);
+        break;
+      case "incident-status":
+        cmdIncidentStatus(config, master, opts);
+        break;
+      case "incident-resolve":
+        cmdIncidentResolve(config, master, opts);
+        break;
+      case "incident-list":
+        cmdIncidentList(config, master, opts);
+        break;
+      default:
+        console.error(`Unknown command: ${command}`);
+        console.error("Run 'insight-flow help' for usage.");
+        process.exit(1);
+    }
   }
-}
 } catch (err) {
   if (err instanceof TaskflowValidationError || err instanceof TaskflowProjectNotFoundError) {
     console.error(`error: ${err.message}`);

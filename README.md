@@ -56,6 +56,7 @@ insight-flow ui --port 8080  # Custom port
 ```
 
 The built-in dev server:
+
 - Serves task JSON as a REST API (`/api/work-tasks`, `/api/work-tasks/:file`)
 - Renders a Kanban board, stats, timeline, and task detail panels
 - Watches `workTasks/` for changes and live-reloads via SSE
@@ -146,13 +147,13 @@ insight-flow version          # Show version
 }
 ```
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `workDir` | `workTasks` | Directory for task data files |
-| `shardSize` | `10` | Tasks per shard file (N00-N09, N10-N19, etc.) |
-| `projectName` | from `package.json` or dir name | Used in role templates |
-| `rolesDir` | `.claude/roles` | Where role templates are copied on init |
-| `server.port` | `6006` | Dashboard dev server port |
+| Key           | Default                         | Description                                   |
+| ------------- | ------------------------------- | --------------------------------------------- |
+| `workDir`     | `workTasks`                     | Directory for task data files                 |
+| `shardSize`   | `10`                            | Tasks per shard file (N00-N09, N10-N19, etc.) |
+| `projectName` | from `package.json` or dir name | Used in role templates                        |
+| `rolesDir`    | `.claude/roles`                 | Where role templates are copied on init       |
+| `server.port` | `6006`                          | Dashboard dev server port                     |
 
 ## Data Model
 
@@ -195,15 +196,15 @@ JSON Schema files are included at `schema/task.schema.json`, `schema/shard.schem
 
 insight-flow was designed for AI-assisted development with Claude Code. The role templates (`.claude/roles/`) define specialized agent behaviors:
 
-| Role | Skill | Purpose |
-|------|-------|---------|
-| Taskmaster | `/taskmaster` | Creates well-structured task specs |
-| Implementer | `/task-implement` | Implements tasks from specs |
-| Reviewer | `/task-review` | AI code review |
-| Review Fixer | `/task-review-fix` | Fixes review feedback |
-| Git Agent | `/task-git` | Branch, commit, push, PR, merge |
-| Incident | `/task-incident` | Production incident tracking |
-| Change Request | `/task-request-changes` | Post-implementation changes |
+| Role           | Skill                   | Purpose                            |
+| -------------- | ----------------------- | ---------------------------------- |
+| Taskmaster     | `/taskmaster`           | Creates well-structured task specs |
+| Implementer    | `/task-implement`       | Implements tasks from specs        |
+| Reviewer       | `/task-review`          | AI code review                     |
+| Review Fixer   | `/task-review-fix`      | Fixes review feedback              |
+| Git Agent      | `/task-git`             | Branch, commit, push, PR, merge    |
+| Incident       | `/task-incident`        | Production incident tracking       |
+| Change Request | `/task-request-changes` | Post-implementation changes        |
 
 Each role reads from and writes to the same task JSON, creating a full audit trail visible in the dashboard.
 

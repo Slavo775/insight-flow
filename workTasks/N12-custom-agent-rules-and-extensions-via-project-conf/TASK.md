@@ -5,9 +5,11 @@
 **Created:** 2026-05-21
 
 ## Problem
+
 - The built-in agent roles (implementer, reviewer, etc.) are generic. Projects need a way to inject project-specific rules, extra constraints, or entirely custom agents without modifying the shared `TASK_*_ROLE.md` files.
 
 ## Goal
+
 1. Define a config file format (e.g., `taskflow.config.json`) where the user can declare per-agent rule extensions and custom agents.
 2. `insight-flow init` reads the config and merges user-defined rules into the generated `TASK_*_ROLE.md` (or generates new skill files for custom agents).
 3. Custom agents behave identically to built-in agents: they get a Claude Code skill (`/<agent-name>`) and are listed in CLAUDE.md.
@@ -15,7 +17,9 @@
 5. A clear documented schema for `taskflow.config.json` so users know what keys are valid.
 
 ## Scope
+
 ### In scope
+
 - `taskflow.config.json` schema: `agents` object with `extend` (per-built-in-agent extra rules) and `custom` (new agent definitions).
 - `insight-flow init` logic in `packages/taskflow/src/commands/init.ts` (or equivalent) to read the config and merge/generate role files.
 - Generation of `.claude/skills/<agent>.md` for custom agents and injection of `/<agent>` into CLAUDE.md skills list.
@@ -23,6 +27,7 @@
 - Documentation: update `packages/taskflow/README.md` with the config schema.
 
 ### Out of scope
+
 - Runtime prompt injection (changes are file-based only).
 - GUI config editor.
 - Overriding core role contracts (INPUT/OUTPUT CONTRACT sections stay intact).
@@ -62,6 +67,7 @@
    - Add `## Customizing agents` section to `packages/taskflow/README.md` with the full config schema and a worked example.
 
 ## Verification
+
 - Run `insight-flow init` with a `taskflow.config.json` present → `TASK_IMPLEMENTER_ROLE.md` contains `## Project Extensions` with the configured rules.
 - Run `insight-flow init` without config → no `## Project Extensions` section, no regression.
 - Custom agent `name: "deploy-check"` → `.claude/skills/deploy-check.md` exists and CLAUDE.md lists `/deploy-check`.
@@ -69,6 +75,7 @@
 - `npx tsc --noEmit` passes in `packages/taskflow/`.
 
 ## Notes
+
 - Built-in agent name → file mapping to maintain: `task-implement` → `TASK_IMPLEMENTER_ROLE.md`, `task-review` → `TASK_REVIEWER_ROLE.md`, `task-review-fix` → `TASK_REVIEW_FIXER_ROLE.md`, `task-git` → `TASK_GIT_ROLE.md`, `taskmaster` → `TASKMASTER_ROLE.md`.
 - Related: N09 (taskflow init), N11 (agent enforcement).
 - `AGENT_ENFORCEMENT.md` is referenced via `@AGENT_ENFORCEMENT.md` in all role files — custom agents should include the same reference.
