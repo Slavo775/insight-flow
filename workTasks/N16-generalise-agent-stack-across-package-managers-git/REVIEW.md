@@ -193,3 +193,34 @@ Round 3 logged the bare-URL issue as a canonical-text blocker at `task-git.md:51
 - Total blockers stack now at **3** across rounds 2–4: (R2) model name in `Co-Authored-By`; (R3) bare canonical compare URL; (R4) bare appendix example URL + missing PR-create example in `PR_API.md`.
 - Recommend folding R2 + R3 + R4 into a single `/task-review-fix` pass, since they all touch the same files (`.claude/commands/task-git.md`, `PR_API.md`) and share the "compose a rich URL" pattern.
 - Round-1 AI review missed this site too — the regression test only checks for forbidden technology STRINGS, not for shallow URL patterns. Add an assertion that compare URLs in canonical text + non-CLI example blocks contain `?` (query string) or are explicitly marked as "bare URL — title and body must be appended" so future bare-URL slips get caught.
+
+
+---
+
+## Round 5 — AI Re-review (after R2 + R3 + R4 fix)
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-22
+**Verdict:** APPROVED
+
+### Summary
+
+All three stacked human-review blockers (Round 2, 3, 4) addressed in commit `2e6b0ff`. Diff is targeted and clean: 3 canonical files touched, +93/−10 lines, no scope creep. 15/15 tests pass. The strip-and-extend pattern is now consistent — model identifier, canonical compare URL, appendix example URLs, and the `PR_API.md` PR-create fallback all line up.
+
+### Blocker verification
+
+- **R2 — `Co-Authored-By: Claude Opus 4.7` hardcoded** → **RESOLVED.** `.claude/commands/task-git.md:36` now reads "End with `Co-Authored-By: Claude Code <noreply@anthropic.com>` (model-agnostic — keep the trailer honest regardless of whether Opus, Sonnet, Haiku, or a future model is authoring)." Generic. Regression-guarded by the new `Claude (Opus|Sonnet|Haiku) \d` pattern in `no-technology-tight.test.mjs:60`.
+
+- **R3 — canonical CREATE PR step outputs bare compare URL** → **RESOLVED.** `task-git.md:51` now reads "compose a host-appropriate prefill URL containing the task title and the PR body as URL-encoded query parameters so the user lands on a populated create-PR form (not a blank one). The agent already has both pieces … URL-encode via `node -e 'process.stdout.write(encodeURIComponent(...))'`." Canonical text stays host-agnostic; per-host syntax delegated to the Examples appendix + `@PR_API.md`. Good shape — matches N16's strip-and-extend pattern.
+
+- **R4 — appendix bare URL + `PR_API.md` missing PR-create fallback** → **RESOLVED.** `task-git.md` appendix replaces the single bare-URL block with three labelled prefill examples (GitHub `?expand=1&title=&body=`, GitLab `?merge_request[…]=…`, Bitbucket bare-with-explanation). `PR_API.md` gained a parallel "no host CLI — PR creation via prefill URL" example block alongside the existing review-fallback. Verified: `expand=1` appears 1× in task-git.md + 2× in PR_API.md; `merge_request[` appears 2× in task-git.md and 2× in PR_API.md. Per-host coverage is consistent across both files.
+
+### Non-blocking verification
+
+The 6 non-blocking notes from Round 1 are now mostly addressed (commit `18bd99c` covered 1, 2, 3, 4, 5, and 6 was a doc-only suggestion that isn't blocking). The new Round-5 follow-up note from R4 (extend the regression test) shipped in this fix commit too.
+
+### Notes
+
+- Total review history on N16: 5 rounds (1 AI, 4 human/AI mix). The strip-and-extend approach surfaced 3 distinct technology-tight axes (package manager / git host / language → N14 + N15 + N16; model identifier → R2; compare URL prefill → R3/R4). Each got a regression test pattern. Future generalisation work should be cheaper because the test grows the forbidden-pattern list, not the per-file scrub logic.
+- The deferred items from Round 1 that were addressed in `18bd99c`: `init --examples`, README pointer, positive-shape init test, marker-window comment. All shipped before R2/R3/R4 surfaced.
+- Recommend: human can take another pass (round 6 if needed), or merge. Either way the diff is in good shape. PR #10 is at `2e6b0ff` on `feat/N16-...`.
