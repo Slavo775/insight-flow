@@ -31,34 +31,37 @@ The blocks below show how a project on each common host could configure its `age
 <!-- example: GitHub REST API + gh CLI -->
 GitHub (REST API + `gh`):
 
+Token handling: prefer `gh auth token` (reads from gh's credential store) over `cat ~/.github-token` — putting the token directly in a command via `$(cat …)` exposes it briefly in process listings (`ps`, `/proc/<pid>/cmdline`). The examples below use `gh auth token` for safety.
+
 ```bash
 # Fetch PR diff
-curl -s -H "Authorization: token $(cat ~/.github-token)" \
+TOKEN=$(gh auth token)
+curl -s -H "Authorization: token $TOKEN" \
   -H "Accept: application/vnd.github.v3.diff" \
   https://api.github.com/repos/<owner>/<repo>/pulls/<PR_NUMBER>
 
 # Fetch reviews + inline comments
-curl -s -H "Authorization: token $(cat ~/.github-token)" \
+curl -s -H "Authorization: token $TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/repos/<owner>/<repo>/pulls/<PR_NUMBER>/reviews
-curl -s -H "Authorization: token $(cat ~/.github-token)" \
+curl -s -H "Authorization: token $TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/repos/<owner>/<repo>/pulls/<PR_NUMBER>/comments
 
 # Post a review (event ∈ APPROVE | REQUEST_CHANGES | COMMENT)
-curl -s -X POST -H "Authorization: token $(cat ~/.github-token)" \
+curl -s -X POST -H "Authorization: token $TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/repos/<owner>/<repo>/pulls/<PR_NUMBER>/reviews \
   -d '{"event":"REQUEST_CHANGES","body":"..."}'
 
 # Reply to a review comment
-curl -s -X POST -H "Authorization: token $(cat ~/.github-token)" \
+curl -s -X POST -H "Authorization: token $TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/repos/<owner>/<repo>/pulls/<PR_NUMBER>/comments/<COMMENT_ID>/replies \
   -d '{"body":"Fixed in <commit>."}'
 ```
 
-The `gh` CLI cannot REQUEST_CHANGES on your own PR; use the REST API or fall back to a comment via `<the-cli> pr comment`.
+The `gh` CLI cannot REQUEST_CHANGES on your own PR; use the REST API or fall back to a comment via `<the-cli> pr comment`. If `gh` is not installed and you must read a token from disk, prefer `curl --netrc-file` over command-substitution to keep the secret out of the process table.
 
 <!-- example: GitLab REST API + glab CLI -->
 GitLab (REST API + `glab`):

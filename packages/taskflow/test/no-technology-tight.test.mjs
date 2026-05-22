@@ -61,6 +61,13 @@ function stripExampleBlocks(content) {
   // Drop any fenced code block that is preceded (within 8 lines) by a marker
   // line: `<!-- example: ... -->` or a paragraph/heading starting with
   // `Example:` (case-insensitive). Anything inside such a block is scrubbed.
+  //
+  // Marker → fence distance is capped at 8 lines. If a future doc places the
+  // marker further away, the test will *false-alarm* (flag the block as
+  // non-example) rather than miss a violation — that's the safe direction.
+  // If you hit a false alarm, move the marker closer to its fence rather
+  // than bumping this constant; markers should sit immediately above the
+  // block they label.
   const lines = content.split("\n");
   const out = [];
   let inBlock = false;
