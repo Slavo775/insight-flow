@@ -60,6 +60,8 @@ Follow-up answers:
 
 Server-side check confirmed the WS handshake itself works (snapshot delivered, frames over LAN IP fine), so this is **client/protocol drift after handshake**, not a routing or firewall problem.
 
+**Desktop Chrome confirms the human's suspicion is correct.** Reproduced by the human at `http://localhost:6006`: the live-dot flashes **green briefly, then turns yellow**, then DevTools Console fills with `WebSocket connection to 'ws://localhost:6006/ws' failed:` in a tight loop (screenshot attached: stack of ~10 identical errors at `(index):433` which is the `connectWS()` site in the bundled dashboard JS). So the bug is **not iOS-specific** — desktop Chrome hits the same WS lifecycle defect, just harder (every reconnect attempt fails outright rather than reconnecting briefly and dying again). A synthetic Node WS client mimicking Chrome's headers stays connected past 30 s against the same server, so the server is not killing connections from its side — something is going wrong specifically with the reconnect cycle in real browsers.
+
 ### Blockers
 
 1. **No WebSocket keep-alive ping from the server — iOS Safari kills the connection within ~30 s of idle, the dashboard stays yellow forever.**
@@ -74,9 +76,13 @@ Server-side check confirmed the WS handshake itself works (snapshot delivered, f
      });
      ```
      Gate on a `hasSyncedOnce` flag to skip the redundant fetch on the very first open (where the initial page load already did it).
-3. **Verify desktop is or isn't affected by the same bugs.**
-   - **Why**: human said *"I bet is same for pc"*. The earlier "live smoke" only proved the server emits frames; it did not prove a real browser repaints on receipt. macOS may simply be less aggressive about idling WS than iOS, masking the heartbeat bug, but blocker 2 (no re-fetch on reconnect) still applies on every reconnect.
-   - **Fix**: as part of verifying blockers 1 + 2, open Chrome on the same desktop, leave the dashboard open for 2 minutes with no activity, then mutate a task via CLI and confirm the Kanban repaints. If it does not, gather DevTools console + Network → WS frames and reopen this blocker with the captured evidence.
+3. **Real-browser WS reconnect is broken — desktop Chrome also fails (confirmed).**
+   - **Why**: the human reproduced on desktop Chrome at `http://localhost:6006`. Dot turns green for a moment, then yellow, then `WebSocket connection to 'ws://localhost:6006/ws' failed:` repeats in DevTools Console indefinitely. A Node client mimicking Chrome's headers (Origin, User-Agent, Sec-WebSocket-Extensions, etc.) holds the same connection past 30 s without issue, so the server is honouring real-browser handshakes — the failure is on **subsequent reconnects** triggered by the dashboard's `setTimeout(connectWS, 3000)` loop. Possible root causes to investigate during fix:
+     - The dashboard's `ws.onerror = function() { ws.close(); }` (`dashboard.ts:476`) may interact badly with the reconnect timer when `onerror` and `onclose` both fire — could leave a stale `ws` reference or trigger redundant reconnects on top of one already-pending connection.
+     - The server's WS frame parser in `ws.ts` calls `socket.destroy()` on a client CLOSE frame instead of replying with a CLOSE frame; an abrupt teardown can leave Chrome's WS state machine flagging an error even though we intended a clean close. RFC 6455 §5.5.1 requires the server to reply with a CLOSE before destroying the socket.
+     - No `error` handler on the upgraded `socket` itself in `ws.ts` — if a TCP-level error fires post-upgrade it gets bubbled to Node's uncaught handler.
+     - Possibly: macOS firewall / NAT path is dropping idle TCP at ~30 s on real-browser sockets (different connection-tracking than the synthetic Node client). Heartbeat ping (blocker 1) would mask this regardless of which sub-cause is real.
+   - **Fix**: address blockers 1 + 2 first (heartbeat + re-fetch on reconnect), then with the dashboard left idle in desktop Chrome for 2 minutes and a CLI-triggered mutation, confirm the Kanban repaints and DevTools Console is silent. Also: server should reply with a proper CLOSE frame (`0x88` + 2-byte status code) before `socket.destroy()` in `ws.ts` `processBuffer()`'s `opcode === 0x8` branch.
 
 ### Non-blocking
 
