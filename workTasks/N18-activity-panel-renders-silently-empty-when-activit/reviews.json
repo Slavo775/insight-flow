@@ -17,7 +17,18 @@
       "comment": "install-activity-hook does not respect activityEngine.enabled=false; init does. Make the subcommand match init's guard before merge.",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-22T21:22:17.739Z",
+        "endedAt": "2026-05-22T21:23:41.512Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/commands/install-activity-hook.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/test/activity-hook.test.mjs"
+        ],
+        "comment": "install-activity-hook now refuses when activityEngine.enabled=false (matching init's guard); --force escape hatch added; two new tests cover refusal and force-override.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

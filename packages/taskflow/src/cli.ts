@@ -105,7 +105,7 @@ function printHelp(): void {
     migrate                               Migrate from legacy tracker.json
     migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
     prompt-build [--config path] [--apply] Print or apply enforcement block from taskflow.prompt.json
-    install-activity-hook                 Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent)
+    install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
 
     help                                  Show this help
     version                               Show version
@@ -140,7 +140,7 @@ try {
     cmdPromptBuild(opts);
   } else if (command === "install-activity-hook") {
     const config = resolveConfig();
-    cmdInstallActivityHook(config);
+    cmdInstallActivityHook(config, opts);
   } else {
     // All other commands need master.json
     const config = resolveConfig();

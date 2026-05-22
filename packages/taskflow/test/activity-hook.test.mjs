@@ -26,8 +26,9 @@ assert.ok(existsSync(helperPath), "dist/cli.js must exist (run build first)");
 // a child_process invocation of the CLI binary inside a tmp project.
 import { execFileSync } from "node:child_process";
 
-function tmpProject() {
+function tmpProject(opts = {}) {
   const dir = mkdtempSync(join(tmpdir(), "taskflow-hook-test-"));
+  const enabled = opts.activityEnabled !== false;
   // Minimal taskflow.config.json so resolveConfig() succeeds.
   writeFileSync(
     resolve(dir, "taskflow.config.json"),
@@ -38,7 +39,7 @@ function tmpProject() {
         projectName: "hook-test",
         rolesDir: ".claude/roles",
         server: { port: 6006 },
-        activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
+        activityEngine: { enabled, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
       },
       null,
       2,
@@ -54,6 +55,19 @@ function tmpProject() {
 
 function runCli(dir, args) {
   return execFileSync("node", [helperPath, ...args], { cwd: dir, encoding: "utf-8" });
+}
+
+function runCliExpectFail(dir, args) {
+  try {
+    execFileSync("node", [helperPath, ...args], { cwd: dir, encoding: "utf-8", stdio: "pipe" });
+    return { code: 0, stdout: "", stderr: "" };
+  } catch (err) {
+    return {
+      code: err.status,
+      stdout: err.stdout?.toString() ?? "",
+      stderr: err.stderr?.toString() ?? "",
+    };
+  }
 }
 
 test("install-activity-hook installs hook and registers settings on a fresh project", () => {
@@ -85,6 +99,37 @@ test("install-activity-hook is idempotent — second run is a no-op", () => {
     const parsed = JSON.parse(second.trim());
     assert.equal(parsed.action, "install-activity-hook");
     assert.equal(parsed.result, "already-installed");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("install-activity-hook refuses when activityEngine.enabled is false", () => {
+  const dir = tmpProject({ activityEnabled: false });
+  try {
+    const r = runCliExpectFail(dir, ["install-activity-hook"]);
+    assert.notEqual(r.code, 0, "command must exit non-zero");
+    assert.match(r.stderr, /activityEngine\.enabled: false/, "must explain why it refused");
+    assert.ok(
+      !existsSync(resolve(dir, ".claude/hooks/taskflow-activity.sh")),
+      "must not create hook script when refused",
+    );
+    assert.ok(
+      !existsSync(resolve(dir, ".claude/settings.local.json")),
+      "must not create settings file when refused",
+    );
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("install-activity-hook --force overrides activityEngine.enabled=false", () => {
+  const dir = tmpProject({ activityEnabled: false });
+  try {
+    const out = runCli(dir, ["install-activity-hook", "--force"]);
+    const parsed = JSON.parse(out.trim());
+    assert.equal(parsed.result, "installed");
+    assert.ok(existsSync(resolve(dir, ".claude/hooks/taskflow-activity.sh")));
   } finally {
     rmSync(dir, { recursive: true });
   }
