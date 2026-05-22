@@ -27,6 +27,15 @@
       "type": "human",
       "by": "task-human-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-22T19:20:15.945Z",
+      "endedAt": "2026-05-22T19:21:11.715Z",
+      "verdict": "fix-needed",
+      "comment": "Round 4 human: appendix no-CLI example at task-git.md:128 also bare URL — escalates Round-3 non-blocking #1 to blocker. Plus: PR_API.md no-CLI example only covers review-fallback, missing PR-create fallback. 3 blockers now stacked (R2 trailer + R3 canonical URL + R4 appendix URL); fold into one fix commit.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

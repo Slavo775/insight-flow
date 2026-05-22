@@ -147,3 +147,49 @@ The current bare compare URL (`compare/main...<branch>`) only takes the user to 
 
 - This issue persists from N14's "trim dead branch" pass that originally removed the rich compare-URL block from `task-git.md`. The bare-URL version reintroduced in N16's fallback is arguably worse than what existed before N14 — bringing back the rich URL (host-agnostic in canonical text + per-host examples) is the right resolution.
 - Combined with Round 2's `Co-Authored-By` blocker, N16 now has **2 human-flagged blockers** + the 6 round-1 non-blockings (5 of which were fixed in commit `18bd99c`). Recommend fixing both Round-2 and Round-3 blockers in a single follow-up commit, then opening Round 4 for re-approval.
+
+
+---
+
+## Round 4 — Human Review (escalation of Round 3 non-blocking)
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-22
+**Verdict:** FIX NEEDED
+
+The human's feedback verbatim, quoting the `no host CLI installed` example in `.claude/commands/task-git.md:124–131`:
+
+> ```bash
+> echo "https://<host>/<owner>/<repo>/compare/main...$(git branch --show-current)"
+> # Then ask the user to paste the created PR URL back:
+> insi same here long url
+
+(The trailing `insi` appears to be an interrupted "insight-flow…" — the meaning is clear from context: the same long-URL-with-title-and-body fix that Round 3 flagged for the canonical workflow at line 51 also needs to apply to the **Examples appendix's "no host CLI" block** at line 128.)
+
+### Summary
+
+Round 3 logged the bare-URL issue as a canonical-text blocker at `task-git.md:51` AND noted (non-blocking #1) that the same pattern repeats in the Examples appendix at line 128 and in `PR_API.md`. Round 4 escalates that note to a blocker: the appendix example is what users actually see when they're configuring their `agents.extend.task-git`, so a bare URL there teaches them the wrong pattern.
+
+### Blockers
+
+- **`.claude/commands/task-git.md:124–131`** (no host CLI example in the Examples appendix) prints a bare compare URL. **Fix:** compose the same rich prefill URL the canonical text will switch to in the Round-3 fix. Use a generic placeholder syntax in the appendix line that's host-agnostic-but-realistic:
+  ```bash
+  TITLE_ENCODED=$(node -e "process.stdout.write(encodeURIComponent('<type>(scope): <task title>'))")
+  BODY_ENCODED=$(node -e "process.stdout.write(encodeURIComponent('## Summary\n- ...\n\n## Task\n\`<task-id>\` — <title>'))")
+  # GitHub prefill:
+  echo "https://github.com/<owner>/<repo>/compare/<base>...$(git branch --show-current)?expand=1&title=${TITLE_ENCODED}&body=${BODY_ENCODED}"
+  ```
+  Then `insight-flow mr-update --id <ID> --url "<pasted-pr-url>"` after the user opens and submits.
+
+- **`PR_API.md`'s "no host CLI" example block** currently focuses only on the review-comment fallback (writes REVIEW.md). For symmetry with `task-git.md`, **add a parallel "no host CLI for PR creation" example** showing the rich prefill URL pattern (with `node -e encodeURIComponent` or `jq -sRr @uri`). Right now PR_API.md gives no help to users who need to create a PR without a host CLI — only to users who need to post a review without one.
+
+### Non-blocking
+
+- The Round-3 fix and the Round-4 fix touch the same lines + the same example pattern. Land them in **one commit** rather than two — the canonical step (Round 3 line 51) and the appendix example (Round 4 line 128) should change together so the canonical instruction and the illustration stay in lockstep.
+- Document the URL-encoder choice in one place (`AGENT_PROTOCOL.md` or `PR_API.md` orientation paragraph). Right now the rich-URL fix is going into two files; both should reference the same encoding helper rather than each agent re-deriving it.
+
+### Notes
+
+- Total blockers stack now at **3** across rounds 2–4: (R2) model name in `Co-Authored-By`; (R3) bare canonical compare URL; (R4) bare appendix example URL + missing PR-create example in `PR_API.md`.
+- Recommend folding R2 + R3 + R4 into a single `/task-review-fix` pass, since they all touch the same files (`.claude/commands/task-git.md`, `PR_API.md`) and share the "compose a rich URL" pattern.
+- Round-1 AI review missed this site too — the regression test only checks for forbidden technology STRINGS, not for shallow URL patterns. Add an assertion that compare URLs in canonical text + non-CLI example blocks contain `?` (query string) or are explicitly marked as "bare URL — title and body must be appended" so future bare-URL slips get caught.
