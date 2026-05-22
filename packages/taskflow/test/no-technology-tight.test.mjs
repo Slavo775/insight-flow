@@ -33,6 +33,7 @@ const FILES = [
 
 // Forbidden anywhere outside an example block.
 const FORBIDDEN = [
+  // Package managers + language toolchains.
   /\bnpx\b/,
   /\bnpm run\b/,
   /\bpnpm \b/,
@@ -40,16 +41,23 @@ const FORBIDDEN = [
   /\bbun \b/,
   /\btsc\b/,
   /\btsconfig\b/,
+  // Git hosts + their CLIs.
   /\bgh pr\b/,
   /\bgh --\b/,
   /\bglab \b/,
   /github\.com/,
   /gitlab\.com/,
+  // Language manifests.
   /pyproject/i,
   /requirements\.txt/,
   /pom\.xml/,
   /\bgo\.mod\b/,
   /Cargo\.toml/,
+  // Specific Claude model identifiers — added in N16 round 2.
+  // Canonical agent prompts must use a model-agnostic trailer like
+  // `Co-Authored-By: Claude Code <noreply@anthropic.com>` so the
+  // attribution stays honest under Opus, Sonnet, Haiku, or future models.
+  /\bClaude (Opus|Sonnet|Haiku) \d/,
 ];
 
 // Substrings we explicitly allow even in canonical prose. They refer to

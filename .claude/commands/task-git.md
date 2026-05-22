@@ -33,7 +33,7 @@ WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit
 4. **Stage changes** — `git status` to see what changed. Stage relevant files (`git add <files>`). Always include `workTasks/master.json` and any changed `workTasks/tasks-*.json` shard files. Never stage `.env`, credentials, or unrelated files.
 5. **Commit** — write a conventional commit message based on the diff:
    - Scope: derive from changed files (e.g., `web`, `api`, `agent`, `db`). For task docs/tracker only, use scope `tasks`.
-   - Message: concise, describes the "why". End with `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>`.
+   - Message: concise, describes the "why". End with `Co-Authored-By: Claude Code <noreply@anthropic.com>` (model-agnostic — keep the trailer honest regardless of whether Opus, Sonnet, Haiku, or a future model is authoring).
    - If hooks fail, diagnose and fix, then retry.
 6. **Push** — `git push -u origin HEAD` (sets upstream on first push).
 7. **Update tracker** — run:
@@ -48,7 +48,7 @@ WORKFLOW: CREATE PULL REQUEST (when "create MR", "create PR", "open pull request
 
 1. **Get task** — `insight-flow show --id Nxx --summary` for branch + title.
 2. **Ensure pushed** — if no pushes yet, run the PUSH workflow first.
-3. **Create PR** — invoke the command defined in `taskflow.config.json.agents.extend.task-git` for your project's git host. If no command is configured, print the host's compare URL (e.g. `https://<host>/<owner>/<repo>/compare/main...<branch>`) and prompt the user to open the PR manually. See the Examples appendix at the bottom of this file for common per-host invocations.
+3. **Create PR** — invoke the command defined in `taskflow.config.json.agents.extend.task-git` for your project's git host. If no command is configured, **compose a host-appropriate prefill URL** containing the task title and the PR body as URL-encoded query parameters so the user lands on a populated create-PR form (not a blank one). The agent already has both pieces — the task title and the commit message bullets it just produced — so no user prompting is required. URL-encode via `node -e "process.stdout.write(encodeURIComponent(...))"` (insight-flow's canonical encoder; works without extra dependencies). Print the composed URL and ask the user to open it, submit, and paste back the created PR URL for `mr-update`. See the Examples appendix below + `@PR_API.md` for per-host prefill syntax.
 4. **Record URL** in tracker:
    ```
    insight-flow mr-update --id <ID> --url "<pr-url>"
@@ -121,12 +121,43 @@ GitLab (`glab` CLI installed):
 glab mr create --title "<type>(scope): <task title>" --description-file /tmp/pr-body.md
 ```
 
-<!-- example: no host CLI installed -->
-No host CLI (any host — print compare URL, user opens manually):
+<!-- example: GitHub via prefill URL (no host CLI) -->
+GitHub (no `gh` installed — compose a prefill URL so the user opens a populated form):
 
 ```bash
-echo "https://<host>/<owner>/<repo>/compare/main...$(git branch --show-current)"
-# Then ask the user to paste the created PR URL back:
+TITLE="<type>(scope): <task title>"
+BODY="$(cat <<'EOF'
+## Summary
+- <bullet points>
+
+## Task
+<task-id> — <title>
+EOF
+)"
+TITLE_ENCODED=$(node -e "process.stdout.write(encodeURIComponent(process.argv[1]))" "$TITLE")
+BODY_ENCODED=$(node -e "process.stdout.write(encodeURIComponent(process.argv[1]))" "$BODY")
+echo "https://github.com/<owner>/<repo>/compare/main...$(git branch --show-current)?expand=1&title=${TITLE_ENCODED}&body=${BODY_ENCODED}"
+# User opens the URL — the form is pre-filled. They submit and paste the resulting PR URL back:
+insight-flow mr-update --id <ID> --url "<pasted-pr-url>"
+```
+
+<!-- example: GitLab via prefill URL (no host CLI) -->
+GitLab (no `glab` installed — same idea, different query-param shape):
+
+```bash
+TITLE_ENCODED=$(node -e "process.stdout.write(encodeURIComponent('<type>(scope): <task title>'))")
+BODY_ENCODED=$(node -e "process.stdout.write(encodeURIComponent('## Summary\n- ...'))")
+BRANCH=$(git branch --show-current)
+echo "https://gitlab.com/<owner>/<repo>/-/merge_requests/new?merge_request[source_branch]=${BRANCH}&merge_request[target_branch]=main&merge_request[title]=${TITLE_ENCODED}&merge_request[description]=${BODY_ENCODED}"
+insight-flow mr-update --id <ID> --url "<pasted-pr-url>"
+```
+
+<!-- example: Bitbucket / other host with limited prefill -->
+Bitbucket (and any host with limited prefill support — fall back to a bare URL and prompt for title/body manually):
+
+```bash
+echo "https://bitbucket.org/<owner>/<repo>/pull-requests/new?source=$(git branch --show-current)&dest=main&t=1"
+# The user will need to enter title + body manually on Bitbucket's form.
 insight-flow mr-update --id <ID> --url "<pasted-pr-url>"
 ```
 

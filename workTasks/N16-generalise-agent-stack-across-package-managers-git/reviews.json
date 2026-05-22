@@ -35,7 +35,18 @@
       "comment": "Round 4 human: appendix no-CLI example at task-git.md:128 also bare URL — escalates Round-3 non-blocking #1 to blocker. Plus: PR_API.md no-CLI example only covers review-fallback, missing PR-create fallback. 3 blockers now stacked (R2 trailer + R3 canonical URL + R4 appendix URL); fold into one fix commit.",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-22T19:29:57.105Z",
+        "endedAt": "2026-05-22T19:31:34.040Z",
+        "status": "fixed",
+        "filesChanged": [
+          ".claude/commands/task-git.md",
+          "PR_API.md",
+          "packages/taskflow/test/no-technology-tight.test.mjs"
+        ],
+        "comment": "Fixed 3 stacked human-review blockers: (R2) Co-Authored-By trailer is now generic 'Claude Code' — model-agnostic; (R3) canonical CREATE PR step composes a host-appropriate prefill URL with URL-encoded title + body instead of bare compare URL; (R4) Examples appendix expanded with GitHub/GitLab/Bitbucket prefill examples + PR_API.md gained parallel PR-create fallback example. Non-blocking: regression test extended with /Claude (Opus|Sonnet|Haiku) \\d/ pattern to guard the model-identifier axis. 15/15 tests pass.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

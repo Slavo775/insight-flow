@@ -81,14 +81,37 @@ curl -s -X POST -H "PRIVATE-TOKEN: $(cat ~/.gitlab-token)" \
   "https://gitlab.com/api/v4/projects/<encoded-path>/merge_requests/<MR_IID>/notes"
 ```
 
-<!-- example: Bitbucket / no host CLI -->
-Bitbucket or no host CLI installed — write `REVIEW.md` only:
+<!-- example: Bitbucket / no host CLI — review fallback -->
+Bitbucket or no host CLI installed (review fallback): write `REVIEW.md` only:
 
 ```bash
 # After running insight-flow review-end, REVIEW.md is on disk.
 # Print the path and ask the user to paste it into the host's review UI.
 echo "Review written to workTasks/<task-folder>/REVIEW.md — please paste into the PR review surface manually."
 ```
+
+<!-- example: no host CLI — PR creation via prefill URL -->
+PR creation fallback (no host CLI — compose a prefill URL so the user lands on a populated create-PR form, not a blank one):
+
+```bash
+TITLE_ENCODED=$(node -e "process.stdout.write(encodeURIComponent('<type>(scope): <task title>'))")
+BODY_ENCODED=$(node -e "process.stdout.write(encodeURIComponent('## Summary\n- ...\n\n## Task\n<task-id> — <title>'))")
+BRANCH=$(git branch --show-current)
+
+# GitHub prefill (?expand=1&title=…&body=…):
+echo "https://github.com/<owner>/<repo>/compare/main...${BRANCH}?expand=1&title=${TITLE_ENCODED}&body=${BODY_ENCODED}"
+
+# GitLab prefill (?merge_request[title]=…&merge_request[description]=…):
+echo "https://gitlab.com/<owner>/<repo>/-/merge_requests/new?merge_request[source_branch]=${BRANCH}&merge_request[target_branch]=main&merge_request[title]=${TITLE_ENCODED}&merge_request[description]=${BODY_ENCODED}"
+
+# Bitbucket has limited prefill — bare URL, user fills title/body manually:
+echo "https://bitbucket.org/<owner>/<repo>/pull-requests/new?source=${BRANCH}&dest=main&t=1"
+
+# After the user opens, submits, and pastes the resulting PR URL:
+# insight-flow mr-update --id <ID> --url "<pasted-pr-url>"
+```
+
+URL-encoder: `node -e "process.stdout.write(encodeURIComponent(...))"` is insight-flow's canonical encoder (no extra dependencies needed). Alternatives: `jq -sRr @uri` for projects with `jq` installed, or `python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))"` for Python projects.
 
 ---
 
