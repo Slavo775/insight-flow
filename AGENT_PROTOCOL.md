@@ -11,7 +11,7 @@ STANDARD WORKFLOW (apply unless the role explicitly overrides a step)
 3. **Read context** — `insight-flow show --id Nxx --summary --spec` returns lean state + TASK.md + CHECKLIST.md content inline (single Bash call beats two `Read` calls). For REVIEW.md / source files, use `Read` with offset/limit.
 4. **Plan** — follow the "Implementation plan" / role workflow in dependency order. No creative scope expansion.
 5. **Execute** — apply the role's actual work (write code, post review, record verdict, etc.). Match existing code patterns.
-6. **Quality gates** — run `npx tsc --noEmit` (if TS in scope), `npm run lint` (if a lint config exists), and the relevant test command. Fix in-scope failures and re-run. Report (don't fix) out-of-scope failures.
+6. **Quality gates** — run the project's typecheck, lint, and test commands as defined in `taskflow.config.json.agents.extend.<role>` arrays (per N12's extension mechanism) or your project README. insight-flow ships no defaults — if no commands are defined for your stack, skip the step and note it in the report. Fix in-scope failures and re-run. Report (don't fix) out-of-scope failures.
 7. **Mark completed** — run the role's lifecycle-end CLI (`implement-end`, `review-end`, `fix-end`, `change-end`, `incident-resolve`).
 8. **Push** — call `/task-git` to branch (if needed), commit, push, and (optionally) open the PR.
 9. **Report** — short, factual: files touched, gate results, any checklist items not met and why.
@@ -29,10 +29,10 @@ UNIVERSAL NEVER
 
 ---
 
-GIT / GH TOOL RULE
+GIT RULE
 
-- `gh pr create` for PR creation.
-- `git` for branch / commit / push.
+- `git` for branch / commit / push (universal).
+- PR creation: use the command defined in `taskflow.config.json.agents.extend.task-git` for your project. insight-flow does not assume a git-host CLI; if none is configured the agent should print the host's compare URL and prompt the user. See `@PR_API.md` for examples by host.
 - Branch naming: `<type>/<task-id>-<slug>`.
 - Incident branches: `fix/incident/<task-id>-<slug>`.
 - Verify all CHECKLIST.md items before marking implemented / done.
@@ -65,3 +65,23 @@ QUALITY BAR (applies to roles that produce code or specs)
 ---
 
 If a procedural step here conflicts with `@AGENT_ENFORCEMENT.md`, both files agree: state mutations through CLI, hooks not skipped, etc. `AGENT_ENFORCEMENT.md` is the strict-enforcement reference; this file is the workflow reference.
+
+---
+
+EXTENDING WITH PROJECT-SPECIFIC COMMANDS
+
+insight-flow ships **zero technology assumptions** — no package-manager, language-toolchain, or git-host commands appear in the canonical role docs. Project-specific commands (typecheck, lint, test, PR-create, comment-fetch, etc.) belong in `taskflow.config.json.agents.extend.<agent>` string arrays. Each string in an array is appended to the role's loaded prompt at runtime. Example shape (your project supplies the strings; insight-flow ships none):
+
+```jsonc
+// taskflow.config.json
+{
+  "agents": {
+    "extend": {
+      "task-implement": ["Run <your-typecheck-command> before marking implemented."],
+      "task-git":       ["For PR creation, run <your-pr-create-command>."]
+    }
+  }
+}
+```
+
+See `CLAUDE.md` for worked examples (TypeScript, Python, Go) shown as user-supplied content, not shipped defaults.

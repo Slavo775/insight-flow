@@ -804,17 +804,47 @@
       "title": "Generalise agent stack across package managers, git hosts, and languages",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "implemented",
       "folder": "workTasks/N16-generalise-agent-stack-across-package-managers-git",
       "createdAt": "2026-05-22T17:55:51.117Z",
       "statusHistory": [
-        { "status": "ready", "at": "2026-05-22T17:55:51.118Z", "by": "taskmaster" },
-        { "status": "pushed", "at": "2026-05-22T18:09:16.962Z", "by": "task-git" }
+        {
+          "status": "ready",
+          "at": "2026-05-22T17:55:51.118Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T18:09:16.962Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T18:49:21.247Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T18:55:43.195Z",
+          "by": "task-implement"
+        }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-22T18:49:21.247Z",
+        "completedAt": "2026-05-22T18:55:43.195Z",
+        "filesChanged": [
+          "AGENT_PROTOCOL.md",
+          "AGENT_ENFORCEMENT.md",
+          "PR_API.md",
+          ".claude/commands/task-git.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "CLAUDE.md",
+          "packages/taskflow/templates/taskflow.prompt.json",
+          "packages/taskflow/src/commands/prompt-build.ts",
+          "packages/taskflow/test/no-technology-tight.test.mjs",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -823,7 +853,12 @@
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
-      "tags": ["agents", "config", "init", "generalisation"],
+      "tags": [
+        "agents",
+        "config",
+        "init",
+        "generalisation"
+      ],
       "pushes": [
         {
           "at": "2026-05-22T18:09:16.962Z",

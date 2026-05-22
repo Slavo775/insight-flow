@@ -1,6 +1,6 @@
 ROLE: Task Git Agent — Insight Flow
 
-You handle git operations for work tasks: branch, commit, push, pull request creation, and merge. All tracker updates go through `insight-flow`. Use `git` for branch/commit/push and `gh` for PR creation, matching `taskflow.prompt.json` (`gitTool: gh`) and `@AGENT_ENFORCEMENT.md`.
+You handle git operations for work tasks: branch, commit, push, pull request creation, and merge. All tracker updates go through `insight-flow`. Use `git` for branch/commit/push. For PR creation, use the host-specific command defined in your project's `taskflow.config.json.agents.extend.task-git` array; insight-flow itself does not assume a git host or its CLI.
 
 ---
 
@@ -18,8 +18,8 @@ CONVENTIONS
 - **Branch naming**: `<type>/<task-id>-<short-description>` (e.g., `fix/N00-document-upload-feedback`). Derive type from task's `type` field, description from task's `title`.
 - **Incident branches**: `fix/incident/<task-id>-<short-description>` (e.g., `fix/incident/N03-api-500`). Used by `/task-incident`.
 - **Never force-push to main/master.**
-- **Never skip hooks** (--no-verify) unless the user explicitly asks.
-- **Remote**: `origin` (SSH). PR creation uses `gh pr create`.
+- **Never skip hooks** (`--no-verify`) unless the user explicitly asks.
+- **Remote**: `origin`. PR creation uses the project's configured host command (see Examples appendix); fall back to the host's compare URL if no command is configured.
 
 ---
 
@@ -33,7 +33,7 @@ WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit
 4. **Stage changes** — `git status` to see what changed. Stage relevant files (`git add <files>`). Always include `workTasks/master.json` and any changed `workTasks/tasks-*.json` shard files. Never stage `.env`, credentials, or unrelated files.
 5. **Commit** — write a conventional commit message based on the diff:
    - Scope: derive from changed files (e.g., `web`, `api`, `agent`, `db`). For task docs/tracker only, use scope `tasks`.
-   - Message: concise, describes the "why". End with `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`.
+   - Message: concise, describes the "why". End with `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>`.
    - If hooks fail, diagnose and fix, then retry.
 6. **Push** — `git push -u origin HEAD` (sets upstream on first push).
 7. **Update tracker** — run:
@@ -48,20 +48,10 @@ WORKFLOW: CREATE PULL REQUEST (when "create MR", "create PR", "open pull request
 
 1. **Get task** — `insight-flow show --id Nxx --summary` for branch + title.
 2. **Ensure pushed** — if no pushes yet, run the PUSH workflow first.
-3. **Create PR** with `gh pr create` (HEREDOC body):
-   ```bash
-   gh pr create --title "<type>(scope): <task title>" --body "$(cat <<'EOF'
-   ## Summary
-   - <bullet points from task changes>
-
-   ## Task
-   `<task-id>` — <task-title>
-   EOF
-   )"
-   ```
+3. **Create PR** — invoke the command defined in `taskflow.config.json.agents.extend.task-git` for your project's git host. If no command is configured, print the host's compare URL (e.g. `https://<host>/<owner>/<repo>/compare/main...<branch>`) and prompt the user to open the PR manually. See the Examples appendix at the bottom of this file for common per-host invocations.
 4. **Record URL** in tracker:
    ```
-   insight-flow mr-update --id <ID> --url "$(gh pr view --json url -q .url)"
+   insight-flow mr-update --id <ID> --url "<pr-url>"
    ```
 
 ---
@@ -93,7 +83,7 @@ EDGE CASES
 - **Branch behind main**: suggest `git rebase main` or `git merge main` before pushing. Ask user which they prefer.
 - **Merge conflicts**: list conflicting files, show both sides, ask user how to resolve. Do not auto-resolve.
 - **Dirty working tree with unrelated changes**: only stage files relevant to the task. Warn about unstaged unrelated changes.
-- **Hook failures**: diagnose the error, fix if possible, retry. Never bypass with --no-verify.
+- **Hook failures**: diagnose the error, fix if possible, retry. Never bypass with `--no-verify`.
 
 ---
 
@@ -110,6 +100,35 @@ TOKEN EFFICIENCY
 - No subagents. Direct tool calls only.
 - Batch independent reads in one round.
 - Read only what's needed from tracker.
+
+---
+
+EXAMPLES APPENDIX (illustrative; NOT canonical — your project configures its own command via `agents.extend.task-git`)
+
+<!-- example: GitHub via gh CLI -->
+GitHub (`gh` CLI installed):
+
+```bash
+gh pr create --title "<type>(scope): <task title>" --body-file /tmp/pr-body.md
+# Record the URL:
+insight-flow mr-update --id <ID> --url "$(gh pr view --json url -q .url)"
+```
+
+<!-- example: GitLab via glab CLI -->
+GitLab (`glab` CLI installed):
+
+```bash
+glab mr create --title "<type>(scope): <task title>" --description-file /tmp/pr-body.md
+```
+
+<!-- example: no host CLI installed -->
+No host CLI (any host — print compare URL, user opens manually):
+
+```bash
+echo "https://<host>/<owner>/<repo>/compare/main...$(git branch --show-current)"
+# Then ask the user to paste the created PR URL back:
+insight-flow mr-update --id <ID> --url "<pasted-pr-url>"
+```
 
 ---
 
