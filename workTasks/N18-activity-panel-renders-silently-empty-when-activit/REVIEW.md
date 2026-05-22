@@ -70,3 +70,43 @@ _(none from human round)_
 ### Notes
 
 - This was caught while the AI review was already APPROVED, so the AI round-1 verdict gets superseded by this round-2 fix-needed verdict for tracking purposes.
+
+
+---
+
+## Round 3 — AI re-review
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-22
+**Verdict:** approved
+
+### Summary
+
+Round-2 human blocker is resolved. `cmdInstallActivityHook` now reads `config.activityEngine?.enabled` and exits non-zero with a clear stderr message when the engine is disabled, mirroring the guard in `init/index.ts:197`. A `--force` flag escapes the guard for the case where the user wants to install ahead of re-enabling. CLI help text updated. Two new smoke tests cover refusal (no `.claude/` artifacts, non-zero exit, stderr matches `/activityEngine\.enabled: false/`) and the force override. Diff is minimal — 3 source files, ~91 lines added, no unrelated changes. All 5 activity-hook tests + every other test still pass.
+
+### Checklist verification
+
+- [x] **Round-2 blocker fixed.** `commands/install-activity-hook.ts:14` guards on `config.activityEngine?.enabled === false && !force`; refusal exits with `process.exit(1)` and a stderr message naming the config key and the override flag.
+- [x] **Behaviour matches `init`.** `init/index.ts:197` skips installation when `enabled === false`; the subcommand now refuses with the same condition. Two entry points are consistent.
+- [x] **Escape hatch present.** `--force` is parsed by the existing CLI argv handler and passed via `opts`; `!!opts.force` correctly coerces both the no-value flag form and any string truthiness.
+- [x] **CLI help string updated.** `cli.ts:108` reads `install-activity-hook [--force]` with the refusal semantics documented.
+- [x] **Tests cover both branches.** `test/activity-hook.test.mjs` — new `refuses when activityEngine.enabled is false` asserts non-zero exit, stderr regex, and absence of both `.claude/hooks/taskflow-activity.sh` and `.claude/settings.local.json`. New `--force overrides activityEngine.enabled=false` asserts `result: "installed"` and hook script existence. `tmpProject({ activityEnabled })` factory was extracted cleanly.
+- [x] **No scope creep.** Diff touches only the three files named in the fix-end (`install-activity-hook.ts`, `cli.ts`, `activity-hook.test.mjs`). N17 untouched; no other unrelated edits.
+- [x] **Live dogfood proof.** After `insight-flow init` at the repo root with `enabled: true` (the dogfood scenario you just ran), the server boot log shows `Hook: ok` — the install-activity-hook code path was effectively re-validated end-to-end.
+
+### Blockers
+
+_None._
+
+### Non-blocking
+
+1. The 4 non-blocking notes from round 1 (dead-code mkdir in `installActivityHook`, no direct test for `detectActivityHookStatus`, awkward `settings-missing` copy, missing intent comment for the `.local.json`-only writer) remain unaddressed. They were explicitly non-blocking then and stay non-blocking now — flag for a future cleanup pass rather than gating this PR.
+
+### Security & edge cases
+
+- Refusal happens **before** any filesystem write, so a disabled-engine project cannot have its `.claude/` partially mutated when the command refuses. ✓
+- `--force` is opt-in only; no env var or implicit override path. ✓
+
+### Notes
+
+- N18 is now ready for merge alongside N17 (also approved). The branch `fix/N17-N18-dashboard-live-updates-and-activity-empty-state` carries both implementations + the round-2 fix + this re-review verdict.

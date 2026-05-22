@@ -29,6 +29,15 @@
         "comment": "install-activity-hook now refuses when activityEngine.enabled=false (matching init's guard); --force escape hatch added; two new tests cover refusal and force-override.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-22T21:31:52.046Z",
+      "endedAt": "2026-05-22T21:33:50.527Z",
+      "verdict": "approved",
+      "comment": "Round-2 blocker resolved: install-activity-hook now respects activityEngine.enabled and refuses (with --force escape) when disabled. Two new smoke tests cover refusal + override. No scope creep; round-1 non-blocking notes deferred.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
     }
   ]
 }
