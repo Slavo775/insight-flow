@@ -3,114 +3,110 @@
 **Type:** feat
 **Priority:** high
 **Created:** 2026-05-22
+**Modified:** 2026-05-22
 
 ## Problem
 
-The current agent role docs + protocol assume a single environment: **TypeScript + pnpm + GitHub + `gh` CLI**. When `insight-flow` is installed into a project using a different stack, the agent prompts issue commands the project can't execute:
+The agent role docs + protocol still bake specific technologies into prompts: `npm` / `npx` / `tsc` in `AGENT_PROTOCOL.md`, `gh pr create` in `.claude/commands/task-git.md`, "GitHub PR" narrative in the reviewer/fixer roles, and host-specific curl snippets in `GITHUB_PR_API.md`. This makes the stack unusable in any project that doesn't match TS + pnpm + GitHub.
 
-- Quality gates say `npx tsc --noEmit` / `npm run lint` / `npm run test` — fails on yarn / pnpm / bun projects (wrong runner) and on Python / Go / Java / Rust projects (no `tsc`).
-- PR creation says `gh pr create` — fails when the user uses GitLab (`glab`) / Bitbucket, or has no host CLI installed.
-- `AGENT_PROTOCOL.md` (introduced in N15) consolidated these assumptions in one place, making the gaps visible but not fixing them.
+The original direction (detect-stack at init + substitute via `prompt-build`) is **no longer the chosen approach**. Per the user's direction (2026-05-22):
 
-Surfaced by human review of N15 (`workTasks/N15-*/REVIEW.md`). N15 is parked at `fix-needed` waiting on this work.
+> please make sure that any of the agent do not tight on any technologie user can extend our agents with thier prompt so no need to have techlogies there please in all agents and files
+
+The chosen approach is: **strip every technology mention from agent prompts entirely.** Project-specific commands (typecheck / lint / test / PR-create / etc.) become the user's responsibility, contributed via the `agents.extend` mechanism shipped in N12 (`taskflow.config.json.agents.extend.<agent>` arrays append into the role docs at init time). insight-flow's own role docs stay technology-agnostic and only describe **orchestration**.
 
 ## Goal
 
-1. Detect the project's stack at `insight-flow init` time: package manager (from lockfile), language (from manifest), git host (from `git remote`).
-2. Persist detected values + their command triples in `taskflow.config.json` so agents and `prompt-build` can substitute them.
-3. Replace every hardcoded `npx` / `npm` / `gh` / `tsc` reference across role docs, `AGENT_PROTOCOL.md`, templates, and `.claude/commands/task-git.md` with `{{PM}}` / `{{GIT_TOOL}}` / `{{TYPECHECK_CMD}}` / etc. placeholders that `prompt-build` substitutes.
-4. Re-review N15 with the generalised stack in place.
+1. Strip every literal technology / tool name from `AGENT_PROTOCOL.md`, all 8 role files, `.claude/commands/task-git.md`, and `taskflow.prompt.json`. Replace with technology-agnostic phrasing that delegates to the user's `agents.extend` block.
+2. Replace `GITHUB_PR_API.md` (host-specific curl snippets) with `PR_API.md` — a one-paragraph orientation pointing users at the extension contract, plus a small "examples appendix" clearly marked as illustrative.
+3. Document the extension contract in `CLAUDE.md`, `README.md`, and `AGENT_PROTOCOL.md`: "insight-flow agents are technology-agnostic. Project-specific commands live in `taskflow.config.json.agents.extend.<agent>` arrays."
+4. Remove the `gitTool` field from `taskflow.prompt.json` schema (no longer used).
+5. `insight-flow init` does NOT detect the project's stack. It just writes the base config and lets the user populate `agents.extend.*` themselves.
+6. Re-review N15 once these changes land — its three blockers will be resolved by deletion, not substitution.
 
 ## Scope
 
 ### In scope
 
-- `packages/taskflow/src/types.ts`: extend `TaskflowConfig` with `stack: { packageManager, language, gitHost, gitTool, commands }`.
-- `packages/taskflow/src/init/index.ts`: add `detectStack(cwd)` — returns inferred config based on filesystem markers (lockfiles, manifests, `git remote`). Wire into `initProject`.
-- `packages/taskflow/src/commands/prompt-build.ts`: extend with stack substitution. Today it only handles `gitTool`; expand to substitute `{{PM}}`, `{{TYPECHECK_CMD}}`, `{{LINT_CMD}}`, `{{TEST_CMD}}`, `{{PR_CREATE_CMD}}`, `{{GIT_HOST}}` into role docs + `AGENT_PROTOCOL.md`.
-- `packages/taskflow/templates/taskflow.prompt.json`: replace `gitTool: gh` with the full stack schema (defaults: auto-detect).
-- Role docs at repo root (8 role files + `AGENT_PROTOCOL.md`): replace literal `npx tsc --noEmit`, `npm run lint`, `npm run test`, `gh pr create`, etc. with `{{PM}}` / command-triple placeholders. The repo's *own* role files become the "TS + pnpm + GitHub" instantiation produced by running `prompt-build --apply` against the local config; the source-of-truth template versions in `packages/taskflow/templates/roles/` carry the placeholders.
-- `.claude/commands/task-git.md`: same placeholder treatment for `gh pr create`.
-- `GITHUB_PR_API.md` → renamed to `PR_API.md` and templatised; init writes the host-specific variant to the project (`gh` snippet for GitHub, `glab` snippet for GitLab, `curl`-only snippet for no-CLI).
-- `packages/taskflow/templates/task/TASK.md.tpl` + `CHECKLIST.md.tpl`: parameterise the Verification section so scaffolded tasks pick up the project's command triple.
-- New tests in `packages/taskflow/test/`:
-  - `detect-stack.test.mjs` — verifies `detectStack` returns the right triple for fixtures (pnpm-lock.yaml + tsconfig + github remote → pnpm/typescript/github; pyproject.toml + gitlab remote → python/gitlab; etc.).
-  - `prompt-build-substitution.test.mjs` — verifies `prompt-build --apply` substitutes every placeholder from config.
-- Re-flow on N15: after this lands, re-run sync-role-templates, re-apply prompt-build, re-review N15.
+- **`AGENT_PROTOCOL.md`** — remove `npx tsc --noEmit`, `npm run lint`, `gh pr create`, and any GitHub-specific URLs. Quality-gate step becomes: "run the project's typecheck / lint / test commands (defined in your `agents.extend` block or your project's README)". Git/gh rule line becomes: "PR creation: use your project's PR-create command (defined per project)."
+- **`.claude/commands/task-git.md`** — drop `gh pr create` literal command. Keep an "Example: GitHub via `gh` CLI" appendix at the bottom, clearly marked as illustrative.
+- **`TASK_REVIEWER_ROLE.md`, `TASK_REVIEW_FIXER_ROLE.md`** — replace "GitHub PR" with "the PR" / "the review surface". Remove `@GITHUB_PR_API.md` reference; replace with `@PR_API.md` (the new technology-agnostic version).
+- **`TASK_IMPLEMENTER_ROLE.md`, `TASK_REVIEW_FIXER_ROLE.md`, `TASK_INCIDENT_ROLE.md`** — replace "`npx tsc --noEmit`, `npm run lint`" mentions in workflow with "the project's quality-gate commands as specified in `agents.extend`".
+- **Rename + rewrite `GITHUB_PR_API.md` → `PR_API.md`** — drop the curl-for-GitHub snippets from the canonical body. Body becomes: "PR API specifics (creating reviews, fetching comments, replying) are project-specific. Add the commands your stack uses to `taskflow.config.json.agents.extend.task-review` and `agents.extend.task-review-fix`." Append a small examples block: "Example: GitHub (REST API + `gh`)", "Example: GitLab (`glab`)", "Example: Bitbucket / no host CLI" — flagged as illustrative, not canonical.
+- **`taskflow.prompt.json` schema** — drop `gitTool: gh`. Keep `strictCLI`, `requireChecklist`, `branchPrefix`. `prompt-build`'s job narrows to enforcement-block patching only.
+- **`init`** — no stack detection. Writes base config + scaffolds roles + creates `.claude/commands`. Optional `--examples` flag could write commented-out `agents.extend` stubs for each agent so users have a starting point; default is no detection.
+- **`CLAUDE.md` and `README.md`** — add a "Technology agnosticism" / "Extending agents" section pointing users at `agents.extend` with a worked example (showing how to add `pnpm typecheck` for a TS project, `uv run pytest` for a Python project, `glab mr create` for a GitLab project — as user-supplied content, NOT shipped defaults).
+- **`packages/taskflow/src/init/index.ts`** — verify the existing `agents.extend` append logic from N12 still works after these changes. No new logic; only doc updates pointing users at it.
+- **`packages/taskflow/templates/roles/*.md` + `packages/taskflow/templates/agent-protocol/AGENT_PROTOCOL.md`** (if introduced) — same scrub as the canonical root files, since `init` ships them to consumer projects.
+- **Tests**: add `packages/taskflow/test/no-technology-tight.test.mjs` that greps every agent prompt file for forbidden literal-technology strings (`npx`, `npm `, `pnpm `, `yarn `, `bun `, `tsc`, `tsconfig`, `gh pr`, `gh --`, `github.com`, `gitlab.com`, `pyproject`, `requirements.txt`, `pom.xml`, `go.mod`, `Cargo.toml`) and fails if any appear outside an explicitly-marked example block. Update `init.test.mjs` to assert that `init` does NOT write a `stack` field.
 
 ### Out of scope
 
-- Per-language tool selection beyond a default triple per language (e.g. choosing between `mypy` vs `pyright` for Python). v1 picks a sensible default per language; advanced overrides come later.
-- Bitbucket support beyond schema reservation (`gitHost: bitbucket` is accepted but no PR command template — emits a compare URL).
-- Migrating existing consumer projects' configs — they re-run `insight-flow init` (or hand-edit) to opt in.
-- Bringing back the React dashboard removed in N14 (irrelevant to this work).
-- The "manual quality-equivalence dry run" from N15's checklist — moved into this task's verification so it's done against the *generalised* roles, not the TS-pnpm-GitHub-tight ones.
+- The `detectStack` machinery from the original N16 spec — discarded entirely (no detection, no substitution).
+- The `{{PM}}` / `{{TYPECHECK_CMD}}` / `{{PR_CREATE_CMD}}` placeholder system from the original spec — discarded; no substitution because there are no technology mentions to substitute.
+- Per-task `TASK.md` "Verification" sections — those are user-authored, not stack-generated. The taskmaster role already says "Be specific: exact file paths, function names" — so per-task verification commands are correctly the user's responsibility.
+- The `taskflow.prompt.json` `gitTool` migration for consumer projects — they delete the key on next `prompt-build --apply` (or it's silently ignored).
 
 ## Implementation plan
 
-1. **Schema** (`packages/taskflow/src/types.ts` + `packages/taskflow/src/schema/index.ts`)
-   - Add a `Stack` type with: `packageManager` (npm/pnpm/yarn/bun/none), `language` (typescript/python/java/go/rust/mixed/none), `gitHost` (github/gitlab/bitbucket/none), `gitTool` (gh/glab/git), `commands: { typecheck, lint, test, prCreate }` (each string | null).
-   - Add Zod schemas. `stack` is optional on `TaskflowConfigSchema` so legacy configs still parse; init writes one going forward.
+1. **Scrub `AGENT_PROTOCOL.md`**
+   - Line 14 (Quality gates step): replace `npx tsc --noEmit (if TS in scope), npm run lint (if a lint config exists), and the relevant test command` with: `run the project's typecheck, lint, and test commands as defined in your `taskflow.config.json` `agents.extend` block (or skip the step if not defined for your stack)`.
+   - Line 34 (Git/gh tool rule): replace `gh pr create for PR creation` with: `PR creation: use the command defined in your `agents.extend.task-git` block. insight-flow does not assume a git host CLI.`
+   - Drop the literal `gh pr create` example in the tracker cheat-sheet (it's an insight-flow CLI section, not a project-stack one — verify nothing slipped in here).
 
-2. **Stack detection** (`packages/taskflow/src/init/detect-stack.ts`, new)
-   - `detectStack(cwd): Stack` with helpers:
-     - `detectPackageManager`: pnpm-lock.yaml → pnpm; yarn.lock → yarn; bun.lockb → bun; package-lock.json → npm; package.json without lockfile → npm; otherwise none.
-     - `detectLanguage`: tsconfig.json → typescript; pyproject.toml | requirements.txt → python; pom.xml | build.gradle → java; go.mod → go; Cargo.toml → rust; multiple matches → mixed; nothing → none.
-     - `detectGitHost`: parse `git config --get remote.origin.url` (gracefully fail if not a repo). Match `github.com` / `gitlab.com` / `bitbucket.org`. Default `none`.
-     - `detectGitTool`: prefer `gh` if `gitHost: github` and `gh --version` succeeds; `glab` for gitlab; otherwise `git`.
-     - `commandTriple(pm, lang)`: returns a sensible default triple. Examples below.
-   - Triples (v1 defaults):
-     - pnpm + typescript: `pnpm typecheck` / `pnpm lint` / `pnpm test`
-     - npm + typescript: `npx tsc --noEmit` / `npm run lint` / `npm test`
-     - uv + python: `uv run mypy .` / `uv run ruff check .` / `uv run pytest`
-     - go: `go vet ./...` / `golangci-lint run` / `go test ./...`
-     - java + maven: `mvn -q compile` / `mvn -q checkstyle:check` / `mvn -q test`
-     - rust + cargo: `cargo check` / `cargo clippy --all-targets -- -D warnings` / `cargo test`
-     - language `none` or `mixed`: each command may be `null`; role docs handle nulls gracefully.
+2. **Scrub `.claude/commands/task-git.md`**
+   - Replace `gh pr create` HEREDOC block with: a generic step ("Open a PR using your project's git host workflow — the exact command is defined in your `agents.extend.task-git` block. If none defined, output the PR's compare URL and prompt the user.").
+   - Add an explicitly-marked "Examples appendix" at the bottom with `gh pr create`, `glab mr create`, and compare-URL fallback — clearly flagged as illustrations, not the canonical instruction.
 
-3. **Init wiring** (`packages/taskflow/src/init/index.ts`)
-   - Run `detectStack(cwd)` and merge into the written `taskflow.config.json` unless the user passes `--no-detect`. If `taskflow.config.json` already exists, only fill missing `stack.*` fields; never overwrite user-edited ones.
-   - Print the detected triple in `init`'s console output (e.g. "Detected: pnpm + typescript + github · commands: pnpm typecheck / pnpm lint / pnpm test").
+3. **Scrub reviewer + fixer role docs**
+   - `TASK_REVIEWER_ROLE.md`: "GitHub PR" → "the PR" / "the review surface". `@GITHUB_PR_API.md` → `@PR_API.md`.
+   - `TASK_REVIEW_FIXER_ROLE.md`: same scrub.
+   - Workflow steps that say "post review on GitHub" become "post review using the command in your `agents.extend.task-review` block; fall back to writing REVIEW.md only if no command is defined."
 
-4. **`prompt-build` extension** (`packages/taskflow/src/commands/prompt-build.ts`)
-   - Replace today's `gitTool: gh|git` logic with full stack substitution.
-   - Placeholders supported in role docs + `AGENT_PROTOCOL.md`: `{{PM}}`, `{{LANG}}`, `{{GIT_HOST}}`, `{{GIT_TOOL}}`, `{{TYPECHECK_CMD}}`, `{{LINT_CMD}}`, `{{TEST_CMD}}`, `{{PR_CREATE_CMD}}`.
-   - Null commands render as a `# (no <lang> typecheck — skip)` comment so the role doc still reads cleanly.
-   - `--apply` writes the substituted versions into the project's role files (today the `.claude/roles/` dir or the legacy root layout depending on `rolesDir` config).
+4. **Scrub implementer / fixer / incident workflow language**
+   - `TASK_IMPLEMENTER_ROLE.md`, `TASK_REVIEW_FIXER_ROLE.md`, `TASK_INCIDENT_ROLE.md`: quality-gate references → "run the project's quality-gate commands (per `agents.extend`)".
 
-5. **Templatise canonical role docs** (templates live in `packages/taskflow/templates/roles/` going forward; root role files are derived for this repo)
-   - Replace every literal `npx tsc --noEmit` / `npm run lint` / `npm run test` / `gh pr create` in `templates/roles/*.md` and `templates/agent-protocol/AGENT_PROTOCOL.md` (move it under `templates/`) with the matching `{{...}}` placeholder.
-   - Update `scripts/sync-role-templates.mjs`: source-of-truth flips — templates dir is canonical, root files are the result of `prompt-build --apply` for this repo.
-   - Update `.claude/commands/task-git.md` to use `{{PR_CREATE_CMD}}` instead of `gh pr create`.
-   - Update `packages/taskflow/templates/task/TASK.md.tpl` + `CHECKLIST.md.tpl` Verification sections to use the command-triple placeholders.
+5. **Rename `GITHUB_PR_API.md` → `PR_API.md`**
+   - Body: technology-agnostic orientation + examples appendix.
+   - Update every `@GITHUB_PR_API.md` reference in roles to `@PR_API.md`.
+   - Delete the old file.
 
-6. **`GITHUB_PR_API.md` → `PR_API.md`**
-   - Rename + restructure as three include-able snippets (`templates/api/pr-api.gh.md`, `pr-api.glab.md`, `pr-api.git.md`).
-   - `insight-flow init` (or `prompt-build --apply`) writes the host-specific snippet to the project as `PR_API.md`. Roles `@PR_API.md` (not host-specific). For consumers running `gitTool: git`, the snippet documents the compare-URL fallback.
+6. **`taskflow.prompt.json` cleanup**
+   - Drop `gitTool: gh` from the default config + schema.
+   - `prompt-build` no longer reads `gitTool`. Its job narrows to enforcement-block patching only.
 
-7. **Tests** (new files in `packages/taskflow/test/`)
-   - `detect-stack.test.mjs`: ≥ 6 fixture directories (pnpm-ts-github, npm-ts-github, yarn-ts-github, pyproject-python-gitlab, go-mod-github, empty); assert detected stack.
-   - `prompt-build-substitution.test.mjs`: feed a stub role doc with all placeholders + a stub stack; assert every placeholder substituted, null commands rendered as comments.
-   - Update existing `init.test.mjs` to check the `stack` field is populated after `initProject`.
+7. **`init` adjustment**
+   - Remove any detection logic (there wasn't much; mostly just the `gitTool: gh` default carried through). Init writes base config + roles + commands, prints "Done. To make agents stack-aware, add commands to taskflow.config.json `agents.extend.<agent>` arrays. See `CLAUDE.md` for examples."
+   - Optional `--examples` flag: write commented-out `agents.extend` stubs to the config so users have a starting template. Default behaviour: no stubs.
 
-8. **Apply to this repo + re-flow N15**
-   - Run `insight-flow init --force` against this repo so the new stack detection writes a config with `pnpm + typescript + github + gh`.
-   - Run `insight-flow prompt-build --apply` to produce the substituted root role files.
-   - Verify the substituted versions are byte-identical (modulo intentional command-triple values) to the current N15 versions for this stack — proves we didn't regress on TS+pnpm+GitHub while generalising.
-   - Mark N15 ready for re-review (its blocker is now resolved).
+8. **Document the extension contract**
+   - `CLAUDE.md`: new section "Extending agents with project-specific commands" — explains `agents.extend.<agent>: string[]` schema and shows a worked example for TS, Python, Go projects (as user-supplied content).
+   - `README.md`: a paragraph in the "Configuration" section pointing at the same.
+   - `AGENT_PROTOCOL.md` footer: "Project-specific commands belong in `agents.extend`. insight-flow itself ships zero stack assumptions."
+
+9. **Tests**
+   - `packages/taskflow/test/no-technology-tight.test.mjs` (new): greps every canonical prompt file (`AGENT_PROTOCOL.md`, `TASK_*_ROLE.md`, `TASKMASTER_*_ROLE.md`, `.claude/commands/task-git.md`, `PR_API.md`) for forbidden strings. Fails if any match falls outside a fenced code block immediately preceded by `Example:` or `<!-- example -->`.
+   - `packages/taskflow/test/init.test.mjs` update: assert that `init` does NOT write `stack.*` or `gitTool` fields to `taskflow.config.json`.
+   - Existing `init.test.mjs` `agents.extend` tests confirm the user-extension mechanism still works.
+
+10. **Re-flow N15**
+    - After this lands, re-run `pnpm sync-roles` to push the scrubbed templates.
+    - Re-open N15 (currently `merged` as of round-3 approval). Since N15 is already merged, the three blockers it carried (B1/B2/B3) are now resolved on main by this N16 work — no re-review of N15 needed. Note this in N16's REVIEW.md.
 
 ## Verification
 
-- `cd packages/taskflow && pnpm typecheck && pnpm build && pnpm test` — green (init + migrate-reviews + scaffold-and-bundle + new detect-stack + new prompt-build-substitution).
-- `node packages/taskflow/dist/cli.js init --force` in a tmpdir with `pyproject.toml` + a GitLab remote → `taskflow.config.json` shows `stack.language: python`, `stack.gitHost: gitlab`.
-- `node packages/taskflow/dist/cli.js init --force` in this repo → `stack.packageManager: pnpm`, `stack.language: typescript`, `stack.gitHost: github`, `stack.gitTool: gh`.
-- After running `prompt-build --apply` on this repo: `grep "npx tsc --noEmit" TASK_*_ROLE.md AGENT_PROTOCOL.md .claude/commands/task-git.md` returns the expected pnpm-typescript triple (`pnpm typecheck`, `pnpm lint`, `pnpm test`) and zero raw `{{...}}` placeholders.
-- After running `prompt-build --apply` in a fixture Python project: the same files show `uv run mypy .` / `uv run ruff check .` / `uv run pytest`.
-- N15 re-review: open `workTasks/N15-*/REVIEW.md`; the three human-flagged blockers should be marked resolved with file references to this PR.
+- `cd packages/taskflow && pnpm typecheck && pnpm build && pnpm test` — green (init + migrate-reviews + scaffold-and-bundle + new no-technology-tight).
+- `grep -rE "(\\bnpx |\\bnpm run|\\bpnpm |\\byarn |\\bbun |\\btsc\\b|tsconfig\\.json|\\bgh pr|\\bgh --|gitlab\\.com|github\\.com|pyproject|requirements\\.txt|pom\\.xml|\\bgo\\.mod\\b|Cargo\\.toml)" AGENT_PROTOCOL.md TASK_*_ROLE.md TASKMASTER_*_ROLE.md .claude/commands/task-git.md PR_API.md` returns matches ONLY inside fenced code blocks immediately preceded by `Example:` / `<!-- example -->`.
+- `node packages/taskflow/dist/cli.js init --force` in a tmpdir → `taskflow.config.json` has no `stack` field and no `gitTool` field. Stdout reads "Done. To make agents stack-aware, add commands to taskflow.config.json `agents.extend.<agent>` arrays."
+- A fixture config with `agents.extend.task-implement: ["Run pnpm typecheck before marking implemented."]` still produces a role file with that line appended (per N12).
+- `PR_API.md` exists; `GITHUB_PR_API.md` does not. Every role file that referenced `@GITHUB_PR_API.md` now references `@PR_API.md`.
+- N15's three blockers (B1 npm/npx, B2 gh/GitHub, B3 tsc) are gone from canonical role files. Verified by re-grep on main after merge.
 
 ## Notes
 
-- This is a generalisation task, not a behavior change for the insight-flow repo itself. The repo's own role docs end up substantively identical (TS+pnpm+GitHub commands) after the rewrite — the value is that other consumers' projects now produce *their own* substituted versions instead of the TS/pnpm/GitHub-tight ones.
-- Source-of-truth shift: templates become canonical, root role files become generated. `sync-role-templates.mjs` flips direction. This is a meaningful workflow change for maintainers and should be called out in the CHANGELOG when 0.5.0 (or 0.6.0) cuts.
-- Related: N14 (token savings round 1), N15 (compression — currently parked at `fix-needed` on this work).
-- Estimated CLI surface impact: small. New `init` step (~80 LOC), new `prompt-build` substitution table (~40 LOC), new tests (~120 LOC). Most of the work is mechanical replacement across 9 role + protocol files.
+- This pivot is cleaner than the substitution approach: less code (no `detectStack`, no placeholder substitution), simpler mental model ("agents don't assume tech; users add tech via extensions"), better separation of concerns (insight-flow owns workflow orchestration, the user owns their stack).
+- Trade-off: out-of-the-box, the role docs are less actionable for a fresh user. Mitigation: `init --examples` writes commented `agents.extend` stubs; `CLAUDE.md` documents the contract with worked examples for common stacks.
+- This makes N12's `agents.extend` mechanism the **canonical** extension point, not a convenience feature.
+- N15 was approved + merged in round 3; the three blockers it carried are now closed by deletion in this task, not by re-review of N15.
+- Related: N12 (custom agent rules + extensions, the mechanism we lean on here), N14 (token reduction round 1), N15 (role-doc compression).
+- Estimated impact: smaller diff than the original N16 spec — most of the work is mechanical text scrubbing across ~12 files, plus one new test, plus 2 doc additions. No new CLI machinery.
