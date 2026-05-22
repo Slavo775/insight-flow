@@ -970,7 +970,7 @@
       "title": "Dashboard live-updates miss subfolder writes — recursive watcher needed",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N17-dashboard-live-updates-miss-subfolder-writes-recur",
       "createdAt": "2026-05-22T20:28:06.149Z",
       "statusHistory": [
@@ -978,12 +978,30 @@
           "status": "ready",
           "at": "2026-05-22T20:28:06.149Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T20:36:50.354Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T20:40:07.868Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T20:49:24.770Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-22T20:40:07.868Z",
+        "completedAt": "2026-05-22T20:49:24.770Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -998,9 +1016,15 @@
         "ws",
         "bug"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-22T20:36:50.354Z",
+          "commitHash": "16c087a",
+          "commitMessage": "fix(tasks): scaffold N17 (recursive watcher) + N18 (activity empty-state)"
+        }
+      ],
+      "branch": "fix/N17-N18-dashboard-live-updates-and-activity-empty-state",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/11",
       "mergedAt": null
     },
     {
@@ -1008,7 +1032,7 @@
       "title": "Activity panel renders silently empty when activity hook is not installed",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N18-activity-panel-renders-silently-empty-when-activit",
       "createdAt": "2026-05-22T20:28:07.483Z",
       "statusHistory": [
@@ -1016,12 +1040,37 @@
           "status": "ready",
           "at": "2026-05-22T20:28:07.484Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T20:36:50.431Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T20:40:07.942Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T20:49:24.851Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-22T20:40:07.942Z",
+        "completedAt": "2026-05-22T20:49:24.850Z",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/commands/install-activity-hook.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/README.md",
+          "packages/taskflow/test/activity-hook.test.mjs",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -1036,9 +1085,15 @@
         "ux",
         "bug"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-22T20:36:50.431Z",
+          "commitHash": "16c087a",
+          "commitMessage": "fix(tasks): scaffold N17 (recursive watcher) + N18 (activity empty-state)"
+        }
+      ],
+      "branch": "fix/N17-N18-dashboard-live-updates-and-activity-empty-state",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/11",
       "mergedAt": null
     }
   ]

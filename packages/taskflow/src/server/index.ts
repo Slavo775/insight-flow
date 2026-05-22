@@ -1,5 +1,12 @@
 import { createServer } from "node:http";
-import { readFileSync, existsSync, readdirSync, watch, unlinkSync } from "node:fs";
+import {
+  readFileSync,
+  existsSync,
+  readdirSync,
+  watch,
+  unlinkSync,
+  type FSWatcher,
+} from "node:fs";
 import { normalize, resolve, sep } from "node:path";
 import { exec } from "node:child_process";
 import type { TaskflowConfig } from "../types.js";
@@ -7,11 +14,14 @@ import { getWorkDir } from "../config.js";
 import { handleUpgrade, type WsClient } from "./ws.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
 import { getDashboardHtml } from "./dashboard.js";
+import { detectActivityHookStatus, type ActivityHookStatus } from "../activity-hook.js";
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".json": "application/json; charset=utf-8",
 };
+
+const WATCH_DEBOUNCE_MS = 100;
 
 /**
  * Inflate a shard JSON string with reviews/incidents loaded from each task's
@@ -78,6 +88,98 @@ function hydrateShardJson(raw: string, workDir: string): string {
   return JSON.stringify(parsed);
 }
 
+function listSubdirs(root: string): string[] {
+  try {
+    return readdirSync(root, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => resolve(root, d.name));
+  } catch {
+    return [];
+  }
+}
+
+interface WatchSession {
+  close: () => void;
+  refreshSubdirs?: () => void;
+}
+
+/**
+ * Watch `workDir` so any mutation under it triggers `onChange`. On macOS and
+ * Windows we use the native recursive watcher. On Linux (where Node's recursive
+ * mode is not supported) we register one watcher per existing subdirectory and
+ * re-walk the root when a top-level rename event arrives (new task folder).
+ */
+function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
+  const watchers = new Set<FSWatcher>();
+
+  const platform = process.platform;
+  if (platform === "darwin" || platform === "win32") {
+    try {
+      const w = watch(workDir, { recursive: true }, () => onChange());
+      watchers.add(w);
+      return {
+        close: () => {
+          for (const w2 of watchers) w2.close();
+          watchers.clear();
+        },
+      };
+    } catch {
+      // fall through to per-subdir fallback if recursive isn't available
+    }
+  }
+
+  const rootWatcher = watch(workDir, { recursive: false }, () => {
+    onChange();
+    refreshSubdirs();
+  });
+  watchers.add(rootWatcher);
+
+  const subdirWatchers = new Map<string, FSWatcher>();
+
+  function refreshSubdirs(): void {
+    const subdirs = listSubdirs(workDir);
+    const seen = new Set(subdirs);
+    for (const [path, w] of subdirWatchers) {
+      if (!seen.has(path)) {
+        try {
+          w.close();
+        } catch {
+          // ignore
+        }
+        subdirWatchers.delete(path);
+        watchers.delete(w);
+      }
+    }
+    for (const dir of subdirs) {
+      if (subdirWatchers.has(dir)) continue;
+      try {
+        const w = watch(dir, { recursive: false }, () => onChange());
+        subdirWatchers.set(dir, w);
+        watchers.add(w);
+      } catch {
+        // ignore unreadable folder
+      }
+    }
+  }
+
+  refreshSubdirs();
+
+  return {
+    close: () => {
+      for (const w of watchers) {
+        try {
+          w.close();
+        } catch {
+          // ignore
+        }
+      }
+      watchers.clear();
+      subdirWatchers.clear();
+    },
+    refreshSubdirs,
+  };
+}
+
 export function startServer(config: TaskflowConfig, port?: number): void {
   const serverPort = port || config.server.port;
   const workDir = getWorkDir(config);
@@ -95,8 +197,13 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     process.exit(1);
   }
 
+  const configEnabled = activityConfig.enabled !== false;
+  const hookStatus: ActivityHookStatus = configEnabled
+    ? detectActivityHookStatus(process.cwd())
+    : "ok";
+
   // Activity engine
-  const activity = activityConfig.enabled
+  const activity = configEnabled
     ? new ActivityEngine(activityLogPath, activityConfig)
     : new NoopActivityEngine();
 
@@ -106,9 +213,16 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     broadcast({ type: "activity", data: event });
   });
 
-  const watcher = watch(workDir, { recursive: false }, () => {
-    broadcast({ type: "file-change", data: null });
-  });
+  let debounceTimer: NodeJS.Timeout | null = null;
+  function scheduleFileChangeBroadcast(): void {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      broadcast({ type: "file-change", data: null });
+    }, WATCH_DEBOUNCE_MS);
+  }
+
+  const watcher = watchWorkDir(workDir, scheduleFileChangeBroadcast);
 
   function broadcast(msg: { type: string; data: unknown }): void {
     const payload = JSON.stringify(msg);
@@ -197,6 +311,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       type: "snapshot",
       data: {
         activity: activity.getRecentEvents(),
+        hookStatus,
+        configEnabled,
       },
     };
     client.send(JSON.stringify(snapshot));
@@ -207,12 +323,16 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   });
 
   server.listen(serverPort, () => {
-    const engineStatus = activityConfig.enabled ? "Activity engine ON" : "Activity engine OFF";
+    const engineStatus = configEnabled ? "Activity engine ON" : "Activity engine OFF";
     console.log("\n  Taskflow Dashboard\n");
     console.log("  Local:   http://localhost:" + serverPort);
     console.log("  Data:    " + workDir);
     console.log("  Live:    WebSocket on /ws");
-    console.log("  Engine:  " + engineStatus + "\n");
+    console.log("  Engine:  " + engineStatus);
+    if (configEnabled) {
+      console.log("  Hook:    " + hookStatus);
+    }
+    console.log("");
 
     const openCmd =
       process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
@@ -222,6 +342,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   process.on("SIGINT", () => {
     activity.stop();
     watcher.close();
+    if (debounceTimer) clearTimeout(debounceTimer);
     try {
       if (existsSync(activityLogPath)) unlinkSync(activityLogPath);
     } catch {

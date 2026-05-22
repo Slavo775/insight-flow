@@ -15,9 +15,14 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "      <h1><span class=\"live-dot\" id=\"status-dot\"></span>Taskflow Dashboard</h1>\n" +
     "      <p class=\"subtitle\" id=\"project-name\">Loading...</p>\n" +
     "    </div>\n" +
+    "    <div class=\"top-bar-actions\">\n" +
     (activityEnabled
-      ? "    <button class=\"toggle-activity\" id=\"toggle-activity\" onclick=\"toggleActivity()\">Activity ▶</button>\n"
+      ? ""
+      : "      <span class=\"engine-chip engine-off\" title=\"Set activityEngine.enabled to true in taskflow.config.json to enable\">Engine: off (config)</span>\n") +
+    (activityEnabled
+      ? "      <button class=\"toggle-activity\" id=\"toggle-activity\" onclick=\"toggleActivity()\">Activity ▶</button>\n"
       : "") +
+    "    </div>\n" +
     "  </div>\n" +
     "\n" +
     "  <div class=\"layout\">\n" +
@@ -61,6 +66,13 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
     .toggle-activity { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 12px; }
     .toggle-activity:hover { border-color: var(--accent); }
+    .top-bar-actions { display: flex; gap: 8px; align-items: center; }
+    .engine-chip { font-size: 11px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-muted); }
+    .engine-chip.engine-off { background: var(--surface); }
+    .activity-empty-state { padding: 18px 16px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .activity-empty-state strong { color: var(--text); display: block; margin-bottom: 6px; font-size: 12px; }
+    .activity-empty-state code { background: var(--border); color: var(--text); padding: 2px 6px; border-radius: 3px; font-size: 11px; display: inline-block; margin-top: 4px; }
+    .activity-empty-state .hint { color: var(--text-muted); font-size: 11px; margin-top: 8px; }
     .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse 2s infinite; }
     .live-dot.disconnected { background: var(--red); animation: none; }
     .live-dot.reconnecting { background: var(--yellow); }
@@ -175,6 +187,8 @@ function getScript(activityEnabled: boolean, _port: number): string {
     var currentShard = null;
     var ws = null;
     var wsConnected = false;
+    var hookStatus = 'ok';
+    var configEnabled = true;
 
     function badgeClass(status) {
       if (['ready'].includes(status)) return 'badge-ready';
@@ -403,8 +417,11 @@ function getScript(activityEnabled: boolean, _port: number): string {
       var shard = await results[0].json();
       tasks = shard.tasks || [];
       try {
-        await results[1].json();
-        document.getElementById('project-name').textContent = 'Shard: ' + name.replace('tasks-', '').replace('.json', '') + ' · ' + tasks.length + ' tasks';
+        var master = await results[1].json();
+        var current = master && master.meta && master.meta.currentTaskId ? master.meta.currentTaskId : null;
+        var label = 'Shard: ' + name.replace('tasks-', '').replace('.json', '') + ' · ' + tasks.length + ' tasks';
+        if (current) label += ' · current ' + current;
+        document.getElementById('project-name').textContent = label;
       } catch(e) {}
       renderShardNav();
       render();
@@ -438,13 +455,24 @@ function getScript(activityEnabled: boolean, _port: number): string {
       ws.onmessage = function(e) {
         try {
           var msg = JSON.parse(e.data);
-          if (msg.type === 'file-change' && currentShard) {
-            loadShard(currentShard);
+          if (msg.type === 'file-change') {
+            loadShardIndex().then(function() {
+              if (currentShard) return loadShard(currentShard);
+            });
           } else if (msg.type === 'snapshot') {
+            if (msg.data && typeof msg.data.hookStatus === 'string') {
+              hookStatus = msg.data.hookStatus;
+            }
+            if (msg.data && typeof msg.data.configEnabled === 'boolean') {
+              configEnabled = msg.data.configEnabled;
+            }
             if (msg.data && msg.data.activity && typeof addActivityEvent === 'function') {
               for (var i = 0; i < msg.data.activity.length; i++) {
                 addActivityEvent(msg.data.activity[i]);
               }
+            }
+            if (typeof renderActivityEmptyState === 'function') {
+              renderActivityEmptyState();
             }
           } else if (msg.type === 'activity' && typeof addActivityEvent === 'function') {
             addActivityEvent(msg.data);
@@ -480,6 +508,7 @@ function getScript(activityEnabled: boolean, _port: number): string {
       if (activityPanelOpen) {
         panel.classList.add('open');
         btn.textContent = 'Activity ◀';
+        renderActivityEmptyState();
       } else {
         panel.classList.remove('open');
         btn.textContent = 'Activity ▶';
@@ -508,10 +537,58 @@ function getScript(activityEnabled: boolean, _port: number): string {
       if (activityEvents.length > 200) activityEvents = activityEvents.slice(-200);
       lastActivityTime = Date.now();
       updateActivityStatus(true);
+      var empty = document.querySelector('.activity-empty-state');
+      if (empty) empty.remove();
       renderActivityItem(ev);
 
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(function() { updateActivityStatus(false); }, 5000);
+    }
+
+    function activityEmptyStateMessage() {
+      if (hookStatus === 'hook-missing') {
+        return {
+          headline: 'Activity hook not installed',
+          body: 'The dashboard receives events from a Claude Code PostToolUse hook script that has not been created in this project yet.',
+        };
+      }
+      if (hookStatus === 'settings-missing') {
+        return {
+          headline: 'Activity hook registered settings missing',
+          body: 'The hook script exists but no PostToolUse entry references it in .claude/settings.local.json.',
+        };
+      }
+      if (hookStatus === 'both-missing') {
+        return {
+          headline: 'Activity hook not installed',
+          body: 'Neither .claude/hooks/taskflow-activity.sh nor a PostToolUse registration exists in this project.',
+        };
+      }
+      return null;
+    }
+
+    function renderActivityEmptyState() {
+      var feed = document.getElementById('activity-feed');
+      if (!feed) return;
+      var existing = feed.querySelector('.activity-empty-state');
+      if (activityEvents.length > 0 || hookStatus === 'ok') {
+        if (existing) existing.remove();
+        return;
+      }
+      var msg = activityEmptyStateMessage();
+      if (!msg) return;
+      if (existing) existing.remove();
+      var idle = feed.querySelector('.activity-idle');
+      if (idle) idle.remove();
+      var box = document.createElement('div');
+      box.className = 'activity-empty-state';
+      box.innerHTML =
+        '<strong>' + escHtml(msg.headline) + '</strong>' +
+        escHtml(msg.body) +
+        '<div class="hint">Run from the project root:</div>' +
+        '<code>insight-flow install-activity-hook</code>' +
+        '<div class="hint">Already-installed projects re-run safely (no-op).</div>';
+      feed.appendChild(box);
     }
 
     function updateActivityStatus(active) {

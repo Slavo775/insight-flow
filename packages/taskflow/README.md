@@ -142,6 +142,16 @@ Run `insight-flow help` for the full list.
 | `activityEngine.logFile`   | `".taskflow-activity.jsonl"` | Ephemeral JSONL log file written by the activity hook. Gitignored.                                                          |
 | `activityEngine.maxEvents` | `200`                        | Ring-buffer size for the activity feed.                                                                                     |
 
+### Enabling the activity panel
+
+The activity panel needs a Claude Code `PostToolUse` hook to emit events. Three states:
+
+1. **Automatic** — running `insight-flow init` installs `.claude/hooks/taskflow-activity.sh` and registers it in `.claude/settings.local.json`.
+2. **Retrofit existing project** — if you globally installed `insight-flow` or skipped init, run `insight-flow install-activity-hook` from the project root. The command is idempotent (re-running on a fully installed project is a no-op) and never overwrites unrelated PostToolUse hooks.
+3. **Disabled by config** — setting `activityEngine.enabled` to `false` hides the panel entirely. The top-bar shows an `Engine: off (config)` chip so the state is explicit.
+
+When the panel is enabled but the hook is missing, the dashboard renders a clear empty-state with the retrofit command instead of staying silently idle.
+
 ## Slash commands (Claude Code)
 
 `insight-flow init` writes nine slash commands to `.claude/commands/`:

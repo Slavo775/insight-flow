@@ -34,6 +34,7 @@ import {
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
+import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import type { ParsedArgs } from "./types.js";
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -104,6 +105,7 @@ function printHelp(): void {
     migrate                               Migrate from legacy tracker.json
     migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
     prompt-build [--config path] [--apply] Print or apply enforcement block from taskflow.prompt.json
+    install-activity-hook                 Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent)
 
     help                                  Show this help
     version                               Show version
@@ -136,6 +138,9 @@ try {
     cmdMigrateReviews(config);
   } else if (command === "prompt-build") {
     cmdPromptBuild(opts);
+  } else if (command === "install-activity-hook") {
+    const config = resolveConfig();
+    cmdInstallActivityHook(config);
   } else {
     // All other commands need master.json
     const config = resolveConfig();
