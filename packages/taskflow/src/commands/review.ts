@@ -10,6 +10,7 @@ import {
   saveTaskReviews,
   recomputeTaskSummary,
 } from "../storage.js";
+import { scaffoldReviewMd } from "../spec.js";
 
 export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
@@ -36,7 +37,28 @@ export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts:
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
   saveShard(getWorkDir(config), shardFile, shard);
-  console.log(JSON.stringify({ action: "review-started", id, reviewIndex: reviews.length - 1 }));
+
+  const scaffold = scaffoldReviewMd(config, task, {
+    reviewer:
+      (opts.type as string) === "human"
+        ? "Human (Project Owner)"
+        : `Task Reviewer (${(opts.type as string) || "ai"})`,
+    date: now().slice(0, 10),
+    prUrl: task.mrUrl ?? "(no PR yet)",
+  });
+
+  console.log(
+    JSON.stringify({
+      action: "review-started",
+      id,
+      reviewIndex: reviews.length - 1,
+      reviewMd: {
+        created: scaffold.created,
+        round: scaffold.round,
+        path: `${task.folder}/REVIEW.md`,
+      },
+    }),
+  );
 }
 
 export function cmdReviewEnd(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
