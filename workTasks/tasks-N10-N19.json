@@ -769,7 +769,7 @@
       "title": "Generalise agent stack across package managers, git hosts, and languages",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N16-generalise-agent-stack-across-package-managers-git",
       "createdAt": "2026-05-22T17:55:51.117Z",
       "statusHistory": [
@@ -777,6 +777,11 @@
           "status": "ready",
           "at": "2026-05-22T17:55:51.118Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T18:09:16.962Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -797,8 +802,14 @@
         "init",
         "generalisation"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-22T18:09:16.962Z",
+          "commitHash": "74be641",
+          "commitMessage": "docs(tasks): add N16 — generalise agent stack across package managers, git hosts, and languages"
+        }
+      ],
+      "branch": "feat/N16-generalise-agent-stack-across-package-managers-git",
       "mrUrl": null,
       "mergedAt": null
     }
