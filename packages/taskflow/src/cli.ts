@@ -71,11 +71,11 @@ function printHelp(): void {
     status --id Nxx --status <status> [--by agent]
     list [--status ready]
     current
-    show --id Nxx [--summary]      Print task JSON (or compact summary)
-    stats
-    next
-    next-review
-    next-fix
+    show --id Nxx [--summary] [--spec]   Print task JSON; --summary returns lean fields, --spec includes TASK.md + CHECKLIST.md content
+    stats [--tokens]                     Aggregate stats; --tokens reports tokensUsed trends per type/priority
+    next [--with-spec]                   Pick next actionable task; --with-spec inlines TASK.md + CHECKLIST.md in the response
+    next-review [--with-spec]            Pick next reviewable task; --with-spec as above
+    next-fix [--with-spec]               Pick next fix-needed task; --with-spec as above
     next-change
 
     implement-start --id Nxx
@@ -195,16 +195,16 @@ try {
         cmdList(config, master, opts);
         break;
       case "stats":
-        cmdStats(config, master);
+        cmdStats(config, master, opts);
         break;
       case "next":
-        cmdNext(config, master);
+        cmdNext(config, master, opts);
         break;
       case "next-review":
-        cmdNextReview(config, master);
+        cmdNextReview(config, master, opts);
         break;
       case "next-fix":
-        cmdNextFix(config, master);
+        cmdNextFix(config, master, opts);
         break;
       case "change-request":
         cmdChangeRequest(config, master, opts);

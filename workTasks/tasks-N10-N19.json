@@ -670,7 +670,7 @@
       "title": "Compress agent role docs + bundle CLI reads + template REVIEW.md",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N15-compress-agent-role-docs-bundle-cli-reads-template",
       "createdAt": "2026-05-22T16:09:27.763Z",
       "statusHistory": [
@@ -678,12 +678,48 @@
           "status": "ready",
           "at": "2026-05-22T16:09:27.764Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T16:17:21.664Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T16:19:14.364Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T16:27:18.573Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-22T16:19:14.364Z",
+        "completedAt": "2026-05-22T16:27:18.573Z",
+        "filesChanged": [
+          "AGENT_PROTOCOL.md",
+          "TASKMASTER_ROLE.md",
+          "TASKMASTER_CHANGE_ROLE.md",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md",
+          "packages/taskflow/src/spec.ts",
+          "packages/taskflow/src/commands/show.ts",
+          "packages/taskflow/src/commands/review.ts",
+          "packages/taskflow/src/commands/query.ts",
+          "packages/taskflow/src/commands/create.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/scripts/sync-role-templates.mjs",
+          "packages/taskflow/templates/task/REVIEW.md.tpl",
+          "packages/taskflow/templates/roles/AGENT_PROTOCOL.md",
+          "packages/taskflow/test/scaffold-and-bundle.test.mjs",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -697,8 +733,14 @@
         "cli",
         "perf"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-22T16:17:21.663Z",
+          "commitHash": "bca33ae",
+          "commitMessage": "docs(tasks): add N15 — compress role docs + bundle CLI reads + template REVIEW.md"
+        }
+      ],
+      "branch": "rework/N15-compress-agent-role-docs-bundle-cli-reads-template",
       "mrUrl": null,
       "mergedAt": null
     }
