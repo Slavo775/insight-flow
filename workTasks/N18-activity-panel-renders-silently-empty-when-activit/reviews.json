@@ -9,6 +9,15 @@
       "type": "ai",
       "by": "task-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-22T21:17:05.537Z",
+      "endedAt": "2026-05-22T21:17:26.939Z",
+      "verdict": "fix-needed",
+      "comment": "install-activity-hook does not respect activityEngine.enabled=false; init does. Make the subcommand match init's guard before merge.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

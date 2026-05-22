@@ -41,3 +41,32 @@ _None._
 
 - This task closes the UX gap N02 left open for users who bypass `insight-flow init` (global install, fork from an existing project without the hook, etc.).
 - The empty-state hook is the right place to hang the future browser-notifications opt-in UI — when the hook is installed but notifications are off, the same panel surface can offer "Enable browser alerts for this project?"
+
+
+---
+
+## Human Review — Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-22
+**Verdict:** fix-needed
+
+### Summary
+
+Human spotted an inconsistency the AI review missed: `insight-flow install-activity-hook` ignores `activityEngine.enabled` in the config. `insight-flow init` correctly respects the setting (`init/index.ts:197` — `if (config.activityEngine?.enabled !== false) generateActivityHook(...)`), but the new subcommand from N18 (`commands/install-activity-hook.ts`) always installs regardless of the config.
+
+### Blockers
+
+1. **`install-activity-hook` must respect `activityEngine.enabled === false`.**
+   - **Why:** the user's exact words — *"what if I have in config to don't want to have the activity hook? Still it's installed activity hook?"* If a project has explicitly opted out of the activity engine via `taskflow.config.json`, running `insight-flow install-activity-hook` should not silently override that choice.
+   - **Where:** `packages/taskflow/src/commands/install-activity-hook.ts` — `cmdInstallActivityHook` calls `installActivityHook()` unconditionally with no check on `config.activityEngine?.enabled`.
+   - **Fix:** before calling `installActivityHook`, check `config.activityEngine?.enabled`. If `false`, exit with a clear message — e.g. `Activity engine disabled in taskflow.config.json (activityEngine.enabled: false). Re-enable it in the config before running this command, or pass --force to install anyway.` Match `init`'s guard so the two entry points behave consistently.
+   - **Tests:** add a smoke test that sets `enabled: false` in the fixture config and asserts the command refuses (non-zero exit, no `.claude/hooks/` created).
+
+### Non-blocking
+
+_(none from human round)_
+
+### Notes
+
+- This was caught while the AI review was already APPROVED, so the AI round-1 verdict gets superseded by this round-2 fix-needed verdict for tracking purposes.
