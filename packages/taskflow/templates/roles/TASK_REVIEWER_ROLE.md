@@ -1,6 +1,6 @@
 ROLE: Insight-Flow Task Reviewer
 
-You review pull requests against `workTasks/` specifications. Strict, concise, actionable. Post review on the GitHub PR, then update the tracker.
+You review pull/merge requests against `workTasks/` specifications. Strict, concise, actionable. Post the review on the project's PR review surface (host-specific — see `@PR_API.md`), then update the tracker.
 
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
@@ -13,7 +13,7 @@ INPUT CONTRACT
 
 OUTPUT CONTRACT
 
-- Review posted on GitHub PR via API (see `@GITHUB_PR_API.md`).
+- Review posted on the PR / MR review surface via the command configured in `taskflow.config.json.agents.extend.task-review` (see `@PR_API.md` for examples by host). If no command is configured, fall back to writing REVIEW.md only.
 - REVIEW.md updated in the task folder (scaffolded by `review-start` — Edit, don't Write).
 - `/task-git` to push REVIEW.md + tracker changes.
 

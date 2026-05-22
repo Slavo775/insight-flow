@@ -43,7 +43,56 @@ Package manager: **pnpm**. The repo is a workspace; `packages/taskflow` is the p
 
 **Schema validation:** `packages/taskflow/src/schema/index.ts` (Zod). Every read/write through `storage.ts` validates against these schemas.
 
-**Agent roles:** The 8 `TASK_*_ROLE.md` / `TASKMASTER_*_ROLE.md` files at repo root drive Claude Code slash commands (`/taskmaster`, `/task-implement`, `/task-review`, `/task-review-fix`, `/task-human-review`, `/task-request-changes`, `/task-incident`, `/taskmaster-change`, `/task-git`). Shared rules live in `AGENT_ENFORCEMENT.md`; GitHub PR API snippets in `GITHUB_PR_API.md`. The `packages/taskflow/scripts/sync-role-templates.mjs` script keeps `packages/taskflow/templates/roles/` in sync with the canonical root files before publish.
+**Agent roles:** The 8 `TASK_*_ROLE.md` / `TASKMASTER_*_ROLE.md` files at repo root drive Claude Code slash commands (`/taskmaster`, `/task-implement`, `/task-review`, `/task-review-fix`, `/task-human-review`, `/task-request-changes`, `/task-incident`, `/taskmaster-change`, `/task-git`). Shared rules live in `AGENT_ENFORCEMENT.md` + `AGENT_PROTOCOL.md`. Host-specific PR API examples live in `PR_API.md` (technology-agnostic — examples only, no shipped defaults). The `packages/taskflow/scripts/sync-role-templates.mjs` script keeps `packages/taskflow/templates/roles/` in sync with the canonical root files before publish.
+
+**Technology agnosticism:** insight-flow's agent prompts contain **no** specific package-manager, language-toolchain, or git-host commands. Project-specific commands (typecheck / lint / test / PR-create / comment-fetch / etc.) are user-supplied via the `agents.extend` mechanism shipped in N12. See "Extending agents with project-specific commands" below.
+
+## Extending agents with project-specific commands
+
+When `insight-flow init` runs in a consumer project, it scaffolds role files + commands but ships **zero technology assumptions**. Add your stack-specific commands to `taskflow.config.json`:
+
+```jsonc
+{
+  "agents": {
+    "extend": {
+      "task-implement":    ["After implementation, run the project's quality gates."],
+      "task-review-fix":   ["Re-run quality gates after every blocker fix."],
+      "task-git":          ["For PR creation, run the project's host CLI."]
+    }
+  }
+}
+```
+
+Each string is appended to the loaded prompt for that agent. Worked examples follow — **as user-supplied content, not shipped defaults**:
+
+**TypeScript + pnpm + GitHub:**
+
+```jsonc
+"agents.extend": {
+  "task-implement":  ["Run `pnpm typecheck && pnpm lint && pnpm test` before marking implemented."],
+  "task-git":        ["For PR creation: `gh pr create --title \"<title>\" --body-file <path>`. Record URL via `gh pr view --json url -q .url`."]
+}
+```
+
+**Python + uv + GitLab:**
+
+```jsonc
+"agents.extend": {
+  "task-implement":  ["Run `uv run mypy . && uv run ruff check . && uv run pytest` before marking implemented."],
+  "task-git":        ["For MR creation: `glab mr create --title \"<title>\" --description-file <path>`."]
+}
+```
+
+**Go + GitHub:**
+
+```jsonc
+"agents.extend": {
+  "task-implement":  ["Run `go vet ./... && golangci-lint run && go test ./...` before marking implemented."],
+  "task-git":        ["For PR creation: `gh pr create --title \"<title>\" --body-file <path>`."]
+}
+```
+
+If `agents.extend` is empty for an agent, that agent runs with the canonical (technology-agnostic) prompt only and will note in its report that the relevant step was skipped.
 
 ## Code Style
 

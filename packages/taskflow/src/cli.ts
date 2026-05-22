@@ -64,7 +64,7 @@ function printHelp(): void {
     insight-flow <command> [options]      Run a task command
 
   COMMANDS
-    init [--force]                        Initialize insight-flow in current project (--force overwrites existing role files)
+    init [--force] [--examples]           Initialize insight-flow in current project (--force overwrites existing role files; --examples adds commented agents.extend stubs)
     ui [--port 6006]                      Launch dashboard server
 
     create --title "..." [--type feat] [--priority high] [--tags a,b]
@@ -121,7 +121,7 @@ try {
     const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
     startServer(config, port);
   } else if (command === "init") {
-    initProject(process.cwd(), !!opts.force);
+    initProject(process.cwd(), !!opts.force, { examples: !!opts.examples });
   } else if (command === "help" || command === "--help" || command === "-h") {
     printHelp();
   } else if (command === "version" || command === "--version" || command === "-v") {

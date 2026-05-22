@@ -155,6 +155,23 @@ insight-flow version          # Show version
 | `rolesDir`    | `.claude/roles`                 | Where role templates are copied on init       |
 | `server.port` | `6006`                          | Dashboard dev server port                     |
 
+### Extending agents with project-specific commands
+
+insight-flow's agent prompts are **technology-agnostic** — no specific package-manager, language-toolchain, or git-host commands are shipped. To wire up your stack's commands (typecheck / lint / test / PR-create / etc.), add them to `taskflow.config.json` under `agents.extend.<agent-name>` as string arrays. Each string is appended to the loaded prompt for that agent at runtime.
+
+```jsonc
+{
+  "agents": {
+    "extend": {
+      "task-implement": ["Run <your-quality-gate-commands> before marking implemented."],
+      "task-git":       ["For PR creation, run <your-host-CLI-command>."]
+    }
+  }
+}
+```
+
+`insight-flow init --examples` writes commented stubs for every built-in agent so you have a starting template. Worked examples for TypeScript+pnpm+GitHub, Python+uv+GitLab, and Go+GitHub are in `CLAUDE.md`. The PR-API per-host examples (curl snippets for GitHub REST, GitLab REST, no-CLI fallback) are in `PR_API.md` — all explicitly marked illustrative, none shipped as defaults.
+
 ## Data Model
 
 Tasks are stored as sharded JSON files for performance:

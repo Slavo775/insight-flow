@@ -798,6 +798,167 @@
       "branch": "rework/N15-compress-agent-role-docs-bundle-cli-reads-template",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/9",
       "mergedAt": "2026-05-22T18:33:17.164Z"
+    },
+    {
+      "id": "N16",
+      "title": "Generalise agent stack across package managers, git hosts, and languages",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N16-generalise-agent-stack-across-package-managers-git",
+      "createdAt": "2026-05-22T17:55:51.117Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-22T17:55:51.118Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T18:09:16.962Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T18:49:21.247Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T18:55:43.195Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T18:57:45.385Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T19:01:50.579Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-22T19:03:42.784Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-22T19:05:28.353Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T19:10:54.635Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T19:11:38.087Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T19:16:36.496Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-22T19:17:10.103Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T19:18:48.269Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-22T19:19:27.398Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T19:20:15.944Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-22T19:21:11.715Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-22T19:29:57.105Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-22T19:31:34.041Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T19:42:54.592Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-22T19:48:31.711Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-22T18:49:21.247Z",
+        "completedAt": "2026-05-22T18:55:43.195Z",
+        "filesChanged": [
+          "AGENT_PROTOCOL.md",
+          "AGENT_ENFORCEMENT.md",
+          "PR_API.md",
+          ".claude/commands/task-git.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "CLAUDE.md",
+          "packages/taskflow/templates/taskflow.prompt.json",
+          "packages/taskflow/src/commands/prompt-build.ts",
+          "packages/taskflow/test/no-technology-tight.test.mjs",
+          "packages/taskflow/package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 5,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "config",
+        "init",
+        "generalisation"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-22T18:09:16.962Z",
+          "commitHash": "74be641",
+          "commitMessage": "docs(tasks): add N16 — generalise agent stack across package managers, git hosts, and languages"
+        },
+        {
+          "at": "2026-05-22T18:57:45.385Z",
+          "commitHash": "8a7ee10",
+          "commitMessage": "feat(taskflow): strip technology mentions from agent prompts; delegate via agents.extend (N16)"
+        },
+        {
+          "at": "2026-05-22T19:11:38.087Z",
+          "commitHash": "18bd99c",
+          "commitMessage": "feat(taskflow): address N16 round-1 review non-blocking items"
+        }
+      ],
+      "branch": "feat/N16-generalise-agent-stack-across-package-managers-git",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/10",
+      "mergedAt": null
     }
   ]
 }

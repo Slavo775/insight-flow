@@ -3,17 +3,16 @@ import { join, resolve } from "node:path";
 import type { ParsedArgs } from "../types.js";
 
 interface PromptConfig {
-  gitTool: "gh" | "git";
   strictCLI: boolean;
-  prStrategy: "draft" | "ready";
   branchPrefix: string;
   requireChecklist: boolean;
 }
 
+// insight-flow ships zero technology assumptions. Project-specific commands
+// (git host, package manager, language toolchain) belong in
+// `taskflow.config.json.agents.extend.<agent>` arrays — see AGENT_PROTOCOL.md.
 const DEFAULTS: PromptConfig = {
-  gitTool: "gh",
   strictCLI: true,
-  prStrategy: "ready",
   branchPrefix: "",
   requireChecklist: true,
 };
@@ -49,20 +48,6 @@ function buildEnforcementBlock(cfg: PromptConfig): string {
     lines.push("");
   }
 
-  const sectionTitle = cfg.gitTool === "gh" ? "GIT / GH TOOL RULE" : "GIT TOOL RULE";
-
-  const prLine =
-    cfg.gitTool === "gh"
-      ? cfg.prStrategy === "draft"
-        ? "- Use `gh pr create --draft` for PR creation"
-        : "- Use `gh pr create` for PR creation (opens ready for review)"
-      : "- Use a git compare URL for PR creation — no gh CLI";
-
-  const pushLine =
-    cfg.gitTool === "gh"
-      ? "- Use `git` for branch creation, commits, and push"
-      : "- Use `git` for all operations (branch, commit, push)";
-
   const branchLine = cfg.branchPrefix
     ? `- Branch naming: ${cfg.branchPrefix}<type>/<task-id>-<slug>`
     : "- Branch naming: <type>/<task-id>-<slug>";
@@ -71,18 +56,21 @@ function buildEnforcementBlock(cfg: PromptConfig): string {
     ? "- Verify all CHECKLIST.md items before marking implemented or done"
     : "- Checklist verification is optional";
 
-  lines.push(sectionTitle);
-  lines.push(prLine);
-  lines.push(pushLine);
+  lines.push("GIT RULE");
+  lines.push("- Use `git` for branch creation, commits, and push (universal).");
+  lines.push(
+    "- PR creation: use the command defined in `taskflow.config.json.agents.extend.task-git` for your project. See `@PR_API.md` for examples by host.",
+  );
   lines.push(branchLine);
   lines.push(checklistLine);
-  lines.push("- Never mix tools for the same operation");
+  lines.push("- Never mix tools for the same operation.");
 
   return lines.join("\n");
 }
 
 const ENFORCEMENT_START = "STRICT ENFORCEMENT — TASK FILE MUTATIONS";
-const GIT_RULE_START = "GIT / GH TOOL RULE";
+const GIT_RULE_START = "GIT RULE";
+const LEGACY_GIT_RULE_START = "GIT / GH TOOL RULE";
 const AGENT_REF = "@AGENT_ENFORCEMENT.md";
 
 // Replace inline enforcement block (or insert @reference) with @AGENT_ENFORCEMENT.md.
@@ -94,9 +82,12 @@ function patchRoleFileWithRef(filePath: string): boolean {
   // Already has the @reference — nothing to do
   if (content.includes(AGENT_REF)) return false;
 
-  // Has inline enforcement block — replace with @reference
+  // Has inline enforcement block — replace with @reference. Accept both the
+  // current "GIT RULE" heading and the legacy "GIT / GH TOOL RULE" heading
+  // (pre-N16) so we can rewrite older role files on first apply.
   const strictStart = content.indexOf(ENFORCEMENT_START);
-  const gitStart = content.indexOf(GIT_RULE_START);
+  let gitStart = content.indexOf(GIT_RULE_START);
+  if (gitStart === -1) gitStart = content.indexOf(LEGACY_GIT_RULE_START);
 
   if (strictStart !== -1 && gitStart !== -1) {
     const afterBlock = content.indexOf("\n---\n", gitStart);

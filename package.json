@@ -5,6 +5,7 @@
   "scripts": {
     "build:package": "pnpm --dir packages/taskflow run build",
     "pack:taskflow": "pnpm --dir packages/taskflow exec npm pack",
-    "play": "pnpm --dir playground run ui"
+    "play": "pnpm --dir playground run ui",
+    "ui": "node packages/taskflow/dist/cli.js ui"
   }
 }

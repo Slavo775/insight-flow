@@ -25,10 +25,17 @@ const AGENT_ROLE_FILE_MAP: Record<string, string> = {
 const EXT_START = "<!-- taskflow:extensions:start -->";
 const EXT_END = "<!-- taskflow:extensions:end -->";
 
-export function initProject(cwd: string = process.cwd(), force: boolean = false): void {
+export function initProject(
+  cwd: string = process.cwd(),
+  force: boolean = false,
+  options: { examples?: boolean } = {},
+): void {
   const configPath = resolve(cwd, "taskflow.config.json");
 
-  // 1. Write config
+  // 1. Write config. insight-flow ships zero technology assumptions — when
+  // `options.examples` is true we add commented `agents.extend` stubs so
+  // the user has a starting template for wiring up their stack's commands.
+  // See CLAUDE.md "Extending agents with project-specific commands".
   let config: TaskflowConfig = {
     workDir: "workTasks",
     shardSize: 10,
@@ -47,8 +54,15 @@ export function initProject(cwd: string = process.cwd(), force: boolean = false)
       // ignore parse errors
     }
   } else {
-    writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
-    console.log("Created taskflow.config.json");
+    const body = options.examples
+      ? buildConfigWithExamples(config)
+      : JSON.stringify(config, null, 2) + "\n";
+    writeFileSync(configPath, body);
+    console.log(
+      options.examples
+        ? "Created taskflow.config.json with commented agents.extend stubs"
+        : "Created taskflow.config.json",
+    );
   }
 
   // 2. Create workTasks dir + master.json
@@ -553,4 +567,33 @@ function inferName(cwd: string): string {
     // ignore
   }
   return resolve(cwd).split("/").pop() || "project";
+}
+
+/**
+ * Compose taskflow.config.json with commented `agents.extend` stubs. We
+ * emit a JSONC-friendly body (JSON.stringify wouldn't include comments)
+ * so users see the contract immediately and can uncomment + fill in their
+ * stack's commands. The JSON parser tolerates the leading/trailing
+ * whitespace; consumers that re-write config via JSON.stringify will lose
+ * the comments but keep the data.
+ */
+function buildConfigWithExamples(config: TaskflowConfig): string {
+  const base = JSON.stringify(config, null, 2);
+  // Insert the agents.extend stub block just before the final closing brace.
+  const stub = `,
+  "agents": {
+    "// extend": "Strings here are appended to each agent's prompt at runtime. insight-flow ships no technology assumptions — these stubs document the contract.",
+    "extend": {
+      "task-implement":     [],
+      "task-review":        [],
+      "task-review-fix":    [],
+      "task-incident":      [],
+      "task-git":           [],
+      "taskmaster":         [],
+      "task-human-review":  [],
+      "task-request-changes": []
+    }
+  }
+`;
+  return base.replace(/\n}\s*$/, stub + "}\n");
 }

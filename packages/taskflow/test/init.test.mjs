@@ -42,6 +42,65 @@ test("init without agents config — no Project Extensions section", () => {
   }
 });
 
+test("init writes a technology-agnostic config (no stack / gitTool / prStrategy fields)", () => {
+  const dir = makeTempDir();
+  try {
+    initProject(dir);
+    const config = JSON.parse(readFileSync(resolve(dir, "taskflow.config.json"), "utf-8"));
+    // Positive shape assertion — these are the canonical keys insight-flow ships.
+    const allowedKeys = new Set([
+      "workDir",
+      "shardSize",
+      "projectName",
+      "rolesDir",
+      "server",
+      "activityEngine",
+      "agents",
+    ]);
+    for (const key of Object.keys(config)) {
+      assert.ok(
+        allowedKeys.has(key),
+        `Unexpected key '${key}' in default config. insight-flow ships zero technology assumptions — anything outside the allowed set risks re-introducing the N15 blockers fixed by N16.`,
+      );
+    }
+    // Specifically forbid the keys the N15/N16 history surfaced.
+    assert.equal(config.stack, undefined, "init must not write a `stack` field");
+    assert.equal(config.gitTool, undefined, "init must not write a `gitTool` field");
+    assert.equal(config.prStrategy, undefined, "init must not write a `prStrategy` field");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("init --examples writes commented agents.extend stubs for every built-in agent", () => {
+  const dir = makeTempDir();
+  try {
+    initProject(dir, false, { examples: true });
+    const body = readFileSync(resolve(dir, "taskflow.config.json"), "utf-8");
+    // The stub block is a JSONC-ish helper: parse-tolerant for human edit.
+    assert.match(body, /"agents":/, "Should contain agents block");
+    assert.match(body, /"extend":/, "Should contain extend block");
+    for (const agent of [
+      "task-implement",
+      "task-review",
+      "task-review-fix",
+      "task-incident",
+      "task-git",
+      "taskmaster",
+      "task-human-review",
+      "task-request-changes",
+    ]) {
+      assert.match(
+        body,
+        new RegExp(`"${agent}":\\s*\\[\\]`),
+        `Should include empty stub for agent '${agent}'`,
+      );
+    }
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("init with agents.extend — appends Project Extensions to role file", () => {
   const dir = makeTempDir();
   try {
