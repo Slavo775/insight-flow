@@ -9,6 +9,15 @@
       "type": "ai",
       "by": "task-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-22T21:41:36.473Z",
+      "endedAt": "2026-05-22T21:42:32.033Z",
+      "verdict": "fix-needed",
+      "comment": "Mobile Safari shows yellow (reconnecting) live-dot; mutations do not repaint. Two blockers: (1) no WS keep-alive ping, Safari kills idle WS; (2) ws.onopen does not refetch state on reconnect. Verify same on desktop.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
