@@ -112,3 +112,38 @@ Same shape as N15's three generalisation blockers but on a new axis: the canonic
 
 - This issue was missed by both the implementer and the round-1 AI reviewer. The new `no-technology-tight.test.mjs` regression test doesn't catch model-name strings — its forbidden-pattern list covers package managers, language toolchains, and git hosts but not Claude model identifiers. Worth extending the test's pattern list with `Claude (Opus|Sonnet|Haiku) [0-9]` to prevent future regressions on this axis.
 - Recommendation: keep N16 at `fix-needed`; land the trailer fix + extend the regression test in a small commit on this branch before merging PR #10.
+
+
+---
+
+## Round 3 — Human Review (follow-up to Round 2)
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-22
+**Verdict:** FIX NEEDED (additional blocker on top of Round 2)
+
+The human's feedback verbatim, quoting `.claude/commands/task-git.md` step 3 of the CREATE PR workflow:
+
+> 3. **Create PR** — invoke the command defined in `taskflow.config.json.agents.extend.task-git` for your project's git host. If no command is configured, print the host's compare URL (e.g. `https://<host>/<owner>/<repo>/compare/main...<branch>`) and prompt the user to open the PR manually. See the Examples appendix at the bottom of this file for common per-host invocations. better will be regarding to URL to compose url all with description title and so on so this loooong url with all sets
+
+### Summary
+
+The current bare compare URL (`compare/main...<branch>`) only takes the user to the create-PR page — they still have to type the title and body manually. Every major host accepts **query parameters** that pre-fill the form (`?expand=1&title=<URL-encoded>&body=<URL-encoded>` on GitHub, equivalent params on GitLab / Bitbucket). The agent already has the title (from the task) and body (from the commit-message bullets) — composing the long URL costs nothing and saves the user a manual paste.
+
+### Blockers
+
+- **`.claude/commands/task-git.md:51` (CREATE PR workflow step 3, "If no command is configured" fallback)** outputs a bare compare URL. **Fix:** when no `agents.extend.task-git` command is configured, compose a host-appropriate URL that includes the task title + commit-body bullets as URL-encoded query params. The canonical instruction stays technology-agnostic ("compose a host-appropriate prefill URL using the task title and PR body, URL-encoded"); the per-host syntax goes into the Examples appendix.
+  - GitHub: `https://github.com/<owner>/<repo>/compare/<base>...<branch>?expand=1&title=<encoded-title>&body=<encoded-body>`
+  - GitLab: `https://gitlab.com/<owner>/<repo>/-/merge_requests/new?merge_request[source_branch]=<branch>&merge_request[target_branch]=<base>&merge_request[title]=<encoded>&merge_request[description]=<encoded>`
+  - Bitbucket: `https://bitbucket.org/<owner>/<repo>/pull-requests/new?source=<branch>&dest=<base>&t=1` (Bitbucket's prefill support is limited; document the limitation).
+
+### Suggestions (non-blocking)
+
+- Also update the matching block in `PR_API.md` Examples appendix's "no host CLI installed" example so it shows the same rich URL pattern, not a bare compare URL.
+- Consider a small helper in the agent's prompt: a 2-line `node -e "process.stdout.write(encodeURIComponent('...'))"` snippet so the agent doesn't have to URL-encode by hand. Or document `jq -sRr @uri` as the canonical encoder.
+- Bonus: the agent already knows the task title and the commit body it just wrote — it should be able to compose the URL deterministically without prompting the user.
+
+### Notes
+
+- This issue persists from N14's "trim dead branch" pass that originally removed the rich compare-URL block from `task-git.md`. The bare-URL version reintroduced in N16's fallback is arguably worse than what existed before N14 — bringing back the rich URL (host-agnostic in canonical text + per-host examples) is the right resolution.
+- Combined with Round 2's `Co-Authored-By` blocker, N16 now has **2 human-flagged blockers** + the 6 round-1 non-blockings (5 of which were fixed in commit `18bd99c`). Recommend fixing both Round-2 and Round-3 blockers in a single follow-up commit, then opening Round 4 for re-approval.

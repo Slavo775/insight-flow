@@ -18,6 +18,15 @@
       "type": "human",
       "by": "task-human-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-22T19:18:48.270Z",
+      "endedAt": "2026-05-22T19:19:27.398Z",
+      "verdict": "fix-needed",
+      "comment": "Round 3 human review: additional blocker on top of Round 2. Bare compare URL fallback should compose a rich pre-fill URL (title + body as query params, URL-encoded) so the create-PR form opens populated. GitHub uses ?expand=1&title=&body=; GitLab uses merge_request[title]/[description]; Bitbucket has limited prefill. Canonical instruction stays host-agnostic; per-host syntax in Examples appendix + PR_API.md.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
