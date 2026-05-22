@@ -40,3 +40,53 @@ The compression pass was scoped to "tighten what's already here" but didn't addr
 ---
 
 (The AI review of N15 hasn't happened yet — when one is added later, append below this section as `## Round 2` per the new template flow.)
+
+
+---
+
+## Round 2 — AI Review
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-22
+**Verdict:** FIX NEEDED (agrees with human review round 1)
+
+### Summary
+
+PR #9 ships the four scoped wins (role-doc compression, CLI read bundling via `--with-spec` / `--spec`, REVIEW.md scaffolding, `stats --tokens`) cleanly. Tests green (12/12). The diff is honest: −1261 / +992, every role ≤ 40 lines, `AGENT_PROTOCOL.md` referenced by all 8 roles. As a delta, this is solid work.
+
+However, I am confirming the human's verdict of **fix-needed** for the three generalisation blockers. The fix lives in N16, which has been opened on a separate branch (`feat/N16-...`). N15 should remain `fix-needed` until N16 lands and N15's protocol/role docs pick up the substituted commands.
+
+Risk assessment: **low for this delta in isolation**, **medium for shipping it as-is to other-stack consumers** (which is exactly what the human flagged).
+
+### Blocker verification
+
+All three human-flagged blockers reproduced from current code on this branch.
+
+- **B1 (hardcoded `npm` / `npx`)** — confirmed at `AGENT_PROTOCOL.md:14`:
+  > 6. **Quality gates** — run `npx tsc --noEmit` (if TS in scope), `npm run lint` (if a lint config exists), …
+
+  Single occurrence after compression (the consolidation actually *helped* — there used to be 4+ identical references across roles). Fix is genuinely a one-line substitution in the protocol file once N16's `prompt-build` substitution lands.
+
+- **B2 (hardcoded `gh` / GitHub)** — confirmed at 7 sites:
+  - `AGENT_PROTOCOL.md:34` (`gh pr create` for PR creation)
+  - `.claude/commands/task-git.md:22, 51, 53, 64` (multiple `gh pr create` / `gh pr view` invocations)
+  - `TASK_REVIEWER_ROLE.md:3, 16` and `TASK_REVIEW_FIXER_ROLE.md:3, 11, 16, 23` (narrative "GitHub PR" references — fine to keep narrative, but the *commands* need placeholders)
+
+  Wider blast radius than B1. N16's `{{PR_CREATE_CMD}}` + the `PR_API.md` host-variant approach is the right shape.
+
+- **B3 (hardcoded TypeScript — `tsc`)** — confirmed at `AGENT_PROTOCOL.md:14` (same line as B1). Single occurrence; fixes alongside B1 with `{{TYPECHECK_CMD}}`.
+
+### Non-blocking verification
+
+Two minor inconsistencies the human didn't catch, worth fixing inside N16 (cheap) but not blocking on their own:
+
+1. **`scaffoldReviewMd` Round-N section names diverge from the Round-1 template.** The template (`packages/taskflow/templates/task/REVIEW.md.tpl`) has `Summary` · `Checklist verification` · `Blockers` · `Non-blocking` · `Security & edge cases` · `Notes`. The Round-N append in `packages/taskflow/src/spec.ts:scaffoldReviewMd` writes `Summary` · `Blocker verification` · `Non-blocking verification` · `Notes`. Different shape between rounds makes downstream `grep`-by-section brittle. **Fix:** keep section names identical across rounds (Round-N is a re-review of prior findings, but the heading structure should match). Optionally add an explicit `## Verdict` heading per round.
+
+2. **`TASK_REVIEWER_ROLE.md:24` claims mandatory REVIEW.md structure includes "Security & edge cases" + "Next actions", but the new template ships "Security & edge cases" + "Notes" (no "Next actions").** Either add `## Next actions` to the template or update the role doc to drop the mention. Currently spec and implementation disagree by one heading.
+
+### Notes
+
+- The compression is *good for solving the generalisation problem later*: B1 + B3 went from ~4 hit sites pre-N15 to 1 hit site post-N15. N16's substitution work has less surface area thanks to this consolidation.
+- The "manual quality-equivalence dry run" CHECKLIST item was deferred from N15 to N16 by the implementer's report. Confirmed appropriate — running it against the *generalised* roles (post-N16) is the right place to do it.
+- The implementer's substitution of `role-output-golden.test.mjs` (with mocked-LLM fixtures, originally scoped) for the simpler `scaffold-and-bundle.test.mjs` is **accepted** — the new tests cover the load-bearing deterministic plumbing, and the mocked-LLM harness was over-engineered. Flagging here so the deviation is on the record.
+- Recommend: keep N15 at `fix-needed`. After N16 lands and the substitution runs against this repo, do a final pass on N15 (verify B1/B2/B3 are byte-resolved, fix the two Non-blocking items above), then approve.
