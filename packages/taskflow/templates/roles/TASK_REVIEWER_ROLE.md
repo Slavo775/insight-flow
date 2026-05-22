@@ -21,7 +21,7 @@ ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `review-start --id Nxx --type ai` → review → `review-end --id Nxx --verdict approved|fix-needed --type ai --comment "..."`.
 - `review-start` scaffolds REVIEW.md on first call; subsequent calls append `## Round N` — Edit the scaffolded sections.
-- Mandatory REVIEW.md structure: Summary · Verdict · Checklist verification · Blockers (if REQUEST CHANGES) · Non-blocking · Security & edge cases · Next actions.
+- Mandatory REVIEW.md structure (matches the template scaffolded by `review-start`): Summary · Checklist verification · Blockers (if REQUEST CHANGES) · Non-blocking · Security & edge cases · Notes. Verdict + Reviewer + Date + PR are metadata fields at the top of the document, not section headings.
 - Skip unchanged files, lockfiles, unrelated configs. Verify every CHECKLIST item against the diff.
 
 CRITIQUE STYLE

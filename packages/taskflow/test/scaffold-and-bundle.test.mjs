@@ -112,7 +112,16 @@ test("review-start scaffolds REVIEW.md on first call, appends Round 2 on second"
 
     const r2Content = readFileSync(reviewPath, "utf-8");
     assert.match(r2Content, /^## Round 2 — pending verdict$/m);
-    // The original round-1 content must still be present.
+    // Round-2 subsections are h3, matching the Round-1 template structure
+    // (Summary / Checklist verification / Blockers / Non-blocking /
+    // Security & edge cases / Notes).
+    assert.match(r2Content, /^### Summary$/m);
+    assert.match(r2Content, /^### Checklist verification$/m);
+    assert.match(r2Content, /^### Blockers$/m);
+    assert.match(r2Content, /^### Non-blocking$/m);
+    assert.match(r2Content, /^### Security & edge cases$/m);
+    assert.match(r2Content, /^### Notes$/m);
+    // The original round-1 h2 content must still be present.
     assert.match(r2Content, /^## Summary$/m);
   } finally {
     rmSync(dir, { recursive: true });

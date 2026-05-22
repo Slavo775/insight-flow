@@ -77,7 +77,11 @@ export function scaffoldReviewMd(
     return { created: true, round: 1 };
   }
 
-  // Existing file — append a Round N block.
+  // Existing file — append a Round N block. Section headings mirror the
+  // Round-1 template (Summary / Checklist verification / Blockers /
+  // Non-blocking / Security & edge cases / Notes) but at h3 so they nest
+  // cleanly under the `## Round N` h2 and don't collide with the original
+  // round's global h2 sections.
   const existing = readFileSync(reviewMd, "utf-8");
   const roundMatches = existing.match(/^## Round \d+/gm) ?? [];
   const nextRound = roundMatches.length + 2; // initial review = round 1 (no heading); next round starts at 2
@@ -87,10 +91,12 @@ export function scaffoldReviewMd(
     `**Reviewer:** ${vars.reviewer}\n` +
     `**Date:** ${vars.date}\n` +
     `**Verdict:** pending\n\n` +
-    `## Summary\n\n` +
-    `## Blocker verification\n\n` +
-    `## Non-blocking verification\n\n` +
-    `## Notes\n`;
+    `### Summary\n\n` +
+    `### Checklist verification\n\n` +
+    `### Blockers\n\n` +
+    `### Non-blocking\n\n` +
+    `### Security & edge cases\n\n` +
+    `### Notes\n`;
 
   writeFileSync(reviewMd, existing + block);
   return { created: false, round: nextRound };
