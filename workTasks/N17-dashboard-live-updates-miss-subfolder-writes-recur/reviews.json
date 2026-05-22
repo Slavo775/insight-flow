@@ -1,0 +1,14 @@
+{
+  "taskId": "N17",
+  "reviews": [
+    {
+      "startedAt": "2026-05-22T21:02:03.681Z",
+      "endedAt": "2026-05-22T21:04:02.837Z",
+      "verdict": "approved",
+      "comment": "All 6 checklist items pass; macOS native recursive watch + 100ms debounce verified live (1 touch → 1 frame, 5-touch burst → 1 frame). Non-blocking notes: no automated watcher test, no error listener on watchers, refreshSubdirs runs on every root event. Linux fallback ships untested on linux but gated by process.platform.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "taskId": "N18",
+  "reviews": [
+    {
+      "startedAt": "2026-05-22T21:02:03.754Z",
+      "endedAt": "2026-05-22T21:04:02.914Z",
+      "verdict": "approved",
+      "comment": "All 8 checklist items pass; install-activity-hook is idempotent, preserves unrelated PostToolUse entries, and the dashboard surfaces clear empty-states for hook-missing/settings-missing/both-missing plus an Engine: off chip when config disables. Non-blocking notes: dead-code mkdir, detectActivityHookStatus untested directly, settings-missing copy is awkward, intent comment missing for the .local.json-only writer behaviour.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
