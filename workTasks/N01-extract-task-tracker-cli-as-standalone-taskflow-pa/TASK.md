@@ -6,10 +6,12 @@
 **Modified:** 2026-05-13
 
 ## Problem
+
 - The task lifecycle system (CLI, agent roles, JSON schema, dashboard) is tightly coupled to the insight-flow repo. It has standalone value as a reusable framework — "Storybook for tasking" — but cannot be adopted by other projects without copy-pasting.
 - Goal: extract the core into a portable npm package (`taskflow`) so any Claude Code user can `npx taskflow init` and get structured, auditable, visualizable AI task execution.
 
 ## Goal
+
 1. Standalone npm package with `taskflow` CLI binary.
 2. `taskflow init` scaffolds `workTasks/`, config, and agent role files into any project.
 3. All existing `task-tracker.mjs` commands work via `taskflow <command>`.
@@ -21,7 +23,9 @@
 9. External tracker sync (Jira, Linear, GitHub Issues) via importers/exporters.
 
 ## Scope
+
 ### In scope
+
 - Extract `scripts/task-tracker.mjs` logic into `packages/taskflow/` (monorepo structure).
 - Add `bin` entry so it's callable as `taskflow` or `npx taskflow`.
 - `taskflow.config.json` support: custom `workDir`, shard size, project name.
@@ -36,9 +40,11 @@
 - External tracker sync: importers/exporters for Jira, Linear, and GitHub Issues (bidirectional where feasible).
 
 ### Out of scope
+
 - None — this task covers the full framework extraction.
 
 ## Implementation plan
+
 1. **Monorepo structure** — Add `packages/taskflow/` with `package.json` (bin: `taskflow`), `tsconfig.json`. Keep insight-flow app at root.
 2. **Move core logic** — Extract storage layer, command handlers, and state machine from `task-tracker.mjs` into `packages/taskflow/src/` as proper modules:
    - `src/storage.ts` — shard read/write, master management
@@ -64,9 +70,11 @@
    - Zero config: reads `taskflow.config.json` for `workDir`, otherwise defaults to `workTasks/`.
    - Implementation: lightweight Node server (e.g., `node:http` or `hono`) bundled into the CLI — no separate install needed.
 10. **Dashboard package** — Extract insight-flow viz components into `packages/dashboard/`:
-   - Pre-built SPA bundle shipped with the CLI (served by the dev server).
-   - Static report generation mode for CI (`taskflow report` → HTML output).
-   - Embeddable React component export for integration into existing admin panels.
+
+- Pre-built SPA bundle shipped with the CLI (served by the dev server).
+- Static report generation mode for CI (`taskflow report` → HTML output).
+- Embeddable React component export for integration into existing admin panels.
+
 10. **npm publish** — Set up package naming (`taskflow` or scoped `@taskflow/cli` + `@taskflow/dashboard`), write README, configure `prepublishOnly` build script, publish to npm.
 11. **CI/CD & webhooks** — GitHub Actions workflow templates (`.github/workflows/taskflow.yml`) for task status checks. Webhook system: configurable HTTP callbacks on status transitions (e.g., notify Slack on `approved`). Plugin interface: `taskflow.config.json` `plugins` array for custom lifecycle hooks.
 12. **External sync** — Importer/exporter modules in `packages/taskflow/src/sync/`:
@@ -75,6 +83,7 @@
     - `github-issues.ts` — sync with GitHub Issues (labels map to task types/statuses).
 
 ## Verification
+
 - `cd /tmp/test-project && npx taskflow init` creates expected structure.
 - `taskflow create --title "Test" --type feat --priority low` creates a task.
 - `taskflow current` / `taskflow list` / `taskflow stats` work.
@@ -83,6 +92,7 @@
 - JSON schema validates existing N00 task data.
 
 ## Notes
+
 - The dashboard already reads the same JSON format, so extraction is mostly packaging work.
 - The role `.md` files are the "addon" equivalent — each role is a specialized agent behavior that plugs into the lifecycle.
 - Consider naming: `taskflow`, `@taskflow/cli`, `ai-taskflow`, `claude-taskflow` — check npm availability before publish.

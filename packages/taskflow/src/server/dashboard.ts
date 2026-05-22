@@ -122,8 +122,40 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .detail-panel h2 { font-size: 16px; margin-bottom: 16px; }
     .detail-panel .close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
     .detail-section { margin-bottom: 16px; }
-    .detail-section h3 { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .detail-section h3 { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .detail-section h3 .count { background: var(--border); color: var(--text-muted); border-radius: 10px; padding: 1px 7px; font-size: 10px; }
     .detail-section pre { font-size: 11px; background: var(--surface); padding: 8px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; }
+    .kv { display: grid; grid-template-columns: 110px 1fr; gap: 4px 12px; font-size: 12px; background: var(--surface); padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; }
+    .kv dt { color: var(--text-muted); font-size: 11px; padding-top: 2px; }
+    .kv dd { color: var(--text); word-break: break-word; }
+    .kv dd a { color: var(--accent); text-decoration: none; }
+    .kv dd a:hover { text-decoration: underline; }
+    .kv dd .mono { font-family: inherit; color: var(--text); }
+    .kv dd .muted { color: var(--text-muted); }
+    .item-list { display: flex; flex-direction: column; gap: 8px; }
+    .item { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; }
+    .item-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+    .item-head .who { color: var(--text-muted); font-size: 11px; }
+    .item-head .when { color: var(--text-muted); font-size: 11px; margin-left: auto; }
+    .item-body { color: var(--text); font-size: 12px; line-height: 1.5; }
+    .item-body .comment { color: var(--text); border-left: 2px solid var(--border); padding: 2px 0 2px 10px; margin-top: 6px; white-space: pre-wrap; }
+    .item-foot { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
+    .files { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .file-chip { background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; font-size: 10px; color: var(--text-muted); }
+    .timeline-mini { display: flex; flex-direction: column; gap: 4px; font-size: 11px; }
+    .timeline-mini-item { display: grid; grid-template-columns: 130px auto 1fr; gap: 8px; align-items: baseline; }
+    .timeline-mini-item .t-when { color: var(--text-muted); font-size: 10px; }
+    .timeline-mini-item .t-who { color: var(--text-muted); font-size: 10px; }
+    .commit-list { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+    .commit { display: flex; gap: 10px; align-items: baseline; padding: 6px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+    .commit .hash { color: var(--accent); font-size: 11px; flex-shrink: 0; }
+    .commit .msg { color: var(--text); font-size: 12px; flex: 1; min-width: 0; word-break: break-word; }
+    .commit .when { color: var(--text-muted); font-size: 10px; flex-shrink: 0; }
+    .severity { font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+    .severity-critical { background: #4a0f0f; color: #fca5a5; }
+    .severity-high { background: #3b1111; color: var(--red); }
+    .severity-medium { background: #3b2f06; color: var(--yellow); }
+    .severity-low { background: #1e3a5f; color: var(--cyan); }
     .empty { color: var(--text-muted); font-size: 12px; padding: 20px; text-align: center; }`;
 
 function getScript(activityEnabled: boolean, _port: number): string {
@@ -207,18 +239,144 @@ function getScript(activityEnabled: boolean, _port: number): string {
 
     function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+    function kvRow(label, value) {
+      if (value === null || value === undefined || value === '') return '';
+      return '<dt>' + escHtml(label) + '</dt><dd>' + value + '</dd>';
+    }
+
+    function section(title, count, body) {
+      var head = '<h3>' + escHtml(title);
+      if (typeof count === 'number') head += '<span class="count">' + count + '</span>';
+      head += '</h3>';
+      return '<div class="detail-section">' + head + body + '</div>';
+    }
+
+    function fileChips(files) {
+      if (!files || !files.length) return '';
+      return '<div class="files">' + files.map(function(f) {
+        return '<span class="file-chip">' + escHtml(f) + '</span>';
+      }).join('') + '</div>';
+    }
+
+    function renderInfo(t) {
+      var rows = [
+        kvRow('Type',     '<span class="mono">' + escHtml(t.type) + '</span>'),
+        kvRow('Priority', '<span class="mono">' + escHtml(t.priority) + '</span>'),
+        kvRow('Status',   '<span class="badge ' + badgeClass(t.status) + '">' + escHtml(t.status) + '</span>'),
+        kvRow('Created',  '<span class="muted">' + formatTime(t.createdAt) + '</span>'),
+        kvRow('Folder',   '<span class="mono">' + escHtml(t.folder || '—') + '</span>'),
+        kvRow('Branch',   t.branch ? '<span class="mono">' + escHtml(t.branch) + '</span>' : '<span class="muted">—</span>'),
+        kvRow('Tags',     (t.tags && t.tags.length) ? t.tags.map(function(x) { return '<span class="file-chip">#' + escHtml(x) + '</span>'; }).join(' ') : '<span class="muted">—</span>'),
+        kvRow('PR',       t.mrUrl ? '<a href="' + escHtml(t.mrUrl) + '" target="_blank" rel="noopener">' + escHtml(t.mrUrl) + '</a>' : '<span class="muted">—</span>'),
+      ].join('');
+      return '<dl class="kv">' + rows + '</dl>';
+    }
+
+    function renderImplementation(impl) {
+      if (!impl) return '<div class="empty">Not started</div>';
+      var minutes = impl.startedAt && impl.completedAt
+        ? Math.round((new Date(impl.completedAt).getTime() - new Date(impl.startedAt).getTime()) / 60000)
+        : null;
+      var rows = [
+        kvRow('Started',   impl.startedAt   ? formatTime(impl.startedAt)   : '<span class="muted">—</span>'),
+        kvRow('Completed', impl.completedAt ? formatTime(impl.completedAt) : '<span class="muted">—</span>'),
+        kvRow('Duration',  minutes !== null ? '<span class="mono">' + minutes + ' min</span>' : '<span class="muted">—</span>'),
+        kvRow('Tokens',    impl.tokensUsed  ? '<span class="mono">' + impl.tokensUsed.toLocaleString() + '</span>' : '<span class="muted">—</span>'),
+        kvRow('Files',     (impl.filesChanged && impl.filesChanged.length) ? fileChips(impl.filesChanged) : '<span class="muted">none</span>'),
+      ].join('');
+      return '<dl class="kv">' + rows + '</dl>';
+    }
+
+    function renderReview(r, i) {
+      var verdict = r.verdict || 'pending';
+      var head = '<div class="item-head">' +
+        '<strong>Round ' + (i + 1) + '</strong>' +
+        '<span class="badge ' + badgeClass(verdict) + '">' + escHtml(verdict) + '</span>' +
+        '<span class="who">' + escHtml(r.type || 'ai') + ' · ' + escHtml(r.by || '?') + '</span>' +
+        '<span class="when">' + formatTime(r.startedAt) + (r.endedAt ? ' → ' + formatTime(r.endedAt) : '') + '</span>' +
+        '</div>';
+      var body = r.comment ? '<div class="item-body"><div class="comment">' + escHtml(r.comment) + '</div></div>' : '';
+      var fix = '';
+      if (r.fix) {
+        var fixMinutes = r.fix.startedAt && r.fix.endedAt
+          ? Math.round((new Date(r.fix.endedAt).getTime() - new Date(r.fix.startedAt).getTime()) / 60000)
+          : null;
+        fix = '<div class="item-foot">' +
+          '<span>fix: <span class="badge ' + badgeClass(r.fix.status) + '">' + escHtml(r.fix.status) + '</span></span>' +
+          '<span class="who">by ' + escHtml(r.fix.by || '?') + '</span>' +
+          (fixMinutes !== null ? '<span>' + fixMinutes + ' min</span>' : '') +
+          '</div>' +
+          (r.fix.comment ? '<div class="item-body"><div class="comment">' + escHtml(r.fix.comment) + '</div></div>' : '') +
+          fileChips(r.fix.filesChanged);
+      }
+      return '<div class="item">' + head + body + fix + '</div>';
+    }
+
+    function renderPush(p) {
+      return '<div class="commit">' +
+        '<span class="hash">' + escHtml((p.commitHash || '').slice(0, 8)) + '</span>' +
+        '<span class="msg">' + escHtml(p.commitMessage || '') + '</span>' +
+        '<span class="when">' + formatTime(p.at) + '</span>' +
+        '</div>';
+    }
+
+    var SEVERITY_CLASS = { critical: 'severity-critical', high: 'severity-high', medium: 'severity-medium', low: 'severity-low' };
+    function severityChip(sev) {
+      var cls = SEVERITY_CLASS[sev] || 'severity-medium';
+      return '<span class="severity ' + cls + '">' + escHtml(sev || 'medium') + '</span>';
+    }
+
+    function renderIncident(inc) {
+      var rows = [
+        kvRow('Severity', severityChip(inc.severity)),
+        kvRow('Status',   '<span class="badge ' + badgeClass(inc.status) + '">' + escHtml(inc.status) + '</span>'),
+        kvRow('Reported', formatTime(inc.reportedAt)),
+        kvRow('Resolved', inc.resolvedAt ? formatTime(inc.resolvedAt) : '<span class="muted">—</span>'),
+        kvRow('Branch',   inc.branch ? '<span class="mono">' + escHtml(inc.branch) + '</span>' : '<span class="muted">—</span>'),
+      ].filter(Boolean).join('');
+      var description = inc.description ? '<div class="item-body"><div class="comment">' + escHtml(inc.description) + '</div></div>' : '';
+      var root = inc.rootCause ? '<div class="item-body" style="margin-top:8px"><strong style="font-size:11px;color:var(--text-muted)">ROOT CAUSE</strong><div class="comment">' + escHtml(inc.rootCause) + '</div></div>' : '';
+      var fix = inc.fix ? '<div class="item-body" style="margin-top:8px"><strong style="font-size:11px;color:var(--text-muted)">FIX</strong><div class="comment">' + escHtml(inc.fix) + '</div></div>' : '';
+      return '<div class="item">' +
+        '<div class="item-head"><strong>' + escHtml(inc.id) + '</strong> — ' + escHtml(inc.title) + '</div>' +
+        '<dl class="kv">' + rows + '</dl>' +
+        description + root + fix +
+        '</div>';
+    }
+
+    function renderStatusHistory(hist) {
+      if (!hist || !hist.length) return '<div class="empty">No history</div>';
+      var items = hist.slice().reverse().map(function(h) {
+        return '<div class="timeline-mini-item">' +
+          '<span class="t-when">' + formatTime(h.at) + '</span>' +
+          '<span class="badge ' + badgeClass(h.status) + '">' + escHtml(h.status) + '</span>' +
+          '<span class="t-who">by ' + escHtml(h.by || '?') + '</span>' +
+          '</div>';
+      }).join('');
+      return '<div class="timeline-mini">' + items + '</div>';
+    }
+
     function showDetail(id) {
       var t = tasks.find(function(x) { return x.id === id; });
       if (!t) return;
       var dc = document.getElementById('detail-content');
+      var reviews = t.reviews || [];
+      var incidents = t.incidents || [];
+      var pushes = t.pushes || [];
       dc.innerHTML =
-        '<h2>' + t.id + ' — ' + escHtml(t.title) + '</h2>' +
-        '<div class="detail-section"><h3>Info</h3><pre>' + JSON.stringify({ type: t.type, priority: t.priority, status: t.status, created: t.createdAt, folder: t.folder, branch: t.branch, mrUrl: t.mrUrl }, null, 2) + '</pre></div>' +
-        '<div class="detail-section"><h3>Implementation</h3><pre>' + JSON.stringify(t.implementation, null, 2) + '</pre></div>' +
-        (t.reviews && t.reviews.length ? '<div class="detail-section"><h3>Reviews (' + t.reviews.length + ')</h3><pre>' + JSON.stringify(t.reviews, null, 2) + '</pre></div>' : '') +
-        (t.pushes && t.pushes.length ? '<div class="detail-section"><h3>Pushes (' + t.pushes.length + ')</h3><pre>' + JSON.stringify(t.pushes, null, 2) + '</pre></div>' : '') +
-        (t.incidents && t.incidents.length ? '<div class="detail-section"><h3>Incidents (' + t.incidents.length + ')</h3><pre>' + JSON.stringify(t.incidents, null, 2) + '</pre></div>' : '') +
-        '<div class="detail-section"><h3>Status History</h3><pre>' + JSON.stringify(t.statusHistory, null, 2) + '</pre></div>';
+        '<h2>' + escHtml(t.id) + ' — ' + escHtml(t.title) + '</h2>' +
+        section('Info', null, renderInfo(t)) +
+        section('Implementation', null, renderImplementation(t.implementation)) +
+        (reviews.length
+          ? section('Reviews', reviews.length, '<div class="item-list">' + reviews.map(renderReview).join('') + '</div>')
+          : '') +
+        (pushes.length
+          ? section('Pushes', pushes.length, '<div class="commit-list">' + pushes.map(renderPush).join('') + '</div>')
+          : '') +
+        (incidents.length
+          ? section('Incidents', incidents.length, '<div class="item-list">' + incidents.map(renderIncident).join('') + '</div>')
+          : '') +
+        section('Status history', (t.statusHistory || []).length, renderStatusHistory(t.statusHistory));
       document.getElementById('detail').style.display = 'block';
       document.getElementById('overlay').style.display = 'block';
     }

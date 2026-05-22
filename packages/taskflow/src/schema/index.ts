@@ -55,10 +55,12 @@ export const IncidentStatusEntrySchema = z.object({
   by: z.string().optional(),
 });
 
+export const IncidentSeveritySchema = z.enum(["critical", "high", "medium", "low"]);
+
 export const IncidentSchema = z.object({
   id: z.string(),
   title: z.string(),
-  severity: z.string(),
+  severity: IncidentSeveritySchema,
   status: z.string(),
   reportedAt: z.string(),
   resolvedAt: z.string().nullable(),
@@ -95,9 +97,14 @@ export const TaskSchema = z.object({
     filesChanged: z.array(z.string()),
     tokensUsed: z.number().nullable(),
   }),
-  reviews: z.array(ReviewSchema),
+  // reviews/incidents live in per-task side files (reviews.json, incidents.json).
+  // Both remain accepted inline for legacy shards predating the split.
+  reviews: z.array(ReviewSchema).optional(),
   changesAfterImplementation: z.array(ChangeRequestSchema),
-  incidents: z.array(IncidentSchema),
+  incidents: z.array(IncidentSchema).optional(),
+  reviewCount: z.number().int().min(0).optional(),
+  lastReviewVerdict: z.string().nullable().optional(),
+  openIncidentCount: z.number().int().min(0).optional(),
   committedAt: z.string().nullable(),
   totalDurationMinutes: z.number().nullable(),
   tags: z.array(z.string()),
@@ -113,6 +120,16 @@ export const ShardFileSchema = z.object({
     to: z.number().int().min(0),
   }),
   tasks: z.array(TaskSchema),
+});
+
+export const ReviewsFileSchema = z.object({
+  taskId: z.string().regex(/^N\d{2,}$/),
+  reviews: z.array(ReviewSchema),
+});
+
+export const IncidentsFileSchema = z.object({
+  taskId: z.string().regex(/^N\d{2,}$/),
+  incidents: z.array(IncidentSchema),
 });
 
 export const MasterFileSchema = z.object({

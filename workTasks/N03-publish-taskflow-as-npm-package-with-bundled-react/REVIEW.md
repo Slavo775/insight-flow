@@ -23,6 +23,7 @@
 ## Checklist verification
 
 ### Package SPA build
+
 - [x] `vite.package.config.ts` uses `@vitejs/plugin-react` + `@tailwindcss/vite` + `vite-tsconfig-paths`, no lovable preset
 - [x] `base: "./"` set
 - [x] `outDir: packages/taskflow/dist/ui`
@@ -30,10 +31,12 @@
 - [x] `index.package.html` loads `/src/main.spa.tsx`
 
 ### API client
+
 - [x] `API_BASE_URL` resolves from `window.__TASKFLOW_CONFIG__?.apiBase` → env → `""`
 - [x] No `localhost:3033` in `packages/taskflow/dist` (grep confirmed empty)
 
 ### Server changes
+
 - [x] Static file serving from `dist/ui/` for non-`/api/*` / non-`/ws` GETs
 - [x] SPA fallback returns `index.html` for unknown paths
 - [x] Runtime config injection at `<!-- TASKFLOW_CONFIG -->` marker with `<`-escaping for XSS-safety
@@ -42,6 +45,7 @@
 - [x] WebSocket file-change → React-query invalidation via `useTaskflowLiveSync`
 
 ### Publishing
+
 - [x] Version 0.2.0
 - [x] `repository`, `homepage`, `bugs`, `author`, `license` populated
 - [x] `publishConfig.access: "public"`
@@ -52,6 +56,7 @@
 - [x] `packages/taskflow/LICENSE` (MIT)
 
 ### Playground
+
 - [x] `playground/package.json` depends on `taskflow` via `link:../packages/taskflow`
 - [x] `playground/taskflow.config.json` with `workDir: "workTasks"`, `server.port: 6007`
 - [x] `playground/workTasks/master.json` + `tasks-N00-N09.json` (4 seeded tasks: merged, fix-needed, with incident)
@@ -60,10 +65,12 @@
 - [x] Root scripts: `build:package`, `play`, `pack:taskflow`
 
 ### Config flexibility
+
 - [x] `workDir` controls where JSONs are read from (playground sets `workTasks` and the server reads from `playground/workTasks/`)
 - [x] `server.port` respected — smoke test confirmed port 6007
 
 ### Quality gates
+
 - [x] `pnpm typecheck` in package: PASS
 - [x] Root `npx tsc --noEmit`: PASS
 - [x] Build produces `dist/cli.js` + `dist/ui/index.html` + `dist/ui/assets/`
@@ -72,6 +79,7 @@
 - [x] ESLint on changed files: 0 errors, 1 warning (`react-refresh/only-export-components` on `main.spa.tsx` — inherent to a Vite entry that renders; harmless in production)
 
 ### Verification
+
 - [x] `pnpm run build` end-to-end success
 - [x] `pnpm taskflow ui` boots the React SPA on port 6007 with the bundled UI
 - [x] Sample shards load via `/api/work-tasks/*` (curl confirmed)
@@ -85,6 +93,7 @@
 ## Issues found
 
 ### Blockers
+
 None.
 
 ### Non-blocking suggestions
@@ -115,15 +124,15 @@ None.
 
 ## Quality gate results
 
-| Gate | Result |
-|------|--------|
-| `pnpm typecheck` (package) | ✅ pass |
-| `npx tsc --noEmit` (root) | ✅ pass |
-| `npx eslint <changed files>` | ✅ 0 errors, 1 inconsequential warning |
-| `pnpm run build` (package) | ✅ produces CLI + UI bundle |
-| `npm pack --dry-run` | ✅ 12 files, 277KB |
-| End-to-end (playground server smoke) | ✅ serves SPA, injects config, returns shards |
-| `grep "localhost:3033" packages/taskflow/dist` | ✅ empty |
+| Gate                                           | Result                                        |
+| ---------------------------------------------- | --------------------------------------------- |
+| `pnpm typecheck` (package)                     | ✅ pass                                       |
+| `npx tsc --noEmit` (root)                      | ✅ pass                                       |
+| `npx eslint <changed files>`                   | ✅ 0 errors, 1 inconsequential warning        |
+| `pnpm run build` (package)                     | ✅ produces CLI + UI bundle                   |
+| `npm pack --dry-run`                           | ✅ 12 files, 277KB                            |
+| End-to-end (playground server smoke)           | ✅ serves SPA, injects config, returns shards |
+| `grep "localhost:3033" packages/taskflow/dist` | ✅ empty                                      |
 
 ---
 

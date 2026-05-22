@@ -1,0 +1,39 @@
+{
+  "taskId": "N14",
+  "reviews": [
+    {
+      "startedAt": "2026-05-22T11:27:12.473Z",
+      "endedAt": "2026-05-22T11:40:53.102Z",
+      "verdict": "fix-needed",
+      "comment": "2 blockers: migrate-reviews not idempotent (corrupts summary fields on rerun); TASK.md out-of-scope section contradicts delivered dashboard pivot. Eight token-saving items verified; pivot also delivered but unrecorded.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-22T11:43:51.451Z",
+        "endedAt": "2026-05-22T12:45:28.720Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/commands/migrate.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/test/migrate-reviews.test.mjs",
+          "packages/taskflow/package.json",
+          "workTasks/N14-reduce-token-consumption-across-insight-flow-agent/TASK.md",
+          "workTasks/N14-reduce-token-consumption-across-insight-flow-agent/CHECKLIST.md"
+        ],
+        "comment": "Fixed Blocker 1: migrate-reviews now reads via hybrid loaders so re-runs preserve summary fields; added regression test (init + migrate suites both green). Fixed Blocker 2: TASK.md + CHECKLIST.md amended with the dashboard-pivot scope. Non-blocking 1: shard write skipped when nothing changed (verified shardsTouched:[] on rerun). Non-blocking 5: test/migrate-reviews.test.mjs added. Security: hydrateShardJson containment guard. Severity nit: enum-constrained schema + whitelist CSS map in severityChip.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-22T15:08:27.550Z",
+      "endedAt": "2026-05-22T15:09:39.733Z",
+      "verdict": "approved",
+      "comment": "Round 2: both blockers resolved (migrate-reviews idempotent via hybrid loaders, summary fields restored, TASK.md/CHECKLIST.md scope amended). All non-blocking items addressed (regression test, shard-write guard, containment, severity enum, whitelist CSS). 7/7 tests pass. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

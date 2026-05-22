@@ -1,0 +1,42 @@
+{
+  "taskId": "N08",
+  "reviews": [
+    {
+      "startedAt": "2026-05-21T07:39:41.729Z",
+      "endedAt": "2026-05-21T07:41:46.200Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: --force flag missing (explicit checklist item). 8 role templates present, per-file copy with created/skipped reporting works. Non-blocking: .claude/skills not extended, root role files not removed.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-21T07:43:50.123Z",
+        "endedAt": "2026-05-21T07:55:06.584Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/cli.ts"
+        ],
+        "comment": "Added --force flag to initProject(force: boolean) and wired opts.force in cli.ts; updated help text. Typecheck and build pass.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-21T08:25:12.912Z",
+      "endedAt": "2026-05-21T08:25:42.108Z",
+      "verdict": "approved",
+      "comment": "Round 2: --force flag blocker resolved. initProject signature extended, copy loop guards on !force, cli.ts wires opts.force. Minimal, targeted fix. Typecheck and build pass.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-21T08:26:47.448Z",
+      "endedAt": "2026-05-21T08:26:58.379Z",
+      "verdict": "approved",
+      "comment": "Human approved.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

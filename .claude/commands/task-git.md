@@ -1,23 +1,25 @@
 ROLE: Task Git Agent — Insight Flow
 
-You handle git operations for work tasks: branch, commit, push, pull request creation, and merge. All tracker updates go through `insight-flow`. All git operations use `git` commands — never `gh`.
+You handle git operations for work tasks: branch, commit, push, pull request creation, and merge. All tracker updates go through `insight-flow`. Use `git` for branch/commit/push and `gh` for PR creation, matching `taskflow.prompt.json` (`gitTool: gh`) and `@AGENT_ENFORCEMENT.md`.
 
 ---
 
 INPUT CONTRACT
+
 - Human or another skill provides: task ID (e.g., `N00`) and/or an intent (`push`, `create MR`, `merge`, `done`).
 - **If no task ID**: run `insight-flow current` to get the active task.
-- Read the task from the sharded tracker files (`workTasks/master.json` + `workTasks/tasks-NXX-NYY.json`) to understand its state (branch, pushes, mrUrl, status).
+- Read minimal task state with `insight-flow show --id Nxx --summary` (status, branch, mrUrl). Avoid reading full shard JSON unless you need history.
 
 ---
 
 CONVENTIONS
+
 - **Commit style**: conventional commits. Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`, `perf`, `style`, `revert`, `bug`.
 - **Branch naming**: `<type>/<task-id>-<short-description>` (e.g., `fix/N00-document-upload-feedback`). Derive type from task's `type` field, description from task's `title`.
 - **Incident branches**: `fix/incident/<task-id>-<short-description>` (e.g., `fix/incident/N03-api-500`). Used by `/task-incident`.
 - **Never force-push to main/master.**
 - **Never skip hooks** (--no-verify) unless the user explicitly asks.
-- **Remote**: `origin` (SSH). No `gh` CLI — use `git` only.
+- **Remote**: `origin` (SSH). PR creation uses `gh pr create`.
 
 ---
 
@@ -44,33 +46,22 @@ WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit
 
 WORKFLOW: CREATE PULL REQUEST (when "create MR", "create PR", "open pull request")
 
-Since `gh` is not available, provide the user a PR creation URL:
-
-1. **Get task** — read tracker for task ID, branch, title.
+1. **Get task** — `insight-flow show --id Nxx --summary` for branch + title.
 2. **Ensure pushed** — if no pushes yet, run the PUSH workflow first.
-3. **Output the compare URL** for the user to open:
-   ```
-   https://github.com/Slavo775/insight-flow/compare/main...<branch>?expand=1&title=<URL-encoded-title>&body=<URL-encoded-body>
-   ```
-4. **Suggest PR title and body** in chat so the user can copy-paste:
-   ```
-   Title: <type>(scope): <task title>
-   
-   Body:
+3. **Create PR** with `gh pr create` (HEREDOC body):
+   ```bash
+   gh pr create --title "<type>(scope): <task title>" --body "$(cat <<'EOF'
    ## Summary
-   - <bullet points from task title + changes>
+   - <bullet points from task changes>
 
    ## Task
    `<task-id>` — <task-title>
-
-   ## Checklist
-   - [ ] Typecheck passes
-   - [ ] Lint passes
-   - [ ] Tests pass
+   EOF
+   )"
    ```
-5. **Ask the user** to paste the PR URL after creating it, then:
+4. **Record URL** in tracker:
    ```
-   insight-flow mr-update --id <ID> --url "<pr-url>"
+   insight-flow mr-update --id <ID> --url "$(gh pr view --json url -q .url)"
    ```
 
 ---
@@ -107,6 +98,7 @@ EDGE CASES
 ---
 
 SAFETY
+
 - Before destructive ops (force-push, branch delete, reset), confirm with the user.
 - Show `git status` / `git log -1` after each operation for verification.
 - If merge conflicts occur during merge to main, list them and ask the user how to proceed.
@@ -114,6 +106,7 @@ SAFETY
 ---
 
 TOKEN EFFICIENCY
+
 - No subagents. Direct tool calls only.
 - Batch independent reads in one round.
 - Read only what's needed from tracker.

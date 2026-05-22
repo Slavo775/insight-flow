@@ -1,0 +1,32 @@
+{
+  "taskId": "N01",
+  "reviews": [
+    {
+      "startedAt": "2026-05-13T06:39:31.963Z",
+      "endedAt": "2026-05-13T06:39:47.334Z",
+      "verdict": "fix-needed",
+      "comment": "taskflow init should also set up Claude Code config: global skills in .claude/settings.json + local CLAUDE.md with taskflow context",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-13T07:17:38.907Z",
+        "endedAt": "2026-05-13T07:19:24.929Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/init/index.ts"
+        ],
+        "comment": "Added Claude Code setup to taskflow init: 9 skill commands in .claude/commands/ + CLAUDE.md with taskflow context",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-13T07:25:41.467Z",
+      "endedAt": "2026-05-13T07:28:58.149Z",
+      "verdict": "approved",
+      "comment": "Core framework complete and working. Minor issues: unused extname import, dead templates/roles code, redundant CLAUDE.md heading. Deferred items (npm publish, webhooks, external sync) acknowledged as later phases.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

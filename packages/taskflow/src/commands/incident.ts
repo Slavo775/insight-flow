@@ -1,7 +1,23 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../types.js";
-import { loadTaskById, loadAllTasks, saveShard, saveMaster, getWorkDir, now, resolveId } from "../storage.js";
+import {
+  loadTaskById,
+  loadAllTasks,
+  saveShard,
+  saveMaster,
+  getWorkDir,
+  now,
+  resolveId,
+  loadTaskIncidentsHybrid,
+  loadTaskReviewsHybrid,
+  saveTaskIncidents,
+  recomputeTaskSummary,
+} from "../storage.js";
 
-export function cmdIncidentCreate(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
+export function cmdIncidentCreate(
+  config: TaskflowConfig,
+  master: MasterFile,
+  opts: ParsedArgs,
+): void {
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = loadTaskById(config, master, id);
 
@@ -10,7 +26,7 @@ export function cmdIncidentCreate(config: TaskflowConfig, master: MasterFile, op
     process.exit(1);
   }
 
-  if (!task.incidents) task.incidents = [];
+  const incidents = loadTaskIncidentsHybrid(config, task);
 
   const incId = `INC-${String(master.meta.nextIncidentId || 1).padStart(3, "0")}`;
   const slug = (opts.title as string)
@@ -19,7 +35,7 @@ export function cmdIncidentCreate(config: TaskflowConfig, master: MasterFile, op
     .replace(/^-|-$/g, "")
     .slice(0, 40);
 
-  task.incidents.push({
+  incidents.push({
     id: incId,
     title: opts.title as string,
     severity: (opts.severity as string) || "high",
@@ -32,23 +48,30 @@ export function cmdIncidentCreate(config: TaskflowConfig, master: MasterFile, op
     fix: null,
     statusHistory: [{ status: "reported", at: now(), by: (opts.by as string) || "task-incident" }],
   });
+  saveTaskIncidents(config, task, incidents);
 
+  recomputeTaskSummary(task, loadTaskReviewsHybrid(config, task), incidents);
   saveShard(getWorkDir(config), shardFile, shard);
   master.meta.nextIncidentId = (master.meta.nextIncidentId || 1) + 1;
   saveMaster(config, master);
 
+  const created = incidents[incidents.length - 1];
   console.log(
     JSON.stringify({
       action: "incident-created",
       taskId: id,
       incidentId: incId,
-      branch: task.incidents[task.incidents.length - 1].branch,
-      severity: task.incidents[task.incidents.length - 1].severity,
-    }, null, 2),
+      branch: created.branch,
+      severity: created.severity,
+    }),
   );
 }
 
-export function cmdIncidentStatus(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
+export function cmdIncidentStatus(
+  config: TaskflowConfig,
+  master: MasterFile,
+  opts: ParsedArgs,
+): void {
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = loadTaskById(config, master, id);
 
@@ -61,20 +84,38 @@ export function cmdIncidentStatus(config: TaskflowConfig, master: MasterFile, op
     process.exit(1);
   }
 
-  const incident = (task.incidents || []).find((inc) => inc.id === opts.incident);
+  const incidents = loadTaskIncidentsHybrid(config, task);
+  const incident = incidents.find((inc) => inc.id === opts.incident);
   if (!incident) {
     console.error(`Incident ${opts.incident} not found on task ${id}`);
     process.exit(1);
   }
 
   incident.status = opts.status as string;
-  incident.statusHistory.push({ status: opts.status as string, at: now(), by: (opts.by as string) || "task-incident" });
+  incident.statusHistory.push({
+    status: opts.status as string,
+    at: now(),
+    by: (opts.by as string) || "task-incident",
+  });
+  saveTaskIncidents(config, task, incidents);
 
+  recomputeTaskSummary(task, loadTaskReviewsHybrid(config, task), incidents);
   saveShard(getWorkDir(config), shardFile, shard);
-  console.log(JSON.stringify({ action: "incident-status-updated", taskId: id, incidentId: opts.incident, status: opts.status }, null, 2));
+  console.log(
+    JSON.stringify({
+      action: "incident-status-updated",
+      taskId: id,
+      incidentId: opts.incident,
+      status: opts.status,
+    }),
+  );
 }
 
-export function cmdIncidentResolve(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
+export function cmdIncidentResolve(
+  config: TaskflowConfig,
+  master: MasterFile,
+  opts: ParsedArgs,
+): void {
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = loadTaskById(config, master, id);
 
@@ -83,7 +124,8 @@ export function cmdIncidentResolve(config: TaskflowConfig, master: MasterFile, o
     process.exit(1);
   }
 
-  const incident = (task.incidents || []).find((inc) => inc.id === opts.incident);
+  const incidents = loadTaskIncidentsHybrid(config, task);
+  const incident = incidents.find((inc) => inc.id === opts.incident);
   if (!incident) {
     console.error(`Incident ${opts.incident} not found on task ${id}`);
     process.exit(1);
@@ -93,8 +135,14 @@ export function cmdIncidentResolve(config: TaskflowConfig, master: MasterFile, o
   incident.resolvedAt = now();
   incident.rootCause = (opts.rootCause as string) || null;
   incident.fix = (opts.fix as string) || null;
-  incident.statusHistory.push({ status: "fixed", at: now(), by: (opts.by as string) || "task-incident" });
+  incident.statusHistory.push({
+    status: "fixed",
+    at: now(),
+    by: (opts.by as string) || "task-incident",
+  });
+  saveTaskIncidents(config, task, incidents);
 
+  recomputeTaskSummary(task, loadTaskReviewsHybrid(config, task), incidents);
   saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
@@ -102,16 +150,22 @@ export function cmdIncidentResolve(config: TaskflowConfig, master: MasterFile, o
       taskId: id,
       incidentId: opts.incident,
       rootCause: incident.rootCause,
-    }, null, 2),
+    }),
   );
 }
 
-export function cmdIncidentList(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
-  const tasks = opts.id ? [loadTaskById(config, master, opts.id as string).task] : loadAllTasks(config, master);
+export function cmdIncidentList(
+  config: TaskflowConfig,
+  master: MasterFile,
+  opts: ParsedArgs,
+): void {
+  const tasks = opts.id
+    ? [loadTaskById(config, master, opts.id as string).task]
+    : loadAllTasks(config, master);
 
   const incidents: Array<Record<string, unknown>> = [];
   for (const task of tasks) {
-    for (const inc of task.incidents || []) {
+    for (const inc of loadTaskIncidentsHybrid(config, task)) {
       incidents.push({ taskId: task.id, taskTitle: task.title, ...inc });
     }
   }
@@ -121,5 +175,5 @@ export function cmdIncidentList(config: TaskflowConfig, master: MasterFile, opts
     return;
   }
 
-  console.log(JSON.stringify({ incidents }, null, 2));
+  console.log(JSON.stringify({ incidents }));
 }

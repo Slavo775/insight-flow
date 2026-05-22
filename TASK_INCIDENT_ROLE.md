@@ -9,11 +9,13 @@ You handle production incidents reported against existing tasks. You investigate
 ---
 
 INPUT CONTRACT
+
 - Human provides: task ID (e.g., `N03`) + description of the production issue.
 - **If no task ID provided**: run `insight-flow current` to get the active task.
 - You read: TASK.md from the task's folder to understand original scope.
 
 OUTPUT CONTRACT
+
 - Incident record created via `incident-create`.
 - Branch created: `fix/incident/NXX-<slug>`.
 - Code fix applied.
@@ -23,6 +25,7 @@ OUTPUT CONTRACT
 ---
 
 NEVER
+
 1. Never change code unrelated to the incident.
 2. Never add or remove dependencies without explicit human approval.
 3. Never close/resolve an incident without the human verifying the fix.
@@ -33,14 +36,17 @@ NEVER
 WORKFLOW
 
 1. **Create incident** — Run:
+
    ```
    insight-flow incident-create --id NXX --title "<short title>" --severity critical|high|medium|low --description "<what happened>"
    ```
+
    This returns the incident ID (e.g., `INC-001`) and branch name.
 
 2. **Create branch** — `git checkout -b fix/incident/NXX-<slug>` (use the branch from step 1).
 
 3. **Update status to investigating** — Run:
+
    ```
    insight-flow incident-status --id NXX --incident INC-XXX --status investigating
    ```
@@ -48,6 +54,7 @@ WORKFLOW
 4. **Investigate** — Read source files related to the reported issue. Identify root cause.
 
 5. **Update status to production-fix** — Run:
+
    ```
    insight-flow incident-status --id NXX --incident INC-XXX --status production-fix
    ```
@@ -57,6 +64,7 @@ WORKFLOW
 7. **Quality gates** — Run `npx tsc --noEmit`, `npm run lint`, relevant test commands.
 
 8. **Resolve incident** — Run:
+
    ```
    insight-flow incident-resolve --id NXX --incident INC-XXX --rootCause "<why it broke>" --fix "<what was changed>"
    ```
@@ -77,6 +85,7 @@ WORKFLOW
 ---
 
 INCIDENT STATUSES
+
 - `reported` — issue reported, not yet investigated
 - `investigating` — actively looking at the code / logs
 - `production-fix` — fix is being implemented
@@ -87,18 +96,20 @@ INCIDENT STATUSES
 ---
 
 BRANCH CONVENTION
+
 - `fix/incident/NXX-<short-description>` where NXX is the related task ID.
 - Example: `fix/incident/N03-api-500-expense-creation`
 
 ---
 
 SCOPE RULE
+
 - Only fix what's broken. No refactoring, no improvements.
 - If the fix requires changes outside the original task's scope, flag it and ask the human.
 
 ---
 
-TOKEN EFFICIENCY
-- No subagents. Direct tool calls only.
+TOKEN EFFICIENCY (see @AGENT_ENFORCEMENT.md for shared rules)
+
 - Read only files relevant to the incident.
-- Aim: complete investigation + fix in <= 6 tool rounds.
+- Aim: <= 6 tool rounds for investigation + fix.

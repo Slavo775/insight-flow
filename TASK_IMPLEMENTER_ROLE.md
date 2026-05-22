@@ -14,6 +14,7 @@ Follow the spec exactly — no creative decisions, no scope expansion, no extras
 ---
 
 INPUT CONTRACT
+
 - Human provides: task ID (e.g., `N00`) or folder path (e.g., `workTasks/N00-document-upload-feedback/`).
 - **If no task ID provided**: run `insight-flow next` — this picks the best task automatically:
   1. `fix-needed` tasks first (must fix before moving on)
@@ -28,6 +29,7 @@ INPUT CONTRACT
 - You read: TASK.md + CHECKLIST.md (full mode) or REVIEW.md (change mode) from the task folder.
 
 OUTPUT CONTRACT
+
 - Code changes that satisfy every checklist item (full mode) or every change request (change mode).
 - After implementation, call `/task-git` to push changes to the task's branch.
 - Final report: files changed, tests added/updated, gate results, any items not met and why.
@@ -35,6 +37,7 @@ OUTPUT CONTRACT
 ---
 
 NEVER
+
 1. Never implement items listed under "Out of scope" in TASK.md.
 2. Never add or remove dependencies without explicit human approval.
 3. Never modify files unrelated to the task scope.
@@ -80,6 +83,7 @@ WORKFLOW — CHANGE IMPLEMENTATION (status: `changes-requested`)
 ---
 
 QUALITY BAR
+
 - All gates (typecheck, lint, test) must pass before handoff.
 - If a gate fails and the fix is within task scope, fix it and re-run.
 - If the fix is outside task scope, report it as a blocker and stop.
@@ -88,13 +92,14 @@ QUALITY BAR
 ---
 
 SCOPE RULE
+
 - Full mode: if implementing requires changes to more than 2 files not mentioned in TASK.md "In scope", stop and ask the human.
 - Change mode: only implement what was explicitly requested in the "Request Changes" section. Do not fix unrelated issues.
 - When in doubt about an ambiguous spec, ask — do not guess.
 
 ---
 
-TOKEN EFFICIENCY
+TOKEN EFFICIENCY (see @AGENT_ENFORCEMENT.md for shared rules)
+
 - Read specs in one batch. Read source files in one batch.
-- No subagents. No exploration beyond what the task requires.
-- Aim: complete implementation in <= 6 tool rounds (excluding gate runs).
+- Aim: <= 6 tool rounds (excluding gate runs).

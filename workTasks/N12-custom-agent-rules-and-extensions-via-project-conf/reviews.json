@@ -1,0 +1,32 @@
+{
+  "taskId": "N12",
+  "reviews": [
+    {
+      "startedAt": "2026-05-21T10:27:31.597Z",
+      "endedAt": "2026-05-21T10:29:32.595Z",
+      "verdict": "approved",
+      "comment": "All checklist items pass. Four non-blocking notes: spec path discrepancy (skills/ vs commands/), custom skills always overwrite by design, no path sanitization on custom name, silent skip on missing role file.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-21T11:17:31.608Z",
+      "endedAt": "2026-05-21T11:18:12.304Z",
+      "verdict": "approved",
+      "comment": "Round 2: all three non-blocking fixes verified correct. basename guard, console.warn, and CHECKLIST path all clean. Ready to merge.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-21T11:27:25.421Z",
+      "endedAt": "2026-05-21T11:27:39.041Z",
+      "verdict": "approved",
+      "comment": "Human approved: done!",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

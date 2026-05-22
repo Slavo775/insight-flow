@@ -1,6 +1,7 @@
 # N02 — Real-time activity engine with WebSocket dashboard — Checklist
 
 ## Done criteria
+
 - [ ] `ActivityEvent` and `ActivityEngineConfig` types defined in `types.ts`
 - [ ] `taskflow.config.json` supports `activityEngine: { enabled, logFile, maxEvents }` with defaults
 - [ ] Hook script exists and appends JSONL lines to activity log on each Claude Code tool call
@@ -20,12 +21,14 @@
 - [ ] `.taskflow-activity.jsonl` added to `.gitignore` during init
 
 ## Quality gates
+
 - [ ] `npx tsc --noEmit` passes (both root and packages/taskflow)
 - [ ] `pnpm run build` succeeds in packages/taskflow
 - [ ] No regressions in existing dashboard (Kanban, stats, task detail still work)
 - [ ] WebSocket reconnects automatically after server restart
 
 ## Verification
+
 - [ ] Fresh `taskflow init` → `.claude/settings.local.json` contains hook config
 - [ ] Start `taskflow` → dashboard opens with activity panel
 - [ ] Trigger a Claude Code tool call → event appears in activity panel within ~200ms

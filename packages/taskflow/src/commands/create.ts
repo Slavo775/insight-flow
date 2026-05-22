@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync } from "node:fs";
+import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../types.js";
 import {
@@ -10,6 +10,43 @@ import {
   getWorkDir,
   now,
 } from "../storage.js";
+import { resolvePackageAsset } from "../paths.js";
+
+function renderTemplate(tplPath: string, vars: Record<string, string>): string {
+  let body = readFileSync(tplPath, "utf-8");
+  for (const [key, value] of Object.entries(vars)) {
+    body = body.replaceAll(`{{${key}}}`, value);
+  }
+  return body;
+}
+
+function scaffoldTaskDocs(
+  folderPath: string,
+  vars: Record<string, string>,
+): { taskMdCreated: boolean; checklistMdCreated: boolean } {
+  let taskMdCreated = false;
+  let checklistMdCreated = false;
+
+  const taskMd = resolve(folderPath, "TASK.md");
+  if (!existsSync(taskMd)) {
+    const tpl = resolvePackageAsset("templates/task/TASK.md.tpl");
+    if (existsSync(tpl)) {
+      writeFileSync(taskMd, renderTemplate(tpl, vars));
+      taskMdCreated = true;
+    }
+  }
+
+  const checklistMd = resolve(folderPath, "CHECKLIST.md");
+  if (!existsSync(checklistMd)) {
+    const tpl = resolvePackageAsset("templates/task/CHECKLIST.md.tpl");
+    if (existsSync(tpl)) {
+      writeFileSync(checklistMd, renderTemplate(tpl, vars));
+      checklistMdCreated = true;
+    }
+  }
+
+  return { taskMdCreated, checklistMdCreated };
+}
 
 export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const title = opts.title as string;
@@ -52,9 +89,11 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
       filesChanged: [] as string[],
       tokensUsed: null,
     },
-    reviews: [],
+    // reviews + incidents live in per-task side files (created lazily on first mutation).
     changesAfterImplementation: [],
-    incidents: [],
+    reviewCount: 0,
+    lastReviewVerdict: null,
+    openIncidentCount: 0,
     committedAt: null,
     totalDurationMinutes: null,
     tags: opts.tags ? (opts.tags as string).split(",").map((t) => t.trim()) : [],
@@ -72,5 +111,21 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
   master.meta.currentTaskId = id;
   saveMaster(config, master);
 
-  console.log(JSON.stringify({ action: "created", id, folder: task.folder }, null, 2));
+  const scaffold = scaffoldTaskDocs(folderPath, {
+    ID: id,
+    TITLE: title,
+    TYPE: task.type,
+    PRIORITY: task.priority,
+    DATE: now().slice(0, 10),
+  });
+
+  console.log(
+    JSON.stringify({
+      action: "created",
+      id,
+      folder: task.folder,
+      taskMd: scaffold.taskMdCreated ? `${task.folder}/TASK.md` : null,
+      checklistMd: scaffold.checklistMdCreated ? `${task.folder}/CHECKLIST.md` : null,
+    }),
+  );
 }

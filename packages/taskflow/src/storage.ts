@@ -1,8 +1,23 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import type { MasterFile, ShardFile, Task, TaskflowConfig } from "./types.js";
+import type {
+  Incident,
+  IncidentsFile,
+  MasterFile,
+  Review,
+  ReviewsFile,
+  ShardFile,
+  Task,
+  TaskflowConfig,
+} from "./types.js";
 import { getWorkDir, getMasterPath } from "./config.js";
-import { MasterFileSchema, ShardFileSchema, TaskflowValidationError } from "./schema/index.js";
+import {
+  IncidentsFileSchema,
+  MasterFileSchema,
+  ReviewsFileSchema,
+  ShardFileSchema,
+  TaskflowValidationError,
+} from "./schema/index.js";
 export { getWorkDir, getMasterPath };
 
 export function getShardFileName(taskNum: number, shardSize: number = 10): string {
@@ -18,9 +33,7 @@ export function getShardPath(workDir: string, shardFile: string): string {
 export function loadMaster(config: TaskflowConfig, cwd?: string): MasterFile {
   const masterPath = getMasterPath(config, cwd);
   if (!existsSync(masterPath)) {
-    throw new Error(
-      `master.json not found at ${masterPath}. Run 'taskflow init' to initialize.`,
-    );
+    throw new Error(`master.json not found at ${masterPath}. Run 'taskflow init' to initialize.`);
   }
   const raw = JSON.parse(readFileSync(masterPath, "utf-8"));
   const parsed = MasterFileSchema.safeParse(raw);
@@ -128,4 +141,108 @@ export function resolveId(master: MasterFile, id?: string): string {
     throw new Error("No task ID provided and no current task set.");
   }
   return resolved;
+}
+
+/**
+ * Resolve `<workDir>/<task.folder relative tail>`. Task.folder is stored as
+ * "workTasks/Nxx-slug" (relative to repo root), but we read with respect to
+ * the configured workDir to keep tests + alternate roots working.
+ */
+function resolveTaskFolder(cwd: string | undefined, config: TaskflowConfig, task: Task): string {
+  const workDir = getWorkDir(config, cwd);
+  const tail = task.folder.replace(/^.*?\//, ""); // drop leading "workTasks/" (or workDir prefix)
+  return resolve(workDir, tail);
+}
+
+export function getReviewsPath(config: TaskflowConfig, task: Task, cwd?: string): string {
+  return resolve(resolveTaskFolder(cwd, config, task), "reviews.json");
+}
+
+export function getIncidentsPath(config: TaskflowConfig, task: Task, cwd?: string): string {
+  return resolve(resolveTaskFolder(cwd, config, task), "incidents.json");
+}
+
+/** Load reviews for a task from its side file. Returns [] if missing. */
+export function loadTaskReviews(config: TaskflowConfig, task: Task, cwd?: string): Review[] {
+  const path = getReviewsPath(config, task, cwd);
+  if (!existsSync(path)) return [];
+  const raw = JSON.parse(readFileSync(path, "utf-8"));
+  const parsed = ReviewsFileSchema.safeParse(raw);
+  if (!parsed.success) throw new TaskflowValidationError(path, parsed.error);
+  return parsed.data.reviews;
+}
+
+/** Save reviews for a task to its side file. Creates the file as needed. */
+export function saveTaskReviews(
+  config: TaskflowConfig,
+  task: Task,
+  reviews: Review[],
+  cwd?: string,
+): void {
+  const folder = resolveTaskFolder(cwd, config, task);
+  if (!existsSync(folder)) mkdirSync(folder, { recursive: true });
+  const path = getReviewsPath(config, task, cwd);
+  const data: ReviewsFile = { taskId: task.id, reviews };
+  const parsed = ReviewsFileSchema.safeParse(data);
+  if (!parsed.success) throw new TaskflowValidationError(path, parsed.error);
+  writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
+}
+
+/** Load incidents for a task from its side file. Returns [] if missing. */
+export function loadTaskIncidents(config: TaskflowConfig, task: Task, cwd?: string): Incident[] {
+  const path = getIncidentsPath(config, task, cwd);
+  if (!existsSync(path)) return [];
+  const raw = JSON.parse(readFileSync(path, "utf-8"));
+  const parsed = IncidentsFileSchema.safeParse(raw);
+  if (!parsed.success) throw new TaskflowValidationError(path, parsed.error);
+  return parsed.data.incidents;
+}
+
+/** Save incidents for a task to its side file. */
+export function saveTaskIncidents(
+  config: TaskflowConfig,
+  task: Task,
+  incidents: Incident[],
+  cwd?: string,
+): void {
+  const folder = resolveTaskFolder(cwd, config, task);
+  if (!existsSync(folder)) mkdirSync(folder, { recursive: true });
+  const path = getIncidentsPath(config, task, cwd);
+  const data: IncidentsFile = { taskId: task.id, incidents };
+  const parsed = IncidentsFileSchema.safeParse(data);
+  if (!parsed.success) throw new TaskflowValidationError(path, parsed.error);
+  writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
+}
+
+const INCIDENT_OPEN_STATUSES = new Set(["reported", "investigating", "production-fix", "fixed"]);
+
+/** Update the summary fields on a Task object in place. */
+export function recomputeTaskSummary(task: Task, reviews: Review[], incidents: Incident[]): void {
+  task.reviewCount = reviews.length;
+  task.lastReviewVerdict = reviews.length ? reviews[reviews.length - 1].verdict : null;
+  task.openIncidentCount = incidents.filter((inc) => INCIDENT_OPEN_STATUSES.has(inc.status)).length;
+  // Inline arrays are deprecated; remove them so shards stay lean.
+  if (task.reviews !== undefined) delete task.reviews;
+  if (task.incidents !== undefined) delete task.incidents;
+}
+
+/**
+ * Load the canonical reviews + incidents for a task: side file if present,
+ * otherwise the inline arrays from the shard (legacy). Useful in mutation
+ * helpers that need to read-modify-write.
+ */
+export function loadTaskReviewsHybrid(config: TaskflowConfig, task: Task, cwd?: string): Review[] {
+  const sideFilePath = getReviewsPath(config, task, cwd);
+  if (existsSync(sideFilePath)) return loadTaskReviews(config, task, cwd);
+  return task.reviews ?? [];
+}
+
+export function loadTaskIncidentsHybrid(
+  config: TaskflowConfig,
+  task: Task,
+  cwd?: string,
+): Incident[] {
+  const sideFilePath = getIncidentsPath(config, task, cwd);
+  if (existsSync(sideFilePath)) return loadTaskIncidents(config, task, cwd);
+  return task.incidents ?? [];
 }

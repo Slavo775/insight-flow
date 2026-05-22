@@ -11,11 +11,7 @@ export interface WsClient {
   onClose: (cb: () => void) => void;
 }
 
-export function handleUpgrade(
-  req: IncomingMessage,
-  socket: Duplex,
-  head: Buffer,
-): WsClient | null {
+export function handleUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer): WsClient | null {
   const key = req.headers["sec-websocket-key"];
   if (!key) {
     socket.destroy();

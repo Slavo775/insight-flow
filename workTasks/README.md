@@ -105,22 +105,22 @@ ready --> /task-implement --> in-progress --> implemented
 
 ### Task Statuses
 
-| Status | Meaning |
-|--------|---------|
-| `ready` | Created, waiting for implementation |
-| `in-progress` | Being implemented |
-| `implemented` | Implementation complete, not yet pushed |
-| `pushed` | Code pushed to remote branch |
-| `reviewing` | Under review (AI or human) |
-| `approved` | Review passed |
-| `fix-needed` | Review found blockers |
-| `fixing` | Fix in progress |
-| `fixed` | Fix applied, ready for re-review |
-| `merged` | Merged to main |
-| `changes-requested` | Post-implementation change requests recorded |
-| `changes-implementing` | Change requests being implemented |
-| `changes-implemented` | Change requests implemented, ready for push |
-| `done` | Fully complete |
+| Status                 | Meaning                                      |
+| ---------------------- | -------------------------------------------- |
+| `ready`                | Created, waiting for implementation          |
+| `in-progress`          | Being implemented                            |
+| `implemented`          | Implementation complete, not yet pushed      |
+| `pushed`               | Code pushed to remote branch                 |
+| `reviewing`            | Under review (AI or human)                   |
+| `approved`             | Review passed                                |
+| `fix-needed`           | Review found blockers                        |
+| `fixing`               | Fix in progress                              |
+| `fixed`                | Fix applied, ready for re-review             |
+| `merged`               | Merged to main                               |
+| `changes-requested`    | Post-implementation change requests recorded |
+| `changes-implementing` | Change requests being implemented            |
+| `changes-implemented`  | Change requests implemented, ready for push  |
+| `done`                 | Fully complete                               |
 
 ## Incident Tracking
 
@@ -167,14 +167,14 @@ Change requests are stored in the `changesAfterImplementation` array on each tas
 reported --> investigating --> production-fix --> fixed --> verified --> closed
 ```
 
-| Status | Meaning |
-|--------|---------|
-| `reported` | Issue reported, not yet investigated |
-| `investigating` | Actively looking at code/logs |
-| `production-fix` | Fix is being implemented |
-| `fixed` | Fix pushed, awaiting human verification |
-| `verified` | Human confirmed fix works in production |
-| `closed` | Merged and done |
+| Status           | Meaning                                 |
+| ---------------- | --------------------------------------- |
+| `reported`       | Issue reported, not yet investigated    |
+| `investigating`  | Actively looking at code/logs           |
+| `production-fix` | Fix is being implemented                |
+| `fixed`          | Fix pushed, awaiting human verification |
+| `verified`       | Human confirmed fix works in production |
+| `closed`         | Merged and done                         |
 
 ### Incident Branch Convention
 
@@ -202,17 +202,17 @@ Example: `fix/incident/N03-api-500-expense-creation`
 
 ### Agent Descriptions
 
-| Agent | Command | Role File | Purpose |
-|-------|---------|-----------|---------|
-| Taskmaster | `/taskmaster` | `TASKMASTER_ROLE.md` | Creates tasks (TASK.md + CHECKLIST.md), assigns IDs |
-| Taskmaster Change | `/taskmaster-change` | `TASKMASTER_CHANGE_ROLE.md` | Modifies existing task spec + pushes |
-| Implementer | `/task-implement` | `TASK_IMPLEMENTER_ROLE.md` | Implements tasks per spec OR change requests (auto-detects mode) |
-| Reviewer | `/task-review` | `TASK_REVIEWER_ROLE.md` | AI code review against spec + checklist |
-| Human Review | `/task-human-review` | `TASK_HUMAN_REVIEW_ROLE.md` | Records human review feedback |
-| Fixer | `/task-review-fix` | `TASK_REVIEW_FIXER_ROLE.md` | Fixes review blockers |
-| Git Agent | `/task-git` | `.claude/commands/task-git.md` | Branch, commit, push, merge |
-| Request Changes | `/task-request-changes` | `TASK_REQUEST_CHANGES_ROLE.md` | Records post-testing change requests |
-| Incident | `/task-incident` | `TASK_INCIDENT_ROLE.md` | Handles production incidents |
+| Agent             | Command                 | Role File                      | Purpose                                                          |
+| ----------------- | ----------------------- | ------------------------------ | ---------------------------------------------------------------- |
+| Taskmaster        | `/taskmaster`           | `TASKMASTER_ROLE.md`           | Creates tasks (TASK.md + CHECKLIST.md), assigns IDs              |
+| Taskmaster Change | `/taskmaster-change`    | `TASKMASTER_CHANGE_ROLE.md`    | Modifies existing task spec + pushes                             |
+| Implementer       | `/task-implement`       | `TASK_IMPLEMENTER_ROLE.md`     | Implements tasks per spec OR change requests (auto-detects mode) |
+| Reviewer          | `/task-review`          | `TASK_REVIEWER_ROLE.md`        | AI code review against spec + checklist                          |
+| Human Review      | `/task-human-review`    | `TASK_HUMAN_REVIEW_ROLE.md`    | Records human review feedback                                    |
+| Fixer             | `/task-review-fix`      | `TASK_REVIEW_FIXER_ROLE.md`    | Fixes review blockers                                            |
+| Git Agent         | `/task-git`             | `.claude/commands/task-git.md` | Branch, commit, push, merge                                      |
+| Request Changes   | `/task-request-changes` | `TASK_REQUEST_CHANGES_ROLE.md` | Records post-testing change requests                             |
+| Incident          | `/task-incident`        | `TASK_INCIDENT_ROLE.md`        | Handles production incidents                                     |
 
 ### Typical Session Flow
 
@@ -236,12 +236,12 @@ Example: `fix/incident/N03-api-500-expense-creation`
 
 ## Branch Conventions
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Feature task | `feat/NXX-<slug>` | `feat/N03-expense-attachment-upload` |
-| Fix task | `fix/NXX-<slug>` | `fix/N00-document-upload-feedback` |
-| Rework task | `rework/NXX-<slug>` | `rework/N05-refactor-auth` |
-| Incident fix | `fix/incident/NXX-<slug>` | `fix/incident/N03-api-500-expense` |
+| Type         | Pattern                   | Example                              |
+| ------------ | ------------------------- | ------------------------------------ |
+| Feature task | `feat/NXX-<slug>`         | `feat/N03-expense-attachment-upload` |
+| Fix task     | `fix/NXX-<slug>`          | `fix/N00-document-upload-feedback`   |
+| Rework task  | `rework/NXX-<slug>`       | `rework/N05-refactor-auth`           |
+| Incident fix | `fix/incident/NXX-<slug>` | `fix/incident/N03-api-500-expense`   |
 
 ## CLI Reference
 
@@ -320,8 +320,8 @@ incident-list [--id N03]   # For one task or all tasks
 
 Each task gets a folder: `workTasks/NXX-<slug>/`
 
-| File | Created By | Purpose |
-|------|-----------|---------|
-| `TASK.md` | `/taskmaster` | Problem, goal, scope, implementation plan |
-| `CHECKLIST.md` | `/taskmaster` | Done criteria, quality gates, verification |
-| `REVIEW.md` | `/task-review` | Review findings, verdicts, human review notes |
+| File           | Created By     | Purpose                                       |
+| -------------- | -------------- | --------------------------------------------- |
+| `TASK.md`      | `/taskmaster`  | Problem, goal, scope, implementation plan     |
+| `CHECKLIST.md` | `/taskmaster`  | Done criteria, quality gates, verification    |
+| `REVIEW.md`    | `/task-review` | Review findings, verdicts, human review notes |

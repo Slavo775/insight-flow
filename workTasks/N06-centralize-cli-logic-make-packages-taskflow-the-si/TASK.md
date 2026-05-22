@@ -5,16 +5,20 @@
 **Created:** 2026-05-20
 
 ## Problem
+
 Per REVIEW_ANALYSIS.md § 2 ("Code Quality & Migration Debt"), `scripts/task-tracker.mjs` and `packages/taskflow/src/cli.ts` share ~95% of their logic — a high-risk maintenance trap. Even after [[N05]] deletes the legacy script and updates role files, the wider repo (CI workflows, package.json scripts, docs, IDE configs, hooks, skills) may still reference the old path or duplicate logic. This task is the cleanup sweep that guarantees `packages/taskflow` is the only CLI implementation in the repo.
 
 ## Goal
+
 1. No file outside `packages/taskflow/` defines or duplicates taskflow command logic (status transitions, ID generation, shard reads/writes).
 2. Every script, hook, workflow, doc, and config that needs taskflow functionality calls the `insight-flow` binary (or imports from the package), not a local re-implementation.
 3. `packages/taskflow/README.md` documents the binary as the canonical entry point and lists every supported command.
 4. CI (if any) builds the package before running anything that depends on it.
 
 ## Scope
+
 ### In scope
+
 - `package.json` (root) — scripts that wrap taskflow commands.
 - `.github/workflows/*.yml` — any CI step that invokes taskflow.
 - `.claude/` — hooks, commands, skills, settings that shell out to the CLI.
@@ -23,6 +27,7 @@ Per REVIEW_ANALYSIS.md § 2 ("Code Quality & Migration Debt"), `scripts/task-tra
 - Removing dead code in the package itself if duplication exists between `cli.ts` and `storage.ts` / `commands/`.
 
 ### Out of scope
+
 - Editing role files (handled by [[N05]]).
 - Adding Zod validation ([[N07]]).
 - Moving role templates into the package ([[N08]]).
@@ -30,6 +35,7 @@ Per REVIEW_ANALYSIS.md § 2 ("Code Quality & Migration Debt"), `scripts/task-tra
 - Path resolution refactor ([[N10]]).
 
 ## Implementation plan
+
 1. **Inventory all callers**
    - `grep -rn "insight-flow" . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist`
    - `grep -rn "task-tracker" . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist`
@@ -57,13 +63,15 @@ Per REVIEW_ANALYSIS.md § 2 ("Code Quality & Migration Debt"), `scripts/task-tra
    - Run any CI workflow locally (`act` or equivalent) if available.
 
 ## Verification
+
 - `grep -rn "task-tracker" . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist` returns zero matches (after [[N05]] also lands).
 - No file outside `packages/taskflow/` contains the strings `loadMaster`, `loadShard`, or other internal taskflow helpers.
 - `packages/taskflow/README.md` lists every command currently exposed by `insight-flow --help`.
 - `pnpm --filter insight-flow build:cli` succeeds; `insight-flow current` returns the current task.
 
 ## Notes
+
 - Source: REVIEW_ANALYSIS.md § 2 and § 5 Phase 1.2.
 - Should land AFTER [[N05]] (or together) — N05 deletes the legacy script and updates roles; N06 finishes the sweep across CI, hooks, scripts, and docs.
-- If duplication is found *inside* the package between `cli.ts` and `commands/`, extract shared logic into `storage.ts` or a `lib/` helper rather than leaving it.
+- If duplication is found _inside_ the package between `cli.ts` and `commands/`, extract shared logic into `storage.ts` or a `lib/` helper rather than leaving it.
 - Don't introduce a new abstraction layer just because — only consolidate where duplication is real.

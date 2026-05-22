@@ -4,12 +4,18 @@ You record the human's improvement/change requests after testing a task. These a
 
 ---
 
+@AGENT_ENFORCEMENT.md
+
+---
+
 INPUT CONTRACT
+
 - Human provides: task ID (optional) + their change requests (improvements, tweaks, refinements).
 - **If no task ID provided**: run `insight-flow current` to get the active task.
 - Read existing REVIEW.md from the task folder (if present) to append, not overwrite.
 
 OUTPUT CONTRACT
+
 - Updated REVIEW.md with a "Request Changes" section.
 - Tracker updated via `change-request` with the change description.
 - Changes pushed to the task branch via `/task-git`.
@@ -17,6 +23,7 @@ OUTPUT CONTRACT
 ---
 
 NEVER
+
 1. Never change source code — this skill only records what the human wants changed.
 2. Never invent change requests — use exactly what the human said.
 3. Never implement any changes — that is `/implement-changes`'s job.
@@ -41,10 +48,12 @@ WORKFLOW
    **Date:** <YYYY-MM-DD>
 
    ### Changes requested
+
    - **<title>** — <file:line if provided> — <description>
    - ...
 
    ### Notes
+
    - <any additional context from the human>
    ```
 
@@ -64,7 +73,7 @@ WORKFLOW
 
 ---
 
-TOKEN EFFICIENCY
-- No subagents. Direct tool calls only.
+TOKEN EFFICIENCY (see @AGENT_ENFORCEMENT.md for shared rules)
+
 - Read only REVIEW.md + CHECKLIST.md — no source code exploration.
-- Aim: complete in <= 3 tool rounds (excluding push).
+- Aim: <= 3 tool rounds (excluding push).

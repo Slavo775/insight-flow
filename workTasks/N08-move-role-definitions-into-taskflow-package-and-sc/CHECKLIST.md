@@ -1,6 +1,7 @@
 # N08 — Move role definitions into taskflow package and scaffold them via init — Checklist
 
 ## Done criteria
+
 - [ ] All 8 role files copied to `packages/taskflow/templates/roles/`
 - [ ] `packages/taskflow/src/init/index.ts` extended to copy role templates to the consumer repo
 - [ ] `init` skips existing files unless `--force` is passed
@@ -11,6 +12,7 @@
 - [ ] Package README documents `init` and what it scaffolds
 
 ## Quality gates
+
 - [ ] `pnpm --filter insight-flow typecheck` passes
 - [ ] `pnpm --filter insight-flow build:cli` succeeds
 - [ ] `pnpm lint` passes
@@ -18,6 +20,7 @@
 - [ ] Existing `.claude/skills/*.md` that reference role files still resolve (symlinks, updated paths, or regenerated)
 
 ## Verification
+
 - [ ] `ls packages/taskflow/templates/roles/` lists all 8 expected role files
 - [ ] In an empty `/tmp/test-init` directory, `npx insight-flow init` creates all 8 role files
 - [ ] Re-running `insight-flow init` in the same directory skips existing files (no overwrite)

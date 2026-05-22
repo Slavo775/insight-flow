@@ -32,9 +32,11 @@
 ### Non-blocking 1 — `build:ui` / `dev:ui` invoke Vite via absolute path
 
 **File:** `packages/taskflow/package.json`
+
 ```
 "build:ui": "node ../../node_modules/vite/bin/vite.js build --config vite.config.ts"
 ```
+
 **Why:** `../../node_modules` is a monorepo-internal path that breaks if the package is run outside this repo (e.g., from a tarball install in a different project). Should be `vite build --config vite.config.ts` (relying on `pnpm exec` or the devDependency being hoisted).
 **Severity:** Non-blocking — the UI is pre-built and shipped in the tarball; consumers never run `build:ui`. This only affects internal developers.
 

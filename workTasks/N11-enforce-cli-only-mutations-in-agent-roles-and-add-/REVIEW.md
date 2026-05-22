@@ -53,6 +53,7 @@ Risk: **low** (role files and a new CLI command — no data model changes, no pr
 **File:** All 8 `TASK_*_ROLE.md` + `TASKMASTER*.md`
 **Why:** Identical 13-line block is copy-pasted 8 times. The `prompt-build --apply` command exists to regenerate them, but it is not enforced as the update path — editors can still diverge. A single `AGENT_ENFORCEMENT.md` referenced via `@AGENT_ENFORCEMENT.md` at the top of each role file removes all duplication and is guaranteed consistent.
 **Fix:**
+
 1. Create `AGENT_ENFORCEMENT.md` containing the full enforcement block.
 2. Replace the inline block in each role file with a single line: `@AGENT_ENFORCEMENT.md`.
 3. Update `prompt-build --apply` to write `AGENT_ENFORCEMENT.md` only — not patch individual role files.

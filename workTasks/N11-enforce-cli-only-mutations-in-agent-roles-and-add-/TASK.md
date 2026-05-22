@@ -6,7 +6,7 @@
 
 ## Problem
 
-Agent role files (TASK_*_ROLE.md, TASKMASTER_ROLE.md) do not explicitly prohibit direct file editing of task artifacts. An AI can bypass `insight-flow` and write tracker.json, TASK.md, or CHECKLIST.md directly — risking state divergence or silent data corruption. Additionally, `gh` permission coverage in settings is incomplete and inconsistently documented across roles. There is no user-configurable prompt builder to customize agent behavior per project preferences.
+Agent role files (TASK\_\*\_ROLE.md, TASKMASTER_ROLE.md) do not explicitly prohibit direct file editing of task artifacts. An AI can bypass `insight-flow` and write tracker.json, TASK.md, or CHECKLIST.md directly — risking state divergence or silent data corruption. Additionally, `gh` permission coverage in settings is incomplete and inconsistently documented across roles. There is no user-configurable prompt builder to customize agent behavior per project preferences.
 
 ## Goal
 
@@ -19,6 +19,7 @@ Agent role files (TASK_*_ROLE.md, TASKMASTER_ROLE.md) do not explicitly prohibit
 ## Scope
 
 ### In scope
+
 - `TASKMASTER_ROLE.md` — add `STRICT ENFORCEMENT` block
 - `TASK_IMPLEMENTER_ROLE.md` — add `STRICT ENFORCEMENT` block
 - `TASK_REVIEWER_ROLE.md` — add `STRICT ENFORCEMENT` block
@@ -33,6 +34,7 @@ Agent role files (TASK_*_ROLE.md, TASKMASTER_ROLE.md) do not explicitly prohibit
 - `packages/taskflow/templates/taskflow.prompt.json` — default config template
 
 ### Out of scope
+
 - CLAUDE.md (project-level docs; agent rules live in role files)
 - Changing the insight-flow data model or existing commands
 - Enforcement in TASKMASTER_CHANGE_ROLE.md or any non-tracked role files (verify they exist first)
@@ -40,7 +42,7 @@ Agent role files (TASK_*_ROLE.md, TASKMASTER_ROLE.md) do not explicitly prohibit
 ## Implementation plan
 
 1. **Read and audit all 7 role files**
-   - Read each TASK_*_ROLE.md + TASKMASTER_ROLE.md
+   - Read each TASK\_\*\_ROLE.md + TASKMASTER_ROLE.md
    - Identify where in each file the enforcement block fits best (after INPUT CONTRACT or at the top)
 
 2. **Add `STRICT ENFORCEMENT` block to each role file**

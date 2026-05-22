@@ -74,6 +74,7 @@ No GitHub PR (committed directly to main). Post-merge review.
 ### Blocker verification
 
 **Blocker 1 — `--force` flag missing:** RESOLVED.
+
 - `initProject(cwd, force = false)` — signature updated (`init/index.ts:13`).
 - Copy loop: `if (!force && existsSync(dest))` — existing files overwritten when `force=true` (`init/index.ts:70`).
 - `cli.ts:119`: `initProject(process.cwd(), !!opts.force)` — flag wired from parsed args.

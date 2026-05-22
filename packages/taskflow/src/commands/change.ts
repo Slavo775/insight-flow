@@ -1,7 +1,19 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../types.js";
-import { loadTaskById, loadAllTasks, saveShard, saveMaster, getWorkDir, now, resolveId } from "../storage.js";
+import {
+  loadTaskById,
+  loadAllTasks,
+  saveShard,
+  saveMaster,
+  getWorkDir,
+  now,
+  resolveId,
+} from "../storage.js";
 
-export function cmdChangeRequest(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
+export function cmdChangeRequest(
+  config: TaskflowConfig,
+  master: MasterFile,
+  opts: ParsedArgs,
+): void {
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = loadTaskById(config, master, id);
 
@@ -24,7 +36,11 @@ export function cmdChangeRequest(config: TaskflowConfig, master: MasterFile, opt
   });
 
   task.status = "changes-requested";
-  task.statusHistory.push({ status: "changes-requested", at: now(), by: (opts.by as string) || "task-request-changes" });
+  task.statusHistory.push({
+    status: "changes-requested",
+    at: now(),
+    by: (opts.by as string) || "task-request-changes",
+  });
 
   saveShard(getWorkDir(config), shardFile, shard);
   console.log(
@@ -33,7 +49,7 @@ export function cmdChangeRequest(config: TaskflowConfig, master: MasterFile, opt
       id,
       changeIndex: task.changesAfterImplementation.length - 1,
       description: opts.description,
-    }, null, 2),
+    }),
   );
 }
 
@@ -54,7 +70,11 @@ export function cmdChangeStart(config: TaskflowConfig, master: MasterFile, opts:
 
   lastChange.status = "implementing";
   task.status = "changes-implementing";
-  task.statusHistory.push({ status: "changes-implementing", at: now(), by: (opts.by as string) || "implement-changes" });
+  task.statusHistory.push({
+    status: "changes-implementing",
+    at: now(),
+    by: (opts.by as string) || "implement-changes",
+  });
 
   saveShard(getWorkDir(config), shardFile, shard);
   console.log(
@@ -62,7 +82,7 @@ export function cmdChangeStart(config: TaskflowConfig, master: MasterFile, opts:
       action: "change-started",
       id,
       changeIndex: task.changesAfterImplementation.length - 1,
-    }, null, 2),
+    }),
   );
 }
 
@@ -91,7 +111,11 @@ export function cmdChangeEnd(config: TaskflowConfig, master: MasterFile, opts: P
   }
 
   task.status = "changes-implemented";
-  task.statusHistory.push({ status: "changes-implemented", at: now(), by: (opts.by as string) || "implement-changes" });
+  task.statusHistory.push({
+    status: "changes-implemented",
+    at: now(),
+    by: (opts.by as string) || "implement-changes",
+  });
 
   saveShard(getWorkDir(config), shardFile, shard);
   console.log(
@@ -100,7 +124,7 @@ export function cmdChangeEnd(config: TaskflowConfig, master: MasterFile, opts: P
       id,
       changeIndex: task.changesAfterImplementation.length - 1,
       filesChanged: lastChange.filesChanged.length,
-    }, null, 2),
+    }),
   );
 }
 
@@ -128,19 +152,15 @@ export function cmdNextChange(config: TaskflowConfig, master: MasterFile): void 
   const lastChange = pick.changesAfterImplementation?.[pick.changesAfterImplementation.length - 1];
 
   console.log(
-    JSON.stringify(
-      {
-        next: pick.id,
-        title: pick.title,
-        type: pick.type,
-        priority: pick.priority,
-        status: pick.status,
-        folder: pick.folder,
-        changeDescription: lastChange?.description || null,
-        reason: `Change request pending (${pick.changesAfterImplementation?.length || 0} total)`,
-      },
-      null,
-      2,
-    ),
+    JSON.stringify({
+      next: pick.id,
+      title: pick.title,
+      type: pick.type,
+      priority: pick.priority,
+      status: pick.status,
+      folder: pick.folder,
+      changeDescription: lastChange?.description || null,
+      reason: `Change request pending (${pick.changesAfterImplementation?.length || 0} total)`,
+    }),
   );
 }

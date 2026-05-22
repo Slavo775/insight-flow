@@ -5,10 +5,12 @@
 **Created:** 2026-05-18
 
 ## Problem
+
 - The `packages/taskflow` package was prepared for npm in N03 but never shipped. The bare name `taskflow` is taken on npm by an unrelated project (intuitivcloud/taskflow), so a rename is required before the first publish.
 - We want the package live on npm under the user's account `sslavo` (currently only hosting `react-enhanced-image`) so it can be installed via `npx insight-flow` / `npm i insight-flow`.
 
 ## Goal
+
 1. Rename the publishable package from `taskflow` to `insight-flow` everywhere it appears (package metadata, bin name, README usage examples, internal scripts).
 2. Verify the rename does not break the build, the bundled UI build script, or the CLI entry point.
 3. Publish version `0.2.0` (or bump to `0.3.0` if the rename warrants it) to npm under the `sslavo` account with public access.
@@ -16,7 +18,9 @@
 5. Update repo docs (root README, package README) to reference the new install command.
 
 ## Scope
+
 ### In scope
+
 - `packages/taskflow/package.json` — change `name` to `insight-flow`, update `bin` key, bump version, keep `publishConfig.access: public`.
 - `packages/taskflow/README.md` — update install / npx examples.
 - Root `package.json` scripts (`build:package`, `pack:taskflow`) — paths stay the same (folder is still `packages/taskflow`), but rename script keys to `pack:insight-flow` if it improves clarity (optional).
@@ -25,6 +29,7 @@
 - Verify `npm login` is active as `sslavo` and run `pnpm --dir packages/taskflow publish` (or `npm publish` from inside the package dir).
 
 ### Out of scope
+
 - Renaming the folder `packages/taskflow` → `packages/insight-flow` (keep folder name to minimize diff; only the published `name` changes).
 - Renaming the GitHub repo or the dashboard SPA.
 - Setting up CI-based publishing / changesets / automated release notes — manual publish for this first cut.
@@ -71,6 +76,7 @@
    - Note: the actual `npm publish` step should happen from the merged main branch (or from the feature branch with user approval) — flag this in the PR description so reviewers know publish is a manual post-merge step.
 
 ## Verification
+
 - `npm view insight-flow` returns version `0.3.0` with the correct repo/homepage links and `sslavo` as the maintainer.
 - `npx insight-flow@latest --help` (or equivalent) prints usage info.
 - `npx insight-flow@latest init` in an empty directory produces the expected scaffolded files (skills, CLAUDE.md, schema, etc.).
@@ -78,6 +84,7 @@
 - `git diff` shows only the rename + version bump + doc updates (no accidental refactors).
 
 ## Notes
+
 - The `taskflow` name on npm is owned by intuitivcloud/taskflow (1.0.1, last published >1 year ago). Don't try to publish under that name — npm will reject with 403.
 - Reference: N03 (`workTasks/N03-publish-taskflow-npm/`) did the publish-prep work — exports, files allowlist, build pipeline, `prepublishOnly`. N04 is purely the rename + actual publish.
 - Folder `packages/taskflow/` stays as-is to minimize churn; only the published `name` changes. If we later want the folder renamed, do it as a separate refactor task.

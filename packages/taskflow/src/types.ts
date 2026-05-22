@@ -92,9 +92,18 @@ export interface Task {
     filesChanged: string[];
     tokensUsed: number | null;
   };
-  reviews: Review[];
+  /**
+   * Reviews live in `<folder>/reviews.json` as of schema v2. Inline arrays may
+   * still appear in legacy shards; treat both as the same data. New writes go
+   * to the side file only.
+   */
+  reviews?: Review[];
   changesAfterImplementation: ChangeRequest[];
-  incidents: Incident[];
+  /** Incidents live in `<folder>/incidents.json` as of schema v2. */
+  incidents?: Incident[];
+  reviewCount?: number;
+  lastReviewVerdict?: string | null;
+  openIncidentCount?: number;
   committedAt: string | null;
   totalDurationMinutes: number | null;
   tags: string[];
@@ -102,6 +111,16 @@ export interface Task {
   branch: string | null;
   mrUrl: string | null;
   mergedAt: string | null;
+}
+
+export interface ReviewsFile {
+  taskId: string;
+  reviews: Review[];
+}
+
+export interface IncidentsFile {
+  taskId: string;
+  incidents: Incident[];
 }
 
 export interface ShardFile {

@@ -13,6 +13,7 @@ Adds TanStack Query-based API fetching with shard pagination to the DataLoader. 
 Previous review round requested 4 fixes (reset dataMode, nav labels, isFetch naming, fetch toast). All 4 are resolved in commit `599bd52`.
 
 ## Checklist verification
+
 - [x] `QueryClientProvider` wraps the app in `__root.tsx` (line 74)
 - [x] `src/lib/api.ts` exports `useShardIndex()` and `useShardData()` hooks (+ `useMasterData()`)
 - [x] Shard index fetched from `/api/work-tasks` on load
@@ -25,11 +26,13 @@ Previous review round requested 4 fixes (reset dataMode, nav labels, isFetch nam
 - [x] API base URL configurable via constant/env — `VITE_API_BASE_URL` env var with fallback
 
 ## Quality gate results
+
 - [x] `npx tsc --noEmit` passes
 - [x] `pnpm lint` passes (0 issues in changed files)
 - [x] No regressions — existing store shape extended, not modified
 
 ## Notes
+
 - `useMasterData` hook is a nice addition beyond spec — provides metadata alongside each shard.
 - The `mergeFiles` utility is correctly shared between FetchMode and UploadMode.
 - Toast on fetch (`data-loader.tsx:71`) will fire on every shard navigation — acceptable UX for confirming data loaded.

@@ -62,19 +62,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T07:39:41.890Z",
-          "endedAt": "2026-05-21T07:41:46.346Z",
-          "verdict": "approved",
-          "comment": "paths.ts with resolveProjectRoot/resolvePackageAsset clean, no __dirname/../../.. in src. Non-blocking: safeResolveProjectRoot swallows error so friendly message may not surface, cache keyed on cwd equality.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 842,
       "tags": [
@@ -267,92 +258,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T08:57:31.806Z",
-          "endedAt": "2026-05-21T08:57:46.922Z",
-          "verdict": "fix-needed",
-          "comment": "Centralize STRICT ENFORCEMENT into one shared file instead of copy-pasting into all 8 role files",
-          "type": "human",
-          "by": "task-human-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-21T09:09:51.419Z",
-          "endedAt": "2026-05-21T09:11:15.111Z",
-          "verdict": "fix-needed",
-          "comment": "Blocker: centralize enforcement block into AGENT_ENFORCEMENT.md referenced via @-include. Non-blocking: extra blank line in patchRoleFile insert branch.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": {
-            "startedAt": "2026-05-21T09:12:35.219Z",
-            "endedAt": "2026-05-21T09:14:49.211Z",
-            "status": "fixed",
-            "filesChanged": [
-              "AGENT_ENFORCEMENT.md",
-              "TASKMASTER_ROLE.md",
-              "TASK_IMPLEMENTER_ROLE.md",
-              "TASK_REVIEWER_ROLE.md",
-              "TASK_REVIEW_FIXER_ROLE.md",
-              "TASK_HUMAN_REVIEW_ROLE.md",
-              "TASK_INCIDENT_ROLE.md",
-              "TASK_REQUEST_CHANGES_ROLE.md",
-              "TASKMASTER_CHANGE_ROLE.md",
-              "packages/taskflow/src/commands/prompt-build.ts"
-            ],
-            "comment": "Created AGENT_ENFORCEMENT.md; replaced inline blocks with @AGENT_ENFORCEMENT.md in 8 role files; updated prompt-build --apply to write central file; fixed patchRoleFile blank line bug",
-            "by": "task-review-fix"
-          }
-        },
-        {
-          "startedAt": "2026-05-21T09:20:22.316Z",
-          "endedAt": "2026-05-21T09:21:02.004Z",
-          "verdict": "approved",
-          "comment": "Blocker 1 resolved: AGENT_ENFORCEMENT.md centralizes enforcement, all 8 role files use @reference. Non-blocking blank line fix applied. Clean.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-21T09:28:46.748Z",
-          "endedAt": "2026-05-21T09:29:04.748Z",
-          "verdict": "fix-needed",
-          "comment": "GIT/GH TOOL RULE references taskflow.prompt.json — extra token cost. Bake resolved gitTool value into AGENT_ENFORCEMENT.md directly so agents need no file lookup.",
-          "type": "human",
-          "by": "task-human-review",
-          "fix": {
-            "startedAt": "2026-05-21T09:32:09.074Z",
-            "endedAt": "2026-05-21T09:33:12.292Z",
-            "status": "fixed",
-            "filesChanged": [
-              "AGENT_ENFORCEMENT.md",
-              "packages/taskflow/src/commands/prompt-build.ts"
-            ],
-            "comment": "buildEnforcementBlock now writes clean resolved prose. prompt-build --apply regenerated AGENT_ENFORCEMENT.md with concrete git tool values, no config file reference.",
-            "by": "task-review-fix"
-          }
-        },
-        {
-          "startedAt": "2026-05-21T09:37:13.117Z",
-          "endedAt": "2026-05-21T09:37:48.616Z",
-          "verdict": "approved",
-          "comment": "Human blocker resolved: AGENT_ENFORCEMENT.md now contains concrete resolved prose, no config file references. All config fields baked in at generation time.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-21T09:51:15.955Z",
-          "endedAt": "2026-05-21T09:51:28.338Z",
-          "verdict": "approved",
-          "comment": "Human approved. Ready to merge.",
-          "type": "human",
-          "by": "task-human-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 6,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 74,
       "tags": [
@@ -522,37 +431,10 @@
         ],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T10:27:31.597Z",
-          "endedAt": "2026-05-21T10:29:32.595Z",
-          "verdict": "approved",
-          "comment": "All checklist items pass. Four non-blocking notes: spec path discrepancy (skills/ vs commands/), custom skills always overwrite by design, no path sanitization on custom name, silent skip on missing role file.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-21T11:17:31.608Z",
-          "endedAt": "2026-05-21T11:18:12.304Z",
-          "verdict": "approved",
-          "comment": "Round 2: all three non-blocking fixes verified correct. basename guard, console.warn, and CHECKLIST path all clean. Ready to merge.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        },
-        {
-          "startedAt": "2026-05-21T11:27:25.421Z",
-          "endedAt": "2026-05-21T11:27:39.041Z",
-          "verdict": "approved",
-          "comment": "Human approved: done!",
-          "type": "human",
-          "by": "task-human-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 84,
       "tags": [
@@ -647,19 +529,10 @@
         "filesChanged": [],
         "tokensUsed": null
       },
-      "reviews": [
-        {
-          "startedAt": "2026-05-21T17:36:39.858Z",
-          "endedAt": "2026-05-21T17:39:10.621Z",
-          "verdict": "fix-needed",
-          "comment": "3 blockers: npm publish incomplete (2FA), git tag missing, package.json+CHANGELOG not committed to branch.",
-          "type": "ai",
-          "by": "task-review",
-          "fix": null
-        }
-      ],
       "changesAfterImplementation": [],
-      "incidents": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": 59,
       "tags": [
@@ -677,6 +550,115 @@
       "branch": "feat/N13-release-insight-flow-v0-4-0",
       "mrUrl": null,
       "mergedAt": "2026-05-21T18:09:18.562Z"
+    },
+    {
+      "id": "N14",
+      "title": "Reduce token consumption across insight-flow agents and CLI",
+      "type": "rework",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "workTasks/N14-reduce-token-consumption-across-insight-flow-agent",
+      "createdAt": "2026-05-22T10:48:44.125Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-22T10:48:44.126Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T11:27:07.558Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T11:27:07.643Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T11:27:12.473Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-22T11:40:53.102Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-22T11:43:51.451Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-22T12:45:28.720Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T15:08:27.549Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-22T15:09:39.734Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T15:35:16.611Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": "2026-05-22T11:27:07.643Z",
+        "filesChanged": [
+          "packages/taskflow/src/commands/*.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/src/storage.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/templates/task/TASK.md.tpl",
+          "packages/taskflow/templates/task/CHECKLIST.md.tpl",
+          "packages/taskflow/scripts/sync-role-templates.mjs",
+          "packages/taskflow/tsup.config.ts",
+          "packages/taskflow/package.json",
+          "AGENT_ENFORCEMENT.md",
+          "GITHUB_PR_API.md",
+          "TASK_*_ROLE.md",
+          "TASKMASTER_*_ROLE.md",
+          ".claude/commands/task-git.md",
+          "CLAUDE.md",
+          "package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "cli",
+        "perf",
+        "refactor"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-22T15:35:16.610Z",
+          "commitHash": "3b04f94",
+          "commitMessage": "refactor(taskflow): cut token consumption across CLI + agents; consolidate to a single server-rendered dashboard (N14)"
+        }
+      ],
+      "branch": "rework/N14-reduce-token-consumption-across-insight-flow-agent",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/8",
+      "mergedAt": null
     }
   ]
 }

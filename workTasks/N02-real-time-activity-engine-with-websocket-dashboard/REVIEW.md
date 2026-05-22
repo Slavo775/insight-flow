@@ -36,20 +36,26 @@ All round-1 issues resolved in commit `eefae32`. Tracker bookkeeping in `46f4681
 ## Round 2 — Issues resolved
 
 ### Blocker 1 — New files not staged/committed → RESOLVED
+
 `activity.ts`, `dashboard.ts`, `ws.ts` are now part of commit `eefae32`. Verified via `git diff main..HEAD --stat` shows all three with `+` mode.
 
 ### Non-blocking — CSS `display: none` then `display: flex` conflict → RESOLVED
+
 `dashboard.ts:70` now reads:
+
 ```css
 .activity-panel { ... display: none; ... flex-direction: column; }
 .activity-panel.open { display: flex; }
 ```
+
 Base rule has `display: none` only; `flex-direction: column` is inert until `.open` flips to `display: flex`. Panel correctly starts hidden.
 
 ### Non-blocking — `addActivityEvent` called when activity is disabled → RESOLVED
+
 `dashboard.ts:286, 291` both `snapshot` and `activity` branches now guard with `typeof addActivityEvent === 'function'`. When `activityEnabled` is false the function is never declared, but the guards skip the call so no `ReferenceError` is possible.
 
 ### Non-blocking — Unused `ActivityEngineConfig` import → RESOLVED
+
 `init/index.ts:4` now imports only `TaskflowConfig`. No lingering references — typecheck would have caught a dangling identifier.
 
 ## Quality gate results

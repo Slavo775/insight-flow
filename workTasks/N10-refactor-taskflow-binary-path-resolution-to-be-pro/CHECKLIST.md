@@ -1,6 +1,7 @@
 # N10 — Refactor taskflow binary path resolution to be project-root relative — Checklist
 
 ## Done criteria
+
 - [ ] `packages/taskflow/src/paths.ts` exposes `resolveProjectRoot()` and `resolvePackageAsset()`
 - [ ] `resolveProjectRoot()` walks up from `process.cwd()` looking for `workTasks/master.json`, caches the result
 - [ ] `resolvePackageAsset(rel)` uses `import.meta.url` to anchor on the package install location
@@ -11,6 +12,7 @@
 - [ ] CLI top-level handler converts `TaskflowProjectNotFoundError` into a friendly error message
 
 ## Quality gates
+
 - [ ] `pnpm --filter insight-flow typecheck` passes
 - [ ] `pnpm --filter insight-flow build:cli` succeeds
 - [ ] `pnpm lint` passes
@@ -19,6 +21,7 @@
 - [ ] `grep -rn "__dirname" packages/taskflow/src/` returns zero matches
 
 ## Verification
+
 - [ ] `insight-flow current` works from repo root
 - [ ] `insight-flow current` works from `workTasks/` subdirectory (project root resolved upward)
 - [ ] `insight-flow current` from `/tmp` (or any dir outside a project) prints "no insight-flow project found" and exits non-zero
