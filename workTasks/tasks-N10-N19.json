@@ -556,7 +556,7 @@
       "title": "Reduce token consumption across insight-flow agents and CLI",
       "type": "rework",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N14-reduce-token-consumption-across-insight-flow-agent",
       "createdAt": "2026-05-22T10:48:44.125Z",
       "statusHistory": [
@@ -604,6 +604,11 @@
           "status": "approved",
           "at": "2026-05-22T15:09:39.734Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T15:35:16.611Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -644,9 +649,15 @@
         "perf",
         "refactor"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-22T15:35:16.610Z",
+          "commitHash": "3b04f94",
+          "commitMessage": "refactor(taskflow): cut token consumption across CLI + agents; consolidate to a single server-rendered dashboard (N14)"
+        }
+      ],
+      "branch": "rework/N14-reduce-token-consumption-across-insight-flow-agent",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/8",
       "mergedAt": null
     }
   ]
