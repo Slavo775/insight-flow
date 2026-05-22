@@ -1,0 +1,44 @@
+{
+  "taskId": "N15",
+  "reviews": [
+    {
+      "startedAt": "2026-05-22T17:17:40.371Z",
+      "endedAt": "2026-05-22T17:18:30.743Z",
+      "verdict": "fix-needed",
+      "comment": "3 blockers: hardcoded npm/npx (should be pm-configurable), hardcoded gh (should support glab/git fallback), hardcoded TypeScript (should be language-configurable). All three are detect-at-init + config + prompt-build substitution. Likely worth a separate N16 task.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-22T18:17:22.296Z",
+      "endedAt": "2026-05-22T18:18:31.146Z",
+      "verdict": "fix-needed",
+      "comment": "Round 2 (AI): confirms human review verdict. All 3 generalisation blockers reproduced; consolidation in AGENT_PROTOCOL.md narrowed B1+B3 to a single line (good). Two extra non-blocking inconsistencies flagged (Round-N section names diverge from template; reviewer role claims sections that template doesn't ship). N15 stays fix-needed until N16's substitution lands.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-22T18:28:21.987Z",
+        "endedAt": "2026-05-22T18:29:40.469Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/spec.ts",
+          "TASK_REVIEWER_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_REVIEWER_ROLE.md",
+          "packages/taskflow/test/scaffold-and-bundle.test.mjs"
+        ],
+        "comment": "Fixed 2 non-blocking inconsistencies from round-2 AI review: (1) scaffoldReviewMd Round-N section names now mirror Round-1 template (Summary / Checklist verification / Blockers / Non-blocking / Security & edge cases / Notes) as h3 under the Round-N h2; (2) TASK_REVIEWER_ROLE.md mandatory-structure line aligned with the actual template (dropped 'Next actions', kept 'Notes'; clarified Verdict is metadata not a section). 3 blockers left untouched per user direction — those land in N16.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-22T18:32:19.067Z",
+      "endedAt": "2026-05-22T18:32:47.152Z",
+      "verdict": "approved",
+      "comment": "Round 3 human approval. Non-blocking items from round-2 fixed in ca23044; 3 generalisation blockers explicitly deferred to N16. Ready to merge.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

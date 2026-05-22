@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../types.js";
 import {
@@ -11,14 +11,7 @@ import {
   now,
 } from "../storage.js";
 import { resolvePackageAsset } from "../paths.js";
-
-function renderTemplate(tplPath: string, vars: Record<string, string>): string {
-  let body = readFileSync(tplPath, "utf-8");
-  for (const [key, value] of Object.entries(vars)) {
-    body = body.replaceAll(`{{${key}}}`, value);
-  }
-  return body;
-}
+import { renderTemplate } from "../spec.js";
 
 function scaffoldTaskDocs(
   folderPath: string,
