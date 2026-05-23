@@ -379,3 +379,26 @@ None.
 ### Notes
 
 - Template sync is correct: `NOTIFY_HOOK_SCRIPT` in `notify-hook.ts` is the authoritative source; the live `.claude/hooks/taskflow-notify.sh` matches it exactly.
+
+
+---
+
+## Human Review — Round 10
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+- No notifications received at all — neither OS nor browser — when testing manually with `insight-flow notify "N19 test notification"`. The command exited silently with no output but nothing appeared on the desktop or in the browser.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- Both OS and browser channels are broken in this test.
+- Previous round tested OS only; this round confirms browser is also not firing.
+- The silent exit 0 makes the failure invisible — the command gives no feedback even when notifications don't reach the user.
