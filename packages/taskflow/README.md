@@ -268,6 +268,73 @@ startServer(config); // or startServer(config, 7000) to override port
 const tasks = loadAllTasks(config); // read every shard
 ```
 
+## Multi-project overview
+
+When you run multiple `insight-flow ui` instances (one per project), the `insight-flow-master` package provides a live overview page that aggregates all of them into a single card grid.
+
+### How it works
+
+Project servers (push model):
+1. On startup, `insight-flow ui` auto-starts `insight-flow-master` locally (if not already running) and registers with it.
+2. On every file-change, the project server pushes its current state (current task, status counts, activity) to the master via HTTP POST.
+3. If the master restarts and loses its registry, the next push returns 401 — the project server silently re-registers and retries.
+
+The master:
+- Holds an in-memory registry of all registered projects.
+- Serves `GET /overview` — a live card grid, one card per project.
+- Broadcasts `project-update` events via Socket.IO to the browser.
+
+### Local setup
+
+```bash
+# Build the master package (once)
+pnpm --dir packages/insight-flow-master run build
+
+# Start your projects — master auto-starts on the first one
+insight-flow ui                          # project A on :6006, master on :6000
+# (in another terminal, different project dir)
+insight-flow ui                          # project B on :6006, registers with existing master
+
+# Open the overview
+open http://localhost:6000/overview
+# Or via any project server's /overview (renders as an iframe)
+open http://localhost:6006/overview
+```
+
+### Remote master
+
+Set `startMasterLocally: false` in `taskflow.config.json` to point at a master running on another machine:
+
+```jsonc
+{
+  "master": {
+    "url": "http://my-server:6000",
+    "startMasterLocally": false
+  }
+}
+```
+
+### Standalone mode
+
+To disable master integration entirely for a project:
+
+```jsonc
+{
+  "master": { "standalone": true }
+}
+```
+
+`GET /overview` returns 404 and no master process is started.
+
+### Master standalone mode
+
+The master itself can run in standalone mode (no new registrations accepted, overview shows existing cards only):
+
+```json
+// ~/.insight-flow/master.json
+{ "port": 6000, "standalone": true }
+```
+
 ## License
 
 MIT

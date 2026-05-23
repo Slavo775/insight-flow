@@ -1,0 +1,29 @@
+{
+  "name": "insight-flow-master",
+  "version": "0.1.0",
+  "description": "Master server for insight-flow multi-project overview",
+  "type": "module",
+  "bin": {
+    "insight-flow-master": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.3",
+    "zod": "^4.4.3"
+  },
+  "license": "MIT",
+  "author": "Slavo Sedlak <slavomir.sedlak.webdev@gmail.com>"
+}

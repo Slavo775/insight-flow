@@ -175,6 +175,13 @@ export interface NotificationsConfig {
   cli?: boolean;
 }
 
+export interface MasterConfig {
+  url?: string;
+  port?: number;
+  standalone?: boolean;
+  startMasterLocally?: boolean;
+}
+
 export interface TaskflowConfig {
   workDir: string;
   shardSize: number;
@@ -186,6 +193,7 @@ export interface TaskflowConfig {
   activityEngine?: ActivityEngineConfig;
   agents?: AgentsConfig;
   notifications?: NotificationsConfig;
+  master?: MasterConfig;
 }
 
 export interface ParsedArgs {

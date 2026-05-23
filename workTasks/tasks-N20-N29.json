@@ -9,7 +9,7 @@
       "title": "Multi-project overview page aggregating multiple insight-flow servers",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N20-multi-project-overview-page-aggregating-multiple-i",
       "createdAt": "2026-05-23T09:43:25.203Z",
       "statusHistory": [
@@ -17,12 +17,53 @@
           "status": "ready",
           "at": "2026-05-23T09:43:25.203Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:16:34.369Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:24:54.694Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:32:58.252Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-23T14:42:11.217Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-23T14:47:33.092Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-23T14:42:11.217Z",
+        "completedAt": "2026-05-23T14:47:33.092Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/types.ts",
+          "packages/insight-flow-master/src/config.ts",
+          "packages/insight-flow-master/src/registry.ts",
+          "packages/insight-flow-master/src/lock.ts",
+          "packages/insight-flow-master/src/server.ts",
+          "packages/insight-flow-master/src/overview.ts",
+          "packages/insight-flow-master/src/index.ts",
+          "packages/insight-flow-master/package.json",
+          "packages/insight-flow-master/tsconfig.json",
+          "packages/insight-flow-master/tsup.config.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/README.md",
+          "pnpm-workspace.yaml"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -36,8 +77,24 @@
         "overview",
         "multi-project"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-23T14:16:34.368Z",
+          "commitHash": "6bfaac56ab382c35af182a2d220da84713ca5332",
+          "commitMessage": "docs(tasks): rewrite N20 spec — push-based master server architecture"
+        },
+        {
+          "at": "2026-05-23T14:24:54.694Z",
+          "commitHash": "64f92ce0522aad2c6835a266ec34bee5a9860c0c",
+          "commitMessage": "docs(tasks): N20 spec rev2 — extract master to own package, add startMasterLocally"
+        },
+        {
+          "at": "2026-05-23T14:32:58.252Z",
+          "commitHash": "c2a0a1114f6b59bf35026f461b64d34afdd870ae",
+          "commitMessage": "docs(tasks): N20 spec rev3 — master standalone config + src/config.ts"
+        }
+      ],
+      "branch": "feat/N20-multi-project-overview",
       "mrUrl": null,
       "mergedAt": null
     },

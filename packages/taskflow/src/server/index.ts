@@ -1,14 +1,18 @@
 import { createServer } from "node:http";
 import {
   readFileSync,
+  writeFileSync,
+  unlinkSync,
   existsSync,
   readdirSync,
   watch,
-  unlinkSync,
+  mkdirSync,
   type FSWatcher,
 } from "node:fs";
-import { normalize, resolve, sep } from "node:path";
-import { exec } from "node:child_process";
+import { normalize, resolve, sep, dirname } from "node:path";
+import { homedir } from "node:os";
+import { fileURLToPath } from "node:url";
+import { exec, spawn } from "node:child_process";
 import { Server as IOServer, type Socket as IOSocket } from "socket.io";
 import type { TaskflowConfig } from "../types.js";
 import { getWorkDir } from "../config.js";
@@ -162,6 +166,184 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Master server integration (N20)
+// ---------------------------------------------------------------------------
+
+const MASTER_LOCK_DIR = resolve(homedir(), ".insight-flow");
+const MASTER_LOCK_PATH = resolve(MASTER_LOCK_DIR, "master.lock");
+
+interface MasterLock { pid: number; port: number; }
+
+function readMasterLock(): MasterLock | null {
+  try { return JSON.parse(readFileSync(MASTER_LOCK_PATH, "utf-8")) as MasterLock; } catch { return null; }
+}
+
+function writeMasterLock(pid: number, port: number): void {
+  mkdirSync(MASTER_LOCK_DIR, { recursive: true });
+  writeFileSync(MASTER_LOCK_PATH, JSON.stringify({ pid, port, startedAt: new Date().toISOString() }, null, 2));
+}
+
+function clearMasterLock(): void {
+  try { unlinkSync(MASTER_LOCK_PATH); } catch { /* ignore */ }
+}
+
+function isMasterPidAlive(pid: number): boolean {
+  try { process.kill(pid, 0); return true; } catch { return false; }
+}
+
+function findMasterBin(): string | null {
+  const __dir = dirname(fileURLToPath(import.meta.url));
+  // sibling package in workspace: packages/insight-flow-master/dist/index.js
+  const siblingBin = resolve(__dir, "../../../insight-flow-master/dist/index.js");
+  if (existsSync(siblingBin)) return siblingBin;
+  return null;
+}
+
+async function waitForMaster(port: number): Promise<boolean> {
+  const url = `http://localhost:${port}/overview`;
+  for (let i = 0; i < 10; i++) {
+    await new Promise<void>((r) => setTimeout(r, 300));
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(500) });
+      if (res.ok || res.status === 404) return true;
+    } catch { /* not ready */ }
+  }
+  return false;
+}
+
+async function registerWithMaster(masterUrl: string, label: string, projectUrl: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${masterUrl}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label, url: projectUrl }),
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json() as { id?: string };
+    return data.id ?? null;
+  } catch { return null; }
+}
+
+async function pushStateToMaster(
+  masterUrl: string,
+  id: string,
+  state: Record<string, unknown>,
+): Promise<number> {
+  try {
+    const res = await fetch(`${masterUrl}/api/projects/${id}/update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(state),
+      signal: AbortSignal.timeout(3000),
+    });
+    return res.status;
+  } catch { return 0; }
+}
+
+function buildProjectState(
+  config: TaskflowConfig,
+  activity: ActivityEngine | NoopActivityEngine,
+): Record<string, unknown> {
+  const workDir = getWorkDir(config);
+  let currentTaskId: string | null = null;
+  let currentTaskTitle: string | null = null;
+  let currentTaskStatus: string | null = null;
+  const taskCounts: Record<string, number> = {};
+
+  try {
+    const masterJson = JSON.parse(
+      readFileSync(resolve(workDir, "master.json"), "utf-8"),
+    ) as { meta?: { currentTaskId?: string; shards?: string[] } };
+    currentTaskId = masterJson.meta?.currentTaskId ?? null;
+
+    for (const shardFile of masterJson.meta?.shards ?? []) {
+      const shardPath = resolve(workDir, shardFile);
+      if (!existsSync(shardPath)) continue;
+      const shard = JSON.parse(readFileSync(shardPath, "utf-8")) as {
+        tasks?: Array<{ id: string; title?: string; status: string }>;
+      };
+      for (const task of shard.tasks ?? []) {
+        taskCounts[task.status] = (taskCounts[task.status] ?? 0) + 1;
+        if (task.id === currentTaskId) {
+          currentTaskTitle = task.title ?? null;
+          currentTaskStatus = task.status;
+        }
+      }
+    }
+  } catch { /* ignore */ }
+
+  return {
+    currentTaskId,
+    currentTaskTitle,
+    currentTaskStatus,
+    taskCounts,
+    recentActivity: activity.getRecentEvents().slice(-50),
+  };
+}
+
+let masterId: string | null = null;
+
+async function setupMasterIntegration(
+  config: TaskflowConfig,
+  serverPort: number,
+  activity: ActivityEngine | NoopActivityEngine,
+): Promise<(() => void) | null> {
+  const masterCfg = config.master;
+  if (masterCfg?.standalone) return null;
+
+  const masterUrl = masterCfg?.url ?? "http://localhost:6000";
+  const masterPort = masterCfg?.port ?? 6000;
+  const startLocally = masterCfg?.startMasterLocally !== false;
+
+  // Auto-start master locally if needed
+  if (startLocally) {
+    const lock = readMasterLock();
+    const running = lock && isMasterPidAlive(lock.pid);
+    if (!running) {
+      if (lock) clearMasterLock();
+      const binPath = findMasterBin();
+      if (binPath) {
+        const child = spawn(process.execPath, [binPath, "--port", String(masterPort)], {
+          detached: false,
+          stdio: "ignore",
+        });
+        child.unref();
+        await waitForMaster(masterPort);
+      } else {
+        console.log("  [master] insight-flow-master binary not found, skipping auto-start");
+        console.log("  [master] Run: pnpm --dir packages/insight-flow-master run build");
+      }
+    }
+  }
+
+  // Register with master
+  const projectUrl = `http://localhost:${serverPort}`;
+  masterId = await registerWithMaster(masterUrl, config.projectName, projectUrl);
+  if (!masterId) {
+    console.log("  [master] Could not register with master at " + masterUrl + " — overview disabled");
+    return null;
+  }
+
+  console.log("  [master] Registered with " + masterUrl + " (id: " + masterId.slice(0, 8) + "...)");
+
+  // Push initial state
+  const state = buildProjectState(config, activity);
+  void pushStateToMaster(masterUrl, masterId, state);
+
+  // Return push function to call on file-change
+  return async function pushOnChange(): Promise<void> {
+    if (!masterId) return;
+    const s = buildProjectState(config, activity);
+    const status = await pushStateToMaster(masterUrl, masterId, s);
+    if (status === 401) {
+      masterId = await registerWithMaster(masterUrl, config.projectName, projectUrl);
+      if (masterId) await pushStateToMaster(masterUrl, masterId, s);
+    }
+  };
+}
+
 export function startServer(config: TaskflowConfig, port?: number): void {
   const serverPort = port || config.server.port;
   const workDir = getWorkDir(config);
@@ -189,11 +371,37 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
   activity.start();
 
+  // Master integration — runs async, non-blocking
+  let pushToMaster: (() => void) | null = null;
+  void setupMasterIntegration(config, serverPort, activity).then((fn) => {
+    pushToMaster = fn;
+  });
+
+  const masterUrl = config.master?.url ?? "http://localhost:6000";
+
   const server = createServer((req, res) => {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET");
+
+    // /overview — iframe proxy to master server
+    if (url.pathname === "/overview") {
+      if (config.master?.standalone) {
+        res.writeHead(404, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "Overview not available in standalone mode" }));
+        return;
+      }
+      const iframeHtml =
+        "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">" +
+        "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;overflow:hidden}</style>" +
+        "</head><body>" +
+        "<iframe src=\"" + masterUrl + "/overview\" style=\"width:100%;height:100vh;border:none;display:block\"></iframe>" +
+        "</body></html>";
+      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.end(iframeHtml);
+      return;
+    }
 
     if (url.pathname === "/api/work-tasks") {
       try {
@@ -275,6 +483,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
       io.emit("file-change", null);
+      if (pushToMaster) void pushToMaster();
     }, WATCH_DEBOUNCE_MS);
   }
 
@@ -289,6 +498,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     console.log("  Engine:  " + engineStatus);
     if (configEnabled) {
       console.log("  Hook:    " + hookStatus);
+    }
+    if (!config.master?.standalone) {
+      console.log("  Overview: http://localhost:" + serverPort + "/overview");
     }
     console.log("");
 
