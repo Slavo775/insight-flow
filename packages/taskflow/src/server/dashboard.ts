@@ -49,6 +49,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "    <div id=\"detail-content\"></div>\n" +
     "  </div>\n" +
     "\n" +
+    "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
     "  <script>\n" + getScript(activityEnabled, port) + "\n  </script>\n" +
     "</body>\n</html>";
 }
@@ -185,10 +186,10 @@ function getScript(activityEnabled: boolean, _port: number): string {
     var tasks = [];
     var shards = [];
     var currentShard = null;
-    var ws = null;
-    var wsConnected = false;
+    var sock = null;
     var hookStatus = 'ok';
     var configEnabled = true;
+    var hasSyncedOnce = false;
 
     function badgeClass(status) {
       if (['ready'].includes(status)) return 'badge-ready';
@@ -444,51 +445,49 @@ function getScript(activityEnabled: boolean, _port: number): string {
     }
 
     function connectWS() {
-      var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws = new WebSocket(protocol + '//' + location.host + '/ws');
+      // socket.io-client is loaded by /socket.io/socket.io.js (served by the
+      // Socket.IO server). Falls back to long-polling automatically if WS
+      // upgrade fails for any reason. Reconnection is built-in.
+      sock = io({ transports: ['websocket', 'polling'], reconnectionDelay: 1000 });
 
-      ws.onopen = function() {
-        wsConnected = true;
+      sock.on('connect', function() {
         setConnectionStatus('connected');
-      };
+        if (hasSyncedOnce && currentShard) {
+          // Re-fetch state on every reconnect so anything that happened
+          // during the disconnect window is recovered.
+          loadShardIndex().then(function() {
+            if (currentShard) return loadShard(currentShard);
+          });
+        }
+        hasSyncedOnce = true;
+      });
 
-      ws.onmessage = function(e) {
-        try {
-          var msg = JSON.parse(e.data);
-          if (msg.type === 'file-change') {
-            loadShardIndex().then(function() {
-              if (currentShard) return loadShard(currentShard);
-            });
-          } else if (msg.type === 'snapshot') {
-            if (msg.data && typeof msg.data.hookStatus === 'string') {
-              hookStatus = msg.data.hookStatus;
-            }
-            if (msg.data && typeof msg.data.configEnabled === 'boolean') {
-              configEnabled = msg.data.configEnabled;
-            }
-            if (msg.data && msg.data.activity && typeof addActivityEvent === 'function') {
-              for (var i = 0; i < msg.data.activity.length; i++) {
-                addActivityEvent(msg.data.activity[i]);
-              }
-            }
-            if (typeof renderActivityEmptyState === 'function') {
-              renderActivityEmptyState();
-            }
-          } else if (msg.type === 'activity' && typeof addActivityEvent === 'function') {
-            addActivityEvent(msg.data);
+      sock.on('disconnect', function() { setConnectionStatus('reconnecting'); });
+      sock.on('reconnect_attempt', function() { setConnectionStatus('reconnecting'); });
+      sock.on('connect_error', function() { setConnectionStatus('reconnecting'); });
+
+      sock.on('snapshot', function(data) {
+        if (data && typeof data.hookStatus === 'string') hookStatus = data.hookStatus;
+        if (data && typeof data.configEnabled === 'boolean') configEnabled = data.configEnabled;
+        if (data && data.activity && typeof addActivityEvent === 'function') {
+          for (var i = 0; i < data.activity.length; i++) {
+            addActivityEvent(data.activity[i]);
           }
-        } catch(err) {}
-      };
+        }
+        if (typeof renderActivityEmptyState === 'function') {
+          renderActivityEmptyState();
+        }
+      });
 
-      ws.onclose = function() {
-        wsConnected = false;
-        setConnectionStatus('reconnecting');
-        setTimeout(connectWS, 3000);
-      };
+      sock.on('file-change', function() {
+        loadShardIndex().then(function() {
+          if (currentShard) return loadShard(currentShard);
+        });
+      });
 
-      ws.onerror = function() {
-        ws.close();
-      };
+      sock.on('activity', function(ev) {
+        if (typeof addActivityEvent === 'function') addActivityEvent(ev);
+      });
     }`;
 
   // Activity panel JS (only if enabled)

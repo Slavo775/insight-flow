@@ -17,7 +17,20 @@
       "comment": "Mobile Safari shows yellow (reconnecting) live-dot; mutations do not repaint. Two blockers: (1) no WS keep-alive ping, Safari kills idle WS; (2) ws.onopen does not refetch state on reconnect. Verify same on desktop.",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T08:02:51.566Z",
+        "endedAt": "2026-05-23T08:16:15.629Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/ws.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/pnpm-lock.yaml"
+        ],
+        "comment": "Swapped hand-rolled WS for Socket.IO. Auto-fallback to long-polling when WS upgrade is rejected by browsers, built-in heartbeat (25s) + reconnect, refetch-on-reconnect via hasSyncedOnce flag. Verified live in Chrome + mobile Safari.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
