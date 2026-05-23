@@ -23,3 +23,60 @@
 ### Notes
 
 - Only the overview card activity rendering is flagged in this round. The rest of the N21 implementation (aside panel, timestamps, log-activity command, enrichment hooks, PHASE MARKERS in role files, master endpoint) was not reviewed from this screenshot.
+
+
+---
+
+## Round 2 — AI Review
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Summary
+
+Full implementation of N21 is in place across all target files. The round-1 blocker (overview card activity wrapper) is fixed. One new blocker found: `log-activity.test.mjs` is not registered in the `pnpm test` script, so `pnpm --dir packages/taskflow test` does not exercise the new tests. README documentation is missing (non-blocking for merge but checklist-required). Everything else checks out.
+
+### Checklist verification
+
+**Config** ✅ — `phaseMarkers`, `hookEnrichment`, `verbosity` added to `types.ts` + `config.ts`; `buildConfigWithExamples` emits JSONC comments for all three.
+
+**Free hooks** ✅ — `UserPromptSubmit` (skill detection), `Stop` (completed event via `.last-skill` side file), `PreToolUse` (command classifier) all generated in `activity-hook.ts`. `init/index.ts` gates generation on `hookEnrichment !== false`. Idempotent.
+
+**`log-activity` subcommand** ✅ — `commands/log-activity.ts` appends one JSONL line with `tool: "Phase"`; exits < 100ms (verified by test); respects `phaseMarkers: false`; `--phase done` → `action: "done"` confirmed.
+
+**Dashboard aside panel** ✅ — Popup replaced by `<aside>`, collapse/expand with `localStorage` persistence, newest-first (`unshift` + `insertBefore(item, firstChild)`), cap at 50, `refreshTimestamps()` called on every WS message (snapshot, file-change, activity events), `shouldShowEvent` enforces `verbosity`. Event renderers for Phase / Skill / Tool+label / fallback all present.
+
+**Master server activity endpoint** ✅ — `GET /api/activity/:projectId` added in `server.ts`; returns last 3 from `entry.state.recentActivity`; 404 for unknown project; 200 with `[]` if `recentActivity` is absent (uses `?? []`).
+
+**Overview card active/idle** ✅ — `deriveIdleStatus` returns `'idle'` only when last event is `Phase+done`, `'active'` otherwise, `'none'` with no events. Idle/active badge moved inside `proj-task` wrapper (round-1 suggestion implemented). No timeout path exists.
+
+**Agent role files** ✅ — All 9 canonical role files + 8 templates have `<!-- taskflow:phase-markers:start/end -->` block. `stripPhaseMarkers` in `init/index.ts` removes it when `phaseMarkers: false`.
+
+**`pnpm test` wires** ❌ — `log-activity.test.mjs` runs cleanly (4/4 pass) but is **not added to the `test` script** in `packages/taskflow/package.json`. `pnpm --dir packages/taskflow test` skips it entirely.
+
+**README** ❌ — No new documentation for free hooks, `log-activity` CLI, three config toggles, verbosity modes, done-event idle convention, or master server endpoint. Checklist item not met.
+
+### Blockers
+
+1. **`log-activity.test.mjs` not registered in `pnpm test` script** — `packages/taskflow/package.json` test script does not include `node test/log-activity.test.mjs`. CI / `pnpm --dir packages/taskflow test` never runs the new tests. Add `&& node test/log-activity.test.mjs` to the script string.
+
+### Non-blocking
+
+1. **README undocumented** — Checklist requires a new "Activity feed enrichment" section covering hooks, CLI, config toggles, verbosity, done-event idle, master endpoint. Missing entirely. Should be addressed before v0.5.0 release (N22).
+
+2. **Typo in variable name** — `overview.ts:182` uses `var idgeBadge` (missing `l`). Harmless (local var, not referenced externally), but worth a one-character fix.
+
+3. **`log-activity-done.test.mjs` referenced in CHECKLIST but not created** — Coverage is provided by the existing `log-activity.test.mjs` (test 2 checks `action === "done"`). No functional gap, but checklist wording is misleading.
+
+### Security & edge cases
+
+- `renderActivityMini` in `overview.ts` passes all values through `escHtml()` before insertion — no XSS risk from malicious activity event content.
+- `cmdLogActivity` swallows all `appendFileSync` errors — correct for fire-and-forget; log file path is config-controlled, not user-supplied at runtime.
+- Hook scripts use `printf` for JSONL writing with `%s` substitution — shell injection is not possible as values come from Claude Code's own JSON output, not external user input.
+- `PreToolUse` classifier uses `grep -q` pattern matching — truncation/edge cases in long commands are benign (classifier falls back to no-label, which is correct).
+
+### Notes
+
+- The master server endpoint reads from `entry.state.recentActivity` (push model) rather than reading `.taskflow-activity.jsonl` directly as the spec proposed. This is the correct architectural choice given the master has no filesystem access to project directories — no fix needed.
+- Round-1 suggestion (idle badge co-located with activity wrapper) is implemented.
