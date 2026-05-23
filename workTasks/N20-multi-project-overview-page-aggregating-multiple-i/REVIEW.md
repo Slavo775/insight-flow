@@ -150,3 +150,22 @@ N20 adds `packages/insight-flow-master` (push-based aggregator, Socket.IO, lock-
 ### Security & edge cases
 
 ### Notes
+
+
+---
+
+## Human Review — Round 6
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Master crashes when Socket.IO makes its polling handshake — unhandled async rejection** — Socket.IO (via engine.io) uses `prependListener` to register its own `request` listener first. When a browser opens the overview page, Socket.IO performs an initial HTTP polling handshake (`GET /socket.io/?EIO=4&transport=polling&t=...`), handles it, and writes the response headers (`res.headersSent = true`). The app's `server.on("request", async ...)` handler also fires for this request. It finds no matching route and falls through to `res.writeHead(404, ...)` on the already-responded socket — throwing `ERR_HTTP_HEADERS_SENT: Cannot set headers after they are sent to the client`. Because the handler is `async`, this becomes an unhandled promise rejection, and Node.js v15+ exits the process. This is why the overview works briefly (until the first Socket.IO connection attempt) then crashes.
+   - **Fix:** Add `if (res.headersSent) return;` at the top of the `server.on("request", ...)` handler in `packages/insight-flow-master/src/server.ts` (before setting CORS headers). Also wrap the entire handler body in a `try/catch` that logs the error and returns 500 if headers aren't sent — so any future unhandled paths don't crash the process.
+
+### Notes
+
+- User quote: "okej overview works but only a while then crash why?"
+- Timing is consistent: crash happens within seconds of opening the overview page in a browser (Socket.IO initiates polling handshake on connect).

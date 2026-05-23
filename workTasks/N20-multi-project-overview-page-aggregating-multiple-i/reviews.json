@@ -84,6 +84,15 @@
         "comment": "Fixed blocker 1: detached:false → detached:true; master now runs in its own process group, survives project server exit",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T15:41:50.564Z",
+      "endedAt": "2026-05-23T15:42:26.828Z",
+      "verdict": "fix-needed",
+      "comment": "Master crashes on Socket.IO polling handshake — async request handler has no res.headersSent guard, unhandled rejection kills process",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
