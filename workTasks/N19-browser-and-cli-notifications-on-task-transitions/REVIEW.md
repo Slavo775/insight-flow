@@ -342,3 +342,40 @@ None.
 - Only OS-level (desktop) notifications are broken.
 - Human tested the feature and confirmed: browser notification came, OS notification did not.
 - Proposed resolution (human's exact words): "switch the logic so first look into project root when its not there try to global".
+
+
+---
+
+## AI Review — Round 9
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+Fix for Round 8 blocker is correct. The Stop hook and its source template now resolve `insight-flow` local-first (`node_modules/.bin/insight-flow`), then the repo's own built dist, then the global binary as a last resort. `$IF_CMD` is used consistently for both the `current` probe and the `notify` call. Both the live hook and the `NOTIFY_HOOK_SCRIPT` constant in `notify-hook.ts` were updated identically, so future `insight-flow init` invocations will install the fixed hook. All 22 tests pass.
+
+### Checklist verification
+
+- [x] Round 8 blocker addressed: hook no longer hard-codes global binary — pass
+- [x] `LOCAL_BIN` path derivation: `$HOOK_DIR/../..` → project root → `node_modules/.bin/insight-flow` — correct
+- [x] `$IF_CMD` used for both `current` and `notify` calls — pass
+- [x] Live hook and `NOTIFY_HOOK_SCRIPT` template updated identically — pass
+- [x] Build and all 22 tests pass — pass
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+- `[ -f "$LOCAL_BIN" ]` tests existence only, not the executable bit. In practice npm always sets it, so this is a non-issue, but `[ -x "$LOCAL_BIN" ]` would be marginally more defensive.
+
+### Security & edge cases
+
+- If a consumer project has an old local install (`node_modules/.bin/insight-flow` at v0.4.0), the hook will still silently do nothing — but that's the same outcome as before and requires the user to upgrade, which is expected.
+
+### Notes
+
+- Template sync is correct: `NOTIFY_HOOK_SCRIPT` in `notify-hook.ts` is the authoritative source; the live `.claude/hooks/taskflow-notify.sh` matches it exactly.

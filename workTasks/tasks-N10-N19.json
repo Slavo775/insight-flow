@@ -1246,7 +1246,7 @@
       "title": "Browser and CLI notifications on task transitions",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N19-browser-and-cli-notifications-on-task-transitions",
       "createdAt": "2026-05-23T09:43:23.812Z",
       "statusHistory": [
@@ -1394,6 +1394,21 @@
           "status": "fixed",
           "at": "2026-05-23T12:57:19.180Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T12:57:55.864Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T13:00:51.238Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T13:01:48.684Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -1413,8 +1428,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 8,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 9,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -1454,6 +1469,11 @@
           "at": "2026-05-23T12:46:17.988Z",
           "commitHash": "3fe026d",
           "commitMessage": "docs(tasks): N19 human review round 8 — fix-needed"
+        },
+        {
+          "at": "2026-05-23T12:57:55.863Z",
+          "commitHash": "9e7d9a5",
+          "commitMessage": "fix(notify): resolve insight-flow local-first before falling back to global"
         }
       ],
       "branch": "feat/N19-browser-and-cli-notifications",
