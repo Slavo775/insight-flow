@@ -4,6 +4,15 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live React dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
+## What's new in 0.5.0
+
+- **Reliable live updates** — Socket.IO replaces the hand-rolled WebSocket; auto reconnect, long-polling fallback, works on Chrome and mobile Safari.
+- **Notifications** — task transitions fire browser `Notification` API alerts and OS desktop notifications via `insight-flow notify`. Both opt-out in config.
+- **Multi-project overview** — `/overview` aggregates all registered insight-flow servers in one page with live/reconnecting/down status badges.
+- **Richer activity feed** — free hook enrichment (skill start/end, command classification) plus cheap phase markers via `insight-flow log-activity`. Both opt-out in config.
+
+See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
+
 ## Install
 
 ```bash
