@@ -34,6 +34,15 @@
         "comment": "Round 3 fix: AGENT_NOTIFY.md shared file — replaced per-file WHEN TO NOTIFY with @AGENT_NOTIFY.md reference; added notify steps to SKILL_* constants; simplified stripWhenToNotify to blank AGENT_NOTIFY.md",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T11:24:19.012Z",
+      "endedAt": "2026-05-23T11:28:00.823Z",
+      "verdict": "fix-needed",
+      "comment": "Round 4: browser notification title missing projectName prefix (spec requires '<projectName>: <taskId> → <status>', implementation uses '<taskId> → <status>'); buildConfigWithExamples emits duplicate notifications key",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
     }
   ]
 }

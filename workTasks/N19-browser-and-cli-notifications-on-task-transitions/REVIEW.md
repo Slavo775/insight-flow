@@ -143,3 +143,97 @@ None.
 ### Notes
 
 - `AGENT_NOTIFY.md` should be listed alongside `AGENT_ENFORCEMENT.md` and `AGENT_PROTOCOL.md` in `README.md` and in the sync-role-templates script.
+
+
+---
+
+## Round 4
+
+**Reviewer:** AI (task-review)
+**Date:** 2026-05-23
+**PR:** https://github.com/Slavo775/insight-flow/pull/12
+**Verdict:** fix-needed
+
+### Summary
+
+Round 3 changes are structurally sound: `AGENT_NOTIFY.md` shared file is in place, all 16 role files reference it, `SKILL_*` constants carry inline notify steps, `stripWhenToNotify` now blanks the file instead of regex-stripping per file. Two issues remain. The browser notification title is missing the `<projectName>` prefix the spec requires. The `init --examples` path emits a duplicate `"notifications"` key because the key is already present in the base config before the stub is appended.
+
+### Checklist verification
+
+- [x] `TaskflowConfig.notifications: { browser, cli }` with defaults true/true — pass
+- [x] Dashboard diffs snapshots, fires Notification API on watched status changes — pass
+- [ ] Notification title format `<projectName>: <taskId> → <status>` — **fail** (`fireDesktopNotif` uses `taskId + ' → ' + status`, projectName absent)
+- [x] Settings popover with per-status toggles, sound, mute-focused (localStorage) — pass
+- [x] Notification permission flow — pass
+- [x] `insight-flow notify "<message>"` with `--title`, `--project` flags — pass
+- [x] Platform auto-detect: osascript / notify-send / PowerShell; errors swallowed — pass
+- [x] CLI exits <100 ms fire-and-forget — pass
+- [x] `notifications.cli: false` → silent exit 0 — pass
+- [x] Canonical + template role files have `@AGENT_NOTIFY.md` — pass
+- [x] `insight-flow init` strips WHEN TO NOTIFY (blanks AGENT_NOTIFY.md) when cli false — pass
+- [x] SKILL_* constants carry inline notify steps — pass
+- [x] README Notifications section — pass
+- [x] typecheck ✓ build ✓ tests ✓ — pass
+
+### Blockers
+
+1. **Browser notification title missing `<projectName>` — spec deviation**
+
+   `dashboard.ts:581`: `fireDesktopNotif` constructs the title as `taskId + ' → ' + status`. The CHECKLIST specifies `<projectName>: <taskId> → <status>`. Without the project name, notifications are ambiguous when multiple projects are open (N20 will compound this).
+
+   The `projectName` is available server-side in `config`. Fix: embed it into the generated script as a JS literal and use it in `fireDesktopNotif`.
+
+   ```typescript
+   // in getScript, add to the var declarations block:
+   var PROJECT_NAME = ${JSON.stringify(config.projectName || '')};
+   ```
+
+   ```javascript
+   function fireDesktopNotif(taskId, status, sound) {
+     var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + taskId + ' → ' + status;
+     try { new Notification(title, { silent: !sound }); } catch(e) {}
+   }
+   ```
+
+   `getScript` signature needs `projectName` added, or the value inlined at call site in `getDashboardHtml`.
+
+2. **`buildConfigWithExamples` emits duplicate `"notifications"` key**
+
+   `init/index.ts:534–558`: `buildConfigWithExamples` serialises `config` via `JSON.stringify`, which already includes `"notifications": {"browser":true,"cli":true}` (set on line 47). The stub then re-inserts `"notifications"` with JSONC comments before the closing brace, creating a duplicate key. Most parsers silently use the last value, but the output is confusing and technically invalid JSON.
+
+   Fix: exclude `notifications` from the base config before stringifying:
+   ```typescript
+   const { notifications: _n, ...baseWithoutNotifications } = config;
+   const base = JSON.stringify(baseWithoutNotifications, null, 2);
+   ```
+
+### Non-blocking
+
+- `init/index.ts:166` comment says "Strip WHEN TO NOTIFY block from per-project role copies" — the function now blanks `AGENT_NOTIFY.md` instead. Update the comment.
+- `README.md:173` says "omits the WHEN TO NOTIFY section from per-project role-file copies" — mechanism changed; update to "clears `AGENT_NOTIFY.md` in the project's roles directory".
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- `AGENT_NOTIFY.md` is not yet listed alongside `AGENT_ENFORCEMENT.md` / `AGENT_PROTOCOL.md` in `README.md` (carried from round 3). Non-blocking for N19.
+
+## Round 4 — pending verdict
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-23
+**Verdict:** pending
+
+### Summary
+
+### Checklist verification
+
+### Blockers
+
+### Non-blocking
+
+### Security & edge cases
+
+### Notes
