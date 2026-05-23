@@ -220,20 +220,38 @@ None.
 
 - `AGENT_NOTIFY.md` is not yet listed alongside `AGENT_ENFORCEMENT.md` / `AGENT_PROTOCOL.md` in `README.md` (carried from round 3). Non-blocking for N19.
 
-## Round 4 — pending verdict
+## Round 5
 
-**Reviewer:** Task Reviewer (ai)
+**Reviewer:** Human (Project Owner)
 **Date:** 2026-05-23
-**Verdict:** pending
+**Verdict:** fix-needed
 
 ### Summary
 
-### Checklist verification
+Design direction change. The current `@AGENT_NOTIFY.md` mechanism asks agents to explicitly call `insight-flow notify` at specific CLI milestones (`implement-end`, `review-end`, `merge`). The human wants notifications to fire **automatically** when an agent is done with a work session — triggered by a hook (like the existing PostToolUse activity hook), not by an explicit agent call. Agents should not be responsible for firing notifications themselves.
 
 ### Blockers
 
+1. **Notification should fire via a hook when the agent finishes work, not via explicit agent calls**
+
+   The human's exact words: *"please when to notify only after pushes? please is not after pushes is when agent is done with work like post tool fire"*
+
+   The current design has `AGENT_NOTIFY.md` instruct every agent to explicitly call `insight-flow notify` after key milestones. The human wants this replaced by a hook-based trigger — the same pattern as the `PostToolUse` activity hook that already records events automatically. When an agent session ends (or at a natural work-done boundary), a hook fires the notification, not the agent prompt.
+
+   **Fix direction:**
+   - Add a new Claude Code hook (e.g. `Stop` hook or a `PostToolUse` hook checking for tracker-write events) that calls `insight-flow notify` automatically when an agent ends its turn or completes a tracked action.
+   - Remove or de-emphasise the explicit `insight-flow notify` calls from `AGENT_NOTIFY.md` and `SKILL_*` constants — agents should not need to remember to call notify.
+   - The hook-based approach is more reliable than agent prompts: it fires unconditionally regardless of whether the agent follows the prompt instructions.
+
 ### Non-blocking
+
+None.
 
 ### Security & edge cases
 
+None.
+
 ### Notes
+
+- This is consistent with the existing `PostToolUse` activity hook pattern in `packages/taskflow/src/activity-hook.ts`. The notification hook could be a sibling of that hook.
+- The `insight-flow notify` CLI subcommand itself remains correct and useful — it's the triggering mechanism (agent vs hook) that changes.

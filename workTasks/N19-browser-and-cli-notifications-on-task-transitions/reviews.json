@@ -43,6 +43,15 @@
       "type": "ai",
       "by": "task-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T11:46:43.765Z",
+      "endedAt": "2026-05-23T11:48:35.521Z",
+      "verdict": "fix-needed",
+      "comment": "Design direction: notification should fire via a hook when agent finishes work (like PostToolUse activity hook), not via explicit insight-flow notify calls in agent prompts",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
