@@ -80,3 +80,40 @@ Full implementation of N21 is in place across all target files. The round-1 bloc
 
 - The master server endpoint reads from `entry.state.recentActivity` (push model) rather than reading `.taskflow-activity.jsonl` directly as the spec proposed. This is the correct architectural choice given the master has no filesystem access to project directories — no fix needed.
 - Round-1 suggestion (idle badge co-located with activity wrapper) is implemented.
+
+
+---
+
+## Human Review — Round 3
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Overview card activity text must be white and larger** — `packages/insight-flow-master/src/overview.ts` → `.proj-activity-item` CSS
+
+   Currently activity text is muted/dim. Human said: "please activity white text and bigger".
+
+   **Fix:** Change `.proj-activity-item` text color from `var(--text-muted)` to `var(--text)` (white) and increase font-size.
+
+2. **Overview card grid layout must be responsive** — `packages/insight-flow-master/src/overview.ts` → `#grid` CSS
+
+   The card grid should behave like the project grid: 1 project = full width; 2 projects = 50% each (2-column); 3–4 projects = 50% width × 50% height (2×2). Human said: "width like grid should be if one on the full available space if 2 width 50% if 3 and 4 height 50% width 50%".
+
+   **Fix:** Use CSS grid with responsive column rules — 1 card fills full row, 2 cards split 50/50, 3–4 cards form a 2×2 grid with equal height cells.
+
+3. **Activity in overview card may not be in sync with the dashboard** — `packages/insight-flow-master/src/overview.ts` → `renderActivityMini` + data source
+
+   Human said: "activity seems dont know if we have all activiti 1:1 with dashboard". The overview card currently renders up to the last 3 events from `state.recentActivity`. This data comes from the project's push to the master server — it may lag or miss events that have been written to the activity log but not yet pushed. The dashboard reads the JSONL file directly via the WebSocket feed.
+
+   **Fix:** Verify the overview card always reflects the latest pushed activity state. At minimum, document and/or surface the 3-event limit clearly, and ensure the field shown (`recentActivity`) is populated on every project state push.
+
+### Suggestions (non-blocking)
+
+- None in this round.
+
+### Notes
+
+- Screenshot shows 1 project card ("insight-flow") with "down" badge. Activity section is visible with EDIT/READ badges and truncated paths in muted color. Grid is currently full-width for a single project (correct), but multi-project layout has not been verified visually.
