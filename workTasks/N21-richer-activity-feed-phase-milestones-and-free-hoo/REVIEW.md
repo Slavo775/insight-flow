@@ -117,3 +117,35 @@ Full implementation of N21 is in place across all target files. The round-1 bloc
 ### Notes
 
 - Screenshot shows 1 project card ("insight-flow") with "down" badge. Activity section is visible with EDIT/READ badges and truncated paths in muted color. Grid is currently full-width for a single project (correct), but multi-project layout has not been verified visually.
+
+
+---
+
+## Human Review — Round 4
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Activity events appear duplicated in the feed** — `packages/taskflow/src/server/activity.ts` → `ActivityEngine.readNewLines`
+
+   Screenshot shows "completed N21 fix — all blockers resolved" DONE event appearing three times in the activity panel at the same timestamp.
+
+   **Human said:** "why 3 times?"
+
+   **Root cause:** `readNewLines` uses `existingCount = this.events.length` as the index of the first unprocessed line in the JSONL file. But `this.events` is a ring buffer — once it reaches `maxEvents`, old entries are evicted and `this.events.length` stays capped at `maxEvents`. After the first eviction, the next call to `readNewLines` uses `existingCount = maxEvents` as the start index, even though the file may have `maxEvents + N` lines already processed. This causes lines `[maxEvents .. lines.length-1]` to be re-emitted on every subsequent read — including events that were processed long ago.
+
+   With `maxEvents = 200` and the `fs.watch` watcher plus 500ms fallback poll both calling `readNewLines`, a busy session easily exceeds 200 events. After that, each new append re-emits a batch of already-seen events.
+
+   **Fix:** Introduce a private `linesProcessed` counter (never decremented) as the canonical line offset. Use it instead of `this.events.length` as the loop start index. Ring buffer eviction must not affect it.
+
+### Suggestions (non-blocking)
+
+- None in this round.
+
+### Notes
+
+- Duplicate events also cause incorrect idle/active state cycling (an old DONE event re-emitted resets the panel to idle unexpectedly).
+- The ring buffer eviction logic at `activity.ts:86-88` is correct for the in-memory cap; only the line-offset tracking is wrong.
