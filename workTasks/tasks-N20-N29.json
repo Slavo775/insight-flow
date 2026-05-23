@@ -9,7 +9,7 @@
       "title": "Multi-project overview page aggregating multiple insight-flow servers",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "fix-needed",
       "folder": "workTasks/N20-multi-project-overview-page-aggregating-multiple-i",
       "createdAt": "2026-05-23T09:43:25.203Z",
       "statusHistory": [
@@ -42,6 +42,21 @@
           "status": "implemented",
           "at": "2026-05-23T14:47:33.092Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:49:01.200Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T15:06:30.098Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T15:07:03.369Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -67,8 +82,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -92,10 +107,15 @@
           "at": "2026-05-23T14:32:58.252Z",
           "commitHash": "c2a0a1114f6b59bf35026f461b64d34afdd870ae",
           "commitMessage": "docs(tasks): N20 spec rev3 — master standalone config + src/config.ts"
+        },
+        {
+          "at": "2026-05-23T14:49:01.200Z",
+          "commitHash": "c95d130e2161d0b8d31e2a639d93b4b82d6811c4",
+          "commitMessage": "feat(server): N20 multi-project overview with push-based master server"
         }
       ],
       "branch": "feat/N20-multi-project-overview",
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/13",
       "mergedAt": null
     },
     {
