@@ -48,3 +48,22 @@ N20 adds the `insight-flow-master` package (push-based aggregator) and wires pro
 ### Notes
 
 - User quote: "can we enable overview?" after seeing `[master] insight-flow-master binary not found, skipping auto-start` and `[master] Could not register with master at http://localhost:6100 — overview disabled` in the server startup log.
+
+
+---
+
+## Human Review — Round 3
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **`findMasterBin()` resolves the wrong path — binary never found even after `pnpm build`** — `server/index.ts:198` uses `resolve(__dir, "../../../insight-flow-master/dist/index.js")`. Starting from `packages/taskflow/dist/`, three `../` steps reach the repo root, so it looks for `<repo-root>/insight-flow-master/dist/index.js` — a path that does not exist. The package lives at `<repo-root>/packages/insight-flow-master/dist/index.js`, which is only two `../` steps away.
+   - **Fix:** Change `"../../../insight-flow-master/dist/index.js"` → `"../../insight-flow-master/dist/index.js"` at `packages/taskflow/src/server/index.ts:198`. No config change needed — this is purely a path bug.
+
+### Notes
+
+- User built with `pnpm build` (both packages succeeded) then ran `pnpm ui` and still got "binary not found". Confirmed: correct path is 2 levels up, not 3.
+- User asked "should we configure the config?" — no config change needed; the issue is a wrong relative path in source code.

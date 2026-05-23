@@ -39,6 +39,15 @@
         "comment": "Fixed blocker 1: added root build script that builds master then taskflow; updated CLAUDE.md",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T15:22:04.926Z",
+      "endedAt": "2026-05-23T15:22:34.652Z",
+      "verdict": "fix-needed",
+      "comment": "findMasterBin() uses ../../../ (3 levels) instead of ../../ (2 levels) — resolves to wrong path, binary never found",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
