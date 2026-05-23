@@ -1,0 +1,144 @@
+{
+  "taskId": "N19",
+  "reviews": [
+    {
+      "startedAt": "2026-05-23T10:42:11.603Z",
+      "endedAt": "2026-05-23T10:43:35.837Z",
+      "verdict": "fix-needed",
+      "comment": "Git agent missing WHEN TO NOTIFY — merge notification never fires. Fix: add section to SKILL_GIT constant in init/index.ts and to .claude/commands/task-git.md.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T10:47:28.970Z",
+      "endedAt": "2026-05-23T10:48:05.339Z",
+      "verdict": "fix-needed",
+      "comment": "Round 2: (1) All SKILL_* constants in init/index.ts missing WHEN TO NOTIFY — consumer projects get no notifications. (2) task-git skill missing directly. (3) Section placement too weak — agents skip it; must embed in workflow steps.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T11:06:56.545Z",
+      "endedAt": "2026-05-23T11:07:27.975Z",
+      "verdict": "fix-needed",
+      "comment": "Round 3: Design direction — create shared AGENT_NOTIFY.md (same pattern as AGENT_ENFORCEMENT.md / AGENT_PROTOCOL.md), replace all inline WHEN TO NOTIFY blocks with @AGENT_NOTIFY.md reference. Cleaner, single source of truth, easier stripping when notifications.cli=false.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T11:09:10.335Z",
+        "endedAt": "2026-05-23T11:22:27.545Z",
+        "status": "fixed",
+        "filesChanged": [],
+        "comment": "Round 3 fix: AGENT_NOTIFY.md shared file — replaced per-file WHEN TO NOTIFY with @AGENT_NOTIFY.md reference; added notify steps to SKILL_* constants; simplified stripWhenToNotify to blank AGENT_NOTIFY.md",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T11:24:19.012Z",
+      "endedAt": "2026-05-23T11:28:00.823Z",
+      "verdict": "fix-needed",
+      "comment": "Round 4: browser notification title missing projectName prefix (spec requires '<projectName>: <taskId> → <status>', implementation uses '<taskId> → <status>'); buildConfigWithExamples emits duplicate notifications key",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T11:46:43.765Z",
+      "endedAt": "2026-05-23T11:48:35.521Z",
+      "verdict": "fix-needed",
+      "comment": "Design direction: notification should fire via a hook when agent finishes work (like PostToolUse activity hook), not via explicit insight-flow notify calls in agent prompts",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T11:50:06.699Z",
+        "endedAt": "2026-05-23T11:57:13.438Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/notify-hook.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/init/index.ts",
+          "AGENT_NOTIFY.md",
+          "packages/taskflow/templates/roles/AGENT_NOTIFY.md",
+          ".claude/commands/task-git.md",
+          "packages/taskflow/README.md"
+        ],
+        "comment": "Added Stop hook for automatic notify; fixed projectName in browser notif title; fixed duplicate notifications key in init --examples",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T12:01:26.702Z",
+      "endedAt": null,
+      "verdict": null,
+      "comment": null,
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T12:22:13.064Z",
+      "endedAt": "2026-05-23T12:22:54.157Z",
+      "verdict": "approved",
+      "comment": "Post-restart test confirmed: Stop hook fires OS notifications automatically",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T12:42:40.531Z",
+      "endedAt": "2026-05-23T12:45:30.503Z",
+      "verdict": "fix-needed",
+      "comment": "Notifications never fire on global v0.4.0 install — notify command not in that version",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T12:54:26.131Z",
+        "endedAt": "2026-05-23T12:57:19.179Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/notify-hook.ts .claude/hooks/taskflow-notify.sh"
+        ],
+        "comment": "Resolve insight-flow local-first (node_modules/.bin) before falling back to global",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T13:00:51.239Z",
+      "endedAt": "2026-05-23T13:01:48.683Z",
+      "verdict": "approved",
+      "comment": "Local-first hook resolution fixes Round 8 blocker; live hook and template updated identically; all tests pass",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T13:03:53.993Z",
+      "endedAt": "2026-05-23T13:04:24.852Z",
+      "verdict": "fix-needed",
+      "comment": "No notifications at all — OS and browser both silent when notify command is run manually",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T13:25:48.228Z",
+        "endedAt": "2026-05-23T13:25:53.637Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/commands/notify.ts"
+        ],
+        "comment": "Remove 80ms execFile timeout that was killing osascript/notify-send/powershell before notification could deliver",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T13:29:46.952Z",
+      "endedAt": "2026-05-23T13:30:10.742Z",
+      "verdict": "approved",
+      "comment": "OS notification banner fires immediately after timeout fix; browser notifications also confirmed working",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

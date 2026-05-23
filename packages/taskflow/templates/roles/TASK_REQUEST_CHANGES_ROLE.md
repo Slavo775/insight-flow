@@ -17,6 +17,8 @@ OUTPUT CONTRACT
 - Tracker updated via `change-request` with the change description.
 - `/task-git` to push REVIEW.md + tracker changes.
 
+@AGENT_NOTIFY.md
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `change-request --id Nxx --description "<one-line summary>" --by task-request-changes` → push.

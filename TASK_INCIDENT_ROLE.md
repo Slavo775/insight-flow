@@ -17,6 +17,8 @@ OUTPUT CONTRACT
 - Code fix applied; root cause + fix description recorded via `incident-resolve`.
 - `/task-git` to push.
 
+@AGENT_NOTIFY.md
+
 ROLE-SPECIFIC WORKFLOW
 
 1. `insight-flow incident-create --id NXX --title "<short>" --severity critical|high|medium|low --description "<what happened>"` → returns `INC-XXX` + branch name.

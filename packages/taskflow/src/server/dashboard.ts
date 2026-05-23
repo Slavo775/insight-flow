@@ -2,7 +2,9 @@ import type { TaskflowConfig } from "../types.js";
 
 export function getDashboardHtml(config: TaskflowConfig): string {
   const activityEnabled = config.activityEngine?.enabled !== false;
+  const browserNotifications = config.notifications?.browser !== false;
   const port = config.server.port;
+  const projectName = config.projectName || "";
 
   return "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n" +
     "  <meta charset=\"UTF-8\">\n" +
@@ -21,6 +23,21 @@ export function getDashboardHtml(config: TaskflowConfig): string {
       : "      <span class=\"engine-chip engine-off\" title=\"Set activityEngine.enabled to true in taskflow.config.json to enable\">Engine: off (config)</span>\n") +
     (activityEnabled
       ? "      <button class=\"toggle-activity\" id=\"toggle-activity\" onclick=\"toggleActivity()\">Activity ▶</button>\n"
+      : "") +
+    (browserNotifications
+      ? "      <div class=\"settings-wrap\"><button class=\"settings-btn\" id=\"settings-btn\" onclick=\"toggleSettings()\" title=\"Notification settings\">&#9881;</button>\n" +
+        "      <div class=\"settings-popover\" id=\"settings-popover\">\n" +
+        "        <div class=\"settings-header\">Notifications</div>\n" +
+        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-implemented\" onchange=\"saveNotifSettings()\"> Task implemented</label>\n" +
+        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-approved\" onchange=\"saveNotifSettings()\"> Review approved</label>\n" +
+        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-fix-needed\" onchange=\"saveNotifSettings()\"> Fix needed</label>\n" +
+        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-merged\" onchange=\"saveNotifSettings()\"> Merged</label>\n" +
+        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-changes-requested\" onchange=\"saveNotifSettings()\"> Changes requested</label>\n" +
+        "        <div class=\"settings-divider\"></div>\n" +
+        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-sound\" onchange=\"saveNotifSettings()\"> Sound</label>\n" +
+        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-mute-focused\" onchange=\"saveNotifSettings()\"> Mute when tab focused</label>\n" +
+        "        <div id=\"notif-permission-hint\" class=\"settings-hint\"></div>\n" +
+        "      </div></div>\n"
       : "") +
     "    </div>\n" +
     "  </div>\n" +
@@ -50,7 +67,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "  </div>\n" +
     "\n" +
     "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
-    "  <script>\n" + getScript(activityEnabled, port) + "\n  </script>\n" +
+    "  <script>\n" + getScript(activityEnabled, port, browserNotifications, projectName) + "\n  </script>\n" +
     "</body>\n</html>";
 }
 
@@ -169,11 +186,22 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .severity-high { background: #3b1111; color: var(--red); }
     .severity-medium { background: #3b2f06; color: var(--yellow); }
     .severity-low { background: #1e3a5f; color: var(--cyan); }
-    .empty { color: var(--text-muted); font-size: 12px; padding: 20px; text-align: center; }`;
+    .empty { color: var(--text-muted); font-size: 12px; padding: 20px; text-align: center; }
+    .settings-wrap { position: relative; }
+    .settings-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; line-height: 1; }
+    .settings-btn:hover { border-color: var(--accent); color: var(--text); }
+    .settings-popover { display: none; position: absolute; right: 0; top: calc(100% + 6px); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; min-width: 200px; z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+    .settings-popover.open { display: block; }
+    .settings-header { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 10px; }
+    .settings-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; cursor: pointer; color: var(--text); }
+    .settings-row input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
+    .settings-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+    .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }`;
 
-function getScript(activityEnabled: boolean, _port: number): string {
+function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean, projectName: string): string {
   // Base dashboard JS (Kanban, stats, timeline, detail panel, shard nav)
   let script = `
+    var PROJECT_NAME = ${JSON.stringify(projectName)};
     var COLUMNS = [
       { key: 'ready', label: 'Ready', matches: ['ready'] },
       { key: 'progress', label: 'In Progress', matches: ['in-progress', 'implemented', 'changes-implementing', 'changes-implemented'] },
@@ -190,6 +218,7 @@ function getScript(activityEnabled: boolean, _port: number): string {
     var hookStatus = 'ok';
     var configEnabled = true;
     var hasSyncedOnce = false;
+    var prevTaskSnapshot = {};
 
     function badgeClass(status) {
       if (['ready'].includes(status)) return 'badge-ready';
@@ -416,7 +445,9 @@ function getScript(activityEnabled: boolean, _port: number): string {
         fetch('/api/work-tasks/master.json'),
       ]);
       var shard = await results[0].json();
-      tasks = shard.tasks || [];
+      var newTasks = shard.tasks || [];
+      checkStatusTransitions(newTasks);
+      tasks = newTasks;
       try {
         var master = await results[1].json();
         var current = master && master.meta && master.meta.currentTaskId ? master.meta.currentTaskId : null;
@@ -442,7 +473,133 @@ function getScript(activityEnabled: boolean, _port: number): string {
       dot.className = 'live-dot';
       if (status === 'disconnected') dot.classList.add('disconnected');
       else if (status === 'reconnecting') dot.classList.add('reconnecting');
+    }` + (browserNotifications ? `
+
+    var NOTIF_WATCHED = ['implemented', 'approved', 'fix-needed', 'merged', 'changes-requested'];
+    var notifSettings = { statuses: {}, sound: true, muteFocused: false };
+
+    function loadNotifSettings() {
+      try {
+        var raw = localStorage.getItem('tf-notif-settings');
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          notifSettings = parsed;
+        } else {
+          for (var i = 0; i < NOTIF_WATCHED.length; i++) notifSettings.statuses[NOTIF_WATCHED[i]] = true;
+        }
+      } catch(e) {
+        for (var i = 0; i < NOTIF_WATCHED.length; i++) notifSettings.statuses[NOTIF_WATCHED[i]] = true;
+      }
     }
+
+    function saveNotifSettings() {
+      notifSettings.statuses = {};
+      notifSettings.sound = document.getElementById('notif-sound') ? document.getElementById('notif-sound').checked : true;
+      notifSettings.muteFocused = document.getElementById('notif-mute-focused') ? document.getElementById('notif-mute-focused').checked : false;
+      for (var i = 0; i < NOTIF_WATCHED.length; i++) {
+        var s = NOTIF_WATCHED[i];
+        var el = document.getElementById('notif-' + s);
+        notifSettings.statuses[s] = el ? el.checked : true;
+      }
+      try { localStorage.setItem('tf-notif-settings', JSON.stringify(notifSettings)); } catch(e) {}
+    }
+
+    function syncSettingsUI() {
+      for (var i = 0; i < NOTIF_WATCHED.length; i++) {
+        var s = NOTIF_WATCHED[i];
+        var el = document.getElementById('notif-' + s);
+        if (el) el.checked = notifSettings.statuses[s] !== false;
+      }
+      var snd = document.getElementById('notif-sound');
+      if (snd) snd.checked = notifSettings.sound !== false;
+      var mf = document.getElementById('notif-mute-focused');
+      if (mf) mf.checked = !!notifSettings.muteFocused;
+    }
+
+    function toggleSettings() {
+      var pop = document.getElementById('settings-popover');
+      if (!pop) return;
+      var open = pop.classList.toggle('open');
+      if (open) {
+        syncSettingsUI();
+        updatePermissionHint();
+        document.addEventListener('click', outsideSettingsClick, true);
+      } else {
+        document.removeEventListener('click', outsideSettingsClick, true);
+      }
+    }
+
+    function outsideSettingsClick(e) {
+      var wrap = document.querySelector('.settings-wrap');
+      if (wrap && !wrap.contains(e.target)) {
+        var pop = document.getElementById('settings-popover');
+        if (pop) pop.classList.remove('open');
+        document.removeEventListener('click', outsideSettingsClick, true);
+      }
+    }
+
+    function updatePermissionHint() {
+      var hint = document.getElementById('notif-permission-hint');
+      if (!hint) return;
+      if (!('Notification' in window)) {
+        hint.textContent = 'Notifications not supported in this browser.';
+      } else if (Notification.permission === 'denied') {
+        hint.textContent = 'Permission denied. Allow notifications in browser settings.';
+      } else if (Notification.permission === 'default') {
+        hint.textContent = 'Click a status toggle to enable notifications.';
+      } else {
+        hint.textContent = '';
+      }
+    }
+
+    function requestNotifPermission(callback) {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'granted') {
+        if (callback) callback();
+        return;
+      }
+      if (Notification.permission === 'denied') return;
+      Notification.requestPermission().then(function(perm) {
+        updatePermissionHint();
+        if (perm === 'granted' && callback) callback();
+      });
+    }
+
+    function checkStatusTransitions(newTasks) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      if (notifSettings.muteFocused && !document.hidden) return;
+      for (var i = 0; i < newTasks.length; i++) {
+        var t = newTasks[i];
+        var prev = prevTaskSnapshot[t.id];
+        if (prev && prev !== t.status && notifSettings.statuses[t.status] !== false && NOTIF_WATCHED.indexOf(t.status) >= 0) {
+          fireDesktopNotif(t.id, t.status, notifSettings.sound !== false);
+        }
+        prevTaskSnapshot[t.id] = t.status;
+      }
+    }
+
+    function fireDesktopNotif(taskId, status, sound) {
+      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + taskId + ' → ' + status;
+      try {
+        new Notification(title, { silent: !sound });
+      } catch(e) {}
+    }
+
+    // On first load request permission if not yet decided
+    (function() {
+      loadNotifSettings();
+      if ('Notification' in window && Notification.permission === 'default') {
+        try { localStorage.getItem('tf-notif-asked'); } catch(e) {}
+        var asked = false;
+        try { asked = !!localStorage.getItem('tf-notif-asked'); } catch(e) {}
+        if (!asked) {
+          requestNotifPermission(null);
+          try { localStorage.setItem('tf-notif-asked', '1'); } catch(e) {}
+        }
+      }
+    })();` : `
+
+    function checkStatusTransitions() {}`) + `
 
     function connectWS() {
       // socket.io-client is loaded by /socket.io/socket.io.js (served by the

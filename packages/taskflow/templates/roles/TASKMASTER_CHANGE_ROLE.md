@@ -16,6 +16,8 @@ OUTPUT CONTRACT
 - `/task-git` to commit + push.
 - Token budget: ~2k tokens, ≤ 4 tool rounds.
 
+@AGENT_NOTIFY.md
+
 ROLE-SPECIFIC OVERRIDES
 
 - Scope: only modify TASK.md / CHECKLIST.md. Do not change source code or create new tasks.

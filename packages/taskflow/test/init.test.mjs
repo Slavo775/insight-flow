@@ -55,6 +55,7 @@ test("init writes a technology-agnostic config (no stack / gitTool / prStrategy 
       "rolesDir",
       "server",
       "activityEngine",
+      "notifications",
       "agents",
     ]);
     for (const key of Object.keys(config)) {

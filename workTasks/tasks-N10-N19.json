@@ -1240,6 +1240,315 @@
       "branch": "fix/N17-N18-dashboard-live-updates-and-activity-empty-state",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/11",
       "mergedAt": "2026-05-23T09:33:23.886Z"
+    },
+    {
+      "id": "N19",
+      "title": "Browser and CLI notifications on task transitions",
+      "type": "feat",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "workTasks/N19-browser-and-cli-notifications-on-task-transitions",
+      "createdAt": "2026-05-23T09:43:23.812Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-23T09:43:23.813Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-23T10:20:53.781Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T10:22:04.703Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T10:42:11.603Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T10:43:35.837Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T10:47:28.968Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T10:48:05.339Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T11:06:56.545Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T11:07:27.975Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T11:09:10.334Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T11:22:27.545Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T11:23:19.020Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T11:24:19.012Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T11:28:00.824Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T11:40:31.893Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T11:46:43.764Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T11:48:35.522Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T11:50:06.699Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T11:57:13.439Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T11:59:14.289Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T12:01:26.701Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T12:22:13.063Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T12:22:54.158Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T12:23:30.378Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T12:42:40.530Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T12:45:30.504Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T12:46:17.988Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T12:54:26.130Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T12:57:19.180Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T12:57:55.864Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T13:00:51.238Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T13:01:48.684Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T13:02:16.692Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T13:03:53.992Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T13:04:24.853Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T13:05:49.707Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T13:25:48.228Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T13:25:53.637Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T13:26:21.655Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T13:29:46.951Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T13:30:10.742Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T13:30:37.231Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": "2026-05-23T10:20:53.780Z",
+        "filesChanged": [
+          "packages/taskflow/src/commands/notify.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/config.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/test/notify.test.mjs",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 11,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "notifications",
+        "cli",
+        "opt-out"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-23T10:22:04.703Z",
+          "commitHash": "5f752a9",
+          "commitMessage": "feat(notifications): N19 — browser and CLI notifications on task transitions"
+        },
+        {
+          "at": "2026-05-23T11:23:19.019Z",
+          "commitHash": "2bc8e514a61134771c9cd780e1c3946b9c95a0d4",
+          "commitMessage": "fix(agent): add AGENT_NOTIFY.md shared notify file — N19 round 3"
+        },
+        {
+          "at": "2026-05-23T11:40:31.893Z",
+          "commitHash": "7514ac211b052e5cb273ba4e19e9129915a45419",
+          "commitMessage": "docs(tasks): N19 AI review round 4 — fix-needed"
+        },
+        {
+          "at": "2026-05-23T11:59:14.288Z",
+          "commitHash": "ac6df126bba83f1e5baa1e403f90ec3b74ca86eb",
+          "commitMessage": "feat(notify): Stop hook fires OS notifications automatically — N19 rounds 4+5"
+        },
+        {
+          "at": "2026-05-23T12:23:30.377Z",
+          "commitHash": "305d9a5",
+          "commitMessage": "docs(tasks): N19 human review round 7 — approved"
+        },
+        {
+          "at": "2026-05-23T12:46:17.988Z",
+          "commitHash": "3fe026d",
+          "commitMessage": "docs(tasks): N19 human review round 8 — fix-needed"
+        },
+        {
+          "at": "2026-05-23T12:57:55.863Z",
+          "commitHash": "9e7d9a5",
+          "commitMessage": "fix(notify): resolve insight-flow local-first before falling back to global"
+        },
+        {
+          "at": "2026-05-23T13:02:16.692Z",
+          "commitHash": "e4b1e2c",
+          "commitMessage": "docs(tasks): N19 AI review round 9 — approved"
+        },
+        {
+          "at": "2026-05-23T13:05:49.707Z",
+          "commitHash": "9f40ed6",
+          "commitMessage": "docs(tasks): N19 human review round 10 — fix-needed"
+        },
+        {
+          "at": "2026-05-23T13:26:21.655Z",
+          "commitHash": "f0ed474",
+          "commitMessage": "fix(notify): remove execFile timeout that killed osascript before delivery"
+        },
+        {
+          "at": "2026-05-23T13:30:37.230Z",
+          "commitHash": "ff5c6e3",
+          "commitMessage": "docs(tasks): N19 human review round 11 — approved"
+        }
+      ],
+      "branch": "feat/N19-browser-and-cli-notifications",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/12",
+      "mergedAt": null
     }
   ]
 }

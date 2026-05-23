@@ -22,6 +22,8 @@ OUTPUT CONTRACT
 - `/task-git` to push to the task's branch.
 - Report: files changed, tests added, gate results, any checklist item not met and why.
 
+@AGENT_NOTIFY.md
+
 ROLE-SPECIFIC OVERRIDES
 
 - Full mode lifecycle: `implement-start --id Nxx` → execute → `implement-end --id Nxx --files "a.ts,b.ts"`.

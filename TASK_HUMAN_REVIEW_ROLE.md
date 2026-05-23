@@ -17,6 +17,8 @@ OUTPUT CONTRACT
 - Tracker updated via `review-end` with the appropriate verdict.
 - `/task-git` to push REVIEW.md + tracker changes.
 
+@AGENT_NOTIFY.md
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `review-start --id Nxx --type human --by task-human-review` → record → `review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment "<one-line summary>"`.

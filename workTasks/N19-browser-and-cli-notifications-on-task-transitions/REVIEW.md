@@ -1,0 +1,427 @@
+# N19 — Browser and CLI notifications on task transitions — Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**PR:** https://github.com/Slavo775/insight-flow/pull/12
+**Verdict:** fix-needed
+
+## Summary
+
+N19 ships browser and CLI notifications correctly for all agents except the git agent. The `insight-flow notify` CLI works, the dashboard Notification API diff is wired up, and all other role files have the WHEN TO NOTIFY section. However the git agent — which owns the `merge` milestone (the most important one) — was missed entirely because it has no standalone `TASK_GIT_ROLE.md` file; its prompt lives as an inline constant (`SKILL_GIT`) in `init/index.ts` and as a self-contained skill in `.claude/commands/task-git.md`. Neither received the WHEN TO NOTIFY section.
+
+## Checklist verification
+
+- [x] `TaskflowConfig.notifications: { browser, cli }` with defaults true/true — pass
+- [x] Dashboard diffs snapshots, fires Notification API on watched status changes — pass
+- [x] Settings popover with per-status toggles, sound, mute-focused (localStorage) — pass
+- [x] Notification permission flow — pass
+- [x] `insight-flow notify "<message>"` with `--title`, `--project` flags — pass
+- [x] Platform auto-detect: osascript / notify-send / PowerShell; errors swallowed — pass
+- [x] CLI exits <100 ms fire-and-forget — pass
+- [x] `notifications.cli: false` → silent exit 0 — pass
+- [x] Canonical + template role files have WHEN TO NOTIFY section — **partial fail** (git agent missing)
+- [x] `insight-flow init` strips WHEN TO NOTIFY when notifications.cli is false — pass
+- [x] README Notifications section — pass
+- [x] typecheck ✓ build ✓ tests ✓ — pass
+
+## Blockers
+
+1. **Git agent missing WHEN TO NOTIFY — no merge notification fires**
+
+   The `merge` milestone (`insight-flow notify "<task-id> merged"`) is the most valuable one and belongs to the git agent. The git agent prompt lives in two places that were both skipped:
+   - `packages/taskflow/src/init/index.ts` — `SKILL_GIT` constant (~line 375) — no WHEN TO NOTIFY
+   - `.claude/commands/task-git.md` — this project's canonical git skill — no WHEN TO NOTIFY
+
+   There is no `TASK_GIT_ROLE.md` root file or template, so the loop that updated the 8 role files never touched the git agent.
+
+   **Fix:** Add a WHEN TO NOTIFY block to both `SKILL_GIT` in `init/index.ts` and to `.claude/commands/task-git.md`:
+   ```
+   WHEN TO NOTIFY
+   - After `insight-flow merge --id Nxx`: `insight-flow notify "<task-id> merged"`
+   - Limit: 1 call per task. Skip if notifications.cli is false in config.
+   ```
+
+## Non-blocking
+
+- The WHEN TO NOTIFY section in the other 8 role files lists `After merge` as a line, but only the git agent ever runs `insight-flow merge`. Harmless but redundant — could be cleaned up in a follow-on.
+
+## Security & edge cases
+
+None.
+
+## Notes
+
+- No `TASK_GIT_ROLE.md` exists anywhere in the repo; the git agent has always been an inline skill string. Any future changes to the git agent must update both `SKILL_GIT` in `init/index.ts` AND `.claude/commands/task-git.md`.
+
+
+---
+
+## Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Summary
+
+Deeper audit after round 1. The WHEN TO NOTIFY gap is wider than the git agent alone. All nine `SKILL_*` constants in `init/index.ts` — the prompts that consumer projects actually get when they run `insight-flow init` — are condensed inline strings with no WHEN TO NOTIFY. Consumer project agents will never fire notifications. Additionally, even in this repo where the 8 skills reference `@TASK_*_ROLE.md`, the behavioral signal is too weak: the task-human-review agent ran a full review session and recorded `fix-needed` without calling `insight-flow notify "N19 needs fixes"`.
+
+### Blockers
+
+1. **All `SKILL_*` constants in `init/index.ts` missing WHEN TO NOTIFY — consumer projects get no notifications**
+
+   When a user runs `insight-flow init` in their project, nine skill files are written from the inline `SKILL_*` constants (`SKILL_IMPLEMENT`, `SKILL_REVIEW`, `SKILL_GIT`, etc.). These are short bootstrap prompts with no `@TASK_*_ROLE.md` reference and no WHEN TO NOTIFY section. The template role files in `templates/roles/` are copied to `.claude/roles/` but the generated skills don't reference them. Net result: every consumer project agent silently skips notifications.
+
+   **Fix:** Add a compact WHEN TO NOTIFY block to each `SKILL_*` constant in `packages/taskflow/src/init/index.ts`. Only the milestones relevant to each skill are needed (e.g. `SKILL_IMPLEMENT` → after implement-end; `SKILL_GIT` → after merge; `SKILL_REVIEW` → after review-end).
+
+2. **task-git skill (`.claude/commands/task-git.md`) missing WHEN TO NOTIFY — same root cause as blocker 1 but affects this repo directly**
+
+   Already captured in round 1. The file is a standalone inline prompt (not an `@` reference). The merge notification — the most valuable one — never fires. Same fix: add WHEN TO NOTIFY to the file and to the `SKILL_GIT` constant.
+
+3. **WHEN TO NOTIFY section is too easy to skip — agents follow workflow steps, not standalone sections**
+
+   Even with the section present in the role files (e.g. `TASK_HUMAN_REVIEW_ROLE.md`), the task-human-review agent completed a full review-end → fix-needed flow without calling `insight-flow notify "N19 needs fixes"`. The section sits between OUTPUT CONTRACT and ROLE-SPECIFIC OVERRIDES as a named block but is not embedded in the numbered workflow steps where agents actually execute work.
+
+   **Fix:** Move the WHEN TO NOTIFY call into each role's workflow as a numbered step, not a standalone section. Example for TASK_HUMAN_REVIEW_ROLE.md lifecycle:
+   ```
+   - Lifecycle: review-start → record → review-end → (if fix-needed) insight-flow notify "<id> needs fixes" → (if approved) insight-flow notify "<id> approved" → /task-git
+   ```
+
+### Non-blocking
+
+- The `WHEN TO NOTIFY` section in the 8 role files listing all 4 milestones (including `After merge`) is redundant for agents that never reach merge. No harm done, but the section could be agent-scoped to reduce noise.
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- The gap between consumer-project skills and this-repo canonical skills is a recurring pattern: changes to role file templates don't automatically propagate to the `SKILL_*` constants. Consider whether init should generate skills that reference `@roles/TASK_*_ROLE.md` instead of embedding inline strings — that would make future additions like WHEN TO NOTIFY automatic for all consumers.
+
+
+---
+
+## Round 3
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Summary
+
+Design direction change: WHEN TO NOTIFY should not be inlined in each role file: WHEN TO NOTIFY should not be inlined in each role file. Instead, create a shared `AGENT_NOTIFY.md` file (same pattern as `AGENT_ENFORCEMENT.md` and `AGENT_PROTOCOL.md`) referenced by all agents via `@AGENT_NOTIFY.md`. This supersedes the inline-block fix approach from rounds 1 & 2 and solves the "single source of truth" and "easy to skip" problems in one move.
+
+### Blockers
+
+1. **Replace inline WHEN TO NOTIFY blocks with a shared `@AGENT_NOTIFY.md` reference**
+
+   All the WHEN TO NOTIFY text duplicated across 8 root role files and 8 template role files should be replaced with a single `@AGENT_NOTIFY.md` reference — exactly the same pattern as `@AGENT_ENFORCEMENT.md` and `@AGENT_PROTOCOL.md`.
+
+   **Fix:**
+   - Create `AGENT_NOTIFY.md` at the repo root with the canonical WHEN TO NOTIFY content (4 milestones + limit + skip-if-false note)
+   - Create `packages/taskflow/templates/roles/AGENT_NOTIFY.md` with the same content (gets copied to `.claude/roles/` in consumer projects by `initProject`)
+   - In all 8 root role files and 8 template role files: remove the inline WHEN TO NOTIFY block and add `@AGENT_NOTIFY.md` after `@AGENT_PROTOCOL.md`
+   - In `.claude/commands/task-git.md` and `SKILL_GIT` constant: add `@AGENT_NOTIFY.md` (or inline it since task-git has no `@` reference chain)
+   - In all other `SKILL_*` constants in `init/index.ts`: add `@AGENT_NOTIFY.md` reference (or a one-line inline note since these are condensed bootstrap prompts)
+   - `insight-flow init` stripping logic: instead of regex-stripping per-file, simply empty or replace `AGENT_NOTIFY.md` in the consumer's `.claude/roles/` when `notifications.cli: false`
+
+   **Why this is better than the round 2 fix:**
+   - Single file to update if milestone list changes
+   - Consistent with the existing shared-rules pattern
+   - Stripping is cleaner (one file to blank, not a regex per role file)
+   - Agents see it at a predictable position in every role load
+
+### Non-blocking
+
+- The `SKILL_*` constants (consumer bootstrap prompts) are too short to include the full `AGENT_NOTIFY.md` content inline. For those, a one-line reference like `@AGENT_NOTIFY.md` in the generated skill file (if the consumer's `.claude/roles/` path is accessible) would be ideal. If not, a single condensed line suffices: `After key milestones run: insight-flow notify "<task-id> <milestone>"`.
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- `AGENT_NOTIFY.md` should be listed alongside `AGENT_ENFORCEMENT.md` and `AGENT_PROTOCOL.md` in `README.md` and in the sync-role-templates script.
+
+
+---
+
+## Round 4
+
+**Reviewer:** AI (task-review)
+**Date:** 2026-05-23
+**PR:** https://github.com/Slavo775/insight-flow/pull/12
+**Verdict:** fix-needed
+
+### Summary
+
+Round 3 changes are structurally sound: `AGENT_NOTIFY.md` shared file is in place, all 16 role files reference it, `SKILL_*` constants carry inline notify steps, `stripWhenToNotify` now blanks the file instead of regex-stripping per file. Two issues remain. The browser notification title is missing the `<projectName>` prefix the spec requires. The `init --examples` path emits a duplicate `"notifications"` key because the key is already present in the base config before the stub is appended.
+
+### Checklist verification
+
+- [x] `TaskflowConfig.notifications: { browser, cli }` with defaults true/true — pass
+- [x] Dashboard diffs snapshots, fires Notification API on watched status changes — pass
+- [ ] Notification title format `<projectName>: <taskId> → <status>` — **fail** (`fireDesktopNotif` uses `taskId + ' → ' + status`, projectName absent)
+- [x] Settings popover with per-status toggles, sound, mute-focused (localStorage) — pass
+- [x] Notification permission flow — pass
+- [x] `insight-flow notify "<message>"` with `--title`, `--project` flags — pass
+- [x] Platform auto-detect: osascript / notify-send / PowerShell; errors swallowed — pass
+- [x] CLI exits <100 ms fire-and-forget — pass
+- [x] `notifications.cli: false` → silent exit 0 — pass
+- [x] Canonical + template role files have `@AGENT_NOTIFY.md` — pass
+- [x] `insight-flow init` strips WHEN TO NOTIFY (blanks AGENT_NOTIFY.md) when cli false — pass
+- [x] SKILL_* constants carry inline notify steps — pass
+- [x] README Notifications section — pass
+- [x] typecheck ✓ build ✓ tests ✓ — pass
+
+### Blockers
+
+1. **Browser notification title missing `<projectName>` — spec deviation**
+
+   `dashboard.ts:581`: `fireDesktopNotif` constructs the title as `taskId + ' → ' + status`. The CHECKLIST specifies `<projectName>: <taskId> → <status>`. Without the project name, notifications are ambiguous when multiple projects are open (N20 will compound this).
+
+   The `projectName` is available server-side in `config`. Fix: embed it into the generated script as a JS literal and use it in `fireDesktopNotif`.
+
+   ```typescript
+   // in getScript, add to the var declarations block:
+   var PROJECT_NAME = ${JSON.stringify(config.projectName || '')};
+   ```
+
+   ```javascript
+   function fireDesktopNotif(taskId, status, sound) {
+     var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + taskId + ' → ' + status;
+     try { new Notification(title, { silent: !sound }); } catch(e) {}
+   }
+   ```
+
+   `getScript` signature needs `projectName` added, or the value inlined at call site in `getDashboardHtml`.
+
+2. **`buildConfigWithExamples` emits duplicate `"notifications"` key**
+
+   `init/index.ts:534–558`: `buildConfigWithExamples` serialises `config` via `JSON.stringify`, which already includes `"notifications": {"browser":true,"cli":true}` (set on line 47). The stub then re-inserts `"notifications"` with JSONC comments before the closing brace, creating a duplicate key. Most parsers silently use the last value, but the output is confusing and technically invalid JSON.
+
+   Fix: exclude `notifications` from the base config before stringifying:
+   ```typescript
+   const { notifications: _n, ...baseWithoutNotifications } = config;
+   const base = JSON.stringify(baseWithoutNotifications, null, 2);
+   ```
+
+### Non-blocking
+
+- `init/index.ts:166` comment says "Strip WHEN TO NOTIFY block from per-project role copies" — the function now blanks `AGENT_NOTIFY.md` instead. Update the comment.
+- `README.md:173` says "omits the WHEN TO NOTIFY section from per-project role-file copies" — mechanism changed; update to "clears `AGENT_NOTIFY.md` in the project's roles directory".
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- `AGENT_NOTIFY.md` is not yet listed alongside `AGENT_ENFORCEMENT.md` / `AGENT_PROTOCOL.md` in `README.md` (carried from round 3). Non-blocking for N19.
+
+## Round 5
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Summary
+
+Design direction change. The current `@AGENT_NOTIFY.md` mechanism asks agents to explicitly call `insight-flow notify` at specific CLI milestones (`implement-end`, `review-end`, `merge`). The human wants notifications to fire **automatically** when an agent is done with a work session — triggered by a hook (like the existing PostToolUse activity hook), not by an explicit agent call. Agents should not be responsible for firing notifications themselves.
+
+### Blockers
+
+1. **Notification should fire via a hook when the agent finishes work, not via explicit agent calls**
+
+   The human's exact words: *"please when to notify only after pushes? please is not after pushes is when agent is done with work like post tool fire"*
+
+   The current design has `AGENT_NOTIFY.md` instruct every agent to explicitly call `insight-flow notify` after key milestones. The human wants this replaced by a hook-based trigger — the same pattern as the `PostToolUse` activity hook that already records events automatically. When an agent session ends (or at a natural work-done boundary), a hook fires the notification, not the agent prompt.
+
+   **Fix direction:**
+   - Add a new Claude Code hook (e.g. `Stop` hook or a `PostToolUse` hook checking for tracker-write events) that calls `insight-flow notify` automatically when an agent ends its turn or completes a tracked action.
+   - Remove or de-emphasise the explicit `insight-flow notify` calls from `AGENT_NOTIFY.md` and `SKILL_*` constants — agents should not need to remember to call notify.
+   - The hook-based approach is more reliable than agent prompts: it fires unconditionally regardless of whether the agent follows the prompt instructions.
+
+### Non-blocking
+
+None.
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- This is consistent with the existing `PostToolUse` activity hook pattern in `packages/taskflow/src/activity-hook.ts`. The notification hook could be a sibling of that hook.
+- The `insight-flow notify` CLI subcommand itself remains correct and useful — it's the triggering mechanism (agent vs hook) that changes.
+
+
+---
+
+## Round 6
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** pending — awaiting restart
+
+### Summary
+
+Human reports notifications are not yet visible, but acknowledges the Stop hook requires a Claude Code session restart to take effect. Testing deferred to post-restart.
+
+Human's exact words: *"still dont see the notification but lets see after restart claude"*
+
+### Blockers
+
+None confirmed yet — outcome depends on post-restart test.
+
+### Non-blocking
+
+None.
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- The Stop hook was installed in this session via `insight-flow init`. Claude Code registers hooks at session start from `.claude/settings.local.json`, so a restart is required before the hook fires.
+- Verdict to be updated once the human confirms behaviour after restart.
+
+
+---
+
+## Human Review — Round 7
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+Human confirmed notifications fire after a Claude Code session restart. The Stop hook approach works as intended.
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- Human confirmed post-restart behaviour: OS notifications fire automatically when an agent finishes work via the Stop hook.
+- Round 6 pending verdict resolved as approved.
+
+
+---
+
+## Human Review — Round 8
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+- OS notifications do not fire. The Stop hook calls the globally-installed `insight-flow` (v0.4.0) which has no notify command — silently broken for all users on the current release.
+- Fix required: the hook must resolve `insight-flow` local-first (project `node_modules/.bin/insight-flow`), and only fall back to the global binary if no local install is found.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- Browser push notifications DO arrive and also include sound — that part works correctly.
+- Only OS-level (desktop) notifications are broken.
+- Human tested the feature and confirmed: browser notification came, OS notification did not.
+- Proposed resolution (human's exact words): "switch the logic so first look into project root when its not there try to global".
+
+
+---
+
+## AI Review — Round 9
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+Fix for Round 8 blocker is correct. The Stop hook and its source template now resolve `insight-flow` local-first (`node_modules/.bin/insight-flow`), then the repo's own built dist, then the global binary as a last resort. `$IF_CMD` is used consistently for both the `current` probe and the `notify` call. Both the live hook and the `NOTIFY_HOOK_SCRIPT` constant in `notify-hook.ts` were updated identically, so future `insight-flow init` invocations will install the fixed hook. All 22 tests pass.
+
+### Checklist verification
+
+- [x] Round 8 blocker addressed: hook no longer hard-codes global binary — pass
+- [x] `LOCAL_BIN` path derivation: `$HOOK_DIR/../..` → project root → `node_modules/.bin/insight-flow` — correct
+- [x] `$IF_CMD` used for both `current` and `notify` calls — pass
+- [x] Live hook and `NOTIFY_HOOK_SCRIPT` template updated identically — pass
+- [x] Build and all 22 tests pass — pass
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+- `[ -f "$LOCAL_BIN" ]` tests existence only, not the executable bit. In practice npm always sets it, so this is a non-issue, but `[ -x "$LOCAL_BIN" ]` would be marginally more defensive.
+
+### Security & edge cases
+
+- If a consumer project has an old local install (`node_modules/.bin/insight-flow` at v0.4.0), the hook will still silently do nothing — but that's the same outcome as before and requires the user to upgrade, which is expected.
+
+### Notes
+
+- Template sync is correct: `NOTIFY_HOOK_SCRIPT` in `notify-hook.ts` is the authoritative source; the live `.claude/hooks/taskflow-notify.sh` matches it exactly.
+
+
+---
+
+## Human Review — Round 10
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+- No notifications received at all — neither OS nor browser — when testing manually with `insight-flow notify "N19 test notification"`. The command exited silently with no output but nothing appeared on the desktop or in the browser.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- Both OS and browser channels are broken in this test.
+- Previous round tested OS only; this round confirms browser is also not firing.
+- The silent exit 0 makes the failure invisible — the command gives no feedback even when notifications don't reach the user.
+
+
+---
+
+## Human Review — Round 11
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- Human confirmed OS notification banner fires immediately after removing the 80ms execFile timeout.
+- Both OS notifications (osascript) and browser notifications (dashboard) verified working.
+- Round 10 blocker resolved.

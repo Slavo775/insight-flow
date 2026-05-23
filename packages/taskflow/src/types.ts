@@ -170,6 +170,11 @@ export interface AgentsConfig {
   custom?: CustomAgent[];
 }
 
+export interface NotificationsConfig {
+  browser?: boolean;
+  cli?: boolean;
+}
+
 export interface TaskflowConfig {
   workDir: string;
   shardSize: number;
@@ -180,6 +185,7 @@ export interface TaskflowConfig {
   };
   activityEngine?: ActivityEngineConfig;
   agents?: AgentsConfig;
+  notifications?: NotificationsConfig;
 }
 
 export interface ParsedArgs {

@@ -17,6 +17,8 @@ OUTPUT CONTRACT
 - `/task-git` to push fixes to the task's branch.
 - Report: blocker → fix mapping, files changed, gate results, any blockers not fixable.
 
+@AGENT_NOTIFY.md
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `fix-start --id Nxx` → execute → `fix-end --id Nxx --files "..." --comment "Fixed blockers 1–N"`.

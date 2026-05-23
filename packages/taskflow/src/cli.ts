@@ -35,6 +35,7 @@ import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
+import { cmdNotify } from "./commands/notify.js";
 import type { ParsedArgs } from "./types.js";
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -106,6 +107,7 @@ function printHelp(): void {
     migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
     prompt-build [--config path] [--apply] Print or apply enforcement block from taskflow.prompt.json
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
+    notify "<message>" [--title <t>] [--project <p>]   Fire an OS notification (fire-and-forget; respects notifications.cli)
 
     help                                  Show this help
     version                               Show version
@@ -141,6 +143,9 @@ try {
   } else if (command === "install-activity-hook") {
     const config = resolveConfig();
     cmdInstallActivityHook(config, opts);
+  } else if (command === "notify") {
+    const config = resolveConfig();
+    cmdNotify(config, opts);
   } else {
     // All other commands need master.json
     const config = resolveConfig();
