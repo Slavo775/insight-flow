@@ -102,6 +102,15 @@
         "comment": "Fixed blocker 1: added res.headersSent guard + try/catch on async request handler; Socket.IO polling requests no longer crash master",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T16:07:03.750Z",
+      "endedAt": "2026-05-23T16:07:46.174Z",
+      "verdict": "approved",
+      "comment": "Approved. Follow-up noted: bundle master into insight-flow npm package so findMasterBin() works post npm install -g",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

@@ -169,3 +169,17 @@ N20 adds `packages/insight-flow-master` (push-based aggregator, Socket.IO, lock-
 
 - User quote: "okej overview works but only a while then crash why?"
 - Timing is consistent: crash happens within seconds of opening the overview page in a browser (Socket.IO initiates polling handshake on connect).
+
+
+---
+
+## Human Review — Round 7 (Final)
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Notes
+
+- User quote: "approved! hope it is possible to bundle master server into npm package?"
+- Follow-up question about npm bundling: currently `insight-flow-master` is a separate workspace package. When `packages/taskflow` is published to npm, the master binary path (`../../insight-flow-master/dist/index.js`) won't exist in a user's `npm install -g insight-flow` setup — `findMasterBin()` will always return `null` there. Bundling master into the `insight-flow` npm package is the right next step: copy `insight-flow-master/dist/index.js` into `packages/taskflow`'s published files and update `findMasterBin()` to resolve from the installed package root. Worth a dedicated task.
