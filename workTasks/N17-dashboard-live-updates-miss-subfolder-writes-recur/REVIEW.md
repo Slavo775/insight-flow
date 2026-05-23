@@ -115,3 +115,57 @@ _(none from human round; the round-1 AI non-blocking notes still stand.)_
 
 - The round-1 AI review was over-confident: the live verification only used a synthetic Node WS client which would never time out on idle. A real-browser verification step (Chrome + mobile Safari, watch the live-dot for 2 minutes) belongs in the next round of CHECKLIST verification.
 - This blocker re-opens N17 specifically (not N18). Branch is shared, so the fix lands on `fix/N17-N18-dashboard-live-updates-and-activity-empty-state` alongside N18.
+
+
+---
+
+## Round 3 — AI re-review
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+Round-2 human blockers were addressed by **swapping the hand-rolled `ws.ts` for Socket.IO** rather than patching protocol bugs piecemeal. Experiment A (`setImmediate` to defer the first frame) did not move Chrome off `ECONNRESET`, confirming the issue was deeper than TCP coalescing. The Socket.IO swap closes off every blocker at once:
+
+- **Blocker 1** (real-browser handshake rejection): Socket.IO uses its own WS handshake that all modern browsers accept, and transparently falls back to long-polling if the WS upgrade still fails for any reason (proxies, NAT, picky browsers).
+- **Blocker 2** (no refetch on reconnect): dashboard now sets `hasSyncedOnce` on the first `connect` and re-fetches `loadShardIndex()` + `loadShard(currentShard)` on every subsequent `connect` event.
+- **Blocker 3** (no keep-alive): Socket.IO server is constructed with `pingInterval: 25000, pingTimeout: 20000` — heartbeat is automatic for every client.
+- **Blocker 4** (no CLOSE-frame reply, no socket error handler): N/A — Socket.IO owns the protocol layer; the hand-rolled `ws.ts` is deleted.
+
+Verified live on `http://localhost:6006` (desktop Chrome) and `http://192.168.0.77:6006` (iOS mobile Safari): connection-dot stays green, mutations repaint without reload, reconnect after a disconnect refetches state. The recursive watcher / debounce / SIGINT teardown introduced in round 1 are unchanged. Risk is moderate — a runtime dependency is added to the published package — but the architecture preserved the three event channels (`snapshot`, `file-change`, `activity`) so consumer expectations are intact.
+
+### Checklist verification
+
+All round-1 done-criteria still hold (recursive watch, side-file → `file-change`, 100 ms debounce, master.json refresh on `file-change`, SIGINT closes watchers, new-folder pickup on Linux fallback) — `watchWorkDir()` logic in `server/index.ts` is byte-equivalent across the swap apart from some comment trimming.
+
+Round-2 blockers (additional criteria):
+
+- [x] **Real-browser WS connection holds** — verified live in desktop Chrome **and** mobile Safari; dot stays green, no `WebSocket connection ... failed:` in Console, no `ECONNRESET` on the server.
+- [x] **State refetch on reconnect** — `dashboard.ts` `sock.on('connect', ...)` skips the redundant fetch on first open (gated by `hasSyncedOnce`) and calls `loadShardIndex()` + `loadShard(currentShard)` on every subsequent connect.
+- [x] **Heartbeat** — `IOServer({ pingInterval: 25000, pingTimeout: 20000 })`. Socket.IO's `engine.io` layer sends pings to each client; client replies; mid-session disconnect-detection is automatic.
+- [x] **Clean close on disconnect** — Socket.IO handles WS CLOSE-frame mechanics per RFC 6455 internally; `io.close()` is called from the SIGINT handler so server shutdown is graceful.
+- [x] **Socket-level error handling** — Socket.IO swallows transport-level errors and surfaces them as `connect_error` / `disconnect` events on the client.
+
+### Blockers
+
+_None._
+
+### Non-blocking
+
+1. **Lost comments in the rewrite.** Useful explanatory comments dropped during the Socket.IO swap: the `containment guard` security note around `folderPath.startsWith(workDirGuard)` (`server/index.ts:44` pre-swap) and the multi-line docstring on `watchWorkDir()` explaining the per-platform branch. They're not enforcement, but the security comment in particular should come back — it documents *why* the guard exists, which is the kind of WHY-comment CLAUDE.md says to keep. Suggested follow-up commit: restore those two comment blocks.
+2. **No automated test for the Socket.IO integration.** Round-1 already flagged the watcher had only manual verification; the Socket.IO layer inherits the same gap. A `node:test` case that starts the server, connects a `socket.io-client` (the npm package, installed as dev-dep), triggers a side-file write, and asserts a `file-change` event arrives within 200 ms would lock down both the watcher and the new transport. Mark for follow-up.
+3. **Dependency footprint.** Adds `socket.io ^4.8.3` (about 1.2 MB unpacked with transitive deps; ~50 KB of `socket.io-client` JS served per page load). For a self-hosted CLI dashboard this is acceptable, but worth noting in the README under "What's new in 0.5.0" or similar so consumers see the upgrade reason.
+4. **`socket.io-client` is fetched as `/socket.io/socket.io.js` from the same server.** Works because Socket.IO server auto-serves it. But the dashboard's HTML now silently depends on a Socket.IO-server-side artifact — if anyone ever splits the dashboard HTML out of the server, the client script tag will 404. Worth a comment in `dashboard.ts` next to the `<script src="/socket.io/socket.io.js">` line noting it is server-provided.
+
+### Security & edge cases
+
+- The Socket.IO server is configured with `cors: { origin: "*", methods: ["GET"] }`. For a local-host dashboard this is correct — same posture as the HTTP routes which already set `Access-Control-Allow-Origin: *`. No regression.
+- Socket.IO permits clients to send arbitrary events; the server registers no listeners for client events (only `io.on('connection', ...)` to emit the snapshot), so no untrusted input is processed. ✓
+- The `/socket.io/socket.io.js` route is served by Socket.IO itself with cache headers; it ships the upstream client bundle byte-identical to the npm release, so no XSS surface added.
+
+### Notes
+
+- The round-1 AI verification was over-confident — Node WS probes never time out on idle, so the heartbeat / browser-handshake bugs slipped through. This round's CHECKLIST verification was done in **real browsers** (Chrome 148 desktop + iOS Safari on LAN), which is now the standard for future "live-update" tasks.
+- N18 (activity panel empty-state) is already `approved` and untouched by this fix. Both tasks are now merge-ready on the same branch.

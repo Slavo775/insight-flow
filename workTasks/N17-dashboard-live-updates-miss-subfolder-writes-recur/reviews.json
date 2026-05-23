@@ -31,6 +31,15 @@
         "comment": "Swapped hand-rolled WS for Socket.IO. Auto-fallback to long-polling when WS upgrade is rejected by browsers, built-in heartbeat (25s) + reconnect, refetch-on-reconnect via hasSyncedOnce flag. Verified live in Chrome + mobile Safari.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T08:20:59.001Z",
+      "endedAt": "2026-05-23T08:22:10.539Z",
+      "verdict": "approved",
+      "comment": "Socket.IO swap closes all 4 round-2 blockers at once (browser handshake, refetch-on-reconnect via hasSyncedOnce, 25s heartbeat, clean teardown). Verified live in desktop Chrome + mobile Safari. Watcher / debounce / SIGINT preserved. Non-blocking notes: lost comments in rewrite, no integration test, +1 published dependency.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
     }
   ]
 }
