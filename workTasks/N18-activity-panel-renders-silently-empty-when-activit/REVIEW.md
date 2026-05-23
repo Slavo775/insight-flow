@@ -189,3 +189,27 @@ _None._
 
 - Both N17 and N18 are now `approved` on the shared branch `fix/N17-N18-dashboard-live-updates-and-activity-empty-state`. PR #11 is merge-ready.
 - Outstanding non-blocking items from earlier rounds (dead-code mkdir in `installActivityHook`, no direct test for `detectActivityHookStatus`, awkward `settings-missing` copy, missing intent comment for the `.local.json`-only writer, restored security/docstring comments in `server/index.ts`, no automated test for the Socket.IO integration) remain explicitly deferred — none gate merge.
+
+
+---
+
+## Human Review — Round 6 (no-op)
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+Human opened a /task-human-review to raise a feature idea — richer Claude activity events ("start reviewing", "run this command", "edit this file", "understanding the issue", "analyzing"). After we discussed feasibility and token cost, their exact decision was: *"okey let is as is i write new ticket thanks!"* — keep PR #11 as-is and file a separate ticket for the activity-enrichment work post-merge.
+
+### Blockers
+
+_None._
+
+### Notes
+
+- N18 stays `approved` from round 5. No code change requested in this round; opening this round was a heads-up, not a fix request.
+- Future ticket scope (per the discussion):
+  - **Free (hook-side, zero token cost):** richer tool-call rendering using data the hook already captures, `UserPromptSubmit` + `Stop` hooks for skill phase markers ("Started /task-review-fix", "Completed"), `PreToolUse` command classification (`pnpm test` → "Running tests", `git commit` → "Committing").
+  - **Skip (token-heavy):** semantic narration like "analyzing the bug" or "understanding the issue" — would force Claude to articulate state via tool calls, costing ~30–100 tokens per write. Performative; not worth the overhead.
