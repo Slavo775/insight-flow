@@ -238,7 +238,7 @@
       "title": "Richer activity feed — phase milestones and free hook enrichment",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N21-richer-activity-feed-phase-milestones-and-free-hoo",
       "createdAt": "2026-05-23T09:43:26.690Z",
       "statusHistory": [
@@ -381,6 +381,11 @@
           "status": "approved",
           "at": "2026-05-23T19:29:50.502Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-23T19:33:58.707Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -414,7 +419,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 591,
       "tags": [
         "activity-engine",
         "hooks",
@@ -440,14 +445,14 @@
       ],
       "branch": "feat/N21-richer-activity-feed-phase-milestones",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/14",
-      "mergedAt": null
+      "mergedAt": "2026-05-23T19:33:58.707Z"
     },
     {
       "id": "N22",
       "title": "Release insight-flow v0.5.0 with N17 N18 plus N19 N20 N21 features",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N22-release-insight-flow-v0-5-0-with-n17-n18-plus-n19-",
       "createdAt": "2026-05-23T09:43:28.054Z",
       "statusHistory": [
@@ -455,12 +460,27 @@
           "status": "ready",
           "at": "2026-05-23T09:43:28.055Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-23T19:42:04.700Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-23T19:45:59.111Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-23T19:42:04.700Z",
+        "completedAt": "2026-05-23T19:45:59.111Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/CHANGELOG.md",
+          "packages/taskflow/README.md",
+          "CHANGELOG.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
