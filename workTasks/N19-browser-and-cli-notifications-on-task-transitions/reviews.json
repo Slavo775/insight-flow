@@ -67,6 +67,24 @@
         "comment": "Added Stop hook for automatic notify; fixed projectName in browser notif title; fixed duplicate notifications key in init --examples",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T12:01:26.702Z",
+      "endedAt": null,
+      "verdict": null,
+      "comment": null,
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T12:22:13.064Z",
+      "endedAt": "2026-05-23T12:22:54.157Z",
+      "verdict": "approved",
+      "comment": "Post-restart test confirmed: Stop hook fires OS notifications automatically",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

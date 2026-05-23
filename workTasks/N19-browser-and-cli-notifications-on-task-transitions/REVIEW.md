@@ -255,3 +255,65 @@ None.
 
 - This is consistent with the existing `PostToolUse` activity hook pattern in `packages/taskflow/src/activity-hook.ts`. The notification hook could be a sibling of that hook.
 - The `insight-flow notify` CLI subcommand itself remains correct and useful — it's the triggering mechanism (agent vs hook) that changes.
+
+
+---
+
+## Round 6
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** pending — awaiting restart
+
+### Summary
+
+Human reports notifications are not yet visible, but acknowledges the Stop hook requires a Claude Code session restart to take effect. Testing deferred to post-restart.
+
+Human's exact words: *"still dont see the notification but lets see after restart claude"*
+
+### Blockers
+
+None confirmed yet — outcome depends on post-restart test.
+
+### Non-blocking
+
+None.
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- The Stop hook was installed in this session via `insight-flow init`. Claude Code registers hooks at session start from `.claude/settings.local.json`, so a restart is required before the hook fires.
+- Verdict to be updated once the human confirms behaviour after restart.
+
+
+---
+
+## Human Review — Round 7
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+Human confirmed notifications fire after a Claude Code session restart. The Stop hook approach works as intended.
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Security & edge cases
+
+None.
+
+### Notes
+
+- Human confirmed post-restart behaviour: OS notifications fire automatically when an agent finishes work via the Stop hook.
+- Round 6 pending verdict resolved as approved.
