@@ -424,6 +424,7 @@ function generateActivityHook(cwd: string, config: TaskflowConfig): void {
   const result = installActivityHook(cwd, logFile);
   if (result.hookWritten || result.settingsUpdated) {
     console.log("Generated activity hook in .claude/hooks/ and registered in settings.local.json");
+    console.log("  → restart your Claude Code session for the hook to take effect");
   } else {
     console.log("Activity hook already registered, skipping.");
   }

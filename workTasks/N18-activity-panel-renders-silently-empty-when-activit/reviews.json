@@ -46,7 +46,18 @@
       "comment": "Activity panel stays empty when hookStatus is ok but events haven't flowed (Claude Code session was started before insight-flow init). Need a 'waiting for activity / restart your Claude Code session' empty-state in dashboard.ts renderActivityEmptyState.",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T08:49:48.291Z",
+        "endedAt": "2026-05-23T08:59:36.280Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/commands/install-activity-hook.ts",
+          "packages/taskflow/src/init/index.ts"
+        ],
+        "comment": "Added 'Waiting for Claude activity' empty-state for hookStatus=ok (deferred 3s to avoid flash). Cancelled by addActivityEvent + toggleActivity close. install-activity-hook and init now print a 'restart your Claude Code session' hint after a successful fresh install.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

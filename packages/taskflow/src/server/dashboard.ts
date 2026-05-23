@@ -499,6 +499,7 @@ function getScript(activityEnabled: boolean, _port: number): string {
     var idleTimer = null;
     var autoScroll = true;
     var activityEvents = [];
+    var emptyStateTimer = null;
 
     function toggleActivity() {
       activityPanelOpen = !activityPanelOpen;
@@ -511,6 +512,7 @@ function getScript(activityEnabled: boolean, _port: number): string {
       } else {
         panel.classList.remove('open');
         btn.textContent = 'Activity ▶';
+        if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
       }
     }
 
@@ -536,6 +538,7 @@ function getScript(activityEnabled: boolean, _port: number): string {
       if (activityEvents.length > 200) activityEvents = activityEvents.slice(-200);
       lastActivityTime = Date.now();
       updateActivityStatus(true);
+      if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
       var empty = document.querySelector('.activity-empty-state');
       if (empty) empty.remove();
       renderActivityItem(ev);
@@ -545,32 +548,43 @@ function getScript(activityEnabled: boolean, _port: number): string {
     }
 
     function activityEmptyStateMessage() {
+      var installHint = {
+        hint: 'Run from the project root:',
+        command: 'insight-flow install-activity-hook',
+        hintAfter: 'Already-installed projects re-run safely (no-op).',
+      };
       if (hookStatus === 'hook-missing') {
-        return {
+        return Object.assign({
           headline: 'Activity hook not installed',
           body: 'The dashboard receives events from a Claude Code PostToolUse hook script that has not been created in this project yet.',
-        };
+        }, installHint);
       }
       if (hookStatus === 'settings-missing') {
-        return {
+        return Object.assign({
           headline: 'Activity hook registered settings missing',
           body: 'The hook script exists but no PostToolUse entry references it in .claude/settings.local.json.',
-        };
+        }, installHint);
       }
       if (hookStatus === 'both-missing') {
-        return {
+        return Object.assign({
           headline: 'Activity hook not installed',
           body: 'Neither .claude/hooks/taskflow-activity.sh nor a PostToolUse registration exists in this project.',
+        }, installHint);
+      }
+      if (hookStatus === 'ok') {
+        return {
+          headline: 'Waiting for Claude activity',
+          body: 'The hook is installed and the dashboard is connected. If events do not appear, restart your Claude Code session — settings.local.json is read at session start, so a hook added mid-session is not picked up until you launch a new session.',
         };
       }
       return null;
     }
 
-    function renderActivityEmptyState() {
+    function paintActivityEmptyState() {
       var feed = document.getElementById('activity-feed');
       if (!feed) return;
       var existing = feed.querySelector('.activity-empty-state');
-      if (activityEvents.length > 0 || hookStatus === 'ok') {
+      if (activityEvents.length > 0) {
         if (existing) existing.remove();
         return;
       }
@@ -581,13 +595,33 @@ function getScript(activityEnabled: boolean, _port: number): string {
       if (idle) idle.remove();
       var box = document.createElement('div');
       box.className = 'activity-empty-state';
-      box.innerHTML =
-        '<strong>' + escHtml(msg.headline) + '</strong>' +
-        escHtml(msg.body) +
-        '<div class="hint">Run from the project root:</div>' +
-        '<code>insight-flow install-activity-hook</code>' +
-        '<div class="hint">Already-installed projects re-run safely (no-op).</div>';
+      var html = '<strong>' + escHtml(msg.headline) + '</strong>' + escHtml(msg.body);
+      if (msg.hint) html += '<div class="hint">' + escHtml(msg.hint) + '</div>';
+      if (msg.command) html += '<code>' + escHtml(msg.command) + '</code>';
+      if (msg.hintAfter) html += '<div class="hint">' + escHtml(msg.hintAfter) + '</div>';
+      box.innerHTML = html;
       feed.appendChild(box);
+    }
+
+    function renderActivityEmptyState() {
+      if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
+      var feed = document.getElementById('activity-feed');
+      if (!feed) return;
+      if (activityEvents.length > 0) {
+        paintActivityEmptyState();
+        return;
+      }
+      if (hookStatus === 'ok') {
+        // Defer the "Waiting for Claude activity" message ~3 s so it does
+        // not flash before the first event in a healthy session. The timer
+        // is cleared if an event arrives or the panel closes meanwhile.
+        emptyStateTimer = setTimeout(function() {
+          emptyStateTimer = null;
+          paintActivityEmptyState();
+        }, 3000);
+        return;
+      }
+      paintActivityEmptyState();
     }
 
     function updateActivityStatus(active) {
