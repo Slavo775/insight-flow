@@ -58,6 +58,15 @@
         "comment": "Added 'Waiting for Claude activity' empty-state for hookStatus=ok (deferred 3s to avoid flash). Cancelled by addActivityEvent + toggleActivity close. install-activity-hook and init now print a 'restart your Claude Code session' hint after a successful fresh install.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T09:07:03.949Z",
+      "endedAt": "2026-05-23T09:07:42.708Z",
+      "verdict": "approved",
+      "comment": "Human verified the Waiting-for-Claude-activity empty-state and the manual-smoke pipeline. approved!",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

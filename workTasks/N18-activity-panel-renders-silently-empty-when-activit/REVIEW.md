@@ -163,3 +163,29 @@ _(none from human round)_
 
 - This re-opens N18 for a round-4 fix on the same branch (`fix/N17-N18-dashboard-live-updates-and-activity-empty-state`). N17 stays `approved`.
 - The deeper alternative — having the activity engine watch `.claude/settings.local.json` for changes and auto-reload, or making Claude Code itself re-read settings on file change — is out of scope. The empty-state guidance is the minimum-viable fix.
+
+
+---
+
+## Human Review — Round 5
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+Human verified the round-4 fix end-to-end. Their exact word:
+
+> *"approved!"*
+
+Manual smoke confirmed the full pipeline is wired correctly in this repo: hook script present (`.claude/hooks/taskflow-activity.sh`, 905 B), settings registration present (`.claude/settings.local.json` PostToolUse entry), server reports `Hook: ok`, and a hand-written JSONL line shows up in the activity feed live. The "Waiting for Claude activity — restart your Claude Code session" empty-state now surfaces the only remaining gotcha (session lifecycle) instead of leaving users staring at a silent "idle" badge.
+
+### Blockers
+
+_None._
+
+### Notes
+
+- Both N17 and N18 are now `approved` on the shared branch `fix/N17-N18-dashboard-live-updates-and-activity-empty-state`. PR #11 is merge-ready.
+- Outstanding non-blocking items from earlier rounds (dead-code mkdir in `installActivityHook`, no direct test for `detectActivityHookStatus`, awkward `settings-missing` copy, missing intent comment for the `.local.json`-only writer, restored security/docstring comments in `server/index.ts`, no automated test for the Socket.IO integration) remain explicitly deferred — none gate merge.
