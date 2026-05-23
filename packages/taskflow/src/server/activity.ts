@@ -6,6 +6,7 @@ export class ActivityEngine {
   private listeners: Array<(event: ActivityEvent) => void> = [];
   private watcher: ReturnType<typeof watch> | null = null;
   private lastSize = 0;
+  private linesProcessed = 0;
   private logPath: string;
   private maxEvents: number;
   private enabled: boolean;
@@ -22,6 +23,7 @@ export class ActivityEngine {
     // Clear ephemeral log on start
     writeFileSync(this.logPath, "");
     this.lastSize = 0;
+    this.linesProcessed = 0;
 
     // Start watching the log file
     this.watcher = watch(this.logPath, () => {
@@ -75,11 +77,13 @@ export class ActivityEngine {
       const content = readFileSync(this.logPath, "utf-8");
       const lines = content.split("\n").filter((l) => l.trim());
 
-      // Process only new lines
-      const existingCount = this.events.length;
-      for (let i = existingCount; i < lines.length; i++) {
+      // Process only lines we haven't seen yet — use linesProcessed, not
+      // events.length, because ring-buffer eviction shrinks events.length
+      // without advancing the file cursor.
+      for (let i = this.linesProcessed; i < lines.length; i++) {
         try {
           const event = JSON.parse(lines[i]) as ActivityEvent;
+          this.linesProcessed++;
           this.events.push(event);
 
           // Ring buffer: keep only maxEvents
@@ -91,7 +95,8 @@ export class ActivityEngine {
             listener(event);
           }
         } catch {
-          // Skip malformed lines
+          // Skip malformed lines but still advance the cursor
+          this.linesProcessed++;
         }
       }
 
