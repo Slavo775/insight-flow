@@ -1246,7 +1246,7 @@
       "title": "Browser and CLI notifications on task transitions",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N19-browser-and-cli-notifications-on-task-transitions",
       "createdAt": "2026-05-23T09:43:23.812Z",
       "statusHistory": [
@@ -1439,6 +1439,21 @@
           "status": "fixed",
           "at": "2026-05-23T13:25:53.637Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T13:26:21.655Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T13:29:46.951Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T13:30:10.742Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -1458,8 +1473,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 10,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 11,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -1514,6 +1529,11 @@
           "at": "2026-05-23T13:05:49.707Z",
           "commitHash": "9f40ed6",
           "commitMessage": "docs(tasks): N19 human review round 10 — fix-needed"
+        },
+        {
+          "at": "2026-05-23T13:26:21.655Z",
+          "commitHash": "f0ed474",
+          "commitMessage": "fix(notify): remove execFile timeout that killed osascript before delivery"
         }
       ],
       "branch": "feat/N19-browser-and-cli-notifications",

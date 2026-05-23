@@ -130,6 +130,15 @@
         "comment": "Remove 80ms execFile timeout that was killing osascript/notify-send/powershell before notification could deliver",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T13:29:46.952Z",
+      "endedAt": "2026-05-23T13:30:10.742Z",
+      "verdict": "approved",
+      "comment": "OS notification banner fires immediately after timeout fix; browser notifications also confirmed working",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
