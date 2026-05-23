@@ -66,6 +66,15 @@
       "type": "ai",
       "by": "task-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T15:32:53.394Z",
+      "endedAt": "2026-05-23T15:33:21.490Z",
+      "verdict": "fix-needed",
+      "comment": "Master dies without user action — detached:false causes master to die with spawning process group; AI review non-blocking #1 promoted to blocker",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

@@ -120,3 +120,33 @@ N20 adds `packages/insight-flow-master` (push-based aggregator, Socket.IO, lock-
 
 - `socket.io/socket.io.js` loads from the master's origin (`/socket.io/socket.io.js`). Correct even in iframe context — the iframe document is served from the master, so relative URLs resolve against `localhost:6100`. ✅
 - All three human-review blockers (port, root build script, path depth) have been fixed and verified. The implementation is correct and complete for the v1 scope.
+
+
+---
+
+## Human Review — Round 5
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Master dies spontaneously — overview breaks without any user action** — Registration succeeded and overview loaded once (200). Shortly after, refreshing `/overview` returned `ERR_CONNECTION_REFUSED` on the iframe src (`http://localhost:6100/overview`) — master process is gone. Project server is still running. Root cause: the spawned master child process uses `detached: false` (`server/index.ts:308`), so it shares the process group with the spawning project server. Any signal that kills the project server's terminal session (e.g. tab close, shell exit, SIGHUP) also kills the master, since they share the same process group. Once dead, the master is never auto-revived — the project server only tries to spawn master once at startup.
+   - **Fix:** Change `detached: false` → `detached: true` in the `spawn()` call at `packages/taskflow/src/server/index.ts:308`. Keep `child.unref()` — it prevents Node from waiting for the child on exit, which is correct for a background daemon. With `detached: true`, the master survives the spawning project server's death and continues serving `/overview` until explicitly killed.
+
+### Notes
+
+- User quote: "okej server register to master also overview was on but now [screenshot: ERR_CONNECTION_REFUSED on /overview] and I've done nothing"
+- Network tab showed: first `/overview` → 200 (0.5 KB, the iframe wrapper page); second `/overview` → (failed) `net::ERR_CONNECTION_REFUSED` (185 KB, the master's page) — confirms master is dead, project server alive.
+- This promotes the AI review's non-blocking item #1 to a confirmed blocker.
+
+### Checklist verification
+
+### Blockers
+
+### Non-blocking
+
+### Security & edge cases
+
+### Notes
