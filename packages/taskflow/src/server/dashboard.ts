@@ -642,6 +642,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           // (including reconnects) so stale client-side events are not
           // duplicated each time Socket.IO re-establishes the connection.
           activityEvents = [];
+          if (typeof seenEventKeys !== 'undefined') seenEventKeys.clear();
           var feed = document.getElementById('activity-feed');
           if (feed) feed.innerHTML = '';
           for (var i = 0; i < data.activity.length; i++) {
@@ -675,7 +676,12 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     var ACTIVITY_CAP = 50;
     var activityPanelCollapsed = false;
     var activityEvents = [];
+    var seenEventKeys = new Set();
     var emptyStateTimer = null;
+
+    function eventKey(ev) {
+      return (ev.ts || '') + '|' + (ev.tool || '') + '|' + (ev.action || '') + '|' + (ev.message || ev.file || '');
+    }
 
     function initActivityPanel() {
       try { activityPanelCollapsed = localStorage.getItem('activityPanelCollapsed') === '1'; } catch(e) {}
@@ -735,6 +741,9 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     }
 
     function addActivityEvent(ev) {
+      var key = eventKey(ev);
+      if (seenEventKeys.has(key)) return;
+      seenEventKeys.add(key);
       activityEvents.unshift(ev);
       if (activityEvents.length > ACTIVITY_CAP) activityEvents = activityEvents.slice(0, ACTIVITY_CAP);
 

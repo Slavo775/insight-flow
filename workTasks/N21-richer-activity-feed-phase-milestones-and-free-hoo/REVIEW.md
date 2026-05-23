@@ -149,3 +149,24 @@ Full implementation of N21 is in place across all target files. The round-1 bloc
 
 - Duplicate events also cause incorrect idle/active state cycling (an old DONE event re-emitted resets the panel to idle unexpectedly).
 - The ring buffer eviction logic at `activity.ts:86-88` is correct for the in-memory cap; only the line-offset tracking is wrong.
+
+
+---
+
+## Human Review — Round 5
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Activity events still appear duplicated despite previous fixes** — `packages/taskflow/src/server/dashboard.ts` → `addActivityEvent` / `sock.on('snapshot')`
+
+   Screenshot shows every event appearing exactly twice: DONE, START, and Bash events all duplicated. The JSONL log contains each event only once, so the duplication is entirely client-side.
+
+   **Human said:** "but still some there"
+
+   **Root cause:** The previous `snapshot` reset fix is not sufficient. Socket.IO's transport upgrade (polling → WebSocket) and brief reconnect cycles can cause the `snapshot` to arrive at the client at the same time as a live `activity` event, producing one copy from each path. Additionally, even a clean snapshot replay is susceptible to the same event arriving via both the `activity` handler and the subsequent snapshot.
+
+   **Fix:** Add client-side deduplication in `addActivityEvent` using a `seenEventKeys` Set keyed on `ts|tool|action|message|file`. Any event whose key is already in the set is silently dropped. The set must be cleared when the feed is reset (snapshot handler). This is a defensive last-line guard that prevents duplicates regardless of origin.
