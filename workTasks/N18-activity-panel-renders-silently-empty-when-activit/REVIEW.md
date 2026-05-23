@@ -110,3 +110,56 @@ _None._
 ### Notes
 
 - N18 is now ready for merge alongside N17 (also approved). The branch `fix/N17-N18-dashboard-live-updates-and-activity-empty-state` carries both implementations + the round-2 fix + this re-review verdict.
+
+
+---
+
+## Human Review — Round 4
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Summary
+
+After the N17 Socket.IO fix the dashboard works end-to-end (green dot, real-time file-change broadcasts, snapshot delivered with `hookStatus: "ok"`). But the Claude Activity panel stays empty with the "idle" badge even though the hook is installed and registered. Human's exact words:
+
+> *"still Claude activity is empty"*
+
+Verified diagnosis (server-side):
+
+- `.claude/hooks/taskflow-activity.sh` exists ✓
+- `.claude/settings.local.json` has the PostToolUse entry ✓
+- Server boot logs `Hook: ok` ✓
+- Snapshot delivered to the browser contains `{ "activity": [], "hookStatus": "ok", "configEnabled": true }` ✓
+- `.taskflow-activity.jsonl` is **0 bytes** — no events have been emitted ✗
+
+Root cause: the human's Claude Code session was launched **before** `insight-flow init` added the PostToolUse hook to `settings.local.json`. Claude Code reads that file at session start; mid-session edits to the hook registration don't take effect until the next session. So the hook *exists*, the dashboard correctly reports `Hook: ok`, but no actual tool-use events are being written by the running Claude Code session, so the panel stays empty forever.
+
+This is bad UX: the user did everything right (ran `insight-flow init`, server says hook is OK, dashboard agrees), and the panel still shows nothing. The N18 empty-state implementation only handles the `hookStatus !== "ok"` cases — it has no guidance for the "hook installed but no events flowing" case.
+
+### Blockers
+
+1. **Add a "hook installed but no events" empty-state with session-restart guidance.**
+   - **Why:** when `hookStatus === "ok"` AND `activityEvents.length === 0`, the panel currently shows just the "idle" badge with no explanation. The most common reason for this state (by far) is "user installed the hook mid-session and Claude Code has not picked it up yet". Without a hint, users will assume the dashboard is broken (which is exactly what happened here).
+   - **Where:** `packages/taskflow/src/server/dashboard.ts` — `renderActivityEmptyState()` returns early when `hookStatus === 'ok'`. Extend it to cover the ok-but-empty case.
+   - **Fix:**
+     - Extend `activityEmptyStateMessage()` to return a non-null message when `hookStatus === 'ok'` and `activityEvents.length === 0`, with copy like:
+       > **Waiting for Claude activity** — the hook is installed and the dashboard is connected. If events do not appear, restart your Claude Code session: `settings.local.json` is read at session start, so a hook added mid-session is not picked up until you launch a new session.
+     - Defer the empty-state render by ~3 s on first connect so it does not flash briefly before the first real event arrives in an active session. Once the first event lands, `addActivityEvent()` already removes the empty-state card, so the deferred render is harmless when events do flow.
+   - **Optional secondary:** in `commands/install-activity-hook.ts`, after a successful fresh install print a one-line hint to stderr/stdout: `"Activity hook installed. Restart your Claude Code session to start streaming events."` Mirror in `init/index.ts`'s `generateActivityHook` success log.
+   - **Tests:** extend the existing smoke test or add a new dashboard-level assertion that with `hookStatus: ok` and `activityEvents: []` the rendered HTML for the panel contains the "restart your Claude Code session" copy. Optional — the existing tests are smoke-only.
+
+### Non-blocking
+
+_(none from human round)_
+
+### Security & edge cases
+
+- The new empty-state copy is static text; same `escHtml()` discipline as the existing empty-state, no injection surface.
+- The deferred render must be cancelled if the panel is closed before it fires, or it will leak a timer. Use `clearTimeout` in `toggleActivity()` when closing.
+
+### Notes
+
+- This re-opens N18 for a round-4 fix on the same branch (`fix/N17-N18-dashboard-live-updates-and-activity-empty-state`). N17 stays `approved`.
+- The deeper alternative — having the activity engine watch `.claude/settings.local.json` for changes and auto-reload, or making Claude Code itself re-read settings on file change — is out of scope. The empty-state guidance is the minimum-viable fix.
