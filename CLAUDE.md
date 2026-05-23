@@ -9,7 +9,10 @@ Insight Flow is a CLI workbench for AI-assisted task lifecycle management. The `
 ## Commands
 
 ```bash
-# Build the CLI
+# Build all packages (taskflow CLI + insight-flow-master)
+pnpm build
+
+# Build only the CLI (skips master rebuild)
 pnpm --dir packages/taskflow run build
 
 # Pack the npm tarball
@@ -19,7 +22,7 @@ pnpm pack:taskflow
 pnpm play                                # → http://localhost:6006
 
 # From inside the playground or any insight-flow project
-insight-flow ui                          # → dashboard
+insight-flow ui                          # → dashboard (auto-starts master on :6100)
 insight-flow stats                       # → CLI commands (see TASK_*_ROLE.md)
 ```
 

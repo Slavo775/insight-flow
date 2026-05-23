@@ -28,7 +28,17 @@
       "comment": "Master binary not built — root build:package script skips insight-flow-master, so overview never auto-starts",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T15:16:33.665Z",
+        "endedAt": "2026-05-23T15:17:08.075Z",
+        "status": "fixed",
+        "filesChanged": [
+          "package.json",
+          "CLAUDE.md"
+        ],
+        "comment": "Fixed blocker 1: added root build script that builds master then taskflow; updated CLAUDE.md",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
