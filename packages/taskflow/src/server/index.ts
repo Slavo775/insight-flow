@@ -293,8 +293,8 @@ async function setupMasterIntegration(
   const masterCfg = config.master;
   if (masterCfg?.standalone) return null;
 
-  const masterUrl = masterCfg?.url ?? "http://localhost:6000";
-  const masterPort = masterCfg?.port ?? 6000;
+  const masterUrl = masterCfg?.url ?? "http://localhost:6100";
+  const masterPort = masterCfg?.port ?? 6100;
   const startLocally = masterCfg?.startMasterLocally !== false;
 
   // Auto-start master locally if needed
@@ -377,7 +377,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     pushToMaster = fn;
   });
 
-  const masterUrl = config.master?.url ?? "http://localhost:6000";
+  const masterUrl = config.master?.url ?? "http://localhost:6100";
 
   const server = createServer((req, res) => {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);

@@ -8,7 +8,18 @@
       "comment": "Port 6000 is browser-blocked (ERR_UNSAFE_PORT); iframe embed also broken — same root cause",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T15:07:57.522Z",
+        "endedAt": "2026-05-23T15:09:38.828Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/insight-flow-master/src/config.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/README.md"
+        ],
+        "comment": "Fixed blockers 1+2: changed default master port 6000→6100 (browser-safe); iframe loads once port is unblocked",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

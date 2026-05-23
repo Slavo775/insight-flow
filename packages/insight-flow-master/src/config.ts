@@ -9,7 +9,7 @@ export const MasterServerConfigSchema = z.object({
   standalone: z.boolean().optional(),
 });
 
-const DEFAULTS: Required<MasterServerConfig> = { port: 6000, standalone: false };
+const DEFAULTS: Required<MasterServerConfig> = { port: 6100, standalone: false };
 
 export function loadMasterConfig(): Required<MasterServerConfig> {
   const configPath = resolve(homedir(), ".insight-flow", "master.json");

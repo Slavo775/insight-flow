@@ -291,12 +291,12 @@ The master:
 pnpm --dir packages/insight-flow-master run build
 
 # Start your projects — master auto-starts on the first one
-insight-flow ui                          # project A on :6006, master on :6000
+insight-flow ui                          # project A on :6006, master on :6100
 # (in another terminal, different project dir)
 insight-flow ui                          # project B on :6006, registers with existing master
 
 # Open the overview
-open http://localhost:6000/overview
+open http://localhost:6100/overview
 # Or via any project server's /overview (renders as an iframe)
 open http://localhost:6006/overview
 ```
@@ -308,7 +308,7 @@ Set `startMasterLocally: false` in `taskflow.config.json` to point at a master r
 ```jsonc
 {
   "master": {
-    "url": "http://my-server:6000",
+    "url": "http://my-server:6100",
     "startMasterLocally": false
   }
 }
@@ -332,7 +332,7 @@ The master itself can run in standalone mode (no new registrations accepted, ove
 
 ```json
 // ~/.insight-flow/master.json
-{ "port": 6000, "standalone": true }
+{ "port": 6100, "standalone": true }
 ```
 
 ## License
