@@ -120,7 +120,16 @@
       "comment": "No notifications at all — OS and browser both silent when notify command is run manually",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T13:25:48.228Z",
+        "endedAt": "2026-05-23T13:25:53.637Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/commands/notify.ts"
+        ],
+        "comment": "Remove 80ms execFile timeout that was killing osascript/notify-send/powershell before notification could deliver",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

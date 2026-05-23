@@ -21,10 +21,10 @@ function fireNotification(title: string, message: string): void {
     if (platform === "darwin") {
       const script =
         `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)}`;
-      const child = execFile("osascript", ["-e", script], { timeout: 80 });
+      const child = execFile("osascript", ["-e", script]);
       child.unref();
     } else if (platform === "linux") {
-      const child = execFile("notify-send", [title, message], { timeout: 80 });
+      const child = execFile("notify-send", [title, message]);
       child.unref();
     } else if (platform === "win32") {
       const ps =
@@ -35,7 +35,7 @@ function fireNotification(title: string, message: string): void {
         `$x.GetElementsByTagName('text')[1].AppendChild($x.CreateTextNode(${JSON.stringify(message)})) | Out-Null; ` +
         `$n = [Windows.UI.Notifications.ToastNotification]::new($x); ` +
         `[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('insight-flow').Show($n)`;
-      const child = execFile("powershell", ["-NoProfile", "-Command", ps], { timeout: 80 });
+      const child = execFile("powershell", ["-NoProfile", "-Command", ps]);
       child.unref();
     }
   } catch {
