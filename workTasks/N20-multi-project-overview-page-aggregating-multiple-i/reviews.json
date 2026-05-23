@@ -20,6 +20,15 @@
         "comment": "Fixed blockers 1+2: changed default master port 6000→6100 (browser-safe); iframe loads once port is unblocked",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-23T15:13:58.815Z",
+      "endedAt": "2026-05-23T15:14:38.407Z",
+      "verdict": "fix-needed",
+      "comment": "Master binary not built — root build:package script skips insight-flow-master, so overview never auto-starts",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

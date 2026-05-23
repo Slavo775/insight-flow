@@ -30,3 +30,21 @@ N20 adds the `insight-flow-master` package (push-based aggregator) and wires pro
 ### Notes
 
 - Exact user quote: "why? also iframe not working" (with screenshot showing `ERR_UNSAFE_PORT` on `http://localhost:6000/overview`)
+
+
+---
+
+## Human Review — Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Master binary not built — overview never starts** — `pnpm ui` runs `node packages/taskflow/dist/cli.js ui`, but `packages/insight-flow-master/dist/index.js` doesn't exist until `pnpm --dir packages/insight-flow-master run build` is run separately. `findMasterBin()` in `server/index.ts:195` returns `null` when the binary is missing, so auto-start is silently skipped and registration fails. The root `build:package` script only builds `packages/taskflow`, leaving the master unbuilt after a clean checkout or `git pull`.
+   - **Fix:** Add a root `build` script to `package.json` that builds both packages in order: `pnpm --dir packages/insight-flow-master run build && pnpm --dir packages/taskflow run build`. Update `CLAUDE.md` build command to reference the new root `build` script. This ensures a single `pnpm build` from the repo root is sufficient.
+
+### Notes
+
+- User quote: "can we enable overview?" after seeing `[master] insight-flow-master binary not found, skipping auto-start` and `[master] Could not register with master at http://localhost:6100 — overview disabled` in the server startup log.
