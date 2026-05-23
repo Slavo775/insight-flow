@@ -329,7 +329,8 @@ None.
 
 ### Blockers
 
-- Notifications never fire when `insight-flow` is installed globally at v0.4.0. The notification feature does not exist in 0.4.0 — the Stop hook calls into insight-flow, but that version has no notify command. Any user on the current global install will see no notifications at all.
+- OS notifications do not fire. The Stop hook calls the globally-installed `insight-flow` (v0.4.0) which has no notify command — silently broken for all users on the current release.
+- Fix required: the hook must resolve `insight-flow` local-first (project `node_modules/.bin/insight-flow`), and only fall back to the global binary if no local install is found.
 
 ### Suggestions (non-blocking)
 
@@ -337,5 +338,7 @@ None.
 
 ### Notes
 
-- Human tested the feature and received no OS notifications.
-- Root cause: the hook depends on the new notify command that ships in the upcoming release; users with the old global install are silently broken.
+- Browser push notifications DO arrive and also include sound — that part works correctly.
+- Only OS-level (desktop) notifications are broken.
+- Human tested the feature and confirmed: browser notification came, OS notification did not.
+- Proposed resolution (human's exact words): "switch the logic so first look into project root when its not there try to global".
