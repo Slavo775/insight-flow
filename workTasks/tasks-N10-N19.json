@@ -1246,7 +1246,7 @@
       "title": "Browser and CLI notifications on task transitions",
       "type": "feat",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "fixed",
       "folder": "workTasks/N19-browser-and-cli-notifications-on-task-transitions",
       "createdAt": "2026-05-23T09:43:23.812Z",
       "statusHistory": [
@@ -1379,6 +1379,21 @@
           "status": "fix-needed",
           "at": "2026-05-23T12:45:30.504Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T12:46:17.988Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T12:54:26.130Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T12:57:19.180Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -1434,6 +1449,11 @@
           "at": "2026-05-23T12:23:30.377Z",
           "commitHash": "305d9a5",
           "commitMessage": "docs(tasks): N19 human review round 7 — approved"
+        },
+        {
+          "at": "2026-05-23T12:46:17.988Z",
+          "commitHash": "3fe026d",
+          "commitMessage": "docs(tasks): N19 human review round 8 — fix-needed"
         }
       ],
       "branch": "feat/N19-browser-and-cli-notifications",
