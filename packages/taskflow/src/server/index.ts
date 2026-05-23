@@ -473,8 +473,15 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     });
   });
 
+  let activityDebounceTimer: NodeJS.Timeout | null = null;
   activity.onEvent((event) => {
     io.emit("activity", event);
+    // Debounce master push so rapid tool events don't flood it
+    if (activityDebounceTimer) clearTimeout(activityDebounceTimer);
+    activityDebounceTimer = setTimeout(() => {
+      activityDebounceTimer = null;
+      if (pushToMaster) void pushToMaster();
+    }, 2000);
   });
 
   let debounceTimer: NodeJS.Timeout | null = null;

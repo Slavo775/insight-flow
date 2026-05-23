@@ -57,8 +57,10 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .live-dot.disconnected { background: var(--red); animation: none; }
     .live-dot.reconnecting { background: var(--yellow); }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .card-grid { display: flex; flex-wrap: wrap; gap: 16px; }
-    .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 320px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .card-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    .card-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.grid-multi { grid-template-columns: repeat(2, 1fr); }
+    .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
     .proj-card-header { display: flex; justify-content: space-between; align-items: center; }
     .proj-label { font-size: 14px; font-weight: 600; color: var(--text); }
     .conn-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
@@ -81,7 +83,7 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .badge-pushed { background: #2a1a06; color: var(--orange); }
     .badge-other { background: var(--border); color: var(--text-muted); }
     .proj-activity-feed { display: flex; flex-direction: column; gap: 3px; }
-    .proj-activity-item { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; gap: 6px; align-items: center; }
+    .proj-activity-item { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; gap: 6px; align-items: center; }
     .proj-activity-badge { font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: 600; text-transform: uppercase; flex-shrink: 0; }
     .proj-activity-badge-phase { background: #3b1a00; color: var(--orange); }
     .proj-activity-badge-skill { background: #1a0a3b; color: var(--purple); }
@@ -179,14 +181,14 @@ function getScript(initialData: string): string {
           (secondary ? '<span style="color:var(--text-muted);font-size:9px;flex-shrink:0;margin-left:4px">' + escHtml(String(secondary).slice(0, 30)) + '</span>' : '') +
           '</div>';
       }).join('');
-      var idgeBadge = idleStatus === 'idle'
+      var idleBadge = idleStatus === 'idle'
         ? '<span class="proj-idle-badge">idle</span>'
         : idleStatus === 'active'
           ? '<span class="proj-active-badge">active</span>'
           : '';
       var header = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
         '<span style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Activity</span>' +
-        idgeBadge +
+        idleBadge +
         '</div>';
       return '<div class="proj-task">' + header + '<div class="proj-activity-feed">' + rows + '</div></div>';
     }
@@ -218,8 +220,17 @@ function getScript(initialData: string): string {
         '</div>';
     }
 
+    function applyGridClass() {
+      var grid = document.getElementById('grid');
+      if (!grid) return;
+      grid.classList.remove('grid-2', 'grid-multi');
+      if (PROJECTS.length === 2) grid.classList.add('grid-2');
+      else if (PROJECTS.length >= 3) grid.classList.add('grid-multi');
+    }
+
     function renderAll() {
       document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
+      applyGridClass();
       updateSubtitle();
       snapshotStatuses();
     }
@@ -256,6 +267,7 @@ function getScript(initialData: string): string {
       } else {
         PROJECTS.push(p);
         document.getElementById('grid').insertAdjacentHTML('beforeend', renderCard(p));
+        applyGridClass();
       }
       updateSubtitle();
     }
