@@ -238,7 +238,7 @@
       "title": "Richer activity feed — phase milestones and free hook enrichment",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N21-richer-activity-feed-phase-milestones-and-free-hoo",
       "createdAt": "2026-05-23T09:43:26.690Z",
       "statusHistory": [
@@ -246,12 +246,47 @@
           "status": "ready",
           "at": "2026-05-23T09:43:26.690Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T17:20:41.696Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-23T17:29:05.637Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-23T17:42:21.119Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-23T17:29:05.637Z",
+        "completedAt": "2026-05-23T17:42:21.119Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/config.ts",
+          "packages/taskflow/src/commands/log-activity.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/insight-flow-master/src/server.ts",
+          "packages/insight-flow-master/src/overview.ts",
+          "packages/taskflow/test/log-activity.test.mjs",
+          "TASKMASTER_ROLE.md",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md",
+          "TASKMASTER_CHANGE_ROLE.md",
+          "packages/taskflow/templates/roles"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -266,8 +301,14 @@
         "cli",
         "opt-out"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-23T17:20:41.696Z",
+          "commitHash": "5280229",
+          "commitMessage": "docs(tasks): N21 task spec updated with richer events, aside panel, and idle/active signal"
+        }
+      ],
+      "branch": "feat/N21-richer-activity-feed-phase-milestones",
       "mrUrl": null,
       "mergedAt": null
     },

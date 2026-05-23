@@ -80,7 +80,14 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .badge-merged { background: #1a1a2e; color: #818cf8; }
     .badge-pushed { background: #2a1a06; color: var(--orange); }
     .badge-other { background: var(--border); color: var(--text-muted); }
-    .proj-activity { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .proj-activity-feed { display: flex; flex-direction: column; gap: 3px; }
+    .proj-activity-item { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; gap: 6px; align-items: center; }
+    .proj-activity-badge { font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: 600; text-transform: uppercase; flex-shrink: 0; }
+    .proj-activity-badge-phase { background: #3b1a00; color: var(--orange); }
+    .proj-activity-badge-skill { background: #1a0a3b; color: var(--purple); }
+    .proj-activity-badge-tool { background: var(--border); color: var(--text-muted); }
+    .proj-idle-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--border); color: var(--text-muted); }
+    .proj-active-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #0a3622; color: var(--green); }
     .proj-footer { display: flex; justify-content: flex-end; }
     .open-link { font-size: 11px; color: var(--accent); text-decoration: none; }
     .open-link:hover { text-decoration: underline; }
@@ -137,11 +144,26 @@ function getScript(initialData: string): string {
       return parts.join('');
     }
 
-    function renderActivity(ev) {
-      if (!ev) return '';
-      var action = ev.action || ev.tool || '';
-      var file = ev.file ? ' ' + ev.file : '';
-      return escHtml(action + file);
+    function deriveIdleStatus(recentActivity) {
+      if (!recentActivity || !recentActivity.length) return 'none';
+      var last = recentActivity[recentActivity.length - 1];
+      if (last && last.tool === 'Phase' && last.action === 'done') return 'idle';
+      return 'active';
+    }
+
+    function renderActivityMini(recentActivity) {
+      if (!recentActivity || !recentActivity.length) return '';
+      var items = recentActivity.slice(-3).reverse();
+      var rows = items.map(function(ev) {
+        var tool = ev.tool || '';
+        var badgeCls = tool === 'Phase' ? 'proj-activity-badge-phase' : tool === 'Skill' ? 'proj-activity-badge-skill' : 'proj-activity-badge-tool';
+        var label = tool === 'Phase' ? (ev.message || ev.action || 'phase') : tool === 'Skill' ? ('/' + (ev.skill || ev.action || '?')) : (ev.label || ev.action || tool);
+        return '<div class="proj-activity-item">' +
+          '<span class="proj-activity-badge ' + badgeCls + '">' + escHtml(tool.toLowerCase() || '?') + '</span>' +
+          '<span>' + escHtml(String(label).slice(0, 50)) + '</span>' +
+          '</div>';
+      }).join('');
+      return '<div class="proj-activity-feed">' + rows + '</div>';
     }
 
     function renderCard(p) {
@@ -157,15 +179,21 @@ function getScript(initialData: string): string {
       } else {
         taskHtml = '<div class="proj-task"><span class="proj-task-empty">No active task</span></div>';
       }
-      var activity = s.recentActivity && s.recentActivity.length ? s.recentActivity[s.recentActivity.length - 1] : null;
+      var idleStatus = deriveIdleStatus(s.recentActivity);
+      var idleBadgeHtml = idleStatus === 'idle'
+        ? '<span class="proj-idle-badge">idle</span>'
+        : idleStatus === 'active'
+          ? '<span class="proj-active-badge">active</span>'
+          : '';
+      var activityHtml = renderActivityMini(s.recentActivity);
       return '<div class="proj-card" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
           '<span class="proj-label">' + escHtml(p.label) + '</span>' +
-          '<span class="conn-badge ' + bi.cls + '" data-badge>' + bi.label + '</span>' +
+          '<div style="display:flex;gap:6px;align-items:center">' + idleBadgeHtml + '<span class="conn-badge ' + bi.cls + '" data-badge>' + bi.label + '</span></div>' +
         '</div>' +
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +
-        (activity ? '<div class="proj-activity">' + renderActivity(activity) + '</div>' : '') +
+        (activityHtml ? activityHtml : '') +
         '<div class="proj-footer"><a href="' + escHtml(p.url) + '" class="open-link" target="_blank">Open dashboard →</a></div>' +
         '</div>';
     }

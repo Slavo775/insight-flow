@@ -9,7 +9,7 @@ import {
 import { resolve, basename } from "node:path";
 import type { TaskflowConfig, AgentsConfig, CustomAgent, AgentExtensions } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
-import { installActivityHook } from "../activity-hook.js";
+import { installActivityHook, installEnrichmentHooks } from "../activity-hook.js";
 import { installNotifyHook } from "../notify-hook.js";
 
 const AGENT_ROLE_FILE_MAP: Record<string, string> = {
@@ -169,6 +169,11 @@ export function initProject(
     stripWhenToNotify(resolve(cwd, config.rolesDir));
   }
 
+  // 4d. Strip PHASE MARKERS block from per-project role copies when phaseMarkers is disabled
+  if (config.activityEngine?.phaseMarkers === false) {
+    stripPhaseMarkers(resolve(cwd, config.rolesDir));
+  }
+
   if (customAgents.length > 0) {
     generateCustomAgentSkills(commandsDir, customAgents);
   }
@@ -204,6 +209,9 @@ export function initProject(
   // 6. Generate Claude Code hook for activity engine
   if (config.activityEngine?.enabled !== false) {
     generateActivityHook(cwd, config);
+    if (config.activityEngine?.hookEnrichment !== false) {
+      generateEnrichmentHooks(cwd, config);
+    }
   }
 
   // 6b. Generate Claude Code Stop hook for automatic OS notifications
@@ -444,6 +452,17 @@ function generateActivityHook(cwd: string, config: TaskflowConfig): void {
   }
 }
 
+function generateEnrichmentHooks(cwd: string, config: TaskflowConfig): void {
+  const logFile = config.activityEngine?.logFile || ".taskflow-activity.jsonl";
+  const result = installEnrichmentHooks(cwd, logFile);
+  if (result.hooksWritten > 0 || result.settingsUpdated) {
+    console.log(`Generated ${result.hooksWritten} enrichment hook(s) (UserPromptSubmit, Stop, PreToolUse) in .claude/hooks/`);
+    console.log("  → restart your Claude Code session for the hooks to take effect");
+  } else {
+    console.log("Enrichment hooks already registered, skipping.");
+  }
+}
+
 function generateNotifyHook(cwd: string): void {
   const result = installNotifyHook(cwd);
   if (result.hookWritten || result.settingsUpdated) {
@@ -461,6 +480,28 @@ function stripWhenToNotify(rolesDir: string): void {
   const notifyPath = resolve(rolesDir, "AGENT_NOTIFY.md");
   if (existsSync(notifyPath)) {
     writeFileSync(notifyPath, "");
+  }
+}
+
+const PHASE_MARKERS_START = "<!-- taskflow:phase-markers:start -->";
+const PHASE_MARKERS_END = "<!-- taskflow:phase-markers:end -->";
+
+function stripPhaseMarkers(rolesDir: string): void {
+  if (!existsSync(rolesDir)) return;
+  const files = readdirSync(rolesDir).filter((f) => f.endsWith(".md"));
+  for (const file of files) {
+    const filePath = resolve(rolesDir, file);
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf-8");
+    } catch {
+      continue;
+    }
+    if (!content.includes(PHASE_MARKERS_START)) continue;
+    const before = content.substring(0, content.indexOf(PHASE_MARKERS_START));
+    const afterIdx = content.indexOf(PHASE_MARKERS_END);
+    const after = afterIdx >= 0 ? content.substring(afterIdx + PHASE_MARKERS_END.length) : "";
+    writeFileSync(filePath, (before + after).replace(/\n{3,}/g, "\n\n").trimEnd() + "\n");
   }
 }
 
@@ -546,11 +587,22 @@ function inferName(cwd: string): string {
  * the comments but keep the data.
  */
 function buildConfigWithExamples(config: TaskflowConfig): string {
-  // Exclude notifications from the base JSON — the stub below re-inserts it
-  // with JSONC comments so users see the opt-out semantics immediately.
-  const { notifications: _n, ...baseConfig } = config;
+  // Exclude notifications + activityEngine from the base JSON — the stub below
+  // re-inserts them with JSONC comments so users see the opt-out semantics.
+  const { notifications: _n, activityEngine: _a, ...baseConfig } = config;
   const base = JSON.stringify(baseConfig, null, 2);
   const stub = `,
+  "activityEngine": {
+    "enabled": true,
+    "logFile": ".taskflow-activity.jsonl",
+    "maxEvents": 200,
+    "// phaseMarkers": "Set to false to suppress agent PHASE MARKERS calls (zero token overhead).",
+    "phaseMarkers": true,
+    "// hookEnrichment": "Set to false to skip UserPromptSubmit / Stop / PreToolUse enrichment hooks.",
+    "hookEnrichment": true,
+    "// verbosity": "milestones | detailed | both. Controls which events appear in the activity panel.",
+    "verbosity": "both"
+  },
   "notifications": {
     "// browser": "Set to false to disable browser desktop notifications on status transitions.",
     "browser": true,

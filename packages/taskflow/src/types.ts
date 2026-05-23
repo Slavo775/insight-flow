@@ -146,12 +146,18 @@ export interface ActivityEvent {
   duration?: number;
   status?: string;
   session?: string;
+  label?: string;
+  message?: string;
+  skill?: string;
 }
 
 export interface ActivityEngineConfig {
   enabled: boolean;
   logFile: string;
   maxEvents: number;
+  phaseMarkers?: boolean;
+  hookEnrichment?: boolean;
+  verbosity?: "milestones" | "detailed" | "both";
 }
 
 export interface AgentExtensions {

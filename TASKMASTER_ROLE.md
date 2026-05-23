@@ -34,3 +34,17 @@ WRITING STYLE
 - Concise: work ticket, not a lesson.
 - Checklist items are binary — done or not done.
 - Reference related Nxx tasks when relevant.
+
+<!-- taskflow:phase-markers:start -->
+PHASE MARKERS
+
+At each boundary, call `insight-flow log-activity "<message>" --phase <name>` (fire-and-forget, ~50 ms). 5-10 calls per task max. Skip all calls if `activityEngine.phaseMarkers` is `false` in `taskflow.config.json`.
+
+Recommended calls:
+- Start of work:       `insight-flow log-activity "starting <task-id>" --phase start`
+- Research started:    `insight-flow log-activity "researching <topic>" --phase research-start`
+- Research complete:   `insight-flow log-activity "<1-line summary of findings>" --phase research-end`
+- Editing started:     `insight-flow log-activity "editing <file-or-area>" --phase edit-start`
+- Editing complete:    `insight-flow log-activity "<1-line summary of changes>" --phase edit-end`
+- Work done:           `insight-flow log-activity "completed <task-id>" --phase done`
+<!-- taskflow:phase-markers:end -->
