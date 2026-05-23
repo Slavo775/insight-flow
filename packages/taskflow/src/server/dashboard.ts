@@ -15,9 +15,14 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "      <h1><span class=\"live-dot\" id=\"status-dot\"></span>Taskflow Dashboard</h1>\n" +
     "      <p class=\"subtitle\" id=\"project-name\">Loading...</p>\n" +
     "    </div>\n" +
+    "    <div class=\"top-bar-actions\">\n" +
     (activityEnabled
-      ? "    <button class=\"toggle-activity\" id=\"toggle-activity\" onclick=\"toggleActivity()\">Activity ▶</button>\n"
+      ? ""
+      : "      <span class=\"engine-chip engine-off\" title=\"Set activityEngine.enabled to true in taskflow.config.json to enable\">Engine: off (config)</span>\n") +
+    (activityEnabled
+      ? "      <button class=\"toggle-activity\" id=\"toggle-activity\" onclick=\"toggleActivity()\">Activity ▶</button>\n"
       : "") +
+    "    </div>\n" +
     "  </div>\n" +
     "\n" +
     "  <div class=\"layout\">\n" +
@@ -44,6 +49,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "    <div id=\"detail-content\"></div>\n" +
     "  </div>\n" +
     "\n" +
+    "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
     "  <script>\n" + getScript(activityEnabled, port) + "\n  </script>\n" +
     "</body>\n</html>";
 }
@@ -61,6 +67,13 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
     .toggle-activity { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 12px; }
     .toggle-activity:hover { border-color: var(--accent); }
+    .top-bar-actions { display: flex; gap: 8px; align-items: center; }
+    .engine-chip { font-size: 11px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-muted); }
+    .engine-chip.engine-off { background: var(--surface); }
+    .activity-empty-state { padding: 18px 16px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .activity-empty-state strong { color: var(--text); display: block; margin-bottom: 6px; font-size: 12px; }
+    .activity-empty-state code { background: var(--border); color: var(--text); padding: 2px 6px; border-radius: 3px; font-size: 11px; display: inline-block; margin-top: 4px; }
+    .activity-empty-state .hint { color: var(--text-muted); font-size: 11px; margin-top: 8px; }
     .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse 2s infinite; }
     .live-dot.disconnected { background: var(--red); animation: none; }
     .live-dot.reconnecting { background: var(--yellow); }
@@ -173,8 +186,10 @@ function getScript(activityEnabled: boolean, _port: number): string {
     var tasks = [];
     var shards = [];
     var currentShard = null;
-    var ws = null;
-    var wsConnected = false;
+    var sock = null;
+    var hookStatus = 'ok';
+    var configEnabled = true;
+    var hasSyncedOnce = false;
 
     function badgeClass(status) {
       if (['ready'].includes(status)) return 'badge-ready';
@@ -403,8 +418,11 @@ function getScript(activityEnabled: boolean, _port: number): string {
       var shard = await results[0].json();
       tasks = shard.tasks || [];
       try {
-        await results[1].json();
-        document.getElementById('project-name').textContent = 'Shard: ' + name.replace('tasks-', '').replace('.json', '') + ' · ' + tasks.length + ' tasks';
+        var master = await results[1].json();
+        var current = master && master.meta && master.meta.currentTaskId ? master.meta.currentTaskId : null;
+        var label = 'Shard: ' + name.replace('tasks-', '').replace('.json', '') + ' · ' + tasks.length + ' tasks';
+        if (current) label += ' · current ' + current;
+        document.getElementById('project-name').textContent = label;
       } catch(e) {}
       renderShardNav();
       render();
@@ -427,40 +445,49 @@ function getScript(activityEnabled: boolean, _port: number): string {
     }
 
     function connectWS() {
-      var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws = new WebSocket(protocol + '//' + location.host + '/ws');
+      // socket.io-client is loaded by /socket.io/socket.io.js (served by the
+      // Socket.IO server). Falls back to long-polling automatically if WS
+      // upgrade fails for any reason. Reconnection is built-in.
+      sock = io({ transports: ['websocket', 'polling'], reconnectionDelay: 1000 });
 
-      ws.onopen = function() {
-        wsConnected = true;
+      sock.on('connect', function() {
         setConnectionStatus('connected');
-      };
+        if (hasSyncedOnce && currentShard) {
+          // Re-fetch state on every reconnect so anything that happened
+          // during the disconnect window is recovered.
+          loadShardIndex().then(function() {
+            if (currentShard) return loadShard(currentShard);
+          });
+        }
+        hasSyncedOnce = true;
+      });
 
-      ws.onmessage = function(e) {
-        try {
-          var msg = JSON.parse(e.data);
-          if (msg.type === 'file-change' && currentShard) {
-            loadShard(currentShard);
-          } else if (msg.type === 'snapshot') {
-            if (msg.data && msg.data.activity && typeof addActivityEvent === 'function') {
-              for (var i = 0; i < msg.data.activity.length; i++) {
-                addActivityEvent(msg.data.activity[i]);
-              }
-            }
-          } else if (msg.type === 'activity' && typeof addActivityEvent === 'function') {
-            addActivityEvent(msg.data);
+      sock.on('disconnect', function() { setConnectionStatus('reconnecting'); });
+      sock.on('reconnect_attempt', function() { setConnectionStatus('reconnecting'); });
+      sock.on('connect_error', function() { setConnectionStatus('reconnecting'); });
+
+      sock.on('snapshot', function(data) {
+        if (data && typeof data.hookStatus === 'string') hookStatus = data.hookStatus;
+        if (data && typeof data.configEnabled === 'boolean') configEnabled = data.configEnabled;
+        if (data && data.activity && typeof addActivityEvent === 'function') {
+          for (var i = 0; i < data.activity.length; i++) {
+            addActivityEvent(data.activity[i]);
           }
-        } catch(err) {}
-      };
+        }
+        if (typeof renderActivityEmptyState === 'function') {
+          renderActivityEmptyState();
+        }
+      });
 
-      ws.onclose = function() {
-        wsConnected = false;
-        setConnectionStatus('reconnecting');
-        setTimeout(connectWS, 3000);
-      };
+      sock.on('file-change', function() {
+        loadShardIndex().then(function() {
+          if (currentShard) return loadShard(currentShard);
+        });
+      });
 
-      ws.onerror = function() {
-        ws.close();
-      };
+      sock.on('activity', function(ev) {
+        if (typeof addActivityEvent === 'function') addActivityEvent(ev);
+      });
     }`;
 
   // Activity panel JS (only if enabled)
@@ -472,6 +499,7 @@ function getScript(activityEnabled: boolean, _port: number): string {
     var idleTimer = null;
     var autoScroll = true;
     var activityEvents = [];
+    var emptyStateTimer = null;
 
     function toggleActivity() {
       activityPanelOpen = !activityPanelOpen;
@@ -480,9 +508,11 @@ function getScript(activityEnabled: boolean, _port: number): string {
       if (activityPanelOpen) {
         panel.classList.add('open');
         btn.textContent = 'Activity ◀';
+        renderActivityEmptyState();
       } else {
         panel.classList.remove('open');
         btn.textContent = 'Activity ▶';
+        if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
       }
     }
 
@@ -508,10 +538,90 @@ function getScript(activityEnabled: boolean, _port: number): string {
       if (activityEvents.length > 200) activityEvents = activityEvents.slice(-200);
       lastActivityTime = Date.now();
       updateActivityStatus(true);
+      if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
+      var empty = document.querySelector('.activity-empty-state');
+      if (empty) empty.remove();
       renderActivityItem(ev);
 
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(function() { updateActivityStatus(false); }, 5000);
+    }
+
+    function activityEmptyStateMessage() {
+      var installHint = {
+        hint: 'Run from the project root:',
+        command: 'insight-flow install-activity-hook',
+        hintAfter: 'Already-installed projects re-run safely (no-op).',
+      };
+      if (hookStatus === 'hook-missing') {
+        return Object.assign({
+          headline: 'Activity hook not installed',
+          body: 'The dashboard receives events from a Claude Code PostToolUse hook script that has not been created in this project yet.',
+        }, installHint);
+      }
+      if (hookStatus === 'settings-missing') {
+        return Object.assign({
+          headline: 'Activity hook registered settings missing',
+          body: 'The hook script exists but no PostToolUse entry references it in .claude/settings.local.json.',
+        }, installHint);
+      }
+      if (hookStatus === 'both-missing') {
+        return Object.assign({
+          headline: 'Activity hook not installed',
+          body: 'Neither .claude/hooks/taskflow-activity.sh nor a PostToolUse registration exists in this project.',
+        }, installHint);
+      }
+      if (hookStatus === 'ok') {
+        return {
+          headline: 'Waiting for Claude activity',
+          body: 'The hook is installed and the dashboard is connected. If events do not appear, restart your Claude Code session — settings.local.json is read at session start, so a hook added mid-session is not picked up until you launch a new session.',
+        };
+      }
+      return null;
+    }
+
+    function paintActivityEmptyState() {
+      var feed = document.getElementById('activity-feed');
+      if (!feed) return;
+      var existing = feed.querySelector('.activity-empty-state');
+      if (activityEvents.length > 0) {
+        if (existing) existing.remove();
+        return;
+      }
+      var msg = activityEmptyStateMessage();
+      if (!msg) return;
+      if (existing) existing.remove();
+      var idle = feed.querySelector('.activity-idle');
+      if (idle) idle.remove();
+      var box = document.createElement('div');
+      box.className = 'activity-empty-state';
+      var html = '<strong>' + escHtml(msg.headline) + '</strong>' + escHtml(msg.body);
+      if (msg.hint) html += '<div class="hint">' + escHtml(msg.hint) + '</div>';
+      if (msg.command) html += '<code>' + escHtml(msg.command) + '</code>';
+      if (msg.hintAfter) html += '<div class="hint">' + escHtml(msg.hintAfter) + '</div>';
+      box.innerHTML = html;
+      feed.appendChild(box);
+    }
+
+    function renderActivityEmptyState() {
+      if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
+      var feed = document.getElementById('activity-feed');
+      if (!feed) return;
+      if (activityEvents.length > 0) {
+        paintActivityEmptyState();
+        return;
+      }
+      if (hookStatus === 'ok') {
+        // Defer the "Waiting for Claude activity" message ~3 s so it does
+        // not flash before the first event in a healthy session. The timer
+        // is cleared if an event arrives or the panel closes meanwhile.
+        emptyStateTimer = setTimeout(function() {
+          emptyStateTimer = null;
+          paintActivityEmptyState();
+        }, 3000);
+        return;
+      }
+      paintActivityEmptyState();
     }
 
     function updateActivityStatus(active) {

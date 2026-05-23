@@ -964,6 +964,272 @@
       "branch": "feat/N16-generalise-agent-stack-across-package-managers-git",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/10",
       "mergedAt": "2026-05-22T20:06:10.540Z"
+    },
+    {
+      "id": "N17",
+      "title": "Dashboard live-updates miss subfolder writes — recursive watcher needed",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N17-dashboard-live-updates-miss-subfolder-writes-recur",
+      "createdAt": "2026-05-22T20:28:06.149Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-22T20:28:06.149Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T20:36:50.354Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T20:40:07.868Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T20:49:24.770Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T20:50:04.955Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T21:02:03.681Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-22T21:04:02.837Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T21:41:36.472Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-22T21:42:32.033Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T08:02:51.565Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T08:16:15.629Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T08:20:59.000Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T08:22:10.540Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-22T20:40:07.868Z",
+        "completedAt": "2026-05-22T20:49:24.770Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "server",
+        "ws",
+        "bug"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-22T20:36:50.354Z",
+          "commitHash": "16c087a",
+          "commitMessage": "fix(tasks): scaffold N17 (recursive watcher) + N18 (activity empty-state)"
+        },
+        {
+          "at": "2026-05-22T20:50:04.955Z",
+          "commitHash": "7468f5f",
+          "commitMessage": "fix(server,dashboard): implement N17 + N18 — recursive watcher, activity panel empty-state"
+        }
+      ],
+      "branch": "fix/N17-N18-dashboard-live-updates-and-activity-empty-state",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/11",
+      "mergedAt": null
+    },
+    {
+      "id": "N18",
+      "title": "Activity panel renders silently empty when activity hook is not installed",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N18-activity-panel-renders-silently-empty-when-activit",
+      "createdAt": "2026-05-22T20:28:07.483Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-22T20:28:07.484Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T20:36:50.431Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-22T20:40:07.942Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-22T20:49:24.851Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-22T20:50:05.032Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T21:02:03.754Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-22T21:04:02.914Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T21:17:05.537Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-22T21:17:26.940Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-22T21:22:17.739Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-22T21:23:41.513Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-22T21:31:52.045Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-22T21:33:50.527Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T08:44:02.704Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T08:44:54.589Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T08:49:48.291Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T08:59:36.281Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T09:07:03.948Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T09:07:42.709Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T09:15:04.670Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-22T20:40:07.942Z",
+        "completedAt": "2026-05-22T20:49:24.850Z",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/commands/install-activity-hook.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/README.md",
+          "packages/taskflow/test/activity-hook.test.mjs",
+          "packages/taskflow/package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 5,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "activity-engine",
+        "ux",
+        "bug"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-22T20:36:50.431Z",
+          "commitHash": "16c087a",
+          "commitMessage": "fix(tasks): scaffold N17 (recursive watcher) + N18 (activity empty-state)"
+        },
+        {
+          "at": "2026-05-22T20:50:05.032Z",
+          "commitHash": "7468f5f",
+          "commitMessage": "fix(server,dashboard): implement N17 + N18 — recursive watcher, activity panel empty-state"
+        }
+      ],
+      "branch": "fix/N17-N18-dashboard-live-updates-and-activity-empty-state",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/11",
+      "mergedAt": null
     }
   ]
 }

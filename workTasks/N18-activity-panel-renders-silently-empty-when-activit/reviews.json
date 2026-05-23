@@ -1,0 +1,72 @@
+{
+  "taskId": "N18",
+  "reviews": [
+    {
+      "startedAt": "2026-05-22T21:02:03.754Z",
+      "endedAt": "2026-05-22T21:04:02.914Z",
+      "verdict": "approved",
+      "comment": "All 8 checklist items pass; install-activity-hook is idempotent, preserves unrelated PostToolUse entries, and the dashboard surfaces clear empty-states for hook-missing/settings-missing/both-missing plus an Engine: off chip when config disables. Non-blocking notes: dead-code mkdir, detectActivityHookStatus untested directly, settings-missing copy is awkward, intent comment missing for the .local.json-only writer behaviour.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-22T21:17:05.537Z",
+      "endedAt": "2026-05-22T21:17:26.939Z",
+      "verdict": "fix-needed",
+      "comment": "install-activity-hook does not respect activityEngine.enabled=false; init does. Make the subcommand match init's guard before merge.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-22T21:22:17.739Z",
+        "endedAt": "2026-05-22T21:23:41.512Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/commands/install-activity-hook.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/test/activity-hook.test.mjs"
+        ],
+        "comment": "install-activity-hook now refuses when activityEngine.enabled=false (matching init's guard); --force escape hatch added; two new tests cover refusal and force-override.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-22T21:31:52.046Z",
+      "endedAt": "2026-05-22T21:33:50.527Z",
+      "verdict": "approved",
+      "comment": "Round-2 blocker resolved: install-activity-hook now respects activityEngine.enabled and refuses (with --force escape) when disabled. Two new smoke tests cover refusal + override. No scope creep; round-1 non-blocking notes deferred.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T08:44:02.705Z",
+      "endedAt": "2026-05-23T08:44:54.588Z",
+      "verdict": "fix-needed",
+      "comment": "Activity panel stays empty when hookStatus is ok but events haven't flowed (Claude Code session was started before insight-flow init). Need a 'waiting for activity / restart your Claude Code session' empty-state in dashboard.ts renderActivityEmptyState.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T08:49:48.291Z",
+        "endedAt": "2026-05-23T08:59:36.280Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/commands/install-activity-hook.ts",
+          "packages/taskflow/src/init/index.ts"
+        ],
+        "comment": "Added 'Waiting for Claude activity' empty-state for hookStatus=ok (deferred 3s to avoid flash). Cancelled by addActivityEvent + toggleActivity close. install-activity-hook and init now print a 'restart your Claude Code session' hint after a successful fresh install.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T09:07:03.949Z",
+      "endedAt": "2026-05-23T09:15:04.669Z",
+      "verdict": "approved",
+      "comment": "Discussion-only round. Human raised richer-activity-events idea, decided to keep PR #11 as-is and file a separate ticket: 'okey let is as is i write new ticket thanks!'",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
