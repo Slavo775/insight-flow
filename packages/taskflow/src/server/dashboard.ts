@@ -4,6 +4,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
   const activityEnabled = config.activityEngine?.enabled !== false;
   const browserNotifications = config.notifications?.browser !== false;
   const port = config.server.port;
+  const projectName = config.projectName || "";
 
   return "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n" +
     "  <meta charset=\"UTF-8\">\n" +
@@ -66,7 +67,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "  </div>\n" +
     "\n" +
     "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
-    "  <script>\n" + getScript(activityEnabled, port, browserNotifications) + "\n  </script>\n" +
+    "  <script>\n" + getScript(activityEnabled, port, browserNotifications, projectName) + "\n  </script>\n" +
     "</body>\n</html>";
 }
 
@@ -197,9 +198,10 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .settings-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
     .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }`;
 
-function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean): string {
+function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean, projectName: string): string {
   // Base dashboard JS (Kanban, stats, timeline, detail panel, shard nav)
   let script = `
+    var PROJECT_NAME = ${JSON.stringify(projectName)};
     var COLUMNS = [
       { key: 'ready', label: 'Ready', matches: ['ready'] },
       { key: 'progress', label: 'In Progress', matches: ['in-progress', 'implemented', 'changes-implementing', 'changes-implemented'] },
@@ -577,8 +579,9 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     }
 
     function fireDesktopNotif(taskId, status, sound) {
+      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + taskId + ' → ' + status;
       try {
-        new Notification(taskId + ' → ' + status, { silent: !sound });
+        new Notification(title, { silent: !sound });
       } catch(e) {}
     }
 

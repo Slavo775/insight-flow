@@ -10,6 +10,7 @@ import { resolve, basename } from "node:path";
 import type { TaskflowConfig, AgentsConfig, CustomAgent, AgentExtensions } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
 import { installActivityHook } from "../activity-hook.js";
+import { installNotifyHook } from "../notify-hook.js";
 
 const AGENT_ROLE_FILE_MAP: Record<string, string> = {
   taskmaster: "TASKMASTER_ROLE.md",
@@ -205,6 +206,11 @@ export function initProject(
     generateActivityHook(cwd, config);
   }
 
+  // 6b. Generate Claude Code Stop hook for automatic OS notifications
+  if (config.notifications?.cli !== false) {
+    generateNotifyHook(cwd);
+  }
+
   // 7. Add .taskflow-activity.jsonl to .gitignore
   const gitignorePath = resolve(cwd, ".gitignore");
   const activityLogEntry = ".taskflow-activity.jsonl";
@@ -306,8 +312,7 @@ WORKFLOW:
 3. Read TASK.md + CHECKLIST.md from the task folder
 4. Implement the plan, run quality gates
 5. \`insight-flow implement-end --id Nxx --files "file1.ts,file2.ts"\`
-6. \`insight-flow notify "<task-id> implemented"\`
-7. Call /task-git to push
+6. Call /task-git to push
 
 $ARGUMENTS
 `;
@@ -324,9 +329,8 @@ WORKFLOW:
 3. Read TASK.md, CHECKLIST.md, and all changed files
 4. Review against checklist, check quality gates
 5. \`insight-flow review-end --id Nxx --verdict approved|fix-needed --comment "..."\`
-6. \`insight-flow notify "<task-id> approved"\` or \`insight-flow notify "<task-id> needs fixes"\`
-7. If fix-needed, write REVIEW.md with findings
-8. Call /task-git to push
+6. If fix-needed, write REVIEW.md with findings
+7. Call /task-git to push
 
 $ARGUMENTS
 `;
@@ -359,8 +363,7 @@ WORKFLOW:
 2. \`insight-flow review-start --id Nxx --type human --by task-human-review\`
 3. Write/update REVIEW.md with human feedback (blockers, suggestions)
 4. \`insight-flow review-end --id Nxx --verdict approved|fix-needed --type human --comment "..."\`
-5. \`insight-flow notify "<task-id> approved"\` or \`insight-flow notify "<task-id> needs fixes"\`
-6. Call /task-git to push
+5. Call /task-git to push
 
 $ARGUMENTS
 `;
@@ -379,7 +382,7 @@ PUSH WORKFLOW:
 5. \`git push -u origin HEAD\`
 6. \`insight-flow push --id Nxx --commit <hash> --message "..." --branch <branch>\`
 
-MERGE: After \`insight-flow merge --id Nxx\`, run \`insight-flow notify "<task-id> merged"\`.
+MERGE: \`insight-flow merge --id Nxx\` — the Stop hook fires a notification automatically.
 
 $ARGUMENTS
 `;
@@ -441,6 +444,18 @@ function generateActivityHook(cwd: string, config: TaskflowConfig): void {
   }
 }
 
+function generateNotifyHook(cwd: string): void {
+  const result = installNotifyHook(cwd);
+  if (result.hookWritten || result.settingsUpdated) {
+    console.log("Generated notify hook in .claude/hooks/ and registered Stop hook in settings.local.json");
+    console.log("  → restart your Claude Code session for the hook to take effect");
+  } else {
+    console.log("Notify hook already registered, skipping.");
+  }
+}
+
+// Blanks AGENT_NOTIFY.md in the consumer's .claude/roles/ when cli notifications
+// are disabled, so the referenced file resolves to an empty string.
 function stripWhenToNotify(rolesDir: string): void {
   if (!existsSync(rolesDir)) return;
   const notifyPath = resolve(rolesDir, "AGENT_NOTIFY.md");
@@ -531,13 +546,15 @@ function inferName(cwd: string): string {
  * the comments but keep the data.
  */
 function buildConfigWithExamples(config: TaskflowConfig): string {
-  const base = JSON.stringify(config, null, 2);
-  // Insert the agents.extend stub block just before the final closing brace.
+  // Exclude notifications from the base JSON — the stub below re-inserts it
+  // with JSONC comments so users see the opt-out semantics immediately.
+  const { notifications: _n, ...baseConfig } = config;
+  const base = JSON.stringify(baseConfig, null, 2);
   const stub = `,
   "notifications": {
     "// browser": "Set to false to disable browser desktop notifications on status transitions.",
     "browser": true,
-    "// cli": "Set to false to disable 'insight-flow notify' calls from agent role files.",
+    "// cli": "Set to false to disable the Stop hook that fires OS notifications when Claude finishes a turn.",
     "cli": true
   },
   "agents": {

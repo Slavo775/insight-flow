@@ -1,18 +1,14 @@
 WHEN TO NOTIFY — applies to every insight-flow role.
 
-Fire `insight-flow notify` at key task milestones so the human gets an OS-level desktop
-notification regardless of whether a browser tab is open. Commands are fire-and-forget
-(<100 ms, errors swallowed). Skip if `notifications.cli` is `false` in `taskflow.config.json`.
+OS-level desktop notifications fire automatically via a Claude Code Stop hook
+(`.claude/hooks/taskflow-notify.sh`) when you finish a turn on a task in a
+notable status. No agent needs to call `insight-flow notify` explicitly.
 
-MILESTONES
+The hook fires when the current task's status is one of:
+  implemented | approved | fix-needed | fixed | merged | changes-implemented
 
-- After `implement-end`:              `insight-flow notify "<task-id> implemented"`
-- After `review-end --verdict approved`:  `insight-flow notify "<task-id> approved"`
-- After `review-end --verdict fix-needed`: `insight-flow notify "<task-id> needs fixes"`
-- After `insight-flow merge`:         `insight-flow notify "<task-id> merged"`
+If the hook is not installed, or when running in a CI/headless context where
+`insight-flow notify` can't fire, the command exits 0 silently — no errors.
 
-RULES
-
-- Limit: 1–3 notify calls per task total across all agents.
-- Only fire for milestones your role actually reaches.
-- Never inspect the exit code or stdout of `insight-flow notify`.
+To reinstall the hook: `insight-flow init` (idempotent).
+To disable OS notifications: set `notifications.cli: false` in taskflow.config.json.

@@ -51,7 +51,22 @@
       "comment": "Design direction: notification should fire via a hook when agent finishes work (like PostToolUse activity hook), not via explicit insight-flow notify calls in agent prompts",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T11:50:06.699Z",
+        "endedAt": "2026-05-23T11:57:13.438Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/notify-hook.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/init/index.ts",
+          "AGENT_NOTIFY.md",
+          "packages/taskflow/templates/roles/AGENT_NOTIFY.md",
+          ".claude/commands/task-git.md",
+          "packages/taskflow/README.md"
+        ],
+        "comment": "Added Stop hook for automatic notify; fixed projectName in browser notif title; fixed duplicate notifications key in init --examples",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

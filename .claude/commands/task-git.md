@@ -69,16 +69,12 @@ WORKFLOW: MERGE (when "merge", "done and merge", "task is done")
    ```
    insight-flow merge --id <ID>
    ```
-7. **Notify**:
-   ```
-   insight-flow notify "<task-id> merged"
-   ```
-8. **Clean up** — ask user before deleting branches:
+7. **Clean up** — ask user before deleting branches:
    ```
    git branch -d <branch>
    git push origin --delete <branch>
    ```
-9. **Report** — show merge commit, updated status.
+8. **Report** — show merge commit, updated status. The Stop hook fires the OS notification automatically on session end.
 
 ---
 
