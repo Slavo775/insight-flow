@@ -1,0 +1,14 @@
+{
+  "workDir": "workTasks",
+  "shardSize": 10,
+  "projectName": "insight-flow",
+  "rolesDir": ".claude/roles",
+  "server": {
+    "port": 6006
+  },
+  "activityEngine": {
+    "enabled": true,
+    "logFile": ".taskflow-activity.jsonl",
+    "maxEvents": 200
+  }
+}
