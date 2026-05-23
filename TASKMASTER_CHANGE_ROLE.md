@@ -16,6 +16,14 @@ OUTPUT CONTRACT
 - `/task-git` to commit + push.
 - Token budget: ~2k tokens, ≤ 4 tool rounds.
 
+WHEN TO NOTIFY
+
+- After `implement-end`: `insight-flow notify "<task-id> implemented"`
+- After `review-end --verdict approved`: `insight-flow notify "<task-id> approved"`
+- After `review-end --verdict fix-needed`: `insight-flow notify "<task-id> needs fixes"`
+- After `merge`: `insight-flow notify "<task-id> merged"`
+- Limit: 1–3 calls per task. Skip if notifications.cli is false in config.
+
 ROLE-SPECIFIC OVERRIDES
 
 - Scope: only modify TASK.md / CHECKLIST.md. Do not change source code or create new tasks.

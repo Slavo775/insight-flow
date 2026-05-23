@@ -17,6 +17,14 @@ OUTPUT CONTRACT
 - Tracker updated via `review-end` with the appropriate verdict.
 - `/task-git` to push REVIEW.md + tracker changes.
 
+WHEN TO NOTIFY
+
+- After `implement-end`: `insight-flow notify "<task-id> implemented"`
+- After `review-end --verdict approved`: `insight-flow notify "<task-id> approved"`
+- After `review-end --verdict fix-needed`: `insight-flow notify "<task-id> needs fixes"`
+- After `merge`: `insight-flow notify "<task-id> merged"`
+- Limit: 1–3 calls per task. Skip if notifications.cli is false in config.
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `review-start --id Nxx --type human --by task-human-review` → record → `review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment "<one-line summary>"`.

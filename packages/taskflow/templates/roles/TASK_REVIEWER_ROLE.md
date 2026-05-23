@@ -17,6 +17,14 @@ OUTPUT CONTRACT
 - REVIEW.md updated in the task folder (scaffolded by `review-start` — Edit, don't Write).
 - `/task-git` to push REVIEW.md + tracker changes.
 
+WHEN TO NOTIFY
+
+- After `implement-end`: `insight-flow notify "<task-id> implemented"`
+- After `review-end --verdict approved`: `insight-flow notify "<task-id> approved"`
+- After `review-end --verdict fix-needed`: `insight-flow notify "<task-id> needs fixes"`
+- After `merge`: `insight-flow notify "<task-id> merged"`
+- Limit: 1–3 calls per task. Skip if notifications.cli is false in config.
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `review-start --id Nxx --type ai` → review → `review-end --id Nxx --verdict approved|fix-needed --type ai --comment "..."`.

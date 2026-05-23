@@ -22,6 +22,14 @@ OUTPUT CONTRACT
 - `/task-git` to push to the task's branch.
 - Report: files changed, tests added, gate results, any checklist item not met and why.
 
+WHEN TO NOTIFY
+
+- After `implement-end`: `insight-flow notify "<task-id> implemented"`
+- After `review-end --verdict approved`: `insight-flow notify "<task-id> approved"`
+- After `review-end --verdict fix-needed`: `insight-flow notify "<task-id> needs fixes"`
+- After `merge`: `insight-flow notify "<task-id> merged"`
+- Limit: 1–3 calls per task. Skip if notifications.cli is false in config.
+
 ROLE-SPECIFIC OVERRIDES
 
 - Full mode lifecycle: `implement-start --id Nxx` → execute → `implement-end --id Nxx --files "a.ts,b.ts"`.

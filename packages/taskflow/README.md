@@ -141,6 +141,43 @@ Run `insight-flow help` for the full list.
 | `activityEngine.enabled`   | `true`                       | Stream Claude Code tool activity into the dashboard's activity panel.                                                       |
 | `activityEngine.logFile`   | `".taskflow-activity.jsonl"` | Ephemeral JSONL log file written by the activity hook. Gitignored.                                                          |
 | `activityEngine.maxEvents` | `200`                        | Ring-buffer size for the activity feed.                                                                                     |
+| `notifications.browser`    | `true`                       | Enable browser desktop notifications for task-status transitions (Notification API).                                        |
+| `notifications.cli`        | `true`                       | Enable `insight-flow notify` calls from agent role files. Set to `false` to silence all CLI notifications.                  |
+
+### Notifications
+
+insight-flow fires OS-level notifications from two places:
+
+**Browser (dashboard tab open)** — when a watched task's status changes, the dashboard fires a `Notification` via the Web Notification API. A gear icon in the top bar opens a settings popover where you can:
+- Toggle per-status notifications (implemented, approved, fix-needed, merged, changes-requested)
+- Enable/disable sound
+- Mute notifications when the tab is focused
+
+Settings are persisted to `localStorage`. The browser prompts for permission on first load; if denied, no notifications fire and no console errors appear.
+
+**CLI (independent of browser tab)** — agents call `insight-flow notify "<message>"` at key milestones. The command auto-detects the platform (`osascript` on macOS, `notify-send` on Linux, PowerShell on Windows) and exits in <100 ms whether the OS handles the notification or not — errors are silently swallowed. Agents never inspect the exit code.
+
+Disable either half via config:
+
+```json
+{
+  "notifications": {
+    "browser": false,
+    "cli": false
+  }
+}
+```
+
+When `notifications.cli` is `false`:
+- `insight-flow notify` exits 0 silently without invoking any OS handler.
+- `insight-flow init` omits the WHEN TO NOTIFY section from per-project role-file copies.
+
+**CLI usage:**
+
+```bash
+insight-flow notify "N19 implemented"
+insight-flow notify "N19 approved" --title "Review done" --project my-app
+```
 
 ### Enabling the activity panel
 

@@ -17,6 +17,14 @@ OUTPUT CONTRACT
 - Tracker updated via `change-request` with the change description.
 - `/task-git` to push REVIEW.md + tracker changes.
 
+WHEN TO NOTIFY
+
+- After `implement-end`: `insight-flow notify "<task-id> implemented"`
+- After `review-end --verdict approved`: `insight-flow notify "<task-id> approved"`
+- After `review-end --verdict fix-needed`: `insight-flow notify "<task-id> needs fixes"`
+- After `merge`: `insight-flow notify "<task-id> merged"`
+- Limit: 1–3 calls per task. Skip if notifications.cli is false in config.
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `change-request --id Nxx --description "<one-line summary>" --by task-request-changes` → push.

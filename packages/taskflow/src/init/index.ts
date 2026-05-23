@@ -44,6 +44,7 @@ export function initProject(
     rolesDir: ".claude/roles",
     server: { port: 6006 },
     activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
+    notifications: { browser: true, cli: true },
   };
 
   if (existsSync(configPath)) {
@@ -160,6 +161,11 @@ export function initProject(
 
   if (agentsConfig?.extend) {
     applyAgentExtensions(resolve(cwd, config.rolesDir), agentsConfig.extend);
+  }
+
+  // 4c. Strip WHEN TO NOTIFY block from per-project role copies when cli notifications are disabled
+  if (config.notifications?.cli === false) {
+    stripWhenToNotify(resolve(cwd, config.rolesDir));
   }
 
   if (customAgents.length > 0) {
@@ -430,6 +436,20 @@ function generateActivityHook(cwd: string, config: TaskflowConfig): void {
   }
 }
 
+const WHEN_TO_NOTIFY_RE = /\nWHEN TO NOTIFY\n[\s\S]*?(?=\n[A-Z][A-Z ]+\n|$)/;
+
+function stripWhenToNotify(rolesDir: string): void {
+  if (!existsSync(rolesDir)) return;
+  const entries = readdirSync(rolesDir).filter((f) => f.endsWith(".md"));
+  for (const file of entries) {
+    const filePath = resolve(rolesDir, file);
+    const content = readFileSync(filePath, "utf-8");
+    if (!content.includes("WHEN TO NOTIFY")) continue;
+    const stripped = content.replace(WHEN_TO_NOTIFY_RE, "");
+    writeFileSync(filePath, stripped);
+  }
+}
+
 function applyAgentExtensions(rolesDir: string, extend: AgentExtensions): void {
   for (const [agentName, rules] of Object.entries(extend)) {
     if (!rules.length) continue;
@@ -515,6 +535,12 @@ function buildConfigWithExamples(config: TaskflowConfig): string {
   const base = JSON.stringify(config, null, 2);
   // Insert the agents.extend stub block just before the final closing brace.
   const stub = `,
+  "notifications": {
+    "// browser": "Set to false to disable browser desktop notifications on status transitions.",
+    "browser": true,
+    "// cli": "Set to false to disable 'insight-flow notify' calls from agent role files.",
+    "cli": true
+  },
   "agents": {
     "// extend": "Strings here are appended to each agent's prompt at runtime. insight-flow ships no technology assumptions — these stubs document the contract.",
     "extend": {
