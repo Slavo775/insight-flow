@@ -306,7 +306,7 @@ async function setupMasterIntegration(
       const binPath = findMasterBin();
       if (binPath) {
         const child = spawn(process.execPath, [binPath, "--port", String(masterPort)], {
-          detached: false,
+          detached: true,
           stdio: "ignore",
         });
         child.unref();

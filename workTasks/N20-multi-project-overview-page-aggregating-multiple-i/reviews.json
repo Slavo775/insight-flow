@@ -74,7 +74,16 @@
       "comment": "Master dies without user action — detached:false causes master to die with spawning process group; AI review non-blocking #1 promoted to blocker",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T15:34:55.857Z",
+        "endedAt": "2026-05-23T15:35:16.145Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "comment": "Fixed blocker 1: detached:false → detached:true; master now runs in its own process group, survives project server exit",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
