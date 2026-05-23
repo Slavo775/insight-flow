@@ -26,12 +26,13 @@ The browser-connects-to-each-server approach was discarded: the browser has no w
 ### In scope
 
 **New package `packages/insight-flow-master/` (standalone workspace package):**
-- `src/index.ts` — CLI entry point; parses `--port`; manages lock file; starts server.
+- `src/index.ts` — CLI entry point; parses `--port`; loads config; manages lock file; starts server.
+- `src/config.ts` — loads `~/.insight-flow/master.json`; validates with Zod; returns merged defaults. Exported type: `MasterServerConfig { port?: number; standalone?: boolean }`.
 - `src/server.ts` — HTTP + Socket.IO server; `POST /api/register`; `POST /api/projects/:id/update`; `GET /overview`.
 - `src/overview.ts` — `getOverviewHtml(projects)` returning complete self-contained HTML+JS.
 - `src/registry.ts` — in-memory `Map<id, MasterProjectEntry>`; `register()`, `update()`, `getAll()`.
 - `src/lock.ts` — `readMasterLock`, `writeMasterLock`, `clearMasterLock`, `checkMasterPidAlive` (lock at `~/.insight-flow/master.lock`).
-- `src/types.ts` — `MasterProjectEntry`, `MasterProjectState` types (owned by this package).
+- `src/types.ts` — `MasterProjectEntry`, `MasterProjectState`, `MasterServerConfig` types (owned by this package).
 - `package.json` — name `insight-flow-master`; bin `insight-flow-master`; pnpm workspace sibling of `packages/taskflow`.
 - `tsconfig.json`, `tsup.config.ts` — same build pattern as `packages/taskflow`.
 - `README.md` — standalone usage + remote deployment notes.
@@ -44,7 +45,17 @@ The browser-connects-to-each-server approach was discarded: the browser has no w
 
 **Lock file:** `~/.insight-flow/master.lock` → `{ pid, port, startedAt }`. Written by `insight-flow-master` or by `packages/taskflow` when it auto-starts master in-process. Stale if PID dead → cleared on next startup.
 
-**Config (`taskflow.config.json`):**
+**Master server config (`~/.insight-flow/master.json`):** read by the `insight-flow-master` binary at startup.
+```jsonc
+{
+  "port": 6000,       // port to listen on
+  "standalone": false // true = run without accepting project registrations (UI-only mode)
+}
+```
+All fields optional; defaults apply if file absent or field missing.
+When `standalone: true` the master starts and serves `/overview` but rejects `POST /api/register` with 503 — useful for running a read-only overview from a static snapshot or for testing the UI in isolation.
+
+**Project server config (`taskflow.config.json`):**
 ```jsonc
 {
   "master": {
@@ -67,36 +78,41 @@ Setting `startMasterLocally: false` with a remote `url` supports a master runnin
 ## Implementation plan
 
 1. **Scaffold `packages/insight-flow-master/`.**
-   - `package.json`: name `insight-flow-master`, version `0.1.0`, bin `{ "insight-flow-master": "dist/index.js" }`, deps: `socket.io`, `uuid`; devDeps mirror `packages/taskflow`.
+   - `package.json`: name `insight-flow-master`, version `0.1.0`, bin `{ "insight-flow-master": "dist/index.js" }`, deps: `socket.io`, `uuid`, `zod`; devDeps mirror `packages/taskflow`.
    - `tsconfig.json` + `tsup.config.ts`: same build pattern as `packages/taskflow` (single ESM+CJS bundle, target Node 18).
    - Add to pnpm workspace `pnpm-workspace.yaml` if not already covered by `packages/*` glob.
 
-2. **Types in `packages/insight-flow-master/src/types.ts`.**
+2. **Types + config schema in `packages/insight-flow-master/src/types.ts`.**
+   - `MasterServerConfig { port?: number; standalone?: boolean }`.
    - `MasterProjectState { currentTaskId: string | null; taskCounts: Record<string, number>; recentActivity: object[] }`.
    - `MasterProjectEntry { id: string; label: string; url: string; registeredAt: string; lastSeenAt: string; state: MasterProjectState }`.
 
-3. **Registry (`src/registry.ts`).**
+3. **Config loader (`src/config.ts`).**
+   - `loadMasterConfig(): MasterServerConfig` — reads `~/.insight-flow/master.json` with `fs.readFileSync`; validates with `MasterServerConfigSchema` (Zod, all fields optional); returns merged with defaults `{ port: 6000, standalone: false }`. Returns defaults if file absent or malformed (no crash).
+   - `MasterServerConfigSchema` — Zod schema, exported for tests.
+
+4. **Registry (`src/registry.ts`).**
    - `Map<string, MasterProjectEntry>` module singleton.
    - `register(label, url): string` — generate UUID v4, store, return id.
    - `update(id, state): boolean` — update entry + `lastSeenAt`; return false (→ 401) if id unknown.
    - `getAll(): MasterProjectEntry[]`.
 
-4. **Lock file helpers (`src/lock.ts`).**
+5. **Lock file helpers (`src/lock.ts`).**
    - Lock path: `~/.insight-flow/master.lock` (create dir with `fs.mkdirSync(..., { recursive: true })`).
    - `readMasterLock(): { pid, port } | null`.
    - `writeMasterLock(pid, port)`.
    - `clearMasterLock()`.
    - `checkMasterPidAlive(pid): boolean` — `process.kill(pid, 0)` with try/catch.
 
-5. **Server (`src/server.ts`).**
+6. **Server (`src/server.ts`).**
    - HTTP + Socket.IO (default port 6000).
-   - `POST /api/register` — `{ label, url }` → `registry.register()` → `{ id }`.
+   - `POST /api/register` — `{ label, url }` → if `config.standalone` return 503; otherwise `registry.register()` → `{ id }`.
    - `POST /api/projects/:id/update` — `MasterProjectState` body → `registry.update()` → 401 if false; on success emit `project-update` to all browser sockets.
    - `GET /overview` → `getOverviewHtml(registry.getAll())`.
    - CORS `*` on all routes (matches `packages/taskflow` pattern from N17).
-   - Export `startMasterServer(port): Promise<{ close(): void }>`.
+   - Export `startMasterServer(config: MasterServerConfig): Promise<{ close(): void }>`.
 
-6. **Overview HTML (`src/overview.ts`).**
+7. **Overview HTML (`src/overview.ts`).**
    - `getOverviewHtml(projects: MasterProjectEntry[])` → self-contained HTML+JS string.
    - Top bar: total projects + live count.
    - Flex-wrap card grid (~320 px per card): label + connection badge, current task (id + truncated title + status badge), per-status count row, latest activity line, "Open dashboard" link to `project.url`.
@@ -105,14 +121,15 @@ Setting `startMasterLocally: false` with a remote `url` supports a master runnin
    - N19 notification integration: diff-and-fire on status change; title `<label>: <taskId> → <status>`; reads `tf-notif-*` localStorage settings.
    - CSS: inline dark-theme variables matching `dashboard.ts`.
 
-7. **CLI entry (`src/index.ts`).**
-   - Parse `--port` arg (default 6000).
+8. **CLI entry (`src/index.ts`).**
+   - `loadMasterConfig()` → merge with `--port` CLI arg (CLI arg wins over config file).
    - Read lock file: if PID alive → print "Master already running on port X" and exit.
    - If stale → `clearMasterLock()`.
-   - `startMasterServer(port)` → `writeMasterLock(process.pid, port)`.
+   - `startMasterServer(config)` → `writeMasterLock(process.pid, config.port)`.
    - On SIGINT/SIGTERM → `clearMasterLock()` + exit.
+   - Print startup summary: port, standalone mode, lock file path.
 
-8. **`packages/taskflow` — types + schema.**
+9. **`packages/taskflow` — types + schema.**
    - `src/types.ts`: add `MasterConfig { url?: string; port?: number; standalone?: boolean; startMasterLocally?: boolean }`. Add `master?: MasterConfig` to `TaskflowConfig`. No import from `insight-flow-master` — push body is plain JSON.
    - `src/schema/index.ts`: add `MasterConfigSchema` (all fields optional).
 
@@ -125,8 +142,8 @@ Setting `startMasterLocally: false` with a remote `url` supports a master runnin
    - Wire `pushToMaster` into the existing file-change debounce (after `file-change` Socket.IO broadcast).
    - `GET /overview`: if standalone/no master config → 404; otherwise `<iframe src="<master.url>/overview" style="width:100%;height:100vh;border:none;display:block" />`.
 
-10. **`packages/taskflow` README.**
-    - "Multi-project overview" section: local setup, remote master (`startMasterLocally: false`), `insight-flow-master` standalone binary, `standalone: true` opt-out.
+11. **`packages/taskflow` README.**
+    - "Multi-project overview" section: local setup, remote master (`startMasterLocally: false`), `insight-flow-master` standalone binary, both `standalone` flags explained.
 
 ## Verification
 
@@ -139,6 +156,7 @@ Setting `startMasterLocally: false` with a remote `url` supports a master runnin
 - Manual E: kill master server; project servers log push failure silently; `insight-flow ui` on next project start auto-restarts master, project re-registers, overview recovers.
 - Manual F: set `master.standalone: true` in `taskflow.config.json`; `insight-flow ui` starts normally; `GET /overview` returns 404; no master process is started.
 - Manual H: set `startMasterLocally: false` with `url` pointing to a remote host running `insight-flow-master`; `insight-flow ui` registers with the remote, no local master starts; cards appear correctly in the remote `/overview`.
+- Manual I: set `standalone: true` in `~/.insight-flow/master.json`; start `insight-flow-master`; `POST /api/register` returns 503; `/overview` renders an empty grid without crashing.
 - Manual G: master restarts while project servers are running; next file-change push returns 401; project server re-registers silently, push succeeds, card recovers — no user intervention needed.
 
 ## Notes

@@ -5,11 +5,12 @@
 **New package `packages/insight-flow-master`:**
 - [ ] Package scaffolded: `package.json` (name `insight-flow-master`, bin `insight-flow-master`), `tsconfig.json`, `tsup.config.ts`.
 - [ ] `src/types.ts`: `MasterProjectEntry`, `MasterProjectState`.
+- [ ] `src/config.ts`: `loadMasterConfig()` reads `~/.insight-flow/master.json`, validates with Zod, returns merged defaults `{ port: 6000, standalone: false }`.
 - [ ] `src/registry.ts`: `register()`, `update()` (returns false on unknown id), `getAll()`.
 - [ ] `src/lock.ts`: `readMasterLock`, `writeMasterLock`, `clearMasterLock`, `checkMasterPidAlive`.
-- [ ] `src/server.ts`: `POST /api/register`, `POST /api/projects/:id/update` (401 on unknown id), `GET /overview`, Socket.IO `project-update` broadcast, CORS `*`.
+- [ ] `src/server.ts`: `POST /api/register` (503 when `standalone: true`), `POST /api/projects/:id/update` (401 on unknown id), `GET /overview`, Socket.IO `project-update` broadcast, CORS `*`.
 - [ ] `src/overview.ts`: `getOverviewHtml()` — card grid, connection badge timing, N19 notification diff-and-fire, dark-theme CSS.
-- [ ] `src/index.ts`: `--port` arg, stale-lock detection, `startMasterServer()`, lock write, SIGINT/SIGTERM cleanup.
+- [ ] `src/index.ts`: `loadMasterConfig()` + `--port` override, stale-lock detection, `startMasterServer(config)`, lock write, startup summary log, SIGINT/SIGTERM cleanup.
 - [ ] `pnpm --dir packages/insight-flow-master run build` produces runnable `dist/index.js`.
 
 **Modified `packages/taskflow`:**
@@ -42,3 +43,4 @@
 - [ ] Manual F: `standalone: true` → no master started, `GET /overview` returns 404.
 - [ ] Manual G: master restart while projects running → next push 401 → silent re-register → card recovers.
 - [ ] Manual H: `startMasterLocally: false` + remote `url` → no local master started; project registers with remote; cards appear on remote `/overview`.
+- [ ] Manual I: `standalone: true` in `~/.insight-flow/master.json` → `POST /api/register` returns 503; `/overview` renders empty grid without error.
