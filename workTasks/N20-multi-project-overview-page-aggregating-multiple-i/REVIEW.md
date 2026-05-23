@@ -67,3 +67,56 @@ N20 adds the `insight-flow-master` package (push-based aggregator) and wires pro
 
 - User built with `pnpm build` (both packages succeeded) then ran `pnpm ui` and still got "binary not found". Confirmed: correct path is 2 levels up, not 3.
 - User asked "should we configure the config?" — no config change needed; the issue is a wrong relative path in source code.
+
+
+---
+
+## AI Review — Round 4
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-23
+**Verdict:** approved
+
+### Summary
+
+N20 adds `packages/insight-flow-master` (push-based aggregator, Socket.IO, lock-file managed) and wires project servers to auto-register and push state on file-change. Three human review rounds caught: port 6000 browser-blocked → 6100, root build script missing `insight-flow-master`, and the binary path resolution off-by-one (`../../../` → `../../`). All three were fixed and verified. Risk is medium — new process spawning, cross-process HTTP, lock-file management — but the implementation handles the failure modes correctly (unreachable master logs + skips, 401 triggers silent re-registration, stale lock cleared on startup).
+
+### Checklist verification
+
+- ✅ `package.json`, `tsconfig.json`, `tsup.config.ts` scaffolded in `packages/insight-flow-master`.
+- ✅ `src/types.ts`: `MasterProjectEntry`, `MasterProjectState`.
+- ✅ `src/config.ts`: `loadMasterConfig()` with Zod validation, defaults `{ port: 6100, standalone: false }` (6100 per human review fix).
+- ✅ `src/registry.ts`: `register()`, `update()` (false on unknown id), `getAll()`.
+- ✅ `src/lock.ts`: all four helpers; `~/.insight-flow/master.lock`.
+- ✅ `src/server.ts`: `POST /api/register` (503 in standalone), `POST /api/projects/:id/update` (401 on unknown id), `GET /overview`, `project-update` Socket.IO broadcast, CORS `*`.
+- ✅ `src/overview.ts`: card grid, connection badges (live/stale/down at 60s/120s), N19 notification diff-and-fire, dark-theme CSS matching `dashboard.ts`.
+- ✅ `src/index.ts`: config load, `--port` override, stale-lock detection, startup log, SIGINT/SIGTERM cleanup.
+- ✅ `MasterConfig` + `master?` on `TaskflowConfig` in `src/types.ts`.
+- ✅ `MasterConfigSchema` in `src/schema/index.ts`.
+- ✅ `setupMasterIntegration`: auto-start gated on `startMasterLocally !== false`, lock-alive check.
+- ✅ Registration with silent skip on unreachable master.
+- ✅ Push on every file-change; 401 → re-register + retry once.
+- ✅ `GET /overview`: iframe proxy or 404 in standalone.
+- ✅ README "Multi-project overview" section with local + remote + both standalone modes.
+- ✅ Root `build` script builds master then taskflow (`package.json`).
+- ✅ Both packages build and typecheck clean.
+
+### Non-blocking
+
+1. **`detached: false` on spawned master** (`server/index.ts:308`) — With `detached: false` the master child shares the parent's process group. When the spawning project server receives SIGINT/SIGTERM (e.g. `Ctrl+C`), the OS delivers the signal to the entire group, killing the master too. If a second project server is also registered, it loses the overview until it next starts a `pnpm ui` (which re-spawns master). Not critical for single-project use — the re-registration loop covers recovery — but contradicts the spec note about the master surviving project server restarts. Fix: `detached: true` (also remove `child.unref()` since `detached` handles event-loop decoupling).
+
+2. **`recentActivity: object[]`** in `types.ts:MasterProjectState` — `renderActivity` accesses `.action`, `.tool`, `.file` with no type safety. Consider narrowing to `{ tool?: string; action?: string; file?: string }` to match `ActivityEvent` shape.
+
+3. **`config.port = p` mutation in `index.ts:18`** — Mutates the returned config object. Harmless (it's a local value), but unexpected. Prefer `config = { ...config, port: p }` or a local `let port = config.port`.
+
+### Security & edge cases
+
+- HTML injection in overview: all user-supplied strings pass through `escHtml()` before insertion. ✅
+- `initialData` JSON-in-JS injection: `<`, `>`, `&` are Unicode-escaped on line 5-7. ✅
+- `readBody` error path resolves with `""` — malformed bodies return 400 JSON. ✅
+- Master lock collision (two project servers start simultaneously): both see no live PID, both try to spawn master. The second master fails binding to port 6100, never writes a lock, exits. The first master wrote its lock; `waitForMaster` on the second project server succeeds and it registers normally. ✅
+
+### Notes
+
+- `socket.io/socket.io.js` loads from the master's origin (`/socket.io/socket.io.js`). Correct even in iframe context — the iframe document is served from the master, so relative URLs resolve against `localhost:6100`. ✅
+- All three human-review blockers (port, root build script, path depth) have been fixed and verified. The implementation is correct and complete for the v1 scope.
