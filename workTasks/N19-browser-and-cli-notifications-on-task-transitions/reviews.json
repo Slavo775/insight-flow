@@ -1,0 +1,39 @@
+{
+  "taskId": "N19",
+  "reviews": [
+    {
+      "startedAt": "2026-05-23T10:42:11.603Z",
+      "endedAt": "2026-05-23T10:43:35.837Z",
+      "verdict": "fix-needed",
+      "comment": "Git agent missing WHEN TO NOTIFY — merge notification never fires. Fix: add section to SKILL_GIT constant in init/index.ts and to .claude/commands/task-git.md.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T10:47:28.970Z",
+      "endedAt": "2026-05-23T10:48:05.339Z",
+      "verdict": "fix-needed",
+      "comment": "Round 2: (1) All SKILL_* constants in init/index.ts missing WHEN TO NOTIFY — consumer projects get no notifications. (2) task-git skill missing directly. (3) Section placement too weak — agents skip it; must embed in workflow steps.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T11:06:56.545Z",
+      "endedAt": "2026-05-23T11:07:27.975Z",
+      "verdict": "fix-needed",
+      "comment": "Round 3: Design direction — create shared AGENT_NOTIFY.md (same pattern as AGENT_ENFORCEMENT.md / AGENT_PROTOCOL.md), replace all inline WHEN TO NOTIFY blocks with @AGENT_NOTIFY.md reference. Cleaner, single source of truth, easier stripping when notifications.cli=false.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T11:09:10.335Z",
+        "endedAt": "2026-05-23T11:22:27.545Z",
+        "status": "fixed",
+        "filesChanged": [],
+        "comment": "Round 3 fix: AGENT_NOTIFY.md shared file — replaced per-file WHEN TO NOTIFY with @AGENT_NOTIFY.md reference; added notify steps to SKILL_* constants; simplified stripWhenToNotify to blank AGENT_NOTIFY.md",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

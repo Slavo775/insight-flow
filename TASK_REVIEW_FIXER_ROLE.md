@@ -17,13 +17,7 @@ OUTPUT CONTRACT
 - `/task-git` to push fixes to the task's branch.
 - Report: blocker → fix mapping, files changed, gate results, any blockers not fixable.
 
-WHEN TO NOTIFY
-
-- After `implement-end`: `insight-flow notify "<task-id> implemented"`
-- After `review-end --verdict approved`: `insight-flow notify "<task-id> approved"`
-- After `review-end --verdict fix-needed`: `insight-flow notify "<task-id> needs fixes"`
-- After `merge`: `insight-flow notify "<task-id> merged"`
-- Limit: 1–3 calls per task. Skip if notifications.cli is false in config.
+@AGENT_NOTIFY.md
 
 ROLE-SPECIFIC OVERRIDES
 

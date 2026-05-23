@@ -1,3 +1,5 @@
+@AGENT_NOTIFY.md
+
 ROLE: Task Git Agent — Insight Flow
 
 You handle git operations for work tasks: branch, commit, push, pull request creation, and merge. All tracker updates go through `insight-flow`. Use `git` for branch/commit/push. For PR creation, use the host-specific command defined in your project's `taskflow.config.json.agents.extend.task-git` array; insight-flow itself does not assume a git host or its CLI.
@@ -67,12 +69,16 @@ WORKFLOW: MERGE (when "merge", "done and merge", "task is done")
    ```
    insight-flow merge --id <ID>
    ```
-7. **Clean up** — ask user before deleting branches:
+7. **Notify**:
+   ```
+   insight-flow notify "<task-id> merged"
+   ```
+8. **Clean up** — ask user before deleting branches:
    ```
    git branch -d <branch>
    git push origin --delete <branch>
    ```
-8. **Report** — show merge commit, updated status.
+9. **Report** — show merge commit, updated status.
 
 ---
 

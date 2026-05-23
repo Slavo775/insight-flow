@@ -306,7 +306,8 @@ WORKFLOW:
 3. Read TASK.md + CHECKLIST.md from the task folder
 4. Implement the plan, run quality gates
 5. \`insight-flow implement-end --id Nxx --files "file1.ts,file2.ts"\`
-6. Call /task-git to push
+6. \`insight-flow notify "<task-id> implemented"\`
+7. Call /task-git to push
 
 $ARGUMENTS
 `;
@@ -323,8 +324,9 @@ WORKFLOW:
 3. Read TASK.md, CHECKLIST.md, and all changed files
 4. Review against checklist, check quality gates
 5. \`insight-flow review-end --id Nxx --verdict approved|fix-needed --comment "..."\`
-6. If fix-needed, write REVIEW.md with findings
-7. Call /task-git to push
+6. \`insight-flow notify "<task-id> approved"\` or \`insight-flow notify "<task-id> needs fixes"\`
+7. If fix-needed, write REVIEW.md with findings
+8. Call /task-git to push
 
 $ARGUMENTS
 `;
@@ -357,7 +359,8 @@ WORKFLOW:
 2. \`insight-flow review-start --id Nxx --type human --by task-human-review\`
 3. Write/update REVIEW.md with human feedback (blockers, suggestions)
 4. \`insight-flow review-end --id Nxx --verdict approved|fix-needed --type human --comment "..."\`
-5. Call /task-git to push
+5. \`insight-flow notify "<task-id> approved"\` or \`insight-flow notify "<task-id> needs fixes"\`
+6. Call /task-git to push
 
 $ARGUMENTS
 `;
@@ -375,6 +378,8 @@ PUSH WORKFLOW:
 4. Commit with conventional message
 5. \`git push -u origin HEAD\`
 6. \`insight-flow push --id Nxx --commit <hash> --message "..." --branch <branch>\`
+
+MERGE: After \`insight-flow merge --id Nxx\`, run \`insight-flow notify "<task-id> merged"\`.
 
 $ARGUMENTS
 `;
@@ -436,17 +441,11 @@ function generateActivityHook(cwd: string, config: TaskflowConfig): void {
   }
 }
 
-const WHEN_TO_NOTIFY_RE = /\nWHEN TO NOTIFY\n[\s\S]*?(?=\n[A-Z][A-Z ]+\n|$)/;
-
 function stripWhenToNotify(rolesDir: string): void {
   if (!existsSync(rolesDir)) return;
-  const entries = readdirSync(rolesDir).filter((f) => f.endsWith(".md"));
-  for (const file of entries) {
-    const filePath = resolve(rolesDir, file);
-    const content = readFileSync(filePath, "utf-8");
-    if (!content.includes("WHEN TO NOTIFY")) continue;
-    const stripped = content.replace(WHEN_TO_NOTIFY_RE, "");
-    writeFileSync(filePath, stripped);
+  const notifyPath = resolve(rolesDir, "AGENT_NOTIFY.md");
+  if (existsSync(notifyPath)) {
+    writeFileSync(notifyPath, "");
   }
 }
 
