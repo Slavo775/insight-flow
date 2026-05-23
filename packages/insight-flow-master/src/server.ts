@@ -28,6 +28,9 @@ export async function startMasterServer(
   });
 
   server.on("request", async (req, res) => {
+    // Socket.IO handles its own requests first (prependListener); skip if already responded.
+    if (res.headersSent) return;
+    try {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -99,6 +102,12 @@ export async function startMasterServer(
 
     res.writeHead(404, { "Content-Type": MIME_JSON });
     res.end(JSON.stringify({ error: "Not found" }));
+    } catch (err) {
+      if (!res.headersSent) {
+        res.writeHead(500, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ error: "Internal server error" }));
+      }
+    }
   });
 
   await new Promise<void>((resolve) => {

@@ -92,7 +92,16 @@
       "comment": "Master crashes on Socket.IO polling handshake — async request handler has no res.headersSent guard, unhandled rejection kills process",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T15:54:55.889Z",
+        "endedAt": "2026-05-23T15:55:23.406Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/insight-flow-master/src/server.ts"
+        ],
+        "comment": "Fixed blocker 1: added res.headersSent guard + try/catch on async request handler; Socket.IO polling requests no longer crash master",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
