@@ -970,7 +970,7 @@
       "title": "Dashboard live-updates miss subfolder writes — recursive watcher needed",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N17-dashboard-live-updates-miss-subfolder-writes-recur",
       "createdAt": "2026-05-22T20:28:06.149Z",
       "statusHistory": [
@@ -1038,6 +1038,11 @@
           "status": "approved",
           "at": "2026-05-23T08:22:10.540Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-23T09:33:23.791Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1054,7 +1059,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 785,
       "tags": [
         "dashboard",
         "server",
@@ -1075,14 +1080,14 @@
       ],
       "branch": "fix/N17-N18-dashboard-live-updates-and-activity-empty-state",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/11",
-      "mergedAt": null
+      "mergedAt": "2026-05-23T09:33:23.791Z"
     },
     {
       "id": "N18",
       "title": "Activity panel renders silently empty when activity hook is not installed",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N18-activity-panel-renders-silently-empty-when-activit",
       "createdAt": "2026-05-22T20:28:07.483Z",
       "statusHistory": [
@@ -1185,6 +1190,11 @@
           "status": "approved",
           "at": "2026-05-23T09:15:04.670Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-23T09:33:23.886Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1208,7 +1218,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 785,
       "tags": [
         "dashboard",
         "activity-engine",
@@ -1229,7 +1239,7 @@
       ],
       "branch": "fix/N17-N18-dashboard-live-updates-and-activity-empty-state",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/11",
-      "mergedAt": null
+      "mergedAt": "2026-05-23T09:33:23.886Z"
     }
   ]
 }
