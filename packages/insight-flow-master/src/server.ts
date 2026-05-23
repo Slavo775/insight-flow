@@ -93,6 +93,22 @@ export async function startMasterServer(
       return;
     }
 
+    // GET /api/activity/:projectId — last 3 activity events for a project
+    const activityMatch = /^\/api\/activity\/([^/]+)$/.exec(url.pathname);
+    if (req.method === "GET" && activityMatch) {
+      const id = activityMatch[1];
+      const entry = registry.getById(id);
+      if (!entry) {
+        res.writeHead(404, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ error: "Unknown project id" }));
+        return;
+      }
+      const events = (entry.state.recentActivity ?? []).slice(-3);
+      res.writeHead(200, { "Content-Type": MIME_JSON });
+      res.end(JSON.stringify({ project: entry.label, events }));
+      return;
+    }
+
     // GET /overview
     if (req.method === "GET" && url.pathname === "/overview") {
       res.writeHead(200, { "Content-Type": MIME_HTML });

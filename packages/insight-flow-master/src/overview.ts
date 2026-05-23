@@ -57,8 +57,10 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .live-dot.disconnected { background: var(--red); animation: none; }
     .live-dot.reconnecting { background: var(--yellow); }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .card-grid { display: flex; flex-wrap: wrap; gap: 16px; }
-    .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 320px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .card-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    .card-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.grid-multi { grid-template-columns: repeat(2, 1fr); }
+    .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
     .proj-card-header { display: flex; justify-content: space-between; align-items: center; }
     .proj-label { font-size: 14px; font-weight: 600; color: var(--text); }
     .conn-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
@@ -80,7 +82,14 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .badge-merged { background: #1a1a2e; color: #818cf8; }
     .badge-pushed { background: #2a1a06; color: var(--orange); }
     .badge-other { background: var(--border); color: var(--text-muted); }
-    .proj-activity { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .proj-activity-feed { display: flex; flex-direction: column; gap: 3px; }
+    .proj-activity-item { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; gap: 6px; align-items: center; }
+    .proj-activity-badge { font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: 600; text-transform: uppercase; flex-shrink: 0; }
+    .proj-activity-badge-phase { background: #3b1a00; color: var(--orange); }
+    .proj-activity-badge-skill { background: #1a0a3b; color: var(--purple); }
+    .proj-activity-badge-tool { background: var(--border); color: var(--text-muted); }
+    .proj-idle-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--border); color: var(--text-muted); }
+    .proj-active-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #0a3622; color: var(--green); }
     .proj-footer { display: flex; justify-content: flex-end; }
     .open-link { font-size: 11px; color: var(--accent); text-decoration: none; }
     .open-link:hover { text-decoration: underline; }
@@ -137,11 +146,51 @@ function getScript(initialData: string): string {
       return parts.join('');
     }
 
-    function renderActivity(ev) {
-      if (!ev) return '';
-      var action = ev.action || ev.tool || '';
-      var file = ev.file ? ' ' + ev.file : '';
-      return escHtml(action + file);
+    function deriveIdleStatus(recentActivity) {
+      if (!recentActivity || !recentActivity.length) return 'none';
+      var last = recentActivity[recentActivity.length - 1];
+      if (last && last.tool === 'Phase' && last.action === 'done') return 'idle';
+      return 'active';
+    }
+
+    function renderActivityMini(recentActivity, idleStatus) {
+      if (!recentActivity || !recentActivity.length) return '';
+      var items = recentActivity.slice(-3).reverse();
+      var rows = items.map(function(ev) {
+        var tool = ev.tool || '';
+        var badgeCls = tool === 'Phase' ? 'proj-activity-badge-phase'
+          : tool === 'Skill' ? 'proj-activity-badge-skill'
+          : 'proj-activity-badge-tool';
+        var primary, secondary;
+        if (tool === 'Phase') {
+          primary = ev.message || ev.action || 'phase';
+          secondary = ev.action && ev.message ? ev.action : null;
+        } else if (tool === 'Skill') {
+          primary = '/' + (ev.skill || ev.action || '?');
+          secondary = ev.action || null;
+        } else if (ev.label) {
+          primary = ev.label;
+          secondary = ev.file ? ev.file.slice(0, 60) : (ev.action || null);
+        } else {
+          primary = ev.action || tool;
+          secondary = ev.file ? ev.file.slice(0, 60) : null;
+        }
+        return '<div class="proj-activity-item">' +
+          '<span class="proj-activity-badge ' + badgeCls + '">' + escHtml(tool.toLowerCase() || '?') + '</span>' +
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + escHtml(String(primary).slice(0, 60)) + '</span>' +
+          (secondary ? '<span style="color:var(--text-muted);font-size:9px;flex-shrink:0;margin-left:4px">' + escHtml(String(secondary).slice(0, 30)) + '</span>' : '') +
+          '</div>';
+      }).join('');
+      var idleBadge = idleStatus === 'idle'
+        ? '<span class="proj-idle-badge">idle</span>'
+        : idleStatus === 'active'
+          ? '<span class="proj-active-badge">active</span>'
+          : '';
+      var header = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+        '<span style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Activity</span>' +
+        idleBadge +
+        '</div>';
+      return '<div class="proj-task">' + header + '<div class="proj-activity-feed">' + rows + '</div></div>';
     }
 
     function renderCard(p) {
@@ -157,7 +206,8 @@ function getScript(initialData: string): string {
       } else {
         taskHtml = '<div class="proj-task"><span class="proj-task-empty">No active task</span></div>';
       }
-      var activity = s.recentActivity && s.recentActivity.length ? s.recentActivity[s.recentActivity.length - 1] : null;
+      var idleStatus = deriveIdleStatus(s.recentActivity);
+      var activityHtml = renderActivityMini(s.recentActivity, idleStatus);
       return '<div class="proj-card" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
           '<span class="proj-label">' + escHtml(p.label) + '</span>' +
@@ -165,13 +215,22 @@ function getScript(initialData: string): string {
         '</div>' +
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +
-        (activity ? '<div class="proj-activity">' + renderActivity(activity) + '</div>' : '') +
+        (activityHtml ? activityHtml : '') +
         '<div class="proj-footer"><a href="' + escHtml(p.url) + '" class="open-link" target="_blank">Open dashboard →</a></div>' +
         '</div>';
     }
 
+    function applyGridClass() {
+      var grid = document.getElementById('grid');
+      if (!grid) return;
+      grid.classList.remove('grid-2', 'grid-multi');
+      if (PROJECTS.length === 2) grid.classList.add('grid-2');
+      else if (PROJECTS.length >= 3) grid.classList.add('grid-multi');
+    }
+
     function renderAll() {
       document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
+      applyGridClass();
       updateSubtitle();
       snapshotStatuses();
     }
@@ -208,6 +267,7 @@ function getScript(initialData: string): string {
       } else {
         PROJECTS.push(p);
         document.getElementById('grid').insertAdjacentHTML('beforeend', renderCard(p));
+        applyGridClass();
       }
       updateSubtitle();
     }

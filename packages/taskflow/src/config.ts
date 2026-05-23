@@ -9,6 +9,9 @@ const ACTIVITY_DEFAULTS: ActivityEngineConfig = {
   enabled: true,
   logFile: ".taskflow-activity.jsonl",
   maxEvents: 200,
+  phaseMarkers: true,
+  hookEnrichment: true,
+  verbosity: "both",
 };
 
 const NOTIFICATION_DEFAULTS: NotificationsConfig = {

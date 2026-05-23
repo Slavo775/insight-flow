@@ -36,6 +36,7 @@ import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import { cmdNotify } from "./commands/notify.js";
+import { cmdLogActivity } from "./commands/log-activity.js";
 import type { ParsedArgs } from "./types.js";
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -108,6 +109,7 @@ function printHelp(): void {
     prompt-build [--config path] [--apply] Print or apply enforcement block from taskflow.prompt.json
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
     notify "<message>" [--title <t>] [--project <p>]   Fire an OS notification (fire-and-forget; respects notifications.cli)
+    log-activity "<message>" [--phase <name>]           Emit a phase milestone to the activity feed (no-op when phaseMarkers is false)
 
     help                                  Show this help
     version                               Show version
@@ -146,6 +148,9 @@ try {
   } else if (command === "notify") {
     const config = resolveConfig();
     cmdNotify(config, opts);
+  } else if (command === "log-activity") {
+    const config = resolveConfig();
+    cmdLogActivity(config, opts);
   } else {
     // All other commands need master.json
     const config = resolveConfig();

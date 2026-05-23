@@ -5,6 +5,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
   const browserNotifications = config.notifications?.browser !== false;
   const port = config.server.port;
   const projectName = config.projectName || "";
+  const verbosity = config.activityEngine?.verbosity ?? "both";
 
   return "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n" +
     "  <meta charset=\"UTF-8\">\n" +
@@ -21,9 +22,6 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     (activityEnabled
       ? ""
       : "      <span class=\"engine-chip engine-off\" title=\"Set activityEngine.enabled to true in taskflow.config.json to enable\">Engine: off (config)</span>\n") +
-    (activityEnabled
-      ? "      <button class=\"toggle-activity\" id=\"toggle-activity\" onclick=\"toggleActivity()\">Activity ▶</button>\n"
-      : "") +
     (browserNotifications
       ? "      <div class=\"settings-wrap\"><button class=\"settings-btn\" id=\"settings-btn\" onclick=\"toggleSettings()\" title=\"Notification settings\">&#9881;</button>\n" +
         "      <div class=\"settings-popover\" id=\"settings-popover\">\n" +
@@ -50,13 +48,14 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "      <div class=\"timeline\" id=\"timeline\"></div>\n" +
     "    </div>\n" +
     (activityEnabled
-      ? "    <div class=\"activity-panel\" id=\"activity-panel\">\n" +
+      ? "    <aside class=\"activity-aside\" id=\"activity-aside\">\n" +
         "      <div class=\"activity-header\">\n" +
+        "        <button class=\"activity-collapse-btn\" id=\"activity-collapse-btn\" onclick=\"toggleActivityPanel()\" title=\"Collapse\">&#9664;</button>\n" +
         "        <h2>Claude Activity</h2>\n" +
-        "        <span class=\"activity-status\" id=\"activity-status\">idle</span>\n" +
+        "        <span class=\"activity-status\" id=\"activity-status\"></span>\n" +
         "      </div>\n" +
         "      <div class=\"activity-feed\" id=\"activity-feed\"></div>\n" +
-        "    </div>\n"
+        "    </aside>\n"
       : "") +
     "  </div>\n" +
     "\n" +
@@ -67,7 +66,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "  </div>\n" +
     "\n" +
     "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
-    "  <script>\n" + getScript(activityEnabled, port, browserNotifications, projectName) + "\n  </script>\n" +
+    "  <script>\n" + getScript(activityEnabled, port, browserNotifications, projectName, verbosity) + "\n  </script>\n" +
     "</body>\n</html>";
 }
 
@@ -82,8 +81,6 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     h1 { font-size: 18px; margin-bottom: 4px; }
     .subtitle { color: var(--text-muted); font-size: 12px; margin-bottom: 0; }
     .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .toggle-activity { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 12px; }
-    .toggle-activity:hover { border-color: var(--accent); }
     .top-bar-actions { display: flex; gap: 8px; align-items: center; }
     .engine-chip { font-size: 11px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-muted); }
     .engine-chip.engine-off { background: var(--surface); }
@@ -95,26 +92,40 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .live-dot.disconnected { background: var(--red); animation: none; }
     .live-dot.reconnecting { background: var(--yellow); }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .layout { display: flex; gap: 16px; }
+    .layout { display: flex; gap: 16px; align-items: flex-start; }
     .main-content { flex: 1; min-width: 0; }
-    .activity-panel { width: 340px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: none; max-height: calc(100vh - 120px); overflow: hidden; flex-direction: column; }
-    .activity-panel.open { display: flex; }
-    .activity-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-    .activity-header h2 { font-size: 13px; font-weight: 600; }
-    .activity-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--border); color: var(--text-muted); }
+    .activity-aside { width: 340px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; max-height: calc(100vh - 96px); overflow: hidden; transition: width 0.2s ease; position: sticky; top: 24px; }
+    .activity-aside.collapsed { width: 44px; }
+    .activity-aside.collapsed .activity-feed { display: none; }
+    .activity-aside.collapsed .activity-header h2 { display: none; }
+    .activity-aside.collapsed .activity-status { display: none; }
+    .activity-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .activity-aside.collapsed .activity-header { justify-content: center; border-bottom: none; }
+    .activity-header h2 { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; }
+    .activity-collapse-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 26px; height: 26px; border-radius: 4px; cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
+    .activity-collapse-btn:hover { border-color: var(--accent); color: var(--text); }
+    .activity-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--border); color: var(--text-muted); white-space: nowrap; }
     .activity-status.active { background: #0a3622; color: var(--green); }
-    .activity-feed { flex: 1; overflow-y: auto; padding: 8px 0; }
-    .activity-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 16px; font-size: 11px; border-bottom: 1px solid var(--border); }
+    .activity-status.idle { background: var(--border); color: var(--text-muted); }
+    .activity-feed { flex: 1; overflow-y: auto; padding: 4px 0; }
+    .activity-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 12px; font-size: 11px; border-bottom: 1px solid var(--border); }
     .activity-item:hover { background: rgba(255,255,255,0.02); }
     .activity-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
     .activity-icon.read { background: #1e3a5f; color: var(--cyan); }
     .activity-icon.edit { background: #3b2f06; color: var(--yellow); }
     .activity-icon.bash { background: #0a3622; color: var(--green); }
     .activity-icon.write { background: #2d1b4e; color: var(--purple); }
+    .activity-icon.phase { background: #3b1a00; color: var(--orange); }
+    .activity-icon.skill { background: #1a0a3b; color: var(--purple); }
     .activity-icon.other { background: var(--border); color: var(--text-muted); }
     .activity-tool { font-weight: 600; color: var(--text); }
     .activity-file { color: var(--text-muted); word-break: break-all; }
+    .activity-file-muted { color: var(--text-muted); font-size: 10px; word-break: break-all; }
     .activity-time { color: var(--text-muted); font-size: 10px; margin-left: auto; white-space: nowrap; flex-shrink: 0; }
+    .activity-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .activity-badge-phase { background: #3b1a00; color: var(--orange); }
+    .activity-badge-skill { background: #1a0a3b; color: var(--purple); }
+    .activity-phase-msg { font-weight: 600; color: var(--text); }
     .activity-idle { color: var(--text-muted); text-align: center; padding: 24px 16px; font-size: 12px; }
     .stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
     .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; min-width: 120px; }
@@ -198,7 +209,7 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .settings-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
     .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }`;
 
-function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean, projectName: string): string {
+function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean, projectName: string, verbosity: string): string {
   // Base dashboard JS (Kanban, stats, timeline, detail panel, shard nav)
   let script = `
     var PROJECT_NAME = ${JSON.stringify(projectName)};
@@ -627,6 +638,13 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         if (data && typeof data.hookStatus === 'string') hookStatus = data.hookStatus;
         if (data && typeof data.configEnabled === 'boolean') configEnabled = data.configEnabled;
         if (data && data.activity && typeof addActivityEvent === 'function') {
+          // Reset feed to server's authoritative state on every snapshot
+          // (including reconnects) so stale client-side events are not
+          // duplicated each time Socket.IO re-establishes the connection.
+          activityEvents = [];
+          if (typeof seenEventKeys !== 'undefined') seenEventKeys.clear();
+          var feed = document.getElementById('activity-feed');
+          if (feed) feed.innerHTML = '';
           for (var i = 0; i < data.activity.length; i++) {
             addActivityEvent(data.activity[i]);
           }
@@ -634,16 +652,19 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         if (typeof renderActivityEmptyState === 'function') {
           renderActivityEmptyState();
         }
+        if (typeof refreshTimestamps === 'function') refreshTimestamps();
       });
 
       sock.on('file-change', function() {
         loadShardIndex().then(function() {
           if (currentShard) return loadShard(currentShard);
         });
+        if (typeof refreshTimestamps === 'function') refreshTimestamps();
       });
 
       sock.on('activity', function(ev) {
         if (typeof addActivityEvent === 'function') addActivityEvent(ev);
+        if (typeof refreshTimestamps === 'function') refreshTimestamps();
       });
     }`;
 
@@ -651,25 +672,47 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
   if (activityEnabled) {
     script += `
 
-    var activityPanelOpen = false;
-    var lastActivityTime = 0;
-    var idleTimer = null;
-    var autoScroll = true;
+    var VERBOSITY = ${JSON.stringify(verbosity)};
+    var ACTIVITY_CAP = 50;
+    var activityPanelCollapsed = false;
     var activityEvents = [];
+    var seenEventKeys = new Set();
     var emptyStateTimer = null;
 
-    function toggleActivity() {
-      activityPanelOpen = !activityPanelOpen;
-      var panel = document.getElementById('activity-panel');
-      var btn = document.getElementById('toggle-activity');
-      if (activityPanelOpen) {
-        panel.classList.add('open');
-        btn.textContent = 'Activity ◀';
-        renderActivityEmptyState();
+    function eventKey(ev) {
+      return (ev.ts || '') + '|' + (ev.tool || '') + '|' + (ev.action || '') + '|' + (ev.message || ev.file || '');
+    }
+
+    function initActivityPanel() {
+      try { activityPanelCollapsed = localStorage.getItem('activityPanelCollapsed') === '1'; } catch(e) {}
+      applyActivityPanelState();
+    }
+
+    function applyActivityPanelState() {
+      var aside = document.getElementById('activity-aside');
+      var btn = document.getElementById('activity-collapse-btn');
+      if (!aside) return;
+      if (activityPanelCollapsed) {
+        aside.classList.add('collapsed');
+        if (btn) btn.innerHTML = '&#9654;';
+        if (btn) btn.title = 'Expand';
       } else {
-        panel.classList.remove('open');
-        btn.textContent = 'Activity ▶';
-        if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
+        aside.classList.remove('collapsed');
+        if (btn) btn.innerHTML = '&#9664;';
+        if (btn) btn.title = 'Collapse';
+      }
+    }
+
+    function toggleActivityPanel() {
+      activityPanelCollapsed = !activityPanelCollapsed;
+      try { localStorage.setItem('activityPanelCollapsed', activityPanelCollapsed ? '1' : '0'); } catch(e) {}
+      applyActivityPanelState();
+    }
+
+    function refreshTimestamps() {
+      var items = document.querySelectorAll('.activity-time[data-ts]');
+      for (var i = 0; i < items.length; i++) {
+        items[i].textContent = relativeTime(items[i].getAttribute('data-ts'));
       }
     }
 
@@ -690,18 +733,98 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       return Math.floor(diff / 3600000) + 'h';
     }
 
+    function shouldShowEvent(ev) {
+      var tool = ev.tool || '';
+      if (VERBOSITY === 'milestones') return tool === 'Phase' || tool === 'Skill';
+      if (VERBOSITY === 'detailed') return tool !== 'Phase' && tool !== 'Skill';
+      return true;
+    }
+
     function addActivityEvent(ev) {
-      activityEvents.push(ev);
-      if (activityEvents.length > 200) activityEvents = activityEvents.slice(-200);
-      lastActivityTime = Date.now();
-      updateActivityStatus(true);
+      var key = eventKey(ev);
+      if (seenEventKeys.has(key)) return;
+      seenEventKeys.add(key);
+      activityEvents.unshift(ev);
+      if (activityEvents.length > ACTIVITY_CAP) activityEvents = activityEvents.slice(0, ACTIVITY_CAP);
+
+      // Active/idle: only set idle when a done Phase event arrives
+      if (ev.tool === 'Phase' && ev.action === 'done') {
+        updateActivityStatus('idle');
+      } else {
+        updateActivityStatus('active');
+      }
+
       if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
       var empty = document.querySelector('.activity-empty-state');
       if (empty) empty.remove();
-      renderActivityItem(ev);
 
-      if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = setTimeout(function() { updateActivityStatus(false); }, 5000);
+      if (shouldShowEvent(ev)) prependActivityItem(ev);
+      trimActivityFeed();
+    }
+
+    function prependActivityItem(ev) {
+      var feed = document.getElementById('activity-feed');
+      if (!feed) return;
+      var idle = feed.querySelector('.activity-idle');
+      if (idle) idle.remove();
+      var item = document.createElement('div');
+      item.className = 'activity-item';
+      item.innerHTML = renderActivityItemHtml(ev);
+      feed.insertBefore(item, feed.firstChild);
+    }
+
+    function trimActivityFeed() {
+      var feed = document.getElementById('activity-feed');
+      if (!feed) return;
+      var items = feed.querySelectorAll('.activity-item');
+      for (var i = ACTIVITY_CAP; i < items.length; i++) {
+        items[i].remove();
+      }
+    }
+
+    function renderActivityItemHtml(ev) {
+      var tool = ev.tool || '?';
+      var ts = ev.ts || '';
+
+      if (tool === 'Phase') {
+        var phaseAction = ev.action || 'milestone';
+        var phaseMsg = escHtml(ev.message || phaseAction);
+        return '<div class="activity-icon phase">&#9670;</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<span class="activity-badge activity-badge-phase">' + escHtml(phaseAction) + '</span> ' +
+            '<span class="activity-phase-msg">' + phaseMsg + '</span>' +
+          '</div>' +
+          '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
+      }
+
+      if (tool === 'Skill') {
+        var skillName = escHtml(ev.skill || '?');
+        var skillAction = escHtml(ev.action || '');
+        return '<div class="activity-icon skill">&#9889;</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<span class="activity-badge activity-badge-skill">' + skillAction + '</span> ' +
+            '<span class="activity-tool">/' + skillName + '</span>' +
+          '</div>' +
+          '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
+      }
+
+      if (tool === 'Tool' && ev.label) {
+        var labelHtml = escHtml(ev.label);
+        var rawHtml = ev.file ? '<div class="activity-file-muted">' + escHtml(ev.file.slice(0, 80)) + '</div>' : '';
+        return '<div class="activity-icon bash">$</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<span class="activity-tool">' + labelHtml + '</span>' + rawHtml +
+          '</div>' +
+          '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
+      }
+
+      var icon = toolIcon(tool);
+      var fileStr = ev.file ? '<div class="activity-file">' + escHtml(ev.file) + '</div>' : '';
+      return '<div class="activity-icon ' + icon.cls + '">' + icon.icon + '</div>' +
+        '<div style="flex:1;min-width:0"><span class="activity-tool">' + escHtml(tool) + '</span> ' +
+        '<span style="color:var(--text-muted);font-size:10px">' + escHtml(ev.action || '') + '</span>' +
+        fileStr + '</div>' +
+        '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
     }
 
     function activityEmptyStateMessage() {
@@ -769,9 +892,6 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         return;
       }
       if (hookStatus === 'ok') {
-        // Defer the "Waiting for Claude activity" message ~3 s so it does
-        // not flash before the first event in a healthy session. The timer
-        // is cleared if an event arrives or the panel closes meanwhile.
         emptyStateTimer = setTimeout(function() {
           emptyStateTimer = null;
           paintActivityEmptyState();
@@ -781,55 +901,25 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       paintActivityEmptyState();
     }
 
-    function updateActivityStatus(active) {
+    function updateActivityStatus(state) {
       var el = document.getElementById('activity-status');
       if (!el) return;
-      if (active) {
+      if (state === 'active') {
         el.textContent = 'active';
         el.className = 'activity-status active';
-      } else {
+      } else if (state === 'idle') {
         el.textContent = 'idle';
+        el.className = 'activity-status idle';
+      } else {
+        el.textContent = '';
         el.className = 'activity-status';
       }
     }
 
-    function renderActivityItem(ev) {
-      var feed = document.getElementById('activity-feed');
-      if (!feed) return;
+    // Refresh timestamps every 30s as fallback
+    setInterval(refreshTimestamps, 30000);
 
-      // Remove idle message if present
-      var idle = feed.querySelector('.activity-idle');
-      if (idle) idle.remove();
-
-      var icon = toolIcon(ev.tool);
-      var fileStr = ev.file ? '<div class="activity-file">' + escHtml(ev.file) + '</div>' : '';
-      var item = document.createElement('div');
-      item.className = 'activity-item';
-      item.innerHTML =
-        '<div class="activity-icon ' + icon.cls + '">' + icon.icon + '</div>' +
-        '<div style="flex:1;min-width:0"><span class="activity-tool">' + escHtml(ev.tool || '?') + '</span> ' +
-        '<span style="color:var(--text-muted);font-size:10px">' + escHtml(ev.action || '') + '</span>' +
-        fileStr + '</div>' +
-        '<span class="activity-time">' + relativeTime(ev.ts) + '</span>';
-
-      feed.appendChild(item);
-
-      // Auto-scroll if user hasn't scrolled up
-      if (autoScroll) {
-        feed.scrollTop = feed.scrollHeight;
-      }
-    }
-
-    // Pause auto-scroll when user scrolls up
-    (function() {
-      var feed = document.getElementById('activity-feed');
-      if (feed) {
-        feed.addEventListener('scroll', function() {
-          var atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 40;
-          autoScroll = atBottom;
-        });
-      }
-    })();`;
+    initActivityPanel();`;
   }
 
   // Init
