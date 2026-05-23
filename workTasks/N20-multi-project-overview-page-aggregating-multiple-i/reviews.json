@@ -1,0 +1,116 @@
+{
+  "taskId": "N20",
+  "reviews": [
+    {
+      "startedAt": "2026-05-23T15:06:30.098Z",
+      "endedAt": "2026-05-23T15:07:03.369Z",
+      "verdict": "fix-needed",
+      "comment": "Port 6000 is browser-blocked (ERR_UNSAFE_PORT); iframe embed also broken — same root cause",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T15:07:57.522Z",
+        "endedAt": "2026-05-23T15:09:38.828Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/insight-flow-master/src/config.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/README.md"
+        ],
+        "comment": "Fixed blockers 1+2: changed default master port 6000→6100 (browser-safe); iframe loads once port is unblocked",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T15:13:58.815Z",
+      "endedAt": "2026-05-23T15:14:38.407Z",
+      "verdict": "fix-needed",
+      "comment": "Master binary not built — root build:package script skips insight-flow-master, so overview never auto-starts",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T15:16:33.665Z",
+        "endedAt": "2026-05-23T15:17:08.075Z",
+        "status": "fixed",
+        "filesChanged": [
+          "package.json",
+          "CLAUDE.md"
+        ],
+        "comment": "Fixed blocker 1: added root build script that builds master then taskflow; updated CLAUDE.md",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T15:22:04.926Z",
+      "endedAt": "2026-05-23T15:22:34.652Z",
+      "verdict": "fix-needed",
+      "comment": "findMasterBin() uses ../../../ (3 levels) instead of ../../ (2 levels) — resolves to wrong path, binary never found",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T15:23:20.518Z",
+        "endedAt": "2026-05-23T15:23:45.201Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "comment": "Fixed blocker 1: ../../../ → ../../ in findMasterBin(); binary now resolves to packages/insight-flow-master/dist/index.js",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T15:28:04.455Z",
+      "endedAt": "2026-05-23T15:30:15.481Z",
+      "verdict": "approved",
+      "comment": "All checklist items pass; three human-review blockers fixed. Non-blocking: detached:false on spawned master, object[] activity type, config mutation.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-23T15:32:53.394Z",
+      "endedAt": "2026-05-23T15:33:21.490Z",
+      "verdict": "fix-needed",
+      "comment": "Master dies without user action — detached:false causes master to die with spawning process group; AI review non-blocking #1 promoted to blocker",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T15:34:55.857Z",
+        "endedAt": "2026-05-23T15:35:16.145Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "comment": "Fixed blocker 1: detached:false → detached:true; master now runs in its own process group, survives project server exit",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T15:41:50.564Z",
+      "endedAt": "2026-05-23T15:42:26.828Z",
+      "verdict": "fix-needed",
+      "comment": "Master crashes on Socket.IO polling handshake — async request handler has no res.headersSent guard, unhandled rejection kills process",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-23T15:54:55.889Z",
+        "endedAt": "2026-05-23T15:55:23.406Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/insight-flow-master/src/server.ts"
+        ],
+        "comment": "Fixed blocker 1: added res.headersSent guard + try/catch on async request handler; Socket.IO polling requests no longer crash master",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-23T16:07:03.750Z",
+      "endedAt": "2026-05-23T16:07:46.174Z",
+      "verdict": "approved",
+      "comment": "Approved. Follow-up noted: bundle master into insight-flow npm package so findMasterBin() works post npm install -g",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "pnpm --dir packages/insight-flow-master run build && pnpm --dir packages/taskflow run build",
     "build:package": "pnpm --dir packages/taskflow run build",
     "pack:taskflow": "pnpm --dir packages/taskflow exec npm pack",
     "play": "pnpm --dir playground run ui",

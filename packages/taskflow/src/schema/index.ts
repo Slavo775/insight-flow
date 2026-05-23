@@ -132,6 +132,13 @@ export const IncidentsFileSchema = z.object({
   incidents: z.array(IncidentSchema),
 });
 
+export const MasterConfigSchema = z.object({
+  url: z.string().optional(),
+  port: z.number().int().min(1).max(65535).optional(),
+  standalone: z.boolean().optional(),
+  startMasterLocally: z.boolean().optional(),
+});
+
 export const MasterFileSchema = z.object({
   meta: z.object({
     nextId: z.number().int().min(0),

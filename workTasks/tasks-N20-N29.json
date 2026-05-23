@@ -1,0 +1,307 @@
+{
+  "range": {
+    "from": 20,
+    "to": 29
+  },
+  "tasks": [
+    {
+      "id": "N20",
+      "title": "Multi-project overview page aggregating multiple insight-flow servers",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N20-multi-project-overview-page-aggregating-multiple-i",
+      "createdAt": "2026-05-23T09:43:25.203Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-23T09:43:25.203Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:16:34.369Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:24:54.694Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:32:58.252Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-23T14:42:11.217Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-23T14:47:33.092Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T14:49:01.200Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T15:06:30.098Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T15:07:03.369Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T15:07:57.522Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T15:09:38.828Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T15:13:58.814Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T15:14:38.408Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T15:16:33.665Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T15:17:08.076Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T15:22:04.925Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T15:22:34.652Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T15:23:20.518Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T15:23:45.201Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T15:28:04.454Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T15:30:15.482Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T15:32:53.393Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T15:33:21.491Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T15:34:55.857Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T15:35:16.145Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T15:41:50.563Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T15:42:26.828Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-23T15:54:55.889Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-23T15:55:23.407Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T16:07:03.749Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-23T16:07:46.175Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-23T14:42:11.217Z",
+        "completedAt": "2026-05-23T14:47:33.092Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/types.ts",
+          "packages/insight-flow-master/src/config.ts",
+          "packages/insight-flow-master/src/registry.ts",
+          "packages/insight-flow-master/src/lock.ts",
+          "packages/insight-flow-master/src/server.ts",
+          "packages/insight-flow-master/src/overview.ts",
+          "packages/insight-flow-master/src/index.ts",
+          "packages/insight-flow-master/package.json",
+          "packages/insight-flow-master/tsconfig.json",
+          "packages/insight-flow-master/tsup.config.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/README.md",
+          "pnpm-workspace.yaml"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 7,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "overview",
+        "multi-project"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-23T14:16:34.368Z",
+          "commitHash": "6bfaac56ab382c35af182a2d220da84713ca5332",
+          "commitMessage": "docs(tasks): rewrite N20 spec — push-based master server architecture"
+        },
+        {
+          "at": "2026-05-23T14:24:54.694Z",
+          "commitHash": "64f92ce0522aad2c6835a266ec34bee5a9860c0c",
+          "commitMessage": "docs(tasks): N20 spec rev2 — extract master to own package, add startMasterLocally"
+        },
+        {
+          "at": "2026-05-23T14:32:58.252Z",
+          "commitHash": "c2a0a1114f6b59bf35026f461b64d34afdd870ae",
+          "commitMessage": "docs(tasks): N20 spec rev3 — master standalone config + src/config.ts"
+        },
+        {
+          "at": "2026-05-23T14:49:01.200Z",
+          "commitHash": "c95d130e2161d0b8d31e2a639d93b4b82d6811c4",
+          "commitMessage": "feat(server): N20 multi-project overview with push-based master server"
+        }
+      ],
+      "branch": "feat/N20-multi-project-overview",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/13",
+      "mergedAt": null
+    },
+    {
+      "id": "N21",
+      "title": "Richer activity feed — phase milestones and free hook enrichment",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N21-richer-activity-feed-phase-milestones-and-free-hoo",
+      "createdAt": "2026-05-23T09:43:26.690Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-23T09:43:26.690Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "activity-engine",
+        "hooks",
+        "cli",
+        "opt-out"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N22",
+      "title": "Release insight-flow v0.5.0 with N17 N18 plus N19 N20 N21 features",
+      "type": "rework",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N22-release-insight-flow-v0-5-0-with-n17-n18-plus-n19-",
+      "createdAt": "2026-05-23T09:43:28.054Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-23T09:43:28.055Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "npm",
+        "changelog"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    }
+  ]
+}
