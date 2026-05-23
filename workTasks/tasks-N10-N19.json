@@ -1246,7 +1246,7 @@
       "title": "Browser and CLI notifications on task transitions",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "fix-needed",
       "folder": "workTasks/N19-browser-and-cli-notifications-on-task-transitions",
       "createdAt": "2026-05-23T09:43:23.812Z",
       "statusHistory": [
@@ -1364,6 +1364,21 @@
           "status": "approved",
           "at": "2026-05-23T12:22:54.158Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T12:23:30.378Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-23T12:42:40.530Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-23T12:45:30.504Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -1383,8 +1398,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 7,
-      "lastReviewVerdict": "approved",
+      "reviewCount": 8,
+      "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -1414,6 +1429,11 @@
           "at": "2026-05-23T11:59:14.288Z",
           "commitHash": "ac6df126bba83f1e5baa1e403f90ec3b74ca86eb",
           "commitMessage": "feat(notify): Stop hook fires OS notifications automatically — N19 rounds 4+5"
+        },
+        {
+          "at": "2026-05-23T12:23:30.377Z",
+          "commitHash": "305d9a5",
+          "commitMessage": "docs(tasks): N19 human review round 7 — approved"
         }
       ],
       "branch": "feat/N19-browser-and-cli-notifications",

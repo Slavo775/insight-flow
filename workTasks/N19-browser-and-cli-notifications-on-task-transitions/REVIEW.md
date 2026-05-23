@@ -317,3 +317,25 @@ None.
 
 - Human confirmed post-restart behaviour: OS notifications fire automatically when an agent finishes work via the Stop hook.
 - Round 6 pending verdict resolved as approved.
+
+
+---
+
+## Human Review — Round 8
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** fix-needed
+
+### Blockers
+
+- Notifications never fire when `insight-flow` is installed globally at v0.4.0. The notification feature does not exist in 0.4.0 — the Stop hook calls into insight-flow, but that version has no notify command. Any user on the current global install will see no notifications at all.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- Human tested the feature and received no OS notifications.
+- Root cause: the hook depends on the new notify command that ships in the upcoming release; users with the old global install are silently broken.
