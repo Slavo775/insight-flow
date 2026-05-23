@@ -638,6 +638,12 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         if (data && typeof data.hookStatus === 'string') hookStatus = data.hookStatus;
         if (data && typeof data.configEnabled === 'boolean') configEnabled = data.configEnabled;
         if (data && data.activity && typeof addActivityEvent === 'function') {
+          // Reset feed to server's authoritative state on every snapshot
+          // (including reconnects) so stale client-side events are not
+          // duplicated each time Socket.IO re-establishes the connection.
+          activityEvents = [];
+          var feed = document.getElementById('activity-feed');
+          if (feed) feed.innerHTML = '';
           for (var i = 0; i < data.activity.length; i++) {
             addActivityEvent(data.activity[i]);
           }
