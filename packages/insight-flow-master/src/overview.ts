@@ -151,19 +151,44 @@ function getScript(initialData: string): string {
       return 'active';
     }
 
-    function renderActivityMini(recentActivity) {
+    function renderActivityMini(recentActivity, idleStatus) {
       if (!recentActivity || !recentActivity.length) return '';
       var items = recentActivity.slice(-3).reverse();
       var rows = items.map(function(ev) {
         var tool = ev.tool || '';
-        var badgeCls = tool === 'Phase' ? 'proj-activity-badge-phase' : tool === 'Skill' ? 'proj-activity-badge-skill' : 'proj-activity-badge-tool';
-        var label = tool === 'Phase' ? (ev.message || ev.action || 'phase') : tool === 'Skill' ? ('/' + (ev.skill || ev.action || '?')) : (ev.label || ev.action || tool);
+        var badgeCls = tool === 'Phase' ? 'proj-activity-badge-phase'
+          : tool === 'Skill' ? 'proj-activity-badge-skill'
+          : 'proj-activity-badge-tool';
+        var primary, secondary;
+        if (tool === 'Phase') {
+          primary = ev.message || ev.action || 'phase';
+          secondary = ev.action && ev.message ? ev.action : null;
+        } else if (tool === 'Skill') {
+          primary = '/' + (ev.skill || ev.action || '?');
+          secondary = ev.action || null;
+        } else if (ev.label) {
+          primary = ev.label;
+          secondary = ev.file ? ev.file.slice(0, 60) : (ev.action || null);
+        } else {
+          primary = ev.action || tool;
+          secondary = ev.file ? ev.file.slice(0, 60) : null;
+        }
         return '<div class="proj-activity-item">' +
           '<span class="proj-activity-badge ' + badgeCls + '">' + escHtml(tool.toLowerCase() || '?') + '</span>' +
-          '<span>' + escHtml(String(label).slice(0, 50)) + '</span>' +
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis">' + escHtml(String(primary).slice(0, 60)) + '</span>' +
+          (secondary ? '<span style="color:var(--text-muted);font-size:9px;flex-shrink:0;margin-left:4px">' + escHtml(String(secondary).slice(0, 30)) + '</span>' : '') +
           '</div>';
       }).join('');
-      return '<div class="proj-activity-feed">' + rows + '</div>';
+      var idgeBadge = idleStatus === 'idle'
+        ? '<span class="proj-idle-badge">idle</span>'
+        : idleStatus === 'active'
+          ? '<span class="proj-active-badge">active</span>'
+          : '';
+      var header = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+        '<span style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">Activity</span>' +
+        idgeBadge +
+        '</div>';
+      return '<div class="proj-task">' + header + '<div class="proj-activity-feed">' + rows + '</div></div>';
     }
 
     function renderCard(p) {
@@ -180,16 +205,11 @@ function getScript(initialData: string): string {
         taskHtml = '<div class="proj-task"><span class="proj-task-empty">No active task</span></div>';
       }
       var idleStatus = deriveIdleStatus(s.recentActivity);
-      var idleBadgeHtml = idleStatus === 'idle'
-        ? '<span class="proj-idle-badge">idle</span>'
-        : idleStatus === 'active'
-          ? '<span class="proj-active-badge">active</span>'
-          : '';
-      var activityHtml = renderActivityMini(s.recentActivity);
+      var activityHtml = renderActivityMini(s.recentActivity, idleStatus);
       return '<div class="proj-card" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
           '<span class="proj-label">' + escHtml(p.label) + '</span>' +
-          '<div style="display:flex;gap:6px;align-items:center">' + idleBadgeHtml + '<span class="conn-badge ' + bi.cls + '" data-badge>' + bi.label + '</span></div>' +
+          '<span class="conn-badge ' + bi.cls + '" data-badge>' + bi.label + '</span>' +
         '</div>' +
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +
