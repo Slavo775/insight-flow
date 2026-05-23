@@ -195,7 +195,7 @@ function isMasterPidAlive(pid: number): boolean {
 function findMasterBin(): string | null {
   const __dir = dirname(fileURLToPath(import.meta.url));
   // sibling package in workspace: packages/insight-flow-master/dist/index.js
-  const siblingBin = resolve(__dir, "../../../insight-flow-master/dist/index.js");
+  const siblingBin = resolve(__dir, "../../insight-flow-master/dist/index.js");
   if (existsSync(siblingBin)) return siblingBin;
   return null;
 }

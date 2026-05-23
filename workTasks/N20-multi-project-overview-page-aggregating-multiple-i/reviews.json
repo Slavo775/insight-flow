@@ -47,7 +47,16 @@
       "comment": "findMasterBin() uses ../../../ (3 levels) instead of ../../ (2 levels) — resolves to wrong path, binary never found",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-23T15:23:20.518Z",
+        "endedAt": "2026-05-23T15:23:45.201Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "comment": "Fixed blocker 1: ../../../ → ../../ in findMasterBin(); binary now resolves to packages/insight-flow-master/dist/index.js",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
