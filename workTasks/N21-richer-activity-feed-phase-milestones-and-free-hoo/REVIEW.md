@@ -170,3 +170,29 @@ Full implementation of N21 is in place across all target files. The round-1 bloc
    **Root cause:** The previous `snapshot` reset fix is not sufficient. Socket.IO's transport upgrade (polling → WebSocket) and brief reconnect cycles can cause the `snapshot` to arrive at the client at the same time as a live `activity` event, producing one copy from each path. Additionally, even a clean snapshot replay is susceptible to the same event arriving via both the `activity` handler and the subsequent snapshot.
 
    **Fix:** Add client-side deduplication in `addActivityEvent` using a `seenEventKeys` Set keyed on `ts|tool|action|message|file`. Any event whose key is already in the set is silently dropped. The set must be cleared when the feed is reset (snapshot handler). This is a defensive last-line guard that prevents duplicates regardless of origin.
+
+
+---
+
+## Round 3 — pending verdict
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-23
+**Verdict:** pending
+
+### Summary
+
+### Checklist verification
+
+### Blockers
+
+### Non-blocking
+
+### Verdict
+
+**Approved.** Human said: "approved".
+
+### Notes
+
+- All blockers from rounds 1–5 resolved: overview card wrapper, grid layout, activity sync, duplicate events (ring-buffer, snapshot replay, seenEventKeys dedup).
+- README documentation remains outstanding (non-blocking, tracked for N22).
