@@ -1246,7 +1246,7 @@
       "title": "Browser and CLI notifications on task transitions",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N19-browser-and-cli-notifications-on-task-transitions",
       "createdAt": "2026-05-23T09:43:23.812Z",
       "statusHistory": [
@@ -1454,6 +1454,11 @@
           "status": "approved",
           "at": "2026-05-23T13:30:10.742Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-23T13:30:37.231Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1534,6 +1539,11 @@
           "at": "2026-05-23T13:26:21.655Z",
           "commitHash": "f0ed474",
           "commitMessage": "fix(notify): remove execFile timeout that killed osascript before delivery"
+        },
+        {
+          "at": "2026-05-23T13:30:37.230Z",
+          "commitHash": "ff5c6e3",
+          "commitMessage": "docs(tasks): N19 human review round 11 — approved"
         }
       ],
       "branch": "feat/N19-browser-and-cli-notifications",
