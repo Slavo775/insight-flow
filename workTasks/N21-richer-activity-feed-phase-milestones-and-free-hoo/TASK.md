@@ -3,7 +3,7 @@
 **Type:** feat
 **Priority:** high
 **Created:** 2026-05-23
-**Modified:** 2026-05-23
+**Modified:** 2026-05-23 (changelog + npm publish added)
 
 ## Problem
 
@@ -29,6 +29,8 @@ Beyond enrichment, five UX gaps also need closing in this task:
 9. Master server (`insight-flow-master`) exposes `GET /api/activity/:projectName` returning the last 3 activity events for that project; the multi-project overview card shows these below the project status.
 10. `--phase done` event drives the project's active/idle state: the overview marks a project **active** whenever any activity event arrives, and **idle** only when a `done`-phase event is received — never via timeout or inference.
 11. Total agent-side token overhead stays under 500 tokens per task with phase markers enabled; zero when disabled.
+12. Generate a `CHANGELOG.md` entry for this release (covering N17–N21) under a new `[0.5.0]` heading, following the existing keep-a-changelog format.
+13. Bump `packages/taskflow/package.json` version to `0.5.0` and publish to npm (`pnpm publish --access public` from `packages/taskflow/`). User is pre-authenticated with npm.
 
 ## Scope
 
@@ -50,6 +52,9 @@ Beyond enrichment, five UX gaps also need closing in this task:
 - Canonical role files (`TASKMASTER_ROLE.md`, `TASK_IMPLEMENTER_ROLE.md`, `TASK_REVIEWER_ROLE.md`, `TASK_REVIEW_FIXER_ROLE.md`, `TASK_HUMAN_REVIEW_ROLE.md`, `TASK_INCIDENT_ROLE.md`, `TASK_GIT_ROLE.md`, `TASKMASTER_CHANGE_ROLE.md`, `TASK_REQUEST_CHANGES_ROLE.md`) — append a tight "PHASE MARKERS" section listing the recommended call points (including research-start/end with output summary, edit-start/end with output summary, done).
 - `packages/taskflow/templates/roles/*` — mirror via the existing sync-roles script.
 - `packages/taskflow/README.md` — document the new hooks, the CLI subcommand, all three config toggles, and the done-event idle convention.
+- `packages/taskflow/CHANGELOG.md` — prepend a `## [0.5.0] — YYYY-MM-DD` section covering N17–N21: live updates (N17), activity panel UX (N18), notifications (N19), multi-project overview (N20), richer feed / phase markers / hook enrichment (N21). Follow the existing keep-a-changelog format (Breaking changes / Features / Improvements / Tests / Docs subsections).
+- `packages/taskflow/package.json` — bump `"version"` from `"0.4.0"` to `"0.5.0"`.
+- npm publish — `pnpm publish --access public` inside `packages/taskflow/` after build passes. User is authenticated.
 
 ### Out of scope
 
@@ -113,6 +118,16 @@ Beyond enrichment, five UX gaps also need closing in this task:
 8. **README.**
    - "Activity feed enrichment" section: free hooks, CLI subcommand, three config toggles, done-event convention, verbosity modes, master server endpoint.
 
+9. **Changelog + version bump.**
+   - In `packages/taskflow/CHANGELOG.md`, promote `[Unreleased]` to `[0.5.0] — <date>` and prepend a new `[Unreleased]` stub above it.
+   - Cover N17 (WebSocket live updates), N18 (activity panel UX), N19 (notifications), N20 (multi-project overview), N21 (richer feed, phase markers, hook enrichment) — one bullet per significant item under the appropriate subsection.
+   - Bump `"version"` in `packages/taskflow/package.json` to `"0.5.0"`.
+
+10. **npm publish.**
+    - `pnpm --dir packages/taskflow run build` (must pass cleanly).
+    - `pnpm publish --access public` from `packages/taskflow/`.
+    - Verify: `npm view insight-flow version` should return `0.5.0`.
+
 ## Verification
 
 - `pnpm --dir packages/taskflow run typecheck && build && test` all pass.
@@ -123,6 +138,7 @@ Beyond enrichment, five UX gaps also need closing in this task:
 - Manual E: master server `/api/activity/:projectName` returns last 3 events; overview card shows them + correct active/idle badge (idle only after done event).
 - Manual F: collapse the aside panel, reload the page — panel remains collapsed.
 - Token budget: < 500 tokens / task overhead with both halves enabled; 0 with both disabled.
+- `npm view insight-flow version` returns `0.5.0` after publish.
 
 ## Notes
 
@@ -132,3 +148,5 @@ Beyond enrichment, five UX gaps also need closing in this task:
 - Related: N20 (multi-project overview) — master server `/api/activity/:projectName` + active/idle badge are additive to N20's overview card.
 - The `done` event as the sole idle trigger avoids false-idle from session gaps or network blips. Projects that never emit `done` (e.g. non-taskflow sessions) simply stay in the neutral (no badge) state.
 - Token cost summary: hooks = 0 tokens/task; phase markers = ~150–300 tokens/task; total ceiling < 500 with both on; 0 with both off.
+- npm auth: user is pre-authenticated (`npm whoami` confirms). No `npm login` step needed.
+- Changelog covers N17–N21 collectively; future [Unreleased] stub is blank after the release section.

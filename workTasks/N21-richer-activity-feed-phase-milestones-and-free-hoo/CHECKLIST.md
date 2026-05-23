@@ -52,6 +52,14 @@
 ### Docs
 - [ ] README documents free hooks, CLI subcommand, all three config toggles, done-event idle convention, verbosity modes, and master server endpoint.
 
+### Changelog + release
+- [ ] `packages/taskflow/CHANGELOG.md` has a `## [0.5.0] — <date>` section covering N17–N21 (live updates, activity UX, notifications, multi-project overview, richer feed / phase markers / hook enrichment).
+- [ ] Existing `[Unreleased]` content promoted to `[0.5.0]`; new blank `[Unreleased]` stub added above it.
+- [ ] `packages/taskflow/package.json` `"version"` bumped to `"0.5.0"`.
+- [ ] `pnpm --dir packages/taskflow run build` passes cleanly before publish.
+- [ ] `pnpm publish --access public` (run from `packages/taskflow/`) succeeds.
+- [ ] `npm view insight-flow version` returns `0.5.0`.
+
 ## Quality gates
 
 - [ ] `pnpm --dir packages/taskflow run typecheck` passes.
