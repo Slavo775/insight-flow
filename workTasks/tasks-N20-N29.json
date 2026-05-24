@@ -509,7 +509,7 @@
       "title": "Architecture diagrams: agents, server, notifications, activity",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N23-architecture-diagrams-agents-server-notifications-",
       "createdAt": "2026-05-23T20:45:48.252Z",
       "statusHistory": [
@@ -567,6 +567,11 @@
           "status": "approved",
           "at": "2026-05-24T11:47:44.944Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-24T11:48:17.501Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -589,8 +594,14 @@
         "diagrams",
         "architecture"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-24T11:48:17.500Z",
+          "commitHash": "0e32f12",
+          "commitMessage": "docs(N23): add architecture diagram prompts + agent extend config"
+        }
+      ],
+      "branch": "feat/N23-architecture-diagrams",
       "mrUrl": null,
       "mergedAt": null
     }
