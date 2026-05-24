@@ -458,6 +458,37 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
+    if (url.pathname === "/api/events") {
+      const taskId = url.searchParams.get("taskId");
+      if (!taskId || !/^N\d{2,}$/.test(taskId)) {
+        res.writeHead(400, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "valid taskId is required (e.g. ?taskId=N26)" }));
+        return;
+      }
+      try {
+        const entries = readdirSync(workDir, { withFileTypes: true });
+        const dir = entries.find((e) => e.isDirectory() && e.name.startsWith(taskId + "-"));
+        if (!dir) {
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ events: [] }));
+          return;
+        }
+        const eventsPath = resolve(workDir, dir.name, "events.json");
+        if (!existsSync(eventsPath)) {
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ events: [] }));
+          return;
+        }
+        const raw = JSON.parse(readFileSync(eventsPath, "utf-8")) as { events?: unknown[] };
+        res.writeHead(200, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ events: Array.isArray(raw.events) ? raw.events : [] }));
+      } catch {
+        res.writeHead(500, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "Failed to read events" }));
+      }
+      return;
+    }
+
     res.writeHead(200, { "Content-Type": MIME[".html"] });
     res.end(getDashboardHtml(config));
   });

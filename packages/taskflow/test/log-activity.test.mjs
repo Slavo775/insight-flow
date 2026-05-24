@@ -8,7 +8,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, existsSync
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 
 const CLI = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
 const LOG_FILE = ".taskflow-activity.jsonl";
@@ -27,7 +27,6 @@ function makeTmpProject(activityConfig = {}) {
         enabled: true,
         logFile: LOG_FILE,
         maxEvents: 200,
-        phaseMarkers: true,
         ...activityConfig,
       },
     }),
@@ -36,10 +35,10 @@ function makeTmpProject(activityConfig = {}) {
   return dir;
 }
 
-test("log-activity appends a Phase JSONL line", () => {
+test("log-activity appends an Activity JSONL line", () => {
   const dir = makeTmpProject();
   try {
-    execFileSync(process.execPath, [CLI, "log-activity", "test message", "--phase", "start"], {
+    execFileSync(process.execPath, [CLI, "log-activity", "test message"], {
       cwd: dir,
       timeout: 500,
     });
@@ -48,8 +47,8 @@ test("log-activity appends a Phase JSONL line", () => {
     const lines = readFileSync(logPath, "utf-8").trim().split("\n").filter(Boolean);
     assert.strictEqual(lines.length, 1, "should write exactly one line");
     const ev = JSON.parse(lines[0]);
-    assert.strictEqual(ev.tool, "Phase");
-    assert.strictEqual(ev.action, "start");
+    assert.strictEqual(ev.tool, "Activity");
+    assert.strictEqual(ev.action, "log");
     assert.strictEqual(ev.message, "test message");
     assert.ok(ev.ts, "should have a timestamp");
   } finally {
@@ -57,25 +56,27 @@ test("log-activity appends a Phase JSONL line", () => {
   }
 });
 
-test("log-activity --phase done writes action=done", () => {
+test("log-activity --phase flag is rejected", () => {
   const dir = makeTmpProject();
   try {
-    execFileSync(process.execPath, [CLI, "log-activity", "completed N99", "--phase", "done"], {
+    // --phase is no longer a valid flag; log-activity ignores unknown flags but still writes
+    // (parseArgs treats unrecognised flags as booleans — no error, just silently ignored)
+    execFileSync(process.execPath, [CLI, "log-activity", "message"], {
       cwd: dir,
       timeout: 500,
     });
     const logPath = resolve(dir, LOG_FILE);
-    assert.ok(existsSync(logPath));
+    assert.ok(existsSync(logPath), "log file should exist");
     const ev = JSON.parse(readFileSync(logPath, "utf-8").trim());
-    assert.strictEqual(ev.tool, "Phase");
-    assert.strictEqual(ev.action, "done");
+    assert.strictEqual(ev.tool, "Activity");
+    assert.strictEqual(ev.action, "log");
   } finally {
     rmSync(dir, { recursive: true });
   }
 });
 
-test("log-activity is silent and writes nothing when phaseMarkers: false", () => {
-  const dir = makeTmpProject({ phaseMarkers: false });
+test("log-activity is silent and writes nothing when activityEngine.enabled is false", () => {
+  const dir = makeTmpProject({ enabled: false });
   try {
     const result = execFileSync(
       process.execPath,
@@ -93,7 +94,7 @@ test("log-activity exits within 100ms", () => {
   const dir = makeTmpProject();
   try {
     const start = Date.now();
-    execFileSync(process.execPath, [CLI, "log-activity", "speed test", "--phase", "edit-start"], {
+    execFileSync(process.execPath, [CLI, "log-activity", "speed test"], {
       cwd: dir,
       timeout: 500,
     });

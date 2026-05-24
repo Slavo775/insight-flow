@@ -148,6 +148,33 @@ export const MasterFileSchema = z.object({
   }),
 });
 
+export const EventTypeSchema = z.enum([
+  "start",
+  "done",
+  "active",
+  "idle",
+  "edit-start",
+  "edit-end",
+  "research-start",
+  "research-end",
+  "review-start",
+  "review-end",
+  "git-start",
+  "git-end",
+]);
+
+export const TaskEventSchema = z.object({
+  type: EventTypeSchema,
+  taskId: z.string(),
+  timestamp: z.string(),
+  data: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const EventsFileSchema = z.object({
+  taskId: z.string().regex(/^N\d{2,}$/),
+  events: z.array(TaskEventSchema),
+});
+
 export class TaskflowValidationError extends Error {
   readonly file: string;
   readonly issuePath: string;

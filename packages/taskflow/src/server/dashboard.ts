@@ -124,6 +124,8 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .activity-icon.bash { background: #0a3622; color: var(--green); }
     .activity-icon.write { background: #2d1b4e; color: var(--purple); }
     .activity-icon.phase { background: #3b1a00; color: var(--orange); }
+    .activity-icon.event-mandatory { background: #0a2a0a; color: var(--green); }
+    .activity-icon.event-optional { background: #1a2a3b; color: var(--cyan); }
     .activity-icon.skill { background: #1a0a3b; color: var(--purple); }
     .activity-icon.other { background: var(--border); color: var(--text-muted); }
     .activity-tool { font-weight: 600; color: var(--text); }
@@ -132,6 +134,8 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .activity-time { color: var(--text-muted); font-size: 10px; margin-left: auto; white-space: nowrap; flex-shrink: 0; }
     .activity-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
     .activity-badge-phase { background: #3b1a00; color: var(--orange); }
+    .activity-badge-event-mandatory { background: #0a2a0a; color: var(--green); }
+    .activity-badge-event-optional { background: #1a2a3b; color: var(--cyan); }
     .activity-badge-skill { background: #1a0a3b; color: var(--purple); }
     .activity-phase-msg { font-weight: 600; color: var(--text); }
     .activity-idle { color: var(--text-muted); text-align: center; padding: 24px 16px; font-size: 12px; }
@@ -762,8 +766,8 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     function shouldShowEvent(ev) {
       var tool = ev.tool || '';
-      if (VERBOSITY === 'milestones') return tool === 'Phase' || tool === 'Skill';
-      if (VERBOSITY === 'detailed') return tool !== 'Phase' && tool !== 'Skill';
+      if (VERBOSITY === 'milestones') return tool === 'Activity' || tool === 'Event' || tool === 'Phase' || tool === 'Skill';
+      if (VERBOSITY === 'detailed') return tool !== 'Activity' && tool !== 'Event' && tool !== 'Phase' && tool !== 'Skill';
       return true;
     }
 
@@ -774,8 +778,8 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       activityEvents.unshift(ev);
       if (activityEvents.length > ACTIVITY_CAP) activityEvents = activityEvents.slice(0, ACTIVITY_CAP);
 
-      // Active/idle: only set idle when a done Phase event arrives
-      if (ev.tool === 'Phase' && ev.action === 'done') {
+      // Idle when a done event (typed or legacy phase) arrives
+      if (ev.action === 'done' && (ev.tool === 'Event' || ev.tool === 'Phase')) {
         updateActivityStatus('idle');
       } else {
         updateActivityStatus('active');
@@ -812,6 +816,29 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     function renderActivityItemHtml(ev) {
       var tool = ev.tool || '?';
       var ts = ev.ts || '';
+
+      if (tool === 'Activity') {
+        var actMsg = escHtml(ev.message || '');
+        return '<div class="activity-icon phase">&#9670;</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<span class="activity-phase-msg">' + actMsg + '</span>' +
+          '</div>' +
+          '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
+      }
+
+      if (tool === 'Event') {
+        var evtType = ev.action || 'event';
+        var isMandatory = evtType === 'start' || evtType === 'done';
+        var evtIconClass = isMandatory ? 'event-mandatory' : 'event-optional';
+        var evtBadgeClass = isMandatory ? 'activity-badge-event-mandatory' : 'activity-badge-event-optional';
+        var evtIcon = evtType === 'done' ? '&#10003;' : evtType === 'start' ? '&#9654;' : '&#9679;';
+        return '<div class="activity-icon ' + evtIconClass + '">' + evtIcon + '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<span class="activity-badge ' + evtBadgeClass + '">' + escHtml(evtType) + '</span>' +
+            (ev.taskId ? ' <span class="activity-file-muted">' + escHtml(ev.taskId) + '</span>' : '') +
+          '</div>' +
+          '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
+      }
 
       if (tool === 'Phase') {
         var phaseAction = ev.action || 'milestone';

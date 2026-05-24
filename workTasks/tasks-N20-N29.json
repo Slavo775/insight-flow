@@ -702,7 +702,7 @@
       "title": "UI layout with shared top navigation",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N25-ui-layout-with-shared-top-navigation",
       "createdAt": "2026-05-24T12:54:56.507Z",
       "statusHistory": [
@@ -795,6 +795,11 @@
           "status": "approved",
           "at": "2026-05-24T16:21:51.039Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-24T16:26:52.722Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -811,7 +816,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 212,
       "tags": [
         "ui",
         "dashboard",
@@ -827,6 +832,74 @@
       ],
       "branch": "feat/N25-ui-layout-shared-top-navigation",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/18",
+      "mergedAt": "2026-05-24T16:26:52.722Z"
+    },
+    {
+      "id": "N26",
+      "title": "activity vs typed events with automation triggers",
+      "type": "feat",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "workTasks/N26-activity-vs-typed-events-with-automation-triggers",
+      "createdAt": "2026-05-24T18:16:11.608Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-24T18:16:11.608Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-24T20:19:07.811Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-24T20:28:25.640Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-24T20:19:07.811Z",
+        "completedAt": "2026-05-24T20:28:25.640Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/src/commands/log-event.ts",
+          "packages/taskflow/src/commands/log-activity.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/test/log-activity.test.mjs",
+          "packages/taskflow/test/log-event.test.mjs",
+          "packages/taskflow/package.json",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md",
+          "TASKMASTER_ROLE.md",
+          "TASKMASTER_CHANGE_ROLE.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "activity",
+        "events",
+        "automation",
+        "token-saving"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]
