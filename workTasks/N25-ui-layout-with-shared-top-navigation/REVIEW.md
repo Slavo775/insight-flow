@@ -106,3 +106,44 @@ Introduces `getNavHtml` / `getNavCss` helpers in `dashboard.ts`, wires the nav i
 
 - The `overflow-x: auto` on `.main-content` is correct and does not conflict with the flex layout.
 - The `.top-nav{margin:0;top:0;}` override in the `/overview` CSS block is a clean, minimal fix for the dashboard-vs-overview padding difference.
+
+
+---
+
+## AI Review — Round 5
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-24
+**PR:** https://github.com/Slavo775/insight-flow/pull/18 (commit 528ace2)
+**Verdict:** approved
+
+### Summary
+
+Follow-up commit resolving all three non-blocking notes from Round 4. Single file changed (`dashboard.ts`). No functional behaviour altered — pure structural cleanup + two correctness fixes. Zero risk to existing routes or data paths.
+
+### Checklist verification
+
+All original checklist items remain satisfied (verified in Round 4). Reviewing only the delta:
+
+- [x] CSS deduplication — `NAV_CSS` moved before `CSS`; `CSS` ends with `${NAV_CSS}` interpolation. Duplicate inline block removed. `getNavCss()` still returns `NAV_CSS`. ✅
+- [x] `.activity-aside { top: 72px }` — 48px nav + 24px body padding = 72px correct. ✅
+- [x] `escHtml()` applied to `projectName` — covers `&`, `<`, `>`, `"`. Not exported (correct — internal helper). ✅
+- [x] Build passes — verified (tsup ⚡️ success, 162.61 KB).
+
+### Blockers
+
+*(none)*
+
+### Non-blocking
+
+*(none — all prior notes resolved)*
+
+### Security & edge cases
+
+- Nav link `href` values (`/`, `/overview`) are hardcoded constants — no injection surface.
+- `activePage` is typed `"home" | "overview"` — TypeScript prevents arbitrary values reaching the HTML.
+- `escHtml` correctly handles the four HTML special chars; sufficient for a project-name config field.
+
+### Notes
+
+- `activity-aside { max-height: calc(100vh - 96px) }` was not updated. With top now 72px the mathematically precise value would be `calc(100vh - 120px)` (72px top + 24px bottom + some room), but this is a minor cosmetic difference and was not in scope of the requested fixes. Non-issue for merge.
