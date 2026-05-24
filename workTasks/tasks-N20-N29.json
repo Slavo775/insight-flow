@@ -615,7 +615,7 @@
       "title": "Fix hook registration format for Claude Code settings schema",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N24-fix-hook-registration-format-for-claude-code-setti",
       "createdAt": "2026-05-24T12:03:01.443Z",
       "statusHistory": [
@@ -658,6 +658,11 @@
           "status": "approved",
           "at": "2026-05-24T12:22:01.191Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-24T12:28:27.141Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -675,7 +680,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 25,
       "tags": [
         "hooks",
         "init",
@@ -690,6 +695,107 @@
       ],
       "branch": "fix/N24-hook-registration-format",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/17",
+      "mergedAt": "2026-05-24T12:28:27.141Z"
+    },
+    {
+      "id": "N25",
+      "title": "UI layout with shared top navigation",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N25-ui-layout-with-shared-top-navigation",
+      "createdAt": "2026-05-24T12:54:56.507Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-24T12:54:56.507Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-24T13:09:36.005Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-24T13:38:11.811Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-24T14:07:31.968Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-24T14:07:51.648Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-24T14:22:08.307Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-24T14:22:52.132Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-24T14:34:16.293Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-24T14:34:43.777Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-24T14:41:14.401Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-24T14:44:43.789Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-24T14:48:49.775Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-24T14:48:58.839Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-24T13:09:36.005Z",
+        "completedAt": "2026-05-24T13:38:11.811Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "ui",
+        "dashboard",
+        "layout",
+        "navigation"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]

@@ -1,0 +1,51 @@
+{
+  "taskId": "N25",
+  "reviews": [
+    {
+      "startedAt": "2026-05-24T14:07:31.969Z",
+      "endedAt": "2026-05-24T14:07:51.647Z",
+      "verdict": "fix-needed",
+      "comment": "nav margin: -24px pulls header above viewport on /overview (no body padding there)",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-24T14:22:08.308Z",
+        "endedAt": "2026-05-24T14:22:52.131Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "comment": "Fixed blocker 1: added .top-nav{margin:0;top:0;} override in overview CSS to cancel negative margin designed for padded dashboard body",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-24T14:34:16.294Z",
+      "endedAt": "2026-05-24T14:34:43.776Z",
+      "verdict": "fix-needed",
+      "comment": "Missing viewport meta on /overview (tiny on mobile) + content needs overflow-x: auto for horizontal scroll",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-24T14:41:14.401Z",
+        "endedAt": "2026-05-24T14:44:43.789Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Fixed blockers 1-2: added viewport meta to overview page, added overflow-x:auto to .main-content",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-24T14:48:49.776Z",
+      "endedAt": "2026-05-24T14:48:58.838Z",
+      "verdict": "approved",
+      "comment": "Approved after viewport meta + overflow-x fixes",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
