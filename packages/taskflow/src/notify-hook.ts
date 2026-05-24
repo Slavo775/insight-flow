@@ -134,16 +134,16 @@ export function installNotifyHook(cwd: string): InstallNotifyHookResult {
 
   const hooks = (settings.hooks ?? {}) as Record<string, unknown[]>;
   const stop = (hooks.Stop ?? []) as Array<Record<string, unknown>>;
-  const alreadyRegistered = stop.some(
-    (h) =>
-      typeof h === "object" &&
-      h !== null &&
-      ((h.command as string) || "").includes("taskflow-notify.sh"),
-  );
+  const alreadyRegistered = stop.some((h) => {
+    if (!h || typeof h !== "object") return false;
+    if (((h.command as string) || "").includes("taskflow-notify.sh")) return true;
+    const inner = (h.hooks as Array<Record<string, unknown>> | undefined) ?? [];
+    return inner.some((e) => ((e?.command as string) || "").includes("taskflow-notify.sh"));
+  });
 
   let settingsUpdated = false;
   if (!alreadyRegistered) {
-    stop.push({ command: ".claude/hooks/taskflow-notify.sh", timeout: 5000 });
+    stop.push({ matcher: "", hooks: [{ type: "command", command: ".claude/hooks/taskflow-notify.sh", timeout: 5000 }] });
     hooks.Stop = stop;
     settings.hooks = hooks;
     if (!existsSync(resolve(cwd, ".claude"))) {

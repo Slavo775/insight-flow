@@ -509,7 +509,7 @@
       "title": "Architecture diagrams: agents, server, notifications, activity",
       "type": "feat",
       "priority": "medium",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N23-architecture-diagrams-agents-server-notifications-",
       "createdAt": "2026-05-23T20:45:48.252Z",
       "statusHistory": [
@@ -572,6 +572,11 @@
           "status": "pushed",
           "at": "2026-05-24T11:48:17.501Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-24T12:01:13.037Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -588,7 +593,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 915,
       "tags": [
         "docs",
         "diagrams",
@@ -603,6 +608,88 @@
       ],
       "branch": "feat/N23-architecture-diagrams",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/16",
+      "mergedAt": "2026-05-24T12:01:13.036Z"
+    },
+    {
+      "id": "N24",
+      "title": "Fix hook registration format for Claude Code settings schema",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N24-fix-hook-registration-format-for-claude-code-setti",
+      "createdAt": "2026-05-24T12:03:01.443Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-24T12:03:01.443Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-24T12:10:49.633Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-24T12:13:41.067Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-24T12:14:51.708Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-24T12:15:50.257Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-24T12:16:09.646Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-24T12:21:48.891Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-24T12:22:01.191Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-24T12:10:49.633Z",
+        "completedAt": "2026-05-24T12:13:41.066Z",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/notify-hook.ts",
+          "packages/taskflow/package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "hooks",
+        "init",
+        "settings"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-24T12:16:09.645Z",
+          "commitHash": "bf3fb84",
+          "commitMessage": "fix(N24): write hooks in new Claude Code settings schema format"
+        }
+      ],
+      "branch": "fix/N24-hook-registration-format",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/17",
       "mergedAt": null
     }
   ]

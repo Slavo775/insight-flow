@@ -118,16 +118,16 @@ export function installActivityHook(cwd: string, logFile: string): InstallActivi
 
   const hooks = (settings.hooks ?? {}) as Record<string, unknown[]>;
   const postToolUse = (hooks.PostToolUse ?? []) as Array<Record<string, unknown>>;
-  const alreadyRegistered = postToolUse.some(
-    (h) =>
-      typeof h === "object" &&
-      h !== null &&
-      ((h.command as string) || "").includes("taskflow-activity.sh"),
-  );
+  const alreadyRegistered = postToolUse.some((h) => {
+    if (!h || typeof h !== "object") return false;
+    if (((h.command as string) || "").includes("taskflow-activity.sh")) return true;
+    const inner = (h.hooks as Array<Record<string, unknown>> | undefined) ?? [];
+    return inner.some((e) => ((e?.command as string) || "").includes("taskflow-activity.sh"));
+  });
 
   let settingsUpdated = false;
   if (!alreadyRegistered) {
-    postToolUse.push({ command: ".claude/hooks/taskflow-activity.sh", timeout: 5000 });
+    postToolUse.push({ matcher: "", hooks: [{ type: "command", command: ".claude/hooks/taskflow-activity.sh", timeout: 5000 }] });
     hooks.PostToolUse = postToolUse;
     settings.hooks = hooks;
     if (!existsSync(resolve(cwd, ".claude"))) {
@@ -246,11 +246,14 @@ export function installEnrichmentHooks(
   for (const { file, event } of hookDefs) {
     const hookCmd = `.claude/hooks/${file}`;
     const existing = (hooks[event] ?? []) as Array<Record<string, unknown>>;
-    const alreadyRegistered = existing.some(
-      (h) => typeof h === "object" && h !== null && ((h.command as string) || "").includes(file),
-    );
+    const alreadyRegistered = existing.some((h) => {
+      if (!h || typeof h !== "object") return false;
+      if (((h.command as string) || "").includes(file)) return true;
+      const inner = (h.hooks as Array<Record<string, unknown>> | undefined) ?? [];
+      return inner.some((e) => ((e?.command as string) || "").includes(file));
+    });
     if (!alreadyRegistered) {
-      existing.push({ command: hookCmd, timeout: 5000 });
+      existing.push({ matcher: "", hooks: [{ type: "command", command: hookCmd, timeout: 5000 }] });
       hooks[event] = existing;
       settingsUpdated = true;
     }
