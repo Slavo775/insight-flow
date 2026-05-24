@@ -1,0 +1,42 @@
+{
+  "taskId": "N23",
+  "reviews": [
+    {
+      "startedAt": "2026-05-24T11:41:24.199Z",
+      "endedAt": "2026-05-24T11:43:04.466Z",
+      "verdict": "fix-needed",
+      "comment": "2 blockers in Diagram 3: (1) insight-flow notify does not check status — the shell hook does via insight-flow current; (2) browser notifications use window.Notification directly, not a Service Worker. Diagrams 1, 2, 4 approved as-is.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-24T11:43:29.752Z",
+        "endedAt": "2026-05-24T11:44:56.058Z",
+        "status": "fixed",
+        "filesChanged": [
+          "docs/architecture-diagrams.md",
+          "workTasks/N23-architecture-diagrams-agents-server-notifications-/TASK.md"
+        ],
+        "comment": "Fixed blockers 1–2: corrected Diagram 3 in both files — status check is in shell hook (not CLI), browser uses Web Notifications API directly (no Service Worker). Also fixed Style line which implied wrong placement of condition diamond.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-24T11:46:02.416Z",
+      "endedAt": "2026-05-24T11:46:48.151Z",
+      "verdict": "approved",
+      "comment": "Both round 1 blockers resolved: Diagram 3 now correctly shows hook owns status check (insight-flow current + case statement), notify CLI is message-only, browser uses Web Notifications API directly. Applied consistently in both files.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-24T11:47:33.379Z",
+      "endedAt": "2026-05-24T11:47:44.943Z",
+      "verdict": "approved",
+      "comment": "Human approved: push all things.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
