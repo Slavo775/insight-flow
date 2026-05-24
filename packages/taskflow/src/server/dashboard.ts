@@ -71,6 +71,13 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "</body>\n</html>";
 }
 
+const NAV_CSS = `    .top-nav { position: sticky; top: -24px; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; margin: -24px -24px 24px -24px; }
+    .nav-project { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link { font-size: 13px; color: var(--text-muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: background 0.15s, color 0.15s; }
+    .nav-link:hover { background: var(--border); color: var(--text); }
+    .nav-link.active { background: var(--accent); color: #fff; }`;
+
 const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #0a0a0a; --surface: #141414; --border: #262626;
@@ -95,7 +102,7 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .layout { display: flex; gap: 16px; align-items: flex-start; }
     .main-content { flex: 1; min-width: 0; overflow-x: auto; }
-    .activity-aside { width: 340px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; max-height: calc(100vh - 96px); overflow: hidden; transition: width 0.2s ease; position: sticky; top: 24px; }
+    .activity-aside { width: 340px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; max-height: calc(100vh - 96px); overflow: hidden; transition: width 0.2s ease; position: sticky; top: 72px; }
     .activity-aside.collapsed { width: 44px; }
     .activity-aside.collapsed .activity-feed { display: none; }
     .activity-aside.collapsed .activity-header h2 { display: none; }
@@ -209,27 +216,19 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .settings-row input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
     .settings-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
     .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
-    .top-nav { position: sticky; top: -24px; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; margin: -24px -24px 24px -24px; }
-    .nav-project { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-    .nav-links { display: flex; gap: 4px; }
-    .nav-link { font-size: 13px; color: var(--text-muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: background 0.15s, color 0.15s; }
-    .nav-link:hover { background: var(--border); color: var(--text); }
-    .nav-link.active { background: var(--accent); color: #fff; }`;
-
-const NAV_CSS = `    .top-nav { position: sticky; top: -24px; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; margin: -24px -24px 24px -24px; }
-    .nav-project { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-    .nav-links { display: flex; gap: 4px; }
-    .nav-link { font-size: 13px; color: var(--text-muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: background 0.15s, color 0.15s; }
-    .nav-link:hover { background: var(--border); color: var(--text); }
-    .nav-link.active { background: var(--accent); color: #fff; }`;
+${NAV_CSS}`;
 
 export function getNavCss(): string {
   return NAV_CSS;
 }
 
+function escHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export function getNavHtml(projectName: string, activePage: "home" | "overview"): string {
   return "  <nav class=\"top-nav\">\n" +
-    "    <span class=\"nav-project\">" + (projectName || "insight-flow") + "</span>\n" +
+    "    <span class=\"nav-project\">" + escHtml(projectName || "insight-flow") + "</span>\n" +
     "    <div class=\"nav-links\">\n" +
     "      <a href=\"/\" class=\"nav-link" + (activePage === "home" ? " active" : "") + "\">Home</a>\n" +
     "      <a href=\"/overview\" class=\"nav-link" + (activePage === "overview" ? " active" : "") + "\">Overview</a>\n" +
