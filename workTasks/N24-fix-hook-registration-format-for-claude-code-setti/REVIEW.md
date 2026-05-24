@@ -37,3 +37,24 @@ None — settings.local.json is local developer config, not an attack surface.
 
 - Consumer projects with old-format entries already on disk will still trigger the Claude Code validator error until they re-run `insight-flow init`. The fix only affects new installs and re-runs after upgrading to 0.5.1.
 - The `debugger-pro-plus-3000` project already had its settings corrected manually; this fix prevents the same issue in future `init` runs.
+
+
+---
+
+## Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-24
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+approved!

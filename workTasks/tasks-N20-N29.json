@@ -643,6 +643,21 @@
           "status": "approved",
           "at": "2026-05-24T12:15:50.257Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-24T12:16:09.646Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-24T12:21:48.891Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-24T12:22:01.191Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -656,7 +671,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -666,9 +681,15 @@
         "init",
         "settings"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-24T12:16:09.645Z",
+          "commitHash": "bf3fb84",
+          "commitMessage": "fix(N24): write hooks in new Claude Code settings schema format"
+        }
+      ],
+      "branch": "fix/N24-hook-registration-format",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/17",
       "mergedAt": null
     }
   ]
