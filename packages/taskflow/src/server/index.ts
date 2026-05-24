@@ -17,7 +17,7 @@ import { Server as IOServer, type Socket as IOSocket } from "socket.io";
 import type { TaskflowConfig } from "../types.js";
 import { getWorkDir } from "../config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
-import { getDashboardHtml } from "./dashboard.js";
+import { getDashboardHtml, getNavHtml, getNavCss } from "./dashboard.js";
 import { detectActivityHookStatus, type ActivityHookStatus } from "../activity-hook.js";
 
 const MIME: Record<string, string> = {
@@ -392,11 +392,19 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         res.end(JSON.stringify({ error: "Overview not available in standalone mode" }));
         return;
       }
+      const overviewCss =
+        "*{margin:0;padding:0;box-sizing:border-box}" +
+        "html,body{height:100%;background:#0a0a0a;font-family:'SF Mono','Fira Code',monospace;}" +
+        ":root{--bg:#0a0a0a;--surface:#141414;--border:#262626;--text:#e5e5e5;--text-muted:#737373;--accent:#3b82f6}" +
+        getNavCss() +
+        ".top-nav{margin:0;top:0;}";
       const iframeHtml =
         "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">" +
-        "<style>*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;overflow:hidden}</style>" +
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+        "<style>" + overviewCss + "</style>" +
         "</head><body>" +
-        "<iframe src=\"" + masterUrl + "/overview\" style=\"width:100%;height:100vh;border:none;display:block\"></iframe>" +
+        getNavHtml(config.projectName || "", "overview") +
+        "<iframe src=\"" + masterUrl + "/overview\" style=\"width:100%;height:calc(100vh - 48px);border:none;display:block\"></iframe>" +
         "</body></html>";
       res.writeHead(200, { "Content-Type": MIME[".html"] });
       res.end(iframeHtml);
