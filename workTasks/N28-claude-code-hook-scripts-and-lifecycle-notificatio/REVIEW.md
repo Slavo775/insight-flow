@@ -41,3 +41,39 @@ N28 adds 6 Claude Code lifecycle hook scripts (`SessionStart`, `UserPromptSubmit
 
 - N29 is the natural follow-on: OS notification on `log-event done` (agent tier) and deduplication with the overlapping `taskflow-skill.sh` / `taskflow-done.sh` enrichment hooks.
 - The `settings.json` target (committed, project-level) vs `settings.local.json` (personal) distinction is correctly preserved — lifecycle hooks are infrastructure, activity hooks are personal.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Summary
+
+Hooks are not triggering at all after Claude Code restart. The settings.json hook registration format has at least one bug confirmed against the official docs. Additionally, phase markers (`log-activity --phase`) emitted by agents (edit-start, research-end, etc.) are appearing in the activity panel — the owner says events should come exclusively from hooks (zero token cost), not from agent calls.
+
+### Blockers
+
+1. **Hook commands use relative paths — hooks do not fire**
+   The docs show `${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-session-start.sh` as the canonical form. N28 registers bare relative paths (`.claude/hooks/lifecycle-session-start.sh`). If Claude Code does not guarantee CWD = project root when executing hooks, the script is not found and silently skips. After a full Claude Code restart, no events appear in the activity panel — confirming hooks do not execute.
+   > "events do not trigger also I restarted the claude code and nothing"
+
+2. **Phase markers (`log-activity --phase`) must not appear as events — they are token-spending agent calls, not hook events**
+   The activity panel shows "EDIT-START editing REVIEW.md for N28" and "RESEARCH-END research complete…" — these are emitted by agents via `log-activity --phase`. The owner explicitly states events in the panel should come exclusively from hooks (zero token cost, outside Claude's context), not from agents spending tokens to call `log-activity`. Phase markers and hook-sourced events are currently mixed in the same feed.
+   > "this edit start research end is events? please events should be only hooks so without token spending thing we are a little bit off roud there"
+
+### Non-blocking
+
+- `timeout: 10000` in the hook registration is almost certainly in seconds (per docs, default is 600s). 10 000 seconds (~2.7 h) is harmless but wrong — should be 10 or 30.
+
+### Security & edge cases
+
+None beyond the path issue above.
+
+### Notes
+
+- Docs URL reviewed: https://code.claude.com/docs/en/hooks — the `${CLAUDE_PROJECT_DIR}` variable is the canonical way to reference project-relative hook scripts.
+- N29 or a hotfix task should also re-examine the `SessionStart` matcher: docs show `"startup|resume"` as the typical value; N28 uses `""` (match-all). Functionally equivalent per docs, but worth verifying live.
