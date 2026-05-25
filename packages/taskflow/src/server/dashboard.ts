@@ -3,6 +3,7 @@ import type { TaskflowConfig } from "../types.js";
 export function getDashboardHtml(config: TaskflowConfig): string {
   const activityEnabled = config.activityEngine?.enabled === true;
   const browserNotifications = config.notifications?.browser !== false;
+  const soundsEnabled = config.notifications?.sounds?.enabled !== false;
   const port = config.server.port;
   const projectName = config.projectName || "";
   const verbosity = config.activityEngine?.verbosity ?? "both";
@@ -70,7 +71,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "  </div>\n" +
     "\n" +
     "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
-    "  <script>\n" + getScript(activityEnabled, port, browserNotifications, projectName, verbosity) + "\n  </script>\n" +
+    "  <script>\n" + getScript(activityEnabled, port, browserNotifications, projectName, verbosity, soundsEnabled) + "\n  </script>\n" +
     "</body>\n</html>";
 }
 
@@ -247,9 +248,10 @@ export function getNavHtml(projectName: string, activePage: "home" | "overview")
     "  </nav>\n";
 }
 
-function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean, projectName: string, verbosity: string): string {
+function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean, projectName: string, verbosity: string, soundsEnabled: boolean): string {
   // Base dashboard JS (Kanban, stats, timeline, detail panel, shard nav)
   let script = `
+    var CONFIG_SOUNDS_ENABLED = ${soundsEnabled ? "true" : "false"};
     var PROJECT_NAME = ${JSON.stringify(projectName)};
     var COLUMNS = [
       { key: 'ready', label: 'Ready', matches: ['ready'] },
@@ -332,6 +334,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     }
 
     function playStatusSound(state) {
+      if (!CONFIG_SOUNDS_ENABLED) return;
       if (!notifSettings || notifSettings.sound === false) return;
       var src = state === 'idle' ? '/sounds/idle-ping.mp3'
               : state === 'permission-needed' ? '/sounds/permission-alert.mp3'
@@ -699,7 +702,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         var t = newTasks[i];
         var prev = prevTaskSnapshot[t.id];
         if (prev && prev !== t.status && notifSettings.statuses[t.status] !== false && NOTIF_WATCHED.indexOf(t.status) >= 0) {
-          fireDesktopNotif(t.id, t.status, notifSettings.sound !== false);
+          fireDesktopNotif(t.id, t.status, CONFIG_SOUNDS_ENABLED && notifSettings.sound !== false);
         }
         prevTaskSnapshot[t.id] = t.status;
       }

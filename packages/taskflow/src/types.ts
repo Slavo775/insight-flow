@@ -257,6 +257,7 @@ export interface AgentsConfig {
 export interface NotificationsConfig {
   browser?: boolean;
   cli?: boolean;
+  sounds?: { enabled?: boolean };
 }
 
 export interface MasterConfig {

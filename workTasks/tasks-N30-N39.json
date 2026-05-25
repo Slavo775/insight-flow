@@ -925,6 +925,56 @@
       "branch": "feat/N33-N37-claude-status-module",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/23",
       "mergedAt": null
+    },
+    {
+      "id": "N38",
+      "title": "Config flag to enable/disable dashboard sounds",
+      "type": "feat",
+      "priority": "medium",
+      "status": "implemented",
+      "folder": "workTasks/N38-config-flag-to-enable-disable-dashboard-sounds",
+      "createdAt": "2026-05-25T16:48:42.506Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T16:48:42.507Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T16:50:18.810Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T16:52:49.282Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-25T16:50:18.810Z",
+        "completedAt": "2026-05-25T16:52:49.281Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "sounds",
+        "config",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
