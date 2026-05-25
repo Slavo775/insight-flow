@@ -58,6 +58,22 @@
         "comment": "Fixed sound gate: was checking standalone notif-sound key (never written), now checks notifSettings.sound",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-25T15:13:27.019Z",
+      "endedAt": "2026-05-25T15:13:51.676Z",
+      "verdict": "fix-needed",
+      "comment": "dist/sounds nested incorrectly due to cp -r with existing dest; fixed build script to rm -rf dist/sounds first",
+      "type": "human",
+      "by": "Human (Project Owner)",
+      "fix": {
+        "startedAt": "2026-05-25T15:13:56.267Z",
+        "endedAt": "2026-05-25T15:13:59.995Z",
+        "status": "fixed",
+        "filesChanged": [],
+        "comment": null,
+        "by": "task-review-fix"
+      }
     }
   ]
 }

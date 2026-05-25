@@ -104,3 +104,30 @@
 ### Notes
 
 - `notifSettings` is an in-memory object populated by `loadNotifSettings()` from `'tf-notif-settings'` JSON. It is already the canonical source of truth for all notification preferences; `playStatusSound` should use it directly.
+
+
+---
+
+## Human Review — Round 4
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **`/sounds/idle-ping.mp3` returns 404 — MP3 files not served**
+   Browser console shows `GET http://localhost:6006/sounds/idle-ping.mp3 404 (Not Found)` on every status change. The `/sounds/` static route was added and the files were copied to `src/server/sounds/`, but the build script `cp -r src/server/sounds dist/sounds` silently nested the files at `dist/sounds/sounds/` instead of `dist/sounds/` when the destination directory already existed from a prior build.
+   _Fix: change build script to `tsup && rm -rf dist/sounds && cp -r src/server/sounds dist/sounds` to ensure a clean copy each build._
+
+2. **Server running pre-fix code — `playStatusSound` still shows old `localStorage.getItem('notif-sound')` gate in browser**
+   Confirmed by browser DevTools source view. Server must be restarted after rebuild to pick up the latest binary.
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- Root cause of 404: `cp -r <src> <dest>` when `<dest>` exists copies `<src>` as a subdirectory of `<dest>`, not into it.
+- After fix + rebuild + server restart, sounds should play correctly (gate and Audio API are correct per rounds 3–4).
