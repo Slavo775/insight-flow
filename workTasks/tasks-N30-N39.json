@@ -9,7 +9,7 @@
       "title": "Reusable activity item wrapper component",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N30-reusable-activity-item-wrapper-component",
       "createdAt": "2026-05-25T12:12:44.146Z",
       "statusHistory": [
@@ -27,6 +27,16 @@
           "status": "implemented",
           "at": "2026-05-25T12:42:35.238Z",
           "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T13:10:28.238Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T13:13:53.535Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -38,8 +48,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -58,7 +68,7 @@
       "title": "Recent activity rework with reusable wrapper",
       "type": "rework",
       "priority": "medium",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N31-recent-activity-rework-with-reusable-wrapper",
       "createdAt": "2026-05-25T12:12:49.233Z",
       "statusHistory": [
@@ -76,6 +86,16 @@
           "status": "implemented",
           "at": "2026-05-25T12:42:35.339Z",
           "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T13:10:28.349Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T13:13:53.665Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -87,8 +107,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -165,6 +185,21 @@
           "status": "fix-needed",
           "at": "2026-05-25T13:06:39.483Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T13:06:54.794Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T13:10:28.467Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T13:13:53.776Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -176,7 +211,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -196,6 +231,11 @@
           "at": "2026-05-25T13:02:04.193Z",
           "commitHash": "8ffca9c",
           "commitMessage": "fix(dashboard): N32 review fixes — animation, full border, white text, idle badge"
+        },
+        {
+          "at": "2026-05-25T13:06:54.793Z",
+          "commitHash": "3f781f4",
+          "commitMessage": "chore(tasks): N32 human review round 2 — border-bottom only, not full border"
         }
       ],
       "branch": "feat/N29-dashboard-activity-tabs",

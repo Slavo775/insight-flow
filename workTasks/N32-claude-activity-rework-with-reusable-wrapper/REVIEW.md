@@ -60,3 +60,48 @@
 
 - All other Round 1 blockers (animation, white text, idle badge) remain resolved — this is the only remaining fix.
 - Clarification added after initial Round 2 record: fix must apply to Claude Activity items as well (both tabs share `actItemHtml()` so one code change covers both).
+
+
+---
+
+## AI Review — Round 1
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Summary
+
+N32 reworks Claude Activity items to use the shared `.act-item` wrapper via `prependActivityItem()` and `eventColor()`. The structural goal is achieved — items use `.act-item` class, get a color derived from event type, and have a tinted background. Two issues need fixing before approval: the Round 2 human blocker (border-bottom only) is still unresolved in the file, and `prependActivityItem()` sets `borderLeftColor` directly while `actItemHtml()` sets `borderColor` — these diverged after the Round 1 human fix and must both be updated to `borderBottomColor` in the Round 2 fix pass.
+
+### Checklist verification
+
+- [x] `eventColor(ev)` helper added, covers all tool types — pass (lines 830–826)
+- [x] `prependActivityItem()` sets inline styles using `eventColor()` and `hexToRgb()` — pass (lines 844–848)
+- [x] `prependActivityItem()` uses class `act-item` — pass (line 846)
+- [ ] All return paths in `renderActivityItemHtml()` wrapped with `actItemHtml(eventColor(ev), ...)` — **not done**; `renderActivityItemHtml()` returns raw inner HTML and the `act-item` wrapper is applied in `prependActivityItem()` via DOM. Functionally equivalent for the prepend path, but the checklist item is not met.
+- [x] `querySelectorAll('.act-item')` used in `trimActivityFeed()` — pass (line 856)
+- [x] `.activity-feed` CSS updated to flex column with gap — pass (line 111)
+- [x] `.activity-item` CSS wrapper rule removed — pass (no match in source)
+
+### Blockers
+
+1. **Round 2 human blocker unresolved — border-bottom only** — The current `.act-item` CSS has `border: 1px solid transparent` and `actItemHtml()` sets `border-color:` inline. The human review Round 2 requires `border-bottom: 1px solid transparent` in CSS and `border-bottom-color:` in `actItemHtml()`.
+   - File: `dashboard.ts` line 119 (`.act-item` CSS), line 299 (`actItemHtml()`)
+   - Fix: `border: 1px solid transparent` → `border-bottom: 1px solid transparent`; `border-color:` → `border-bottom-color:` in `actItemHtml()`.
+
+2. **`prependActivityItem()` sets `borderLeftColor` — inconsistent with `actItemHtml()`** — After the Round 1 fix changed CSS from `border-left` to `border`, `prependActivityItem()` still writes `item.style.borderLeftColor` (line 847). This means Claude Activity items only color their left border while Recent Activity items (via `actItemHtml`) color all four sides. Both must use `borderBottomColor` once the Round 2 fix lands.
+   - File: `dashboard.ts` line 847
+   - Fix: `item.style.borderLeftColor = color` → `item.style.borderBottomColor = color`.
+
+### Non-blocking
+
+- `renderActivityItemHtml()` not wrapped in `actItemHtml()` (checklist item). The outer wrapper is applied in `prependActivityItem()` instead. This works for the current code path but if a future caller invokes `renderActivityItemHtml()` directly it won't get the wrapper. Consider renaming to `renderActivityItemInner()` to make the contract explicit — low priority.
+
+### Security & edge cases
+
+- All string interpolation in `renderActivityItemHtml()` uses `escHtml()` on user-derived fields. Safe.
+
+### Notes
+
+- Both blockers will be fixed together in the next fix pass targeting the Round 2 human review. One change to `actItemHtml()` + one to `prependActivityItem()` + one to `.act-item` CSS covers everything.
