@@ -116,7 +116,7 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .act-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
     .act-pane { padding: 12px 0; opacity: 1; transition: opacity 0.2s ease; }
     .act-item-list { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
-    .act-item { min-height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 6px; border: 1px solid transparent; font-size: 12px; }
+    .act-item { min-height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid transparent; font-size: 12px; }
     .activity-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
     .activity-icon.read { background: #1e3a5f; color: var(--cyan); }
     .activity-icon.edit { background: #3b2f06; color: var(--yellow); }
@@ -296,7 +296,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     function actItemHtml(color, innerHtml) {
       var rgb = hexToRgb(color);
-      return '<div class="act-item" style="border-color:' + color + ';background:rgba(' + rgb + ',0.08)">' + innerHtml + '</div>';
+      return '<div class="act-item" style="border-bottom-color:' + color + ';background:rgba(' + rgb + ',0.08)">' + innerHtml + '</div>';
     }
 
     function switchActTab(name) {
@@ -844,7 +844,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       var color = eventColor(ev);
       var item = document.createElement('div');
       item.className = 'act-item';
-      item.style.borderLeftColor = color;
+      item.style.borderBottomColor = color;
       item.style.background = 'rgba(' + hexToRgb(color) + ',0.08)';
       item.innerHTML = renderActivityItemHtml(ev);
       feed.insertBefore(item, feed.firstChild);
