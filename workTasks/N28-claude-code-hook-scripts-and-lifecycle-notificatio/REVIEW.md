@@ -65,6 +65,14 @@ Hooks are not triggering at all after Claude Code restart. The settings.json hoo
    The activity panel shows "EDIT-START editing REVIEW.md for N28" and "RESEARCH-END research complete…" — these are emitted by agents via `log-activity --phase`. The owner explicitly states events in the panel should come exclusively from hooks (zero token cost, outside Claude's context), not from agents spending tokens to call `log-activity`. Phase markers and hook-sourced events are currently mixed in the same feed.
    > "this edit start research end is events? please events should be only hooks so without token spending thing we are a little bit off roud there"
 
+3. **`insight-flow init` must install missing hooks even on re-runs**
+   Currently `initProject` calls `generateLifecycleHooks` only during a fresh init. If a project already has `taskflow.config.json` / `settings.json` and the lifecycle hooks are absent (e.g. installed before N28 shipped, or manually removed), a subsequent `insight-flow init` must still detect the missing hooks and add them. The idempotency guard in `installLifecycleHooks` (skip if file exists) only protects against double-writes — but the call itself must always happen, not be gated behind a "first run only" check.
+   > "we need to setup during init too if is not the first setup and hooks are not in the settings we need to setup them"
+
+4. **Hook-fired events must appear in the dashboard activity panel**
+   When hooks fire (`session-start`, `agent-active`, `agent-idle`, `approval-required`, `tool-requested`, `tool-approved`, `file-written`, `file-edited`) and `log-event --source hook` writes them to the session JSONL, those events do not appear in the UI activity feed. The `/api/activity` endpoint and the activity panel must read and render hook-sourced events. Right now the panel shows only `log-activity` phase markers — hook events are written to a separate JSONL but never surfaced in the UI.
+   > "we need all this hooks to appear in the ui in activity"
+
 ### Non-blocking
 
 - `timeout: 10000` in the hook registration is almost certainly in seconds (per docs, default is 600s). 10 000 seconds (~2.7 h) is harmless but wrong — should be 10 or 30.
