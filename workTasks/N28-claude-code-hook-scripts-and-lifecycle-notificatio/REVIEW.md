@@ -309,6 +309,88 @@ All OS notification calls where the AI is aware of or participates in the notifi
 - `notifications.browser` (dashboard browser Notification API) is unaffected — no AI involvement there.
 - The role syncing templates in `packages/taskflow/templates/roles/` must be updated alongside the root role files.
 
+---
+
+## Round 7 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Summary
+
+Looking at the activity panel (screenshot), the `Event tool-requested`, `Event tool-approved`, `Event file-edited` entries show only the event type — no information about which tool was called or which file was touched. The owner asks: do we have this data?
+
+**Answer: the data model and dashboard already support it — the hooks just don't extract or pass it.**
+
+- `log-event` command (`log-event.ts:158`): already accepts `--data '{"tool_name":"...","path":"..."}'` and maps `payload["tool_name"]` → `activityEntry.toolName`, `payload["path"]` → `activityEntry.file`
+- Dashboard (`dashboard.ts:861–888`): already renders `ev.toolName` as inline detail and `ev.file` as the last two path segments for `file-edited` / `file-written` events
+- Hook scripts: extract `SESSION_ID` and `TOOL` (for case-branching) but **never pass either as `--data`**
+
+The gap is entirely in the hook scripts. The fix is mechanical.
+
+### Blockers
+
+1. **`lifecycle-pre-tool.sh` and `lifecycle-post-tool.sh` must extract and pass tool name (and file path for Write/Edit) via `--data`**
+   Claude Code provides the full tool input JSON via stdin. Both hooks already read the input but discard the rich fields. They must extract and pass them:
+
+   **`lifecycle-pre-tool.sh`** — extract tool name, pass to `tool-requested`:
+   ```bash
+   TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+   [ -z "$TOOL" ] && exit 0
+   insight-flow log-event tool-requested --source hook --hook-name PreToolUse \
+     --session-id "$SESSION_ID" \
+     --data "{\"tool_name\":\"$TOOL\"}" \
+     --if-active 2>/dev/null &
+   ```
+
+   **`lifecycle-post-tool.sh`** — extract tool name + file path (for Write/Edit/Read), pass to the relevant event:
+   ```bash
+   TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+   FILE_PATH=$(echo "$INPUT" | grep -o '"file_path":"[^"]*"' | head -1 | cut -d'"' -f4)
+   case "$TOOL" in
+     Write)
+       insight-flow log-event file-written ... --data "{\"tool_name\":\"Write\",\"path\":\"$FILE_PATH\"}" ... &
+       ;;
+     Edit|MultiEdit)
+       insight-flow log-event file-edited ... --data "{\"tool_name\":\"$TOOL\",\"path\":\"$FILE_PATH\"}" ... &
+       ;;
+     *)
+       insight-flow log-event tool-approved ... --data "{\"tool_name\":\"$TOOL\"}" ... &
+       ;;
+   esac
+   ```
+
+   **Important:** do NOT name the variable `PATH` — that shadows the system `PATH` env var. Use `FILE_PATH` or `FPATH`.
+
+   Apply the same change to the template constants in `packages/taskflow/src/activity-hook.ts` (`LIFECYCLE_PRE_TOOL_SCRIPT`, `LIFECYCLE_POST_TOOL_SCRIPT`) so newly generated scripts also carry the data.
+
+   Also apply to the deployed copies:
+   - `.claude/hooks/lifecycle-pre-tool.sh`
+   - `.claude/hooks/lifecycle-post-tool.sh`
+   - `playground/.claude/hooks/lifecycle-pre-tool.sh`
+   - `playground/.claude/hooks/lifecycle-post-tool.sh`
+
+   > "this events have we data about which tool was requested or which file was edited and so on? or no"
+
+### Suggestions (non-blocking)
+
+- For `Bash` tool calls, `tool_input.command` holds the shell command — could be passed as `"input_summary"` in payload so the dashboard shows a truncated preview (matching N27's `activityEntry.inputSummary` rendering at `dashboard.ts:861`).
+- For `Read` tool calls, `tool_input.file_path` is also available — could emit `file-read` events with the path for a fuller picture.
+
+### Notes
+
+- The `log-event --data` flag parses its argument as JSON (`JSON.parse(opts.data)`). Shell quoting of the value must be correct — use double-quoted JSON with escaped inner quotes, e.g. `--data "{\"tool_name\":\"$TOOL\"}"`.
+- If `TOOL` or `FILE_PATH` is empty (edge case: hook JSON shape changed), pass an empty or omitted `--data` rather than malformed JSON.
+
+---
+
+## Round 7 — pending verdict
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** pending
+
 ### Summary
 
 ### Checklist verification

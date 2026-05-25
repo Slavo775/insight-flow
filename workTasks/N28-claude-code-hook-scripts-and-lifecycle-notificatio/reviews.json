@@ -52,6 +52,15 @@
       "type": "human",
       "by": "task-human-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T11:28:21.380Z",
+      "endedAt": "2026-05-25T11:29:07.136Z",
+      "verdict": "fix-needed",
+      "comment": "Hook scripts extract SESSION_ID and TOOL for branching but never pass them as --data to log-event. The entire pipeline already supports it: log-event maps payload.tool_name/path to activityEntry.toolName/file, dashboard already renders both. Fix: extract and pass --data in lifecycle-pre-tool.sh and lifecycle-post-tool.sh templates and deployed files.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
