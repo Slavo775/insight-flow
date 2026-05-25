@@ -91,3 +91,16 @@ None beyond the path issue above.
 `SessionStart` fires for every Claude Code session regardless of context — it is NOT the meaningful "start". The meaningful start for insight-flow is `UserPromptSubmit` filtered to insight-flow skill names (the `case` statement in `lifecycle-agent-active.sh`). `SessionStart` → `session-start` is lower priority.
 
 The remaining hooks (`SessionStart`, `PreToolUse`, `PostToolUse`) are lower priority — fix the path issue for all six, but validate the three above first.
+
+### Event catalog addendum (owner follow-up — future improvement scope)
+
+Owner provided the full Claude Code event list for future hook expansion. Key observations for N29+:
+
+**`SessionEnd` is distinct from `Stop`** — N28 maps `Stop` → `agent-idle` ("Claude finishes responding", i.e. end of a turn). `SessionEnd` fires when the entire session terminates. Both matter: `Stop` is the per-turn end, `SessionEnd` is the true cleanup point. N28 scope only covers `Stop`; `SessionEnd` should be wired in a future task.
+
+**`UserPromptExpansion`** — fires when a slash command expands into a prompt, *before* it reaches Claude. This may be more precise than `UserPromptSubmit` for detecting skill invocations (e.g. `/task-implement` expands here). Worth evaluating as an alternative or supplement to the current `UserPromptSubmit` + `case` detection.
+
+**Not yet wired — lower priority for future tasks:**
+`Setup`, `UserPromptExpansion`, `PermissionDenied`, `PostToolUseFailure`, `PostToolBatch`, `Notification`, `SubagentStart`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `StopFailure`, `TeammateIdle`, `InstructionsLoaded`, `ConfigChange`, `CwdChanged`, `FileChanged`, `WorktreeCreate`, `WorktreeRemove`, `PreCompact`, `PostCompact`, `Elicitation`, `ElicitationResult`, `SessionEnd`.
+
+> "but we need setup all this things to future improvement"
