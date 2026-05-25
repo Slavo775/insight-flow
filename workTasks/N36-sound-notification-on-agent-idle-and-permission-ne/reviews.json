@@ -18,6 +18,28 @@
         "comment": "Replaced ephemeral AudioContext with shared pre-warmed instance",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-25T14:58:05.605Z",
+      "endedAt": "2026-05-25T14:58:24.894Z",
+      "verdict": "fix-needed",
+      "comment": "Replace Web Audio API synthesis with real MP3s (provided); use new Audio() class; serve sounds as static assets",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:58:55.217Z",
+        "endedAt": "2026-05-25T15:01:27.694Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/sounds/idle-ping.mp3",
+          "packages/taskflow/src/server/sounds/permission-alert.mp3",
+          "packages/taskflow/package.json"
+        ],
+        "comment": "Replaced Web Audio API with new Audio() + real MP3 files; served at /sounds/ as static assets",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
