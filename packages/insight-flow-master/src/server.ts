@@ -51,9 +51,9 @@ export async function startMasterServer(
         return;
       }
       const body = await readBody(req);
-      let parsed: { label?: unknown; url?: unknown };
+      let parsed: { label?: unknown; url?: unknown; projectId?: unknown };
       try {
-        parsed = JSON.parse(body) as { label?: unknown; url?: unknown };
+        parsed = JSON.parse(body) as { label?: unknown; url?: unknown; projectId?: unknown };
       } catch {
         res.writeHead(400, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ error: "Invalid JSON" }));
@@ -61,7 +61,8 @@ export async function startMasterServer(
       }
       const label = String(parsed.label ?? "unknown");
       const projectUrl = String(parsed.url ?? "");
-      const id = registry.register(label, projectUrl);
+      const projectId = String(parsed.projectId ?? parsed.label ?? "unknown");
+      const id = registry.upsert(projectId, label, projectUrl);
       res.writeHead(200, { "Content-Type": MIME_JSON });
       res.end(JSON.stringify({ id }));
       return;

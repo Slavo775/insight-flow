@@ -214,12 +214,12 @@ async function waitForMaster(port: number): Promise<boolean> {
   return false;
 }
 
-async function registerWithMaster(masterUrl: string, label: string, projectUrl: string): Promise<string | null> {
+async function registerWithMaster(masterUrl: string, projectId: string, label: string, projectUrl: string): Promise<string | null> {
   try {
     const res = await fetch(`${masterUrl}/api/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label, url: projectUrl }),
+      body: JSON.stringify({ projectId, label, url: projectUrl }),
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
@@ -322,7 +322,7 @@ async function setupMasterIntegration(
 
   // Register with master
   const projectUrl = `http://localhost:${serverPort}`;
-  masterId = await registerWithMaster(masterUrl, config.projectName, projectUrl);
+  masterId = await registerWithMaster(masterUrl, config.projectName, config.projectName, projectUrl);
   if (!masterId) {
     console.log("  [master] Could not register with master at " + masterUrl + " — overview disabled");
     return null;
@@ -340,7 +340,7 @@ async function setupMasterIntegration(
     const s = buildProjectState(config, activity);
     const status = await pushStateToMaster(masterUrl, masterId, s);
     if (status === 401) {
-      masterId = await registerWithMaster(masterUrl, config.projectName, projectUrl);
+      masterId = await registerWithMaster(masterUrl, config.projectName, config.projectName, projectUrl);
       if (masterId) await pushStateToMaster(masterUrl, masterId, s);
     }
   };

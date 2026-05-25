@@ -2,17 +2,28 @@ import { randomUUID } from "node:crypto";
 import type { MasterProjectEntry, MasterProjectState } from "./types.js";
 
 const registry = new Map<string, MasterProjectEntry>();
+const projectIdIndex = new Map<string, string>(); // projectId → current UUID
 
-export function register(label: string, url: string): string {
-  const id = randomUUID();
+export function upsert(projectId: string, label: string, url: string): string {
+  const newId = randomUUID();
   const now = new Date().toISOString();
-  registry.set(id, {
-    id,
+
+  const existing = projectIdIndex.has(projectId)
+    ? registry.get(projectIdIndex.get(projectId)!)
+    : undefined;
+
+  if (existing) {
+    registry.delete(existing.id);
+  }
+
+  registry.set(newId, {
+    id: newId,
+    projectId,
     label,
     url,
-    registeredAt: now,
+    registeredAt: existing?.registeredAt ?? now,
     lastSeenAt: now,
-    state: {
+    state: existing?.state ?? {
       currentTaskId: null,
       currentTaskTitle: null,
       currentTaskStatus: null,
@@ -20,7 +31,12 @@ export function register(label: string, url: string): string {
       recentActivity: [],
     },
   });
-  return id;
+  projectIdIndex.set(projectId, newId);
+  return newId;
+}
+
+export function register(label: string, url: string): string {
+  return upsert(label, label, url);
 }
 
 export function update(id: string, state: MasterProjectState): boolean {
