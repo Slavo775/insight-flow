@@ -94,3 +94,32 @@
 ### Notes
 
 - The `done`→idle bug in `claudeStatusFromEvent()` (N35 blocker 1) also causes wrong title transitions; fixing N35 resolves it here automatically.
+
+
+---
+
+## Human Review — Round 3
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+5. **`agent-active` hook event not mapped to active state — badge stays idle**
+   "why its idle still?"
+   Screenshot shows AGENT-ACTIVE, TOOL-APPROVED, and TOOL-REQUESTED events all arriving in the Claude Activity feed, yet the badge stays **idle** throughout. The `tool-approved` → active case added in the previous fix would work for permission flows, but normal Claude activity fires `agent-active` (not the task lifecycle `start`). `claudeStatusFromEvent()` has no case for `ev.action === 'agent-active'`, so all normal session activity leaves the badge stuck at idle.
+   _Fix: add `if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'agent-active') return 'active';` in `claudeStatusFromEvent()`._
+
+6. **Sound still not working**
+   "also do not hear any sound"
+   Directly caused by blocker 5 — sound only plays when the badge transitions to `idle` or `permission-needed`. Since the badge never leaves idle (no active transition), no state change ever triggers `playStatusSound`. Fix blocker 5 first; if sound still absent after that, the `AudioContext` pre-warming may need further investigation.
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- Both issues are in `claudeStatusFromEvent()` in `dashboard.ts` only.
+- The `agent-active` case is the symmetric counterpart to `agent-idle` — both are native Claude Code hook events and should be treated as the source of truth for session state.
