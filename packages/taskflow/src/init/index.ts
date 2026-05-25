@@ -632,6 +632,20 @@ function buildConfigWithExamples(config: TaskflowConfig): string {
       "taskmaster":         [],
       "task-human-review":  [],
       "task-request-changes": []
+    },
+    "// git": "Control which git operations task-git is allowed to perform. Set any flag to false to block that operation.",
+    "git": {
+      "permissions": {
+        "createBranch":      true,
+        "checkout":          true,
+        "commit":            true,
+        "push":              true,
+        "forcePush":         false,
+        "merge":             true,
+        "deleteBranchLocal": true,
+        "deleteBranchRemote": true,
+        "createPR":          true
+      }
     }
   }
 `;

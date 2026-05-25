@@ -29,6 +29,21 @@ const DEFAULTS: TaskflowConfig = {
   },
   activityEngine: ACTIVITY_DEFAULTS,
   notifications: NOTIFICATION_DEFAULTS,
+  agents: {
+    git: {
+      permissions: {
+        createBranch: true,
+        checkout: true,
+        commit: true,
+        push: true,
+        forcePush: false,
+        merge: true,
+        deleteBranchLocal: true,
+        deleteBranchRemote: true,
+        createPR: true,
+      },
+    },
+  },
 };
 
 export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
@@ -42,6 +57,11 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
   }
 
   const projectName = userConfig.projectName || inferProjectName(anchor) || "project";
+
+  const mergedAgentsGitPerms = {
+    ...DEFAULTS.agents!.git!.permissions,
+    ...(userConfig.agents?.git?.permissions ?? {}),
+  };
 
   return {
     ...DEFAULTS,
@@ -58,6 +78,14 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
     notifications: {
       ...NOTIFICATION_DEFAULTS,
       ...(userConfig.notifications ?? {}),
+    },
+    agents: {
+      ...(DEFAULTS.agents ?? {}),
+      ...(userConfig.agents ?? {}),
+      git: {
+        ...(userConfig.agents?.git ?? {}),
+        permissions: mergedAgentsGitPerms,
+      },
     },
   };
 }

@@ -1,0 +1,47 @@
+{
+  "taskId": "N42",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T19:55:21.111Z",
+      "endedAt": "2026-05-25T19:58:21.114Z",
+      "verdict": "fix-needed",
+      "comment": "GIT PERMISSIONS in wrong file — move to dedicated AGENT_CONFIG.md; restore AGENT_NOTIFY.md to notifications-only",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T20:05:17.594Z",
+        "endedAt": "2026-05-25T20:09:28.027Z",
+        "status": "fixed",
+        "filesChanged": [
+          "AGENT_NOTIFY.md",
+          "AGENT_CONFIG.md",
+          ".claude/commands/task-git.md",
+          "packages/taskflow/templates/roles/AGENT_CONFIG.md",
+          "packages/taskflow/templates/roles/AGENT_NOTIFY.md"
+        ],
+        "comment": "Moved GIT PERMISSIONS to dedicated AGENT_CONFIG.md; restored AGENT_NOTIFY.md to notifications-only; task-git now @includes both",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T20:18:24.757Z",
+      "endedAt": "2026-05-25T20:20:19.405Z",
+      "verdict": "fix-needed",
+      "comment": "AGENT_CONFIG.md READING AGENT EXTENSIONS section is wrong — extensions are applied by CLI at init/prompt-build time, not read by agent at runtime; remove the section",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T20:25:19.931Z",
+        "endedAt": "2026-05-25T20:31:49.606Z",
+        "status": "fixed",
+        "filesChanged": [
+          "AGENT_CONFIG.md",
+          ".claude/commands/task-git.md",
+          "packages/taskflow/templates/roles/AGENT_CONFIG.md"
+        ],
+        "comment": "Removed wrong READING AGENT EXTENSIONS section from AGENT_CONFIG.md; wired permission gates into every task-git workflow step",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

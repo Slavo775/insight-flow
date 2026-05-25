@@ -97,7 +97,7 @@
       "title": "Project status push: route, socket.io broadcast, and overview styles",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N41-project-status-push-route-socket-io-broadcast-and-",
       "createdAt": "2026-05-25T17:50:57.980Z",
       "statusHistory": [
@@ -190,6 +190,11 @@
           "status": "pushed",
           "at": "2026-05-25T19:32:44.732Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-25T19:34:39.959Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -209,7 +214,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 104,
       "tags": [
         "master",
         "socket.io",
@@ -234,6 +239,104 @@
         }
       ],
       "branch": "feat/N41-project-status-push-socket-io-broadcast",
+      "mrUrl": null,
+      "mergedAt": "2026-05-25T19:34:39.959Z"
+    },
+    {
+      "id": "N42",
+      "title": "Git operation permissions in config with task-git enforcement",
+      "type": "feat",
+      "priority": "high",
+      "status": "fixed",
+      "folder": "workTasks/N42-git-operation-permissions-in-config-with-task-git-",
+      "createdAt": "2026-05-25T19:41:42.264Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T19:41:42.264Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T19:44:57.717Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T19:48:36.975Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T19:51:14.033Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T19:55:21.111Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T19:58:21.115Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T20:05:17.594Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T20:09:28.027Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T20:18:24.755Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T20:20:19.406Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T20:25:19.930Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T20:31:49.607Z",
+          "by": "task-review-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-25T19:44:57.717Z",
+        "completedAt": "2026-05-25T19:48:36.975Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "config",
+        "task-git",
+        "permissions"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-25T19:51:14.032Z",
+          "commitHash": "aaef459",
+          "commitMessage": "feat(config): add agents.git.permissions to control task-git operations — N42"
+        }
+      ],
+      "branch": "feat/N42-git-operation-permissions-in-config",
       "mrUrl": null,
       "mergedAt": null
     }
