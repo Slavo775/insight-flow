@@ -24,6 +24,10 @@
    - File: `packages/taskflow/src/server/dashboard.ts` — `.activity-time` CSS class and inline `color:var(--text-muted)` on time spans in `render()` timeline items
    - Fix: Change `.activity-time { color: var(--text-muted) … }` to `color: var(--text)` and update the inline style on the timestamp span in the timeline rows.
 
+5. **Claude Activity "active/idle" badge missing initial state** — the `activity-status` badge inside the Claude Activity tab button currently shows nothing on load. In the old sidebar design the badge defaulted to showing "idle" as soon as the panel rendered. It should show "idle" by default and switch to "active" when events arrive, exactly as before.
+   - File: `packages/taskflow/src/server/dashboard.ts` — `updateActivityStatus()` and initialisation in the `activityEnabled` JS block
+   - Fix: Call `updateActivityStatus('idle')` once during init so the badge is visible from the start.
+
 ### Suggestions (non-blocking)
 
 - None.
@@ -31,3 +35,4 @@
 ### Notes
 
 - Review covers the visual output of all four tasks (N29–N32) implemented together in a single file. All blockers are in `packages/taskflow/src/server/dashboard.ts`.
+- Blocker 5 added in a follow-up review pass before fixes were applied.
