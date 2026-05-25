@@ -97,7 +97,7 @@
       "title": "Project status push: route, socket.io broadcast, and overview styles",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "pushed",
       "folder": "workTasks/N41-project-status-push-route-socket-io-broadcast-and-",
       "createdAt": "2026-05-25T17:50:57.980Z",
       "statusHistory": [
@@ -145,6 +145,11 @@
           "status": "fixed",
           "at": "2026-05-25T18:55:24.036Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T18:58:50.435Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -171,8 +176,14 @@
         "overview",
         "status"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T18:58:50.435Z",
+          "commitHash": "8b72ffe",
+          "commitMessage": "feat(master,overview): project status push route, socket.io broadcast, and card styles — N41"
+        }
+      ],
+      "branch": "feat/N41-project-status-push-socket-io-broadcast",
       "mrUrl": null,
       "mergedAt": null
     }
