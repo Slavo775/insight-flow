@@ -1,0 +1,23 @@
+{
+  "taskId": "N36",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T14:20:01.075Z",
+      "endedAt": "2026-05-25T14:22:27.689Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: AudioContext created without prior user gesture, blocked by browser autoplay policy",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:24:27.221Z",
+        "endedAt": "2026-05-25T14:25:44.727Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Replaced ephemeral AudioContext with shared pre-warmed instance",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

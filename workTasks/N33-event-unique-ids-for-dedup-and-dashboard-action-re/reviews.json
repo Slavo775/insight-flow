@@ -1,0 +1,23 @@
+{
+  "taskId": "N33",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T14:20:00.730Z",
+      "endedAt": "2026-05-25T14:22:27.321Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: ClaudeHookEvent.id format uses dash+8hex, should match evt_<ms>_<4hex> of ActivityEvent",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:24:26.898Z",
+        "endedAt": "2026-05-25T14:25:44.409Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/commands/log-event.ts"
+        ],
+        "comment": "Aligned ClaudeHookEvent.id to evt_<ms>_<4hex> format",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

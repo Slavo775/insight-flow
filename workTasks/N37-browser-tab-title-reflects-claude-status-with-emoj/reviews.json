@@ -1,0 +1,41 @@
+{
+  "taskId": "N37",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T14:15:23.023Z",
+      "endedAt": "2026-05-25T14:15:52.992Z",
+      "verdict": "fix-needed",
+      "comment": "3 blockers: tool-approved missing from state machine, sound AudioContext not resuming, title init uses null instead of idle",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T14:17:22.918Z",
+      "endedAt": "2026-05-25T14:17:36.640Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker 4: idle must come from agent-idle hook only, not from done task event",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T14:20:05.767Z",
+      "endedAt": "2026-05-25T14:22:27.795Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: updatePageTitle(null) on init should be updatePageTitle(idle) to match badge state",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:24:27.346Z",
+        "endedAt": "2026-05-25T14:25:44.839Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Changed updatePageTitle(null) to updatePageTitle(idle) on init",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

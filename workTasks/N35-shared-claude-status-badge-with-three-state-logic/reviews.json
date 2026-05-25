@@ -1,0 +1,23 @@
+{
+  "taskId": "N35",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T14:20:00.965Z",
+      "endedAt": "2026-05-25T14:22:27.541Z",
+      "verdict": "fix-needed",
+      "comment": "2 blockers: done->idle wrong (task event not session signal), tool-approved->active missing",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:24:27.108Z",
+        "endedAt": "2026-05-25T14:25:44.619Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Removed done->idle, added tool-approved->active in claudeStatusFromEvent",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
