@@ -81,10 +81,13 @@ None beyond the path issue above.
 ### Priority addendum (owner follow-up)
 
 **Must work first — fix these three hooks before anything else:**
-1. `SessionStart` → `session-start` (session begins)
-2. `Stop` → `agent-idle` (session ends)
+1. `UserPromptSubmit` → `agent-active` (**this is "start"** — fires when an insight-flow skill is invoked, e.g. `/task-implement`)
+2. `Stop` → `agent-idle` ("end" — session finished)
 3. `PermissionRequest` → `approval-required` + terminal bell + OS notification (AI needs human approval)
 
 > "please crucial for me so far is start end and AI needs approval"
+> "i mean more than Session start is UserPromptSubmit? should be start for us"
 
-The remaining three hooks (`UserPromptSubmit` → agent-active, `PreToolUse` → tool-requested, `PostToolUse` → tool-approved/file-written/file-edited) are lower priority — fix the path issue for all six, but validate the three above first.
+`SessionStart` fires for every Claude Code session regardless of context — it is NOT the meaningful "start". The meaningful start for insight-flow is `UserPromptSubmit` filtered to insight-flow skill names (the `case` statement in `lifecycle-agent-active.sh`). `SessionStart` → `session-start` is lower priority.
+
+The remaining hooks (`SessionStart`, `PreToolUse`, `PostToolUse`) are lower priority — fix the path issue for all six, but validate the three above first.
