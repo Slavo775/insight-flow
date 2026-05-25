@@ -1003,7 +1003,7 @@
       "title": "Claude Code hook scripts and lifecycle notification wiring",
       "type": "feat",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "approved",
       "folder": "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio",
       "createdAt": "2026-05-25T08:28:32.710Z",
       "statusHistory": [
@@ -1016,6 +1016,26 @@
           "status": "fix-needed",
           "at": "2026-05-25T09:59:22.859Z",
           "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T10:08:18.726Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T10:08:18.839Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T10:12:04.625Z",
+          "by": "task-git"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T10:22:49.638Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -1026,7 +1046,7 @@
       },
       "changesAfterImplementation": [],
       "reviewCount": 1,
-      "lastReviewVerdict": "fix-needed",
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -1035,8 +1055,14 @@
         "notifications",
         "events"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T10:12:04.625Z",
+          "commitHash": "0b5c544",
+          "commitMessage": "fix(hooks): N28 — absolute paths, milestones filter, stale detection, N27 merge"
+        }
+      ],
+      "branch": "feat/N28-claude-code-hook-scripts-and-lifecycle-notif",
       "mrUrl": null,
       "mergedAt": null
     }

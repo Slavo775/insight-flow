@@ -3,12 +3,26 @@
   "reviews": [
     {
       "startedAt": "2026-05-25T09:11:35.351Z",
-      "endedAt": "2026-05-25T09:59:22.858Z",
-      "verdict": "fix-needed",
-      "comment": "tracker resync after N27 merge",
+      "endedAt": "2026-05-25T10:22:49.637Z",
+      "verdict": "approved",
+      "comment": "Round-3 re-review: all 4 human blockers confirmed resolved — absolute hook paths, milestones Activity filter, init re-run idempotency, hook events in dashboard. Cross-cutting N26+N27+N28 chain verified end-to-end.",
       "type": "ai",
       "by": "task-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-25T10:08:18.726Z",
+        "endedAt": "2026-05-25T10:08:18.838Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/test/log-activity.test.mjs",
+          "packages/taskflow/test/log-event.test.mjs",
+          "playground/.claude/hooks/lifecycle-pre-tool.sh",
+          "playground/.claude/settings.json"
+        ],
+        "comment": "Fixed all 4 blockers: absolute hook paths with stale detection, milestones panel excludes phase markers, N27 merged for log-event+UI, unused TOOL var removed",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

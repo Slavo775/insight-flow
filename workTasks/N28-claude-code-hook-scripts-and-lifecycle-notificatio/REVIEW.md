@@ -45,6 +45,68 @@ N28 adds 6 Claude Code lifecycle hook scripts (`SessionStart`, `UserPromptSubmit
 
 ---
 
+## Round 3 — AI Re-review (Combined N26 · N27 · N28)
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-25
+**Scope:** N28 blocker re-check + cross-cutting review of the N26→N27→N28 feature chain
+**Verdict:** approved
+
+### Blocker resolution
+
+All four Round 2 blockers are resolved.
+
+**Blocker 1 — Hook commands use relative paths**
+Fixed in `activity-hook.ts:416`:
+```typescript
+const hookCmd = `\${CLAUDE_PROJECT_DIR}/.claude/hooks/${file}`;
+```
+The `installLifecycleHooks` function now always writes the env-var-prefixed absolute form. Stale detection (`staleIdx` search at line 426) finds and upgrades any existing entry that contains the file name but lacks `CLAUDE_PROJECT_DIR`. Both flat `{command}` and nested `{matcher, hooks:[{command}]}` shapes are scanned via `getCmd()`. Root project `.claude/settings.json` verified — all 6 hook entries now use the canonical `${CLAUDE_PROJECT_DIR}/...` form.
+
+**Blocker 2 — Phase markers in milestones view**
+Fixed in `dashboard.ts:793`:
+```js
+if (VERBOSITY === 'milestones') return tool === 'Event' || tool === 'Phase' || tool === 'Skill';
+```
+`Activity` is removed. Agent-emitted `log-activity` entries (tool=`Activity`) no longer appear in milestones verbosity. Hook-sourced events (tool=`Event`) and skill markers remain. Pass.
+
+**Blocker 3 — Init re-runs must install missing hooks**
+`init/index.ts:215` calls `generateLifecycleHooks(cwd)` unconditionally whenever `activityEngine.enabled !== false` — it is NOT gated behind a "first run only" check. `installLifecycleHooks` is internally idempotent: scripts are skipped if they already exist (`existsSync` at line 396), settings entries are skipped or upgraded but never duplicated. A fresh consumer project gets hooks on first `init`; an existing project that already has hooks gets a no-op; a project with stale paths gets them upgraded. Pass.
+
+**Blocker 4 — Hook events must appear in the dashboard activity panel**
+Hook-sourced events are written by `log-event.ts`'s `appendToActivityLog()` with `{tool: "Event", source: "hook"}` into `.taskflow-activity.jsonl`. The `/api/activity` endpoint reads this file and returns all entries to the frontend. `shouldShowEvent()` includes `tool === 'Event'` in every verbosity mode. The activity panel renders hook events with colour-coded badges (amber for `approval-required`, blue for `agent-active`, muted for `agent-idle`, etc.) via the N27-landed rendering path. Pass.
+
+### Cross-cutting verification (N26 · N27 · N28)
+
+The three tasks form a complete pipeline:
+
+| Layer | Task | Artifact |
+|---|---|---|
+| Types + agent events | N26 | `EVENT_TYPES`, `TaskEvent`, `log-event` command (agent path) |
+| Hook event schema + session JSONL | N27 | `ClaudeHookEvent`, `SessionEventsFile`, activation flag, `/api/session-events`, dashboard rendering |
+| Shell scripts + registration | N28 | 6 lifecycle hook scripts, `installLifecycleHooks`, `init` integration |
+
+Verification across the chain:
+- `log-event --source hook --if-active` correctly exits 0 silently when no active flag — no noise outside skill sessions. ✅
+- `agent-active` sets the flag (no `--if-active` guard); `agent-idle` and `session-end` clear it — activation bracket is correct. ✅
+- `lifecycle-agent-active.sh` case-matches 10 insight-flow skill names via `#!/bin/bash` + `|` alternation; non-skill prompts exit 0. Scripts use `#!/bin/bash` shebang and are registered as file-path commands, so the OS honors the shebang — no POSIX-sh compatibility risk. ✅
+- `lifecycle-pre-tool.sh` no longer extracts an unused `$TOOL` variable (Round 1 non-blocker from N28 Round 1 and N27). ✅
+- `lifecycle-permission.sh` fires `printf '\a'` and `osascript` unconditionally (not guarded by `--if-active`) — correct per spec; approval alerts must always reach the user. ✅
+
+### Remaining non-blocking
+
+1. **Flat-format stale path detection gap** — if an external tool writes a stale entry in flat `{command: "..."}` format (not nested `{matcher, hooks: [{command}]}`), the update branch's `if (inner.length)` guard silently no-ops and leaves the path unchanged. All entries written by `installLifecycleHooks` itself use nested format, so this edge case is unreachable in practice. Low risk; no action needed until another writer appears.
+
+2. **N27 non-blocking still open** — `recentEventsTimer` declared but unused; `/api/session-events` returns `sessionId: null` on empty state vs. non-null contract in checklist. Neither is a correctness issue in the current codebase.
+
+3. **`settings.local.json` duplicate PostToolUse entry** — the root project's `settings.local.json` has `taskflow-activity.sh` registered twice under `PostToolUse`. Functionally harmless (idempotent write) but noisy. Cleanup candidate for a future housekeeping task.
+
+### Security
+
+No new concerns. All 6 hook scripts are fail-silent (`2>/dev/null || true`). `osascript` guarded with `command -v` check. Session IDs are UUID-shaped strings; no injection surface. Hook event payloads are `Record<string, unknown>` passed through without eval.
+
+---
+
 ## Round 2 — Human Review
 
 **Reviewer:** Human (Project Owner)
