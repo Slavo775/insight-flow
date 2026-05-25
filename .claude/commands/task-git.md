@@ -1,4 +1,5 @@
 @AGENT_NOTIFY.md
+@AGENT_CONFIG.md
 
 ROLE: Task Git Agent — Insight Flow
 
@@ -25,19 +26,28 @@ CONVENTIONS
 
 ---
 
+PERMISSION GATES
+
+Read `agents.git.permissions` at the start of every run (see `@AGENT_CONFIG.md`).
+Each operation below is only executed if its permission flag is `true` or absent.
+If a flag is `false`, skip the operation and print the blocked message — do not
+ask the user whether to proceed.
+
+---
+
 WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit and push")
 
 1. **Get task** — run `insight-flow current` if no ID given. Read task from tracker.
 2. **Check branch** — if task has no `branch` field or you're on `main`:
-   a. Create branch: `git checkout -b <type>/<task-id>-<slug>`.
+   a. `[createBranch]` Create branch: `git checkout -b <type>/<task-id>-<slug>`.
    b. The branch name uses task type + ID + slugified title.
-3. **If branch exists** but you're not on it: `git checkout <branch>`.
+3. `[checkout]` **If branch exists** but you're not on it: `git checkout <branch>`.
 4. **Stage changes** — `git status` to see what changed. Stage relevant files (`git add <files>`). Always include `workTasks/master.json` and any changed `workTasks/tasks-*.json` shard files. Never stage `.env`, credentials, or unrelated files.
-5. **Commit** — write a conventional commit message based on the diff:
+5. `[commit]` **Commit** — write a conventional commit message based on the diff:
    - Scope: derive from changed files (e.g., `web`, `api`, `agent`, `db`). For task docs/tracker only, use scope `tasks`.
    - Message: concise, describes the "why". End with `Co-Authored-By: Claude Code <noreply@anthropic.com>` (model-agnostic — keep the trailer honest regardless of whether Opus, Sonnet, Haiku, or a future model is authoring).
    - If hooks fail, diagnose and fix, then retry.
-6. **Push** — `git push -u origin HEAD` (sets upstream on first push).
+6. `[push]` **Push** — `git push -u origin HEAD` (sets upstream on first push).
 7. **Update tracker** — run:
    ```
    insight-flow push --id <ID> --commit <hash> --message "<message>" --branch <branch>
@@ -49,8 +59,8 @@ WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit
 WORKFLOW: CREATE PULL REQUEST (when "create MR", "create PR", "open pull request")
 
 1. **Get task** — `insight-flow show --id Nxx --summary` for branch + title.
-2. **Ensure pushed** — if no pushes yet, run the PUSH workflow first.
-3. **Create PR** — invoke the command defined in `taskflow.config.json.agents.extend.task-git` for your project's git host. If no command is configured, **compose a host-appropriate prefill URL** containing the task title and the PR body as URL-encoded query parameters so the user lands on a populated create-PR form (not a blank one). The agent already has both pieces — the task title and the commit message bullets it just produced — so no user prompting is required. URL-encode via `node -e "process.stdout.write(encodeURIComponent(...))"` (insight-flow's canonical encoder; works without extra dependencies). Print the composed URL and ask the user to open it, submit, and paste back the created PR URL for `mr-update`. See the Examples appendix below + `@PR_API.md` for per-host prefill syntax.
+2. `[push]` **Ensure pushed** — if no pushes yet, run the PUSH workflow first.
+3. `[createPR]` **Create PR** — invoke the command defined in `taskflow.config.json.agents.extend.task-git` for your project's git host. If no command is configured, **compose a host-appropriate prefill URL** containing the task title and the PR body as URL-encoded query parameters so the user lands on a populated create-PR form (not a blank one). The agent already has both pieces — the task title and the commit message bullets it just produced — so no user prompting is required. URL-encode via `node -e "process.stdout.write(encodeURIComponent(...))"` (insight-flow's canonical encoder; works without extra dependencies). Print the composed URL and ask the user to open it, submit, and paste back the created PR URL for `mr-update`. See the Examples appendix below + `@PR_API.md` for per-host prefill syntax.
 4. **Record URL** in tracker:
    ```
    insight-flow mr-update --id <ID> --url "<pr-url>"
@@ -62,18 +72,16 @@ WORKFLOW: MERGE (when "merge", "done and merge", "task is done")
 
 1. **Get task** — read tracker for branch, mrUrl, status.
 2. **Edge case — no PR**: if `mrUrl` is missing, tell the user to create the PR first. Provide the compare URL. Do not merge without a PR.
-3. **Ensure on main**: `git checkout main && git pull origin main`.
-4. **Merge branch**: `git merge --no-ff <branch>` (preserves merge commit).
-5. **Push main**: `git push origin main`.
+3. `[checkout]` **Ensure on main**: `git checkout main && git pull origin main`.
+4. `[merge]` **Merge branch**: `git merge --no-ff <branch>` (preserves merge commit).
+5. `[push]` **Push main**: `git push origin main`.
 6. **Update tracker**:
    ```
    insight-flow merge --id <ID>
    ```
 7. **Clean up** — ask user before deleting branches:
-   ```
-   git branch -d <branch>
-   git push origin --delete <branch>
-   ```
+   - `[deleteBranchLocal]` `git branch -d <branch>`
+   - `[deleteBranchRemote]` `git push origin --delete <branch>`
 8. **Report** — show merge commit, updated status. The Stop hook fires the OS notification automatically on session end.
 
 ---
