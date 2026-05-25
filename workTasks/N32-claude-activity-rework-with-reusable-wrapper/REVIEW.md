@@ -48,9 +48,9 @@
 
 ### Blockers
 
-1. **Activity item border should be bottom-only, not full border** — "this border is soo cognitive overload please border should be only border bottom 1px solid" — the `.act-item` wrapper currently has a full `1px solid` border on all sides (applied as fix for Round 1 blocker 2). It should instead have only a `border-bottom: 1px solid` separator.
+1. **Activity item border should be bottom-only, not full border — both tabs** — "this border is soo cognitive overload please border should be only border bottom 1px solid also for the Claude activity item should be same!" — the `.act-item` wrapper currently has a full `1px solid` border on all sides. Both the Recent Activity tab and the Claude Activity tab use `actItemHtml()` / `.act-item`, so the fix must cover both.
    - File: `packages/taskflow/src/server/dashboard.ts` — `.act-item` CSS and `actItemHtml()`
-   - Fix: Change `border: 1px solid transparent` in `.act-item` to `border-bottom: 1px solid transparent`; update `actItemHtml()` to set `border-bottom-color:` (not `border-color:`) inline.
+   - Fix: Change `border: 1px solid transparent` in `.act-item` to `border-bottom: 1px solid transparent`; update `actItemHtml()` to set `border-bottom-color:` (not `border-color:`) inline. This single change fixes both tabs since they share the same wrapper.
 
 ### Suggestions (non-blocking)
 
@@ -59,3 +59,4 @@
 ### Notes
 
 - All other Round 1 blockers (animation, white text, idle badge) remain resolved — this is the only remaining fix.
+- Clarification added after initial Round 2 record: fix must apply to Claude Activity items as well (both tabs share `actItemHtml()` so one code change covers both).
