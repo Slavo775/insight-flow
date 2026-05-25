@@ -925,6 +925,87 @@
       "branch": "feat/N33-N37-claude-status-module",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/23",
       "mergedAt": null
+    },
+    {
+      "id": "N38",
+      "title": "Config flag to enable/disable dashboard sounds",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N38-config-flag-to-enable-disable-dashboard-sounds",
+      "createdAt": "2026-05-25T16:48:42.506Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T16:48:42.507Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T16:50:18.810Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T16:52:49.282Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T16:53:29.084Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T16:59:28.784Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T17:00:54.649Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T17:04:23.432Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T17:04:38.836Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-25T16:50:18.810Z",
+        "completedAt": "2026-05-25T16:52:49.281Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "sounds",
+        "config",
+        "dashboard"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-25T16:53:29.083Z",
+          "commitHash": "a75b6ca",
+          "commitMessage": "feat(dashboard): N38 — config flag to enable/disable sounds"
+        }
+      ],
+      "branch": "feat/N38-config-flag-sounds",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/24",
+      "mergedAt": null
     }
   ]
 }
