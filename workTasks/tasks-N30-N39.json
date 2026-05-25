@@ -107,7 +107,7 @@
       "title": "Claude activity rework with reusable wrapper",
       "type": "rework",
       "priority": "medium",
-      "status": "fix-needed",
+      "status": "fixing",
       "folder": "workTasks/N32-claude-activity-rework-with-reusable-wrapper",
       "createdAt": "2026-05-25T12:12:53.332Z",
       "statusHistory": [
@@ -140,6 +140,16 @@
           "status": "fix-needed",
           "at": "2026-05-25T12:55:50.405Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T12:56:37.537Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T12:57:00.628Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -161,8 +171,14 @@
         "dashboard",
         "claude-activity"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T12:56:37.537Z",
+          "commitHash": "99e452f",
+          "commitMessage": "chore(tasks): N32 human review — add blocker 5 (idle/active badge init)"
+        }
+      ],
+      "branch": "feat/N29-dashboard-activity-tabs",
       "mrUrl": null,
       "mergedAt": null
     }
