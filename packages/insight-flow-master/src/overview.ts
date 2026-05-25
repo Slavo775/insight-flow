@@ -90,6 +90,12 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .proj-activity-badge-tool { background: var(--border); color: var(--text-muted); }
     .proj-idle-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--border); color: var(--text-muted); }
     .proj-active-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #0a3622; color: var(--green); }
+    .proj-card.status-active { border-color: var(--green); background: #0d2318; }
+    .proj-card.status-permission { border-color: var(--red); background: #2a0d0d; }
+    .claude-status-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .claude-status-active { background: #0a3622; color: var(--green); }
+    .claude-status-idle { background: var(--border); color: var(--text-muted); }
+    .claude-status-permission { background: #3b1111; color: var(--red); }
     .proj-footer { display: flex; justify-content: flex-end; }
     .open-link { font-size: 11px; color: var(--accent); text-decoration: none; }
     .open-link:hover { text-decoration: underline; }
@@ -196,6 +202,19 @@ function getScript(initialData: string): string {
     function renderCard(p) {
       var bi = badgeInfo(p.lastSeenAt);
       var s = p.state || {};
+      var statusCls = s.claudeStatus === 'active' ? 'status-active'
+        : s.claudeStatus === 'permission-required' ? 'status-permission'
+        : '';
+      var claudeBadgeCls = s.claudeStatus === 'active' ? 'claude-status-active'
+        : s.claudeStatus === 'permission-required' ? 'claude-status-permission'
+        : 'claude-status-idle';
+      var claudeBadgeLabel = s.claudeStatus === 'active' ? 'active'
+        : s.claudeStatus === 'permission-required' ? 'permission required'
+        : s.claudeStatus === 'idle' ? 'idle'
+        : '';
+      var claudeBadgeHtml = claudeBadgeLabel
+        ? '<span class="claude-status-badge ' + claudeBadgeCls + '">' + claudeBadgeLabel + '</span>'
+        : '';
       var taskHtml;
       if (s.currentTaskId) {
         taskHtml = '<div class="proj-task">' +
@@ -208,10 +227,13 @@ function getScript(initialData: string): string {
       }
       var idleStatus = deriveIdleStatus(s.recentActivity);
       var activityHtml = renderActivityMini(s.recentActivity, idleStatus);
-      return '<div class="proj-card" data-id="' + escHtml(p.id) + '">' +
+      return '<div class="proj-card' + (statusCls ? ' ' + statusCls : '') + '" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
           '<span class="proj-label">' + escHtml(p.label) + '</span>' +
-          '<span class="conn-badge ' + bi.cls + '" data-badge>' + bi.label + '</span>' +
+          '<div style="display:flex;gap:6px;align-items:center">' +
+            claudeBadgeHtml +
+            '<span class="conn-badge ' + bi.cls + '" data-badge>' + bi.label + '</span>' +
+          '</div>' +
         '</div>' +
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +

@@ -94,6 +94,39 @@ export async function startMasterServer(
       return;
     }
 
+    // POST /api/projects/:id/status
+    const statusMatch = /^\/api\/projects\/([^/]+)\/status$/.exec(url.pathname);
+    if (req.method === "POST" && statusMatch) {
+      const id = statusMatch[1];
+      const body = await readBody(req);
+      let parsed: { status?: unknown };
+      try {
+        parsed = JSON.parse(body) as { status?: unknown };
+      } catch {
+        res.writeHead(400, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ error: "Invalid JSON" }));
+        return;
+      }
+      const status = String(parsed.status ?? "");
+      const ok = registry.updateStatus(id, status);
+      if (!ok) {
+        const validStatuses = ["active", "idle", "permission-required"];
+        if (!validStatuses.includes(status)) {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Invalid status; expected active|idle|permission-required" }));
+        } else {
+          res.writeHead(401, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Unknown project id" }));
+        }
+        return;
+      }
+      const entry = registry.getById(id);
+      if (entry) io.emit("project-update", entry);
+      res.writeHead(200, { "Content-Type": MIME_JSON });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
     // GET /api/activity/:projectId — last 3 activity events for a project
     const activityMatch = /^\/api\/activity\/([^/]+)$/.exec(url.pathname);
     if (req.method === "GET" && activityMatch) {

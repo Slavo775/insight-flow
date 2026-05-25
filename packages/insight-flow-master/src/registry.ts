@@ -43,7 +43,18 @@ export function update(id: string, state: MasterProjectState): boolean {
   const entry = registry.get(id);
   if (!entry) return false;
   entry.lastSeenAt = new Date().toISOString();
-  entry.state = state;
+  entry.state = { claudeStatus: entry.state.claudeStatus, ...state };
+  return true;
+}
+
+const VALID_STATUSES = new Set(["active", "idle", "permission-required"]);
+
+export function updateStatus(id: string, status: string): boolean {
+  if (!VALID_STATUSES.has(status)) return false;
+  const entry = registry.get(id);
+  if (!entry) return false;
+  entry.lastSeenAt = new Date().toISOString();
+  entry.state.claudeStatus = status as "active" | "idle" | "permission-required";
   return true;
 }
 
