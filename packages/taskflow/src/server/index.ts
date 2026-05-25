@@ -361,7 +361,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     process.exit(1);
   }
 
-  const configEnabled = activityConfig.enabled !== false;
+  const configEnabled = activityConfig.enabled === true;
   const hookStatus: ActivityHookStatus = configEnabled
     ? detectActivityHookStatus(process.cwd())
     : "ok";

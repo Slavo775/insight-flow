@@ -1,7 +1,7 @@
 import type { TaskflowConfig } from "../types.js";
 
 export function getDashboardHtml(config: TaskflowConfig): string {
-  const activityEnabled = config.activityEngine?.enabled !== false;
+  const activityEnabled = config.activityEngine?.enabled === true;
   const browserNotifications = config.notifications?.browser !== false;
   const port = config.server.port;
   const projectName = config.projectName || "";
@@ -108,6 +108,7 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .activity-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--border); color: var(--text-muted); white-space: nowrap; }
     .activity-status.active { background: #0a3622; color: var(--green); }
     .activity-status.idle { background: var(--border); color: var(--text-muted); }
+    .activity-status.permission-needed { background: #3b1a00; color: var(--yellow); }
     .activity-feed { overflow-y: auto; padding: 4px 0; display: flex; flex-direction: column; gap: 10px; max-height: 600px; }
     .act-tabs { margin-top: 24px; }
     .act-tab-bar { display: flex; align-items: center; border-bottom: 2px solid var(--border); }
@@ -319,6 +320,50 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           })(pane);
         }
       }
+    }
+
+    function claudeStatusFromEvent(ev) {
+      if (ev.tool === 'Event' && ev.action === 'start') return 'active';
+      if (ev.tool === 'Event' && ev.action === 'done') return 'idle';
+      if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'approval-required') return 'permission-needed';
+      if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'agent-idle') return 'idle';
+      return null;
+    }
+
+    function playStatusSound(state) {
+      if (localStorage.getItem('notif-sound') !== 'true') return;
+      try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        if (state === 'idle') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.5);
+        } else if (state === 'permission-needed') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(660, ctx.currentTime);
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.setValueAtTime(0, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.08, ctx.currentTime + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.35);
+        }
+        setTimeout(function() { try { ctx.close(); } catch(e) {} }, 600);
+      } catch(e) {}
+    }
+
+    function updatePageTitle(state) {
+      var base = 'Taskflow Dashboard';
+      var prefix = { active: '⚡', idle: '💤', 'permission-needed': '🚨' };
+      document.title = state && prefix[state] ? prefix[state] + ' ' + base : base;
     }
 
     function formatTime(iso) {
@@ -806,17 +851,17 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     }
 
     function addActivityEvent(ev) {
-      var key = eventKey(ev);
+      var key = ev.id || eventKey(ev);
       if (seenEventKeys.has(key)) return;
       seenEventKeys.add(key);
       activityEvents.unshift(ev);
       if (activityEvents.length > ACTIVITY_CAP) activityEvents = activityEvents.slice(0, ACTIVITY_CAP);
 
-      // Idle when a done event (typed or legacy phase) arrives
-      if (ev.action === 'done' && (ev.tool === 'Event' || ev.tool === 'Phase')) {
-        updateActivityStatus('idle');
-      } else {
-        updateActivityStatus('active');
+      var newStatus = claudeStatusFromEvent(ev);
+      if (newStatus) {
+        updateActivityStatus(newStatus);
+        updatePageTitle(newStatus);
+        if (newStatus === 'idle' || newStatus === 'permission-needed') playStatusSound(newStatus);
       }
 
       if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }
@@ -844,6 +889,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       var color = eventColor(ev);
       var item = document.createElement('div');
       item.className = 'act-item';
+      item.dataset.eventId = ev.id || '';
       item.style.borderBottomColor = color;
       item.style.background = 'rgba(' + hexToRgb(color) + ',0.08)';
       item.innerHTML = renderActivityItemHtml(ev);
@@ -1058,6 +1104,9 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       } else if (state === 'idle') {
         el.textContent = 'idle';
         el.className = 'activity-status idle';
+      } else if (state === 'permission-needed') {
+        el.textContent = '🚨 permission';
+        el.className = 'activity-status permission-needed';
       } else {
         el.textContent = '';
         el.className = 'activity-status';
@@ -1076,6 +1125,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     // Show idle badge immediately on load
     updateActivityStatus('idle');
+    updatePageTitle(null);
 
     // Refresh timestamps every 30s as fallback
     setInterval(refreshTimestamps, 30000);`;

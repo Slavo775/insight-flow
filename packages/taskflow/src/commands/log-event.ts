@@ -187,6 +187,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
 
     // Append to activity log
     const activityEntry: Record<string, unknown> = {
+      id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
       ts,
       tool: "Event",
       action: hookEvent.type,
@@ -246,6 +247,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
 
   // Append to activity log
   appendToActivityLog(config, {
+    id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
     ts,
     tool: "Event",
     action: eventType,
