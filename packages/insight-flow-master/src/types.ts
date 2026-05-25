@@ -13,6 +13,7 @@ export interface MasterProjectState {
 
 export interface MasterProjectEntry {
   id: string;
+  projectId: string;
   label: string;
   url: string;
   registeredAt: string;

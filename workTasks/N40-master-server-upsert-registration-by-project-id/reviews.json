@@ -1,0 +1,14 @@
+{
+  "taskId": "N40",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T17:34:09.034Z",
+      "endedAt": "2026-05-25T17:37:11.240Z",
+      "verdict": "approved",
+      "comment": "Server-side upsert correct; state preserved; backward-compat confirmed. Non-blocking: client upsertProject in overview.ts deduplicates by UUID only — stale card persists until page reload after re-registration. Suggested one-liner fix in notes.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

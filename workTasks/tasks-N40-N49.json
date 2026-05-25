@@ -1,0 +1,70 @@
+{
+  "range": {
+    "from": 40,
+    "to": 49
+  },
+  "tasks": [
+    {
+      "id": "N40",
+      "title": "Master server: upsert registration by project ID",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N40-master-server-upsert-registration-by-project-id",
+      "createdAt": "2026-05-25T17:21:30.169Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T17:21:30.169Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T17:25:23.718Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T17:26:27.815Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T17:34:09.033Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T17:37:11.240Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-25T17:25:23.717Z",
+        "completedAt": "2026-05-25T17:26:27.814Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/types.ts",
+          "packages/insight-flow-master/src/registry.ts",
+          "packages/insight-flow-master/src/server.ts",
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master-server",
+        "registration",
+        "orphans"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    }
+  ]
+}
