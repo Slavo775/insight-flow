@@ -36,6 +36,33 @@
         "comment": "Changed updatePageTitle(null) to updatePageTitle(idle) on init",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-25T14:29:50.570Z",
+      "endedAt": "2026-05-25T14:30:11.402Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker 5: agent-active hook event missing from state machine — badge never leaves idle; blocker 6: sound stuck because no active->idle transition ever fires",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T14:31:57.833Z",
+      "endedAt": "2026-05-25T14:34:38.496Z",
+      "verdict": "fix-needed",
+      "comment": "Blockers 7+8: permission badge never clears after tool-approved (root cause unclear, needs debug trace), agent-active still missing from state machine",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:36:38.457Z",
+        "endedAt": "2026-05-25T14:42:21.240Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "agent-active→active fixes badge and title; tool-approved→active was already compiled, server needed restart",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

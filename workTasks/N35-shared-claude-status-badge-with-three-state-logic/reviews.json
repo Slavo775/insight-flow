@@ -9,13 +9,13 @@
       "type": "ai",
       "by": "task-review",
       "fix": {
-        "startedAt": "2026-05-25T14:24:27.108Z",
-        "endedAt": "2026-05-25T14:25:44.619Z",
+        "startedAt": "2026-05-25T14:36:38.354Z",
+        "endedAt": "2026-05-25T14:42:21.127Z",
         "status": "fixed",
         "filesChanged": [
           "packages/taskflow/src/server/dashboard.ts"
         ],
-        "comment": "Removed done->idle, added tool-approved->active in claudeStatusFromEvent",
+        "comment": "Added agent-active→active to claudeStatusFromEvent",
         "by": "task-review-fix"
       }
     }
