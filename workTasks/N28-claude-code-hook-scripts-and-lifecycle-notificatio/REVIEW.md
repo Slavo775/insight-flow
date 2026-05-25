@@ -222,3 +222,101 @@ Owner provided the full Claude Code event list for future hook expansion. Key ob
 ### Suggestions (non-blocking)
 
 ### Notes
+
+
+---
+
+## Round 6 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Summary
+
+All OS notification calls where the AI is aware of or participates in the notification decision must be removed. Notifications must come exclusively from hooks (zero AI awareness). The exception is user-authorized agent notifications configured explicitly via `agents.extend`. README must be updated with the new model.
+
+### Blockers
+
+1. **Remove `@AGENT_NOTIFY.md` from all 8 agent role files — AI must have zero notification awareness**
+   All 8 role files currently `@AGENT_NOTIFY.md` — loading notification context into the agent's prompt on every skill invocation. Even though `AGENT_NOTIFY.md` says "No agent needs to call insight-flow notify explicitly," the AI is still made aware of and implicitly participates in the notification system. This awareness must be removed entirely. The hook scripts handle all notifications autonomously; agents need to know nothing about it.
+
+   Files to edit (remove the `@AGENT_NOTIFY.md` line from each):
+   - `TASK_IMPLEMENTER_ROLE.md:25`
+   - `TASK_HUMAN_REVIEW_ROLE.md:20`
+   - `TASK_INCIDENT_ROLE.md:20`
+   - `TASK_REQUEST_CHANGES_ROLE.md:20`
+   - `TASK_REVIEW_FIXER_ROLE.md:20`
+   - `TASK_REVIEWER_ROLE.md:20`
+   - `TASKMASTER_CHANGE_ROLE.md:19`
+   - `TASKMASTER_ROLE.md:21`
+
+   Also remove or blank `AGENT_NOTIFY.md` itself — it becomes unused.
+
+   > "remove all usage of notification where AI use it"
+
+2. **`lifecycle-agent-idle.sh` and `lifecycle-permission.sh` must use `insight-flow notify` instead of direct `osascript`**
+   Both hook templates (in `activity-hook.ts` and deployed scripts) call `osascript` directly, bypassing the `notifications.cli` config flag. If a user sets `"notifications": { "cli": false }`, these hooks still fire OS notifications. Replace direct `osascript` calls with `insight-flow notify` (which respects the flag, handles all platforms — macOS/Linux/Windows — and exits silently when disabled).
+
+   Current (both templates and deployed scripts):
+   ```bash
+   if command -v osascript >/dev/null 2>&1; then
+     osascript -e 'display notification "Agent idle" with title "insight-flow"' 2>/dev/null || true
+   fi
+   ```
+   Target:
+   ```bash
+   insight-flow notify "Agent idle" 2>/dev/null &
+   ```
+   Same pattern applies to `lifecycle-permission.sh`: replace the `osascript` block with `insight-flow notify "Approval required"`. The `printf '\a'` bell stays as-is (it's terminal-level, not OS notification level).
+
+   Files: `packages/taskflow/src/activity-hook.ts` (template constants), `.claude/hooks/lifecycle-agent-idle.sh`, `.claude/hooks/lifecycle-permission.sh`, `playground/.claude/hooks/lifecycle-agent-idle.sh`, `playground/.claude/hooks/lifecycle-permission.sh`.
+
+   > "only notification what we need to use is through hook"
+
+3. **Document `agents.extend` as the user-authorized path for AI-triggered notifications in README**
+   If a user wants the AI itself to send a notification at the end of a skill run (e.g., "ping me when implementing is done"), they can add it to `taskflow.config.json`:
+   ```json
+   {
+     "agents": {
+       "extend": {
+         "task-implement": ["When the task is fully implemented and the tracker is updated, run: insight-flow notify 'N<ID> implemented'"]
+       }
+     }
+   }
+   ```
+   This makes AI-triggered notifications explicit and opt-in — the user authorizes them; they do not fire by default.
+
+   Add a full notification section to `packages/taskflow/README.md` covering:
+   - **Hook notifications** (autonomous, no AI): `taskflow-notify.sh` on task status transitions; `lifecycle-agent-idle.sh` on turn end; `lifecycle-permission.sh` on approval requests + terminal bell
+   - **Browser notifications** (dashboard Web Notification API, no AI)
+   - **User-authorized AI notifications** via `agents.extend` in config
+   - `notifications.cli` and `notifications.browser` flags
+   - `insight-flow notify` as the cross-platform primitive
+   - How to disable each tier
+
+   > "please also update readme with all documentation how the notification works now"
+
+### Suggestions (non-blocking)
+
+- `AGENT_NOTIFY.md` can be kept as a blank or stub file (in case downstream consumers reference it) rather than deleted, since `init/index.ts:491` writes to it. A one-line comment saying it's intentionally blank is sufficient.
+- The `sync-role-templates.mjs` script (referenced in CLAUDE.md) syncs root role files to `packages/taskflow/templates/roles/` — the fixer must also remove `@AGENT_NOTIFY.md` from those template copies so re-running `init` in consumer projects doesn't reintroduce the line.
+
+### Notes
+
+- `taskflow-notify.sh` Stop hook is correct — it calls `insight-flow notify` from a hook subprocess (not from AI context). Keep as-is.
+- `insight-flow notify` CLI command must remain — hooks use it.
+- `notifications.browser` (dashboard browser Notification API) is unaffected — no AI involvement there.
+- The role syncing templates in `packages/taskflow/templates/roles/` must be updated alongside the root role files.
+
+### Summary
+
+### Checklist verification
+
+### Blockers
+
+### Non-blocking
+
+### Security & edge cases
+
+### Notes

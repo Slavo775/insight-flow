@@ -43,6 +43,15 @@
         "comment": "Blocker 1 fixed: all 6 lifecycle hook scripts now background log-event with & (fire-and-forget). Bell and osascript in permission script remain synchronous. Templates and deployed files updated.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-25T11:20:32.193Z",
+      "endedAt": "2026-05-25T11:23:15.987Z",
+      "verdict": "fix-needed",
+      "comment": "Blockers: (1) remove @AGENT_NOTIFY from all 8 role files — AI must have zero notification awareness; (2) lifecycle-agent-idle + lifecycle-permission templates must use insight-flow notify instead of raw osascript (respects notifications.cli flag); (3) README must document the three-tier notification model: hooks, browser, user-authorized agents.extend.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
