@@ -1042,7 +1042,7 @@
       "title": "Release v0.6.0 — changelog, version bump, README",
       "type": "chore",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N39-release-v0-6-0-changelog-version-bump-readme",
       "createdAt": "2026-05-25T17:10:23.063Z",
       "statusHistory": [
@@ -1060,6 +1060,11 @@
           "status": "implemented",
           "at": "2026-05-25T17:14:39.987Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T17:15:26.739Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1085,9 +1090,15 @@
         "changelog",
         "docs"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T17:15:26.739Z",
+          "commitHash": "9d0064d",
+          "commitMessage": "chore(release): v0.6.0 — CHANGELOG, version bump, README updates"
+        }
+      ],
+      "branch": "chore/N39-release-v0-6-0",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/25",
       "mergedAt": null
     }
   ]
