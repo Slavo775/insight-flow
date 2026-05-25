@@ -36,3 +36,26 @@
 
 - Review covers the visual output of all four tasks (N29–N32) implemented together in a single file. All blockers are in `packages/taskflow/src/server/dashboard.ts`.
 - Blocker 5 added in a follow-up review pass before fixes were applied.
+
+
+---
+
+## Human Review — Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Activity item border should be bottom-only, not full border** — "this border is soo cognitive overload please border should be only border bottom 1px solid" — the `.act-item` wrapper currently has a full `1px solid` border on all sides (applied as fix for Round 1 blocker 2). It should instead have only a `border-bottom: 1px solid` separator.
+   - File: `packages/taskflow/src/server/dashboard.ts` — `.act-item` CSS and `actItemHtml()`
+   - Fix: Change `border: 1px solid transparent` in `.act-item` to `border-bottom: 1px solid transparent`; update `actItemHtml()` to set `border-bottom-color:` (not `border-color:`) inline.
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- All other Round 1 blockers (animation, white text, idle badge) remain resolved — this is the only remaining fix.
