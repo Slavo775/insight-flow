@@ -77,3 +77,14 @@ None beyond the path issue above.
 
 - Docs URL reviewed: https://code.claude.com/docs/en/hooks — the `${CLAUDE_PROJECT_DIR}` variable is the canonical way to reference project-relative hook scripts.
 - N29 or a hotfix task should also re-examine the `SessionStart` matcher: docs show `"startup|resume"` as the typical value; N28 uses `""` (match-all). Functionally equivalent per docs, but worth verifying live.
+
+### Priority addendum (owner follow-up)
+
+**Must work first — fix these three hooks before anything else:**
+1. `SessionStart` → `session-start` (session begins)
+2. `Stop` → `agent-idle` (session ends)
+3. `PermissionRequest` → `approval-required` + terminal bell + OS notification (AI needs human approval)
+
+> "please crucial for me so far is start end and AI needs approval"
+
+The remaining three hooks (`UserPromptSubmit` → agent-active, `PreToolUse` → tool-requested, `PostToolUse` → tool-approved/file-written/file-edited) are lower priority — fix the path issue for all six, but validate the three above first.
