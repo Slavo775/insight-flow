@@ -54,3 +54,43 @@
 ### Notes
 
 - This blocker is in `claudeStatusFromEvent()` in `dashboard.ts` only.
+
+
+---
+
+## AI Review — Round 2
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Summary
+
+`updatePageTitle()` logic is correct. All emoji mappings present. Two open issues from human reviews remain: init calls `updatePageTitle(null)` (bare title) instead of `updatePageTitle('idle')` (should match badge init state), and the `done`→idle state machine bug (N35) also affects the title. No new findings.
+
+### Checklist verification
+
+- [x] `updatePageTitle(state)` added — ✅ lines 363–367
+- [x] `active` → `⚡` prefix — ✅
+- [x] `idle` → `💤` prefix — ✅
+- [x] `permission-needed` → `🚨` prefix — ✅
+- [x] `null` → plain `Taskflow Dashboard` — ✅
+- [ ] `updatePageTitle(null)` called on init — ❌ **called with `null`, but should be called with `'idle'`** to match the `updateActivityStatus('idle')` on the same line. Human review R1 flagged this.
+- [x] `updatePageTitle(newStatus)` called from event handler — ✅ `addActivityEvent` line 863
+
+### Blockers
+
+1. **Init title shows bare `Taskflow Dashboard` instead of `💤 Taskflow Dashboard`** — `dashboard.ts` line 1128: `updatePageTitle(null)` resets to no prefix, but the badge initialises as `idle`. The title and badge state are inconsistent on first paint.
+   _Fix: change `updatePageTitle(null)` to `updatePageTitle('idle')` at line 1128._
+
+### Non-blocking
+
+- None.
+
+### Security & edge cases
+
+- None.
+
+### Notes
+
+- The `done`→idle bug in `claudeStatusFromEvent()` (N35 blocker 1) also causes wrong title transitions; fixing N35 resolves it here automatically.
