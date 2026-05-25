@@ -148,6 +148,73 @@ export const MasterFileSchema = z.object({
   }),
 });
 
+export const EventTypeSchema = z.enum([
+  "start",
+  "done",
+  "active",
+  "idle",
+  "edit-start",
+  "edit-end",
+  "research-start",
+  "research-end",
+  "review-start",
+  "review-end",
+  "git-start",
+  "git-end",
+]);
+
+export const TaskEventSchema = z.object({
+  type: EventTypeSchema,
+  taskId: z.string(),
+  timestamp: z.string(),
+  source: z.enum(["agent", "hook"]).optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const ClaudeHookEventTypeSchema = z.enum([
+  "session-start",
+  "session-end",
+  "agent-active",
+  "agent-idle",
+  "turn-failed",
+  "tool-requested",
+  "tool-approved",
+  "tool-failed",
+  "approval-required",
+  "approval-granted",
+  "approval-denied",
+  "tool-blocked",
+  "subagent-start",
+  "subagent-done",
+  "file-written",
+  "file-edited",
+  "context-compacted",
+  "config-changed",
+  "notification",
+  "task-batch-done",
+]);
+
+export const ClaudeHookEventSchema = z.object({
+  id: z.string(),
+  type: ClaudeHookEventTypeSchema,
+  source: z.literal("hook"),
+  hookName: z.string(),
+  timestamp: z.string(),
+  sessionId: z.string().optional(),
+  taskId: z.string().optional(),
+  payload: z.record(z.string(), z.unknown()),
+});
+
+export const SessionEventsFileSchema = z.object({
+  sessionId: z.string(),
+  events: z.array(ClaudeHookEventSchema),
+});
+
+export const EventsFileSchema = z.object({
+  taskId: z.string().regex(/^N\d{2,}$/),
+  events: z.array(z.union([TaskEventSchema, ClaudeHookEventSchema])),
+});
+
 export class TaskflowValidationError extends Error {
   readonly file: string;
   readonly issuePath: string;

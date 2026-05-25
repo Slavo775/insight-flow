@@ -5,6 +5,7 @@ import {
   unlinkSync,
   existsSync,
   readdirSync,
+  statSync,
   watch,
   mkdirSync,
   type FSWatcher,
@@ -455,6 +456,81 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     if (url.pathname === "/api/activity") {
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(activity.getRecentEvents()));
+      return;
+    }
+
+    if (url.pathname === "/api/events") {
+      const taskId = url.searchParams.get("taskId");
+      if (!taskId || !/^N\d{2,}$/.test(taskId)) {
+        res.writeHead(400, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "valid taskId is required (e.g. ?taskId=N26)" }));
+        return;
+      }
+      try {
+        const entries = readdirSync(workDir, { withFileTypes: true });
+        const dir = entries.find((e) => e.isDirectory() && e.name.startsWith(taskId + "-"));
+        if (!dir) {
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ events: [] }));
+          return;
+        }
+        const eventsPath = resolve(workDir, dir.name, "events.json");
+        if (!existsSync(eventsPath)) {
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ events: [] }));
+          return;
+        }
+        const raw = JSON.parse(readFileSync(eventsPath, "utf-8")) as { events?: unknown[] };
+        res.writeHead(200, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ events: Array.isArray(raw.events) ? raw.events : [] }));
+      } catch {
+        res.writeHead(500, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "Failed to read events" }));
+      }
+      return;
+    }
+
+    if (url.pathname === "/api/session-events") {
+      const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "100", 10), 500);
+      try {
+        const files = existsSync(MASTER_LOCK_DIR)
+          ? readdirSync(MASTER_LOCK_DIR)
+              .filter((f) => f.startsWith("events-") && f.endsWith(".jsonl"))
+              .map((f) => {
+                const p = resolve(MASTER_LOCK_DIR, f);
+                return { name: f, path: p, mtime: statSync(p).mtimeMs };
+              })
+              .sort((a, b) => b.mtime - a.mtime)
+          : [];
+
+        if (files.length === 0) {
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ events: [], sessionId: null }));
+          return;
+        }
+
+        const mostRecent = files[0];
+        const sessionId = mostRecent.name.replace("events-", "").replace(".jsonl", "");
+        const lines = readFileSync(mostRecent.path, "utf-8")
+          .split("\n")
+          .filter((l) => l.trim());
+        const events = lines
+          .map((l) => {
+            try {
+              return JSON.parse(l) as unknown;
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean)
+          .slice(-limit);
+
+        res.writeHead(200, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ events, sessionId }));
+      } catch {
+        res.writeHead(500, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "Failed to read session events" }));
+      }
       return;
     }
 

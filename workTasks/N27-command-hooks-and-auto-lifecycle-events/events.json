@@ -1,0 +1,96 @@
+{
+  "taskId": "N27",
+  "events": [
+    {
+      "type": "edit-start",
+      "taskId": "N27",
+      "timestamp": "2026-05-24T20:35:16.723Z"
+    },
+    {
+      "type": "done",
+      "taskId": "N27",
+      "timestamp": "2026-05-24T20:37:41.446Z"
+    },
+    {
+      "type": "start",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T06:08:00.951Z"
+    },
+    {
+      "type": "done",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T06:10:10.807Z"
+    },
+    {
+      "type": "start",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T06:21:40.454Z"
+    },
+    {
+      "type": "done",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T06:22:41.789Z"
+    },
+    {
+      "type": "start",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T06:48:46.519Z"
+    },
+    {
+      "id": "1779692336489-3b3cd6c1",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-05-25T06:58:56.489Z",
+      "taskId": "N27",
+      "payload": {
+        "tool_name": "Bash",
+        "input_summary": "git push --force"
+      }
+    },
+    {
+      "id": "1779693180322-bdf76157",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-05-25T07:13:00.321Z",
+      "sessionId": "test-abc123",
+      "taskId": "N27",
+      "payload": {}
+    },
+    {
+      "id": "1779693180433-63e62b11",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-05-25T07:13:00.432Z",
+      "sessionId": "test-abc123",
+      "taskId": "N27",
+      "payload": {}
+    },
+    {
+      "type": "start",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T08:27:18.456Z",
+      "source": "agent"
+    },
+    {
+      "type": "research-start",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T08:28:32.601Z",
+      "source": "agent"
+    },
+    {
+      "type": "research-end",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T08:31:52.967Z",
+      "source": "agent"
+    },
+    {
+      "type": "edit-start",
+      "taskId": "N27",
+      "timestamp": "2026-05-25T08:31:53.122Z",
+      "source": "agent"
+    }
+  ]
+}

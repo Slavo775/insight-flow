@@ -137,6 +137,83 @@ export interface MasterFile {
   };
 }
 
+export const MANDATORY_EVENT_TYPES = ["start", "done"] as const;
+export const OPTIONAL_EVENT_TYPES = [
+  "active",
+  "idle",
+  "edit-start",
+  "edit-end",
+  "research-start",
+  "research-end",
+  "review-start",
+  "review-end",
+  "git-start",
+  "git-end",
+] as const;
+export const EVENT_TYPES = [...MANDATORY_EVENT_TYPES, ...OPTIONAL_EVENT_TYPES] as const;
+export type MandatoryEventType = (typeof MANDATORY_EVENT_TYPES)[number];
+export type OptionalEventType = (typeof OPTIONAL_EVENT_TYPES)[number];
+export type EventType = (typeof EVENT_TYPES)[number];
+
+export interface TaskEvent {
+  type: EventType;
+  taskId: string;
+  timestamp: string;
+  source?: "agent" | "hook";
+  data?: Record<string, unknown>;
+}
+
+export const CLAUDE_HOOK_EVENT_TYPES = [
+  "session-start",
+  "session-end",
+  "agent-active",
+  "agent-idle",
+  "turn-failed",
+  "tool-requested",
+  "tool-approved",
+  "tool-failed",
+  "approval-required",
+  "approval-granted",
+  "approval-denied",
+  "tool-blocked",
+  "subagent-start",
+  "subagent-done",
+  "file-written",
+  "file-edited",
+  "context-compacted",
+  "config-changed",
+  "notification",
+  "task-batch-done",
+] as const;
+
+export type ClaudeHookEventType = (typeof CLAUDE_HOOK_EVENT_TYPES)[number];
+
+export interface ClaudeHookEvent {
+  id: string;
+  type: ClaudeHookEventType;
+  source: "hook";
+  hookName: string;
+  timestamp: string;
+  sessionId?: string;
+  taskId?: string;
+  payload: Record<string, unknown>;
+}
+
+export interface SessionEventsFile {
+  sessionId: string;
+  events: ClaudeHookEvent[];
+}
+
+export interface EventsFile {
+  taskId: string;
+  events: (TaskEvent | ClaudeHookEvent)[];
+}
+
+export interface EventsConfig {
+  dedupWindowSeconds?: number;
+  hooks?: Partial<Record<EventType, string[]>>;
+}
+
 export interface ActivityEvent {
   ts: string;
   tool: string;
@@ -200,6 +277,7 @@ export interface TaskflowConfig {
   agents?: AgentsConfig;
   notifications?: NotificationsConfig;
   master?: MasterConfig;
+  events?: EventsConfig;
 }
 
 export interface ParsedArgs {
