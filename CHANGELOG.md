@@ -5,6 +5,39 @@ Full history lives in [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANG
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-05-25
+
+### Breaking changes
+
+- **N34** — `activityEngine.enabled` now defaults to `false`. Add `"activityEngine": { "enabled": true }` to `taskflow.config.json` to restore previous behaviour.
+
+### Fixed
+
+- **N24** — Hook registration format corrected for Claude Code settings schema.
+
+### Added
+
+- **N25** — Shared top navigation bar across all dashboard pages.
+- **N26** — Strict event-type split: activity events vs typed hook events; `activityEngine.enabled` required for automation triggers.
+- **N27** — Command hooks auto-emit lifecycle events without manual `insight-flow log-event` calls. New `--if-active` flag; session events logged to `.jsonl`.
+- **N28** — Claude Code hook scripts bundled and installed during `insight-flow init`.
+- **N29** — Activity tabs panel below Kanban board: "Claude Activity" and "Recent Activity" panes.
+- **N33** — Unique event IDs on all hook events for deduplication.
+- **N35** — Shared Claude status badge: active (⚡), idle (💤), permission-needed (🚨) — in top nav and tab title.
+- **N36** — Sound notifications on agent-idle and permission-needed. Per-browser toggle in notification settings.
+- **N37** — Browser tab title reflects Claude status with emoji prefix.
+- **N38** — `notifications.sounds.enabled` config flag — project-level sound kill-switch (default `true`).
+
+### Changed
+
+- **N30/N31/N32** — Activity feed items refactored to a shared wrapper; consistent styling across both activity panes.
+
+### Docs
+
+- **N23** — Architecture diagrams: agents, server, notifications, activity engine.
+
+See [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANGELOG.md) for the full entry.
+
 ## [0.5.0] — 2026-05-23
 
 ### Breaking changes

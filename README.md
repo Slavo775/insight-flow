@@ -59,7 +59,7 @@ The built-in dev server:
 
 - Serves task JSON as a REST API (`/api/work-tasks`, `/api/work-tasks/:file`)
 - Renders a Kanban board, stats, timeline, and task detail panels
-- Watches `workTasks/` for changes and live-reloads via SSE
+- Watches `workTasks/` for changes and live-reloads via Socket.IO (auto-reconnect, long-polling fallback)
 - Auto-opens the browser
 
 ## CLI Reference
@@ -147,13 +147,16 @@ insight-flow version          # Show version
 }
 ```
 
-| Key           | Default                         | Description                                   |
-| ------------- | ------------------------------- | --------------------------------------------- |
-| `workDir`     | `workTasks`                     | Directory for task data files                 |
-| `shardSize`   | `10`                            | Tasks per shard file (N00-N09, N10-N19, etc.) |
-| `projectName` | from `package.json` or dir name | Used in role templates                        |
-| `rolesDir`    | `.claude/roles`                 | Where role templates are copied on init       |
-| `server.port` | `6006`                          | Dashboard dev server port                     |
+| Key                              | Default                         | Description                                                                 |
+| -------------------------------- | ------------------------------- | --------------------------------------------------------------------------- |
+| `workDir`                        | `workTasks`                     | Directory for task data files                                               |
+| `shardSize`                      | `10`                            | Tasks per shard file (N00-N09, N10-N19, etc.)                               |
+| `projectName`                    | from `package.json` or dir name | Used in role templates                                                      |
+| `rolesDir`                       | `.claude/roles`                 | Where role templates are copied on init                                     |
+| `server.port`                    | `6006`                          | Dashboard dev server port                                                   |
+| `activityEngine.enabled`         | `false`                         | Enables Claude activity feed, status badge, sounds, and tab-title emoji     |
+| `notifications.browser`          | `true`                          | Enable/disable browser desktop notifications on task status transitions     |
+| `notifications.sounds.enabled`   | `true`                          | Project-level kill-switch for all dashboard sounds (overrides per-browser toggle) |
 
 ### Extending agents with project-specific commands
 

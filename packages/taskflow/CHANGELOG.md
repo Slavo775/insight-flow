@@ -4,6 +4,37 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-05-25
+
+### Breaking changes
+
+- **N34** — `activityEngine.enabled` now defaults to `false`. The activity feed, Claude status badge, sounds, and tab-title emoji are all gated behind this flag. Add `"activityEngine": { "enabled": true }` to `taskflow.config.json` to restore previous behaviour.
+
+### Fixed
+
+- **N24** — Hook registration format corrected for Claude Code `settings.json` schema (hooks array shape was rejected by the schema validator).
+
+### Added
+
+- **N25** — Shared top navigation bar across all dashboard pages (`/`, `/overview`) with project name and active-page highlight.
+- **N26** — Strict event-type separation: activity events (human-readable feed items) vs typed hook events (machine-readable triggers). `activityEngine.enabled` is now the single gate for automation triggers.
+- **N27** — Command hooks auto-emit `start`/`done` lifecycle events without manual `insight-flow log-event` calls. New `--if-active` flag for conditional hook execution; session events logged to a `.jsonl` file alongside the activity log.
+- **N28** — Claude Code hook scripts bundled inside the package and installed during `insight-flow init`; lifecycle notification wiring included out of the box.
+- **N29** — Activity tabs panel below the Kanban board: "Claude Activity" and "Recent Activity" panes with tab switching.
+- **N33** — Unique event IDs (`evt_<timestamp>_<rand>`) on all hook events for client-side deduplication and dashboard action resolution.
+- **N35** — Shared Claude status badge with three states: active (⚡), idle (💤), permission-needed (🚨) — rendered in the top nav and used as the tab-title prefix.
+- **N36** — Sound notifications on agent-idle and permission-needed transitions (`/sounds/idle-ping.mp3`, `/sounds/permission-alert.mp3`). Per-browser opt-out toggle in the notification settings popover.
+- **N37** — Browser tab title reflects Claude status with emoji prefix (⚡ / 💤 / 🚨); resets to plain title when status clears.
+- **N38** — `notifications.sounds.enabled` config flag — project-level kill-switch for all dashboard sounds (default `true`). Overrides the per-browser checkbox when `false`.
+
+### Changed
+
+- **N30/N31/N32** — Activity feed items refactored to a shared wrapper component with consistent border-colour theming; duplicate rendering logic removed from Claude Activity and Recent Activity feeds.
+
+### Docs
+
+- **N23** — Architecture diagrams added: agent flow, server layout, notification pipeline, activity engine.
+
 ## [0.5.0] — 2026-05-23
 
 ### Breaking changes

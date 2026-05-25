@@ -1,15 +1,16 @@
 # insight-flow
 
-> A workbench for AI-assisted task lifecycle management — CLI plus a bundled React dashboard.
+> A workbench for AI-assisted task lifecycle management — CLI plus a server-rendered dashboard (vanilla JS).
 
-insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live React dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
+insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.5.0
+## What's new in 0.6.0
 
-- **Reliable live updates** — Socket.IO replaces the hand-rolled WebSocket; auto reconnect, long-polling fallback, works on Chrome and mobile Safari.
-- **Notifications** — task transitions fire browser `Notification` API alerts and OS desktop notifications via `insight-flow notify`. Both opt-out in config.
-- **Multi-project overview** — `/overview` aggregates all registered insight-flow servers in one page with live/reconnecting/down status badges.
-- **Richer activity feed** — free hook enrichment (skill start/end, command classification) plus cheap phase markers via `insight-flow log-activity`. Both opt-out in config.
+- **Claude status badge** — top nav and browser tab title reflect active (⚡), idle (💤), or permission-needed (🚨) state in real time.
+- **Sound notifications** — audio cues on agent-idle and permission-needed transitions; per-browser toggle in settings; project-level kill-switch via `notifications.sounds.enabled`.
+- **Activity tabs** — "Claude Activity" and "Recent Activity" panes below the Kanban board.
+- **Activity engine opt-in** — `activityEngine.enabled` now defaults to `false`; set it to `true` to enable the feed, sounds, and status badge. **Breaking change** for users who relied on the previous always-on default.
+- **Auto lifecycle events** — command hooks emit `start`/`done` events automatically; no manual `insight-flow log-event` calls needed.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
