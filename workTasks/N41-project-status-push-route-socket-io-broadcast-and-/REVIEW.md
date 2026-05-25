@@ -60,3 +60,38 @@ Adds a lightweight `POST /api/projects/:id/status` route to the master server, a
 ### Notes
 
 - User's exact words: "i dont see the proper status as backgorund"
+
+
+---
+
+## Round 3 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+1. Background tint is too subtle — only border/outline is visible. The card background must be clearly green for `active` and clearly red for `permission-required` so the status is immediately obvious, not just hinted.
+
+2. No visible status indicator showing the current `claudeStatus` value on the card. The user needs to be able to read what the current status is (e.g. a badge or label like "active" / "idle" / "permission required") somewhere on the card — not just infer it from the background colour.
+
+### Suggestions (non-blocking)
+
+### Notes
+
+- User's exact words: "cool please now we have a border green or outline dont know but we need also background to be green also red if permisiion requestt alse somewhere i need to see what status currently is"
+- "red if permission request" — permission-required status should use red, not yellow/orange
+
+
+---
+
+## Round 4 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** approved
+
+### Notes
+
+- User's exact words: "approved!"

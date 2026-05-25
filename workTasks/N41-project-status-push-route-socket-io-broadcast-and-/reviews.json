@@ -27,6 +27,33 @@
         "comment": "Push initial idle status immediately after masterId obtained so claudeStatus is never undefined on first render.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-25T19:22:19.582Z",
+      "endedAt": "2026-05-25T19:22:42.780Z",
+      "verdict": "fix-needed",
+      "comment": "Background tint too subtle (only border visible, needs solid green/red fill). No status label on card showing current claudeStatus value.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T19:25:53.803Z",
+        "endedAt": "2026-05-25T19:29:53.730Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/insight-flow-master/src/overview.ts"
+        ],
+        "comment": "Solid dark-green/red backgrounds for active/permission-required. Added claudeStatus badge in card header showing active/idle/permission required text.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T19:31:19.302Z",
+      "endedAt": "2026-05-25T19:31:31.395Z",
+      "verdict": "approved",
+      "comment": "Approved by project owner.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
