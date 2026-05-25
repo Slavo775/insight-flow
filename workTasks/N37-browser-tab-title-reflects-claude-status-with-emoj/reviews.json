@@ -1,0 +1,77 @@
+{
+  "taskId": "N37",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T14:15:23.023Z",
+      "endedAt": "2026-05-25T14:15:52.992Z",
+      "verdict": "fix-needed",
+      "comment": "3 blockers: tool-approved missing from state machine, sound AudioContext not resuming, title init uses null instead of idle",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T14:17:22.918Z",
+      "endedAt": "2026-05-25T14:17:36.640Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker 4: idle must come from agent-idle hook only, not from done task event",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T14:20:05.767Z",
+      "endedAt": "2026-05-25T14:22:27.795Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: updatePageTitle(null) on init should be updatePageTitle(idle) to match badge state",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:24:27.346Z",
+        "endedAt": "2026-05-25T14:25:44.839Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Changed updatePageTitle(null) to updatePageTitle(idle) on init",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T14:29:50.570Z",
+      "endedAt": "2026-05-25T14:30:11.402Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker 5: agent-active hook event missing from state machine — badge never leaves idle; blocker 6: sound stuck because no active->idle transition ever fires",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T14:31:57.833Z",
+      "endedAt": "2026-05-25T14:34:38.496Z",
+      "verdict": "fix-needed",
+      "comment": "Blockers 7+8: permission badge never clears after tool-approved (root cause unclear, needs debug trace), agent-active still missing from state machine",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:36:38.457Z",
+        "endedAt": "2026-05-25T14:42:21.240Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "agent-active→active fixes badge and title; tool-approved→active was already compiled, server needed restart",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T15:23:58.768Z",
+      "endedAt": "2026-05-25T15:27:09.573Z",
+      "verdict": "approved",
+      "comment": "All R1-R4 blockers resolved: agent-active, tool-approved cases added, updatePageTitle init uses idle, done->idle removed",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

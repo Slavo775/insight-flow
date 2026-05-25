@@ -1,0 +1,97 @@
+{
+  "taskId": "N36",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T14:20:01.075Z",
+      "endedAt": "2026-05-25T14:22:27.689Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: AudioContext created without prior user gesture, blocked by browser autoplay policy",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:24:27.221Z",
+        "endedAt": "2026-05-25T14:25:44.727Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Replaced ephemeral AudioContext with shared pre-warmed instance",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T14:58:05.605Z",
+      "endedAt": "2026-05-25T14:58:24.894Z",
+      "verdict": "fix-needed",
+      "comment": "Replace Web Audio API synthesis with real MP3s (provided); use new Audio() class; serve sounds as static assets",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:58:55.217Z",
+        "endedAt": "2026-05-25T15:01:27.694Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/sounds/idle-ping.mp3",
+          "packages/taskflow/src/server/sounds/permission-alert.mp3",
+          "packages/taskflow/package.json"
+        ],
+        "comment": "Replaced Web Audio API with new Audio() + real MP3 files; served at /sounds/ as static assets",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T15:05:11.481Z",
+      "endedAt": "2026-05-25T15:05:48.789Z",
+      "verdict": "fix-needed",
+      "comment": "Sound gate reads wrong localStorage key: playStatusSound checks notif-sound (never written) instead of notifSettings.sound",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T15:06:17.238Z",
+        "endedAt": "2026-05-25T15:06:37.021Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Fixed sound gate: was checking standalone notif-sound key (never written), now checks notifSettings.sound",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T15:13:27.019Z",
+      "endedAt": "2026-05-25T15:13:51.676Z",
+      "verdict": "fix-needed",
+      "comment": "dist/sounds nested incorrectly due to cp -r with existing dest; fixed build script to rm -rf dist/sounds first",
+      "type": "human",
+      "by": "Human (Project Owner)",
+      "fix": {
+        "startedAt": "2026-05-25T15:13:56.267Z",
+        "endedAt": "2026-05-25T15:13:59.995Z",
+        "status": "fixed",
+        "filesChanged": [],
+        "comment": null,
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T15:23:57.277Z",
+      "endedAt": "2026-05-25T15:27:08.121Z",
+      "verdict": "fix-needed",
+      "comment": "MP3 files are 0 bytes — idle-ping.mp3 and permission-alert.mp3 need actual audio content from Downloads",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T16:32:18.732Z",
+      "endedAt": "2026-05-25T16:32:37.204Z",
+      "verdict": "approved",
+      "comment": "sounds working — approved",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

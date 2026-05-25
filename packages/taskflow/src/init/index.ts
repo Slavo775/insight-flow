@@ -44,7 +44,7 @@ export function initProject(
     projectName: inferName(cwd),
     rolesDir: ".claude/roles",
     server: { port: 6006 },
-    activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
+    activityEngine: { enabled: false, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
     notifications: { browser: true, cli: true },
   };
 
@@ -604,7 +604,8 @@ function buildConfigWithExamples(config: TaskflowConfig): string {
   const base = JSON.stringify(baseConfig, null, 2);
   const stub = `,
   "activityEngine": {
-    "enabled": true,
+    "// enabled": "Set to true to enable Claude activity tracking in the dashboard (opt-in to save tokens).",
+    "enabled": false,
     "logFile": ".taskflow-activity.jsonl",
     "maxEvents": 200,
     "// phaseMarkers": "Set to false to suppress agent PHASE MARKERS calls (zero token overhead).",

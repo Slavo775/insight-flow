@@ -148,7 +148,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
 
   if (isHook) {
     const hookEvent: ClaudeHookEvent = {
-      id: `${Date.now()}-${randomBytes(4).toString("hex")}`,
+      id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
       type: eventType as (typeof CLAUDE_HOOK_EVENT_TYPES)[number],
       source: "hook",
       hookName: hookName ?? "unknown",
@@ -187,6 +187,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
 
     // Append to activity log
     const activityEntry: Record<string, unknown> = {
+      id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
       ts,
       tool: "Event",
       action: hookEvent.type,
@@ -246,6 +247,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
 
   // Append to activity log
   appendToActivityLog(config, {
+    id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
     ts,
     tool: "Event",
     action: eventType,

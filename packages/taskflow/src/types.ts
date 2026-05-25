@@ -215,6 +215,7 @@ export interface EventsConfig {
 }
 
 export interface ActivityEvent {
+  id?: string;
   ts: string;
   tool: string;
   action: string;

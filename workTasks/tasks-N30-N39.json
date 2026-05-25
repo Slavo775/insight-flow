@@ -302,7 +302,7 @@
       "title": "Event unique IDs for dedup and dashboard action resolution",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N33-event-unique-ids-for-dedup-and-dashboard-action-re",
       "createdAt": "2026-05-25T13:53:45.925Z",
       "statusHistory": [
@@ -310,17 +310,67 @@
           "status": "ready",
           "at": "2026-05-25T13:53:45.925Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T13:59:30.461Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T14:06:36.196Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:07:15.954Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:20:00.730Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:22:27.322Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:24:26.898Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T14:25:44.409Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:27:14.715Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:52.735Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:03.604Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
+        "startedAt": "2026-05-25T13:59:30.460Z",
+        "completedAt": "2026-05-25T14:06:36.195Z",
         "filesChanged": [],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -328,9 +378,20 @@
         "events",
         "claude-status-module"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T14:07:15.953Z",
+          "commitHash": "f36469e",
+          "commitMessage": "feat(claude-status): N33-N37 — event IDs, activity opt-in, status badge, sounds, tab title"
+        },
+        {
+          "at": "2026-05-25T14:27:14.715Z",
+          "commitHash": "1b170e6",
+          "commitMessage": "chore(tasks): N33-N37 review side files and session events"
+        }
+      ],
+      "branch": "feat/N33-N37-claude-status-module",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/23",
       "mergedAt": null
     },
     {
@@ -338,7 +399,7 @@
       "title": "Activity engine disabled by default",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N34-activity-engine-disabled-by-default",
       "createdAt": "2026-05-25T13:53:46.029Z",
       "statusHistory": [
@@ -346,17 +407,67 @@
           "status": "ready",
           "at": "2026-05-25T13:53:46.030Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T13:59:30.565Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T14:06:36.301Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:07:16.062Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:20:00.835Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:22:27.432Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:24:27.000Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T14:25:44.514Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:27:14.829Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:54.416Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:05.196Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
+        "startedAt": "2026-05-25T13:59:30.565Z",
+        "completedAt": "2026-05-25T14:06:36.301Z",
         "filesChanged": [],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -364,9 +475,20 @@
         "activity",
         "claude-status-module"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T14:07:16.062Z",
+          "commitHash": "f36469e",
+          "commitMessage": "feat(claude-status): N33-N37 — event IDs, activity opt-in, status badge, sounds, tab title"
+        },
+        {
+          "at": "2026-05-25T14:27:14.829Z",
+          "commitHash": "1b170e6",
+          "commitMessage": "chore(tasks): N33-N37 review side files and session events"
+        }
+      ],
+      "branch": "feat/N33-N37-claude-status-module",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/23",
       "mergedAt": null
     },
     {
@@ -374,7 +496,7 @@
       "title": "Shared Claude status badge with three-state logic",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N35-shared-claude-status-badge-with-three-state-logic",
       "createdAt": "2026-05-25T13:53:46.140Z",
       "statusHistory": [
@@ -382,17 +504,77 @@
           "status": "ready",
           "at": "2026-05-25T13:53:46.140Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T13:59:30.670Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T14:06:36.410Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:07:16.174Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:20:00.965Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:22:27.542Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:24:27.107Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T14:25:44.619Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:27:14.939Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:36:38.354Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T14:42:21.127Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:55.824Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:06.659Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
+        "startedAt": "2026-05-25T13:59:30.670Z",
+        "completedAt": "2026-05-25T14:06:36.410Z",
         "filesChanged": [],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -402,9 +584,20 @@
         "dashboard",
         "claude-status-module"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T14:07:16.173Z",
+          "commitHash": "f36469e",
+          "commitMessage": "feat(claude-status): N33-N37 — event IDs, activity opt-in, status badge, sounds, tab title"
+        },
+        {
+          "at": "2026-05-25T14:27:14.939Z",
+          "commitHash": "1b170e6",
+          "commitMessage": "chore(tasks): N33-N37 review side files and session events"
+        }
+      ],
+      "branch": "feat/N33-N37-claude-status-module",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/23",
       "mergedAt": null
     },
     {
@@ -412,7 +605,7 @@
       "title": "Sound notification on agent idle and permission needed",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N36-sound-notification-on-agent-idle-and-permission-ne",
       "createdAt": "2026-05-25T13:53:46.241Z",
       "statusHistory": [
@@ -420,17 +613,142 @@
           "status": "ready",
           "at": "2026-05-25T13:53:46.242Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T13:59:30.780Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T14:06:36.521Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:07:16.292Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:20:01.075Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:22:27.690Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:24:27.220Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T14:25:44.728Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:27:15.048Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:58:05.604Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:58:24.895Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:58:55.217Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T15:01:27.695Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:05:11.479Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T15:05:48.789Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T15:06:17.237Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T15:06:37.022Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:13:27.018Z",
+          "by": "Human (Project Owner)"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T15:13:51.676Z",
+          "by": "Human (Project Owner)"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T15:13:56.266Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T15:13:59.995Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T15:14:22.628Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:57.276Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T15:27:08.122Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T16:32:18.730Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T16:32:37.204Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
+        "startedAt": "2026-05-25T13:59:30.779Z",
+        "completedAt": "2026-05-25T14:06:36.521Z",
         "filesChanged": [],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 6,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -439,9 +757,25 @@
         "claude-status",
         "claude-status-module"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T14:07:16.292Z",
+          "commitHash": "f36469e",
+          "commitMessage": "feat(claude-status): N33-N37 — event IDs, activity opt-in, status badge, sounds, tab title"
+        },
+        {
+          "at": "2026-05-25T14:27:15.048Z",
+          "commitHash": "1b170e6",
+          "commitMessage": "chore(tasks): N33-N37 review side files and session events"
+        },
+        {
+          "at": "2026-05-25T15:14:22.628Z",
+          "commitHash": "0107675",
+          "commitMessage": "fix(build): N36 — rm -rf dist/sounds before cp to prevent nesting on incremental builds"
+        }
+      ],
+      "branch": "feat/N33-N37-claude-status-module",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/23",
       "mergedAt": null
     },
     {
@@ -449,7 +783,7 @@
       "title": "Browser tab title reflects Claude status with emoji",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N37-browser-tab-title-reflects-claude-status-with-emoj",
       "createdAt": "2026-05-25T13:53:46.348Z",
       "statusHistory": [
@@ -457,17 +791,117 @@
           "status": "ready",
           "at": "2026-05-25T13:53:46.349Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T13:59:30.890Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T14:06:36.644Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:07:16.401Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:15:23.023Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:15:52.993Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:17:22.917Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:17:36.641Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:20:05.766Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:22:27.795Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:24:27.346Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T14:25:44.840Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T14:27:15.153Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:29:50.567Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:30:11.403Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T14:31:57.832Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T14:34:38.497Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T14:36:38.457Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T14:42:21.242Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:58.766Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:09.574Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
+        "startedAt": "2026-05-25T13:59:30.890Z",
+        "completedAt": "2026-05-25T14:06:36.643Z",
         "filesChanged": [],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 6,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -476,9 +910,20 @@
         "claude-status",
         "claude-status-module"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T14:07:16.400Z",
+          "commitHash": "f36469e",
+          "commitMessage": "feat(claude-status): N33-N37 — event IDs, activity opt-in, status badge, sounds, tab title"
+        },
+        {
+          "at": "2026-05-25T14:27:15.153Z",
+          "commitHash": "1b170e6",
+          "commitMessage": "chore(tasks): N33-N37 review side files and session events"
+        }
+      ],
+      "branch": "feat/N33-N37-claude-status-module",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/23",
       "mergedAt": null
     }
   ]

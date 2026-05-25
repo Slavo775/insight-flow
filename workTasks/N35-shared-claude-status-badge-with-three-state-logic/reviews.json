@@ -1,0 +1,32 @@
+{
+  "taskId": "N35",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T14:20:00.965Z",
+      "endedAt": "2026-05-25T14:22:27.541Z",
+      "verdict": "fix-needed",
+      "comment": "2 blockers: done->idle wrong (task event not session signal), tool-approved->active missing",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T14:36:38.354Z",
+        "endedAt": "2026-05-25T14:42:21.127Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Added agent-active→active to claudeStatusFromEvent",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T15:23:55.826Z",
+      "endedAt": "2026-05-25T15:27:06.658Z",
+      "verdict": "approved",
+      "comment": "Both blockers fixed: done->idle removed, tool-approved->active added, agent-active->active bonus",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
