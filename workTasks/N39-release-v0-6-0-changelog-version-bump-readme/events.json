@@ -1204,6 +1204,42 @@
       "taskId": "N39",
       "timestamp": "2026-05-25T17:18:31.700Z",
       "source": "agent"
+    },
+    {
+      "id": "evt_1779731077813_be64",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-05-25T17:44:37.813Z",
+      "sessionId": "135b94a2-3b57-47d0-989c-192a3a14bda6",
+      "taskId": "N39",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1779731083585_8bcd",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-05-25T17:44:43.585Z",
+      "sessionId": "135b94a2-3b57-47d0-989c-192a3a14bda6",
+      "taskId": "N39",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1779731087413_4df1",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-05-25T17:44:47.413Z",
+      "sessionId": "135b94a2-3b57-47d0-989c-192a3a14bda6",
+      "taskId": "N39",
+      "payload": {
+        "tool_name": "Bash"
+      }
     }
   ]
 }
