@@ -148,7 +148,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
 
   if (isHook) {
     const hookEvent: ClaudeHookEvent = {
-      id: `${Date.now()}-${randomBytes(4).toString("hex")}`,
+      id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
       type: eventType as (typeof CLAUDE_HOOK_EVENT_TYPES)[number],
       source: "hook",
       hookName: hookName ?? "unknown",

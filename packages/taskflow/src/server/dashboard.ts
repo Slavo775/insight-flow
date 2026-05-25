@@ -324,16 +324,28 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     function claudeStatusFromEvent(ev) {
       if (ev.tool === 'Event' && ev.action === 'start') return 'active';
-      if (ev.tool === 'Event' && ev.action === 'done') return 'idle';
-      if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'approval-required') return 'permission-needed';
       if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'agent-idle') return 'idle';
+      if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'approval-required') return 'permission-needed';
+      if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'tool-approved') return 'active';
       return null;
     }
+
+    var _audioCtx = null;
+    function getAudioCtx() {
+      try {
+        if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (_audioCtx.state === 'suspended') _audioCtx.resume();
+        return _audioCtx;
+      } catch(e) { return null; }
+    }
+    document.addEventListener('click', function() { getAudioCtx(); });
+    document.addEventListener('keydown', function() { getAudioCtx(); });
 
     function playStatusSound(state) {
       if (localStorage.getItem('notif-sound') !== 'true') return;
       try {
-        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var ctx = getAudioCtx();
+        if (!ctx) return;
         var osc = ctx.createOscillator();
         var gain = ctx.createGain();
         osc.connect(gain);
@@ -356,7 +368,6 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + 0.35);
         }
-        setTimeout(function() { try { ctx.close(); } catch(e) {} }, 600);
       } catch(e) {}
     }
 
@@ -1125,7 +1136,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     // Show idle badge immediately on load
     updateActivityStatus('idle');
-    updatePageTitle(null);
+    updatePageTitle('idle');
 
     // Refresh timestamps every 30s as fallback
     setInterval(refreshTimestamps, 30000);`;
