@@ -1036,6 +1036,59 @@
       "branch": "feat/N38-config-flag-sounds",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/24",
       "mergedAt": "2026-05-25T17:06:21.370Z"
+    },
+    {
+      "id": "N39",
+      "title": "Release v0.6.0 — changelog, version bump, README",
+      "type": "chore",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "workTasks/N39-release-v0-6-0-changelog-version-bump-readme",
+      "createdAt": "2026-05-25T17:10:23.063Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T17:10:23.064Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T17:12:33.086Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T17:14:39.987Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-25T17:12:33.085Z",
+        "completedAt": "2026-05-25T17:14:39.986Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/CHANGELOG.md",
+          "CHANGELOG.md",
+          "packages/taskflow/README.md",
+          "README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "changelog",
+        "docs"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
