@@ -918,7 +918,7 @@
       "title": "command hooks and auto lifecycle events",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N27-command-hooks-and-auto-lifecycle-events",
       "createdAt": "2026-05-24T20:35:13.064Z",
       "statusHistory": [
@@ -936,6 +936,11 @@
           "status": "implemented",
           "at": "2026-05-25T07:13:11.824Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T07:13:39.124Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -961,6 +966,49 @@
         "events",
         "automation",
         "token-saving"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-25T07:13:39.123Z",
+          "commitHash": "07fbf4a",
+          "commitMessage": "feat(events): N27 — hook-sourced event schema, session log, and dashboard display"
+        }
+      ],
+      "branch": "feat/N27-command-hooks-and-auto-lifecycle-events",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/20",
+      "mergedAt": null
+    },
+    {
+      "id": "N28",
+      "title": "Claude Code hook scripts and lifecycle notification wiring",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio",
+      "createdAt": "2026-05-25T08:28:32.710Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T08:28:32.710Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "hooks",
+        "notifications",
+        "events"
       ],
       "pushes": [],
       "branch": null,
