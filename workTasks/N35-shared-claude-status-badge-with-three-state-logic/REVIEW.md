@@ -41,3 +41,46 @@
 ### Notes
 
 - Both blockers also affect N37 (title) since `updatePageTitle` is called from the same `addActivityEvent` handler.
+
+
+---
+
+## AI Review — Round 2
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-25
+**Verdict:** approved
+
+### Summary
+
+Both R1 blockers resolved. `claudeStatusFromEvent()` no longer maps `done` → idle (removed), and `tool-approved` → active is present. As a bonus, `agent-active` → active was added (required by N37 rounds 3–4). All checklist items now pass.
+
+### Checklist verification
+
+- [x] `.activity-status.permission-needed` CSS rule added — ✅ line 111
+- [x] `claudeStatusFromEvent(ev)` defined — ✅ lines 322–332
+- [x] `start` → `active` — ✅ line 326
+- [x] `agent-idle` hook → `idle` — ✅ line 328
+- [x] `done` → idle removed — ✅ no such case in current `claudeStatusFromEvent()`
+- [x] `approval-required` → `permission-needed` — ✅ line 329
+- [x] `tool-approved` → `active` — ✅ line 330
+- [x] `agent-active` → `active` — ✅ line 327 (bonus; required by runtime behaviour)
+- [x] `updateActivityStatus()` handles all three states — ✅ lines 1081–1093
+- [x] Event handler calls `claudeStatusFromEvent` → `updateActivityStatus` — ✅ `addActivityEvent` lines 840–845
+- [x] `updateActivityStatus('idle')` called on init — ✅ line 1107
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+- None.
+
+### Security & edge cases
+
+- None.
+
+### Notes
+
+- `agent-active` case was added beyond the original spec; it is correct and necessary (normal Claude Code sessions fire `agent-active`, not `start`, for ongoing work).

@@ -34,3 +34,40 @@ All three opt-in guards (`dashboard.ts`, `server/index.ts`, `init/index.ts`) cor
 ### Notes
 
 - This is the only task in N33–N37 whose fix doesn't touch `dashboard.ts`.
+
+
+---
+
+## AI Review — Round 2
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-25
+**Verdict:** approved
+
+### Summary
+
+R1 blocker resolved: `playground/taskflow.config.json` now has `"enabled": true`. All five checklist items pass.
+
+### Checklist verification
+
+- [x] `activityEnabled` in `dashboard.ts` uses `=== true` — ✅ line 1
+- [x] Same guard in `server/index.ts` — ✅ confirmed in prior review, not touched in this round
+- [x] `insight-flow init` scaffold sets `"enabled": false` — ✅ `init/index.ts`
+- [x] Config template updated to `enabled: false` — ✅
+- [x] `playground/taskflow.config.json` has `"enabled": true` — ✅ diff line confirms change from `false` → `true`
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+- `init/index.ts` hook-generation guard still uses `!== false` (noted in R1). Functionally correct; style inconsistency only.
+
+### Security & edge cases
+
+- None.
+
+### Notes
+
+- Only one-line change required; cleanly done.

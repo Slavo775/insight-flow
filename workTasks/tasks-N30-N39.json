@@ -302,7 +302,7 @@
       "title": "Event unique IDs for dedup and dashboard action resolution",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "approved",
       "folder": "workTasks/N33-event-unique-ids-for-dedup-and-dashboard-action-re",
       "createdAt": "2026-05-25T13:53:45.925Z",
       "statusHistory": [
@@ -350,6 +350,16 @@
           "status": "pushed",
           "at": "2026-05-25T14:27:14.715Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:52.735Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:03.604Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -359,8 +369,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -389,7 +399,7 @@
       "title": "Activity engine disabled by default",
       "type": "rework",
       "priority": "medium",
-      "status": "pushed",
+      "status": "approved",
       "folder": "workTasks/N34-activity-engine-disabled-by-default",
       "createdAt": "2026-05-25T13:53:46.029Z",
       "statusHistory": [
@@ -437,6 +447,16 @@
           "status": "pushed",
           "at": "2026-05-25T14:27:14.829Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:54.416Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:05.196Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -446,8 +466,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -476,7 +496,7 @@
       "title": "Shared Claude status badge with three-state logic",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N35-shared-claude-status-badge-with-three-state-logic",
       "createdAt": "2026-05-25T13:53:46.140Z",
       "statusHistory": [
@@ -534,6 +554,16 @@
           "status": "fixed",
           "at": "2026-05-25T14:42:21.127Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:55.824Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:06.659Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -543,8 +573,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -575,7 +605,7 @@
       "title": "Sound notification on agent idle and permission needed",
       "type": "feat",
       "priority": "medium",
-      "status": "fixed",
+      "status": "fix-needed",
       "folder": "workTasks/N36-sound-notification-on-agent-idle-and-permission-ne",
       "createdAt": "2026-05-25T13:53:46.241Z",
       "statusHistory": [
@@ -683,6 +713,21 @@
           "status": "fixed",
           "at": "2026-05-25T15:13:59.995Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T15:14:22.628Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:57.276Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-25T15:27:08.122Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -692,7 +737,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 4,
+      "reviewCount": 5,
       "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -712,6 +757,11 @@
           "at": "2026-05-25T14:27:15.048Z",
           "commitHash": "1b170e6",
           "commitMessage": "chore(tasks): N33-N37 review side files and session events"
+        },
+        {
+          "at": "2026-05-25T15:14:22.628Z",
+          "commitHash": "0107675",
+          "commitMessage": "fix(build): N36 — rm -rf dist/sounds before cp to prevent nesting on incremental builds"
         }
       ],
       "branch": "feat/N33-N37-claude-status-module",
@@ -723,7 +773,7 @@
       "title": "Browser tab title reflects Claude status with emoji",
       "type": "feat",
       "priority": "medium",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N37-browser-tab-title-reflects-claude-status-with-emoj",
       "createdAt": "2026-05-25T13:53:46.348Z",
       "statusHistory": [
@@ -821,6 +871,16 @@
           "status": "fixed",
           "at": "2026-05-25T14:42:21.242Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T15:23:58.766Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T15:27:09.574Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -830,8 +890,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 5,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 6,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,

@@ -35,3 +35,41 @@ Core ID generation and dedup wiring is correct. `ActivityEvent` gets `id?: strin
 ### Notes
 
 - `randomBytes(2)` = 65536 combinations per ms; sufficient for single-session uniqueness as specified.
+
+
+---
+
+## AI Review — Round 2
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-25
+**Verdict:** approved
+
+### Summary
+
+R1 blocker resolved: `ClaudeHookEvent.id` now uses `evt_<ms>_<4-hex>` format, matching `ActivityEvent.id`. All write paths are consistent. No new issues.
+
+### Checklist verification
+
+- [x] `id?: string` added to `ActivityEvent` in `types.ts` — ✅ line 215
+- [ ] `id: z.string().optional()` in schema — pre-existing gap; JSONL not Zod-validated on read; runtime impact nil
+- [x] `evt_<ms>_<4-hex>` format on all three write paths — ✅ `randomBytes(2).toString("hex")` in hook path (~148), activity hook path (~187), agent path (~247)
+- [x] `log-event` sets `event.id` before writing — ✅ all three paths
+- [x] Dashboard dedup uses `ev.id || eventKey(ev)` — ✅ `addActivityEvent` line 834
+- [x] `prependActivityItem` sets `item.dataset.eventId` — ✅ line 869
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+- `ActivityEventSchema` absence remains a pre-existing gap, not introduced by N33.
+
+### Security & edge cases
+
+- None.
+
+### Notes
+
+- R1 blocker fixed: hook event IDs now use `evt_${Date.now()}_${randomBytes(2).toString("hex")}` uniformly across all paths.

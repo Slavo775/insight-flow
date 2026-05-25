@@ -152,3 +152,43 @@
 
 - Blocker 7 needs debugging — the event structure in JSONL is correct so the issue must be in how `addActivityEvent` receives or processes the event on the WS path.
 - Blocker 8 is a straightforward one-line addition to `claudeStatusFromEvent()`.
+
+
+---
+
+## AI Review — Round 6
+
+**Reviewer:** Task Reviewer (AI)
+**Date:** 2026-05-25
+**Verdict:** approved
+
+### Summary
+
+All four prior blockers (R1–R4) are resolved in the current diff. `claudeStatusFromEvent()` now contains all required transitions (`agent-active`, `agent-idle`, `approval-required`, `tool-approved`, `start`); the `done` case is absent; `updatePageTitle('idle')` is called on init matching the badge. No blockers remain for N37 specifically.
+
+### Checklist verification
+
+- [x] `updatePageTitle(state)` added — ✅ lines 343–347
+- [x] `active` → `⚡` prefix — ✅
+- [x] `idle` → `💤` prefix — ✅
+- [x] `permission-needed` → `🚨` prefix — ✅
+- [x] `null` / unknown → plain `Taskflow Dashboard` — ✅ (fallback branch)
+- [x] `updatePageTitle('idle')` called on init — ✅ line 1108 (changed from `null` per R1 blocker 3 / AIR2 blocker 1)
+- [x] `updatePageTitle(newStatus)` called from event handler — ✅ `addActivityEvent` line 843
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+- N36 MP3 files are 0 bytes (separate N36 blocker); this means no sound will play but the title and badge changes function independently and correctly.
+
+### Security & edge cases
+
+- None.
+
+### Notes
+
+- R4 blocker 7 (`tool-approved` not clearing badge) is resolved: `claudeStatusFromEvent()` line 330 maps `tool-approved` → `active`, and the WS path flows `activity` event → `addActivityEvent` → `claudeStatusFromEvent` → `updatePageTitle`. Root cause was the missing case in `claudeStatusFromEvent`, not a code-path issue.
+- R4 blocker 8 (`agent-active` missing) is also resolved: line 327 handles it.
