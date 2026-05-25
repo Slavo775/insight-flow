@@ -123,3 +123,32 @@
 
 - Both issues are in `claudeStatusFromEvent()` in `dashboard.ts` only.
 - The `agent-active` case is the symmetric counterpart to `agent-idle` — both are native Claude Code hook events and should be treated as the source of truth for session state.
+
+
+---
+
+## Human Review — Round 4
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+7. **🚨 permission badge does not clear after `tool-approved`**
+   "permission still stays there after permission granted"
+   Screenshot: sequence is AGENT-ACTIVE → TOOL-REQUESTED → APPROVAL-REQUIRED (badge goes to 🚨) → TOOL-APPROVED Read → Bash use → TOOL-REQUESTED → TOOL-APPROVED Bash. Two TOOL-APPROVED events arrive after APPROVAL-REQUIRED, yet badge stays stuck at 🚨 permission throughout. JSONL inspection confirms events are correctly structured: `{"tool":"Event","action":"tool-approved","source":"hook",...}` — matching the `claudeStatusFromEvent` condition exactly. Root cause not yet clear; likely a code-path issue where `addActivityEvent` doesn't reach `claudeStatusFromEvent` for these events, or the WS broadcast delivers events in a format that differs from the JSONL structure. Fix agent should add console logging to trace the event object received in `addActivityEvent` for a `tool-approved` event.
+
+8. **`agent-active` still not mapping to active (unfixed from round 3)**
+   "also agent active event"
+   AGENT-ACTIVE is visible in the feed (screenshot Image #4 and bottom of Image #3), but badge does not change. Blocker 5 from round 3 was recorded but the `/task-review-fix` run that followed only addressed rounds 1–2. This case (`ev.source === 'hook' && ev.action === 'agent-active'`) is still missing from `claudeStatusFromEvent()`.
+   _Fix: add `if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'agent-active') return 'active';`_
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- Blocker 7 needs debugging — the event structure in JSONL is correct so the issue must be in how `addActivityEvent` receives or processes the event on the WS path.
+- Blocker 8 is a straightforward one-line addition to `claudeStatusFromEvent()`.
