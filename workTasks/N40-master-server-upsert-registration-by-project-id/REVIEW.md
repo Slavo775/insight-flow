@@ -37,3 +37,20 @@ Adds upsert semantics to the master server's project registry. Four files change
 
 - Live smoke test confirmed: two registrations with `projectId: "smoke-test"` → one card in overview, second UUID present, first UUID absent. Working as intended.
 - Follow-up candidate: fix `upsertProject` in `overview.ts` to also match on `projectId` (one-liner).
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Notes
+
+approved merge it into master

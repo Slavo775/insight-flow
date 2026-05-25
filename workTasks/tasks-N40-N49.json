@@ -37,6 +37,21 @@
           "status": "approved",
           "at": "2026-05-25T17:37:11.240Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T17:43:28.864Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T17:44:02.791Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T17:44:17.001Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -51,7 +66,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -61,8 +76,14 @@
         "registration",
         "orphans"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-25T17:43:28.863Z",
+          "commitHash": "73d9803ea1911d4af12fa3d689919a1747507fbf",
+          "commitMessage": "fix(master): upsert registration by project ID to eliminate orphans"
+        }
+      ],
+      "branch": "fix/N40-master-server-upsert-registration-by-project-id",
       "mrUrl": null,
       "mergedAt": null
     }
