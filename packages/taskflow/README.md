@@ -155,18 +155,46 @@ Run `insight-flow help` for the full list.
 
 ### Notifications
 
-insight-flow fires OS-level notifications from two places:
+insight-flow uses a **three-tier notification model**. All notifications fire from hook scripts outside Claude's context — the AI agent itself never triggers a notification.
 
-**Browser (dashboard tab open)** — when a watched task's status changes, the dashboard fires a `Notification` via the Web Notification API. A gear icon in the top bar opens a settings popover where you can:
-- Toggle per-status notifications (implemented, approved, fix-needed, merged, changes-requested)
+#### Tier 1 — Hook notifications (autonomous, zero AI involvement)
+
+`insight-flow init` installs three hook scripts that fire OS notifications without any agent action:
+
+| Hook | Trigger | Notification |
+|---|---|---|
+| `taskflow-notify.sh` (Stop) | Claude finishes a turn; task is in a notable status | `"<ID> <status>"` — e.g. `"N19 implemented"` |
+| `lifecycle-agent-idle.sh` (Stop) | Claude finishes a turn (any turn) | `"Agent idle"` |
+| `lifecycle-permission.sh` (PermissionRequest) | Claude needs your approval for a tool call | `"Approval required"` + terminal bell `\a` |
+
+All three call `insight-flow notify` under the hood, which respects the `notifications.cli` flag and auto-detects the platform (`osascript` on macOS, `notify-send` on Linux, PowerShell on Windows).
+
+#### Tier 2 — Browser notifications (dashboard tab)
+
+When a watched task's status changes, the dashboard fires a `Notification` via the Web Notification API. A gear icon in the top bar opens a settings popover where you can:
+
+- Toggle per-status notifications (`implemented`, `approved`, `fix-needed`, `merged`, `changes-requested`)
 - Enable/disable sound
 - Mute notifications when the tab is focused
 
 Settings are persisted to `localStorage`. The browser prompts for permission on first load; if denied, no notifications fire and no console errors appear.
 
-**CLI (independent of browser tab)** — `insight-flow init` installs a Claude Code `Stop` hook (`.claude/hooks/taskflow-notify.sh`) that fires automatically when Claude finishes a turn and the current task is in a notable status (`implemented`, `approved`, `fix-needed`, `fixed`, `merged`, `changes-implemented`). The hook calls `insight-flow notify`, which auto-detects the platform (`osascript` on macOS, `notify-send` on Linux, PowerShell on Windows) and exits in <100 ms — errors are silently swallowed. No agent prompt needs to call notify explicitly.
+#### Tier 3 — User-authorized agent notifications (opt-in via config)
 
-Disable either half via config:
+If you want the AI to send a notification at the end of a specific skill run, add it to `agents.extend` in `taskflow.config.json`. The agent will only send the notification if you instruct it to here — no notification fires by default from agent code.
+
+```json
+{
+  "agents": {
+    "extend": {
+      "task-implement": ["When the task is fully implemented and the tracker is updated, run: insight-flow notify 'N<ID> implemented'"],
+      "task-review-fix": ["After all blockers are fixed, run: insight-flow notify 'N<ID> fixed'"]
+    }
+  }
+}
+```
+
+#### Disabling notifications
 
 ```json
 {
@@ -178,15 +206,20 @@ Disable either half via config:
 ```
 
 When `notifications.cli` is `false`:
-- `insight-flow notify` exits 0 silently without invoking any OS handler.
-- `insight-flow init` skips the Stop hook installer and clears `AGENT_NOTIFY.md` in the project's roles directory.
+- `insight-flow notify` exits 0 silently on all platforms — no OS handler is invoked.
+- Hook scripts that call `insight-flow notify` become no-ops automatically.
+- `insight-flow init` skips the `taskflow-notify.sh` Stop hook installer.
 
-**CLI usage:**
+#### `insight-flow notify` — the cross-platform primitive
+
+Hooks and user-configured agent steps call this command directly:
 
 ```bash
 insight-flow notify "N19 implemented"
 insight-flow notify "N19 approved" --title "Review done" --project my-app
 ```
+
+The command exits in <100 ms; errors are silently swallowed. It is safe to call from shell scripts with `2>/dev/null &` (fire-and-forget).
 
 ### Enabling the activity panel
 

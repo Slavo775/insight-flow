@@ -8,6 +8,4 @@ fi
 [ -z "$SESSION_ID" ] && exit 0
 insight-flow log-event approval-required --source hook --hook-name PermissionRequest --session-id "$SESSION_ID" --if-active 2>/dev/null &
 printf '\a'
-if command -v osascript >/dev/null 2>&1; then
-  osascript -e 'display notification "Approval required" with title "insight-flow"' 2>/dev/null || true
-fi
+insight-flow notify "Approval required" 2>/dev/null &

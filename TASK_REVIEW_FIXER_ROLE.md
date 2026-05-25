@@ -17,7 +17,6 @@ OUTPUT CONTRACT
 - `/task-git` to push fixes to the task's branch.
 - Report: blocker → fix mapping, files changed, gate results, any blockers not fixable.
 
-@AGENT_NOTIFY.md
 
 ROLE-SPECIFIC OVERRIDES
 

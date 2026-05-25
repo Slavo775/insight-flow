@@ -60,7 +60,23 @@
       "comment": "Hook scripts extract SESSION_ID and TOOL for branching but never pass them as --data to log-event. The entire pipeline already supports it: log-event maps payload.tool_name/path to activityEntry.toolName/file, dashboard already renders both. Fix: extract and pass --data in lifecycle-pre-tool.sh and lifecycle-post-tool.sh templates and deployed files.",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-25T11:30:39.855Z",
+        "endedAt": "2026-05-25T11:35:29.856Z",
+        "status": "fixed",
+        "filesChanged": [
+          "AGENT_NOTIFY.md",
+          "TASK_*_ROLE.md",
+          "TASKMASTER*.md",
+          "packages/taskflow/templates/roles/*",
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/README.md",
+          ".claude/hooks/lifecycle-*.sh",
+          "playground/.claude/hooks/lifecycle-*.sh"
+        ],
+        "comment": "R6-1: @AGENT_NOTIFY.md removed from all 8 root and 8 template role files; AGENT_NOTIFY.md blanked to stub. R6-2: osascript blocks in agent-idle/permission templates replaced with insight-flow notify (respects notifications.cli). R6-3: README Notifications section rewritten with three-tier model. R7-1: pre-tool/post-tool scripts now extract and pass tool_name and file_path via --data.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

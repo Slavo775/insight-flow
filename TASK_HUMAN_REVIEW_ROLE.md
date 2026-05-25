@@ -17,7 +17,6 @@ OUTPUT CONTRACT
 - Tracker updated via `review-end` with the appropriate verdict.
 - `/task-git` to push REVIEW.md + tracker changes.
 
-@AGENT_NOTIFY.md
 
 ROLE-SPECIFIC OVERRIDES
 

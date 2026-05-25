@@ -314,9 +314,7 @@ if [ -z "$SESSION_ID" ]; then
 fi
 [ -z "$SESSION_ID" ] && exit 0
 __INSIGHT_FLOW_BIN__ log-event agent-idle --source hook --hook-name Stop --session-id "$SESSION_ID" --if-active 2>/dev/null &
-if command -v osascript >/dev/null 2>&1; then
-  osascript -e 'display notification "Agent idle" with title "insight-flow"' 2>/dev/null || true
-fi
+__INSIGHT_FLOW_BIN__ notify "Agent idle" 2>/dev/null &
 `;
 
 const LIFECYCLE_PRE_TOOL_SCRIPT = `#!/bin/bash
@@ -327,7 +325,9 @@ if [ -z "$SESSION_ID" ]; then
   SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 fi
 [ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
+TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+[ -z "$TOOL" ] && exit 0
+__INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"$TOOL\\"}" --if-active 2>/dev/null &
 `;
 
 const LIFECYCLE_POST_TOOL_SCRIPT = `#!/bin/bash
@@ -339,15 +339,17 @@ if [ -z "$SESSION_ID" ]; then
 fi
 [ -z "$SESSION_ID" ] && exit 0
 TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+[ -z "$TOOL" ] && exit 0
+FILE_PATH=$(echo "$INPUT" | grep -o '"file_path":"[^"]*"' | head -1 | cut -d'"' -f4)
 case "$TOOL" in
   Write)
-    __INSIGHT_FLOW_BIN__ log-event file-written --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
+    __INSIGHT_FLOW_BIN__ log-event file-written --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"Write\\",\\"path\\":\\"$FILE_PATH\\"}" --if-active 2>/dev/null &
     ;;
   Edit|MultiEdit)
-    __INSIGHT_FLOW_BIN__ log-event file-edited --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
+    __INSIGHT_FLOW_BIN__ log-event file-edited --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"$TOOL\\",\\"path\\":\\"$FILE_PATH\\"}" --if-active 2>/dev/null &
     ;;
   *)
-    __INSIGHT_FLOW_BIN__ log-event tool-approved --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
+    __INSIGHT_FLOW_BIN__ log-event tool-approved --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"$TOOL\\"}" --if-active 2>/dev/null &
     ;;
 esac
 `;
@@ -362,9 +364,7 @@ fi
 [ -z "$SESSION_ID" ] && exit 0
 __INSIGHT_FLOW_BIN__ log-event approval-required --source hook --hook-name PermissionRequest --session-id "$SESSION_ID" --if-active 2>/dev/null &
 printf '\\a'
-if command -v osascript >/dev/null 2>&1; then
-  osascript -e 'display notification "Approval required" with title "insight-flow"' 2>/dev/null || true
-fi
+__INSIGHT_FLOW_BIN__ notify "Approval required" 2>/dev/null &
 `;
 
 export interface InstallLifecycleHooksResult {
