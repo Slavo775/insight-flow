@@ -324,6 +324,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     function claudeStatusFromEvent(ev) {
       if (ev.tool === 'Event' && ev.action === 'start') return 'active';
+      if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'agent-active') return 'active';
       if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'agent-idle') return 'idle';
       if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'approval-required') return 'permission-needed';
       if (ev.tool === 'Event' && ev.source === 'hook' && ev.action === 'tool-approved') return 'active';
