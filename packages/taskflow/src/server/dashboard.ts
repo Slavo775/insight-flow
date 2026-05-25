@@ -331,45 +331,13 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       return null;
     }
 
-    var _audioCtx = null;
-    function getAudioCtx() {
-      try {
-        if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (_audioCtx.state === 'suspended') _audioCtx.resume();
-        return _audioCtx;
-      } catch(e) { return null; }
-    }
-    document.addEventListener('click', function() { getAudioCtx(); });
-    document.addEventListener('keydown', function() { getAudioCtx(); });
-
     function playStatusSound(state) {
       if (localStorage.getItem('notif-sound') !== 'true') return;
-      try {
-        var ctx = getAudioCtx();
-        if (!ctx) return;
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        if (state === 'idle') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
-          gain.gain.setValueAtTime(0.15, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 0.5);
-        } else if (state === 'permission-needed') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(660, ctx.currentTime);
-          gain.gain.setValueAtTime(0.08, ctx.currentTime);
-          gain.gain.setValueAtTime(0, ctx.currentTime + 0.1);
-          gain.gain.setValueAtTime(0.08, ctx.currentTime + 0.15);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 0.35);
-        }
-      } catch(e) {}
+      var src = state === 'idle' ? '/sounds/idle-ping.mp3'
+              : state === 'permission-needed' ? '/sounds/permission-alert.mp3'
+              : null;
+      if (!src) return;
+      try { new Audio(src).play().catch(function(){}); } catch(e) {}
     }
 
     function updatePageTitle(state) {
