@@ -839,7 +839,7 @@
       "title": "activity vs typed events with automation triggers",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N26-activity-vs-typed-events-with-automation-triggers",
       "createdAt": "2026-05-24T18:16:11.608Z",
       "statusHistory": [
@@ -872,6 +872,11 @@
           "status": "approved",
           "at": "2026-05-25T08:38:02.648Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-25T11:59:15.354Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -905,7 +910,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 1063,
       "tags": [
         "activity",
         "events",
@@ -921,14 +926,14 @@
       ],
       "branch": "feat/N26-activity-vs-typed-events-with-automation-triggers",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/19",
-      "mergedAt": null
+      "mergedAt": "2026-05-25T11:59:15.354Z"
     },
     {
       "id": "N27",
       "title": "command hooks and auto lifecycle events",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N27-command-hooks-and-auto-lifecycle-events",
       "createdAt": "2026-05-24T20:35:13.064Z",
       "statusHistory": [
@@ -961,6 +966,11 @@
           "status": "approved",
           "at": "2026-05-25T08:41:04.291Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-25T11:59:15.455Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -980,7 +990,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 924,
       "tags": [
         "hooks",
         "events",
@@ -996,14 +1006,14 @@
       ],
       "branch": "feat/N27-command-hooks-and-auto-lifecycle-events",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/20",
-      "mergedAt": null
+      "mergedAt": "2026-05-25T11:59:15.455Z"
     },
     {
       "id": "N28",
       "title": "Claude Code hook scripts and lifecycle notification wiring",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio",
       "createdAt": "2026-05-25T08:28:32.710Z",
       "statusHistory": [
@@ -1111,6 +1121,16 @@
           "status": "pushed",
           "at": "2026-05-25T11:53:14.469Z",
           "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T11:58:32.395Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-25T11:59:15.567Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1124,7 +1144,7 @@
       "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 211,
       "tags": [
         "hooks",
         "notifications",
@@ -1150,10 +1170,74 @@
           "at": "2026-05-25T11:53:14.469Z",
           "commitHash": "dcfea7c",
           "commitMessage": "cleanup dangling REVIEW.md stub"
+        },
+        {
+          "at": "2026-05-25T11:58:32.395Z",
+          "commitHash": "da89d17",
+          "commitMessage": "feat(hooks): N28 — hook scripts, settings, role extensions, gitignore"
         }
       ],
       "branch": "feat/N28-claude-code-hook-scripts-and-lifecycle-notif",
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/21",
+      "mergedAt": "2026-05-25T11:59:15.567Z"
+    },
+    {
+      "id": "N29",
+      "title": "Dashboard activity tabs below board",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N29-dashboard-activity-tabs-below-board",
+      "createdAt": "2026-05-25T12:12:39.921Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T12:12:39.921Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T12:30:45.402Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T12:42:35.135Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T13:10:28.125Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T13:13:53.426Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-25T12:30:45.401Z",
+        "completedAt": "2026-05-25T12:42:35.135Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "ui",
+        "dashboard",
+        "tabs"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/22",
       "mergedAt": null
     }
   ]

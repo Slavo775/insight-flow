@@ -1,0 +1,66 @@
+{
+  "taskId": "N32",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T12:52:02.312Z",
+      "endedAt": "2026-05-25T12:55:50.404Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker 5 added: Claude Activity idle/active badge must show idle on load",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T12:57:00.628Z",
+        "endedAt": null,
+        "status": "in-progress",
+        "filesChanged": [],
+        "comment": null,
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T13:06:19.800Z",
+      "endedAt": "2026-05-25T13:06:39.482Z",
+      "verdict": "fix-needed",
+      "comment": "border should be bottom-only (1px solid), not full border — cognitive overload",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T13:10:28.467Z",
+      "endedAt": "2026-05-25T13:13:53.775Z",
+      "verdict": "fix-needed",
+      "comment": "Round 2 border-bottom fix unresolved; prependActivityItem sets borderLeftColor inconsistent with actItemHtml border-color after Round 1 fix",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T13:18:29.374Z",
+        "endedAt": "2026-05-25T13:19:32.677Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Fixed all blockers: border-bottom on .act-item CSS, actItemHtml border-bottom-color, prependActivityItem borderBottomColor — consistent across both tabs",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T13:21:01.010Z",
+      "endedAt": "2026-05-25T13:21:17.993Z",
+      "verdict": "approved",
+      "comment": "approved — all blockers resolved",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T13:21:40.447Z",
+      "endedAt": "2026-05-25T13:22:14.795Z",
+      "verdict": "approved",
+      "comment": "all blockers resolved — border-bottom consistent across CSS, actItemHtml, prependActivityItem; build clean",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
