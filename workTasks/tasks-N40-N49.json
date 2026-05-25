@@ -97,7 +97,7 @@
       "title": "Project status push: route, socket.io broadcast, and overview styles",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N41-project-status-push-route-socket-io-broadcast-and-",
       "createdAt": "2026-05-25T17:50:57.980Z",
       "statusHistory": [
@@ -185,6 +185,11 @@
           "status": "approved",
           "at": "2026-05-25T19:31:31.396Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T19:32:44.732Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -221,6 +226,11 @@
           "at": "2026-05-25T19:20:53.069Z",
           "commitHash": "c36cd4d",
           "commitMessage": "chore(tasks): N41 review, fix, and session events"
+        },
+        {
+          "at": "2026-05-25T19:32:44.732Z",
+          "commitHash": "7dc24e3",
+          "commitMessage": "fix(overview): stronger status backgrounds and claudeStatus badge on cards — N41"
         }
       ],
       "branch": "feat/N41-project-status-push-socket-io-broadcast",
