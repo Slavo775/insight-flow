@@ -61,20 +61,13 @@
       "type": "human",
       "by": "task-human-review",
       "fix": {
-        "startedAt": "2026-05-25T11:30:39.855Z",
-        "endedAt": "2026-05-25T11:35:29.856Z",
+        "startedAt": "2026-05-25T11:52:00.550Z",
+        "endedAt": "2026-05-25T11:52:55.990Z",
         "status": "fixed",
         "filesChanged": [
-          "AGENT_NOTIFY.md",
-          "TASK_*_ROLE.md",
-          "TASKMASTER*.md",
-          "packages/taskflow/templates/roles/*",
-          "packages/taskflow/src/activity-hook.ts",
-          "packages/taskflow/README.md",
-          ".claude/hooks/lifecycle-*.sh",
-          "playground/.claude/hooks/lifecycle-*.sh"
+          "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio/REVIEW.md"
         ],
-        "comment": "R6-1: @AGENT_NOTIFY.md removed from all 8 root and 8 template role files; AGENT_NOTIFY.md blanked to stub. R6-2: osascript blocks in agent-idle/permission templates replaced with insight-flow notify (respects notifications.cli). R6-3: README Notifications section rewritten with three-tier model. R7-1: pre-tool/post-tool scripts now extract and pass tool_name and file_path via --data.",
+        "comment": "No code changes needed — all R6+R7 blockers were already resolved in commit 803f51e. Cleaned up dangling pending-verdict stub from REVIEW.md.",
         "by": "task-review-fix"
       }
     }

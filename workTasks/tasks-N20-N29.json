@@ -1091,6 +1091,21 @@
           "status": "fixed",
           "at": "2026-05-25T11:35:29.857Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T11:35:52.356Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-25T11:52:00.549Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-25T11:52:55.990Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -1120,6 +1135,11 @@
           "at": "2026-05-25T11:15:20.672Z",
           "commitHash": "ec81b4b",
           "commitMessage": "fire-and-forget lifecycle hook scripts"
+        },
+        {
+          "at": "2026-05-25T11:35:52.355Z",
+          "commitHash": "803f51e",
+          "commitMessage": "remove AI notification awareness, enrich events with tool/file data"
         }
       ],
       "branch": "feat/N28-claude-code-hook-scripts-and-lifecycle-notif",
