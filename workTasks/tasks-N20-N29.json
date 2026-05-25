@@ -983,7 +983,7 @@
       "title": "Claude Code hook scripts and lifecycle notification wiring",
       "type": "feat",
       "priority": "high",
-      "status": "pushed",
+      "status": "implemented",
       "folder": "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio",
       "createdAt": "2026-05-25T08:28:32.710Z",
       "statusHistory": [
@@ -996,12 +996,28 @@
           "status": "pushed",
           "at": "2026-05-25T08:33:35.048Z",
           "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T08:44:09.929Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T09:03:45.667Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-25T08:44:09.928Z",
+        "completedAt": "2026-05-25T09:03:45.666Z",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/commands/install-lifecycle-hooks.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/test/activity-hook.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

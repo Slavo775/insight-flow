@@ -270,3 +270,173 @@ export function installEnrichmentHooks(
   return { hooksWritten, settingsUpdated };
 }
 
+// ---------------------------------------------------------------------------
+// Lifecycle hooks (N28) — hook into Claude Code's event stream
+// ---------------------------------------------------------------------------
+
+const LIFECYCLE_SESSION_START_SCRIPT = `#!/bin/bash
+# insight-flow lifecycle — SessionStart → session-start event (no --if-active: fires for all sessions)
+INPUT=$(cat)
+SESSION_ID="\${CLAUDE_SESSION_ID:-}"
+if [ -z "$SESSION_ID" ]; then
+  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+[ -z "$SESSION_ID" ] && exit 0
+__INSIGHT_FLOW_BIN__ log-event session-start --source hook --hook-name SessionStart --session-id "$SESSION_ID" 2>/dev/null || true
+`;
+
+const LIFECYCLE_AGENT_ACTIVE_SCRIPT = `#!/bin/bash
+# insight-flow lifecycle — UserPromptSubmit → agent-active (only for insight-flow skills)
+INPUT=$(cat)
+SESSION_ID="\${CLAUDE_SESSION_ID:-}"
+if [ -z "$SESSION_ID" ]; then
+  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+[ -z "$SESSION_ID" ] && exit 0
+PROMPT=$(echo "$INPUT" | grep -o '"prompt":"[^"]*"' | head -1 | cut -d'"' -f4)
+SKILL=$(echo "$PROMPT" | grep -o '^/[a-zA-Z][a-zA-Z0-9_-]*' | head -1 | cut -c2-)
+case "$SKILL" in
+  task-implement|task-review|task-review-fix|task-human-review|taskmaster|taskmaster-change|task-git|task-incident|task-request-changes|complete-task)
+    __INSIGHT_FLOW_BIN__ log-event agent-active --source hook --hook-name UserPromptSubmit --session-id "$SESSION_ID" 2>/dev/null || true
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+`;
+
+const LIFECYCLE_AGENT_IDLE_SCRIPT = `#!/bin/bash
+# insight-flow lifecycle — Stop → agent-idle (if active)
+INPUT=$(cat)
+SESSION_ID="\${CLAUDE_SESSION_ID:-}"
+if [ -z "$SESSION_ID" ]; then
+  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+[ -z "$SESSION_ID" ] && exit 0
+__INSIGHT_FLOW_BIN__ log-event agent-idle --source hook --hook-name Stop --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+if command -v osascript >/dev/null 2>&1; then
+  osascript -e 'display notification "Agent idle" with title "insight-flow"' 2>/dev/null || true
+fi
+`;
+
+const LIFECYCLE_PRE_TOOL_SCRIPT = `#!/bin/bash
+# insight-flow lifecycle — PreToolUse → tool-requested (if active)
+INPUT=$(cat)
+SESSION_ID="\${CLAUDE_SESSION_ID:-}"
+if [ -z "$SESSION_ID" ]; then
+  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+[ -z "$SESSION_ID" ] && exit 0
+TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+__INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+`;
+
+const LIFECYCLE_POST_TOOL_SCRIPT = `#!/bin/bash
+# insight-flow lifecycle — PostToolUse → tool-approved / file-written / file-edited (if active)
+INPUT=$(cat)
+SESSION_ID="\${CLAUDE_SESSION_ID:-}"
+if [ -z "$SESSION_ID" ]; then
+  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+[ -z "$SESSION_ID" ] && exit 0
+TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+case "$TOOL" in
+  Write)
+    __INSIGHT_FLOW_BIN__ log-event file-written --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+    ;;
+  Edit|MultiEdit)
+    __INSIGHT_FLOW_BIN__ log-event file-edited --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+    ;;
+  *)
+    __INSIGHT_FLOW_BIN__ log-event tool-approved --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+    ;;
+esac
+`;
+
+const LIFECYCLE_PERMISSION_SCRIPT = `#!/bin/bash
+# insight-flow lifecycle — PermissionRequest → approval-required (if active) + bell + notification
+INPUT=$(cat)
+SESSION_ID="\${CLAUDE_SESSION_ID:-}"
+if [ -z "$SESSION_ID" ]; then
+  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+fi
+[ -z "$SESSION_ID" ] && exit 0
+__INSIGHT_FLOW_BIN__ log-event approval-required --source hook --hook-name PermissionRequest --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+printf '\\a'
+if command -v osascript >/dev/null 2>&1; then
+  osascript -e 'display notification "Approval required" with title "insight-flow"' 2>/dev/null || true
+fi
+`;
+
+export interface InstallLifecycleHooksResult {
+  hooksWritten: number;
+  settingsUpdated: boolean;
+}
+
+export function installLifecycleHooks(
+  cwd: string,
+  insightFlowBin: string = "insight-flow",
+): InstallLifecycleHooksResult {
+  const hooksDir = resolve(cwd, ".claude", "hooks");
+  if (!existsSync(hooksDir)) {
+    mkdirSync(hooksDir, { recursive: true });
+  }
+
+  const hookDefs = [
+    { file: "lifecycle-session-start.sh", script: LIFECYCLE_SESSION_START_SCRIPT, event: "SessionStart" },
+    { file: "lifecycle-agent-active.sh", script: LIFECYCLE_AGENT_ACTIVE_SCRIPT, event: "UserPromptSubmit" },
+    { file: "lifecycle-agent-idle.sh", script: LIFECYCLE_AGENT_IDLE_SCRIPT, event: "Stop" },
+    { file: "lifecycle-pre-tool.sh", script: LIFECYCLE_PRE_TOOL_SCRIPT, event: "PreToolUse" },
+    { file: "lifecycle-post-tool.sh", script: LIFECYCLE_POST_TOOL_SCRIPT, event: "PostToolUse" },
+    { file: "lifecycle-permission.sh", script: LIFECYCLE_PERMISSION_SCRIPT, event: "PermissionRequest" },
+  ];
+
+  let hooksWritten = 0;
+  for (const { file, script } of hookDefs) {
+    const hookPath = resolve(hooksDir, file);
+    if (!existsSync(hookPath)) {
+      writeFileSync(hookPath, script.replace(/__INSIGHT_FLOW_BIN__/g, insightFlowBin), { mode: 0o755 });
+      hooksWritten++;
+    }
+  }
+
+  const settingsPath = resolve(cwd, ".claude", "settings.json");
+  let settings: Record<string, unknown> = {};
+  if (existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(readFileSync(settingsPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      settings = {};
+    }
+  }
+
+  const hooks = (settings.hooks ?? {}) as Record<string, unknown[]>;
+  let settingsUpdated = false;
+
+  for (const { file, event } of hookDefs) {
+    const hookCmd = `.claude/hooks/${file}`;
+    const existing = (hooks[event] ?? []) as Array<Record<string, unknown>>;
+    const alreadyRegistered = existing.some((h) => {
+      if (!h || typeof h !== "object") return false;
+      if (((h.command as string) || "").includes(file)) return true;
+      const inner = (h.hooks as Array<Record<string, unknown>> | undefined) ?? [];
+      return inner.some((e) => ((e?.command as string) || "").includes(file));
+    });
+    if (!alreadyRegistered) {
+      existing.push({ matcher: "", hooks: [{ type: "command", command: hookCmd, timeout: 10000 }] });
+      hooks[event] = existing;
+      settingsUpdated = true;
+    }
+  }
+
+  if (settingsUpdated) {
+    settings.hooks = hooks;
+    if (!existsSync(resolve(cwd, ".claude"))) {
+      mkdirSync(resolve(cwd, ".claude"), { recursive: true });
+    }
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+  }
+
+  return { hooksWritten, settingsUpdated };
+}
+
