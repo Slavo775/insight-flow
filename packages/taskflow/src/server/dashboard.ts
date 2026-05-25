@@ -47,6 +47,9 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "      <div class=\"stats\" id=\"stats\"></div>\n" +
     "      <div class=\"kanban\" id=\"kanban\"></div>\n" +
     "      <div class=\"timeline\" id=\"timeline\"></div>\n" +
+    (activityEnabled
+      ? "      <div class=\"recent-events\" id=\"recent-events\"></div>\n"
+      : "") +
     "    </div>\n" +
     (activityEnabled
       ? "    <aside class=\"activity-aside\" id=\"activity-aside\">\n" +
@@ -137,6 +140,26 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .activity-badge-event-mandatory { background: #0a2a0a; color: var(--green); }
     .activity-badge-event-optional { background: #1a2a3b; color: var(--cyan); }
     .activity-badge-skill { background: #1a0a3b; color: var(--purple); }
+    .activity-icon.hook-amber { background: #3b2500; color: var(--yellow); }
+    .activity-icon.hook-red { background: #3b1111; color: var(--red); }
+    .activity-icon.hook-green { background: #0a3622; color: var(--green); }
+    .activity-icon.hook-muted { background: #1a1a1a; color: var(--text-muted); }
+    .activity-icon.hook-blue { background: #1e3a5f; color: var(--cyan); }
+    .activity-icon.hook-purple { background: #2d1b4e; color: var(--purple); }
+    .activity-badge-hook-amber { background: #3b2500; color: var(--yellow); }
+    .activity-badge-hook-red { background: #3b1111; color: var(--red); }
+    .activity-badge-hook-green { background: #0a3622; color: var(--green); }
+    .activity-badge-hook-muted { background: #1a1a1a; color: var(--text-muted); }
+    .activity-badge-hook-blue { background: #1e3a5f; color: var(--cyan); }
+    .activity-badge-hook-purple { background: #2d1b4e; color: var(--purple); }
+    .recent-events { margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .recent-events-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .recent-events-header h2 { font-size: 14px; }
+    .recent-events-list { display: flex; flex-direction: column; }
+    .recent-event-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+    .recent-event-item:last-child { border-bottom: none; }
+    .recent-event-group { color: var(--text-muted); font-size: 11px; padding: 4px 0; font-style: italic; border-bottom: 1px solid var(--border); }
+    .recent-events-empty { font-size: 12px; color: var(--text-muted); padding: 12px 0; text-align: center; }
     .activity-phase-msg { font-weight: 600; color: var(--text); }
     .activity-idle { color: var(--text-muted); text-align: center; padding: 24px 16px; font-size: 12px; }
     .stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
@@ -828,6 +851,54 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
       if (tool === 'Event') {
         var evtType = ev.action || 'event';
+        var evtSource = ev.source || 'agent';
+
+        if (evtSource === 'hook') {
+          var hIconCls, hBadgeCls, hIcon, hDetail = '';
+          if (evtType === 'approval-required') {
+            hIconCls = 'hook-amber'; hBadgeCls = 'hook-amber'; hIcon = '&#9888;';
+            if (ev.toolName || ev.inputSummary) hDetail = escHtml(ev.toolName ? String(ev.toolName) : String(ev.inputSummary || '')).slice(0, 40);
+          } else if (evtType === 'approval-denied' || evtType === 'tool-blocked') {
+            hIconCls = 'hook-red'; hBadgeCls = 'hook-red'; hIcon = '&#10005;';
+            if (ev.toolName) hDetail = escHtml(String(ev.toolName));
+          } else if (evtType === 'approval-granted' || evtType === 'tool-approved') {
+            hIconCls = 'hook-green'; hBadgeCls = 'hook-green'; hIcon = '&#10003;';
+            if (ev.toolName) hDetail = escHtml(String(ev.toolName));
+          } else if (evtType === 'tool-requested' || evtType === 'tool-failed') {
+            hIconCls = evtType === 'tool-failed' ? 'hook-red' : 'hook-blue';
+            hBadgeCls = evtType === 'tool-failed' ? 'hook-red' : 'hook-blue';
+            hIcon = evtType === 'tool-failed' ? '&#10005;' : '&#9654;';
+            if (ev.toolName) hDetail = escHtml(String(ev.toolName));
+          } else if (evtType === 'session-start' || evtType === 'session-end') {
+            hIconCls = 'hook-muted'; hBadgeCls = 'hook-muted'; hIcon = '&#9711;';
+          } else if (evtType === 'agent-active') {
+            hIconCls = 'hook-blue'; hBadgeCls = 'hook-blue'; hIcon = '&#9679;';
+            if (ev.promptPreview) hDetail = escHtml(String(ev.promptPreview));
+          } else if (evtType === 'agent-idle') {
+            hIconCls = 'hook-muted'; hBadgeCls = 'hook-muted'; hIcon = '&#9675;';
+          } else if (evtType === 'turn-failed') {
+            hIconCls = 'hook-red'; hBadgeCls = 'hook-red'; hIcon = '&#9888;';
+            if (ev.errorType) hDetail = escHtml(String(ev.errorType));
+          } else if (evtType === 'subagent-start' || evtType === 'subagent-done') {
+            hIconCls = 'hook-purple'; hBadgeCls = 'hook-purple'; hIcon = '&#10022;';
+            if (ev.agentType) hDetail = escHtml(String(ev.agentType));
+          } else if (evtType === 'file-written' || evtType === 'file-edited') {
+            hIconCls = 'hook-blue'; hBadgeCls = 'hook-blue'; hIcon = '&#9999;';
+            if (ev.file) hDetail = escHtml(String(ev.file).split('/').slice(-2).join('/'));
+          } else if (evtType === 'context-compacted') {
+            hIconCls = 'hook-muted'; hBadgeCls = 'hook-muted'; hIcon = '&#8623;';
+          } else {
+            hIconCls = 'hook-muted'; hBadgeCls = 'hook-muted'; hIcon = '&#9679;';
+          }
+          return '<div class="activity-icon ' + hIconCls + '">' + hIcon + '</div>' +
+            '<div style="flex:1;min-width:0">' +
+              '<span class="activity-badge activity-badge-' + hBadgeCls + '">' + escHtml(evtType) + '</span>' +
+              (hDetail ? ' <span class="activity-file-muted">' + hDetail + '</span>' : '') +
+              (ev.taskId ? ' <span class="activity-file-muted" style="opacity:0.6">' + escHtml(String(ev.taskId)) + '</span>' : '') +
+            '</div>' +
+            '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
+        }
+
         var isMandatory = evtType === 'start' || evtType === 'done';
         var evtIconClass = isMandatory ? 'event-mandatory' : 'event-optional';
         var evtBadgeClass = isMandatory ? 'activity-badge-event-mandatory' : 'activity-badge-event-optional';
@@ -973,7 +1044,67 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     // Refresh timestamps every 30s as fallback
     setInterval(refreshTimestamps, 30000);
 
-    initActivityPanel();`;
+    initActivityPanel();
+
+    // Recent Events panel
+    var recentEventsTimer = null;
+
+    function hookEventColor(evtType) {
+      if (evtType === 'approval-required') return '#eab308';
+      if (evtType === 'approval-denied' || evtType === 'tool-blocked' || evtType === 'turn-failed' || evtType === 'tool-failed') return '#ef4444';
+      if (evtType === 'approval-granted' || evtType === 'tool-approved') return '#22c55e';
+      if (evtType === 'subagent-start' || evtType === 'subagent-done') return '#a855f7';
+      if (evtType === 'agent-active' || evtType === 'tool-requested') return '#06b6d4';
+      if (evtType === 'file-written' || evtType === 'file-edited') return '#06b6d4';
+      return '#737373';
+    }
+
+    function groupConsecutiveEvents(events) {
+      var groups = [];
+      for (var i = 0; i < events.length; i++) {
+        var ev = events[i];
+        var last = groups.length > 0 ? groups[groups.length - 1] : null;
+        if (last && last.type === ev.type && last.source === (ev.source || 'hook')) {
+          last.count++;
+          last.lastTs = ev.timestamp;
+        } else {
+          groups.push({ type: ev.type, source: ev.source || 'hook', count: 1, firstTs: ev.timestamp, lastTs: ev.timestamp, payload: ev.payload || {} });
+        }
+      }
+      return groups;
+    }
+
+    function renderRecentEvents(events) {
+      var el = document.getElementById('recent-events');
+      if (!el) return;
+      if (!events || events.length === 0) {
+        el.innerHTML = '<div class="recent-events-header"><h2>Recent Session Events</h2></div>' +
+          '<div class="recent-events-empty">No session events yet. Hook events will appear here when an insight-flow skill is active.</div>';
+        return;
+      }
+      var groups = groupConsecutiveEvents(events);
+      var rows = groups.map(function(g) {
+        var color = hookEventColor(g.type);
+        var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + escHtml(color) + ';flex-shrink:0;margin-top:1px"></span>';
+        var label = escHtml(g.type);
+        var countStr = g.count > 1 ? ' <span style="color:#737373;font-size:10px">×' + g.count + '</span>' : '';
+        var when = '<span style="color:#737373;font-size:10px;margin-left:auto;white-space:nowrap">' + escHtml(relativeTime(g.lastTs)) + '</span>';
+        return '<div class="recent-event-item">' + dot + '<span style="flex:1;min-width:0">' + label + countStr + '</span>' + when + '</div>';
+      });
+      el.innerHTML = '<div class="recent-events-header"><h2>Recent Session Events</h2>' +
+        '<span style="font-size:11px;color:#737373">' + events.length + ' event' + (events.length !== 1 ? 's' : '') + '</span></div>' +
+        '<div class="recent-events-list">' + rows.join('') + '</div>';
+    }
+
+    function loadRecentEvents() {
+      fetch('/api/session-events?limit=20')
+        .then(function(r) { return r.json(); })
+        .then(function(data) { renderRecentEvents(data.events || []); })
+        .catch(function() { /* ignore */ });
+    }
+
+    loadRecentEvents();
+    setInterval(loadRecentEvents, 5000);`;
   }
 
   // Init

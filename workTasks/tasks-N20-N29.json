@@ -839,7 +839,7 @@
       "title": "activity vs typed events with automation triggers",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N26-activity-vs-typed-events-with-automation-triggers",
       "createdAt": "2026-05-24T18:16:11.608Z",
       "statusHistory": [
@@ -857,6 +857,21 @@
           "status": "implemented",
           "at": "2026-05-24T20:28:25.640Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-24T20:29:18.633Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T08:35:12.482Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T08:38:02.648Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -886,8 +901,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -896,6 +911,124 @@
         "events",
         "automation",
         "token-saving"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-24T20:29:18.632Z",
+          "commitHash": "16ee2464174a31983f72fc0bdb472e7290fee28f",
+          "commitMessage": "feat(events): N26 — typed events with dedup, log-event command, /api/events endpoint"
+        }
+      ],
+      "branch": "feat/N26-activity-vs-typed-events-with-automation-triggers",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/19",
+      "mergedAt": null
+    },
+    {
+      "id": "N27",
+      "title": "command hooks and auto lifecycle events",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N27-command-hooks-and-auto-lifecycle-events",
+      "createdAt": "2026-05-24T20:35:13.064Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-24T20:35:13.064Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-25T06:48:46.424Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-25T07:13:11.824Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T07:13:39.124Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-25T08:38:08.098Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-25T08:41:04.291Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-25T06:48:46.424Z",
+        "completedAt": "2026-05-25T07:13:11.824Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/src/commands/log-event.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "hooks",
+        "events",
+        "automation",
+        "token-saving"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-25T07:13:39.123Z",
+          "commitHash": "07fbf4a",
+          "commitMessage": "feat(events): N27 — hook-sourced event schema, session log, and dashboard display"
+        }
+      ],
+      "branch": "feat/N27-command-hooks-and-auto-lifecycle-events",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/20",
+      "mergedAt": null
+    },
+    {
+      "id": "N28",
+      "title": "Claude Code hook scripts and lifecycle notification wiring",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio",
+      "createdAt": "2026-05-25T08:28:32.710Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-25T08:28:32.710Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "hooks",
+        "notifications",
+        "events"
       ],
       "pushes": [],
       "branch": null,
