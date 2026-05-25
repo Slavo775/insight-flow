@@ -282,7 +282,7 @@ if [ -z "$SESSION_ID" ]; then
   SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 fi
 [ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event session-start --source hook --hook-name SessionStart --session-id "$SESSION_ID" 2>/dev/null || true
+__INSIGHT_FLOW_BIN__ log-event session-start --source hook --hook-name SessionStart --session-id "$SESSION_ID" 2>/dev/null &
 `;
 
 const LIFECYCLE_AGENT_ACTIVE_SCRIPT = `#!/bin/bash
@@ -297,7 +297,7 @@ PROMPT=$(echo "$INPUT" | grep -o '"prompt":"[^"]*"' | head -1 | cut -d'"' -f4)
 SKILL=$(echo "$PROMPT" | grep -o '^/[a-zA-Z][a-zA-Z0-9_-]*' | head -1 | cut -c2-)
 case "$SKILL" in
   task-implement|task-review|task-review-fix|task-human-review|taskmaster|taskmaster-change|task-git|task-incident|task-request-changes|complete-task)
-    __INSIGHT_FLOW_BIN__ log-event agent-active --source hook --hook-name UserPromptSubmit --session-id "$SESSION_ID" 2>/dev/null || true
+    __INSIGHT_FLOW_BIN__ log-event agent-active --source hook --hook-name UserPromptSubmit --session-id "$SESSION_ID" 2>/dev/null &
     ;;
   *)
     exit 0
@@ -313,7 +313,7 @@ if [ -z "$SESSION_ID" ]; then
   SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 fi
 [ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event agent-idle --source hook --hook-name Stop --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+__INSIGHT_FLOW_BIN__ log-event agent-idle --source hook --hook-name Stop --session-id "$SESSION_ID" --if-active 2>/dev/null &
 if command -v osascript >/dev/null 2>&1; then
   osascript -e 'display notification "Agent idle" with title "insight-flow"' 2>/dev/null || true
 fi
@@ -327,7 +327,7 @@ if [ -z "$SESSION_ID" ]; then
   SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 fi
 [ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+__INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
 `;
 
 const LIFECYCLE_POST_TOOL_SCRIPT = `#!/bin/bash
@@ -341,13 +341,13 @@ fi
 TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
 case "$TOOL" in
   Write)
-    __INSIGHT_FLOW_BIN__ log-event file-written --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+    __INSIGHT_FLOW_BIN__ log-event file-written --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
     ;;
   Edit|MultiEdit)
-    __INSIGHT_FLOW_BIN__ log-event file-edited --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+    __INSIGHT_FLOW_BIN__ log-event file-edited --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
     ;;
   *)
-    __INSIGHT_FLOW_BIN__ log-event tool-approved --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+    __INSIGHT_FLOW_BIN__ log-event tool-approved --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null &
     ;;
 esac
 `;
@@ -360,7 +360,7 @@ if [ -z "$SESSION_ID" ]; then
   SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 fi
 [ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event approval-required --source hook --hook-name PermissionRequest --session-id "$SESSION_ID" --if-active 2>/dev/null || true
+__INSIGHT_FLOW_BIN__ log-event approval-required --source hook --hook-name PermissionRequest --session-id "$SESSION_ID" --if-active 2>/dev/null &
 printf '\\a'
 if command -v osascript >/dev/null 2>&1; then
   osascript -e 'display notification "Approval required" with title "insight-flow"' 2>/dev/null || true

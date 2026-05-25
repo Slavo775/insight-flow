@@ -31,7 +31,18 @@
       "comment": "Hook scripts block Claude Code on every tool call (~50ms each). Background the log-event call in all 6 scripts (and their templates) so the hook exits immediately. Permission bell/osascript stay synchronous.",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-25T11:09:29.763Z",
+        "endedAt": "2026-05-25T11:14:45.775Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          ".claude/hooks/lifecycle-*.sh",
+          "playground/.claude/hooks/lifecycle-*.sh"
+        ],
+        "comment": "Blocker 1 fixed: all 6 lifecycle hook scripts now background log-event with & (fire-and-forget). Bell and osascript in permission script remain synchronous. Templates and deployed files updated.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
