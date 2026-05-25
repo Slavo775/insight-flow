@@ -46,21 +46,21 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     "      <div class=\"shard-nav\" id=\"shard-nav\"></div>\n" +
     "      <div class=\"stats\" id=\"stats\"></div>\n" +
     "      <div class=\"kanban\" id=\"kanban\"></div>\n" +
-    "      <div class=\"timeline\" id=\"timeline\"></div>\n" +
     (activityEnabled
-      ? "      <div class=\"recent-events\" id=\"recent-events\"></div>\n"
-      : "") +
+      ? "      <div class=\"act-tabs\" id=\"act-tabs\">\n" +
+        "        <div class=\"act-tab-bar\">\n" +
+        "          <button class=\"act-tab active\" data-pane=\"claude\" onclick=\"switchActTab('claude')\">Claude Activity <span class=\"activity-status\" id=\"activity-status\"></span></button>\n" +
+        "          <button class=\"act-tab\" data-pane=\"recent\" onclick=\"switchActTab('recent')\">Recent Activity</button>\n" +
+        "        </div>\n" +
+        "        <div class=\"act-pane\" id=\"act-pane-claude\">\n" +
+        "          <div class=\"activity-feed\" id=\"activity-feed\"></div>\n" +
+        "        </div>\n" +
+        "        <div class=\"act-pane\" id=\"act-pane-recent\" style=\"display:none\">\n" +
+        "          <div id=\"timeline\"></div>\n" +
+        "        </div>\n" +
+        "      </div>\n"
+      : "      <div id=\"timeline\"></div>\n") +
     "    </div>\n" +
-    (activityEnabled
-      ? "    <aside class=\"activity-aside\" id=\"activity-aside\">\n" +
-        "      <div class=\"activity-header\">\n" +
-        "        <button class=\"activity-collapse-btn\" id=\"activity-collapse-btn\" onclick=\"toggleActivityPanel()\" title=\"Collapse\">&#9664;</button>\n" +
-        "        <h2>Claude Activity</h2>\n" +
-        "        <span class=\"activity-status\" id=\"activity-status\"></span>\n" +
-        "      </div>\n" +
-        "      <div class=\"activity-feed\" id=\"activity-feed\"></div>\n" +
-        "    </aside>\n"
-      : "") +
     "  </div>\n" +
     "\n" +
     "  <div class=\"detail-overlay\" id=\"overlay\" onclick=\"closeDetail()\"></div>\n" +
@@ -105,22 +105,18 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .layout { display: flex; gap: 16px; align-items: flex-start; }
     .main-content { flex: 1; min-width: 0; overflow-x: auto; }
-    .activity-aside { width: 340px; flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; max-height: calc(100vh - 96px); overflow: hidden; transition: width 0.2s ease; position: sticky; top: 72px; }
-    .activity-aside.collapsed { width: 44px; }
-    .activity-aside.collapsed .activity-feed { display: none; }
-    .activity-aside.collapsed .activity-header h2 { display: none; }
-    .activity-aside.collapsed .activity-status { display: none; }
-    .activity-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .activity-aside.collapsed .activity-header { justify-content: center; border-bottom: none; }
-    .activity-header h2 { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; }
-    .activity-collapse-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 26px; height: 26px; border-radius: 4px; cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
-    .activity-collapse-btn:hover { border-color: var(--accent); color: var(--text); }
     .activity-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--border); color: var(--text-muted); white-space: nowrap; }
     .activity-status.active { background: #0a3622; color: var(--green); }
     .activity-status.idle { background: var(--border); color: var(--text-muted); }
-    .activity-feed { flex: 1; overflow-y: auto; padding: 4px 0; }
-    .activity-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 12px; font-size: 11px; border-bottom: 1px solid var(--border); }
-    .activity-item:hover { background: rgba(255,255,255,0.02); }
+    .activity-feed { overflow-y: auto; padding: 4px 0; display: flex; flex-direction: column; gap: 10px; max-height: 600px; }
+    .act-tabs { margin-top: 24px; }
+    .act-tab-bar { display: flex; align-items: center; border-bottom: 2px solid var(--border); }
+    .act-tab { flex: 1; background: none; border: none; color: var(--text-muted); font-family: inherit; font-size: 13px; padding: 10px 0; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .act-tab:hover { color: var(--text); }
+    .act-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+    .act-pane { padding: 12px 0; }
+    .act-item-list { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+    .act-item { min-height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 6px; border-left: 3px solid transparent; font-size: 12px; }
     .activity-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
     .activity-icon.read { background: #1e3a5f; color: var(--cyan); }
     .activity-icon.edit { background: #3b2f06; color: var(--yellow); }
@@ -152,14 +148,6 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .activity-badge-hook-muted { background: #1a1a1a; color: var(--text-muted); }
     .activity-badge-hook-blue { background: #1e3a5f; color: var(--cyan); }
     .activity-badge-hook-purple { background: #2d1b4e; color: var(--purple); }
-    .recent-events { margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-    .recent-events-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .recent-events-header h2 { font-size: 14px; }
-    .recent-events-list { display: flex; flex-direction: column; }
-    .recent-event-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
-    .recent-event-item:last-child { border-bottom: none; }
-    .recent-event-group { color: var(--text-muted); font-size: 11px; padding: 4px 0; font-style: italic; border-bottom: 1px solid var(--border); }
-    .recent-events-empty { font-size: 12px; color: var(--text-muted); padding: 12px 0; text-align: center; }
     .activity-phase-msg { font-weight: 600; color: var(--text); }
     .activity-idle { color: var(--text-muted); text-align: center; padding: 24px 16px; font-size: 12px; }
     .stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
@@ -183,11 +171,6 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .badge-approved { background: #0a3622; color: var(--green); }
     .badge-merged { background: #1a1a2e; color: #818cf8; }
     .badge-pushed { background: #2a1a06; color: var(--orange); }
-    .timeline { margin-top: 24px; }
-    .timeline h2 { font-size: 14px; margin-bottom: 12px; }
-    .timeline-item { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
-    .timeline-time { color: var(--text-muted); min-width: 140px; }
-    .timeline-event { flex: 1; }
     .shard-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
     .shard-nav button { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 12px; }
     .shard-nav button:hover { border-color: var(--accent); }
@@ -295,6 +278,38 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       return 'badge-pushed';
     }
 
+    function taskStatusColor(status) {
+      var m = {
+        'ready': '#94a3b8', 'in-progress': '#f59e0b', 'implemented': '#06b6d4',
+        'reviewing': '#a855f7', 'approved': '#22c55e', 'fix-needed': '#ef4444',
+        'fixing': '#dc2626', 'fixed': '#22c55e', 'pushed': '#16a34a',
+        'merged': '#10b981', 'changes-requested': '#f97316',
+        'changes-implementing': '#fb923c', 'changes-implemented': '#14b8a6'
+      };
+      return m[status] || '#737373';
+    }
+
+    function hexToRgb(hex) {
+      var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+      return r + ',' + g + ',' + b;
+    }
+
+    function actItemHtml(color, innerHtml) {
+      var rgb = hexToRgb(color);
+      return '<div class="act-item" style="border-left-color:' + color + ';background:rgba(' + rgb + ',0.08)">' + innerHtml + '</div>';
+    }
+
+    function switchActTab(name) {
+      var tabs = document.querySelectorAll('.act-tab');
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.toggle('active', tabs[i].dataset.pane === name);
+      }
+      var panes = document.querySelectorAll('.act-pane');
+      for (var j = 0; j < panes.length; j++) {
+        panes[j].style.display = panes[j].id === 'act-pane-' + name ? '' : 'none';
+      }
+    }
+
     function formatTime(iso) {
       if (!iso) return '-';
       var d = new Date(iso);
@@ -338,12 +353,23 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       }
       events.sort(function(a, b) { return new Date(b.at).getTime() - new Date(a.at).getTime(); });
 
-      document.getElementById('timeline').innerHTML =
-        '<h2>Recent Activity</h2>' +
-        events.slice(0, 20).map(function(e) {
-          return '<div class="timeline-item"><span class="timeline-time">' + formatTime(e.at) + '</span>' +
-          '<span class="timeline-event"><strong>' + e.taskId + '</strong> &rarr; <span class="badge ' + badgeClass(e.status) + '">' + e.status + '</span> by ' + (e.by || '?') + '</span></div>';
-        }).join('');
+      var timelineEl = document.getElementById('timeline');
+      if (timelineEl) {
+        if (events.length === 0) {
+          timelineEl.innerHTML = '<div class="activity-empty-state" style="padding:16px 0"><strong>No activity yet</strong>Task status changes will appear here as tasks move through the workflow.</div>';
+        } else {
+          timelineEl.innerHTML = '<div class="act-item-list">' + events.slice(0, 30).map(function(e) {
+            var color = taskStatusColor(e.status);
+            var inner =
+              '<span style="font-weight:700;color:var(--accent);flex-shrink:0">' + escHtml(e.taskId) + '</span>' +
+              '<span style="color:var(--text-muted);margin:0 4px;flex-shrink:0">→</span>' +
+              '<span style="background:rgba(' + hexToRgb(color) + ',0.18);color:' + color + ';padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;flex-shrink:0">' + escHtml(e.status) + '</span>' +
+              '<span style="color:var(--text-muted);font-size:11px;flex:1;min-width:0"> by ' + escHtml(e.by || '?') + '</span>' +
+              '<span style="margin-left:auto;color:var(--text-muted);font-size:11px;white-space:nowrap;flex-shrink:0">' + formatTime(e.at) + '</span>';
+            return actItemHtml(color, inner);
+          }).join('') + '</div>';
+        }
+      }
     }
 
     function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -728,39 +754,12 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     var VERBOSITY = ${JSON.stringify(verbosity)};
     var ACTIVITY_CAP = 50;
-    var activityPanelCollapsed = false;
     var activityEvents = [];
     var seenEventKeys = new Set();
     var emptyStateTimer = null;
 
     function eventKey(ev) {
       return (ev.ts || '') + '|' + (ev.tool || '') + '|' + (ev.action || '') + '|' + (ev.message || ev.file || '');
-    }
-
-    function initActivityPanel() {
-      try { activityPanelCollapsed = localStorage.getItem('activityPanelCollapsed') === '1'; } catch(e) {}
-      applyActivityPanelState();
-    }
-
-    function applyActivityPanelState() {
-      var aside = document.getElementById('activity-aside');
-      var btn = document.getElementById('activity-collapse-btn');
-      if (!aside) return;
-      if (activityPanelCollapsed) {
-        aside.classList.add('collapsed');
-        if (btn) btn.innerHTML = '&#9654;';
-        if (btn) btn.title = 'Expand';
-      } else {
-        aside.classList.remove('collapsed');
-        if (btn) btn.innerHTML = '&#9664;';
-        if (btn) btn.title = 'Collapse';
-      }
-    }
-
-    function toggleActivityPanel() {
-      activityPanelCollapsed = !activityPanelCollapsed;
-      try { localStorage.setItem('activityPanelCollapsed', activityPanelCollapsed ? '1' : '0'); } catch(e) {}
-      applyActivityPanelState();
     }
 
     function refreshTimestamps() {
@@ -817,13 +816,25 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       trimActivityFeed();
     }
 
+    function eventColor(ev) {
+      if (ev.tool === 'Event' && ev.source === 'hook') return hookEventColor(ev.action || '');
+      if (ev.tool === 'Skill') return '#a855f7';
+      if (ev.tool === 'Phase') return '#06b6d4';
+      if (ev.tool === 'Activity') return '#f59e0b';
+      if (ev.tool === 'Tool') return '#22c55e';
+      return '#737373';
+    }
+
     function prependActivityItem(ev) {
       var feed = document.getElementById('activity-feed');
       if (!feed) return;
       var idle = feed.querySelector('.activity-idle');
       if (idle) idle.remove();
+      var color = eventColor(ev);
       var item = document.createElement('div');
-      item.className = 'activity-item';
+      item.className = 'act-item';
+      item.style.borderLeftColor = color;
+      item.style.background = 'rgba(' + hexToRgb(color) + ',0.08)';
       item.innerHTML = renderActivityItemHtml(ev);
       feed.insertBefore(item, feed.firstChild);
     }
@@ -831,7 +842,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     function trimActivityFeed() {
       var feed = document.getElementById('activity-feed');
       if (!feed) return;
-      var items = feed.querySelectorAll('.activity-item');
+      var items = feed.querySelectorAll('.act-item');
       for (var i = ACTIVITY_CAP; i < items.length; i++) {
         items[i].remove();
       }
@@ -1042,14 +1053,6 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       }
     }
 
-    // Refresh timestamps every 30s as fallback
-    setInterval(refreshTimestamps, 30000);
-
-    initActivityPanel();
-
-    // Recent Events panel
-    var recentEventsTimer = null;
-
     function hookEventColor(evtType) {
       if (evtType === 'approval-required') return '#eab308';
       if (evtType === 'approval-denied' || evtType === 'tool-blocked' || evtType === 'turn-failed' || evtType === 'tool-failed') return '#ef4444';
@@ -1060,52 +1063,8 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       return '#737373';
     }
 
-    function groupConsecutiveEvents(events) {
-      var groups = [];
-      for (var i = 0; i < events.length; i++) {
-        var ev = events[i];
-        var last = groups.length > 0 ? groups[groups.length - 1] : null;
-        if (last && last.type === ev.type && last.source === (ev.source || 'hook')) {
-          last.count++;
-          last.lastTs = ev.timestamp;
-        } else {
-          groups.push({ type: ev.type, source: ev.source || 'hook', count: 1, firstTs: ev.timestamp, lastTs: ev.timestamp, payload: ev.payload || {} });
-        }
-      }
-      return groups;
-    }
-
-    function renderRecentEvents(events) {
-      var el = document.getElementById('recent-events');
-      if (!el) return;
-      if (!events || events.length === 0) {
-        el.innerHTML = '<div class="recent-events-header"><h2>Recent Session Events</h2></div>' +
-          '<div class="recent-events-empty">No session events yet. Hook events will appear here when an insight-flow skill is active.</div>';
-        return;
-      }
-      var groups = groupConsecutiveEvents(events);
-      var rows = groups.map(function(g) {
-        var color = hookEventColor(g.type);
-        var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + escHtml(color) + ';flex-shrink:0;margin-top:1px"></span>';
-        var label = escHtml(g.type);
-        var countStr = g.count > 1 ? ' <span style="color:#737373;font-size:10px">×' + g.count + '</span>' : '';
-        var when = '<span style="color:#737373;font-size:10px;margin-left:auto;white-space:nowrap">' + escHtml(relativeTime(g.lastTs)) + '</span>';
-        return '<div class="recent-event-item">' + dot + '<span style="flex:1;min-width:0">' + label + countStr + '</span>' + when + '</div>';
-      });
-      el.innerHTML = '<div class="recent-events-header"><h2>Recent Session Events</h2>' +
-        '<span style="font-size:11px;color:#737373">' + events.length + ' event' + (events.length !== 1 ? 's' : '') + '</span></div>' +
-        '<div class="recent-events-list">' + rows.join('') + '</div>';
-    }
-
-    function loadRecentEvents() {
-      fetch('/api/session-events?limit=20')
-        .then(function(r) { return r.json(); })
-        .then(function(data) { renderRecentEvents(data.events || []); })
-        .catch(function() { /* ignore */ });
-    }
-
-    loadRecentEvents();
-    setInterval(loadRecentEvents, 5000);`;
+    // Refresh timestamps every 30s as fallback
+    setInterval(refreshTimestamps, 30000);`;
   }
 
   // Init

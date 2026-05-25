@@ -1,0 +1,29 @@
+{
+  "taskId": "N30",
+  "events": [
+    {
+      "id": "1779711164342-f998dc88",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-05-25T12:12:44.342Z",
+      "sessionId": "21ebf6fa-1e6a-45b1-a288-cd25ae894f98",
+      "taskId": "N30",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "1779711169121-094236de",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-05-25T12:12:49.121Z",
+      "sessionId": "21ebf6fa-1e6a-45b1-a288-cd25ae894f98",
+      "taskId": "N30",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    }
+  ]
+}
