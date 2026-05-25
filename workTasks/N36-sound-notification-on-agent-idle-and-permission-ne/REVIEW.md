@@ -45,3 +45,35 @@
 ### Notes
 
 - This is the same issue flagged in human review R1. The fix is straightforward — the rest of the function is correct.
+
+
+---
+
+## Human Review — Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Replace Web Audio API synthesis with real MP3 files via `new Audio()`**
+   The synthesised Web Audio tones are not the desired sounds. The project owner provides two MP3 files to use instead:
+   - **Permission-needed alert**: `/Users/ssedlak/Downloads/universfield-new-notification-050-494248.mp3`
+   - **Idle / done ping**: `/Users/ssedlak/Downloads/freesound_community-ping-82822.mp3`
+
+   _Fix:_
+   1. Copy both MP3s into the project (e.g. `packages/taskflow/src/server/sounds/`).
+   2. Serve them as static assets from the dashboard server.
+   3. Replace `playStatusSound()` to use `new Audio('/sounds/<file>.mp3').play()` instead of the Web Audio API oscillator code.
+   4. Remove `getAudioCtx()` / `_audioCtx` shared-context plumbing — no longer needed.
+   5. The `localStorage.getItem('notif-sound') === 'true'` gate must be kept.
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- Source files provided by the project owner; exact filenames to use after copying are at the implementer's discretion but should be kept descriptive.
+- The `new Audio()` API does not require a user-gesture pre-warm like `AudioContext`, but browsers may still suppress it unless the page has had a prior interaction. Calling `.play()` in a `.catch(()=>{})` wrapper is sufficient.
