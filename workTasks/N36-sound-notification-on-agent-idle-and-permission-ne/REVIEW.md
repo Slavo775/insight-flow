@@ -77,3 +77,30 @@
 
 - Source files provided by the project owner; exact filenames to use after copying are at the implementer's discretion but should be kept descriptive.
 - The `new Audio()` API does not require a user-gesture pre-warm like `AudioContext`, but browsers may still suppress it unless the page has had a prior interaction. Calling `.play()` in a `.catch(()=>{})` wrapper is sufficient.
+
+
+---
+
+## Human Review — Round 3
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Sound gate reads wrong localStorage key — always blocked**
+   "still i do not heard any sounds why?"
+   `playStatusSound()` guards with `localStorage.getItem('notif-sound') !== 'true'` (standalone key). But `saveNotifSettings()` (line 631) writes sound preference inside a JSON blob under `'tf-notif-settings'` as `{sound: true, ...}` — the standalone `'notif-sound'` key is **never written**. So `localStorage.getItem('notif-sound')` always returns `null`, meaning sound is permanently blocked regardless of the UI toggle.
+   _Fix: replace the localStorage gate in `playStatusSound()` with a check against the in-memory `notifSettings.sound` object, which IS correctly loaded and saved by the settings UI:_
+   ```js
+   if (!notifSettings || notifSettings.sound === false) return;
+   ```
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- `notifSettings` is an in-memory object populated by `loadNotifSettings()` from `'tf-notif-settings'` JSON. It is already the canonical source of truth for all notification preferences; `playStatusSound` should use it directly.
