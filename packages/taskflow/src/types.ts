@@ -137,6 +137,41 @@ export interface MasterFile {
   };
 }
 
+export const MANDATORY_EVENT_TYPES = ["start", "done"] as const;
+export const OPTIONAL_EVENT_TYPES = [
+  "active",
+  "idle",
+  "edit-start",
+  "edit-end",
+  "research-start",
+  "research-end",
+  "review-start",
+  "review-end",
+  "git-start",
+  "git-end",
+] as const;
+export const EVENT_TYPES = [...MANDATORY_EVENT_TYPES, ...OPTIONAL_EVENT_TYPES] as const;
+export type MandatoryEventType = (typeof MANDATORY_EVENT_TYPES)[number];
+export type OptionalEventType = (typeof OPTIONAL_EVENT_TYPES)[number];
+export type EventType = (typeof EVENT_TYPES)[number];
+
+export interface TaskEvent {
+  type: EventType;
+  taskId: string;
+  timestamp: string;
+  data?: Record<string, unknown>;
+}
+
+export interface EventsFile {
+  taskId: string;
+  events: TaskEvent[];
+}
+
+export interface EventsConfig {
+  dedupWindowSeconds?: number;
+  hooks?: Partial<Record<EventType, string[]>>;
+}
+
 export interface ActivityEvent {
   ts: string;
   tool: string;
@@ -200,6 +235,7 @@ export interface TaskflowConfig {
   agents?: AgentsConfig;
   notifications?: NotificationsConfig;
   master?: MasterConfig;
+  events?: EventsConfig;
 }
 
 export interface ParsedArgs {

@@ -4,17 +4,16 @@ import type { TaskflowConfig, ParsedArgs } from "../types.js";
 
 export function cmdLogActivity(config: TaskflowConfig, opts: ParsedArgs): void {
   const activityCfg = config.activityEngine;
-  if (activityCfg?.enabled === false || activityCfg?.phaseMarkers === false) {
+  if (activityCfg?.enabled === false) {
     process.exit(0);
   }
 
   const message = (opts._[0] as string) || "";
-  const phase = (opts.phase as string) || "milestone";
   const logFile = resolve(process.cwd(), activityCfg?.logFile ?? ".taskflow-activity.jsonl");
   const ts = new Date().toISOString();
 
   try {
-    const line = JSON.stringify({ ts, tool: "Phase", action: phase, message });
+    const line = JSON.stringify({ ts, tool: "Activity", action: "log", message });
     appendFileSync(logFile, line + "\n");
   } catch {
     // fire-and-forget — swallow all errors
