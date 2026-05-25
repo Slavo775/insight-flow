@@ -23,6 +23,15 @@
         "comment": "Fixed all 4 blockers: absolute hook paths with stale detection, milestones panel excludes phase markers, N27 merged for log-event+UI, unused TOOL var removed",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-25T10:33:53.756Z",
+      "endedAt": "2026-05-25T10:34:48.432Z",
+      "verdict": "fix-needed",
+      "comment": "Hook scripts block Claude Code on every tool call (~50ms each). Background the log-event call in all 6 scripts (and their templates) so the hook exits immediately. Permission bell/osascript stay synchronous.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

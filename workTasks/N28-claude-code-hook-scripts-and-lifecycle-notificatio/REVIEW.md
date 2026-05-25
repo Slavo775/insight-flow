@@ -174,3 +174,51 @@ Owner provided the full Claude Code event list for future hook expansion. Key ob
 `Setup`, `UserPromptExpansion`, `PermissionDenied`, `PostToolUseFailure`, `PostToolBatch`, `Notification`, `SubagentStart`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `StopFailure`, `TeammateIdle`, `InstructionsLoaded`, `ConfigChange`, `CwdChanged`, `FileChanged`, `WorktreeCreate`, `WorktreeRemove`, `PreCompact`, `PostCompact`, `Elicitation`, `ElicitationResult`, `SessionEnd`.
 
 > "but we need setup all this things to future improvement"
+
+
+---
+
+## Round 4 — pending verdict
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** pending
+
+### Summary
+
+### Checklist verification
+
+### Blockers
+
+### Non-blocking
+
+### Security & edge cases
+
+### Notes
+
+---
+
+## Round 4 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+1. **Hook scripts must be fire-and-forget — they are slowing down the AI**
+   Every Claude Code tool call triggers at least two hooks (`PreToolUse`, `PostToolUse`). Each hook subprocess currently blocks Claude Code until `insight-flow log-event` completes (~50 ms per call). Across a typical task session with dozens of tool calls this adds noticeable latency. The hook scripts must background the `insight-flow` call so the script exits immediately and Claude proceeds — event logging happens asynchronously.
+   > "can we have a hook like fire and forget? so AI will be quicker?"
+
+   **Implementation approach** (for `/task-review-fix`):
+   - In each lifecycle script, replace synchronous `insight-flow log-event ...` with a backgrounded call:
+     ```bash
+     insight-flow log-event ... 2>/dev/null &
+     ```
+   - For `lifecycle-permission.sh` specifically: the `printf '\a'` bell and `osascript` notification MUST remain synchronous (they need to reach the user immediately). Only the `log-event` line is backgrounded.
+   - The same change applies to the script template constants in `activity-hook.ts` so newly generated scripts also use fire-and-forget.
+   - Note: `disown` is not needed — bash backgrounded children survive parent exit by default on macOS; `2>/dev/null &` is sufficient.
+
+### Suggestions (non-blocking)
+
+### Notes
