@@ -332,7 +332,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     }
 
     function playStatusSound(state) {
-      if (localStorage.getItem('notif-sound') !== 'true') return;
+      if (!notifSettings || notifSettings.sound === false) return;
       var src = state === 'idle' ? '/sounds/idle-ping.mp3'
               : state === 'permission-needed' ? '/sounds/permission-alert.mp3'
               : null;
