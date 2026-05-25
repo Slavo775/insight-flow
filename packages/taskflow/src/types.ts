@@ -249,9 +249,22 @@ export interface CustomAgent {
   outputContract?: string;
 }
 
+export interface AgentGitPermissions {
+  createBranch?: boolean;       // git checkout -b
+  checkout?: boolean;           // git checkout <existing branch>
+  commit?: boolean;             // git commit
+  push?: boolean;               // git push (to remote)
+  forcePush?: boolean;          // git push --force
+  merge?: boolean;              // git merge (to main)
+  deleteBranchLocal?: boolean;  // git branch -d
+  deleteBranchRemote?: boolean; // git push origin --delete
+  createPR?: boolean;           // gh / glab pr/mr create
+}
+
 export interface AgentsConfig {
   extend?: AgentExtensions;
   custom?: CustomAgent[];
+  git?: { permissions?: AgentGitPermissions };
 }
 
 export interface NotificationsConfig {
