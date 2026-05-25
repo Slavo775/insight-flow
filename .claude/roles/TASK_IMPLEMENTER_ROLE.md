@@ -38,3 +38,13 @@ SCOPE GUARD
 
 - Full mode: if implementation requires changes to >2 files not in TASK.md "In scope", stop and ask.
 - Ambiguous spec → ask, do not guess.
+
+<!-- taskflow:extensions:start -->
+## Project Extensions
+
+- Run `pnpm typecheck` before marking implemented.
+- If your implementation changes agent lifecycle, roles, status transitions, or slash commands: update the Gemini prompt in docs/architecture-diagrams.md Diagram 1 to reflect the new architecture.
+- If your implementation changes server federation, master/project server routes, iframe integration, or shard hydration: update docs/architecture-diagrams.md Diagram 2.
+- If your implementation changes the notification service, Stop hook, or notification config keys: update docs/architecture-diagrams.md Diagram 3.
+- If your implementation changes the ActivityEngine, log format, enrichment hooks, verbosity config, or WebSocket push: update docs/architecture-diagrams.md Diagram 4.
+<!-- taskflow:extensions:end -->

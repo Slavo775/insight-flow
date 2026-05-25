@@ -9,7 +9,7 @@ import {
 import { resolve, basename } from "node:path";
 import type { TaskflowConfig, AgentsConfig, CustomAgent, AgentExtensions } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
-import { installActivityHook, installEnrichmentHooks } from "../activity-hook.js";
+import { installActivityHook, installEnrichmentHooks, installLifecycleHooks } from "../activity-hook.js";
 import { installNotifyHook } from "../notify-hook.js";
 
 const AGENT_ROLE_FILE_MAP: Record<string, string> = {
@@ -212,6 +212,7 @@ export function initProject(
     if (config.activityEngine?.hookEnrichment !== false) {
       generateEnrichmentHooks(cwd, config);
     }
+    generateLifecycleHooks(cwd);
   }
 
   // 6b. Generate Claude Code Stop hook for automatic OS notifications
@@ -460,6 +461,16 @@ function generateEnrichmentHooks(cwd: string, config: TaskflowConfig): void {
     console.log("  → restart your Claude Code session for the hooks to take effect");
   } else {
     console.log("Enrichment hooks already registered, skipping.");
+  }
+}
+
+function generateLifecycleHooks(cwd: string): void {
+  const result = installLifecycleHooks(cwd);
+  if (result.hooksWritten > 0 || result.settingsUpdated) {
+    console.log(`Generated ${result.hooksWritten} lifecycle hook(s) (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) in .claude/hooks/`);
+    console.log("  → restart your Claude Code session to activate lifecycle event streaming");
+  } else {
+    console.log("Lifecycle hooks already registered, skipping.");
   }
 }
 

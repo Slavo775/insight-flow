@@ -1,0 +1,75 @@
+{
+  "taskId": "N28",
+  "reviews": [
+    {
+      "startedAt": "2026-05-25T09:11:35.351Z",
+      "endedAt": "2026-05-25T10:22:49.637Z",
+      "verdict": "approved",
+      "comment": "Round-3 re-review: all 4 human blockers confirmed resolved — absolute hook paths, milestones Activity filter, init re-run idempotency, hook events in dashboard. Cross-cutting N26+N27+N28 chain verified end-to-end.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-25T10:08:18.726Z",
+        "endedAt": "2026-05-25T10:08:18.838Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/test/log-activity.test.mjs",
+          "packages/taskflow/test/log-event.test.mjs",
+          "playground/.claude/hooks/lifecycle-pre-tool.sh",
+          "playground/.claude/settings.json"
+        ],
+        "comment": "Fixed all 4 blockers: absolute hook paths with stale detection, milestones panel excludes phase markers, N27 merged for log-event+UI, unused TOOL var removed",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T10:33:53.756Z",
+      "endedAt": "2026-05-25T10:34:48.432Z",
+      "verdict": "fix-needed",
+      "comment": "Hook scripts block Claude Code on every tool call (~50ms each). Background the log-event call in all 6 scripts (and their templates) so the hook exits immediately. Permission bell/osascript stay synchronous.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T11:09:29.763Z",
+        "endedAt": "2026-05-25T11:14:45.775Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          ".claude/hooks/lifecycle-*.sh",
+          "playground/.claude/hooks/lifecycle-*.sh"
+        ],
+        "comment": "Blocker 1 fixed: all 6 lifecycle hook scripts now background log-event with & (fire-and-forget). Bell and osascript in permission script remain synchronous. Templates and deployed files updated.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-25T11:20:32.193Z",
+      "endedAt": "2026-05-25T11:23:15.987Z",
+      "verdict": "fix-needed",
+      "comment": "Blockers: (1) remove @AGENT_NOTIFY from all 8 role files — AI must have zero notification awareness; (2) lifecycle-agent-idle + lifecycle-permission templates must use insight-flow notify instead of raw osascript (respects notifications.cli flag); (3) README must document the three-tier notification model: hooks, browser, user-authorized agents.extend.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-25T11:28:21.380Z",
+      "endedAt": "2026-05-25T11:29:07.136Z",
+      "verdict": "fix-needed",
+      "comment": "Hook scripts extract SESSION_ID and TOOL for branching but never pass them as --data to log-event. The entire pipeline already supports it: log-event maps payload.tool_name/path to activityEntry.toolName/file, dashboard already renders both. Fix: extract and pass --data in lifecycle-pre-tool.sh and lifecycle-post-tool.sh templates and deployed files.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-25T11:52:00.550Z",
+        "endedAt": "2026-05-25T11:52:55.990Z",
+        "status": "fixed",
+        "filesChanged": [
+          "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio/REVIEW.md"
+        ],
+        "comment": "No code changes needed — all R6+R7 blockers were already resolved in commit 803f51e. Cleaned up dangling pending-verdict stub from REVIEW.md.",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

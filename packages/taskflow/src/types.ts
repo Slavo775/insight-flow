@@ -159,12 +159,54 @@ export interface TaskEvent {
   type: EventType;
   taskId: string;
   timestamp: string;
+  source?: "agent" | "hook";
   data?: Record<string, unknown>;
+}
+
+export const CLAUDE_HOOK_EVENT_TYPES = [
+  "session-start",
+  "session-end",
+  "agent-active",
+  "agent-idle",
+  "turn-failed",
+  "tool-requested",
+  "tool-approved",
+  "tool-failed",
+  "approval-required",
+  "approval-granted",
+  "approval-denied",
+  "tool-blocked",
+  "subagent-start",
+  "subagent-done",
+  "file-written",
+  "file-edited",
+  "context-compacted",
+  "config-changed",
+  "notification",
+  "task-batch-done",
+] as const;
+
+export type ClaudeHookEventType = (typeof CLAUDE_HOOK_EVENT_TYPES)[number];
+
+export interface ClaudeHookEvent {
+  id: string;
+  type: ClaudeHookEventType;
+  source: "hook";
+  hookName: string;
+  timestamp: string;
+  sessionId?: string;
+  taskId?: string;
+  payload: Record<string, unknown>;
+}
+
+export interface SessionEventsFile {
+  sessionId: string;
+  events: ClaudeHookEvent[];
 }
 
 export interface EventsFile {
   taskId: string;
-  events: TaskEvent[];
+  events: (TaskEvent | ClaudeHookEvent)[];
 }
 
 export interface EventsConfig {

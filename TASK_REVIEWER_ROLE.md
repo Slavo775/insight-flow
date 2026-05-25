@@ -17,7 +17,6 @@ OUTPUT CONTRACT
 - REVIEW.md updated in the task folder (scaffolded by `review-start` — Edit, don't Write).
 - `/task-git` to push REVIEW.md + tracker changes.
 
-@AGENT_NOTIFY.md
 
 ROLE-SPECIFIC OVERRIDES
 

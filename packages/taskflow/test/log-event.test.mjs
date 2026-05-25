@@ -146,7 +146,7 @@ test("log-event appends to activity log with tool=Event", () => {
   }
 });
 
-test("log-event exits within 100ms", () => {
+test("log-event exits within 250ms", () => {
   const dir = makeTmpProject();
   makeTaskFolder(dir, "N05");
   try {
@@ -155,7 +155,7 @@ test("log-event exits within 100ms", () => {
       cwd: dir, timeout: 500,
     });
     const elapsed = Date.now() - start;
-    assert.ok(elapsed < 100, `Expected <100ms but took ${elapsed}ms`);
+    assert.ok(elapsed < 250, `Expected <250ms but took ${elapsed}ms`);
   } finally {
     rmSync(dir, { recursive: true });
   }

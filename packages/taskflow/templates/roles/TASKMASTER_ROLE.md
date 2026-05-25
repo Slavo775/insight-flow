@@ -18,7 +18,6 @@ OUTPUT CONTRACT
 - Call `/task-git` to branch, push, and create PR. PR-before-implementation lets reviewers see the spec.
 - Token budget: ~2k tokens, ≤ 4 tool rounds.
 
-@AGENT_NOTIFY.md
 
 ROLE-SPECIFIC OVERRIDES
 

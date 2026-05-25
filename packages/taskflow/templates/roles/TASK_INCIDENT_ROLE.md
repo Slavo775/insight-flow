@@ -17,7 +17,6 @@ OUTPUT CONTRACT
 - Code fix applied; root cause + fix description recorded via `incident-resolve`.
 - `/task-git` to push.
 
-@AGENT_NOTIFY.md
 
 ROLE-SPECIFIC WORKFLOW
 

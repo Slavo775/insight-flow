@@ -83,7 +83,11 @@ test("install-activity-hook installs hook and registers settings on a fresh proj
     const settings = JSON.parse(readFileSync(resolve(dir, ".claude/settings.local.json"), "utf-8"));
     const entries = settings.hooks.PostToolUse || [];
     assert.ok(
-      entries.some((e) => (e.command || "").includes("taskflow-activity.sh")),
+      entries.some(
+        (e) =>
+          (e.command || "").includes("taskflow-activity.sh") ||
+          (e.hooks || []).some((h) => (h.command || "").includes("taskflow-activity.sh")),
+      ),
       "settings.local.json must register the hook command",
     );
   } finally {
@@ -150,9 +154,15 @@ test("install-activity-hook preserves existing unrelated PostToolUse hooks", () 
     );
     runCli(dir, ["install-activity-hook"]);
     const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
-    const cmds = settings.hooks.PostToolUse.map((e) => e.command);
-    assert.ok(cmds.includes(".claude/hooks/other.sh"), "existing hook must remain");
-    assert.ok(cmds.includes(".claude/hooks/taskflow-activity.sh"), "new hook must be appended");
+    function hasCmd(entries, filename) {
+      return entries.some(
+        (e) =>
+          (e.command || "").includes(filename) ||
+          (e.hooks || []).some((h) => (h.command || "").includes(filename)),
+      );
+    }
+    assert.ok(hasCmd(settings.hooks.PostToolUse, "other.sh"), "existing hook must remain");
+    assert.ok(hasCmd(settings.hooks.PostToolUse, "taskflow-activity.sh"), "new hook must be appended");
   } finally {
     rmSync(dir, { recursive: true });
   }
