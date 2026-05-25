@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/lifecycle-session-start.sh",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-session-start.sh",
             "timeout": 10000
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/lifecycle-agent-active.sh",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-agent-active.sh",
             "timeout": 10000
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/lifecycle-agent-idle.sh",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-agent-idle.sh",
             "timeout": 10000
           }
         ]
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/lifecycle-pre-tool.sh",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-pre-tool.sh",
             "timeout": 10000
           }
         ]
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/lifecycle-post-tool.sh",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-post-tool.sh",
             "timeout": 10000
           }
         ]
@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/lifecycle-permission.sh",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-permission.sh",
             "timeout": 10000
           }
         ]

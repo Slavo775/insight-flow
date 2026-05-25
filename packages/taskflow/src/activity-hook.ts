@@ -327,7 +327,6 @@ if [ -z "$SESSION_ID" ]; then
   SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 fi
 [ -z "$SESSION_ID" ] && exit 0
-TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
 __INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id "$SESSION_ID" --if-active 2>/dev/null || true
 `;
 
@@ -414,18 +413,41 @@ export function installLifecycleHooks(
   let settingsUpdated = false;
 
   for (const { file, event } of hookDefs) {
-    const hookCmd = `.claude/hooks/${file}`;
+    const hookCmd = `\${CLAUDE_PROJECT_DIR}/.claude/hooks/${file}`;
     const existing = (hooks[event] ?? []) as Array<Record<string, unknown>>;
-    const alreadyRegistered = existing.some((h) => {
-      if (!h || typeof h !== "object") return false;
-      if (((h.command as string) || "").includes(file)) return true;
+
+    const getCmd = (h: Record<string, unknown>): string => {
+      if (((h.command as string) || "").includes(file)) return (h.command as string) || "";
       const inner = (h.hooks as Array<Record<string, unknown>> | undefined) ?? [];
-      return inner.some((e) => ((e?.command as string) || "").includes(file));
+      const match = inner.find((e) => ((e?.command as string) || "").includes(file));
+      return match ? ((match.command as string) || "") : "";
+    };
+
+    const staleIdx = existing.findIndex((h) => {
+      if (!h || typeof h !== "object") return false;
+      const cmd = getCmd(h);
+      return cmd.includes(file) && !cmd.includes("CLAUDE_PROJECT_DIR");
     });
-    if (!alreadyRegistered) {
-      existing.push({ matcher: "", hooks: [{ type: "command", command: hookCmd, timeout: 10000 }] });
+
+    if (staleIdx !== -1) {
+      const entry = existing[staleIdx] as Record<string, unknown>;
+      const inner = (entry.hooks as Array<Record<string, unknown>> | undefined) ?? [];
+      if (inner.length) {
+        inner[0] = { ...inner[0], command: hookCmd };
+        existing[staleIdx] = { ...entry, hooks: inner };
+      }
       hooks[event] = existing;
       settingsUpdated = true;
+    } else {
+      const alreadyRegistered = existing.some((h) => {
+        if (!h || typeof h !== "object") return false;
+        return getCmd(h).includes(file);
+      });
+      if (!alreadyRegistered) {
+        existing.push({ matcher: "", hooks: [{ type: "command", command: hookCmd, timeout: 10 }] });
+        hooks[event] = existing;
+        settingsUpdated = true;
+      }
     }
   }
 

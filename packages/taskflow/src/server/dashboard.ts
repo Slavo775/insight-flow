@@ -789,7 +789,8 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     function shouldShowEvent(ev) {
       var tool = ev.tool || '';
-      if (VERBOSITY === 'milestones') return tool === 'Activity' || tool === 'Event' || tool === 'Phase' || tool === 'Skill';
+      // milestones: hook-sourced Events and Skills only — not agent-emitted Activity phase markers
+      if (VERBOSITY === 'milestones') return tool === 'Event' || tool === 'Phase' || tool === 'Skill';
       if (VERBOSITY === 'detailed') return tool !== 'Activity' && tool !== 'Event' && tool !== 'Phase' && tool !== 'Skill';
       return true;
     }
