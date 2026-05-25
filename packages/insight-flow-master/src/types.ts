@@ -9,6 +9,7 @@ export interface MasterProjectState {
   currentTaskStatus: string | null;
   taskCounts: Record<string, number>;
   recentActivity: object[];
+  claudeStatus?: "active" | "idle" | "permission-required";
 }
 
 export interface MasterProjectEntry {

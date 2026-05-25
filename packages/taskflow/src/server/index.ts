@@ -214,6 +214,15 @@ async function waitForMaster(port: number): Promise<boolean> {
   return false;
 }
 
+function pushStatusToMaster(masterUrl: string, id: string, status: string): void {
+  void fetch(`${masterUrl}/api/projects/${id}/status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+    signal: AbortSignal.timeout(2000),
+  }).catch(() => {});
+}
+
 async function registerWithMaster(masterUrl: string, projectId: string, label: string, projectUrl: string): Promise<string | null> {
   try {
     const res = await fetch(`${masterUrl}/api/register`, {
@@ -333,6 +342,7 @@ async function setupMasterIntegration(
   // Push initial state
   const state = buildProjectState(config, activity);
   void pushStateToMaster(masterUrl, masterId, state);
+  pushStatusToMaster(masterUrl, masterId, "idle");
 
   // Return push function to call on file-change
   return async function pushOnChange(): Promise<void> {
@@ -577,9 +587,21 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     });
   });
 
+  const CLAUDE_STATUS_MAP: Record<string, string> = {
+    "active": "active",
+    "agent-active": "active",
+    "idle": "idle",
+    "agent-idle": "idle",
+    "approval-required": "permission-required",
+  };
+
   let activityDebounceTimer: NodeJS.Timeout | null = null;
   activity.onEvent((event) => {
     io.emit("activity", event);
+    const claudeStatus = CLAUDE_STATUS_MAP[event.action];
+    if (claudeStatus && masterId) {
+      pushStatusToMaster(masterUrl, masterId, claudeStatus);
+    }
     // Debounce master push so rapid tool events don't flood it
     if (activityDebounceTimer) clearTimeout(activityDebounceTimer);
     activityDebounceTimer = setTimeout(() => {
