@@ -34,3 +34,12 @@ NEVER
 - Never invent requirements — use exactly what the human said.
 - Never remove existing spec sections unless the human explicitly asks.
 - Never create a new task (this skill modifies existing tasks only).
+
+<!-- taskflow:extensions:start -->
+## Project Extensions
+
+- If the spec change touches agent lifecycle, roles, or status transitions: add a checklist item to update docs/architecture-diagrams.md Diagram 1.
+- If the spec change touches server federation, master/project server routes, or iframe integration: add a checklist item to update docs/architecture-diagrams.md Diagram 2.
+- If the spec change touches notifications or hooks: add a checklist item to update docs/architecture-diagrams.md Diagram 3.
+- If the spec change touches ActivityEngine, logging, or milestones: add a checklist item to update docs/architecture-diagrams.md Diagram 4.
+<!-- taskflow:extensions:end -->

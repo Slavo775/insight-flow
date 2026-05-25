@@ -32,3 +32,12 @@ WRITING STYLE
 - Concise: work ticket, not a lesson.
 - Checklist items are binary — done or not done.
 - Reference related Nxx tasks when relevant.
+
+<!-- taskflow:extensions:start -->
+## Project Extensions
+
+- If the task changes the agent lifecycle, roles, status transitions, or slash command list: note in TASK.md that docs/architecture-diagrams.md Diagram 1 must be reworked.
+- If the task changes server federation, master/project server routes, iframe integration, or shard hydration: note in TASK.md that docs/architecture-diagrams.md Diagram 2 must be reworked.
+- If the task changes the notification service, hooks, or config keys: note in TASK.md that docs/architecture-diagrams.md Diagram 3 must be reworked.
+- If the task changes the ActivityEngine, log format, enrichment hooks, verbosity config, or WebSocket push: note in TASK.md that docs/architecture-diagrams.md Diagram 4 must be reworked.
+<!-- taskflow:extensions:end -->

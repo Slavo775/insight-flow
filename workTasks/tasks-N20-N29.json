@@ -1003,7 +1003,7 @@
       "title": "Claude Code hook scripts and lifecycle notification wiring",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "pushed",
       "folder": "workTasks/N28-claude-code-hook-scripts-and-lifecycle-notificatio",
       "createdAt": "2026-05-25T08:28:32.710Z",
       "statusHistory": [
@@ -1106,6 +1106,11 @@
           "status": "fixed",
           "at": "2026-05-25T11:52:55.990Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-25T11:53:14.469Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1140,6 +1145,11 @@
           "at": "2026-05-25T11:35:52.355Z",
           "commitHash": "803f51e",
           "commitMessage": "remove AI notification awareness, enrich events with tool/file data"
+        },
+        {
+          "at": "2026-05-25T11:53:14.469Z",
+          "commitHash": "dcfea7c",
+          "commitMessage": "cleanup dangling REVIEW.md stub"
         }
       ],
       "branch": "feat/N28-claude-code-hook-scripts-and-lifecycle-notif",

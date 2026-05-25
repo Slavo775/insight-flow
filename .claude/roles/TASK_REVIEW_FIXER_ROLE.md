@@ -31,3 +31,10 @@ SCOPE GUARD
 
 - Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it.
 - If a blocker fix requires touching files not in the original task scope, ask the human.
+
+<!-- taskflow:extensions:start -->
+## Project Extensions
+
+- Run `pnpm typecheck` after every blocker fix.
+- If the fix alters agent lifecycle, server federation, notifications, or the activity pipeline: update the relevant Gemini prompt in docs/architecture-diagrams.md.
+<!-- taskflow:extensions:end -->
