@@ -30,3 +30,27 @@
 
 - All three blockers are in `dashboard.ts` only — no schema or CLI changes needed.
 - Covers N35 (badge logic), N36 (sound), N37 (title) collectively since they share the same state machine.
+
+
+---
+
+## Human Review — Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-25
+**Verdict:** fix-needed
+
+### Blockers
+
+4. **Idle state must come from `agent-idle` hook event, not from `done` task event**
+   "agent idle should be on agent idle event not done when notification is triggered"
+   Screenshot shows AGENT-IDLE event logged for N37, confirming the hook fires correctly. However `claudeStatusFromEvent()` also maps `action === 'done'` → `'idle'`, which means any task completion (including notification-triggered done events) incorrectly sets the badge to idle. The `done` task lifecycle event is a task-tracker concern, not a Claude session state signal — only the `agent-idle` hook event should drive the idle state transition.
+   _Fix: remove the `ev.action === 'done'` → `'idle'` branch from `claudeStatusFromEvent()`. Keep only `agent-idle` hook event → idle._
+
+### Suggestions (non-blocking)
+
+- None.
+
+### Notes
+
+- This blocker is in `claudeStatusFromEvent()` in `dashboard.ts` only.
