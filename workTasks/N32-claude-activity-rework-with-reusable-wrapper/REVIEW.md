@@ -126,3 +126,47 @@ N32 reworks Claude Activity items to use the shared `.act-item` wrapper via `pre
 ### Notes
 
 - "approved!" — all previous blockers resolved (border-bottom, animation, white text, idle badge).
+
+
+---
+
+## AI Review — Round 2
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-25
+**Verdict:** approved
+
+### Summary
+
+All blockers from AI Review Round 1 and Human Review Rounds 1–3 are confirmed resolved. The three `border-bottom` fixes (CSS, `actItemHtml()`, `prependActivityItem()`) are consistent and correct. Build passes. No new issues found.
+
+### Checklist verification
+
+- [x] `eventColor(ev)` helper added, covers all tool types — pass (line 830)
+- [x] `prependActivityItem()` sets inline styles using `eventColor()` and `hexToRgb()` — pass (lines 844–848); now uses `borderBottomColor` consistently
+- [x] `prependActivityItem()` uses class `act-item` — pass (line 846)
+- [ ] All return paths in `renderActivityItemHtml()` wrapped with `actItemHtml()` — still not done; outer wrapper remains in `prependActivityItem()`. Functionally correct, acknowledged as non-blocking in prior review.
+- [x] `querySelectorAll('.act-item')` used in `trimActivityFeed()` — pass (line 856)
+- [x] `.activity-feed` CSS updated to flex column with gap — pass (line 111)
+- [x] `.activity-item` CSS wrapper rule removed — pass
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+- `renderActivityItemInner()` rename suggestion from Round 1 remains open — still low priority, no action needed for approval.
+
+### Security & edge cases
+
+No changes to data paths. All prior `escHtml()` coverage intact.
+
+### Notes
+
+- Verified: `.act-item` CSS line 119 → `border-bottom: 1px solid transparent` ✓
+- Verified: `actItemHtml()` line 299 → `border-bottom-color:` ✓
+- Verified: `prependActivityItem()` line 847 → `item.style.borderBottomColor` ✓
+- All three paths (CSS default, HTML string, DOM direct) are now consistent.
+
+### Notes
