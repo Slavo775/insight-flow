@@ -126,7 +126,7 @@ your-project/
 When you run `insight-flow` (or `insight-flow ui`):
 
 1. A local HTTP server starts on the configured port.
-2. The server serves the bundled React dashboard at `/`.
+2. The server serves the server-rendered dashboard at `/`.
 3. The dashboard reads `workTasks/*.json` from your configured `workDir` via `/api/work-tasks*`.
 4. A WebSocket on `/ws` pushes file-change events so the UI updates live as you (or AI agents) edit tasks.
 

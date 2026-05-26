@@ -879,7 +879,7 @@
       "title": "project-wide-docs-audit-and-update",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N49-project-wide-docs-audit-and-update",
       "createdAt": "2026-05-26T12:41:57.935Z",
       "statusHistory": [
@@ -887,12 +887,37 @@
           "status": "ready",
           "at": "2026-05-26T12:41:57.935Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T12:43:34.283Z",
+          "by": "task-git"
+        },
+        {
+          "status": "ready",
+          "at": "2026-05-26T12:49:57.887Z",
+          "by": "manual"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-26T12:49:57.994Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-26T12:52:31.702Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-26T12:49:57.994Z",
+        "completedAt": "2026-05-26T12:52:31.702Z",
+        "filesChanged": [
+          "README.md",
+          "CHANGELOG.md",
+          "packages/taskflow/README.md",
+          "packages/taskflow/CHANGELOG.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -906,9 +931,15 @@
         "readme",
         "changelog"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-26T12:43:34.282Z",
+          "commitHash": "5dee917",
+          "commitMessage": "docs(tasks): scaffold N49 project-wide docs audit and update"
+        }
+      ],
+      "branch": "rework/N49-project-wide-docs-audit-and-update",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/32",
       "mergedAt": null
     }
   ]
