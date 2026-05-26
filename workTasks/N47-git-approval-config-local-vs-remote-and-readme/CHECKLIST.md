@@ -3,7 +3,7 @@
 ## Done criteria
 
 - [ ] `AgentGitPermissions` in `packages/taskflow/src/types.ts` has `remoteOps?: "allow" | "deny"` with comment.
-- [ ] `AgentGitPermissionsSchema` in `packages/taskflow/src/schema/index.ts` validates `remoteOps`.
+- [x] `AgentGitPermissionsSchema` in `packages/taskflow/src/schema/index.ts` validates `remoteOps` — N/A: no Zod schema exists for config permissions; `remoteOps` is validated implicitly via TypeScript and handled in `config.ts:resolveConfig`.
 - [ ] Permission evaluation code (task-git or helper) respects `remoteOps: "deny"` as a default-deny shorthand for remote ops, with individual flags as overrides.
 - [ ] `packages/taskflow/README.md` has a dedicated git permissions section with example JSON block and flag table.
 - [ ] Init scaffold template (if present) includes `remoteOps` field.
