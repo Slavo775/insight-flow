@@ -414,7 +414,7 @@
       "title": "Release 0.7.0 — changelog, README, and version bump",
       "type": "chore",
       "priority": "high",
-      "status": "implemented",
+      "status": "merged",
       "folder": "workTasks/N44-release-0-7-0-changelog-readme-and-version-bump",
       "createdAt": "2026-05-26T06:06:59.942Z",
       "statusHistory": [
@@ -432,6 +432,11 @@
           "status": "implemented",
           "at": "2026-05-26T06:11:38.321Z",
           "by": "task-implement"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-26T06:35:19.694Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -450,10 +455,84 @@
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 28,
       "tags": [
         "release",
         "docs"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-05-26T06:35:19.694Z"
+    },
+    {
+      "id": "N45",
+      "title": "Overview card stuck on permission-required after permission granted",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N45-overview-card-stuck-on-permission-required-after-p",
+      "createdAt": "2026-05-26T06:39:15.107Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T06:39:15.107Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "ready",
+          "at": "2026-05-26T06:41:05.629Z",
+          "by": "manual"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-26T06:41:32.826Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-26T06:42:00.312Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T07:28:49.067Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T07:29:24.755Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T07:30:49.913Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T07:31:11.021Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-26T06:41:32.825Z",
+        "completedAt": "2026-05-26T06:42:00.311Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "overview",
+        "status"
       ],
       "pushes": [],
       "branch": null,

@@ -1,0 +1,23 @@
+{
+  "taskId": "N45",
+  "reviews": [
+    {
+      "startedAt": "2026-05-26T07:28:49.067Z",
+      "endedAt": "2026-05-26T07:29:24.755Z",
+      "verdict": "approved",
+      "comment": "Single-line fix: tool-approved mapped to active in CLAUDE_STATUS_MAP. Parity with dashboard.ts client-side handling. No blockers.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-26T07:30:49.913Z",
+      "endedAt": "2026-05-26T07:31:11.020Z",
+      "verdict": "approved",
+      "comment": "Human approved. Create PR, merge to main, bump to 0.7.1, publish.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

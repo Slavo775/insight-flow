@@ -593,6 +593,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     "idle": "idle",
     "agent-idle": "idle",
     "approval-required": "permission-required",
+    "tool-approved": "active",
   };
 
   let activityDebounceTimer: NodeJS.Timeout | null = null;
