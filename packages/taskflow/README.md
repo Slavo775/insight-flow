@@ -13,31 +13,98 @@ insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, p
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
-## Install
+## Getting started
+
+### 1. Install
 
 ```bash
-# One-off
-npx insight-flow init
-npx insight-flow
-
-# Or globally
+# Global install (recommended — makes `insight-flow` available everywhere)
 npm install -g insight-flow
-insight-flow init
-insight-flow
+
+# Or one-off via npx (no install needed)
+npx insight-flow init   # initialize
+npx insight-flow        # launch dashboard
 ```
 
-## Quickstart
+### 2. Initialize your project
+
+Run this inside your project root (the directory that contains your code):
 
 ```bash
-# 1. Initialize in your project (creates taskflow.config.json + workTasks/ + Claude Code skills)
 insight-flow init
+```
 
-# 2. Create your first task
+Add `--examples` to get commented `agents.extend` stubs in `taskflow.config.json` — useful when you want to wire up your stack-specific commands (typecheck, lint, PR CLI) right away:
+
+```bash
+insight-flow init --examples
+```
+
+Re-running `init` on an existing project is safe — it skips files that already exist and updates only the `insight-flow` section of `CLAUDE.md`.
+
+### 3. What init creates
+
+| Path | Description |
+|------|-------------|
+| `taskflow.config.json` | Project config (port, activity engine, agent permissions, …) |
+| `workTasks/master.json` | Task metadata + shard index |
+| `workTasks/tasks-N00-N09.json` | First task shard |
+| `.claude/commands/taskmaster.md` | `/taskmaster` slash command |
+| `.claude/commands/task-implement.md` | `/task-implement` slash command |
+| `.claude/commands/task-review.md` | `/task-review` slash command |
+| `.claude/commands/task-review-fix.md` | `/task-review-fix` slash command |
+| `.claude/commands/task-human-review.md` | `/task-human-review` slash command |
+| `.claude/commands/task-git.md` | `/task-git` slash command |
+| `.claude/commands/task-incident.md` | `/task-incident` slash command |
+| `.claude/commands/task-request-changes.md` | `/task-request-changes` slash command |
+| `.claude/commands/taskmaster-change.md` | `/taskmaster-change` slash command |
+| `.claude/roles/` | Role spec markdown templates (source of truth for each skill) |
+| `CLAUDE.md` | Created or updated with insight-flow context block |
+| `.claude/hooks/taskflow-activity.sh` | PostToolUse hook — feeds the activity panel |
+| `.claude/hooks/taskflow-skill.sh` | UserPromptSubmit hook — tags events to active task |
+| `.claude/hooks/taskflow-done.sh` | Stop hook — fires OS notification when agent finishes |
+| `.claude/hooks/taskflow-classify.sh` | PreToolUse hook — enriches events with tool classification |
+| `.claude/hooks/taskflow-notify.sh` | Stop hook — fires OS notification on notable task-status transitions |
+| `.taskflow-activity.jsonl` | Ephemeral activity log (auto-gitignored) |
+
+### 4. Connect Claude Code
+
+Open Claude Code (or restart it if it was already running) in the project root. The slash commands from `.claude/commands/` are loaded automatically — you should see them in `/` autocomplete.
+
+Verify by typing `/taskmaster` — it should launch the task creation flow.
+
+If you added hooks and Claude Code was already open, **restart the session** for hooks to take effect (`/exit` then reopen).
+
+### 5. Configure for your stack
+
+insight-flow ships zero technology assumptions. Tell each agent how to run your project's quality gates and how to create PRs via `agents.extend` in `taskflow.config.json`:
+
+```json
+{
+  "agents": {
+    "extend": {
+      "task-implement": ["Run `pnpm typecheck && pnpm lint && pnpm test` before marking implemented."],
+      "task-git": ["For PR creation: `gh pr create --title \"<title>\" --body-file <path>`."]
+    }
+  }
+}
+```
+
+After editing `taskflow.config.json`, run `insight-flow init` again to apply extensions to the role files.
+
+See [Extending built-in agents](#extending-built-in-agents) for the full list of agent names and more examples.
+
+### 6. Create your first task and launch the dashboard
+
+```bash
+# Create a task
 insight-flow create --title "Add auth to dashboard" --type feat --priority high --tags web,auth
 
-# 3. Launch the dashboard
-insight-flow            # opens http://localhost:6006 in your browser
+# Launch the dashboard
+insight-flow            # opens http://localhost:6006
 ```
+
+From here, use slash commands in Claude Code to drive the full lifecycle: `/taskmaster` → `/task-implement` → `/task-review` → `/task-git`.
 
 ## How it works
 
@@ -121,39 +188,121 @@ Run `insight-flow help` for the full list.
 
 ## Configuration
 
-`taskflow.config.json` (created by `insight-flow init`):
+All configuration lives in `taskflow.config.json` at your project root. All keys have defaults — `taskflow.config.json` itself is optional. The keys below are the ones most commonly customised; `insight-flow init` scaffolds them for you.
 
-```json
+### Full example
+
+The block below shows every supported key with its default. Strip the `//` comments before using as valid JSON at runtime (or use `init --examples` which produces a commented version automatically):
+
+```jsonc
 {
-  "workDir": "workTasks",
-  "shardSize": 10,
-  "projectName": "my-project",
-  "rolesDir": ".claude/roles",
+  // ── Core ────────────────────────────────────────────────────────────────────
+  "workDir": "workTasks",          // where task shards live
+  "shardSize": 10,                 // tasks per shard file
+  "projectName": "my-project",     // shown in dashboard header
+  "rolesDir": ".claude/roles",     // where role templates are copied on init
   "server": {
-    "port": 6006
+    "port": 6006                   // HTTP + WebSocket port
   },
+
+  // ── Activity engine ─────────────────────────────────────────────────────────
   "activityEngine": {
     "enabled": true,
     "logFile": ".taskflow-activity.jsonl",
-    "maxEvents": 200
+    "maxEvents": 200,
+    "phaseMarkers": true,          // emit phase events (edit-start, review-end, …)
+    "hookEnrichment": true,        // enrich events with tool/file context from hooks
+    "verbosity": "both"            // "milestones" | "detailed" | "both"
+  },
+
+  // ── Notifications ───────────────────────────────────────────────────────────
+  "notifications": {
+    "browser": true,               // Web Notification API on status changes
+    "cli": true,                   // allow insight-flow notify calls
+    "sounds": {
+      "enabled": true              // play sounds in the dashboard on notifications
+    }
+  },
+
+  // ── Agent behaviour ─────────────────────────────────────────────────────────
+  "agents": {
+    "extend": {
+      "task-implement": [],        // extra rules appended to task-implement prompt
+      "task-review": [],
+      "task-review-fix": [],
+      "task-git": [],
+      "taskmaster": [],
+      "task-human-review": [],
+      "task-incident": [],
+      "task-request-changes": [],
+      "taskmaster-change": []
+    },
+    "custom": [],                  // register custom slash-command agents
+    "git": {
+      "permissions": {
+        "remoteOps": "allow",      // shorthand: "deny" blocks all origin-touching ops
+        "createBranch": true,
+        "checkout": true,
+        "commit": true,
+        "push": true,
+        "forcePush": false,
+        "merge": true,
+        "deleteBranchLocal": true,
+        "deleteBranchRemote": true,
+        "createPR": true
+      }
+    }
+  },
+
+  // ── Multi-project master ────────────────────────────────────────────────────
+  "master": {
+    "url": "http://localhost:6100", // master server URL (multi-project mode)
+    "port": 6100,                  // port when starting master locally
+    "standalone": false,           // run this project as master (no remote)
+    "startMasterLocally": false    // auto-start master server on dashboard launch
+  },
+
+  // ── Events ──────────────────────────────────────────────────────────────────
+  "events": {
+    "dedupWindowSeconds": 60,      // suppress duplicate events within this window
+    "hooks": {
+      "edit-start": ["echo 'editing started'"],  // shell commands per event type
+      "done": ["notify-send 'Task done'"]
+    }
   }
 }
 ```
 
-| Key                        | Default                      | Purpose                                                                                                                     |
-| -------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `workDir`                  | `"workTasks"`                | Directory (relative to your project root) where task JSON shards live. Move/rename this to put task data anywhere you want. |
-| `shardSize`                | `10`                         | Tasks per shard file. Affects new shard rollovers, not existing files.                                                      |
-| `projectName`              | inferred from `package.json` | Shown in the dashboard header.                                                                                              |
-| `rolesDir`                 | `".claude/roles"`            | Where role spec markdown templates are copied on `init`.                                                                    |
-| `server.port`              | `6006`                       | HTTP/WebSocket port the dashboard listens on.                                                                               |
-| `activityEngine.enabled`   | `true`                       | Stream Claude Code tool activity into the dashboard's activity panel.                                                       |
-| `activityEngine.logFile`   | `".taskflow-activity.jsonl"` | Ephemeral JSONL log file written by the activity hook. Gitignored.                                                          |
-| `activityEngine.maxEvents` | `200`                        | Ring-buffer size for the activity feed.                                                                                     |
-| `notifications.browser`    | `true`                       | Enable browser desktop notifications for task-status transitions (Notification API).                                        |
-| `notifications.cli`        | `true`                       | Enable `insight-flow notify` calls from agent role files. Set to `false` to silence all CLI notifications.                  |
+### Core
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `workDir` | `"workTasks"` | Directory (relative to project root) where task JSON shards live. |
+| `shardSize` | `10` | Tasks per shard file. Affects new shard rollovers only, not existing files. |
+| `projectName` | inferred from `package.json` | Shown in the dashboard header. |
+| `rolesDir` | `".claude/roles"` | Where role spec markdown templates are copied on `init`. |
+| `server.port` | `6006` | HTTP/WebSocket port the dashboard listens on. |
+
+### Activity engine
+
+Controls the live activity panel in the dashboard. The panel shows what Claude Code is doing in real time (tool calls, file edits, phase transitions).
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `activityEngine.enabled` | `true` | Enable the activity panel. Set to `false` to hide it entirely. |
+| `activityEngine.logFile` | `".taskflow-activity.jsonl"` | Ephemeral JSONL log written by the PostToolUse hook. Gitignored automatically. |
+| `activityEngine.maxEvents` | `200` | Ring-buffer size for the in-memory activity feed. Older events are dropped. |
+| `activityEngine.phaseMarkers` | `true` | Emit phase-boundary events (`edit-start`, `edit-end`, `review-start`, etc.) into the feed. |
+| `activityEngine.hookEnrichment` | `true` | Enrich events with tool name and file context from Claude Code hook payloads. |
+| `activityEngine.verbosity` | `"both"` | `"milestones"` — phase-marker events only; `"detailed"` — every tool call; `"both"` — all events. |
 
 ### Notifications
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `notifications.browser` | `true` | Web Notification API popups on task-status transitions (implemented, approved, fix-needed, merged). |
+| `notifications.cli` | `true` | Enable `insight-flow notify` calls. Set to `false` to silence all OS/CLI notifications. |
+| `notifications.sounds.enabled` | `true` | Play sounds in the dashboard tab when a notification fires. |
 
 insight-flow uses a **three-tier notification model**. All notifications fire from hook scripts outside Claude's context — the AI agent itself never triggers a notification.
 
@@ -348,6 +497,47 @@ Individual flags override `remoteOps`. This config allows push but blocks everyt
 | `createPR`           | `true`  | yes     | yes                     |
 
 `insight-flow init` scaffolds the full block with `remoteOps: "allow"` so the field is visible from day one.
+
+### Agent behaviour
+
+| Key | Purpose |
+|-----|---------|
+| `agents.extend` | Map of agent name → array of extra rule strings appended to that agent's prompt at `init` time. Re-running `init` replaces (not duplicates) the injected section. Valid agent names: `taskmaster`, `task-implement`, `task-review`, `task-review-fix`, `task-human-review`, `task-git`, `task-incident`, `task-request-changes`, `taskmaster-change`. |
+| `agents.custom` | Array of custom agent definitions (see [Registering custom agents](#registering-custom-agents)). Each entry generates a `.claude/commands/<name>.md` skill and a `CLAUDE.md` row. |
+| `agents.git.permissions` | Git operation flags for the `task-git` agent (see [Git permission gates](#git-permission-gates)). |
+
+### Multi-project master
+
+These keys are only needed for the multi-project overview feature. See [Multi-project overview](#multi-project-overview) for the full setup.
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `master.url` | `undefined` | URL of the master server this project reports to (e.g. `"http://localhost:6100"`). |
+| `master.port` | `6100` | Port the master server listens on when started locally. |
+| `master.standalone` | `false` | Run this project's server as the master (single-project mode with master features). |
+| `master.startMasterLocally` | `false` | Auto-start the master server process when the project dashboard launches. |
+
+### Events
+
+Controls how the CLI deduplicates agent events and lets you run custom shell commands on event boundaries.
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `events.dedupWindowSeconds` | `60` | Suppress duplicate events of the same type emitted within this window (seconds). |
+| `events.hooks` | `{}` | Map of event type → array of shell commands to run when that event fires. Valid event types: `start`, `done`, `active`, `idle`, `edit-start`, `edit-end`, `research-start`, `research-end`, `review-start`, `review-end`, `git-start`, `git-end`. |
+
+Example — run a script when any task starts and send a desktop notification when done:
+
+```json
+{
+  "events": {
+    "hooks": {
+      "start": ["echo 'Task started' >> /tmp/taskflow.log"],
+      "done": ["osascript -e 'display notification \"Task done\"'"]
+    }
+  }
+}
+```
 
 ## Programmatic API
 
