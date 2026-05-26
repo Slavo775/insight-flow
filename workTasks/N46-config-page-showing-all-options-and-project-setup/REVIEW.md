@@ -79,3 +79,24 @@ No new concerns. The CORS comment is now in place.
 ### Notes
 
 The three wrong default values (`false` instead of `true`) were caught correctly by cross-referencing `config.ts ACTIVITY_DEFAULTS`. Since `resolveConfig` merges defaults before the server receives the config object, the only reliable way to detect "this was user-set" vs "this is a default" is to compare the resolved value against the canonical defaults — which is what the fix does correctly.
+
+
+---
+
+## Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-26
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+done merge it

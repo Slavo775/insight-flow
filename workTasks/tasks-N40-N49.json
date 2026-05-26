@@ -607,6 +607,21 @@
           "status": "approved",
           "at": "2026-05-26T09:32:05.880Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T09:32:38.342Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T09:33:47.640Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T09:34:01.973Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -619,7 +634,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -649,6 +664,11 @@
           "at": "2026-05-26T09:26:49.672Z",
           "commitHash": "763a5a7",
           "commitMessage": "fix(dashboard): correct activityEngine default comparisons and add CORS note"
+        },
+        {
+          "at": "2026-05-26T09:32:38.341Z",
+          "commitHash": "4aba93b",
+          "commitMessage": "chore(tasks): add N46 round-2 review — approved"
         }
       ],
       "branch": "feat/N46-config-page-showing-all-options-and-project-setup",
