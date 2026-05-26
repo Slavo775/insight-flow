@@ -1,0 +1,33 @@
+{
+  "taskId": "N47",
+  "reviews": [
+    {
+      "startedAt": "2026-05-26T10:05:26.987Z",
+      "endedAt": "2026-05-26T10:08:00.231Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: AGENT_CONFIG.md not updated — agents reading raw taskflow.config.json silently ignore remoteOps:deny; fix is one prose step in AGENT_CONFIG.md. Non-blocking: unchecked checklist item 2, comment key placement in scaffold.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-26T10:08:49.781Z",
+        "endedAt": "2026-05-26T10:10:06.234Z",
+        "status": "fixed",
+        "filesChanged": [
+          "AGENT_CONFIG.md",
+          "workTasks/N47-git-approval-config-local-vs-remote-and-readme/CHECKLIST.md"
+        ],
+        "comment": "Fixed blocker 1: AGENT_CONFIG.md updated with remoteOps step 2 and renumbered. Annotated checklist item 2 as N/A.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-26T10:11:55.841Z",
+      "endedAt": "2026-05-26T10:12:11.831Z",
+      "verdict": "approved",
+      "comment": "Human approved: approved! done merge it",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

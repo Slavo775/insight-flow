@@ -549,7 +549,7 @@
       "title": "config page showing all options and project setup",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N46-config-page-showing-all-options-and-project-setup",
       "createdAt": "2026-05-26T08:47:40.828Z",
       "statusHistory": [
@@ -622,6 +622,11 @@
           "status": "approved",
           "at": "2026-05-26T09:34:01.973Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-26T09:36:32.126Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -638,7 +643,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 49,
       "tags": [
         "dashboard",
         "config",
@@ -673,6 +678,100 @@
       ],
       "branch": "feat/N46-config-page-showing-all-options-and-project-setup",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/29",
+      "mergedAt": "2026-05-26T09:36:32.125Z"
+    },
+    {
+      "id": "N47",
+      "title": "git-approval-config-local-vs-remote-and-readme",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N47-git-approval-config-local-vs-remote-and-readme",
+      "createdAt": "2026-05-26T09:45:35.282Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T09:45:35.283Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-26T09:58:18.622Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-26T10:02:52.776Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T10:04:34.878Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T10:05:26.987Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-26T10:08:00.231Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-26T10:08:49.781Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-26T10:10:06.235Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T10:11:55.840Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T10:12:11.832Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-26T09:58:18.621Z",
+        "completedAt": "2026-05-26T10:02:52.776Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/config.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "config",
+        "git",
+        "docs"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-26T10:04:34.877Z",
+          "commitHash": "9215726",
+          "commitMessage": "feat(config,docs): add remoteOps shorthand to git permission gates"
+        }
+      ],
+      "branch": "feat/N47-git-approval-config-local-vs-remote-and-readme",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/30",
       "mergedAt": null
     }
   ]
