@@ -764,9 +764,11 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           if (typeof seenEventKeys !== 'undefined') seenEventKeys.clear();
           var feed = document.getElementById('activity-feed');
           if (feed) feed.innerHTML = '';
+          isReplayingSnapshot = true;
           for (var i = 0; i < data.activity.length; i++) {
             addActivityEvent(data.activity[i]);
           }
+          isReplayingSnapshot = false;
         }
         if (typeof renderActivityEmptyState === 'function') {
           renderActivityEmptyState();
@@ -796,6 +798,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     var activityEvents = [];
     var seenEventKeys = new Set();
     var emptyStateTimer = null;
+    var isReplayingSnapshot = false;
 
     function eventKey(ev) {
       return (ev.ts || '') + '|' + (ev.tool || '') + '|' + (ev.action || '') + '|' + (ev.message || ev.file || '');
@@ -844,7 +847,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       if (newStatus) {
         updateActivityStatus(newStatus);
         updatePageTitle(newStatus);
-        if (newStatus === 'idle' || newStatus === 'permission-needed') playStatusSound(newStatus);
+        if ((newStatus === 'idle' || newStatus === 'permission-needed') && !isReplayingSnapshot) playStatusSound(newStatus);
       }
 
       if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }

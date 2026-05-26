@@ -247,7 +247,7 @@
       "title": "Git operation permissions in config with task-git enforcement",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "merged",
       "folder": "workTasks/N42-git-operation-permissions-in-config-with-task-git-",
       "createdAt": "2026-05-25T19:41:42.264Z",
       "statusHistory": [
@@ -310,6 +310,11 @@
           "status": "fixed",
           "at": "2026-05-25T20:31:49.607Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-25T20:38:59.725Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -323,7 +328,7 @@
       "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 57,
       "tags": [
         "config",
         "task-git",
@@ -337,6 +342,65 @@
         }
       ],
       "branch": "feat/N42-git-operation-permissions-in-config",
+      "mrUrl": null,
+      "mergedAt": "2026-05-25T20:38:59.724Z"
+    },
+    {
+      "id": "N43",
+      "title": "Dashboard sounds replay on reconnect — snapshot replays playStatusSound for historical events",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N43-dashboard-sounds-replay-on-reconnect-snapshot-repl",
+      "createdAt": "2026-05-26T05:55:38.024Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T05:55:38.024Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-26T05:57:00.661Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-26T05:57:49.549Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T05:58:15.191Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T05:59:29.731Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-26T05:57:00.660Z",
+        "completedAt": "2026-05-26T05:57:49.548Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "audio",
+        "activity"
+      ],
+      "pushes": [],
+      "branch": null,
       "mrUrl": null,
       "mergedAt": null
     }
