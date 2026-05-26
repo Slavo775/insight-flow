@@ -5,6 +5,18 @@ Full history lives in [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANG
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-05-26
+
+### Fixed
+
+- **N40** — Master server upserts registrations by project ID instead of appending duplicates; eliminates ghost entries after server restarts.
+- **N43** — Dashboard sounds no longer replay on socket reconnect. Historical idle/permission-needed events from the snapshot are suppressed; only live events trigger audio.
+
+### Added
+
+- **N41** — Master overview cards reflect real-time Claude session status (active / idle / permission-required) with solid colour-coded card backgrounds and a text badge. Project server pushes status fire-and-forget on activity events; initial `idle` push happens immediately after registration.
+- **N42** — `agents.git.permissions` config block (9 boolean flags) lets projects block specific git operations (`push`, `merge`, `createPR`, `forcePush`, etc.) while keeping others enabled. `task-git` reads the block on every run and prints a clear blocked message naming the exact config key to change. `insight-flow init` scaffolds the full block with safe defaults (`forcePush: false`, rest `true`). Protocol documented in `AGENT_CONFIG.md`.
+
 ## [0.6.0] — 2026-05-25
 
 ### Breaking changes
