@@ -36,3 +36,38 @@ None — documentation only.
 
 - `jsonc` fence label is correct for display; the note to strip `//` before runtime use is accurate.
 - The `--examples` description ("produces a commented version") is slightly loose — init uses `"// key"` JSON comment-key stubs rather than true `//` comments — harmless in practice.
+
+
+---
+
+## Round 2 — approved
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-26
+**Verdict:** approved
+
+### Summary
+
+Three targeted fixes addressing all non-blocking findings from Round 1. Commit `be2e9cc` on branch `rework/N48-readme-full-config-reference-and-init-guide`. No source files changed — documentation only.
+
+### Checklist verification
+
+- [x] **Fix 1 — config intro sentence** (`README.md:191`): "Every key is optional *except* `workDir`, …" replaced with "All keys have defaults — `taskflow.config.json` itself is optional. The keys below are the ones most commonly customised; `insight-flow init` scaffolds them for you." — **pass**
+- [x] **Fix 2 — `taskmaster-change` in Full example** (`README.md:238`): `"taskmaster-change": []` added as the 9th entry in `agents.extend` block — **pass**. Block now lists all 9 agents, matching the `### Agent behaviour` table and `### Extending built-in agents` section.
+- [x] **Fix 3 — `npx insight-flow` in Install step** (`README.md:26`): `npx insight-flow  # launch dashboard` added under "Or one-off via npx" — **pass**. Users who prefer npx now see both init and dashboard commands.
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+None.
+
+### Security & edge cases
+
+None — documentation only.
+
+### Notes
+
+All three Round 1 non-blocking findings are fully resolved. The README is consistent: full example matches the table sections, config intro is accurate, and both install paths (global + npx) are shown.
