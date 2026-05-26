@@ -350,7 +350,7 @@
       "title": "Dashboard sounds replay on reconnect — snapshot replays playStatusSound for historical events",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N43-dashboard-sounds-replay-on-reconnect-snapshot-repl",
       "createdAt": "2026-05-26T05:55:38.024Z",
       "statusHistory": [
@@ -378,6 +378,11 @@
           "status": "approved",
           "at": "2026-05-26T05:59:29.731Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-26T06:03:07.865Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -393,11 +398,62 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 7,
       "tags": [
         "dashboard",
         "audio",
         "activity"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-05-26T06:03:07.864Z"
+    },
+    {
+      "id": "N44",
+      "title": "Release 0.7.0 — changelog, README, and version bump",
+      "type": "chore",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "workTasks/N44-release-0-7-0-changelog-readme-and-version-bump",
+      "createdAt": "2026-05-26T06:06:59.942Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T06:06:59.942Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-26T06:08:23.493Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-26T06:11:38.321Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-26T06:08:23.492Z",
+        "completedAt": "2026-05-26T06:11:38.321Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "CHANGELOG.md",
+          "packages/taskflow/CHANGELOG.md",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "docs"
       ],
       "pushes": [],
       "branch": null,

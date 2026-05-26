@@ -4,13 +4,12 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.6.0
+## What's new in 0.7.0
 
-- **Claude status badge** — top nav and browser tab title reflect active (⚡), idle (💤), or permission-needed (🚨) state in real time.
-- **Sound notifications** — audio cues on agent-idle and permission-needed transitions; per-browser toggle in settings; project-level kill-switch via `notifications.sounds.enabled`.
-- **Activity tabs** — "Claude Activity" and "Recent Activity" panes below the Kanban board.
-- **Activity engine opt-in** — `activityEngine.enabled` now defaults to `false`; set it to `true` to enable the feed, sounds, and status badge. **Breaking change** for users who relied on the previous always-on default.
-- **Auto lifecycle events** — command hooks emit `start`/`done` events automatically; no manual `insight-flow log-event` calls needed.
+- **Master overview status cards** — overview cards show real-time Claude session status (active / idle / permission-required) with solid colour-coded backgrounds (green for active, red for permission-required) and a text badge. The project server pushes status fire-and-forget on activity events.
+- **Git permission gates** — `agents.git.permissions` in `taskflow.config.json` controls which git operations `task-git` may perform. Nine boolean flags: `createBranch`, `checkout`, `commit`, `push`, `forcePush`, `merge`, `deleteBranchLocal`, `deleteBranchRemote`, `createPR`. `forcePush` defaults to `false`; the rest default to `true`. `insight-flow init` scaffolds the full block automatically.
+- **Sound replay fix** — dashboard no longer plays historical sounds when switching back to a backgrounded tab; an `isReplayingSnapshot` flag suppresses audio during socket-reconnect snapshot replay.
+- **Master server dedup** — registrations are upserted by project ID so ghost entries no longer accumulate after server restarts.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
