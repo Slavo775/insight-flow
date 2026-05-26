@@ -18,7 +18,7 @@ import { Server as IOServer, type Socket as IOSocket } from "socket.io";
 import type { TaskflowConfig } from "../types.js";
 import { getWorkDir } from "../config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
-import { getDashboardHtml, getNavHtml, getNavCss } from "./dashboard.js";
+import { getDashboardHtml, getNavHtml, getNavCss, getConfigPageHtml } from "./dashboard.js";
 import { detectActivityHookStatus, type ActivityHookStatus } from "../activity-hook.js";
 
 const MIME: Record<string, string> = {
@@ -397,6 +397,13 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET");
 
+    // /config — project config viewer
+    if (url.pathname === "/config") {
+      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.end(getConfigPageHtml(config));
+      return;
+    }
+
     // /overview — iframe proxy to master server
     if (url.pathname === "/overview") {
       if (config.master?.standalone) {
@@ -467,6 +474,12 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     if (url.pathname === "/api/activity") {
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(activity.getRecentEvents()));
+      return;
+    }
+
+    if (url.pathname === "/api/config") {
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify(config, null, 2));
       return;
     }
 

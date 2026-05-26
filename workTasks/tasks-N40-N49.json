@@ -549,7 +549,7 @@
       "title": "config page showing all options and project setup",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N46-config-page-showing-all-options-and-project-setup",
       "createdAt": "2026-05-26T08:47:40.828Z",
       "statusHistory": [
@@ -557,12 +557,30 @@
           "status": "ready",
           "at": "2026-05-26T08:47:40.829Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T08:49:54.878Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-26T08:53:06.964Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-26T09:00:19.325Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-26T08:53:06.963Z",
+        "completedAt": "2026-05-26T09:00:19.324Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -576,9 +594,15 @@
         "config",
         "ui"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-26T08:49:54.878Z",
+          "commitHash": "e52e8a3",
+          "commitMessage": "feat(tasks): add N46 spec for config page dashboard subpage"
+        }
+      ],
+      "branch": "feat/N46-config-page-showing-all-options-and-project-setup",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/29",
       "mergedAt": null
     }
   ]
