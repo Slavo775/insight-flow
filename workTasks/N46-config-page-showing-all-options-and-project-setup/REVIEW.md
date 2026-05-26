@@ -40,3 +40,42 @@ Adds a `/config` dashboard subpage (190 lines in `dashboard.ts`, 19 lines in `in
 
 - `cfgValRow` uses raw HTML in the `valHtml` parameter. All call sites correctly escape user-derived data (`escHtml(cmds.join(...))`, `escHtml(lines.join(...))`, `escHtml(ca.description || ca.role)`). No XSS risk in the current implementation.
 - The `.config-row:last-child { border-bottom: none }` rule works correctly because config-rows are always the last children of their `.config-section` containers — verified against the Agents section which ends with an `extend` or `custom` row.
+
+
+---
+
+## Round 2
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-26
+**Verdict:** approved
+
+### Summary
+
+Commit `763a5a7` makes three targeted corrections to the initial implementation. Diff is 7 added / 5 removed lines across 2 files — no scope creep. All three non-blocking items from Round 1 are addressed.
+
+### Checklist verification (Round 2 delta — commit 763a5a7)
+
+- [x] `activityEngine.enabled` default corrected `false → true` matching `config.ts ACTIVITY_DEFAULTS` (`dashboard.ts:320`) — live page now shows `enabled: true [default]`.
+- [x] `activityEngine.phaseMarkers` default corrected `false → true` (`dashboard.ts:323`) — shows `[default]`.
+- [x] `activityEngine.hookEnrichment` default corrected `false → true` (`dashboard.ts:324`) — shows `[default]`.
+- [x] CORS comment added to `/api/config` (`index.ts:479-480`) — documents filter requirement for future sensitive keys.
+- [x] Port default comment added linking `6006` to `config.ts DEFAULTS.server.port` (`dashboard.ts:313`).
+- [x] Build still passes clean after fix.
+- [x] No regressions — `projectName` and `port: 6007` still show as `is-custom`.
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+The static `<title>Config — Taskflow</title>` (noted in Round 1) is still unchanged. Consistent with the home page and acceptable.
+
+### Security & edge cases
+
+No new concerns. The CORS comment is now in place.
+
+### Notes
+
+The three wrong default values (`false` instead of `true`) were caught correctly by cross-referencing `config.ts ACTIVITY_DEFAULTS`. Since `resolveConfig` merges defaults before the server receives the config object, the only reliable way to detect "this was user-set" vs "this is a default" is to compare the resolved value against the canonical defaults — which is what the fix does correctly.
