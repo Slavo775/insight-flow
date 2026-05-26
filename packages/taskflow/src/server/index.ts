@@ -478,6 +478,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     }
 
     if (url.pathname === "/api/config") {
+      // TaskflowConfig has no sensitive fields; if a secret key is ever added,
+      // filter it here before serialising rather than relying on CORS alone.
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(config, null, 2));
       return;

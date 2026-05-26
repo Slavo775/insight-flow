@@ -310,18 +310,18 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
     cfgRow("projectName", config.projectName, false) +
     cfgRow("rolesDir", config.rolesDir, config.rolesDir === ".claude/roles");
 
-  // Server
+  // Server — default port must match config.ts DEFAULTS.server.port
   const server =
     cfgRow("server.port", String(config.server?.port ?? 6006), (config.server?.port ?? 6006) === 6006);
 
-  // Activity Engine
+  // Activity Engine — defaults mirror config.ts ACTIVITY_DEFAULTS
   const ae = config.activityEngine;
   const activityRows =
-    cfgRow("enabled", String(ae?.enabled ?? false), (ae?.enabled ?? false) === false) +
+    cfgRow("enabled", String(ae?.enabled ?? true), (ae?.enabled ?? true) === true) +
     cfgRow("logFile", ae?.logFile ?? ".taskflow-activity.jsonl", (ae?.logFile ?? ".taskflow-activity.jsonl") === ".taskflow-activity.jsonl") +
     cfgRow("maxEvents", String(ae?.maxEvents ?? 200), (ae?.maxEvents ?? 200) === 200) +
-    cfgRow("phaseMarkers", String(ae?.phaseMarkers ?? false), (ae?.phaseMarkers ?? false) === false) +
-    cfgRow("hookEnrichment", String(ae?.hookEnrichment ?? false), (ae?.hookEnrichment ?? false) === false) +
+    cfgRow("phaseMarkers", String(ae?.phaseMarkers ?? true), (ae?.phaseMarkers ?? true) === true) +
+    cfgRow("hookEnrichment", String(ae?.hookEnrichment ?? true), (ae?.hookEnrichment ?? true) === true) +
     cfgRow("verbosity", ae?.verbosity ?? "both", (ae?.verbosity ?? "both") === "both");
 
   // Notifications
