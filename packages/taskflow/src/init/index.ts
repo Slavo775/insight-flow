@@ -633,9 +633,11 @@ function buildConfigWithExamples(config: TaskflowConfig): string {
       "task-human-review":  [],
       "task-request-changes": []
     },
-    "// git": "Control which git operations task-git is allowed to perform. Set any flag to false to block that operation.",
+    "// git": "Control which git operations task-git is allowed to perform. Use remoteOps: 'deny' to block all origin-touching ops at once, or set individual flags.",
     "git": {
       "permissions": {
+        "// remoteOps": "Shorthand: 'deny' blocks push/forcePush/deleteBranchRemote/createPR unless overridden below.",
+        "remoteOps":         "allow",
         "createBranch":      true,
         "checkout":          true,
         "commit":            true,

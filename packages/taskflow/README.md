@@ -7,7 +7,7 @@ insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, p
 ## What's new in 0.7.0
 
 - **Master overview status cards** — overview cards show real-time Claude session status (active / idle / permission-required) with solid colour-coded backgrounds (green for active, red for permission-required) and a text badge. The project server pushes status fire-and-forget on activity events.
-- **Git permission gates** — `agents.git.permissions` in `taskflow.config.json` controls which git operations `task-git` may perform. Nine boolean flags: `createBranch`, `checkout`, `commit`, `push`, `forcePush`, `merge`, `deleteBranchLocal`, `deleteBranchRemote`, `createPR`. `forcePush` defaults to `false`; the rest default to `true`. `insight-flow init` scaffolds the full block automatically.
+- **Git permission gates** — `agents.git.permissions` in `taskflow.config.json` controls which git operations `task-git` may perform. Use `remoteOps: "deny"` to block all origin-touching ops (`push`, `forcePush`, `deleteBranchRemote`, `createPR`) at once; individual flags override the shorthand. See the [Git permission gates](#git-permission-gates) section for the full flag table.
 - **Sound replay fix** — dashboard no longer plays historical sounds when switching back to a backgrounded tab; an `isReplayingSnapshot` flag suppresses audio during socket-reconnect snapshot replay.
 - **Master server dedup** — registrations are upserted by project ID so ghost entries no longer accumulate after server restarts.
 
@@ -298,6 +298,56 @@ Valid agent names: `taskmaster`, `task-implement`, `task-review`, `task-review-f
 | `outputContract` | no       | Workflow steps / output contract for the skill        |
 
 After editing `taskflow.config.json`, re-run `insight-flow init` to apply changes.
+
+### Git permission gates
+
+`agents.git.permissions` controls which git operations the `task-git` agent may perform. Operations are split into **local** (safe, reversible — branch, checkout, commit, local delete) and **remote** (origin-touching — push, force-push, remote delete, PR creation).
+
+**`remoteOps` shorthand** — set once to block or allow all remote operations:
+
+```json
+{
+  "agents": {
+    "git": {
+      "permissions": {
+        "remoteOps": "deny"
+      }
+    }
+  }
+}
+```
+
+Individual flags override `remoteOps`. This config allows push but blocks everything else remote:
+
+```json
+{
+  "agents": {
+    "git": {
+      "permissions": {
+        "remoteOps": "deny",
+        "push": true
+      }
+    }
+  }
+}
+```
+
+**Flag reference:**
+
+| Flag                 | Default | Remote? | Covered by `remoteOps`? |
+| -------------------- | ------- | ------- | ----------------------- |
+| `remoteOps`          | `"allow"` | —     | —                       |
+| `createBranch`       | `true`  | no      | no                      |
+| `checkout`           | `true`  | no      | no                      |
+| `commit`             | `true`  | no      | no                      |
+| `merge`              | `true`  | no      | no                      |
+| `deleteBranchLocal`  | `true`  | no      | no                      |
+| `push`               | `true`  | yes     | yes                     |
+| `forcePush`          | `false` | yes     | yes                     |
+| `deleteBranchRemote` | `true`  | yes     | yes                     |
+| `createPR`           | `true`  | yes     | yes                     |
+
+`insight-flow init` scaffolds the full block with `remoteOps: "allow"` so the field is visible from day one.
 
 ## Programmatic API
 

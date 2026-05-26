@@ -58,10 +58,21 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
 
   const projectName = userConfig.projectName || inferProjectName(anchor) || "project";
 
+  const userGitPerms = userConfig.agents?.git?.permissions ?? {};
   const mergedAgentsGitPerms = {
     ...DEFAULTS.agents!.git!.permissions,
-    ...(userConfig.agents?.git?.permissions ?? {}),
+    ...userGitPerms,
   };
+
+  // remoteOps: "deny" sets all origin-touching flags to false unless individually overridden
+  if (mergedAgentsGitPerms.remoteOps === "deny") {
+    const remoteFlags = ["push", "forcePush", "deleteBranchRemote", "createPR"] as const;
+    for (const flag of remoteFlags) {
+      if (!(flag in userGitPerms)) {
+        mergedAgentsGitPerms[flag] = false;
+      }
+    }
+  }
 
   return {
     ...DEFAULTS,

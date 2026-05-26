@@ -359,12 +359,16 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
   const agents = config.agents;
   let agentsRows = "";
 
-  const gitPerms = agents?.git?.permissions as Record<string, boolean | undefined> | undefined;
+  const gitPerms = agents?.git?.permissions;
   if (gitPerms && Object.keys(gitPerms).length > 0) {
-    const permKeys = ["createBranch", "checkout", "commit", "push", "forcePush", "merge", "deleteBranchLocal", "deleteBranchRemote", "createPR"];
+    const boolKeys = ["createBranch", "checkout", "commit", "push", "forcePush", "merge", "deleteBranchLocal", "deleteBranchRemote", "createPR"];
     let subRows = "";
-    for (const k of permKeys) {
-      const v = gitPerms[k];
+    if (gitPerms.remoteOps !== undefined) {
+      const isDeny = gitPerms.remoteOps === "deny";
+      subRows += cfgRow("remoteOps", gitPerms.remoteOps, !isDeny);
+    }
+    for (const k of boolKeys) {
+      const v = (gitPerms as Record<string, boolean | undefined>)[k];
       if (v !== undefined) {
         subRows += cfgRow(k, String(v), v === true);
       }
