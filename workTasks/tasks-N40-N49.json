@@ -470,7 +470,7 @@
       "title": "Overview card stuck on permission-required after permission granted",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N45-overview-card-stuck-on-permission-required-after-p",
       "createdAt": "2026-05-26T06:39:15.107Z",
       "statusHistory": [
@@ -513,6 +513,11 @@
           "status": "approved",
           "at": "2026-05-26T07:31:11.021Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-26T07:32:31.104Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -528,7 +533,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 53,
       "tags": [
         "master",
         "overview",
@@ -537,6 +542,137 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
+      "mergedAt": "2026-05-26T07:32:31.104Z"
+    },
+    {
+      "id": "N46",
+      "title": "config page showing all options and project setup",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N46-config-page-showing-all-options-and-project-setup",
+      "createdAt": "2026-05-26T08:47:40.828Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T08:47:40.829Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T08:49:54.878Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-26T08:53:06.964Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-26T09:00:19.325Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T09:01:01.743Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T09:01:40.482Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T09:04:08.312Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T09:04:45.187Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T09:26:49.672Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T09:30:59.925Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T09:32:05.880Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T09:32:38.342Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T09:33:47.640Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T09:34:01.973Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-26T08:53:06.963Z",
+        "completedAt": "2026-05-26T09:00:19.324Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "config",
+        "ui"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-26T08:49:54.878Z",
+          "commitHash": "e52e8a3",
+          "commitMessage": "feat(tasks): add N46 spec for config page dashboard subpage"
+        },
+        {
+          "at": "2026-05-26T09:01:01.742Z",
+          "commitHash": "512442d",
+          "commitMessage": "feat(dashboard): add /config subpage with all taskflow.config.json options"
+        },
+        {
+          "at": "2026-05-26T09:04:45.186Z",
+          "commitHash": "6208e10",
+          "commitMessage": "chore(tasks): add N46 review — approved"
+        },
+        {
+          "at": "2026-05-26T09:26:49.672Z",
+          "commitHash": "763a5a7",
+          "commitMessage": "fix(dashboard): correct activityEngine default comparisons and add CORS note"
+        },
+        {
+          "at": "2026-05-26T09:32:38.341Z",
+          "commitHash": "4aba93b",
+          "commitMessage": "chore(tasks): add N46 round-2 review — approved"
+        }
+      ],
+      "branch": "feat/N46-config-page-showing-all-options-and-project-setup",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/29",
       "mergedAt": null
     }
   ]
