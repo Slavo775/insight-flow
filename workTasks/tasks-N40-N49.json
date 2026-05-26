@@ -784,7 +784,7 @@
       "title": "readme-full-config-reference-and-init-guide",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N48-readme-full-config-reference-and-init-guide",
       "createdAt": "2026-05-26T10:17:18.991Z",
       "statusHistory": [
@@ -802,6 +802,21 @@
           "status": "implemented",
           "at": "2026-05-26T10:24:06.579Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-26T10:26:00.893Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-26T10:40:12.984Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-26T10:43:03.917Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -813,8 +828,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -823,9 +838,15 @@
         "readme",
         "init"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-26T10:26:00.893Z",
+          "commitHash": "be40f3e",
+          "commitMessage": "docs(readme): full config reference and step-by-step init guide"
+        }
+      ],
+      "branch": "rework/N48-readme-full-config-reference-and-init-guide",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/31",
       "mergedAt": null
     }
   ]
