@@ -22,7 +22,8 @@ See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 npm install -g insight-flow
 
 # Or one-off via npx (no install needed)
-npx insight-flow init
+npx insight-flow init   # initialize
+npx insight-flow        # launch dashboard
 ```
 
 ### 2. Initialize your project
@@ -187,7 +188,7 @@ Run `insight-flow help` for the full list.
 
 ## Configuration
 
-All configuration lives in `taskflow.config.json` at your project root. Every key is optional except `workDir`, `shardSize`, `projectName`, `rolesDir`, and `server.port` (which have sensible defaults and are scaffolded by `insight-flow init`).
+All configuration lives in `taskflow.config.json` at your project root. All keys have defaults — `taskflow.config.json` itself is optional. The keys below are the ones most commonly customised; `insight-flow init` scaffolds them for you.
 
 ### Full example
 
@@ -233,7 +234,8 @@ The block below shows every supported key with its default. Strip the `//` comme
       "taskmaster": [],
       "task-human-review": [],
       "task-incident": [],
-      "task-request-changes": []
+      "task-request-changes": [],
+      "taskmaster-change": []
     },
     "custom": [],                  // register custom slash-command agents
     "git": {
