@@ -397,7 +397,7 @@
       "title": "reduce token waste in agent role files",
       "type": "rework",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N54-reduce-token-waste-in-agent-role-files",
       "createdAt": "2026-05-26T20:40:35.615Z",
       "statusHistory": [
@@ -465,6 +465,11 @@
           "status": "approved",
           "at": "2026-05-27T10:57:59.070Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-27T10:58:52.205Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -506,7 +511,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 858,
       "tags": [
         "agents",
         "tokens",
@@ -531,6 +536,43 @@
       ],
       "branch": "rework/N54-reduce-token-waste-in-agent-role-files",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/35",
+      "mergedAt": "2026-05-27T10:58:52.204Z"
+    },
+    {
+      "id": "N55",
+      "title": "release-v0.8.0-changelog-readme-version-bump",
+      "type": "chore",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N55-release-v0-8-0-changelog-readme-version-bump",
+      "createdAt": "2026-05-27T11:02:21.542Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T11:02:21.542Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "changelog",
+        "docs"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]
