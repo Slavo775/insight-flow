@@ -4,11 +4,12 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.9.0
+## What's new in 0.9.1
 
-- **Multi-project launcher** — `insight-flow batch-ui` starts dashboards for several projects at once; interactive TTY prompt, auto-port assignment, browser open, `--no-open` flag for CI/headless use.
-- **Register from project folder** — `insight-flow ui-batch-register` reads `taskflow.config.json` and registers the project in a global file (`~/.insight-flow/batch-ui.json`) in one command; actionable errors for missing/invalid config.
-- **Stop all servers** — `insight-flow ui-batch-down` terminates all servers started by the last `batch-ui` run via PID tracking; handles already-exited processes gracefully.
+- **Unregister projects** — `insight-flow ui-batch-unregister` (run inside a project folder) and `insight-flow batch-ui --remove "<label>"` remove entries from the batch-ui registry; both clean `lastSelected` to prevent ghost pre-checks on next run.
+- **`--list` shows config info** — `batch-ui --list` now resolves and displays the `projectName` and `workDir` from each entry's `taskflow.config.json`, making wrong-folder registrations immediately visible.
+- **Port-collision guard** — a `claimedPorts` set prevents the same port being assigned to two projects in one run; occupied ports are reported to stderr: `(port 6007 was occupied, skipped)`.
+- **No duplicate servers** — re-running `batch-ui` skips already-live servers with `[label] server on port N already running, skipped`; their PIDs are merged with new spawns so `ui-batch-down` remains effective.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 

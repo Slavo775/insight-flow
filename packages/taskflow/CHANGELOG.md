@@ -4,6 +4,20 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.9.1] — 2026-05-27
+
+### Added (N58)
+
+- `insight-flow batch-ui --remove "<label>"` — remove a registered project from the batch-ui registry by label; cleans `lastSelected` to prevent ghost pre-checks on next run.
+- `insight-flow ui-batch-unregister` — mirror of `ui-batch-register`; run inside a project folder to remove it from the registry by path match (no label required).
+- `batch-ui --list` now shows the resolved `projectName` and `workDir` from each entry's `taskflow.config.json`, making misregistrations (e.g. wrong folder) immediately visible.
+
+### Fixed (N58)
+
+- Port-collision guard: `cmdBatchUi` maintains an in-memory `claimedPorts` set so `findFreePort` never assigns the same port twice within a single run, even when the OS reassigns a just-probed port before the child process binds.
+- Port-skip warning: `findFreePort` now prints `(port N was occupied, skipped)` to stderr whenever it has to skip an occupied port, so users know old servers are still running.
+- Duplicate-spawn prevention: re-running `batch-ui` with a project whose server is already alive (PID liveness probe via `process.kill(pid, 0)`) prints `[<label>] server on port <N> already running, skipped` and does not spawn a new process. Surviving PIDs are merged with newly spawned ones in `runningPids` so `ui-batch-down` can reach all servers.
+
 ## [0.9.0] — 2026-05-27
 
 ### Added (N56)
