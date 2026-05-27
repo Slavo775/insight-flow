@@ -543,7 +543,7 @@
       "title": "release-v0.8.0-changelog-readme-version-bump",
       "type": "chore",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "fixed",
       "folder": "workTasks/N55-release-v0-8-0-changelog-readme-version-bump",
       "createdAt": "2026-05-27T11:02:21.542Z",
       "statusHistory": [
@@ -571,6 +571,21 @@
           "status": "fix-needed",
           "at": "2026-05-27T12:16:28.047Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T12:18:15.724Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-27T12:19:14.024Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-27T12:19:45.582Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -598,6 +613,11 @@
           "at": "2026-05-27T11:08:09.899Z",
           "commitHash": "45783500ff46ee9412fb8707b9eda7f4f27381d8",
           "commitMessage": "chore(release): bump to v0.8.0, write changelog, merge N49"
+        },
+        {
+          "at": "2026-05-27T12:18:15.724Z",
+          "commitHash": "c2eccbd",
+          "commitMessage": "review(tasks): N55 fix-needed — README What's new not updated to 0.8.0"
         }
       ],
       "branch": "chore/N55-release-v0-8-0-changelog-readme-version-bump",

@@ -4,12 +4,13 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.7.0
+## What's new in 0.8.0
 
-- **Master overview status cards** — overview cards show real-time Claude session status (active / idle / permission-required) with solid colour-coded backgrounds (green for active, red for permission-required) and a text badge. The project server pushes status fire-and-forget on activity events.
-- **Git permission gates** — `agents.git.permissions` in `taskflow.config.json` controls which git operations `task-git` may perform. Use `remoteOps: "deny"` to block all origin-touching ops (`push`, `forcePush`, `deleteBranchRemote`, `createPR`) at once; individual flags override the shorthand. See the [Git permission gates](#git-permission-gates) section for the full flag table.
-- **Sound replay fix** — dashboard no longer plays historical sounds when switching back to a backgrounded tab; an `isReplayingSnapshot` flag suppresses audio during socket-reconnect snapshot replay.
-- **Master server dedup** — registrations are upserted by project ID so ghost entries no longer accumulate after server restarts.
+- **Interactive init** — `insight-flow init` now asks two Y/n questions (lifecycle events, activity tracking) instead of silently applying defaults; non-TTY environments get the defaults automatically.
+- **Config dashboard page** — new `/config` page in the dashboard lists every `taskflow.config.json` option with current values, types, and descriptions.
+- **prompt-build from config** — agent extension strings are read directly from `taskflow.config.json` (`agents.extend`); the separate `taskflow.prompt.json` sidecar is no longer written or read.
+- **Agent-done browser notification** — desktop notifications now fire once when Claude finishes a turn, replacing the previous per-status-transition model.
+- **Leaner agent role files** — the shared EVENTS block is extracted into `AGENT_EVENTS.md` and referenced by all 8 role files, reducing token load per agent run by ~120 words.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
