@@ -1,0 +1,23 @@
+{
+  "taskId": "N55",
+  "reviews": [
+    {
+      "startedAt": "2026-05-27T12:15:41.913Z",
+      "endedAt": "2026-05-27T12:16:28.046Z",
+      "verdict": "fix-needed",
+      "comment": "README What's new section not updated to 0.8.0 — still shows 0.7.0 content. Version bump and CHANGELOG are correct.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-27T12:19:14.024Z",
+        "endedAt": "2026-05-27T12:19:45.582Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/README.md"
+        ],
+        "comment": "Fixed: updated README What's new from 0.7.0 to 0.8.0 with correct highlights",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
