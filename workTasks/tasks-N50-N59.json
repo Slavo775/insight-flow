@@ -52,6 +52,21 @@
           "status": "approved",
           "at": "2026-05-27T07:59:04.213Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T07:59:42.608Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T08:00:36.460Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T08:01:11.299Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -66,7 +81,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -81,6 +96,11 @@
           "at": "2026-05-27T07:51:21.859Z",
           "commitHash": "99fea71",
           "commitMessage": "rework(prompt-build): read config from taskflow.config.json, drop taskflow.prompt.json"
+        },
+        {
+          "at": "2026-05-27T07:59:42.607Z",
+          "commitHash": "fccbe9b",
+          "commitMessage": "fix(prompt-build): project-root resolution and remoteOps local-op edge case"
         }
       ],
       "branch": "rework/N50-prompt-build-reads-from-taskflow-config-json-and-d",

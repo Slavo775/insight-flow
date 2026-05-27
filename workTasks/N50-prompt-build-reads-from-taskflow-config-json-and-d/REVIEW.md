@@ -67,3 +67,31 @@ Addresses all three non-blocking issues from round 1 in `packages/taskflow/src/c
 - `pnpm --dir packages/taskflow run typecheck` — clean
 - `pnpm --dir packages/taskflow test` — 32/32 pass
 - `prompt-build` from `packages/taskflow/src/` subdirectory finds project config correctly
+
+
+---
+
+## Round 3 — verification of round 2 fixes
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-27
+**Verdict:** approved
+
+### Summary
+
+Round 2 fixes land cleanly. No new issues. All original checklist items remain satisfied. Ready to merge.
+
+### Checklist verification
+
+All items unchanged from round 1 — still pass. Round 2 added no scope and did not touch any checklist-covered path.
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+None. All three round 1 non-blocking items were addressed:
+- Subdirectory gap → `resolveProjectRoot()` with cwd fallback (`prompt-build.ts:123–128`).
+- `remoteOps: "deny"` + local denials → explicit local-op enumeration after remote-ops line (`prompt-build.ts:38–43`).
+- Double-read consistency → both reads now use the same project root path.
