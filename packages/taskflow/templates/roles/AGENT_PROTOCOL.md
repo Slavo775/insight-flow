@@ -47,4 +47,6 @@ QUALITY BAR (applies to roles that produce code or specs)
 
 If a procedural step here conflicts with `@AGENT_ENFORCEMENT.md`, both files agree: state mutations through CLI, hooks not skipped, etc. `AGENT_ENFORCEMENT.md` is the strict-enforcement reference; this file is the workflow reference.
 
+---
+
 Project-specific commands (typecheck, lint, test, PR-create) belong in `taskflow.config.json.agents.extend.<agent>` — see `CLAUDE.md` for examples.

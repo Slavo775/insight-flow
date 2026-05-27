@@ -397,7 +397,7 @@
       "title": "reduce token waste in agent role files",
       "type": "rework",
       "priority": "medium",
-      "status": "approved",
+      "status": "changes-implemented",
       "folder": "workTasks/N54-reduce-token-waste-in-agent-role-files",
       "createdAt": "2026-05-26T20:40:35.615Z",
       "statusHistory": [
@@ -430,6 +430,26 @@
           "status": "approved",
           "at": "2026-05-27T10:50:54.896Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T10:51:36.676Z",
+          "by": "task-git"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-27T10:53:05.201Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-27T10:53:09.247Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-27T10:53:40.285Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -451,7 +471,22 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-27T10:53:05.200Z",
+          "description": "Fix stale AGENT_CONFIG.md cross-reference to removed EXTENDING section; update AGENT_PROTOCOL.md stub placement",
+          "requestedBy": "task-review-fix",
+          "status": "implemented",
+          "implementedAt": "2026-05-27T10:53:40.284Z",
+          "filesChanged": [
+            "AGENT_CONFIG.md",
+            "AGENT_PROTOCOL.md",
+            "packages/taskflow/templates/roles/AGENT_PROTOCOL.md"
+          ],
+          "comment": "Fixed stale AGENT_CONFIG.md cross-reference; added separator before stub in AGENT_PROTOCOL.md",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "reviewCount": 1,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
@@ -467,6 +502,11 @@
           "at": "2026-05-27T10:34:57.548Z",
           "commitHash": "79e1364133453ba78cfbbffc513aa98e56509c03",
           "commitMessage": "rework(agents): extract EVENTS block to AGENT_EVENTS.md, trim AGENT_PROTOCOL"
+        },
+        {
+          "at": "2026-05-27T10:51:36.676Z",
+          "commitHash": "14876483994d35fba2ce673f5733633ec932b879",
+          "commitMessage": "docs(tasks): add AI review for N54 — approved"
         }
       ],
       "branch": "rework/N54-reduce-token-waste-in-agent-role-files",
