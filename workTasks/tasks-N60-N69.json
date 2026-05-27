@@ -125,7 +125,7 @@
       "title": "master overview grid: equal-width columns with responsive single-column fallback",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N61-master-overview-grid-equal-width-columns-with-resp",
       "createdAt": "2026-05-27T20:32:04.484Z",
       "statusHistory": [
@@ -133,12 +133,24 @@
           "status": "ready",
           "at": "2026-05-27T20:32:04.484Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T20:35:07.857Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T20:35:58.432Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T20:35:07.856Z",
+        "completedAt": "2026-05-27T20:35:58.432Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/overview.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -155,7 +167,7 @@
       ],
       "pushes": [],
       "branch": null,
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/41",
       "mergedAt": null
     }
   ]

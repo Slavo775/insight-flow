@@ -57,10 +57,9 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .live-dot.disconnected { background: var(--red); animation: none; }
     .live-dot.reconnecting { background: var(--yellow); }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .card-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
-    .card-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
-    .card-grid.grid-multi { grid-template-columns: repeat(2, 1fr); }
-    .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .card-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 800px) { .card-grid { grid-template-columns: 1fr; } }
+    .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
     .proj-card-header { display: flex; justify-content: space-between; align-items: center; }
     .proj-label { font-size: 14px; font-weight: 600; color: var(--text); }
     .conn-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
@@ -242,17 +241,8 @@ function getScript(initialData: string): string {
         '</div>';
     }
 
-    function applyGridClass() {
-      var grid = document.getElementById('grid');
-      if (!grid) return;
-      grid.classList.remove('grid-2', 'grid-multi');
-      if (PROJECTS.length === 2) grid.classList.add('grid-2');
-      else if (PROJECTS.length >= 3) grid.classList.add('grid-multi');
-    }
-
     function renderAll() {
       document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
-      applyGridClass();
       updateSubtitle();
       snapshotStatuses();
     }
@@ -289,7 +279,6 @@ function getScript(initialData: string): string {
       } else {
         PROJECTS.push(p);
         document.getElementById('grid').insertAdjacentHTML('beforeend', renderCard(p));
-        applyGridClass();
       }
       updateSubtitle();
     }
