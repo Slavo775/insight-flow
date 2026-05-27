@@ -34,7 +34,7 @@ import {
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
-import { cmdBatchUi, cmdBatchUiAdd, cmdBatchUiList, cmdUiBatchRegister } from "./commands/batch-ui.js";
+import { cmdBatchUi, cmdBatchUiAdd, cmdBatchUiList, cmdUiBatchRegister, cmdUiBatchDown } from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
@@ -117,6 +117,7 @@ function printHelp(): void {
     log-event <type> [--task Nxx] [--data <json>]       Emit a typed lifecycle event (mandatory: start|done; optional: active|idle|edit-start|edit-end|research-start|research-end|review-start|review-end|git-start|git-end)
 
     ui-batch-register                     Register this folder as a batch-ui project (reads taskflow.config.json)
+    ui-batch-down                         Stop all servers started by the last batch-ui run
     batch-ui [--no-open]                  Launch dashboards for multiple projects (interactive multi-select)
     batch-ui --add "<label>" <path>       Register a project by explicit path
     batch-ui --list                       List all registered batch-ui projects
@@ -170,6 +171,8 @@ async function run(): Promise<void> {
     cmdLogEvent(config, opts);
   } else if (command === "ui-batch-register") {
     cmdUiBatchRegister();
+  } else if (command === "ui-batch-down") {
+    cmdUiBatchDown();
   } else if (command === "batch-ui") {
     if (opts.list) {
       cmdBatchUiList();

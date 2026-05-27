@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import type { BatchUiEntry, BatchUiRegistry } from "./types.js";
+import type { BatchUiEntry, BatchUiRunningProcess, BatchUiRegistry } from "./types.js";
 
 export function getGlobalConfigDir(): string {
   return join(homedir(), ".insight-flow");
@@ -13,15 +13,16 @@ function getRegistryPath(): string {
 
 function readRaw(): BatchUiRegistry {
   const p = getRegistryPath();
-  if (!existsSync(p)) return { entries: [], lastSelected: [] };
+  if (!existsSync(p)) return { entries: [], lastSelected: [], runningPids: [] };
   try {
     const parsed = JSON.parse(readFileSync(p, "utf-8")) as Partial<BatchUiRegistry>;
     return {
       entries: Array.isArray(parsed.entries) ? parsed.entries : [],
       lastSelected: Array.isArray(parsed.lastSelected) ? parsed.lastSelected : [],
+      runningPids: Array.isArray(parsed.runningPids) ? parsed.runningPids : [],
     };
   } catch {
-    return { entries: [], lastSelected: [] };
+    return { entries: [], lastSelected: [], runningPids: [] };
   }
 }
 
@@ -47,5 +48,15 @@ export function readBatchUiLastSelected(): string[] {
 export function writeBatchUiLastSelected(labels: string[]): void {
   const reg = readRaw();
   reg.lastSelected = labels;
+  writeRaw(reg);
+}
+
+export function readBatchUiRunningPids(): BatchUiRunningProcess[] {
+  return readRaw().runningPids;
+}
+
+export function writeBatchUiRunningPids(pids: BatchUiRunningProcess[]): void {
+  const reg = readRaw();
+  reg.runningPids = pids;
   writeRaw(reg);
 }

@@ -599,7 +599,7 @@
       "title": "batch-ui command — multi-project server launcher",
       "type": "feat",
       "priority": "medium",
-      "status": "changes-requested",
+      "status": "changes-implemented",
       "folder": "workTasks/N56-batch-ui-command-multi-project-server-launcher",
       "createdAt": "2026-05-27T11:43:33.915Z",
       "statusHistory": [
@@ -632,6 +632,21 @@
           "status": "changes-requested",
           "at": "2026-05-27T12:58:35.909Z",
           "by": "task-request-changes"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T12:59:26.466Z",
+          "by": "task-git"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-27T13:03:20.819Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-27T13:07:09.295Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
@@ -651,11 +666,17 @@
           "requestedAt": "2026-05-27T12:58:35.908Z",
           "description": "Add ui-batch-down command to stop all batch-spawned servers",
           "requestedBy": "task-request-changes",
-          "status": "requested",
-          "implementedAt": null,
-          "filesChanged": [],
-          "comment": null,
-          "implementedBy": null
+          "status": "implemented",
+          "implementedAt": "2026-05-27T13:07:09.294Z",
+          "filesChanged": [
+            "packages/taskflow/src/commands/batch-ui.ts",
+            "packages/taskflow/src/global-config.ts",
+            "packages/taskflow/src/types.ts",
+            "packages/taskflow/src/cli.ts",
+            "packages/taskflow/README.md"
+          ],
+          "comment": "Added ui-batch-down: persists PIDs on batch-ui launch, SIGTERM on down, clears registry",
+          "implementedBy": "task-implement"
         }
       ],
       "reviewCount": 0,
@@ -678,6 +699,11 @@
           "at": "2026-05-27T11:50:54.096Z",
           "commitHash": "9274a0e",
           "commitMessage": "docs(tasks): N56 — add ui-batch-register command + README docs to spec"
+        },
+        {
+          "at": "2026-05-27T12:59:26.465Z",
+          "commitHash": "7e8ff89",
+          "commitMessage": "chore(tasks): N56 — request changes: add ui-batch-down to stop all servers"
         }
       ],
       "branch": "feat/N56-batch-ui-command-multi-project-server-launcher",

@@ -307,7 +307,14 @@ export interface BatchUiEntry {
   path: string;
 }
 
+export interface BatchUiRunningProcess {
+  label: string;
+  pid: number;
+  port: number;
+}
+
 export interface BatchUiRegistry {
   entries: BatchUiEntry[];
   lastSelected: string[];
+  runningPids: BatchUiRunningProcess[];
 }

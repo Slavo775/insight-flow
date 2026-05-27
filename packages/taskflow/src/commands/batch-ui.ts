@@ -8,8 +8,10 @@ import {
   writeBatchUiRegistry,
   readBatchUiLastSelected,
   writeBatchUiLastSelected,
+  readBatchUiRunningPids,
+  writeBatchUiRunningPids,
 } from "../global-config.js";
-import type { BatchUiEntry } from "../types.js";
+import type { BatchUiEntry, BatchUiRunningProcess } from "../types.js";
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
@@ -178,6 +180,7 @@ export async function cmdBatchUi(opts: ParsedArgs): Promise<void> {
   const shouldOpen = !opts["no-open"];
   const bin = process.platform === "win32" ? "insight-flow.cmd" : "insight-flow";
   const urls: string[] = [];
+  const running: BatchUiRunningProcess[] = [];
 
   let port = 6007;
   for (const entry of chosen) {
@@ -190,11 +193,16 @@ export async function cmdBatchUi(opts: ParsedArgs): Promise<void> {
       detached: true,
       stdio: "ignore",
     });
+    if (child.pid !== undefined) {
+      running.push({ label: entry.label, pid: child.pid, port });
+    }
     child.unref();
 
     console.log(`  [${entry.label}] ${url}`);
     port++;
   }
+
+  writeBatchUiRunningPids(running);
 
   if (shouldOpen && urls.length > 0) {
     setTimeout(() => {
@@ -256,4 +264,45 @@ export function cmdUiBatchRegister(): void {
   // f) confirm
   console.log(`Registered "${label}" → ${cwd}`);
   console.log("Run `insight-flow batch-ui` to launch all registered projects.");
+}
+
+export function cmdUiBatchDown(): void {
+  const running = readBatchUiRunningPids();
+  if (running.length === 0) {
+    console.log("No batch-ui servers are currently tracked.");
+    console.log("Run `insight-flow batch-ui` to start them.");
+    return;
+  }
+
+  const stopped: string[] = [];
+  const alreadyGone: string[] = [];
+  const failed: string[] = [];
+
+  for (const entry of running) {
+    try {
+      process.kill(entry.pid, "SIGTERM");
+      stopped.push(`  [${entry.label}] PID ${entry.pid} (port ${entry.port}) — stopped`);
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "ESRCH") {
+        alreadyGone.push(`  [${entry.label}] PID ${entry.pid} — already stopped`);
+      } else {
+        failed.push(`  [${entry.label}] PID ${entry.pid} — error: ${(err as Error).message}`);
+      }
+    }
+  }
+
+  for (const s of stopped) console.log(s);
+  for (const s of alreadyGone) console.log(s);
+  for (const s of failed) console.error(s);
+
+  writeBatchUiRunningPids([]);
+
+  if (failed.length > 0) {
+    console.error(`\n${failed.length} server(s) could not be stopped.`);
+    process.exit(1);
+  }
+
+  console.log(`\n${stopped.length + alreadyGone.length} server(s) stopped.`);
+  console.log("Run `insight-flow batch-ui` to start them again.");
 }

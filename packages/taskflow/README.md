@@ -643,6 +643,25 @@ echo "" | insight-flow batch-ui --no-open
 
 Spawned server processes are detached — they continue running after `batch-ui` exits.
 
+### Stop all servers
+
+To stop all servers started by the last `batch-ui` run:
+
+```bash
+insight-flow ui-batch-down
+```
+
+Output:
+```
+  [my-app]       PID 45231 (port 6007) — stopped
+  [another-app]  PID 45232 (port 6008) — stopped
+
+2 server(s) stopped.
+Run `insight-flow batch-ui` to start them again.
+```
+
+`ui-batch-down` reads the PIDs written to `~/.insight-flow/batch-ui.json` during the last `batch-ui` launch, sends `SIGTERM` to each, and clears the list. Processes that have already exited are reported as "already stopped" (not an error). The PID list is cleared regardless, so running `ui-batch-down` twice is safe.
+
 ---
 
 ## Multi-project overview
