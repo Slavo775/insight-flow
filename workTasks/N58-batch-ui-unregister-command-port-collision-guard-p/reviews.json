@@ -1,0 +1,41 @@
+{
+  "taskId": "N58",
+  "reviews": [
+    {
+      "startedAt": "2026-05-27T15:49:34.811Z",
+      "endedAt": "2026-05-27T15:50:39.080Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: insight-flow entry in batch-ui shows playground data, not actual dev task board. Needs investigation + batch-ui --list should show resolved workDir/projectName.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-27T18:30:05.511Z",
+        "endedAt": "2026-05-27T18:30:28.948Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/commands/batch-ui.ts"
+        ],
+        "comment": "Enhance batch-ui --list to show resolved projectName + workDir from each entry's taskflow.config.json",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-27T18:44:46.069Z",
+      "endedAt": "2026-05-27T18:45:23.708Z",
+      "verdict": "approved",
+      "comment": "All checklist items verified. Round 1 blocker was orphaned stale process (user data), not a code bug. Round 1 fix (--list shows resolved config) addresses the visibility gap. Build, typecheck, and tests pass.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-27T18:50:54.155Z",
+      "endedAt": "2026-05-27T18:51:18.014Z",
+      "verdict": "approved",
+      "comment": "Approved: document --list config output in README, then merge and publish v0.9.1",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

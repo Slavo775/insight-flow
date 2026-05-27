@@ -815,6 +815,127 @@
       "branch": "chore/N57-release-v0-9-0-changelog-readme-version-bump",
       "mrUrl": null,
       "mergedAt": "2026-05-27T15:25:43.169Z"
+    },
+    {
+      "id": "N58",
+      "title": "batch-ui: unregister command, port-collision guard, port-in-use warning",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N58-batch-ui-unregister-command-port-collision-guard-p",
+      "createdAt": "2026-05-27T15:35:28.106Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T15:35:28.106Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T15:36:51.503Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T15:43:51.418Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T15:46:36.050Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T15:46:55.356Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T15:49:34.811Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-27T15:50:39.081Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-27T18:30:05.511Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-27T18:30:28.955Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T18:31:08.194Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T18:44:46.068Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T18:45:23.709Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T18:50:54.154Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T18:51:18.014Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-27T15:43:51.418Z",
+        "completedAt": "2026-05-27T15:46:36.050Z",
+        "filesChanged": [
+          "packages/taskflow/src/commands/batch-ui.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "batch-ui",
+        "ux"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-27T15:36:51.503Z",
+          "commitHash": "9a0faf1ef35d84e1a496129dd26e793f651a339b",
+          "commitMessage": "chore(tasks): add N58 spec — batch-ui unregister, port-collision guard"
+        },
+        {
+          "at": "2026-05-27T15:46:55.356Z",
+          "commitHash": "8413873ba95a78ab3eeb3025a85a76aa1f7dc9be",
+          "commitMessage": "fix(cli): batch-ui unregister, port-collision guard, already-running skip (N58)"
+        },
+        {
+          "at": "2026-05-27T18:31:08.194Z",
+          "commitHash": "cbfa351bfcc7933a721a1dc90e08f342e87ee446",
+          "commitMessage": "fix(batch-ui): show resolved projectName + workDir in --list output"
+        }
+      ],
+      "branch": "fix/N58-batch-ui-unregister-port-collision",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/38",
+      "mergedAt": null
     }
   ]
 }

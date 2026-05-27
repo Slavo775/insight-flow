@@ -15,15 +15,28 @@ import type { BatchUiEntry, BatchUiRunningProcess } from "../types.js";
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
-function findFreePort(from: number): Promise<number> {
+function findFreePort(from: number, claimed: Set<number> = new Set()): Promise<number> {
+  if (claimed.has(from)) return findFreePort(from + 1, claimed);
   return new Promise((res, rej) => {
     const srv = createServer();
     srv.listen(from, "127.0.0.1", () => {
       const port = (srv.address() as { port: number }).port;
       srv.close(() => res(port));
     });
-    srv.on("error", () => findFreePort(from + 1).then(res, rej));
+    srv.on("error", () => {
+      process.stderr.write(`(port ${from} was occupied, skipped)\n`);
+      findFreePort(from + 1, claimed).then(res, rej);
+    });
   });
+}
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return (err as NodeJS.ErrnoException).code === "EPERM";
+  }
 }
 
 function openUrl(url: string): void {
@@ -146,7 +159,22 @@ export function cmdBatchUiList(): void {
   }
   console.log(`\n  Registered batch-ui projects (${entries.length}):\n`);
   for (const e of entries) {
+    const configPath = join(e.path, "taskflow.config.json");
+    let projectName = "(no config)";
+    let workDir = "";
+    if (existsSync(configPath)) {
+      try {
+        const cfg = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>;
+        const pn = cfg.projectName ?? cfg.name;
+        projectName = typeof pn === "string" && pn.trim() ? pn.trim() : "(unnamed)";
+        workDir = typeof cfg.workDir === "string" && cfg.workDir.trim() ? cfg.workDir.trim() : "";
+      } catch {
+        projectName = "(invalid config)";
+      }
+    }
+    const meta = workDir ? `${projectName} / workDir: ${workDir}` : projectName;
     console.log(`  • ${e.label.padEnd(24)} ${e.path}`);
+    console.log(`    ${"".padEnd(24)} config: ${meta}`);
   }
   console.log("");
 }
@@ -180,11 +208,27 @@ export async function cmdBatchUi(opts: ParsedArgs): Promise<void> {
   const shouldOpen = !opts["no-open"];
   const bin = process.platform === "win32" ? "insight-flow.cmd" : "insight-flow";
   const urls: string[] = [];
-  const running: BatchUiRunningProcess[] = [];
+  const newlySpawned: BatchUiRunningProcess[] = [];
+  const surviving: BatchUiRunningProcess[] = [];
 
+  // Build lookup of already-tracked running processes by label
+  const existingPids = readBatchUiRunningPids();
+  const runningByLabel = new Map(existingPids.map((p) => [p.label, p]));
+
+  const claimedPorts = new Set<number>();
   let port = 6007;
+
   for (const entry of chosen) {
-    port = await findFreePort(port);
+    // Check if this project's server is already alive
+    const existing = runningByLabel.get(entry.label);
+    if (existing && isProcessAlive(existing.pid)) {
+      console.log(`  [${entry.label}] server on port ${existing.port} already running, skipped`);
+      surviving.push(existing);
+      continue;
+    }
+
+    port = await findFreePort(port, claimedPorts);
+    claimedPorts.add(port);
     const url = `http://localhost:${port}`;
     urls.push(url);
 
@@ -194,7 +238,7 @@ export async function cmdBatchUi(opts: ParsedArgs): Promise<void> {
       stdio: "ignore",
     });
     if (child.pid !== undefined) {
-      running.push({ label: entry.label, pid: child.pid, port });
+      newlySpawned.push({ label: entry.label, pid: child.pid, port });
     }
     child.unref();
 
@@ -202,13 +246,49 @@ export async function cmdBatchUi(opts: ParsedArgs): Promise<void> {
     port++;
   }
 
-  writeBatchUiRunningPids(running);
+  // Preserve surviving processes alongside newly spawned ones
+  writeBatchUiRunningPids([...surviving, ...newlySpawned]);
 
   if (shouldOpen && urls.length > 0) {
     setTimeout(() => {
       for (const url of urls) openUrl(url);
     }, 1500);
   }
+}
+
+export function cmdBatchUiRemove(opts: ParsedArgs): void {
+  const label = typeof opts.remove === "string" ? opts.remove.trim() : "";
+  if (!label) {
+    console.error("Usage: insight-flow batch-ui --remove \"<label>\"");
+    process.exit(1);
+  }
+  const entries = readBatchUiRegistry();
+  const idx = entries.findIndex((e) => e.label === label);
+  if (idx === -1) {
+    console.error(`No project registered with label "${label}". Run \`insight-flow batch-ui --list\` to see registered projects.`);
+    process.exit(1);
+  }
+  const removed = entries.splice(idx, 1)[0];
+  writeBatchUiRegistry(entries);
+  // also clean from lastSelected
+  const last = readBatchUiLastSelected().filter((l) => l !== label);
+  writeBatchUiLastSelected(last);
+  console.log(`Unregistered "${removed.label}" → ${removed.path}`);
+}
+
+export function cmdUiBatchUnregister(): void {
+  const cwd = process.cwd();
+  const entries = readBatchUiRegistry();
+  const idx = entries.findIndex((e) => e.path === cwd);
+  if (idx === -1) {
+    console.error(`${cwd} is not registered. Run \`insight-flow batch-ui --list\` to see registered projects.`);
+    process.exit(1);
+  }
+  const removed = entries.splice(idx, 1)[0];
+  writeBatchUiRegistry(entries);
+  const last = readBatchUiLastSelected().filter((l) => l !== removed.label);
+  writeBatchUiLastSelected(last);
+  console.log(`Unregistered "${removed.label}" → ${cwd}`);
 }
 
 export function cmdUiBatchRegister(): void {
