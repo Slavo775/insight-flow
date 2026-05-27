@@ -241,7 +241,7 @@
       "title": "browser notification on agent done replaces status transition notifs",
       "type": "rework",
       "priority": "medium",
-      "status": "changes-requested",
+      "status": "pushed",
       "folder": "workTasks/N52-browser-notification-on-agent-done-replaces-status",
       "createdAt": "2026-05-26T20:02:22.276Z",
       "statusHistory": [
@@ -264,6 +264,11 @@
           "status": "changes-requested",
           "at": "2026-05-27T09:14:11.372Z",
           "by": "task-request-changes"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T09:15:16.930Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -298,8 +303,14 @@
         "notifications",
         "websocket"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T09:15:16.929Z",
+          "commitHash": "76ae128",
+          "commitMessage": "rework(dashboard,notify): replace status-transition browser notifs with agent-done signal"
+        }
+      ],
+      "branch": "rework/N52-browser-notification-on-agent-done",
       "mrUrl": null,
       "mergedAt": null
     },
@@ -308,7 +319,7 @@
       "title": "interactive prompts in init for hooks and activity engine",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N53-interactive-prompts-in-init-for-hooks-and-activity",
       "createdAt": "2026-05-26T20:09:02.030Z",
       "statusHistory": [
@@ -316,12 +327,25 @@
           "status": "ready",
           "at": "2026-05-26T20:09:02.030Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T09:17:39.893Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T09:22:24.291Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T09:17:39.892Z",
+        "completedAt": "2026-05-27T09:22:24.291Z",
+        "filesChanged": [
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/cli.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

@@ -124,14 +124,15 @@ const args = process.argv.slice(2);
 const command = args[0];
 const opts = parseArgs(args.slice(1));
 
-try {
+async function run(): Promise<void> {
   // Commands that don't need master.json
   if (!command || command === "ui") {
     const config = resolveConfig();
     const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
     startServer(config, port);
   } else if (command === "init") {
-    initProject(process.cwd(), !!opts.force, { examples: !!opts.examples });
+    const yesFlag = !!(opts.yes || opts.y) || (opts._ as string[]).includes("-y");
+    await initProject(process.cwd(), !!opts.force, { examples: !!opts.examples, yes: yesFlag });
   } else if (command === "help" || command === "--help" || command === "-h") {
     printHelp();
   } else if (command === "version" || command === "--version" || command === "-v") {
@@ -261,10 +262,12 @@ try {
         process.exit(1);
     }
   }
-} catch (err) {
+}
+
+run().catch((err) => {
   if (err instanceof TaskflowValidationError || err instanceof TaskflowProjectNotFoundError) {
     console.error(`error: ${err.message}`);
     process.exit(1);
   }
   throw err;
-}
+});
