@@ -95,3 +95,28 @@ None.
 
 - Round 1 blocker root cause confirmed: orphaned server at :6007 had `cwd` set to `playground/` — artifact of a prior batch-ui run when the registry path was stale. Killed manually (`kill 26109 7002`). No code change required for the root cause itself; the `--list` config display is the correct preventative measure.
 - `findFreePort` claimed-set check fires before the TCP probe for in-memory claimed ports; TCP-failure branch fires the stderr warning. Distinction is correct — no warning for self-claimed ports.
+
+
+---
+
+## Round 3 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-27
+**Verdict:** approved
+
+### Summary
+
+Human approved. Requested that anything needing documentation be added to the README, then merge and publish v0.9.1.
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+- Document `batch-ui --list` config output in README if not already done.
+
+### Notes
+
+**Human's exact words:** "please if needs to be documented document it in readme and so then merge it and bump the vesion on npm package on 0.9.1"

@@ -597,11 +597,24 @@ Or by label from any directory:
 insight-flow batch-ui --remove "My App"
 ```
 
-To see all registered projects:
+To see all registered projects and verify each one points to the right folder:
 
 ```bash
 insight-flow batch-ui --list
 ```
+
+```
+  Registered batch-ui projects (3):
+
+  • my-app                   /path/to/my-app
+                             config: my-app / workDir: workTasks
+  • side-project             /path/to/side-project
+                             config: side-project / workDir: tasks
+  • stale-entry              /path/to/wrong-folder
+                             config: (no config)
+```
+
+Each entry shows the resolved `projectName` and `workDir` from the folder's `taskflow.config.json`. If an entry shows `(no config)` or the wrong project name, re-register from the correct folder.
 
 ### Launch
 
