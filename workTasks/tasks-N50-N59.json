@@ -946,6 +946,56 @@
       "branch": "fix/N58-batch-ui-unregister-port-collision",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/38",
       "mergedAt": "2026-05-27T18:53:23.429Z"
+    },
+    {
+      "id": "N59",
+      "title": "add AGENT_SECURITY.md prompt-injection guardrails, import in all agents",
+      "type": "feat",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "workTasks/N59-add-agent-security-md-prompt-injection-guardrails-",
+      "createdAt": "2026-05-27T19:23:02.980Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T19:23:02.980Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T19:26:19.607Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T19:28:09.610Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-27T19:26:19.607Z",
+        "completedAt": "2026-05-27T19:28:09.610Z",
+        "filesChanged": [
+          "AGENT_SECURITY.md",
+          "AGENT_ENFORCEMENT.md",
+          "packages/taskflow/scripts/sync-role-templates.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "security",
+        "agents"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
