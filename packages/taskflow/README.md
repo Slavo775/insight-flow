@@ -553,6 +553,98 @@ startServer(config); // or startServer(config, 7000) to override port
 const tasks = loadAllTasks(config); // read every shard
 ```
 
+## Multi-project launcher
+
+`batch-ui` lets you start dashboards for several insight-flow projects at once from a single command, without opening separate terminals.
+
+### Register your projects
+
+Run this once inside each project folder after `insight-flow init`:
+
+```bash
+cd /path/to/my-app
+insight-flow ui-batch-register
+# → Registered "my-app" → /path/to/my-app
+
+cd /path/to/another-app
+insight-flow ui-batch-register
+# → Registered "another-app" → /path/to/another-app
+```
+
+`ui-batch-register` reads `taskflow.config.json` in the current directory to verify it's a valid insight-flow project, then registers it in a global file at `~/.insight-flow/batch-ui.json` (or `%USERPROFILE%\.insight-flow\batch-ui.json` on Windows). The project label comes from the `projectName` field in the config, falling back to the folder name.
+
+**Error cases** — the command exits with a clear message if:
+- `taskflow.config.json` is not found in the current folder (not an insight-flow project)
+- The config file contains invalid JSON
+- The project is already registered (no-op, exits 0)
+
+You can also register a project by explicit path without `cd`-ing:
+
+```bash
+insight-flow batch-ui --add "My App" /abs/path/to/project
+```
+
+To see all registered projects:
+
+```bash
+insight-flow batch-ui --list
+```
+
+### Launch
+
+From any directory, run:
+
+```bash
+insight-flow batch-ui
+```
+
+An interactive multi-select prompt appears:
+
+```
+Select projects to launch (↑↓ navigate, space toggle, enter confirm):
+
+  > [x] my-app
+    [x] another-app
+    [ ] side-project
+
+  2 of 3 selected
+```
+
+Use **↑ ↓** to move, **space** to toggle, **enter** to confirm. Previously selected projects are pre-checked on the next run.
+
+Once you confirm, `batch-ui` assigns ports starting from `6007` and spawns a detached `insight-flow ui` process per project:
+
+```
+  [my-app]       http://localhost:6007
+  [another-app]  http://localhost:6008
+```
+
+The browser opens each URL automatically. Pass `--no-open` to suppress:
+
+```bash
+insight-flow batch-ui --no-open
+```
+
+### Non-interactive / CI mode
+
+When stdin is not a TTY (piped input, CI), `batch-ui` selects all registered projects and runs without a prompt:
+
+```bash
+echo "" | insight-flow batch-ui --no-open
+```
+
+### Platform notes
+
+| Platform | Browser open command | Spawn binary |
+|----------|----------------------|--------------|
+| macOS    | `open <url>`         | `insight-flow` |
+| Linux    | `xdg-open <url>`     | `insight-flow` |
+| Windows  | `start "" <url>`     | `insight-flow.cmd` |
+
+Spawned server processes are detached — they continue running after `batch-ui` exits.
+
+---
+
 ## Multi-project overview
 
 When you run multiple `insight-flow ui` instances (one per project), the `insight-flow-master` package provides a live overview page that aggregates all of them into a single card grid.

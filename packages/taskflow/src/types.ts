@@ -301,3 +301,13 @@ export interface ParsedArgs {
   _: string[];
   [key: string]: string | boolean | string[];
 }
+
+export interface BatchUiEntry {
+  label: string;
+  path: string;
+}
+
+export interface BatchUiRegistry {
+  entries: BatchUiEntry[];
+  lastSelected: string[];
+}

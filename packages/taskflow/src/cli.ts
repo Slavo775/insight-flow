@@ -34,6 +34,7 @@ import {
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
+import { cmdBatchUi, cmdBatchUiAdd, cmdBatchUiList, cmdUiBatchRegister } from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
@@ -115,6 +116,11 @@ function printHelp(): void {
     log-activity "<message>"                            Emit free-form narrative to the activity feed (no-op when activityEngine.enabled is false)
     log-event <type> [--task Nxx] [--data <json>]       Emit a typed lifecycle event (mandatory: start|done; optional: active|idle|edit-start|edit-end|research-start|research-end|review-start|review-end|git-start|git-end)
 
+    ui-batch-register                     Register this folder as a batch-ui project (reads taskflow.config.json)
+    batch-ui [--no-open]                  Launch dashboards for multiple projects (interactive multi-select)
+    batch-ui --add "<label>" <path>       Register a project by explicit path
+    batch-ui --list                       List all registered batch-ui projects
+
     help                                  Show this help
     version                               Show version
 `);
@@ -162,6 +168,16 @@ async function run(): Promise<void> {
   } else if (command === "log-event") {
     const config = resolveConfig();
     cmdLogEvent(config, opts);
+  } else if (command === "ui-batch-register") {
+    cmdUiBatchRegister();
+  } else if (command === "batch-ui") {
+    if (opts.list) {
+      cmdBatchUiList();
+    } else if (opts.add) {
+      cmdBatchUiAdd(opts);
+    } else {
+      await cmdBatchUi(opts);
+    }
   } else {
     // All other commands need master.json
     const config = resolveConfig();

@@ -599,7 +599,7 @@
       "title": "batch-ui command — multi-project server launcher",
       "type": "feat",
       "priority": "medium",
-      "status": "pushed",
+      "status": "implemented",
       "folder": "workTasks/N56-batch-ui-command-multi-project-server-launcher",
       "createdAt": "2026-05-27T11:43:33.915Z",
       "statusHistory": [
@@ -612,12 +612,33 @@
           "status": "pushed",
           "at": "2026-05-27T11:45:22.955Z",
           "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T11:50:54.097Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T12:03:15.867Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T12:11:06.407Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T12:03:15.867Z",
+        "completedAt": "2026-05-27T12:11:06.407Z",
+        "filesChanged": [
+          "packages/taskflow/src/global-config.ts",
+          "packages/taskflow/src/commands/batch-ui.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/README.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -636,6 +657,11 @@
           "at": "2026-05-27T11:45:22.955Z",
           "commitHash": "43e7762",
           "commitMessage": "feat(tasks): add N56 spec — batch-ui multi-project server launcher"
+        },
+        {
+          "at": "2026-05-27T11:50:54.096Z",
+          "commitHash": "9274a0e",
+          "commitMessage": "docs(tasks): N56 — add ui-batch-register command + README docs to spec"
         }
       ],
       "branch": "feat/N56-batch-ui-command-multi-project-server-launcher",
