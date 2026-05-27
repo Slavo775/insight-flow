@@ -821,7 +821,7 @@
       "title": "batch-ui: unregister command, port-collision guard, port-in-use warning",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "workTasks/N58-batch-ui-unregister-command-port-collision-guard-p",
       "createdAt": "2026-05-27T15:35:28.106Z",
       "statusHistory": [
@@ -894,6 +894,16 @@
           "status": "approved",
           "at": "2026-05-27T18:51:18.014Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-27T18:53:23.429Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-05-27T18:53:23.525Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -910,8 +920,8 @@
       "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-05-27T18:53:23.525Z",
+      "totalDurationMinutes": 198,
       "tags": [
         "batch-ui",
         "ux"
@@ -935,7 +945,7 @@
       ],
       "branch": "fix/N58-batch-ui-unregister-port-collision",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/38",
-      "mergedAt": null
+      "mergedAt": "2026-05-27T18:53:23.429Z"
     }
   ]
 }
