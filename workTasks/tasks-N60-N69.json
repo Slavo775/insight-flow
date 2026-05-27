@@ -158,6 +158,21 @@
           "status": "approved",
           "at": "2026-05-27T20:44:07.906Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:44:41.648Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T20:47:25.601Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T20:47:37.334Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -169,7 +184,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -185,6 +200,11 @@
           "at": "2026-05-27T20:36:42.102Z",
           "commitHash": "ff8b1a2",
           "commitMessage": "fix(overview): equal-width grid columns with responsive single-column fallback"
+        },
+        {
+          "at": "2026-05-27T20:44:41.647Z",
+          "commitHash": "a26d77d",
+          "commitMessage": "docs(tasks): N61 review — approved, ai round 1"
         }
       ],
       "branch": "fix/N61-overview-grid-equal-width-responsive",
