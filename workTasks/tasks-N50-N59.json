@@ -599,7 +599,7 @@
       "title": "batch-ui command — multi-project server launcher",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "changes-requested",
       "folder": "workTasks/N56-batch-ui-command-multi-project-server-launcher",
       "createdAt": "2026-05-27T11:43:33.915Z",
       "statusHistory": [
@@ -627,6 +627,11 @@
           "status": "implemented",
           "at": "2026-05-27T12:11:06.407Z",
           "by": "task-implement"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-27T12:58:35.909Z",
+          "by": "task-request-changes"
         }
       ],
       "implementation": {
@@ -641,7 +646,18 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-27T12:58:35.908Z",
+          "description": "Add ui-batch-down command to stop all batch-spawned servers",
+          "requestedBy": "task-request-changes",
+          "status": "requested",
+          "implementedAt": null,
+          "filesChanged": [],
+          "comment": null,
+          "implementedBy": null
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
