@@ -15,7 +15,12 @@ Full history lives in [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANG
 ### Added
 
 - **N41** — Master overview cards reflect real-time Claude session status (active / idle / permission-required) with solid colour-coded card backgrounds and a text badge. Project server pushes status fire-and-forget on activity events; initial `idle` push happens immediately after registration.
-- **N42** — `agents.git.permissions` config block (9 boolean flags) lets projects block specific git operations (`push`, `merge`, `createPR`, `forcePush`, etc.) while keeping others enabled. `task-git` reads the block on every run and prints a clear blocked message naming the exact config key to change. `insight-flow init` scaffolds the full block with safe defaults (`forcePush: false`, rest `true`). Protocol documented in `AGENT_CONFIG.md`.
+- **N42** — `agents.git.permissions` config block (9 boolean flags: `createBranch`, `checkout`, `commit`, `push`, `forcePush`, `merge`, `deleteBranchLocal`, `deleteBranchRemote`, `createPR`) lets projects block specific git operations while keeping others enabled. `task-git` reads the block on every run and prints a clear blocked message naming the exact config key to change. `insight-flow init` scaffolds the full block with safe defaults (`forcePush: false`, rest `true`). Protocol documented in `AGENT_CONFIG.md`.
+- **N47** — `remoteOps: "allow" | "deny"` shorthand added to `agents.git.permissions`. Setting `"deny"` blocks all origin-touching ops (`push`, `forcePush`, `deleteBranchRemote`, `createPR`) at once; individual boolean flags override the shorthand. `resolveConfig()` applies the shorthand post-merge so resolved config and dashboard both reflect the effective values. `AGENT_CONFIG.md` updated with equivalent runtime logic for `task-git`.
+
+### Docs
+
+- **N48** — `packages/taskflow/README.md` rewritten: `## Install` + `## Quickstart` replaced with a 6-step `## Getting started` guide (`### What init creates` table lists all scaffolded paths); `## Configuration` expanded to a complete reference covering all 22 config fields across `TaskflowConfig`, `ActivityEngineConfig`, `NotificationsConfig`, `MasterConfig`, and `EventsConfig`.
 
 ## [0.6.0] — 2026-05-25
 

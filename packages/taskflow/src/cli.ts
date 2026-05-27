@@ -108,7 +108,7 @@ function printHelp(): void {
 
     migrate                               Migrate from legacy tracker.json
     migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
-    prompt-build [--config path] [--apply] Print or apply enforcement block from taskflow.prompt.json
+    prompt-build [--apply]                Print or apply enforcement block from taskflow.config.json
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
     install-lifecycle-hooks [--bin <path>] Install lifecycle event hooks (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) into .claude/settings.json (idempotent)
     notify "<message>" [--title <t>] [--project <p>]   Fire an OS notification (fire-and-forget; respects notifications.cli)
@@ -145,7 +145,8 @@ try {
     const config = resolveConfig();
     cmdMigrateReviews(config);
   } else if (command === "prompt-build") {
-    cmdPromptBuild(opts);
+    const config = resolveConfig();
+    cmdPromptBuild(config, opts);
   } else if (command === "install-activity-hook") {
     const config = resolveConfig();
     cmdInstallActivityHook(config, opts);

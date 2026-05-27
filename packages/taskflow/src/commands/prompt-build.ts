@@ -1,69 +1,63 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { ParsedArgs } from "../types.js";
+import type { ParsedArgs, TaskflowConfig, AgentGitPermissions } from "../types.js";
+import { applyAgentExtensions } from "../agents.js";
+import { resolveProjectRoot } from "../paths.js";
 
-interface PromptConfig {
-  strictCLI: boolean;
-  branchPrefix: string;
-  requireChecklist: boolean;
-}
-
-// insight-flow ships zero technology assumptions. Project-specific commands
-// (git host, package manager, language toolchain) belong in
-// `taskflow.config.json.agents.extend.<agent>` arrays — see AGENT_PROTOCOL.md.
-const DEFAULTS: PromptConfig = {
-  strictCLI: true,
-  branchPrefix: "",
-  requireChecklist: true,
-};
-
-function loadConfig(configPath: string): PromptConfig {
-  if (!existsSync(configPath)) {
-    return DEFAULTS;
-  }
-  try {
-    const raw = JSON.parse(readFileSync(configPath, "utf-8")) as Partial<PromptConfig>;
-    return { ...DEFAULTS, ...raw };
-  } catch {
-    console.error(`Warning: could not parse ${configPath}, using defaults.`);
-    return DEFAULTS;
-  }
-}
-
-function buildEnforcementBlock(cfg: PromptConfig): string {
+function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
   const lines: string[] = [];
 
-  if (cfg.strictCLI) {
-    lines.push("STRICT ENFORCEMENT — TASK FILE MUTATIONS");
-    lines.push(
-      "- NEVER use Edit, Write, or file-creation tools on: tracker.json, TASK.md, CHECKLIST.md, or any file inside workTasks/",
-    );
-    lines.push(
-      "- ALL task state changes MUST go through `insight-flow` CLI commands (create, update-status, set-review, etc.)",
-    );
-    lines.push(
-      '- Running the script is MANDATORY — there are no exceptions, even for "minor" field updates',
-    );
-    lines.push("- Violation: direct file edit bypasses validation, ID sequencing, and audit trail");
-    lines.push("");
+  lines.push("STRICT ENFORCEMENT — TASK FILE MUTATIONS");
+  lines.push("");
+  lines.push(
+    "- NEVER use Edit, Write, or file-creation tools on: tracker.json, TASK.md, CHECKLIST.md, or any file inside workTasks/",
+  );
+  lines.push(
+    "- ALL task state changes MUST go through `insight-flow` CLI commands (create, update-status, set-review, etc.)",
+  );
+  lines.push(
+    "- Running the script is MANDATORY — there are no exceptions, even for \"minor\" field updates",
+  );
+  lines.push("- Violation: direct file edit bypasses validation, ID sequencing, and audit trail");
+  lines.push("");
+  lines.push("GIT RULE");
+  lines.push("");
+  lines.push("- Use `git` for branch creation, commits, and push (universal — works on any host).");
+  lines.push(
+    "- PR creation: use the command defined in `taskflow.config.json.agents.extend.task-git` for your project. insight-flow does not ship a default. See `@PR_API.md` for examples by host (GitHub `gh`, GitLab `glab`, no-CLI compare URL).",
+  );
+  lines.push("- Branch naming: <type>/<task-id>-<slug>");
+  lines.push("- Verify all CHECKLIST.md items before marking implemented or done");
+
+  if (rawGitPerms) {
+    if (rawGitPerms.remoteOps === "deny") {
+      lines.push(
+        "- All remote operations (push, createPR, deleteBranchRemote) are NOT permitted.",
+      );
+      // Also surface any local ops that were explicitly denied alongside remoteOps: "deny"
+      const localOps = ["createBranch", "checkout", "commit", "merge", "deleteBranchLocal"] as const;
+      for (const op of localOps) {
+        if (rawGitPerms[op] === false) {
+          lines.push(`- ${op} is NOT permitted.`);
+        }
+      }
+    } else {
+      for (const [op, val] of Object.entries(rawGitPerms)) {
+        if (op === "remoteOps") continue;
+        if (val === false) {
+          lines.push(`- ${op} is NOT permitted.`);
+        }
+      }
+    }
   }
 
-  const branchLine = cfg.branchPrefix
-    ? `- Branch naming: ${cfg.branchPrefix}<type>/<task-id>-<slug>`
-    : "- Branch naming: <type>/<task-id>-<slug>";
-
-  const checklistLine = cfg.requireChecklist
-    ? "- Verify all CHECKLIST.md items before marking implemented or done"
-    : "- Checklist verification is optional";
-
-  lines.push("GIT RULE");
-  lines.push("- Use `git` for branch creation, commits, and push (universal).");
-  lines.push(
-    "- PR creation: use the command defined in `taskflow.config.json.agents.extend.task-git` for your project. See `@PR_API.md` for examples by host.",
-  );
-  lines.push(branchLine);
-  lines.push(checklistLine);
-  lines.push("- Never mix tools for the same operation.");
+  lines.push("- Never mix tools for the same operation");
+  lines.push("");
+  lines.push("TOKEN EFFICIENCY (applies to every role)");
+  lines.push("");
+  lines.push("- No subagents. Direct tool calls only.");
+  lines.push("- Batch independent reads in one parallel round.");
+  lines.push("- Read only what the task scope explicitly requires.");
 
   return lines.join("\n");
 }
@@ -119,13 +113,32 @@ const ROLE_FILES = [
   "TASK_REQUEST_CHANGES_ROLE.md",
 ];
 
-export function cmdPromptBuild(opts: ParsedArgs): void {
-  const configPath = resolve(
-    process.cwd(),
-    typeof opts.config === "string" ? opts.config : "taskflow.prompt.json",
-  );
-  const cfg = loadConfig(configPath);
-  const block = buildEnforcementBlock(cfg);
+export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
+  const cwd = process.cwd();
+
+  // Read raw user config to get explicitly-set git permissions (without defaults).
+  // Resolved config always has defaults merged in; we only reflect user intent here.
+  // Use project-root resolution so this works when invoked from a subdirectory.
+  let rawGitPerms: AgentGitPermissions | undefined;
+  let projectRoot: string;
+  try {
+    projectRoot = resolveProjectRoot(cwd);
+  } catch {
+    projectRoot = cwd;
+  }
+  const configPath = resolve(projectRoot, "taskflow.config.json");
+  if (existsSync(configPath)) {
+    try {
+      const raw = JSON.parse(readFileSync(configPath, "utf-8")) as {
+        agents?: { git?: { permissions?: AgentGitPermissions } };
+      };
+      rawGitPerms = raw.agents?.git?.permissions;
+    } catch {
+      // ignore parse errors
+    }
+  }
+
+  const block = buildEnforcementBlock(rawGitPerms);
 
   if (!opts.apply) {
     console.log("# Enforcement block (preview)\n");
@@ -135,8 +148,6 @@ export function cmdPromptBuild(opts: ParsedArgs): void {
     );
     return;
   }
-
-  const cwd = process.cwd();
 
   // Write the single canonical enforcement file
   const enforcementPath = join(cwd, "AGENT_ENFORCEMENT.md");
@@ -149,6 +160,13 @@ export function cmdPromptBuild(opts: ParsedArgs): void {
     results.push({ file: name, patched });
   }
 
+  // Apply agents.extend into role files in rolesDir
+  const extend = config.agents?.extend;
+  if (extend) {
+    const rolesDir = resolve(cwd, config.rolesDir);
+    applyAgentExtensions(rolesDir, extend);
+  }
+
   const patched = results.filter((r) => r.patched).map((r) => r.file);
   const skipped = results.filter((r) => !r.patched).map((r) => r.file);
 
@@ -156,7 +174,6 @@ export function cmdPromptBuild(opts: ParsedArgs): void {
     JSON.stringify({
       action: "prompt-build",
       enforcementFile: "AGENT_ENFORCEMENT.md",
-      config: configPath,
       patched,
       skipped,
     }),
