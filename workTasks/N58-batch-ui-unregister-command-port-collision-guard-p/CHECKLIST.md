@@ -9,7 +9,10 @@
 - [ ] `ui-batch-unregister` in an unregistered folder prints error and exits 1
 - [ ] `cmdBatchUi` maintains a `claimedPorts` set so no two projects in one run get the same port
 - [ ] `findFreePort` prints `(port N was occupied, skipped)` to stderr when it advances past an occupied port
-- [ ] Both removal commands documented in `packages/taskflow/README.md` under "Multi-project launcher"
+- [ ] Re-running `batch-ui` with an already-running project prints `[<label>] server on port <N> already running, skipped` and does not spawn a duplicate
+- [ ] A project whose PID is dead (ESRCH) is treated as not running and is re-spawned normally
+- [ ] `writeBatchUiRunningPids` after a re-run preserves surviving already-running entries alongside newly spawned ones (union, not replace)
+- [ ] Both removal commands and the "already running" skip behaviour documented in `packages/taskflow/README.md` under "Multi-project launcher"
 - [ ] `batch-ui --remove` and `ui-batch-unregister` appear in `insight-flow help` output
 - [ ] `pnpm --dir packages/taskflow run build` succeeds with zero TypeScript errors
 
@@ -27,3 +30,4 @@
 - [ ] `cd /tmp && insight-flow ui-batch-unregister` → exits 1 with "is not registered"
 - [ ] `cd <registered-path> && insight-flow ui-batch-unregister` → entry removed, exit 0
 - [ ] After removing a label that was in `lastSelected`, run `batch-ui` → removed label is not pre-checked
+- [ ] Run `batch-ui`, then run `batch-ui` again → already-running projects are skipped, `ui-batch-down` still terminates all of them
