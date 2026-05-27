@@ -599,7 +599,7 @@
       "title": "batch-ui command — multi-project server launcher",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N56-batch-ui-command-multi-project-server-launcher",
       "createdAt": "2026-05-27T11:43:33.915Z",
       "statusHistory": [
@@ -607,6 +607,11 @@
           "status": "ready",
           "at": "2026-05-27T11:43:33.915Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T11:45:22.955Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -626,9 +631,15 @@
         "dx",
         "global"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T11:45:22.955Z",
+          "commitHash": "43e7762",
+          "commitMessage": "feat(tasks): add N56 spec — batch-ui multi-project server launcher"
+        }
+      ],
+      "branch": "feat/N56-batch-ui-command-multi-project-server-launcher",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/36",
       "mergedAt": null
     }
   ]
