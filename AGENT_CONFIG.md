@@ -5,8 +5,7 @@ guards that cannot be baked in at prompt-load time.
 
 Agent extensions (`agents.extend`) are applied at `insight-flow init` /
 `prompt-build` time and are already present in your loaded prompt; you do not
-need to read the config for them. See `AGENT_PROTOCOL.md` — "EXTENDING WITH
-PROJECT-SPECIFIC COMMANDS" for that model.
+need to read the config for them. See `CLAUDE.md` for examples.
 
 ---
 
