@@ -821,7 +821,7 @@
       "title": "batch-ui: unregister command, port-collision guard, port-in-use warning",
       "type": "fix",
       "priority": "high",
-      "status": "implemented",
+      "status": "fix-needed",
       "folder": "workTasks/N58-batch-ui-unregister-command-port-collision-guard-p",
       "createdAt": "2026-05-27T15:35:28.106Z",
       "statusHistory": [
@@ -844,6 +844,21 @@
           "status": "implemented",
           "at": "2026-05-27T15:46:36.050Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T15:46:55.356Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T15:49:34.811Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-27T15:50:39.081Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -857,8 +872,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -871,10 +886,15 @@
           "at": "2026-05-27T15:36:51.503Z",
           "commitHash": "9a0faf1ef35d84e1a496129dd26e793f651a339b",
           "commitMessage": "chore(tasks): add N58 spec — batch-ui unregister, port-collision guard"
+        },
+        {
+          "at": "2026-05-27T15:46:55.356Z",
+          "commitHash": "8413873ba95a78ab3eeb3025a85a76aa1f7dc9be",
+          "commitMessage": "fix(cli): batch-ui unregister, port-collision guard, already-running skip (N58)"
         }
       ],
       "branch": "fix/N58-batch-ui-unregister-port-collision",
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/38",
       "mergedAt": null
     }
   ]
