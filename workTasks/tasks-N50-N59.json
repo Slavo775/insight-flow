@@ -241,7 +241,7 @@
       "title": "browser notification on agent done replaces status transition notifs",
       "type": "rework",
       "priority": "medium",
-      "status": "changes-requested",
+      "status": "approved",
       "folder": "workTasks/N52-browser-notification-on-agent-done-replaces-status",
       "createdAt": "2026-05-26T20:02:22.276Z",
       "statusHistory": [
@@ -264,6 +264,36 @@
           "status": "changes-requested",
           "at": "2026-05-27T09:14:11.372Z",
           "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-27T10:02:04.119Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-27T10:02:55.979Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T10:15:01.113Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T10:16:19.138Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T10:19:56.713Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T10:20:29.705Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -281,15 +311,17 @@
           "requestedAt": "2026-05-27T09:14:11.372Z",
           "description": "Add REVIEW.md documentation covering all implementation details: agent-done endpoint, hook curl update, installNotifyHook overwrite behaviour, and dashboard refactor summary",
           "requestedBy": "task-request-changes",
-          "status": "requested",
-          "implementedAt": null,
-          "filesChanged": [],
-          "comment": null,
-          "implementedBy": null
+          "status": "implemented",
+          "implementedAt": "2026-05-27T10:02:55.979Z",
+          "filesChanged": [
+            "workTasks/N52-browser-notification-on-agent-done-replaces-status/REVIEW.md"
+          ],
+          "comment": "Added Implementation Summary section documenting all changes: agent-done endpoint, hook curl + port reading, installNotifyHook overwrite behaviour, full dashboard refactor, migration note",
+          "implementedBy": "task-implement"
         }
       ],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -308,7 +340,7 @@
       "title": "interactive prompts in init for hooks and activity engine",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N53-interactive-prompts-in-init-for-hooks-and-activity",
       "createdAt": "2026-05-26T20:09:02.030Z",
       "statusHistory": [
@@ -316,6 +348,16 @@
           "status": "ready",
           "at": "2026-05-26T20:09:02.030Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T10:19:58.546Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T10:20:29.807Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -325,8 +367,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
