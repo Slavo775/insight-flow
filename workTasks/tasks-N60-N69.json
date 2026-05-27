@@ -125,7 +125,7 @@
       "title": "master overview grid: equal-width columns with responsive single-column fallback",
       "type": "fix",
       "priority": "high",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N61-master-overview-grid-equal-width-columns-with-resp",
       "createdAt": "2026-05-27T20:32:04.484Z",
       "statusHistory": [
@@ -143,6 +143,21 @@
           "status": "implemented",
           "at": "2026-05-27T20:35:58.432Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:36:42.102Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T20:43:07.005Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T20:44:07.906Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -154,8 +169,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -165,8 +180,14 @@
         "css",
         "layout"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T20:36:42.102Z",
+          "commitHash": "ff8b1a2",
+          "commitMessage": "fix(overview): equal-width grid columns with responsive single-column fallback"
+        }
+      ],
+      "branch": "fix/N61-overview-grid-equal-width-responsive",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/41",
       "mergedAt": null
     }
