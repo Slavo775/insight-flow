@@ -395,7 +395,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);
 
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST");
 
     // /config — project config viewer
     if (url.pathname === "/config") {
@@ -482,6 +482,15 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // filter it here before serialising rather than relying on CORS alone.
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(config, null, 2));
+      return;
+    }
+
+    if (url.pathname === "/api/agent-done" && req.method === "POST") {
+      if (config.notifications?.browser !== false) {
+        io.emit("agent-done", { ts: Date.now() });
+      }
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ ok: true }));
       return;
     }
 

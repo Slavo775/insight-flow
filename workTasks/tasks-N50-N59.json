@@ -127,7 +127,7 @@
       "title": "init calls prompt-build to keep enforcement block in sync with config",
       "type": "rework",
       "priority": "medium",
-      "status": "changes-implemented",
+      "status": "merged",
       "folder": "workTasks/N51-init-calls-prompt-build-to-keep-enforcement-block-",
       "createdAt": "2026-05-26T18:58:35.237Z",
       "statusHistory": [
@@ -185,6 +185,11 @@
           "status": "changes-implemented",
           "at": "2026-05-27T08:42:43.865Z",
           "by": "task-implement"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-27T08:59:41.614Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -214,7 +219,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 841,
       "tags": [
         "cli",
         "init",
@@ -229,14 +234,14 @@
       ],
       "branch": "rework/N51-init-calls-prompt-build-enforcement",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/34",
-      "mergedAt": null
+      "mergedAt": "2026-05-27T08:59:41.614Z"
     },
     {
       "id": "N52",
       "title": "browser notification on agent done replaces status transition notifs",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "changes-requested",
       "folder": "workTasks/N52-browser-notification-on-agent-done-replaces-status",
       "createdAt": "2026-05-26T20:02:22.276Z",
       "statusHistory": [
@@ -244,15 +249,45 @@
           "status": "ready",
           "at": "2026-05-26T20:02:22.277Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T09:04:23.470Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T09:10:25.634Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-27T09:14:11.372Z",
+          "by": "task-request-changes"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T09:04:23.470Z",
+        "completedAt": "2026-05-27T09:10:25.634Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/src/notify-hook.ts",
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-27T09:14:11.372Z",
+          "description": "Add REVIEW.md documentation covering all implementation details: agent-done endpoint, hook curl update, installNotifyHook overwrite behaviour, and dashboard refactor summary",
+          "requestedBy": "task-request-changes",
+          "status": "requested",
+          "implementedAt": null,
+          "filesChanged": [],
+          "comment": null,
+          "implementedBy": null
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
