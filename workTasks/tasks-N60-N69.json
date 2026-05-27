@@ -221,7 +221,7 @@
       "title": "sound files empty in repo causing silent notifications since 0.9.0",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N62-sound-files-empty-in-repo-causing-silent-notificat",
       "createdAt": "2026-05-27T20:51:43.074Z",
       "statusHistory": [
@@ -229,12 +229,29 @@
           "status": "ready",
           "at": "2026-05-27T20:51:43.074Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:54:49.218Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T20:59:03.738Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T21:01:01.597Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T20:59:03.738Z",
+        "completedAt": "2026-05-27T21:01:01.597Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -248,8 +265,14 @@
         "notifications",
         "dashboard"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T20:54:49.217Z",
+          "commitHash": "c0f574f",
+          "commitMessage": "docs(tasks): N62 spec — restore empty sound files to fix silent notifications"
+        }
+      ],
+      "branch": "fix/N62-sound-files-empty-in-repo",
       "mrUrl": null,
       "mergedAt": null
     }

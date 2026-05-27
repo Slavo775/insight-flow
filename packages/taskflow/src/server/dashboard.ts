@@ -508,11 +508,35 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     function playStatusSound(state) {
       if (!CONFIG_SOUNDS_ENABLED) return;
       if (!notifSettings || notifSettings.sound === false) return;
-      var src = state === 'idle' ? '/sounds/idle-ping.mp3'
-              : state === 'permission-needed' ? '/sounds/permission-alert.mp3'
-              : null;
-      if (!src) return;
-      try { new Audio(src).play().catch(function(){}); } catch(e) {}
+      if (state !== 'idle' && state !== 'permission-needed') return;
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        var ctx = new AudioCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+        function beep(freq, t, dur, vol) {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(vol, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          osc.start(t);
+          osc.stop(t + dur);
+        }
+        var now = ctx.currentTime;
+        if (state === 'idle') {
+          beep(880, now, 0.3, 0.2);
+          beep(660, now + 0.12, 0.3, 0.15);
+        } else {
+          beep(660, now, 0.18, 0.3);
+          beep(880, now + 0.22, 0.18, 0.3);
+          beep(660, now + 0.44, 0.25, 0.3);
+        }
+        setTimeout(function() { try { ctx.close(); } catch(e2) {} }, 1200);
+      } catch(e) {}
     }
 
     function updatePageTitle(state) {
