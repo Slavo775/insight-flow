@@ -4,6 +4,18 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-05-27
+
+### Added (N56)
+
+- `insight-flow batch-ui` — interactive multi-select prompt to launch dashboards for multiple registered projects at once; spawns a detached `insight-flow ui` process per project on auto-assigned ports starting at 6007; opens all URLs in the default browser (suppress with `--no-open`); non-TTY mode selects all projects.
+- `insight-flow ui-batch-register` — run inside any insight-flow project folder to register it in the global registry (`~/.insight-flow/batch-ui.json`) using the project name from `taskflow.config.json`; actionable errors for missing/invalid config and duplicate entries.
+- `insight-flow batch-ui --add "<label>" <path>` — register a project by explicit path without `cd`-ing.
+- `insight-flow batch-ui --list` — list all registered projects.
+- `insight-flow ui-batch-down` — stop all servers started by the last `batch-ui` run (reads PIDs from global registry, sends SIGTERM, clears list; handles already-exited processes gracefully).
+- Global registry persists last-selected projects for pre-checked prompt on next run.
+- Cross-platform: macOS (`open`), Linux (`xdg-open`), Windows (`start`, `insight-flow.cmd`).
+
 ## [0.8.0] — 2026-05-27
 
 ### Added

@@ -755,7 +755,7 @@
       "title": "release v0.9.0 — batch-ui changelog, README, version bump",
       "type": "chore",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N57-release-v0-9-0-batch-ui-changelog-readme-version-b",
       "createdAt": "2026-05-27T15:20:14.025Z",
       "statusHistory": [
@@ -763,12 +763,31 @@
           "status": "ready",
           "at": "2026-05-27T15:20:14.025Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T15:22:00.341Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T15:23:15.441Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T15:24:22.889Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T15:23:15.440Z",
+        "completedAt": "2026-05-27T15:24:22.888Z",
+        "filesChanged": [
+          "packages/taskflow/CHANGELOG.md",
+          "packages/taskflow/README.md",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -781,8 +800,14 @@
         "release",
         "docs"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T15:22:00.340Z",
+          "commitHash": "e366813bb9b71b4003051cec5d02b9c4bd411d04",
+          "commitMessage": "chore(tasks): add N57 spec — release v0.9.0 changelog + version bump"
+        }
+      ],
+      "branch": "chore/N57-release-v0-9-0-changelog-readme-version-bump",
       "mrUrl": null,
       "mergedAt": null
     }
