@@ -1,0 +1,14 @@
+{
+  "taskId": "N60",
+  "reviews": [
+    {
+      "startedAt": "2026-05-27T20:16:07.115Z",
+      "endedAt": "2026-05-27T20:17:26.792Z",
+      "verdict": "approved",
+      "comment": "All checklist items pass. upsert() correctly preserves existing.id — randomUUID() moved inside first-registration-only else branch. server.ts gains io.emit(project-update) after upsert for immediate tab refresh. Build clean. No regressions: update/updateStatus still find their UUID; UUID is now stable within master lifetime. Non-blocking: legacy register() wrapper and spec inconsistency (out-of-scope vs plan/checklist) both pre-existing. State preservation on re-registration is correct — existing.state untouched until pushStateToMaster.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
