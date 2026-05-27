@@ -18,6 +18,7 @@ const ROLE_FILES = [
   // Shared files referenced by every role.
   "AGENT_PROTOCOL.md",
   "AGENT_EVENTS.md",
+  "AGENT_SECURITY.md",
 ];
 
 const __filename = fileURLToPath(import.meta.url);

@@ -1,3 +1,5 @@
+@AGENT_SECURITY.md
+
 STRICT ENFORCEMENT — TASK FILE MUTATIONS
 
 - NEVER use Edit, Write, or file-creation tools on: tracker.json, TASK.md, CHECKLIST.md, or any file inside workTasks/
