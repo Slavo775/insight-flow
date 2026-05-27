@@ -113,11 +113,7 @@ const ROLE_FILES = [
   "TASK_REQUEST_CHANGES_ROLE.md",
 ];
 
-// Writes AGENT_ENFORCEMENT.md and patches all role files to reference it.
-// Returns { created: true } if the file was newly written, { created: false } if updated.
-export function applyEnforcement(config: TaskflowConfig, cwd: string): { created: boolean } {
-  // Read raw git perms (without defaults applied) so we reflect user intent only.
-  let rawGitPerms: AgentGitPermissions | undefined;
+function readRawGitPerms(cwd: string): AgentGitPermissions | undefined {
   let projectRoot: string;
   try {
     projectRoot = resolveProjectRoot(cwd);
@@ -125,25 +121,38 @@ export function applyEnforcement(config: TaskflowConfig, cwd: string): { created
     projectRoot = cwd;
   }
   const configPath = resolve(projectRoot, "taskflow.config.json");
-  if (existsSync(configPath)) {
-    try {
-      const raw = JSON.parse(readFileSync(configPath, "utf-8")) as {
-        agents?: { git?: { permissions?: AgentGitPermissions } };
-      };
-      rawGitPerms = raw.agents?.git?.permissions;
-    } catch {
-      // ignore parse errors
-    }
+  if (!existsSync(configPath)) return undefined;
+  try {
+    const raw = JSON.parse(readFileSync(configPath, "utf-8")) as {
+      agents?: { git?: { permissions?: AgentGitPermissions } };
+    };
+    return raw.agents?.git?.permissions;
+  } catch {
+    return undefined;
   }
+}
 
-  const block = buildEnforcementBlock(rawGitPerms);
+// Writes AGENT_ENFORCEMENT.md and patches all role files to reference it.
+// Returns { created: true } if the file was newly written, { created: false } if updated,
+// plus the names of files that were patched vs already up to date.
+export function applyEnforcement(
+  config: TaskflowConfig,
+  cwd: string,
+): { created: boolean; patched: string[]; skipped: string[] } {
+  const block = buildEnforcementBlock(readRawGitPerms(cwd));
   const enforcementPath = join(cwd, "AGENT_ENFORCEMENT.md");
   const created = !existsSync(enforcementPath);
   writeFileSync(enforcementPath, block + "\n", "utf-8");
 
+  const patched: string[] = [];
+  const skipped: string[] = [];
+
+  const track = (name: string, wasPatched: boolean) =>
+    (wasPatched ? patched : skipped).push(name);
+
   // Patch root-level role files (covers insight-flow's own setup)
   for (const name of ROLE_FILES) {
-    patchRoleFileWithRef(join(cwd, name));
+    track(name, patchRoleFileWithRef(join(cwd, name)));
   }
 
   // Patch role files in rolesDir (covers consumer projects initialized by init)
@@ -151,38 +160,19 @@ export function applyEnforcement(config: TaskflowConfig, cwd: string): { created
     const rolesDir = resolve(cwd, config.rolesDir);
     if (existsSync(rolesDir) && rolesDir !== cwd) {
       for (const file of readdirSync(rolesDir).filter((f) => f.endsWith(".md"))) {
-        patchRoleFileWithRef(resolve(rolesDir, file));
+        track(file, patchRoleFileWithRef(resolve(rolesDir, file)));
       }
     }
   }
 
-  return { created };
+  return { created, patched, skipped };
 }
 
 export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
   const cwd = process.cwd();
 
   if (!opts.apply) {
-    // Dry-run: build block for preview without writing anything.
-    let rawGitPerms: AgentGitPermissions | undefined;
-    let projectRoot: string;
-    try {
-      projectRoot = resolveProjectRoot(cwd);
-    } catch {
-      projectRoot = cwd;
-    }
-    const configPath = resolve(projectRoot, "taskflow.config.json");
-    if (existsSync(configPath)) {
-      try {
-        const raw = JSON.parse(readFileSync(configPath, "utf-8")) as {
-          agents?: { git?: { permissions?: AgentGitPermissions } };
-        };
-        rawGitPerms = raw.agents?.git?.permissions;
-      } catch {
-        // ignore parse errors
-      }
-    }
-    const block = buildEnforcementBlock(rawGitPerms);
+    const block = buildEnforcementBlock(readRawGitPerms(cwd));
     console.log("# Enforcement block (preview)\n");
     console.log(block);
     console.log(
@@ -191,7 +181,7 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
     return;
   }
 
-  applyEnforcement(config, cwd);
+  const { patched, skipped } = applyEnforcement(config, cwd);
 
   // Apply agents.extend into role files in rolesDir
   const extend = config.agents?.extend;
@@ -204,6 +194,8 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
     JSON.stringify({
       action: "prompt-build",
       enforcementFile: "AGENT_ENFORCEMENT.md",
+      patched,
+      skipped,
     }),
   );
 }
