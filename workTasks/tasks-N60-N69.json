@@ -1,0 +1,119 @@
+{
+  "range": {
+    "from": 60,
+    "to": 69
+  },
+  "tasks": [
+    {
+      "id": "N60",
+      "title": "master registry upsert generates new UUID on every re-registration causing duplicate project cards",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N60-master-registry-upsert-generates-new-uuid-on-every",
+      "createdAt": "2026-05-27T20:00:15.858Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T20:00:15.858Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:05:48.404Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T20:09:43.915Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T20:10:50.475Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:11:30.726Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T20:16:07.115Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T20:17:26.793Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:18:07.179Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:20:17.309Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T20:25:15.939Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T20:25:28.148Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-27T20:09:43.914Z",
+        "completedAt": "2026-05-27T20:10:50.474Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/registry.ts",
+          "packages/insight-flow-master/src/server.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "registry",
+        "dashboard"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-27T20:05:48.404Z",
+          "commitHash": "9c873ab",
+          "commitMessage": "docs(tasks): N60 spec — master registry UUID rotation causes duplicate project cards"
+        },
+        {
+          "at": "2026-05-27T20:11:30.726Z",
+          "commitHash": "24b610a",
+          "commitMessage": "fix(registry): preserve UUID on re-registration to eliminate duplicate overview cards"
+        },
+        {
+          "at": "2026-05-27T20:18:07.179Z",
+          "commitHash": "2408b34",
+          "commitMessage": "docs(tasks): N60 review — approved, ai round 1"
+        },
+        {
+          "at": "2026-05-27T20:20:17.308Z",
+          "commitHash": "6753d1f",
+          "commitMessage": "fix(registry): remove unused register() wrapper; correct spec out-of-scope"
+        }
+      ],
+      "branch": "fix/N60-master-registry-uuid-rotation-duplicates",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/40",
+      "mergedAt": null
+    }
+  ]
+}
