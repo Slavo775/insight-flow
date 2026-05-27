@@ -40,7 +40,7 @@ Add `--examples` to get commented `agents.extend` stubs in `taskflow.config.json
 insight-flow init --examples
 ```
 
-Re-running `init` on an existing project is safe — it skips files that already exist and updates only the `insight-flow` section of `CLAUDE.md`.
+Re-running `init` on an existing project is safe — it skips files that already exist, updates the `insight-flow` section of `CLAUDE.md`, and always regenerates `AGENT_ENFORCEMENT.md` from the current config.
 
 ### 3. What init creates
 
@@ -59,6 +59,7 @@ Re-running `init` on an existing project is safe — it skips files that already
 | `.claude/commands/task-request-changes.md` | `/task-request-changes` slash command |
 | `.claude/commands/taskmaster-change.md` | `/taskmaster-change` slash command |
 | `.claude/roles/` | Role spec markdown templates (source of truth for each skill) |
+| `AGENT_ENFORCEMENT.md` | Agent enforcement rules (git permissions, task-file mutation guard) — always regenerated from config |
 | `CLAUDE.md` | Created or updated with insight-flow context block |
 | `.claude/hooks/taskflow-activity.sh` | PostToolUse hook — feeds the activity panel |
 | `.claude/hooks/taskflow-skill.sh` | UserPromptSubmit hook — tags events to active task |
@@ -180,6 +181,8 @@ insight-flow incident-list [--id N03]
 
 # Migration / utility
 insight-flow migrate                            # Migrate from legacy tracker.json
+insight-flow prompt-build                       # Preview AGENT_ENFORCEMENT.md block (dry run)
+insight-flow prompt-build --apply               # Write AGENT_ENFORCEMENT.md + patch role files
 insight-flow help
 insight-flow version
 ```
