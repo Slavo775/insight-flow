@@ -583,6 +583,20 @@ You can also register a project by explicit path without `cd`-ing:
 insight-flow batch-ui --add "My App" /abs/path/to/project
 ```
 
+To unregister a project from its folder:
+
+```bash
+cd /path/to/my-app
+insight-flow ui-batch-unregister
+# → Unregistered "my-app" → /path/to/my-app
+```
+
+Or by label from any directory:
+
+```bash
+insight-flow batch-ui --remove "My App"
+```
+
 To see all registered projects:
 
 ```bash
@@ -615,6 +629,20 @@ Once you confirm, `batch-ui` assigns ports starting from `6007` and spawns a det
 
 ```
   [my-app]       http://localhost:6007
+  [another-app]  http://localhost:6008
+```
+
+If a port is already in use (e.g. from a previous run), it is skipped automatically and the next free port is used:
+
+```
+(port 6007 was occupied, skipped)
+  [my-app]       http://localhost:6008
+```
+
+If you run `batch-ui` again while servers are already up, already-running projects are skipped — only new or restarted projects are spawned:
+
+```
+  [my-app]       server on port 6007 already running, skipped
   [another-app]  http://localhost:6008
 ```
 

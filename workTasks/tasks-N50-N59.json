@@ -821,7 +821,7 @@
       "title": "batch-ui: unregister command, port-collision guard, port-in-use warning",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N58-batch-ui-unregister-command-port-collision-guard-p",
       "createdAt": "2026-05-27T15:35:28.106Z",
       "statusHistory": [
@@ -829,12 +829,31 @@
           "status": "ready",
           "at": "2026-05-27T15:35:28.106Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T15:36:51.503Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T15:43:51.418Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T15:46:36.050Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T15:43:51.418Z",
+        "completedAt": "2026-05-27T15:46:36.050Z",
+        "filesChanged": [
+          "packages/taskflow/src/commands/batch-ui.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/README.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -847,8 +866,14 @@
         "batch-ui",
         "ux"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T15:36:51.503Z",
+          "commitHash": "9a0faf1ef35d84e1a496129dd26e793f651a339b",
+          "commitMessage": "chore(tasks): add N58 spec — batch-ui unregister, port-collision guard"
+        }
+      ],
+      "branch": "fix/N58-batch-ui-unregister-port-collision",
       "mrUrl": null,
       "mergedAt": null
     }
