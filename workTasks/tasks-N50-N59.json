@@ -1,0 +1,218 @@
+{
+  "range": {
+    "from": 50,
+    "to": 59
+  },
+  "tasks": [
+    {
+      "id": "N50",
+      "title": "prompt-build reads from taskflow.config.json and drops taskflow.prompt.json",
+      "type": "rework",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N50-prompt-build-reads-from-taskflow-config-json-and-d",
+      "createdAt": "2026-05-26T18:58:30.721Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T18:58:30.721Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T07:33:02.328Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T07:44:48.709Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T07:47:07.729Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T07:49:47.922Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-27T07:33:02.328Z",
+        "completedAt": "2026-05-27T07:44:48.709Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents.ts",
+          "packages/taskflow/src/commands/prompt-build.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/cli.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "prompt-build",
+        "config"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N51",
+      "title": "init calls prompt-build to keep enforcement block in sync with config",
+      "type": "rework",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N51-init-calls-prompt-build-to-keep-enforcement-block-",
+      "createdAt": "2026-05-26T18:58:35.237Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T18:58:35.237Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "init",
+        "prompt-build"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N52",
+      "title": "browser notification on agent done replaces status transition notifs",
+      "type": "rework",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N52-browser-notification-on-agent-done-replaces-status",
+      "createdAt": "2026-05-26T20:02:22.276Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T20:02:22.277Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "notifications",
+        "websocket"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N53",
+      "title": "interactive prompts in init for hooks and activity engine",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N53-interactive-prompts-in-init-for-hooks-and-activity",
+      "createdAt": "2026-05-26T20:09:02.030Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T20:09:02.030Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "init",
+        "ux"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N54",
+      "title": "reduce token waste in agent role files",
+      "type": "rework",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N54-reduce-token-waste-in-agent-role-files",
+      "createdAt": "2026-05-26T20:40:35.615Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-26T20:40:35.616Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "tokens",
+        "prompts"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    }
+  ]
+}
