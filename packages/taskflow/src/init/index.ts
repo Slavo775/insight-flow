@@ -6,6 +6,7 @@ import {
   copyFileSync,
   readdirSync,
 } from "node:fs";
+import { createInterface } from "node:readline";
 import { resolve, basename } from "node:path";
 import type { TaskflowConfig, AgentsConfig, CustomAgent } from "../types.js";
 import { resolvePackageAsset } from "../paths.js";
@@ -15,11 +16,36 @@ import { installNotifyHook } from "../notify-hook.js";
 import { applyEnforcement } from "../commands/prompt-build.js";
 
 
-export function initProject(
+async function promptUser(question: string, defaultYes: boolean): Promise<boolean> {
+  if (!process.stdout.isTTY) return defaultYes;
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      const a = answer.trim().toLowerCase();
+      if (a === "") resolve(defaultYes);
+      else resolve(a === "y" || a === "yes");
+    });
+  });
+}
+
+function lifecycleHooksRegistered(cwd: string): boolean {
+  const candidates = [".claude/settings.local.json", ".claude/settings.json"];
+  for (const rel of candidates) {
+    const path = resolve(cwd, rel);
+    if (!existsSync(path)) continue;
+    let raw: string;
+    try { raw = readFileSync(path, "utf-8"); } catch { continue; }
+    if (raw.includes("lifecycle-session-start.sh")) return true;
+  }
+  return false;
+}
+
+export async function initProject(
   cwd: string = process.cwd(),
   force: boolean = false,
-  options: { examples?: boolean } = {},
-): void {
+  options: { examples?: boolean; yes?: boolean } = {},
+): Promise<void> {
   const configPath = resolve(cwd, "taskflow.config.json");
 
   // 1. Write config. insight-flow ships zero technology assumptions — when
@@ -36,11 +62,14 @@ export function initProject(
     notifications: { browser: true, cli: true },
   };
 
-  if (existsSync(configPath)) {
+  let onDiskConfig: Partial<TaskflowConfig> | null = null;
+  const configExisted = existsSync(configPath);
+
+  if (configExisted) {
     console.log("taskflow.config.json already exists, skipping config creation.");
     try {
-      const onDisk = JSON.parse(readFileSync(configPath, "utf-8")) as Partial<TaskflowConfig>;
-      config = { ...config, ...onDisk };
+      onDiskConfig = JSON.parse(readFileSync(configPath, "utf-8")) as Partial<TaskflowConfig>;
+      config = { ...config, ...onDiskConfig };
     } catch {
       // ignore parse errors
     }
@@ -200,13 +229,56 @@ export function initProject(
     }
   }
 
-  // 6. Generate Claude Code hook for activity engine
-  if (config.activityEngine?.enabled !== false) {
+  // 6. Interactive prompts for hooks and activity engine
+  const useDefaults = options.yes || !process.stdout.isTTY;
+  const lifecycleAlreadyInstalled = configExisted && lifecycleHooksRegistered(cwd);
+  const activityAlreadyConfigured = configExisted && onDiskConfig?.activityEngine?.enabled !== undefined;
+
+  // Question 1: lifecycle hooks (default yes)
+  let installLifecycle = true;
+  if (lifecycleAlreadyInstalled) {
+    installLifecycle = false; // already installed, skip
+  } else if (useDefaults) {
+    installLifecycle = true;
+  } else {
+    console.log("\n  Lifecycle hooks write task status changes to events.json (zero token cost).");
+    installLifecycle = await promptUser("  Enable task lifecycle events? (Y/n) ", true);
+  }
+
+  // Question 2: activity engine (default no)
+  let enableActivity = config.activityEngine?.enabled !== false;
+  if (activityAlreadyConfigured) {
+    enableActivity = config.activityEngine?.enabled !== false; // respect existing
+  } else if (useDefaults) {
+    enableActivity = false;
+  } else {
+    console.log("\n  Activity tracking shows agent phase markers in the dashboard (adds ~50 tokens/turn).");
+    enableActivity = await promptUser("  Enable agent activity tracking? (y/N) ", false);
+  }
+
+  // Update config on disk if activity enabled and not already configured
+  if (!activityAlreadyConfigured && enableActivity) {
+    let diskData: Record<string, unknown> = {};
+    try { diskData = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>; } catch { /* ignore */ }
+    const ae = ((diskData.activityEngine ?? {}) as Record<string, unknown>);
+    ae.enabled = true;
+    diskData.activityEngine = ae;
+    writeFileSync(configPath, JSON.stringify(diskData, null, 2) + "\n");
+    config.activityEngine = { logFile: ".taskflow-activity.jsonl", maxEvents: 200, ...config.activityEngine, enabled: true };
+    console.log("Updated taskflow.config.json with activityEngine.enabled: true");
+  }
+
+  // Install lifecycle hooks
+  if (installLifecycle) {
+    generateLifecycleHooks(cwd);
+  }
+
+  // Install activity hooks when enabled
+  if (enableActivity) {
     generateActivityHook(cwd, config);
     if (config.activityEngine?.hookEnrichment !== false) {
       generateEnrichmentHooks(cwd, config);
     }
-    generateLifecycleHooks(cwd);
   }
 
   // 6b. Generate Claude Code Stop hook for automatic OS notifications
