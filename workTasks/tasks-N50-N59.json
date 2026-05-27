@@ -127,7 +127,7 @@
       "title": "init calls prompt-build to keep enforcement block in sync with config",
       "type": "rework",
       "priority": "medium",
-      "status": "changes-requested",
+      "status": "changes-implemented",
       "folder": "workTasks/N51-init-calls-prompt-build-to-keep-enforcement-block-",
       "createdAt": "2026-05-26T18:58:35.237Z",
       "statusHistory": [
@@ -175,6 +175,16 @@
           "status": "changes-requested",
           "at": "2026-05-27T08:40:30.575Z",
           "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-27T08:41:48.417Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-27T08:42:43.865Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
@@ -191,11 +201,13 @@
           "requestedAt": "2026-05-27T08:40:30.575Z",
           "description": "Update README.md: add AGENT_ENFORCEMENT.md to What-init-creates table, add prompt-build to CLI reference, update re-run note to mention enforcement regeneration",
           "requestedBy": "task-request-changes",
-          "status": "requested",
-          "implementedAt": null,
-          "filesChanged": [],
-          "comment": null,
-          "implementedBy": null
+          "status": "implemented",
+          "implementedAt": "2026-05-27T08:42:43.864Z",
+          "filesChanged": [
+            "packages/taskflow/README.md"
+          ],
+          "comment": "Added AGENT_ENFORCEMENT.md to init table, added prompt-build to CLI ref, updated re-run note",
+          "implementedBy": "task-implement"
         }
       ],
       "reviewCount": 2,
