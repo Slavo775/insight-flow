@@ -9,7 +9,7 @@
       "title": "master registry upsert generates new UUID on every re-registration causing duplicate project cards",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N60-master-registry-upsert-generates-new-uuid-on-every",
       "createdAt": "2026-05-27T20:00:15.858Z",
       "statusHistory": [
@@ -67,6 +67,11 @@
           "status": "approved",
           "at": "2026-05-27T20:25:28.148Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-27T20:26:24.456Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -83,7 +88,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 26,
       "tags": [
         "master",
         "registry",
@@ -113,6 +118,44 @@
       ],
       "branch": "fix/N60-master-registry-uuid-rotation-duplicates",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/40",
+      "mergedAt": "2026-05-27T20:26:24.455Z"
+    },
+    {
+      "id": "N61",
+      "title": "master overview grid: equal-width columns with responsive single-column fallback",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N61-master-overview-grid-equal-width-columns-with-resp",
+      "createdAt": "2026-05-27T20:32:04.484Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T20:32:04.484Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "overview",
+        "css",
+        "layout"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]
