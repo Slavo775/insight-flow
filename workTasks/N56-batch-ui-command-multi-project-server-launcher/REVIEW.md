@@ -73,3 +73,25 @@ None.
 
 - `writeBatchUiRunningPids(running)` is called before the `setTimeout`, so PIDs are persisted even if the process exits before the browser-open fires. Correct ordering.
 - `ui-batch-down` always clears `runningPids` regardless of failures — a second invocation is a safe no-op.
+
+
+---
+
+## Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-27
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- Reviewer confirmed all commands are covered in README and help text.
+- Human's exact words: "okej approved merge it"

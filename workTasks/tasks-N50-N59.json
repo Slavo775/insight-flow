@@ -657,6 +657,21 @@
           "status": "approved",
           "at": "2026-05-27T14:52:22.604Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T15:09:15.904Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T15:13:11.667Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T15:16:25.116Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -689,7 +704,7 @@
           "implementedBy": "task-implement"
         }
       ],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -714,6 +729,11 @@
           "at": "2026-05-27T12:59:26.465Z",
           "commitHash": "7e8ff89",
           "commitMessage": "chore(tasks): N56 — request changes: add ui-batch-down to stop all servers"
+        },
+        {
+          "at": "2026-05-27T15:09:15.903Z",
+          "commitHash": "f2b656bf0ef95d37065d37385ef980c57ecb5852",
+          "commitMessage": "chore(tasks): N56 review approved — all checklist items pass, ui-batch-down verified"
         }
       ],
       "branch": "feat/N56-batch-ui-command-multi-project-server-launcher",
