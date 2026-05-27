@@ -5,7 +5,6 @@ const registry = new Map<string, MasterProjectEntry>();
 const projectIdIndex = new Map<string, string>(); // projectId → current UUID
 
 export function upsert(projectId: string, label: string, url: string): string {
-  const newId = randomUUID();
   const now = new Date().toISOString();
 
   const existing = projectIdIndex.has(projectId)
@@ -13,17 +12,21 @@ export function upsert(projectId: string, label: string, url: string): string {
     : undefined;
 
   if (existing) {
-    registry.delete(existing.id);
+    existing.label = label;
+    existing.url = url;
+    existing.lastSeenAt = now;
+    return existing.id;
   }
 
+  const newId = randomUUID();
   registry.set(newId, {
     id: newId,
     projectId,
     label,
     url,
-    registeredAt: existing?.registeredAt ?? now,
+    registeredAt: now,
     lastSeenAt: now,
-    state: existing?.state ?? {
+    state: {
       currentTaskId: null,
       currentTaskTitle: null,
       currentTaskStatus: null,

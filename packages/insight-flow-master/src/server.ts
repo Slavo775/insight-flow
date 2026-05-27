@@ -63,6 +63,8 @@ export async function startMasterServer(
       const projectUrl = String(parsed.url ?? "");
       const projectId = String(parsed.projectId ?? parsed.label ?? "unknown");
       const id = registry.upsert(projectId, label, projectUrl);
+      const entry = registry.getById(id);
+      if (entry) io.emit("project-update", entry);
       res.writeHead(200, { "Content-Type": MIME_JSON });
       res.end(JSON.stringify({ id }));
       return;

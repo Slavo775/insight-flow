@@ -9,7 +9,7 @@
       "title": "master registry upsert generates new UUID on every re-registration causing duplicate project cards",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N60-master-registry-upsert-generates-new-uuid-on-every",
       "createdAt": "2026-05-27T20:00:15.858Z",
       "statusHistory": [
@@ -17,12 +17,30 @@
           "status": "ready",
           "at": "2026-05-27T20:00:15.858Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:05:48.404Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T20:09:43.915Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T20:10:50.475Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T20:09:43.914Z",
+        "completedAt": "2026-05-27T20:10:50.474Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/registry.ts",
+          "packages/insight-flow-master/src/server.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -36,9 +54,15 @@
         "registry",
         "dashboard"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T20:05:48.404Z",
+          "commitHash": "9c873ab",
+          "commitMessage": "docs(tasks): N60 spec — master registry UUID rotation causes duplicate project cards"
+        }
+      ],
+      "branch": "fix/N60-master-registry-uuid-rotation-duplicates",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/40",
       "mergedAt": null
     }
   ]
