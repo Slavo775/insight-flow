@@ -28,12 +28,6 @@ export function getDashboardHtml(config: TaskflowConfig): string {
       ? "      <div class=\"settings-wrap\"><button class=\"settings-btn\" id=\"settings-btn\" onclick=\"toggleSettings()\" title=\"Notification settings\">&#9881;</button>\n" +
         "      <div class=\"settings-popover\" id=\"settings-popover\">\n" +
         "        <div class=\"settings-header\">Notifications</div>\n" +
-        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-implemented\" onchange=\"saveNotifSettings()\"> Task implemented</label>\n" +
-        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-approved\" onchange=\"saveNotifSettings()\"> Review approved</label>\n" +
-        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-fix-needed\" onchange=\"saveNotifSettings()\"> Fix needed</label>\n" +
-        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-merged\" onchange=\"saveNotifSettings()\"> Merged</label>\n" +
-        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-changes-requested\" onchange=\"saveNotifSettings()\"> Changes requested</label>\n" +
-        "        <div class=\"settings-divider\"></div>\n" +
         "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-sound\" onchange=\"saveNotifSettings()\"> Sound</label>\n" +
         "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-mute-focused\" onchange=\"saveNotifSettings()\"> Mute when tab focused</label>\n" +
         "        <div id=\"notif-permission-hint\" class=\"settings-hint\"></div>\n" +
@@ -448,7 +442,6 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     var hookStatus = 'ok';
     var configEnabled = true;
     var hasSyncedOnce = false;
-    var prevTaskSnapshot = {};
 
     function badgeClass(status) {
       if (['ready'].includes(status)) return 'badge-ready';
@@ -755,7 +748,6 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       ]);
       var shard = await results[0].json();
       var newTasks = shard.tasks || [];
-      checkStatusTransitions(newTasks);
       tasks = newTasks;
       try {
         var master = await results[1].json();
@@ -784,41 +776,25 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       else if (status === 'reconnecting') dot.classList.add('reconnecting');
     }` + (browserNotifications ? `
 
-    var NOTIF_WATCHED = ['implemented', 'approved', 'fix-needed', 'merged', 'changes-requested'];
-    var notifSettings = { statuses: {}, sound: true, muteFocused: false };
+    var notifSettings = { sound: true, muteFocused: false };
 
     function loadNotifSettings() {
       try {
         var raw = localStorage.getItem('tf-notif-settings');
         if (raw) {
           var parsed = JSON.parse(raw);
-          notifSettings = parsed;
-        } else {
-          for (var i = 0; i < NOTIF_WATCHED.length; i++) notifSettings.statuses[NOTIF_WATCHED[i]] = true;
+          notifSettings = { sound: parsed.sound !== false, muteFocused: !!parsed.muteFocused };
         }
-      } catch(e) {
-        for (var i = 0; i < NOTIF_WATCHED.length; i++) notifSettings.statuses[NOTIF_WATCHED[i]] = true;
-      }
+      } catch(e) {}
     }
 
     function saveNotifSettings() {
-      notifSettings.statuses = {};
       notifSettings.sound = document.getElementById('notif-sound') ? document.getElementById('notif-sound').checked : true;
       notifSettings.muteFocused = document.getElementById('notif-mute-focused') ? document.getElementById('notif-mute-focused').checked : false;
-      for (var i = 0; i < NOTIF_WATCHED.length; i++) {
-        var s = NOTIF_WATCHED[i];
-        var el = document.getElementById('notif-' + s);
-        notifSettings.statuses[s] = el ? el.checked : true;
-      }
       try { localStorage.setItem('tf-notif-settings', JSON.stringify(notifSettings)); } catch(e) {}
     }
 
     function syncSettingsUI() {
-      for (var i = 0; i < NOTIF_WATCHED.length; i++) {
-        var s = NOTIF_WATCHED[i];
-        var el = document.getElementById('notif-' + s);
-        if (el) el.checked = notifSettings.statuses[s] !== false;
-      }
       var snd = document.getElementById('notif-sound');
       if (snd) snd.checked = notifSettings.sound !== false;
       var mf = document.getElementById('notif-mute-focused');
@@ -855,7 +831,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       } else if (Notification.permission === 'denied') {
         hint.textContent = 'Permission denied. Allow notifications in browser settings.';
       } else if (Notification.permission === 'default') {
-        hint.textContent = 'Click a status toggle to enable notifications.';
+        hint.textContent = 'Click Sound or Mute to enable notifications.';
       } else {
         hint.textContent = '';
       }
@@ -874,21 +850,11 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       });
     }
 
-    function checkStatusTransitions(newTasks) {
+    function fireDesktopNotif() {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       if (notifSettings.muteFocused && !document.hidden) return;
-      for (var i = 0; i < newTasks.length; i++) {
-        var t = newTasks[i];
-        var prev = prevTaskSnapshot[t.id];
-        if (prev && prev !== t.status && notifSettings.statuses[t.status] !== false && NOTIF_WATCHED.indexOf(t.status) >= 0) {
-          fireDesktopNotif(t.id, t.status, CONFIG_SOUNDS_ENABLED && notifSettings.sound !== false);
-        }
-        prevTaskSnapshot[t.id] = t.status;
-      }
-    }
-
-    function fireDesktopNotif(taskId, status, sound) {
-      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + taskId + ' → ' + status;
+      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + 'Claude finished';
+      var sound = CONFIG_SOUNDS_ENABLED && notifSettings.sound !== false;
       try {
         new Notification(title, { silent: !sound });
       } catch(e) {}
@@ -898,7 +864,6 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     (function() {
       loadNotifSettings();
       if ('Notification' in window && Notification.permission === 'default') {
-        try { localStorage.getItem('tf-notif-asked'); } catch(e) {}
         var asked = false;
         try { asked = !!localStorage.getItem('tf-notif-asked'); } catch(e) {}
         if (!asked) {
@@ -906,9 +871,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           try { localStorage.setItem('tf-notif-asked', '1'); } catch(e) {}
         }
       }
-    })();` : `
-
-    function checkStatusTransitions() {}`) + `
+    })();` : ``) + `
 
     function connectWS() {
       // socket.io-client is loaded by /socket.io/socket.io.js (served by the
@@ -965,7 +928,9 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       sock.on('activity', function(ev) {
         if (typeof addActivityEvent === 'function') addActivityEvent(ev);
         if (typeof refreshTimestamps === 'function') refreshTimestamps();
-      });
+      });` + (browserNotifications ? `
+
+      sock.on('agent-done', function() { fireDesktopNotif(); });` : ``) + `
     }`;
 
   // Activity panel JS (only if enabled)
