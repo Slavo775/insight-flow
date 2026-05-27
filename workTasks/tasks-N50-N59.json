@@ -397,7 +397,7 @@
       "title": "reduce token waste in agent role files",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N54-reduce-token-waste-in-agent-role-files",
       "createdAt": "2026-05-26T20:40:35.615Z",
       "statusHistory": [
@@ -405,17 +405,55 @@
           "status": "ready",
           "at": "2026-05-26T20:40:35.616Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T10:28:56.594Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T10:33:46.959Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T10:34:57.562Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T10:48:32.389Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T10:50:54.896Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T10:28:56.594Z",
+        "completedAt": "2026-05-27T10:33:46.959Z",
+        "filesChanged": [
+          "AGENT_EVENTS.md",
+          "TASKMASTER_ROLE.md",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md",
+          "TASKMASTER_CHANGE_ROLE.md",
+          "AGENT_PROTOCOL.md",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/scripts/sync-role-templates.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -424,8 +462,14 @@
         "tokens",
         "prompts"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T10:34:57.548Z",
+          "commitHash": "79e1364133453ba78cfbbffc513aa98e56509c03",
+          "commitMessage": "rework(agents): extract EVENTS block to AGENT_EVENTS.md, trim AGENT_PROTOCOL"
+        }
+      ],
+      "branch": "rework/N54-reduce-token-waste-in-agent-role-files",
       "mrUrl": null,
       "mergedAt": null
     }
