@@ -159,7 +159,22 @@ export function cmdBatchUiList(): void {
   }
   console.log(`\n  Registered batch-ui projects (${entries.length}):\n`);
   for (const e of entries) {
+    const configPath = join(e.path, "taskflow.config.json");
+    let projectName = "(no config)";
+    let workDir = "";
+    if (existsSync(configPath)) {
+      try {
+        const cfg = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>;
+        const pn = cfg.projectName ?? cfg.name;
+        projectName = typeof pn === "string" && pn.trim() ? pn.trim() : "(unnamed)";
+        workDir = typeof cfg.workDir === "string" && cfg.workDir.trim() ? cfg.workDir.trim() : "";
+      } catch {
+        projectName = "(invalid config)";
+      }
+    }
+    const meta = workDir ? `${projectName} / workDir: ${workDir}` : projectName;
     console.log(`  • ${e.label.padEnd(24)} ${e.path}`);
+    console.log(`    ${"".padEnd(24)} config: ${meta}`);
   }
   console.log("");
 }
