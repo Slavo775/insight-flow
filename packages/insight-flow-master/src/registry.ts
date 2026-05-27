@@ -38,10 +38,6 @@ export function upsert(projectId: string, label: string, url: string): string {
   return newId;
 }
 
-export function register(label: string, url: string): string {
-  return upsert(label, label, url);
-}
-
 export function update(id: string, state: MasterProjectState): boolean {
   const entry = registry.get(id);
   if (!entry) return false;

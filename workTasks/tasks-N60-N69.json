@@ -9,7 +9,7 @@
       "title": "master registry upsert generates new UUID on every re-registration causing duplicate project cards",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N60-master-registry-upsert-generates-new-uuid-on-every",
       "createdAt": "2026-05-27T20:00:15.858Z",
       "statusHistory": [
@@ -47,6 +47,11 @@
           "status": "approved",
           "at": "2026-05-27T20:17:26.793Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T20:18:07.179Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -79,6 +84,11 @@
           "at": "2026-05-27T20:11:30.726Z",
           "commitHash": "24b610a",
           "commitMessage": "fix(registry): preserve UUID on re-registration to eliminate duplicate overview cards"
+        },
+        {
+          "at": "2026-05-27T20:18:07.179Z",
+          "commitHash": "2408b34",
+          "commitMessage": "docs(tasks): N60 review — approved, ai round 1"
         }
       ],
       "branch": "fix/N60-master-registry-uuid-rotation-duplicates",

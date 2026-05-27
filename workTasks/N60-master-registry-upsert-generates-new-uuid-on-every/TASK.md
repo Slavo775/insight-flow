@@ -26,7 +26,6 @@ The server-side registry is correct: `projectIdIndex` deduplicates by `projectId
 ### Out of scope
 
 - Frontend `overview.ts` — no changes needed.
-- `server.ts` — no changes needed.
 - Project-server (`packages/taskflow/src/server/index.ts`) — no changes needed.
 
 ## Implementation plan
