@@ -4,6 +4,24 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-05-27
+
+### Added
+
+- **N46** — New `/config` dashboard page lists every option from `taskflow.config.json` with current values, types, and descriptions. Accessible via the top navigation bar.
+- **N53** — `insight-flow init` now asks two interactive Y/n questions: whether to enable task lifecycle events (default yes) and whether to enable agent activity tracking (default no). Non-TTY environments receive the defaults automatically. Existing configs are respected on re-init.
+
+### Changed
+
+- **N50** — `prompt-build` now reads agent extension strings directly from `taskflow.config.json` (`agents.extend`). The separate `taskflow.prompt.json` sidecar file is no longer written or read; delete it if present in your project.
+- **N51** — `insight-flow init` automatically runs `prompt-build --apply` so `AGENT_ENFORCEMENT.md` stays in sync with `taskflow.config.json` on every init without a separate manual step.
+- **N52** — Browser desktop notifications now fire when Claude finishes a turn (agent done), replacing the previous per-status-transition model. One notification per completed agent session instead of one per task state change.
+- **N54** — The repeated EVENTS block is extracted from all 8 agent role files into a single `AGENT_EVENTS.md`, referenced via `@AGENT_EVENTS.md`. Token load per agent run is reduced by ~120 words. `AGENT_PROTOCOL.md` sheds the duplicate `TOKEN EFFICIENCY`, `GIT RULE`, and `EXTENDING WITH PROJECT-SPECIFIC COMMANDS` sections.
+
+### Docs
+
+- **N49** — Project-wide documentation audit: stale references updated, missing sections filled, and accuracy verified across `CLAUDE.md`, `README.md`, role files, and architecture diagrams.
+
 ## [0.7.0] — 2026-05-26
 
 ### Fixed

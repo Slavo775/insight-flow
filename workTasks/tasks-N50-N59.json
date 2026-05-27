@@ -397,7 +397,7 @@
       "title": "reduce token waste in agent role files",
       "type": "rework",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N54-reduce-token-waste-in-agent-role-files",
       "createdAt": "2026-05-26T20:40:35.615Z",
       "statusHistory": [
@@ -465,6 +465,11 @@
           "status": "approved",
           "at": "2026-05-27T10:57:59.070Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-27T10:58:52.205Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -506,7 +511,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 858,
       "tags": [
         "agents",
         "tokens",
@@ -531,6 +536,208 @@
       ],
       "branch": "rework/N54-reduce-token-waste-in-agent-role-files",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/35",
+      "mergedAt": "2026-05-27T10:58:52.204Z"
+    },
+    {
+      "id": "N55",
+      "title": "release-v0.8.0-changelog-readme-version-bump",
+      "type": "chore",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "workTasks/N55-release-v0-8-0-changelog-readme-version-bump",
+      "createdAt": "2026-05-27T11:02:21.542Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T11:02:21.542Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T11:07:14.421Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T11:08:09.899Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": "2026-05-27T11:07:14.421Z",
+        "filesChanged": [
+          "packages/taskflow/CHANGELOG.md",
+          "packages/taskflow/package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "changelog",
+        "docs"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-27T11:08:09.899Z",
+          "commitHash": "45783500ff46ee9412fb8707b9eda7f4f27381d8",
+          "commitMessage": "chore(release): bump to v0.8.0, write changelog, merge N49"
+        }
+      ],
+      "branch": "chore/N55-release-v0-8-0-changelog-readme-version-bump",
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N56",
+      "title": "batch-ui command — multi-project server launcher",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N56-batch-ui-command-multi-project-server-launcher",
+      "createdAt": "2026-05-27T11:43:33.915Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T11:43:33.915Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T11:45:22.955Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T11:50:54.097Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T12:03:15.867Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T12:11:06.407Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-27T12:58:35.909Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T12:59:26.466Z",
+          "by": "task-git"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-05-27T13:03:20.819Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-05-27T13:07:09.295Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T14:49:22.766Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T14:52:22.604Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T15:09:15.904Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T15:13:11.667Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T15:16:25.116Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-27T12:03:15.867Z",
+        "completedAt": "2026-05-27T12:11:06.407Z",
+        "filesChanged": [
+          "packages/taskflow/src/global-config.ts",
+          "packages/taskflow/src/commands/batch-ui.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-27T12:58:35.908Z",
+          "description": "Add ui-batch-down command to stop all batch-spawned servers",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-05-27T13:07:09.294Z",
+          "filesChanged": [
+            "packages/taskflow/src/commands/batch-ui.ts",
+            "packages/taskflow/src/global-config.ts",
+            "packages/taskflow/src/types.ts",
+            "packages/taskflow/src/cli.ts",
+            "packages/taskflow/README.md"
+          ],
+          "comment": "Added ui-batch-down: persists PIDs on batch-ui launch, SIGTERM on down, clears registry",
+          "implementedBy": "task-implement"
+        }
+      ],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "ui",
+        "dx",
+        "global"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-27T11:45:22.955Z",
+          "commitHash": "43e7762",
+          "commitMessage": "feat(tasks): add N56 spec — batch-ui multi-project server launcher"
+        },
+        {
+          "at": "2026-05-27T11:50:54.096Z",
+          "commitHash": "9274a0e",
+          "commitMessage": "docs(tasks): N56 — add ui-batch-register command + README docs to spec"
+        },
+        {
+          "at": "2026-05-27T12:59:26.465Z",
+          "commitHash": "7e8ff89",
+          "commitMessage": "chore(tasks): N56 — request changes: add ui-batch-down to stop all servers"
+        },
+        {
+          "at": "2026-05-27T15:09:15.903Z",
+          "commitHash": "f2b656bf0ef95d37065d37385ef980c57ecb5852",
+          "commitMessage": "chore(tasks): N56 review approved — all checklist items pass, ui-batch-down verified"
+        }
+      ],
+      "branch": "feat/N56-batch-ui-command-multi-project-server-launcher",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/36",
       "mergedAt": null
     }
   ]
