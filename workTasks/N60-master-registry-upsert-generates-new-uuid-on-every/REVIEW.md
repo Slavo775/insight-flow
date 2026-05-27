@@ -31,3 +31,24 @@ Two-file fix in `packages/insight-flow-master`. `registry.ts` `upsert()` is rest
 
 - Closes the duplicate-card accumulation bug observed in the master overview screenshot (N60). Root cause traced to N40's `upsert` implementation rotating UUIDs unnecessarily.
 - Master-server restart still assigns a new UUID (in-memory `projectIdIndex` is cleared), but that scenario forces a page reload of the overview anyway, so the frontend re-renders from fresh SSR state — no duplicate possible.
+
+
+---
+
+## Human Review — Round 2
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-27
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+accepted done merge it
