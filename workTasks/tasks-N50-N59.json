@@ -127,7 +127,7 @@
       "title": "init calls prompt-build to keep enforcement block in sync with config",
       "type": "rework",
       "priority": "medium",
-      "status": "approved",
+      "status": "changes-requested",
       "folder": "workTasks/N51-init-calls-prompt-build-to-keep-enforcement-block-",
       "createdAt": "2026-05-26T18:58:35.237Z",
       "statusHistory": [
@@ -170,6 +170,11 @@
           "status": "approved",
           "at": "2026-05-27T08:33:04.460Z",
           "by": "task-review"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-05-27T08:40:30.575Z",
+          "by": "task-request-changes"
         }
       ],
       "implementation": {
@@ -181,7 +186,18 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-05-27T08:40:30.575Z",
+          "description": "Update README.md: add AGENT_ENFORCEMENT.md to What-init-creates table, add prompt-build to CLI reference, update re-run note to mention enforcement regeneration",
+          "requestedBy": "task-request-changes",
+          "status": "requested",
+          "implementedAt": null,
+          "filesChanged": [],
+          "comment": null,
+          "implementedBy": null
+        }
+      ],
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,

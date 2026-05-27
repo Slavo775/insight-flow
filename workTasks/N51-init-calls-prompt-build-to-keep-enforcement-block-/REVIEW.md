@@ -60,3 +60,21 @@ None identified. Patching operates on local files with no external input paths; 
 ### Notes
 
 All three non-blocking items are cosmetic or additive. No follow-up tasks required.
+
+---
+
+## Request Changes
+
+**Requested by:** Human (Project Owner)
+**Date:** 2026-05-27
+
+### Changes requested
+
+- **Refinement** — `packages/taskflow/README.md`: "please also update documentations if needed"
+  - Add `AGENT_ENFORCEMENT.md` row to the "What init creates" table (§3)
+  - Add `insight-flow prompt-build [--apply]` to the CLI reference section
+  - Update the re-run safety note (currently "it skips files that already exist and updates only the `insight-flow` section of `CLAUDE.md`") to also mention that `AGENT_ENFORCEMENT.md` is always regenerated
+
+### Notes
+
+Scope limited to `packages/taskflow/README.md` — the gaps that exist post-N51 implementation.
