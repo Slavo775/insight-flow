@@ -543,7 +543,7 @@
       "title": "release-v0.8.0-changelog-readme-version-bump",
       "type": "chore",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N55-release-v0-8-0-changelog-readme-version-bump",
       "createdAt": "2026-05-27T11:02:21.542Z",
       "statusHistory": [
@@ -551,12 +551,20 @@
           "status": "ready",
           "at": "2026-05-27T11:02:21.542Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T11:07:14.421Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-05-27T11:07:14.421Z",
+        "filesChanged": [
+          "packages/taskflow/CHANGELOG.md",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
