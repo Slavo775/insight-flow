@@ -12,6 +12,7 @@ import { resolvePackageAsset } from "../paths.js";
 import { applyAgentExtensions } from "../agents.js";
 import { installActivityHook, installEnrichmentHooks, installLifecycleHooks } from "../activity-hook.js";
 import { installNotifyHook } from "../notify-hook.js";
+import { applyEnforcement } from "../commands/prompt-build.js";
 
 
 export function initProject(
@@ -160,6 +161,12 @@ export function initProject(
   if (config.activityEngine?.phaseMarkers === false) {
     stripPhaseMarkers(resolve(cwd, config.rolesDir));
   }
+
+  // 4e. Write/update AGENT_ENFORCEMENT.md and patch role file @-references
+  const enforcementResult = applyEnforcement(config, cwd);
+  console.log(
+    enforcementResult.created ? "Created AGENT_ENFORCEMENT.md" : "Updated AGENT_ENFORCEMENT.md",
+  );
 
   if (customAgents.length > 0) {
     generateCustomAgentSkills(commandsDir, customAgents);

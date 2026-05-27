@@ -127,7 +127,7 @@
       "title": "init calls prompt-build to keep enforcement block in sync with config",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N51-init-calls-prompt-build-to-keep-enforcement-block-",
       "createdAt": "2026-05-26T18:58:35.237Z",
       "statusHistory": [
@@ -135,12 +135,25 @@
           "status": "ready",
           "at": "2026-05-26T18:58:35.237Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-27T08:22:05.657Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-27T08:27:43.855Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-27T08:22:05.656Z",
+        "completedAt": "2026-05-27T08:27:43.855Z",
+        "filesChanged": [
+          "packages/taskflow/src/commands/prompt-build.ts",
+          "packages/taskflow/src/init/index.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

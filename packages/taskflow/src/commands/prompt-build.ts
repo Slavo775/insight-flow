@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { ParsedArgs, TaskflowConfig, AgentGitPermissions } from "../types.js";
 import { applyAgentExtensions } from "../agents.js";
@@ -113,12 +113,10 @@ const ROLE_FILES = [
   "TASK_REQUEST_CHANGES_ROLE.md",
 ];
 
-export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
-  const cwd = process.cwd();
-
-  // Read raw user config to get explicitly-set git permissions (without defaults).
-  // Resolved config always has defaults merged in; we only reflect user intent here.
-  // Use project-root resolution so this works when invoked from a subdirectory.
+// Writes AGENT_ENFORCEMENT.md and patches all role files to reference it.
+// Returns { created: true } if the file was newly written, { created: false } if updated.
+export function applyEnforcement(config: TaskflowConfig, cwd: string): { created: boolean } {
+  // Read raw git perms (without defaults applied) so we reflect user intent only.
   let rawGitPerms: AgentGitPermissions | undefined;
   let projectRoot: string;
   try {
@@ -139,8 +137,52 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
   }
 
   const block = buildEnforcementBlock(rawGitPerms);
+  const enforcementPath = join(cwd, "AGENT_ENFORCEMENT.md");
+  const created = !existsSync(enforcementPath);
+  writeFileSync(enforcementPath, block + "\n", "utf-8");
+
+  // Patch root-level role files (covers insight-flow's own setup)
+  for (const name of ROLE_FILES) {
+    patchRoleFileWithRef(join(cwd, name));
+  }
+
+  // Patch role files in rolesDir (covers consumer projects initialized by init)
+  if (config.rolesDir) {
+    const rolesDir = resolve(cwd, config.rolesDir);
+    if (existsSync(rolesDir) && rolesDir !== cwd) {
+      for (const file of readdirSync(rolesDir).filter((f) => f.endsWith(".md"))) {
+        patchRoleFileWithRef(resolve(rolesDir, file));
+      }
+    }
+  }
+
+  return { created };
+}
+
+export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
+  const cwd = process.cwd();
 
   if (!opts.apply) {
+    // Dry-run: build block for preview without writing anything.
+    let rawGitPerms: AgentGitPermissions | undefined;
+    let projectRoot: string;
+    try {
+      projectRoot = resolveProjectRoot(cwd);
+    } catch {
+      projectRoot = cwd;
+    }
+    const configPath = resolve(projectRoot, "taskflow.config.json");
+    if (existsSync(configPath)) {
+      try {
+        const raw = JSON.parse(readFileSync(configPath, "utf-8")) as {
+          agents?: { git?: { permissions?: AgentGitPermissions } };
+        };
+        rawGitPerms = raw.agents?.git?.permissions;
+      } catch {
+        // ignore parse errors
+      }
+    }
+    const block = buildEnforcementBlock(rawGitPerms);
     console.log("# Enforcement block (preview)\n");
     console.log(block);
     console.log(
@@ -149,16 +191,7 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
     return;
   }
 
-  // Write the single canonical enforcement file
-  const enforcementPath = join(cwd, "AGENT_ENFORCEMENT.md");
-  writeFileSync(enforcementPath, block + "\n", "utf-8");
-
-  // Ensure each role file references AGENT_ENFORCEMENT.md (not inline)
-  const results: { file: string; patched: boolean }[] = [];
-  for (const name of ROLE_FILES) {
-    const patched = patchRoleFileWithRef(join(cwd, name));
-    results.push({ file: name, patched });
-  }
+  applyEnforcement(config, cwd);
 
   // Apply agents.extend into role files in rolesDir
   const extend = config.agents?.extend;
@@ -167,15 +200,10 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
     applyAgentExtensions(rolesDir, extend);
   }
 
-  const patched = results.filter((r) => r.patched).map((r) => r.file);
-  const skipped = results.filter((r) => !r.patched).map((r) => r.file);
-
   console.log(
     JSON.stringify({
       action: "prompt-build",
       enforcementFile: "AGENT_ENFORCEMENT.md",
-      patched,
-      skipped,
     }),
   );
 }
