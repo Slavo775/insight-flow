@@ -18,6 +18,15 @@
         "comment": "Enhance batch-ui --list to show resolved projectName + workDir from each entry's taskflow.config.json",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-27T18:44:46.069Z",
+      "endedAt": "2026-05-27T18:45:23.708Z",
+      "verdict": "approved",
+      "comment": "All checklist items verified. Round 1 blocker was orphaned stale process (user data), not a code bug. Round 1 fix (--list shows resolved config) addresses the visibility gap. Build, typecheck, and tests pass.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
     }
   ]
 }
