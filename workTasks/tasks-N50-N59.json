@@ -543,7 +543,7 @@
       "title": "release-v0.8.0-changelog-readme-version-bump",
       "type": "chore",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N55-release-v0-8-0-changelog-readme-version-bump",
       "createdAt": "2026-05-27T11:02:21.542Z",
       "statusHistory": [
@@ -556,6 +556,11 @@
           "status": "implemented",
           "at": "2026-05-27T11:07:14.421Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T11:08:09.899Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -577,6 +582,49 @@
         "release",
         "changelog",
         "docs"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-27T11:08:09.899Z",
+          "commitHash": "45783500ff46ee9412fb8707b9eda7f4f27381d8",
+          "commitMessage": "chore(release): bump to v0.8.0, write changelog, merge N49"
+        }
+      ],
+      "branch": "chore/N55-release-v0-8-0-changelog-readme-version-bump",
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N56",
+      "title": "batch-ui command — multi-project server launcher",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N56-batch-ui-command-multi-project-server-launcher",
+      "createdAt": "2026-05-27T11:43:33.915Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-27T11:43:33.915Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "ui",
+        "dx",
+        "global"
       ],
       "pushes": [],
       "branch": null,
