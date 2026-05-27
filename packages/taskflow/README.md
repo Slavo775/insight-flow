@@ -4,13 +4,11 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.8.0
+## What's new in 0.9.0
 
-- **Interactive init** — `insight-flow init` now asks two Y/n questions (lifecycle events, activity tracking) instead of silently applying defaults; non-TTY environments get the defaults automatically.
-- **Config dashboard page** — new `/config` page in the dashboard lists every `taskflow.config.json` option with current values, types, and descriptions.
-- **prompt-build from config** — agent extension strings are read directly from `taskflow.config.json` (`agents.extend`); the separate `taskflow.prompt.json` sidecar is no longer written or read.
-- **Agent-done browser notification** — desktop notifications now fire once when Claude finishes a turn, replacing the previous per-status-transition model.
-- **Leaner agent role files** — the shared EVENTS block is extracted into `AGENT_EVENTS.md` and referenced by all 8 role files, reducing token load per agent run by ~120 words.
+- **Multi-project launcher** — `insight-flow batch-ui` starts dashboards for several projects at once; interactive TTY prompt, auto-port assignment, browser open, `--no-open` flag for CI/headless use.
+- **Register from project folder** — `insight-flow ui-batch-register` reads `taskflow.config.json` and registers the project in a global file (`~/.insight-flow/batch-ui.json`) in one command; actionable errors for missing/invalid config.
+- **Stop all servers** — `insight-flow ui-batch-down` terminates all servers started by the last `batch-ui` run via PID tracking; handles already-exited processes gracefully.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
