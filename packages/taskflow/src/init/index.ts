@@ -560,25 +560,10 @@ function stripWhenToNotify(rolesDir: string): void {
   }
 }
 
-const PHASE_MARKERS_START = "<!-- taskflow:phase-markers:start -->";
-const PHASE_MARKERS_END = "<!-- taskflow:phase-markers:end -->";
-
 function stripPhaseMarkers(rolesDir: string): void {
-  if (!existsSync(rolesDir)) return;
-  const files = readdirSync(rolesDir).filter((f) => f.endsWith(".md"));
-  for (const file of files) {
-    const filePath = resolve(rolesDir, file);
-    let content: string;
-    try {
-      content = readFileSync(filePath, "utf-8");
-    } catch {
-      continue;
-    }
-    if (!content.includes(PHASE_MARKERS_START)) continue;
-    const before = content.substring(0, content.indexOf(PHASE_MARKERS_START));
-    const afterIdx = content.indexOf(PHASE_MARKERS_END);
-    const after = afterIdx >= 0 ? content.substring(afterIdx + PHASE_MARKERS_END.length) : "";
-    writeFileSync(filePath, (before + after).replace(/\n{3,}/g, "\n\n").trimEnd() + "\n");
+  const agentEventsPath = resolve(rolesDir, "AGENT_EVENTS.md");
+  if (existsSync(agentEventsPath)) {
+    writeFileSync(agentEventsPath, "");
   }
 }
 

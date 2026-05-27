@@ -15,8 +15,9 @@ const ROLE_FILES = [
   "TASK_HUMAN_REVIEW_ROLE.md",
   "TASK_INCIDENT_ROLE.md",
   "TASK_REQUEST_CHANGES_ROLE.md",
-  // Shared protocol referenced by every role via `@AGENT_PROTOCOL.md`.
+  // Shared files referenced by every role.
   "AGENT_PROTOCOL.md",
+  "AGENT_EVENTS.md",
 ];
 
 const __filename = fileURLToPath(import.meta.url);
