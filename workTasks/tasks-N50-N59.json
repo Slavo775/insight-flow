@@ -397,7 +397,7 @@
       "title": "reduce token waste in agent role files",
       "type": "rework",
       "priority": "medium",
-      "status": "changes-implemented",
+      "status": "approved",
       "folder": "workTasks/N54-reduce-token-waste-in-agent-role-files",
       "createdAt": "2026-05-26T20:40:35.615Z",
       "statusHistory": [
@@ -450,6 +450,21 @@
           "status": "changes-implemented",
           "at": "2026-05-27T10:53:40.285Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T10:54:21.864Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T10:57:42.943Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T10:57:59.070Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -487,7 +502,7 @@
           "implementedBy": "task-review-fix"
         }
       ],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -507,10 +522,15 @@
           "at": "2026-05-27T10:51:36.676Z",
           "commitHash": "14876483994d35fba2ce673f5733633ec932b879",
           "commitMessage": "docs(tasks): add AI review for N54 — approved"
+        },
+        {
+          "at": "2026-05-27T10:54:21.864Z",
+          "commitHash": "d94e6de406a3700ce92b7aedfd606834f71a4f2c",
+          "commitMessage": "fix(agents): resolve stale AGENT_CONFIG.md ref, add separator in AGENT_PROTOCOL"
         }
       ],
       "branch": "rework/N54-reduce-token-waste-in-agent-role-files",
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/35",
       "mergedAt": null
     }
   ]
