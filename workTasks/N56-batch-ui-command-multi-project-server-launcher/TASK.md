@@ -77,11 +77,49 @@ Running dashboards for multiple insight-flow projects requires manually `cd`-ing
    - Route `command === "batch-ui"` to `cmdBatchUi(opts)` from the new command file.
 
 8. **`ui-batch-register` command** (`packages/taskflow/src/commands/batch-ui.ts`, `cmdUiBatchRegister`)
-   - Resolve label: read `taskflow.config.json` in `cwd` → `name` field if present; otherwise `path.basename(process.cwd())`.
-   - Validate: check `existsSync(path.join(cwd, "taskflow.config.json"))` or `existsSync(path.join(cwd, "workTasks"))`. If neither, print `"No insight-flow project found in <cwd>. Run insight-flow init first."` and exit 1.
-   - Skip duplicate: if an entry with the same `path` already exists in the registry, print `"Already registered as \"<label>\""` and exit 0.
-   - Append entry, write registry, print `"Registered \"<label>\" → <cwd>"`.
-   - Wire in `cli.ts`: `command === "ui-batch-register"` → `cmdUiBatchRegister()`. Add to help text: `ui-batch-register    Register this folder as a batch-ui project`.
+
+   Step-by-step with explicit error handling at each stage:
+
+   a. **Locate config** — build `configPath = path.join(process.cwd(), "taskflow.config.json")`.
+      - If `!existsSync(configPath)`: print and exit 1:
+        ```
+        Error: No taskflow.config.json found in <cwd>.
+        This folder is not an insight-flow project.
+        Run `insight-flow init` to initialise one, or cd into a project folder first.
+        ```
+
+   b. **Parse config** — `JSON.parse(readFileSync(configPath, "utf-8"))`.
+      - If `SyntaxError`: print and exit 1:
+        ```
+        Error: taskflow.config.json in <cwd> contains invalid JSON.
+        <original SyntaxError message>
+        Fix the file and retry.
+        ```
+      - If parse succeeds but result is not a plain object: print and exit 1:
+        ```
+        Error: taskflow.config.json in <cwd> is not a JSON object.
+        Expected { ... } at top level.
+        ```
+
+   c. **Resolve label** — `config.name` (string, trimmed) if present and non-empty; otherwise `path.basename(process.cwd())`.
+
+   d. **Skip duplicate** — if the registry already contains an entry with `path === cwd`: print and exit 0:
+      ```
+      Already registered as "<label>" → <cwd>
+      Nothing to do.
+      ```
+
+   e. **Append + write** — push `{ label, path: cwd }` to registry, `writeBatchUiRegistry(entries)`.
+      - If write fails (permissions, disk): let the `Error` propagate naturally (Node will print a stack trace with the OS error; no need to wrap).
+
+   f. **Confirm** — print:
+      ```
+      Registered "<label>" → <cwd>
+      Run `insight-flow batch-ui` to launch all registered projects.
+      ```
+
+   g. **Wire in `cli.ts`**: `command === "ui-batch-register"` → `cmdUiBatchRegister()`.
+      Add to help text: `ui-batch-register    Register this folder as a batch-ui project`.
 
 9. **Documentation** (`packages/taskflow/README.md`)
    - Add a "## Multi-project launcher" section after the existing `ui` command docs.
@@ -132,7 +170,8 @@ echo "" | insight-flow batch-ui --no-open
 
 - Cross-platform path: `os.homedir()` returns `C:\Users\<user>` on Windows, `/home/<user>` on Linux, `/Users/<user>` on macOS — no special casing needed beyond the `insight-flow.cmd` wrapper for spawn.
 - The master server at `:6100` is already managed by the existing `ui` command's `startServer`; `batch-ui` delegates per-project servers to child `insight-flow ui` processes, so no new server logic is needed.
-- `ui-batch-register` label resolution order: `taskflow.config.json` → `name` field → `path.basename(cwd)`. No user input required.
-- Running `ui-batch-register` twice in the same folder is a no-op (duplicate path check).
+- `ui-batch-register` **requires** `taskflow.config.json` to exist and be valid JSON — there is no fallback to `workTasks/`. This keeps the error surface small and the messages actionable.
+- Label resolution: `config.name` (trimmed, non-empty) → `path.basename(cwd)`. No user input required.
+- Running `ui-batch-register` twice in the same folder is a no-op (duplicate path check by absolute path).
 - Future: a `--kill` sub-command to stop all batch-spawned servers (would need PID tracking in global config).
 - Related: N50 (reduce token waste), N55 (v0.8.0 release) — ship after v0.8.0.
