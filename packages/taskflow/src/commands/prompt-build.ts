@@ -2,6 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { ParsedArgs, TaskflowConfig, AgentGitPermissions } from "../types.js";
 import { applyAgentExtensions } from "../agents.js";
+import { resolveProjectRoot } from "../paths.js";
 
 function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
   const lines: string[] = [];
@@ -33,6 +34,13 @@ function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
       lines.push(
         "- All remote operations (push, createPR, deleteBranchRemote) are NOT permitted.",
       );
+      // Also surface any local ops that were explicitly denied alongside remoteOps: "deny"
+      const localOps = ["createBranch", "checkout", "commit", "merge", "deleteBranchLocal"] as const;
+      for (const op of localOps) {
+        if (rawGitPerms[op] === false) {
+          lines.push(`- ${op} is NOT permitted.`);
+        }
+      }
     } else {
       for (const [op, val] of Object.entries(rawGitPerms)) {
         if (op === "remoteOps") continue;
@@ -110,8 +118,15 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
 
   // Read raw user config to get explicitly-set git permissions (without defaults).
   // Resolved config always has defaults merged in; we only reflect user intent here.
+  // Use project-root resolution so this works when invoked from a subdirectory.
   let rawGitPerms: AgentGitPermissions | undefined;
-  const configPath = resolve(cwd, "taskflow.config.json");
+  let projectRoot: string;
+  try {
+    projectRoot = resolveProjectRoot(cwd);
+  } catch {
+    projectRoot = cwd;
+  }
+  const configPath = resolve(projectRoot, "taskflow.config.json");
   if (existsSync(configPath)) {
     try {
       const raw = JSON.parse(readFileSync(configPath, "utf-8")) as {

@@ -37,6 +37,21 @@
           "status": "approved",
           "at": "2026-05-27T07:49:47.922Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-27T07:51:21.860Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-27T07:57:09.255Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-27T07:59:04.213Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -51,7 +66,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -61,9 +76,15 @@
         "prompt-build",
         "config"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-27T07:51:21.859Z",
+          "commitHash": "99fea71",
+          "commitMessage": "rework(prompt-build): read config from taskflow.config.json, drop taskflow.prompt.json"
+        }
+      ],
+      "branch": "rework/N50-prompt-build-reads-from-taskflow-config-json-and-d",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/33",
       "mergedAt": null
     },
     {

@@ -39,3 +39,31 @@ None. The JSON parse errors are caught silently; `writeFileSync` failures would 
 
 - `AGENT_ENFORCEMENT.md` was already exactly up-to-date (zero diff after `--apply`), so the checklist item "committed" is satisfied by the overall N50 commit.
 - Related: N51 will wire `init` to call `prompt-build --apply`, completing the enforcement-block regeneration story.
+
+
+---
+
+## Round 2 — non-blocking fixes
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-05-27
+**Verdict:** approved
+
+### Summary
+
+Addresses all three non-blocking issues from round 1 in `packages/taskflow/src/commands/prompt-build.ts`. No scope expansion beyond those fixes.
+
+### Changes made
+
+1. **Project-root resolution for raw config read** (`prompt-build.ts:113–122`) — replaced `resolve(cwd, "taskflow.config.json")` with a `resolveProjectRoot(cwd)` walk (fallback to `cwd` on error). Aligns the raw-read path with `resolveConfig()` and fixes the subdirectory invocation gap. Also imports `resolveProjectRoot` from `../paths.js`.
+
+2. **`remoteOps: "deny"` no longer suppresses local-op denials** (`prompt-build.ts:31–44`) — when `remoteOps === "deny"`, the code now also enumerates `["createBranch", "checkout", "commit", "merge", "deleteBranchLocal"]` and emits "NOT permitted" for any that are explicitly `false`.
+
+3. **Double-read note closed** — the raw read still happens alongside `resolveConfig()`, but is now clearly scoped to extracting unmerged user intent. The `resolveProjectRoot` fix makes the two reads consistent. A deeper API refactor (exposing raw config from `resolveConfig`) is left for a future pass if the redundancy causes pain.
+
+### Verification
+
+- `pnpm --dir packages/taskflow run build` — clean
+- `pnpm --dir packages/taskflow run typecheck` — clean
+- `pnpm --dir packages/taskflow test` — 32/32 pass
+- `prompt-build` from `packages/taskflow/src/` subdirectory finds project config correctly
