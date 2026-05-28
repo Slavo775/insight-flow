@@ -699,7 +699,7 @@
       "title": "promote batch-init and batch-prompt-build to top-level commands",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N66-promote-batch-init-and-batch-prompt-build-to-top-l",
       "createdAt": "2026-05-28T09:46:05.868Z",
       "statusHistory": [
@@ -732,6 +732,21 @@
           "status": "implemented",
           "at": "2026-05-28T10:05:00.157Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T10:05:23.826Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T10:17:23.642Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T10:18:50.159Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -746,8 +761,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -761,6 +776,11 @@
           "at": "2026-05-28T09:51:55.382Z",
           "commitHash": "100f4d5",
           "commitMessage": "rework(cli): promote batch-init and batch-prompt-build to top-level commands"
+        },
+        {
+          "at": "2026-05-28T10:05:23.825Z",
+          "commitHash": "c51e126",
+          "commitMessage": "rework(cli): rename batch-init→bulk-init, batch-prompt-build→bulk-prompt-build; bump v0.11.1"
         }
       ],
       "branch": "rework/N66-promote-batch-init-and-batch-prompt-build",
