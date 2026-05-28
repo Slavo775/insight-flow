@@ -23,7 +23,10 @@ Two features landed on main since v0.10.0 that consumers need: `batch-ui --init`
 - `packages/taskflow/package.json` — version field only.
 - `CHANGELOG.md` — add `## [0.11.0]` entry above `## [0.10.0]`.
 - `packages/taskflow/CHANGELOG.md` — same entry (kept in sync).
-- `packages/taskflow/README.md` — update batch-ui section to document `--init` and `--prompt-build`.
+- `packages/taskflow/README.md` — add a `### Batch operations` subsection (or equivalent) to the existing `## Multi-project launcher` section. Must cover:
+  - `batch-ui --init [--force] [--examples]` — purpose, flags, example output, when to use
+  - `batch-ui --prompt-build` — purpose, example output, post-release workflow (upgrade insight-flow → run this to sync all registered projects)
+  - Non-interactive / CI mode for both (pipe from `/dev/null` or `< /dev/null`)
 
 ### Out of scope
 

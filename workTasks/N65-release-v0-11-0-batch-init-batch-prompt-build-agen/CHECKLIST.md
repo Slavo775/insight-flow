@@ -5,7 +5,7 @@
 - [ ] `packages/taskflow/package.json` version is `0.11.0`
 - [ ] `CHANGELOG.md` has `## [0.11.0]` section with Added + Fixed entries for N64
 - [ ] `packages/taskflow/CHANGELOG.md` has the same `## [0.11.0]` section
-- [ ] `packages/taskflow/README.md` documents `batch-ui --init` and `batch-ui --prompt-build`
+- [ ] `packages/taskflow/README.md` has a `### Batch operations` section (or equivalent) with full examples for `--init` and `--prompt-build` including flags, example output, and post-release workflow
 - [ ] `pnpm build` passes with no TypeScript errors
 - [ ] Package published: `npm view insight-flow version` returns `0.11.0`
 - [ ] Git tag `v0.11.0` exists and is pushed to origin

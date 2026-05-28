@@ -703,6 +703,74 @@ Run `insight-flow batch-ui` to start them again.
 
 `ui-batch-down` reads the PIDs written to `~/.insight-flow/batch-ui.json` during the last `batch-ui` launch, sends `SIGTERM` to each, and clears the list. Processes that have already exited are reported as "already stopped" (not an error). The PID list is cleared regardless, so running `ui-batch-down` twice is safe.
 
+### Batch operations
+
+`batch-ui` can also run maintenance commands across all (or selected) registered projects in one shot — without spawning dashboards.
+
+#### Re-init after upgrading
+
+When you install a new version of insight-flow, run `--init` to re-scaffold role files in every registered project:
+
+```bash
+insight-flow batch-ui --init
+```
+
+An interactive picker appears (same as the launch picker). Confirm with **enter** and each project's `init` runs in sequence:
+
+```
+  ✓ my-app
+  ✓ another-app
+  ✗ stale-entry
+    Error: no taskflow.config.json found in /path/to/wrong-folder
+
+2/3 succeeded.
+```
+
+Pass `--force` to overwrite existing role files, or `--examples` to add commented `agents.extend` stubs:
+
+```bash
+insight-flow batch-ui --init --force
+insight-flow batch-ui --init --examples
+```
+
+Non-interactive / CI mode (all projects, no picker):
+
+```bash
+insight-flow batch-ui --init < /dev/null
+```
+
+#### Re-sync role files post-release
+
+After upgrading insight-flow, run `--prompt-build` to apply the updated enforcement block and any `agents.extend` content to every registered project's role files:
+
+```bash
+insight-flow batch-ui --prompt-build
+```
+
+Output:
+
+```
+  ✓ my-app
+  ✓ another-app
+
+2/2 succeeded.
+```
+
+**Post-release workflow:**
+
+```bash
+npm install -g insight-flow@latest     # 1. upgrade the CLI
+insight-flow batch-ui --prompt-build   # 2. sync AGENT_ENFORCEMENT.md + role extensions everywhere
+```
+
+This is the canonical way to propagate `AGENT_ENFORCEMENT.md` and `agents.extend` changes to all your projects after a new release — no manual `cd` into each folder required.
+
+Non-interactive / CI mode:
+
+```bash
+insight-flow batch-ui --prompt-build < /dev/null
+```
+
 ---
 
 ## Multi-project overview
