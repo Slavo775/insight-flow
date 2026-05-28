@@ -39,3 +39,26 @@ No security concerns. The `ctx.resume()` on a suspended context is safe. The `se
 - The TASK.md spec was written before confirming global install file sizes; the divergence was discovered during implementation. No fault.
 - Follow-up task recommended to remove `/sounds/` dead code (endpoint + build copy + empty files).
 - The approach (Web Audio API tones) is portable, dependency-free, and CI-safe — better long-term than binary assets in git.
+
+
+---
+
+## Round 2 — fix-needed
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-28
+**Verdict:** fix-needed
+
+### Blockers
+
+1. The `/sounds/` HTTP endpoint and mp3 file infrastructure were removed entirely, but they should have been kept. "why the sounds what i have there before is not good i wanted to have it there in the future i wanted to have it custom" — the intent was always to support custom user-supplied sound files. The fix should restore the `/sounds/` endpoint and sounds directory, so a user can drop in custom mp3 files. Web Audio API tones should remain as a fallback when no custom file is present.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- Restore `/sounds/` endpoint in `server/index.ts`, bring back the `src/server/sounds/` directory and build copy step.
+- `playStatusSound()` should try the mp3 file first (`new Audio(src).play()`); fall back to Web Audio API tones if the fetch fails (e.g. 404 or empty file).
+- The Web Audio API implementation itself is good and should be kept as the fallback.

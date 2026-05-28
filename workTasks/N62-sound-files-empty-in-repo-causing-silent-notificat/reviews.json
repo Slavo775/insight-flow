@@ -9,6 +9,15 @@
       "type": "ai",
       "by": "task-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-05-28T07:05:34.214Z",
+      "endedAt": "2026-05-28T07:05:56.004Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: /sounds/ endpoint and mp3 infrastructure removed but should be kept for future custom sounds. Restore endpoint + build copy + sounds dir; Web Audio API tones kept as fallback when no file present.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }
