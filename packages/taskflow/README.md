@@ -711,23 +711,23 @@ After installing a new version of insight-flow, run two commands to bring all yo
 
 ```bash
 npm install -g insight-flow@latest   # 1. install the new version
-insight-flow batch-init              # 2. re-scaffold role files in every registered project
-insight-flow batch-prompt-build      # 3. sync AGENT_ENFORCEMENT.md + agents.extend into role files
+insight-flow bulk-init              # 2. re-scaffold role files in every registered project
+insight-flow bulk-prompt-build      # 3. sync AGENT_ENFORCEMENT.md + agents.extend into role files
 ```
 
 An interactive picker appears for each command so you can select which projects to update. To run against all projects without prompting (CI mode):
 
 ```bash
-insight-flow batch-init < /dev/null
-insight-flow batch-prompt-build < /dev/null
+insight-flow bulk-init < /dev/null
+insight-flow bulk-prompt-build < /dev/null
 ```
 
-### batch-init
+### bulk-init
 
 Re-runs `insight-flow init` in every registered project to lay down updated role files and scaffolding:
 
 ```bash
-insight-flow batch-init
+insight-flow bulk-init
 ```
 
 Output:
@@ -744,16 +744,16 @@ Output:
 Pass `--force` to overwrite existing role files, or `--examples` to add commented `agents.extend` stubs:
 
 ```bash
-insight-flow batch-init --force
-insight-flow batch-init --examples
+insight-flow bulk-init --force
+insight-flow bulk-init --examples
 ```
 
-### batch-prompt-build
+### bulk-prompt-build
 
 Re-runs `insight-flow prompt-build --apply` in every registered project to sync `AGENT_ENFORCEMENT.md` and any `agents.extend` entries from `taskflow.config.json` into the project's role files:
 
 ```bash
-insight-flow batch-prompt-build
+insight-flow bulk-prompt-build
 ```
 
 Output:

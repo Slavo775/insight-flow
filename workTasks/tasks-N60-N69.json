@@ -717,12 +717,32 @@
           "status": "implemented",
           "at": "2026-05-28T09:51:22.139Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T09:51:55.383Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T10:03:26.515Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T10:05:00.157Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": "2026-05-28T09:51:22.022Z",
-        "completedAt": "2026-05-28T09:51:22.138Z",
-        "filesChanged": [],
+        "startedAt": "2026-05-28T10:03:26.515Z",
+        "completedAt": "2026-05-28T10:05:00.157Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/README.md",
+          "packages/taskflow/package.json",
+          "packages/taskflow/CHANGELOG.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -736,9 +756,15 @@
         "batch",
         "rename"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-28T09:51:55.382Z",
+          "commitHash": "100f4d5",
+          "commitMessage": "rework(cli): promote batch-init and batch-prompt-build to top-level commands"
+        }
+      ],
+      "branch": "rework/N66-promote-batch-init-and-batch-prompt-build",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/45",
       "mergedAt": null
     }
   ]

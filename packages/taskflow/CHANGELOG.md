@@ -4,6 +4,12 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.11.1] — 2026-05-28
+
+### Changed
+
+- **N66** — `batch-init` renamed to `bulk-init`; `batch-prompt-build` renamed to `bulk-prompt-build`. Both remain top-level commands with identical behaviour — only the command names changed. Update any scripts or aliases that reference the old `batch-*` names.
+
 ## [0.11.0] — 2026-05-28
 
 ### Added
