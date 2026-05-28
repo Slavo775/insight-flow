@@ -31,6 +31,15 @@
         "comment": "Restored /sounds/ endpoint, build copy, and placeholder files. playStatusSound() now tries mp3 via HEAD check first; falls back to Web Audio API tones when file is absent or empty.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-05-28T07:14:53.481Z",
+      "endedAt": "2026-05-28T07:15:10.024Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: /sounds/ HEAD response missing Content-Length header — server omits it, so len check always returns 0 and fallback fires even with a real mp3. Fix: explicit Content-Length in res.writeHead().",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
     }
   ]
 }

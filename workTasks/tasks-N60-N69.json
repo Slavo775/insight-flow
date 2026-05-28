@@ -221,7 +221,7 @@
       "title": "sound files empty in repo causing silent notifications since 0.9.0",
       "type": "fix",
       "priority": "high",
-      "status": "fixed",
+      "status": "fix-needed",
       "folder": "workTasks/N62-sound-files-empty-in-repo-causing-silent-notificat",
       "createdAt": "2026-05-27T20:51:43.074Z",
       "statusHistory": [
@@ -294,6 +294,21 @@
           "status": "fixed",
           "at": "2026-05-28T07:09:51.436Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T07:10:30.483Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T07:14:53.480Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-28T07:15:10.025Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -305,7 +320,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -340,6 +355,11 @@
           "at": "2026-05-28T07:06:29.891Z",
           "commitHash": "260e874",
           "commitMessage": "docs(tasks): N62 human review — fix-needed"
+        },
+        {
+          "at": "2026-05-28T07:10:30.483Z",
+          "commitHash": "6060f04",
+          "commitMessage": "fix(dashboard,server): restore /sounds/ endpoint with Web Audio fallback"
         }
       ],
       "branch": "fix/N62-sound-files-empty-in-repo",

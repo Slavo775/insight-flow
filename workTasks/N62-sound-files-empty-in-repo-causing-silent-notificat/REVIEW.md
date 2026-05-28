@@ -62,3 +62,20 @@ None.
 - Restore `/sounds/` endpoint in `server/index.ts`, bring back the `src/server/sounds/` directory and build copy step.
 - `playStatusSound()` should try the mp3 file first (`new Audio(src).play()`); fall back to Web Audio API tones if the fetch fails (e.g. 404 or empty file).
 - The Web Audio API implementation itself is good and should be kept as the fallback.
+
+
+---
+
+## Round 3 — fix-needed
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-28
+**Verdict:** fix-needed
+
+### Blockers
+
+1. HEAD response from `/sounds/idle-ping.mp3` returns 200 OK but no `Content-Length` header — confirmed via DevTools screenshot. The server does `res.end(data)` without explicitly setting `Content-Length`, so Node omits it. `r.headers.get('content-length')` returns `null` → parsed as `0` → `len > 0` is `false` → Web Audio fallback fires even when a real custom mp3 file is present. Fix: add `"Content-Length": String(data.length)` to the `res.writeHead()` call in the `/sounds/` handler in `server/index.ts`.
+
+### Notes
+
+- "okej but sound exists but the sound is fallback why? :D" — HEAD request visible in DevTools shows 200 OK with audio/mpeg content-type but missing Content-Length header.
