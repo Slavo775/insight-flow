@@ -1,0 +1,81 @@
+{
+  "taskId": "N68",
+  "reviews": [
+    {
+      "startedAt": "2026-05-28T13:09:31.812Z",
+      "endedAt": "2026-05-28T13:11:22.015Z",
+      "verdict": "approved",
+      "comment": "AI review approved with 8 non-blocking suggestions. Implementation matches spec end-to-end; all gates green; smoke-tested live. See REVIEW.md for follow-ups (graceful 413, dedup of event frames, consolidate dual status systems, rename migrate-hooks, add HTTP test).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-28T13:22:51.451Z",
+      "endedAt": "2026-05-28T13:24:33.680Z",
+      "verdict": "approved",
+      "comment": "Round 2 approved. All 8 round-1 non-blockers addressed; build + typecheck + 53 tests pass; live-verified hook alias, 400/413 paths, distinct title glyphs. 4 minor follow-ups noted for future tasks (dashboard indicator unification, hook alias selectivity, health probe, sync file reads).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-28T13:26:28.225Z",
+      "endedAt": "2026-05-28T13:26:52.965Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: false 'agent done' notification fires when agent is still active (Stop hook = turn end, not task done). Fix wording or gating before merge.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-28T13:30:40.494Z",
+      "endedAt": "2026-05-28T13:31:22.775Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker 2: master server status badge stays 'idle + stale' while project is actively worked on. Round-2 fix #3 removed legacy activity-engine status push to master; new /log/events path requires the project-local insight-flow binary, but hooks invoke the globally installed (pre-N68) binary which has no /log/events POST. Fix needs to restore a fallback push, repoint hooks at local dist, or document the upgrade dependency.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-28T13:32:47.948Z",
+        "endedAt": "2026-05-28T13:35:19.733Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "comment": "Blocker 1: reworded 'Claude finished' → 'Awaiting input' (and 'Claude needs permission' → 'Permission required') in both fireStatusDesktopNotif and fireDesktopNotif. Stop hook = turn ended, not task complete; new wording reflects that. Blocker 2: activity-engine events now feed eventStore.insert via a synthetic HookEventInput so master receives status pushes through the unified derivation even when hooks call an unmigrated global CLI binary. Both fixes verified: build + typecheck clean, all 53 tests pass, dashboard restarted on 6006.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-28T13:37:27.510Z",
+      "endedAt": "2026-05-28T13:37:54.350Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker 3: master server rejects 'done'/'awaiting-permission' as invalid status (validates against active|idle|permission-required only). Badge stays on last accepted value. Fix needs translation at push site or widening master's accepted set.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-28T13:39:30.826Z",
+        "endedAt": "2026-05-28T13:43:13.907Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/insight-flow-master/src/types.ts",
+          "packages/insight-flow-master/src/registry.ts",
+          "packages/insight-flow-master/src/server.ts",
+          "packages/insight-flow-master/src/overview.ts"
+        ],
+        "comment": "Blocker 3: widened master server's accepted Claude status vocabulary from 3-state (active|idle|permission-required) to 5-state (added done, awaiting-permission). Updated MasterProjectState type, VALID_STATUSES set, 400-error message, overview CSS (.claude-status-done, .claude-status-awaiting-permission) + render branches. Master + project server restarted; live curl probe: all 5 valid statuses return 200, 'bogus' returns 400 as expected. Backwards-compat: legacy 3-state pushes still work.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-28T13:43:57.086Z",
+      "endedAt": "2026-05-28T13:45:39.662Z",
+      "verdict": "approved",
+      "comment": "Round 4 approved. All 3 blockers from human-review rounds resolved end-to-end: notification wording honest, activity-engine feeds unified EventStore, master server accepts 4-state vocabulary natively. Live-verified: 5 valid statuses → 200, bogus → 400. 53 tests pass. 5 minor non-blocking observations recorded for future cleanup.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

@@ -553,7 +553,17 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
 
     function updatePageTitle(state) {
       var base = 'Taskflow Dashboard';
-      var prefix = { active: '⚡', idle: '💤', 'permission-needed': '🚨' };
+      // Distinct glyphs per N68 state so the tab bar disambiguates
+      // "Claude finished its turn" (done) from "Claude waiting for input"
+      // (idle). 'permission-needed' is the legacy dashboard name and shares
+      // the alert glyph with the new 'awaiting-permission'.
+      var prefix = {
+        active: '⚡',
+        idle: '💤',
+        done: '✅',
+        'awaiting-permission': '🚨',
+        'permission-needed': '🚨',
+      };
       document.title = state && prefix[state] ? prefix[state] + ' ' + base : base;
     }
 
@@ -889,7 +899,28 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     function fireDesktopNotif() {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       if (notifSettings.muteFocused && !document.hidden) return;
-      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + 'Claude finished';
+      // N68 round-3 fix: the Stop hook means "turn ended" not "task done", so
+      // the older "Claude finished" wording was misleading. "Awaiting input"
+      // accurately reflects what's happening: Claude paused, ball is in the
+      // user's court.
+      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + 'Awaiting input';
+      var sound = CONFIG_SOUNDS_ENABLED && notifSettings.sound !== false;
+      try {
+        new Notification(title, { silent: !sound });
+      } catch(e) {}
+    }
+
+    // N68: fire browser notification on derived status transitions. Only the
+    // two actionable statuses (done, awaiting-permission) notify; idle/active
+    // transitions are silent so the user isn't pinged for routine flips.
+    function fireStatusDesktopNotif(toStatus) {
+      if (toStatus !== 'done' && toStatus !== 'awaiting-permission') return;
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      if (notifSettings.muteFocused && !document.hidden) return;
+      // Wording mirrors fireDesktopNotif: a Stop hook = "Awaiting input", not
+      // "Claude finished" (that would imply the whole task is complete).
+      var label = toStatus === 'done' ? 'Awaiting input' : 'Permission required';
+      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + label;
       var sound = CONFIG_SOUNDS_ENABLED && notifSettings.sound !== false;
       try {
         new Notification(title, { silent: !sound });
@@ -964,6 +995,28 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       sock.on('activity', function(ev) {
         if (typeof addActivityEvent === 'function') addActivityEvent(ev);
         if (typeof refreshTimestamps === 'function') refreshTimestamps();
+      });
+
+      // N68: every hook event arrives here as a passthrough frame. The
+      // dashboard does not currently render these directly — the activity
+      // feed is still hydrated from the legacy activity engine — but the
+      // hook is here so future UI (live event log, etc.) can subscribe.
+      sock.on('event', function(_frame) { /* reserved for future UI */ });
+
+      // N68: derived status transitions. Server emits this only when the
+      // latest event by timestamp flips the project status.
+      sock.on('status', function(frame) {
+        if (!frame || typeof frame.to !== 'string') return;
+        var to = frame.to;
+        // Pass the raw four-state value through; updatePageTitle owns the
+        // glyph mapping so done ✅ stays visually distinct from idle 💤.
+        updatePageTitle(to);
+        // Sound + notification only for actionable transitions.
+        if (to === 'done' || to === 'awaiting-permission') {
+          var soundState = to === 'done' ? 'idle' : 'permission-needed';
+          playStatusSound(soundState);` + (browserNotifications ? `
+          fireStatusDesktopNotif(to);` : ``) + `
+        }
       });` + (browserNotifications ? `
 
       sock.on('agent-done', function() { fireDesktopNotif(); });` : ``) + `
@@ -1026,8 +1079,10 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       var newStatus = claudeStatusFromEvent(ev);
       if (newStatus) {
         updateActivityStatus(newStatus);
-        updatePageTitle(newStatus);
-        if ((newStatus === 'idle' || newStatus === 'permission-needed') && !isReplayingSnapshot) playStatusSound(newStatus);
+        // N68: page title + sound now driven exclusively by the status
+        // WebSocket frame from /log/events (single source). The activity
+        // path still updates the in-panel status indicator for legacy
+        // users who have not migrated their hooks.
       }
 
       if (emptyStateTimer) { clearTimeout(emptyStateTimer); emptyStateTimer = null; }

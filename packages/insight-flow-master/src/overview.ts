@@ -95,6 +95,12 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .claude-status-active { background: #0a3622; color: var(--green); }
     .claude-status-idle { background: var(--border); color: var(--text-muted); }
     .claude-status-permission { background: #3b1111; color: var(--red); }
+    /* N68 four-state additions — visually adjacent to their legacy siblings
+       (done ≈ idle, awaiting-permission ≈ permission) but with a green accent
+       on done so the user can tell "Claude turn ended" apart from "Claude
+       60s wait". */
+    .claude-status-done { background: var(--border); color: var(--green); }
+    .claude-status-awaiting-permission { background: #3b1111; color: var(--red); }
     .proj-footer { display: flex; justify-content: flex-end; }
     .open-link { font-size: 11px; color: var(--accent); text-decoration: none; }
     .open-link:hover { text-decoration: underline; }
@@ -201,14 +207,21 @@ function getScript(initialData: string): string {
     function renderCard(p) {
       var bi = badgeInfo(p.lastSeenAt);
       var s = p.state || {};
+      // N68: 'awaiting-permission' shares the alert card border with the
+      // legacy 'permission-required'; 'done' borders nothing (it's a
+      // not-actively-working state, same as 'idle').
       var statusCls = s.claudeStatus === 'active' ? 'status-active'
-        : s.claudeStatus === 'permission-required' ? 'status-permission'
+        : (s.claudeStatus === 'permission-required' || s.claudeStatus === 'awaiting-permission') ? 'status-permission'
         : '';
       var claudeBadgeCls = s.claudeStatus === 'active' ? 'claude-status-active'
         : s.claudeStatus === 'permission-required' ? 'claude-status-permission'
+        : s.claudeStatus === 'awaiting-permission' ? 'claude-status-awaiting-permission'
+        : s.claudeStatus === 'done' ? 'claude-status-done'
         : 'claude-status-idle';
       var claudeBadgeLabel = s.claudeStatus === 'active' ? 'active'
         : s.claudeStatus === 'permission-required' ? 'permission required'
+        : s.claudeStatus === 'awaiting-permission' ? 'awaiting permission'
+        : s.claudeStatus === 'done' ? 'done'
         : s.claudeStatus === 'idle' ? 'idle'
         : '';
       var claudeBadgeHtml = claudeBadgeLabel

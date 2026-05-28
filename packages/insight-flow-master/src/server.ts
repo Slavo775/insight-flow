@@ -112,10 +112,14 @@ export async function startMasterServer(
       const status = String(parsed.status ?? "");
       const ok = registry.updateStatus(id, status);
       if (!ok) {
-        const validStatuses = ["active", "idle", "permission-required"];
+        const validStatuses = ["active", "idle", "permission-required", "done", "awaiting-permission"];
         if (!validStatuses.includes(status)) {
           res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Invalid status; expected active|idle|permission-required" }));
+          res.end(
+            JSON.stringify({
+              error: "Invalid status; expected active|idle|done|permission-required|awaiting-permission",
+            }),
+          );
         } else {
           res.writeHead(401, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "Unknown project id" }));

@@ -37,6 +37,7 @@ import { cmdShow } from "./commands/show.js";
 import { cmdBatchUi, cmdBatchUiAdd, cmdBatchUiList, cmdBatchUiRemove, cmdUiBatchRegister, cmdUiBatchUnregister, cmdUiBatchDown, cmdBatchInit, cmdBatchPromptBuild } from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
+import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
 import { cmdLogActivity } from "./commands/log-activity.js";
 import { cmdLogEvent } from "./commands/log-event.js";
@@ -112,9 +113,11 @@ function printHelp(): void {
     prompt-build [--apply]                Print or apply enforcement block from taskflow.config.json
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
     install-lifecycle-hooks [--bin <path>] Install lifecycle event hooks (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) into .claude/settings.json (idempotent)
+    migrate-hooks [--bin <path>]          Refresh hook scripts after upgrading the package; bumps taskflow.config.json.hooksVersion (idempotent)
     notify "<message>" [--title <t>] [--project <p>]   Fire an OS notification (fire-and-forget; respects notifications.cli)
     log-activity "<message>"                            Emit free-form narrative to the activity feed (no-op when activityEngine.enabled is false)
     log-event <type> [--task Nxx] [--data <json>]       Emit a typed lifecycle event (mandatory: start|done; optional: active|idle|edit-start|edit-end|research-start|research-end|review-start|review-end|git-start|git-end)
+    hook <ClaudeHookEventName> [--data <json>]          Sugar for log-event --source hook --hook-name <raw> (N68; accepts Stop|Notification|PreToolUse|PostToolUse|SessionStart|SessionEnd|UserPromptSubmit|SubagentStop|PermissionRequest)
 
     ui-batch-register                     Register this folder as a batch-ui project (reads taskflow.config.json)
     ui-batch-unregister                   Unregister this folder from batch-ui (mirror of ui-batch-register)
@@ -164,6 +167,8 @@ async function run(): Promise<void> {
     cmdInstallActivityHook(config, opts);
   } else if (command === "install-lifecycle-hooks") {
     cmdInstallLifecycleHooks(opts);
+  } else if (command === "migrate-hooks") {
+    cmdMigrateHooks(opts);
   } else if (command === "notify") {
     const config = resolveConfig();
     cmdNotify(config, opts);
@@ -173,6 +178,36 @@ async function run(): Promise<void> {
   } else if (command === "log-event") {
     const config = resolveConfig();
     cmdLogEvent(config, opts);
+  } else if (command === "hook") {
+    // N68: `insight-flow hook <RawClaudeHookEvent>` — sugar around
+    // `insight-flow log-event <derived> --source hook --hook-name <raw>`.
+    // The server's `/log/events` ingestion already keys off the raw hookName
+    // for status derivation; the derived type stays meaningful for the
+    // legacy per-task events.json + activity log.
+    const config = resolveConfig();
+    const raw = (opts._ as string[])[0];
+    if (!raw) {
+      process.stderr.write("usage: insight-flow hook <ClaudeHookEventName>\n");
+      process.exit(1);
+    }
+    const RAW_TO_DERIVED: Record<string, string> = {
+      SessionStart: "session-start",
+      SessionEnd: "session-end",
+      Stop: "agent-idle",
+      SubagentStop: "subagent-done",
+      Notification: "notification",
+      PreToolUse: "tool-requested",
+      PostToolUse: "tool-approved",
+      UserPromptSubmit: "agent-active",
+      PermissionRequest: "approval-required",
+    };
+    const derived = RAW_TO_DERIVED[raw] ?? "notification";
+    cmdLogEvent(config, {
+      ...opts,
+      _: [derived, ...(opts._ as string[]).slice(1)],
+      source: "hook",
+      "hook-name": raw,
+    });
   } else if (command === "ui-batch-register") {
     cmdUiBatchRegister();
   } else if (command === "ui-batch-unregister") {

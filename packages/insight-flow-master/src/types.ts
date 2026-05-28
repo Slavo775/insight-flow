@@ -3,13 +3,28 @@ export interface MasterServerConfig {
   standalone?: boolean;
 }
 
+/**
+ * Claude project status vocabulary.
+ * - `active` / `idle` / `permission-required` — legacy three-state pushed by
+ *   the activity-engine on pre-N68 project servers.
+ * - `done` / `awaiting-permission` — N68 four-state pushed via
+ *   `/log/events` derivation. Master accepts both vocabularies so projects
+ *   can upgrade independently of each other.
+ */
+export type ClaudeProjectStatus =
+  | "active"
+  | "idle"
+  | "permission-required"
+  | "done"
+  | "awaiting-permission";
+
 export interface MasterProjectState {
   currentTaskId: string | null;
   currentTaskTitle: string | null;
   currentTaskStatus: string | null;
   taskCounts: Record<string, number>;
   recentActivity: object[];
-  claudeStatus?: "active" | "idle" | "permission-required";
+  claudeStatus?: ClaudeProjectStatus;
 }
 
 export interface MasterProjectEntry {

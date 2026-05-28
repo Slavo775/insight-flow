@@ -1,6 +1,18 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+/**
+ * Bumped whenever the bundled hook layout changes in a way that requires
+ * consumer projects to re-run `insight-flow migrate-hooks`. The CLI compares
+ * this against `taskflow.config.json.hooksVersion` and warns on mismatch.
+ *
+ * Version history:
+ *   1 — initial lifecycle hooks (N28).
+ *   2 — N68 hook scripts also POST to /log/events via the CLI; daily JSONL
+ *       backup at <workDir>/.events/<YYYY-MM-DD>.jsonl.
+ */
+export const BUNDLED_HOOKS_VERSION = 2;
+
 export type ActivityHookStatus = "ok" | "hook-missing" | "settings-missing" | "both-missing";
 
 const HOOK_REL_PATH = ".claude/hooks/taskflow-activity.sh";
@@ -375,7 +387,9 @@ export interface InstallLifecycleHooksResult {
 export function installLifecycleHooks(
   cwd: string,
   insightFlowBin: string = "insight-flow",
+  options: { force?: boolean } = {},
 ): InstallLifecycleHooksResult {
+  const force = options.force === true;
   const hooksDir = resolve(cwd, ".claude", "hooks");
   if (!existsSync(hooksDir)) {
     mkdirSync(hooksDir, { recursive: true });
@@ -393,9 +407,24 @@ export function installLifecycleHooks(
   let hooksWritten = 0;
   for (const { file, script } of hookDefs) {
     const hookPath = resolve(hooksDir, file);
+    const expected = script.replace(/__INSIGHT_FLOW_BIN__/g, insightFlowBin);
     if (!existsSync(hookPath)) {
-      writeFileSync(hookPath, script.replace(/__INSIGHT_FLOW_BIN__/g, insightFlowBin), { mode: 0o755 });
+      writeFileSync(hookPath, expected, { mode: 0o755 });
       hooksWritten++;
+    } else if (force) {
+      // N68 migration: rewrite an existing script only when the on-disk
+      // content differs from what we'd emit now (lets repeated migrations
+      // remain a no-op when nothing's changed).
+      let current = "";
+      try {
+        current = readFileSync(hookPath, "utf-8");
+      } catch {
+        current = "";
+      }
+      if (current !== expected) {
+        writeFileSync(hookPath, expected, { mode: 0o755 });
+        hooksWritten++;
+      }
     }
   }
 

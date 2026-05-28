@@ -15,11 +15,13 @@ import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
 import { Server as IOServer, type Socket as IOSocket } from "socket.io";
-import type { TaskflowConfig } from "../types.js";
+import type { TaskflowConfig, HookEventInput } from "../types.js";
 import { getWorkDir } from "../config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
 import { getDashboardHtml, getNavHtml, getNavCss, getConfigPageHtml } from "./dashboard.js";
-import { detectActivityHookStatus, type ActivityHookStatus } from "../activity-hook.js";
+import { detectActivityHookStatus, type ActivityHookStatus, BUNDLED_HOOKS_VERSION } from "../activity-hook.js";
+import { EventStore } from "./event-stream.js";
+import { HookEventInputSchema } from "../schema/index.js";
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -391,6 +393,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
   const masterUrl = config.master?.url ?? "http://localhost:6100";
 
+  // N68: in-memory hook-event store driving derived project status.
+  const eventStore = new EventStore();
+
   const server = createServer((req, res) => {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);
 
@@ -491,6 +496,91 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
+    // N68: hook event ingestion. Hooks POST one event per fire; server orders
+    // by `timestamp`, derives status, broadcasts an `event` frame on fresh
+    // events and a `status` frame only on transitions, then forwards to
+    // master.
+    if (url.pathname === "/log/events" && req.method === "POST") {
+      let body = "";
+      let aborted = false;
+      req.on("data", (chunk: Buffer) => {
+        if (aborted) return;
+        body += chunk.toString("utf-8");
+        if (body.length > 64 * 1024) {
+          aborted = true;
+          res.writeHead(413, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: "payload too large" }));
+          req.destroy();
+        }
+      });
+      req.on("end", () => {
+        if (aborted) return;
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(body);
+        } catch {
+          res.writeHead(400, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: "invalid JSON" }));
+          return;
+        }
+        const validated = HookEventInputSchema.safeParse(parsed);
+        if (!validated.success) {
+          res.writeHead(400, { "Content-Type": MIME[".json"] });
+          res.end(
+            JSON.stringify({
+              ok: false,
+              error: "validation failed",
+              issues: validated.error.issues.map((i) => ({
+                path: i.path.join("."),
+                message: i.message,
+              })),
+            }),
+          );
+          return;
+        }
+        const event = validated.data;
+        const { duplicate, from, to } = eventStore.insert(event);
+
+        // Skip socket emit on duplicates so retried hooks don't double-render
+        // in the dashboard. Status frame still gated on a real transition.
+        if (!duplicate) {
+          io.emit("event", { kind: "event", event });
+          if (from !== to) {
+            const statusAt = new Date().toISOString();
+            io.emit("status", {
+              kind: "status",
+              from,
+              to,
+              at: statusAt,
+              latestEventId: event.id,
+            });
+            if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+          }
+        }
+
+        res.writeHead(200, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ ok: true, status: to, duplicate }));
+      });
+      req.on("error", () => {
+        if (aborted) return;
+        res.writeHead(500, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ ok: false, error: "read failed" }));
+      });
+      return;
+    }
+
+    // N68: read-only inspection — current derived status + recent event window.
+    if (url.pathname === "/log/status") {
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(
+        JSON.stringify({
+          status: eventStore.getStatus(),
+          events: eventStore.getEvents(),
+        }),
+      );
       return;
     }
 
@@ -611,23 +701,43 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     });
   });
 
-  const CLAUDE_STATUS_MAP: Record<string, string> = {
-    "active": "active",
-    "agent-active": "active",
-    "idle": "idle",
-    "agent-idle": "idle",
-    "approval-required": "permission-required",
-    "tool-approved": "active",
-  };
-
+  // N68 round-3 fix: activity-engine events ALSO feed the EventStore so the
+  // master overview gets status updates even when hooks call an unmigrated
+  // (pre-N68) `insight-flow` binary that doesn't POST to `/log/events`. Both
+  // paths funnel through the same `statusFromEvent` derivation, so the
+  // four-state vocabulary stays unified — the activity path is just a
+  // fallback writer keyed off the dash-case derived names (`agent-idle`,
+  // `approval-required`, …) which `statusFromEvent` already knows.
   let activityDebounceTimer: NodeJS.Timeout | null = null;
+  let activitySeq = 0;
   activity.onEvent((event) => {
     io.emit("activity", event);
-    const claudeStatus = CLAUDE_STATUS_MAP[event.action];
-    if (claudeStatus && masterId) {
-      pushStatusToMaster(masterUrl, masterId, claudeStatus);
+
+    // Only forward Event-tool activity rows (hook-sourced) — Tool/Skill/Phase
+    // activity rows don't carry hook-level state and would just add noise.
+    if (event.tool === "Event" && typeof event.action === "string") {
+      const synthetic: HookEventInput = {
+        id: `act_${event.ts}_${activitySeq++}`,
+        timestamp: event.ts,
+        // Pass the dash-case derived action directly; `statusFromEvent`
+        // accepts both vocabularies.
+        type: event.action,
+        payload: {},
+      };
+      const { duplicate, from, to } = eventStore.insert(synthetic);
+      if (!duplicate && from !== to) {
+        io.emit("status", {
+          kind: "status",
+          from,
+          to,
+          at: new Date().toISOString(),
+          latestEventId: synthetic.id,
+        });
+        if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+      }
     }
-    // Debounce master push so rapid tool events don't flood it
+
+    // Debounce master state push so rapid tool events don't flood it.
     if (activityDebounceTimer) clearTimeout(activityDebounceTimer);
     activityDebounceTimer = setTimeout(() => {
       activityDebounceTimer = null;
@@ -659,6 +769,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     }
     if (!config.master?.standalone) {
       console.log("  Overview: http://localhost:" + serverPort + "/overview");
+    }
+    const installedHooksVersion = typeof config.hooksVersion === "number" ? config.hooksVersion : 0;
+    if (installedHooksVersion < BUNDLED_HOOKS_VERSION) {
+      console.log(
+        "  Hooks:   installed v" + installedHooksVersion +
+        " < bundled v" + BUNDLED_HOOKS_VERSION +
+        " — run `insight-flow migrate-hooks` to upgrade",
+      );
     }
     console.log("");
 
