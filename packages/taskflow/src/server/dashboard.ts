@@ -899,11 +899,9 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
     function fireDesktopNotif() {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       if (notifSettings.muteFocused && !document.hidden) return;
-      // N68 round-3 fix: the Stop hook means "turn ended" not "task done", so
-      // the older "Claude finished" wording was misleading. "Awaiting input"
-      // accurately reflects what's happening: Claude paused, ball is in the
-      // user's court.
-      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + 'Awaiting input';
+      // N72: "Done" replaces N68's turn-end wording — user feedback was that
+      // the prior phrasing sounded like a permission prompt.
+      var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + 'Done';
       var sound = CONFIG_SOUNDS_ENABLED && notifSettings.sound !== false;
       try {
         new Notification(title, { silent: !sound });
@@ -917,9 +915,8 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       if (toStatus !== 'done' && toStatus !== 'awaiting-permission') return;
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       if (notifSettings.muteFocused && !document.hidden) return;
-      // Wording mirrors fireDesktopNotif: a Stop hook = "Awaiting input", not
-      // "Claude finished" (that would imply the whole task is complete).
-      var label = toStatus === 'done' ? 'Awaiting input' : 'Permission required';
+      // Wording mirrors fireDesktopNotif: "Done" on Stop hook (N72).
+      var label = toStatus === 'done' ? 'Done' : 'Permission required';
       var title = (PROJECT_NAME ? PROJECT_NAME + ': ' : '') + label;
       var sound = CONFIG_SOUNDS_ENABLED && notifSettings.sound !== false;
       try {
