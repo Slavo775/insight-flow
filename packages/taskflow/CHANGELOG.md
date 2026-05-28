@@ -4,6 +4,17 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-05-28
+
+### Added
+
+- **N64** — `batch-ui --init [--force] [--examples]` runs `insight-flow init` in all (or interactively selected) registered batch-ui projects. Useful after upgrading insight-flow to re-scaffold role files across every consumer project in one command.
+- **N64** — `batch-ui --prompt-build` runs `insight-flow prompt-build --apply` in all (or selected) registered projects. The canonical post-release workflow: after `npm install -g insight-flow@latest`, run `insight-flow batch-ui --prompt-build` to sync `AGENT_ENFORCEMENT.md` and role extensions everywhere.
+
+### Fixed
+
+- **N64** — `prompt-build --apply` now writes `AGENT_ENFORCEMENT.md` into `config.rolesDir` (e.g. `.claude/roles/`) instead of the project root when the project's role files live there. Consumer projects initialised with `insight-flow init` now get the enforcement file co-located with their role files so `@AGENT_ENFORCEMENT.md` references resolve correctly.
+
 ## [0.10.0] — 2026-05-28
 
 ### Security
