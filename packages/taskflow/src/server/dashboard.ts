@@ -514,7 +514,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         if (!AudioCtx) return;
         var ctx = new AudioCtx();
         if (ctx.state === 'suspended') ctx.resume();
-        function beep(freq, t, dur, vol) {
+        var beep = function(freq, t, dur, vol) {
           var osc = ctx.createOscillator();
           var gain = ctx.createGain();
           osc.connect(gain);
@@ -525,7 +525,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
           osc.start(t);
           osc.stop(t + dur);
-        }
+        };
         var now = ctx.currentTime;
         if (state === 'idle') {
           beep(880, now, 0.3, 0.2);

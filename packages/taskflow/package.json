@@ -22,7 +22,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup && rm -rf dist/sounds && cp -r src/server/sounds dist/sounds",
+    "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "pnpm run build && node test/init.test.mjs && node test/migrate-reviews.test.mjs && node test/scaffold-and-bundle.test.mjs && node test/no-technology-tight.test.mjs && node test/activity-hook.test.mjs && node test/notify.test.mjs && node test/log-activity.test.mjs && node test/log-event.test.mjs",

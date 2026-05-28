@@ -2,11 +2,12 @@
 
 ## Done criteria
 
-- [ ] `packages/taskflow/src/server/sounds/idle-ping.mp3` is non-zero (≥ 1 KB)
-- [ ] `packages/taskflow/src/server/sounds/permission-alert.mp3` is non-zero (≥ 1 KB)
-- [ ] `pnpm build` copies both files to `packages/taskflow/dist/sounds/` at the same sizes
-- [ ] `*.mp3 binary` entry present in `.gitattributes` at repo root or package root
-- [ ] HTTP endpoint `GET /sounds/idle-ping.mp3` returns `content-type: audio/mpeg` (non-empty body)
+- [ ] `playStatusSound()` in `dashboard.ts` uses Web Audio API (no `new Audio()` / no `/sounds/` fetch)
+- [ ] `var beep = function(...)` (not a block-scoped function declaration)
+- [ ] `src/server/sounds/` directory and all mp3 files deleted from repo
+- [ ] `/sounds/` HTTP endpoint removed from `server/index.ts`
+- [ ] `.mp3` MIME entry removed from `server/index.ts` MIME map
+- [ ] `package.json` build script is `"tsup"` only (no sounds copy)
 
 ## Quality gates
 
@@ -16,6 +17,6 @@
 
 ## Verification
 
-- [ ] `ls -lh packages/taskflow/src/server/sounds/` shows > 0B for both mp3 files
-- [ ] `ls -lh packages/taskflow/dist/sounds/` shows matching sizes after build
+- [ ] `ls packages/taskflow/src/server/sounds/` → directory does not exist
+- [ ] `ls packages/taskflow/dist/sounds/` → directory does not exist after build
 - [ ] Manual: `pnpm play`, open dashboard, trigger idle/permission status — audio plays audibly

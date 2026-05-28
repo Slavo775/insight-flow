@@ -10,69 +10,50 @@
 
 ## Goal
 
-1. Real audio content for `idle-ping.mp3` and `permission-alert.mp3` committed to `src/server/sounds/` (non-zero size).
-2. `pnpm build` produces a `dist/sounds/` directory with the same non-zero files.
-3. A running dev server at `http://localhost:6006/sounds/idle-ping.mp3` returns a valid playable mp3.
-4. Sound notifications play correctly in the dashboard when status transitions to `idle` or `permission-needed`.
-5. A `.gitignore` or `.gitattributes` safeguard is in place so future binary replacements are not accidentally zeroed.
+1. Sound notifications play in the dashboard when status transitions to `idle` or `permission-needed`.
+2. No binary audio assets in the repository — no build-copy step, no HTTP sound endpoint.
+3. `pnpm build` is simplified to `tsup` only.
 
 ## Scope
 
 ### In scope
 
-- `packages/taskflow/src/server/sounds/idle-ping.mp3`
-- `packages/taskflow/src/server/sounds/permission-alert.mp3`
+- `packages/taskflow/src/server/dashboard.ts` — replace `new Audio(src).play()` with Web Audio API tone generation.
+- `packages/taskflow/src/server/index.ts` — remove dead `/sounds/` HTTP endpoint and `.mp3` MIME entry.
+- `packages/taskflow/package.json` — remove sounds copy from build script.
+- `packages/taskflow/src/server/sounds/` — delete the empty mp3 placeholder files and directory.
 
 ### Out of scope
 
-- Dashboard playback logic (`packages/taskflow/src/server/dashboard.ts`) — playback code is correct.
-- Master server sounds — master has no sound files.
-- Adding new notification sounds or changing notification trigger logic.
+- Master server — has no sound files.
+- Adding new notification sounds or changing trigger logic.
 
 ## Implementation plan
 
-1. **Locate real audio files** — find them in the globally-installed package:
-   - `$(npm root -g)/insight-flow/dist/sounds/idle-ping.mp3` (≈26 KB)
-   - `$(npm root -g)/insight-flow/dist/sounds/permission-alert.mp3` (≈78 KB)
+1. **Replace `playStatusSound()` in `dashboard.ts`** — swap `new Audio(src).play()` for Web Audio API:
+   - `idle`: soft descending two-tone ping (880 Hz → 660 Hz).
+   - `permission-needed`: urgent triple-beep pattern (660 → 880 → 660 Hz).
+   - Use `var beep = function(...)` (not a block-level function declaration) for unambiguous scoping.
+   - Create fresh `AudioContext` per call; close after 1.2 s. Wrap entire function in `try/catch`.
 
-2. **Copy real files into source** — replace the 0-byte placeholders:
-   ```bash
-   cp "$(npm root -g)/insight-flow/dist/sounds/idle-ping.mp3" \
-      packages/taskflow/src/server/sounds/idle-ping.mp3
-   cp "$(npm root -g)/insight-flow/dist/sounds/permission-alert.mp3" \
-      packages/taskflow/src/server/sounds/permission-alert.mp3
-   ```
+2. **Remove dead `/sounds/` endpoint from `server/index.ts`** — delete the 18-line handler block at `url.pathname.startsWith("/sounds/")` and remove `".mp3": "audio/mpeg"` from the MIME map.
 
-3. **Verify sizes** — `ls -lh packages/taskflow/src/server/sounds/` should show > 0B for both files.
+3. **Delete `src/server/sounds/` directory** — remove `idle-ping.mp3`, `permission-alert.mp3`, and the now-empty directory.
 
-4. **Add `.gitattributes` entry** (if not already present) to mark mp3 files as binary, preventing git from treating them as text and corrupting them on checkout:
-   ```
-   *.mp3 binary
-   ```
+4. **Simplify build script in `package.json`** — change `"build": "tsup && rm -rf dist/sounds && cp -r src/server/sounds dist/sounds"` to `"build": "tsup"`.
 
-5. **Build and verify dist** — `pnpm build` then confirm:
-   ```bash
-   ls -lh packages/taskflow/dist/sounds/
-   ```
-   Both files should match the source sizes.
-
-6. **Manual smoke test** — `pnpm play`, open dashboard, trigger a status change to `idle` or cause a permission prompt, confirm audio plays.
+5. **Build and test** — `pnpm build && pnpm test` must pass.
 
 ## Verification
 
 ```bash
-# Source files non-zero
-ls -lh packages/taskflow/src/server/sounds/
-# dist files non-zero after build
-pnpm build && ls -lh packages/taskflow/dist/sounds/
-# HTTP endpoint returns audio/mpeg
-curl -sI http://localhost:6006/sounds/idle-ping.mp3 | grep content-type
+pnpm --dir packages/taskflow run build   # exits 0, no dist/sounds
+pnpm --dir packages/taskflow test         # 6/6 pass
 ```
 
-Manual: open dashboard, wait for or simulate an `idle` status transition — confirm audio plays.
+Manual: `pnpm play`, open dashboard, trigger an `idle` status transition — confirm audio beep plays.
 
 ## Notes
 
-- Root cause introduced when sound files were first committed — empty placeholders were added instead of the real binaries. The global install predates this and has the originals.
-- If the global install is not available (CI, fresh machine), a fallback source is needed: either bundle the files via LFS or find a royalty-free alternative. For now, copying from global install is sufficient.
-- Related: `packages/taskflow/scripts/build.mjs` controls the sounds copy step — no changes needed there.
+- Root cause: the original sound files were committed as 0-byte placeholders and the real binaries never existed in the repo (global install also 0B). Web Audio API tones are the correct long-term fix — no binary assets, works on CI, works on fresh checkouts.
+- The original plan assumed the global install had real files; it does not. Approach was adapted during implementation.

@@ -221,7 +221,7 @@
       "title": "sound files empty in repo causing silent notifications since 0.9.0",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N62-sound-files-empty-in-repo-causing-silent-notificat",
       "createdAt": "2026-05-27T20:51:43.074Z",
       "statusHistory": [
@@ -259,6 +259,11 @@
           "status": "approved",
           "at": "2026-05-28T06:30:19.602Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T06:30:50.291Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -290,6 +295,11 @@
           "at": "2026-05-27T21:01:36.634Z",
           "commitHash": "8151fc5",
           "commitMessage": "fix(dashboard): replace silent mp3 playback with Web Audio API tones"
+        },
+        {
+          "at": "2026-05-28T06:30:50.291Z",
+          "commitHash": "cae1e5c",
+          "commitMessage": "docs(tasks): N62 review — approved, ai round 1"
         }
       ],
       "branch": "fix/N62-sound-files-empty-in-repo",
