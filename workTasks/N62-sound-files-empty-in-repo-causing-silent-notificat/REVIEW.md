@@ -79,3 +79,16 @@ None.
 ### Notes
 
 - "okej but sound exists but the sound is fallback why? :D" — HEAD request visible in DevTools shows 200 OK with audio/mpeg content-type but missing Content-Length header.
+
+
+---
+
+## Round 4 — approved
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-28
+**Verdict:** approved
+
+### Notes
+
+"please done merge it" — approved for merge.
