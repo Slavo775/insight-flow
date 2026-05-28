@@ -163,6 +163,24 @@ export interface TaskEvent {
   data?: Record<string, unknown>;
 }
 
+/**
+ * Two event-type vocabularies live in this file. They are NOT interchangeable:
+ *
+ *   - `CLAUDE_HOOK_EVENT_TYPES` (dash-case) — derived event names used by the
+ *     legacy log-event CLI path: `agent-idle`, `approval-required`, etc.
+ *     These are what hook scripts pass as the `--type` arg and what gets
+ *     written to per-task `events.json` + the activity feed.
+ *
+ *   - `CLAUDE_HOOK_TYPES` (CamelCase) — raw Claude Code hook event names:
+ *     `Stop`, `Notification`, `PreToolUse`, etc. These are what arrive at the
+ *     N68 `/log/events` endpoint as the `type` discriminator, and what the
+ *     server-side status derivation primarily keys off.
+ *
+ * The CLI `hook` subcommand and `cmdLogEvent`'s hook path bridge the two:
+ * `hookName` stores the raw CamelCase name, `type` stores the derived
+ * dash-case one, and the server accepts either form in `statusFromEvent`.
+ * Future contributors: pick the right vocabulary for the layer you're in.
+ */
 export const CLAUDE_HOOK_EVENT_TYPES = [
   "session-start",
   "session-end",
@@ -202,6 +220,68 @@ export interface ClaudeHookEvent {
 export interface SessionEventsFile {
   sessionId: string;
   events: ClaudeHookEvent[];
+}
+
+// ---------------------------------------------------------------------------
+// N68 — server-side hook event ingestion (`POST /log/events`)
+// ---------------------------------------------------------------------------
+
+/**
+ * Project-level status derived from the latest hook event by timestamp.
+ * - `active`  — Claude is working (any hook event other than Stop / Notification).
+ * - `awaiting-permission` — Notification hook fired with permission wording.
+ * - `idle`    — Notification hook fired with idle/waiting-for-input wording.
+ * - `done`    — Stop hook (Claude finished its turn).
+ */
+export const PROJECT_STATUSES = ["active", "awaiting-permission", "idle", "done"] as const;
+export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
+
+/**
+ * Raw Claude Code hook event names — used as the canonical `type` discriminator
+ * in `HookEventInput`. New entries can appear as Claude Code adds hook events;
+ * `HookEventInput.type` is intentionally a free-form string so unknown values
+ * are accepted and simply mapped to `active`.
+ */
+export const CLAUDE_HOOK_TYPES = [
+  "SessionStart",
+  "SessionEnd",
+  "Stop",
+  "Notification",
+  "PreToolUse",
+  "PostToolUse",
+  "UserPromptSubmit",
+  "PreCompact",
+  "SubagentStop",
+] as const;
+export type ClaudeHookType = (typeof CLAUDE_HOOK_TYPES)[number];
+
+/**
+ * Payload for `POST /log/events`. Hooks generate a UUID + ISO timestamp,
+ * preserve the raw Claude Code hook type, and pass through the hook input
+ * payload unchanged. The server orders by `timestamp`, not arrival order.
+ */
+export interface HookEventInput {
+  id: string;
+  timestamp: string;
+  type: string;
+  payload?: Record<string, unknown>;
+  sessionId?: string;
+  taskId?: string;
+}
+
+/** WebSocket frame: emitted on every accepted /log/events POST. */
+export interface EventFrame {
+  kind: "event";
+  event: HookEventInput;
+}
+
+/** WebSocket frame: emitted only when derived status transitions. */
+export interface StatusFrame {
+  kind: "status";
+  from: ProjectStatus;
+  to: ProjectStatus;
+  at: string;
+  latestEventId: string;
 }
 
 export interface EventsFile {
@@ -295,6 +375,13 @@ export interface TaskflowConfig {
   notifications?: NotificationsConfig;
   master?: MasterConfig;
   events?: EventsConfig;
+  /**
+   * Marker for the hook-script generation shipped with the installed package.
+   * Bumped whenever the bundled hook layout in `activity-hook.ts` changes
+   * (N68). The CLI compares this against the package's bundled version and
+   * warns when a consumer needs to run `insight-flow migrate-hooks`.
+   */
+  hooksVersion?: number;
 }
 
 export interface ParsedArgs {

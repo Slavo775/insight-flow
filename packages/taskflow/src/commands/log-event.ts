@@ -10,7 +10,7 @@ import {
 import { resolve } from "node:path";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import type {
   TaskflowConfig,
   ParsedArgs,
@@ -107,6 +107,36 @@ function appendToSessionLog(sessionId: string, event: ClaudeHookEvent): void {
   appendFileSync(getSessionLogPath(sessionId), JSON.stringify(event) + "\n");
 }
 
+/**
+ * Append the raw hook event to a rolling daily JSONL backup at
+ * `<workDir>/.events/<YYYY-MM-DD>.jsonl`. Independent of any specific task —
+ * hooks fire before a task is picked. Fail-silent.
+ */
+function appendToDailyBackup(workDir: string, payload: Record<string, unknown>): void {
+  try {
+    const eventsDir = resolve(workDir, ".events");
+    mkdirSync(eventsDir, { recursive: true });
+    const day = new Date().toISOString().slice(0, 10);
+    appendFileSync(resolve(eventsDir, `${day}.jsonl`), JSON.stringify(payload) + "\n");
+  } catch {
+    // fire-and-forget
+  }
+}
+
+/**
+ * Fire-and-forget POST of a hook event to the project server's `/log/events`.
+ * Server-down must NOT break Claude Code — we drop the response and swallow
+ * all errors. Uses a short timeout so a stuck server doesn't hang the hook.
+ */
+function postToLogEvents(serverPort: number, payload: Record<string, unknown>): void {
+  void fetch(`http://127.0.0.1:${serverPort}/log/events`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(1500),
+  }).catch(() => {});
+}
+
 export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
   const eventType = opts._[0] as string | undefined;
   const source = (opts.source as string | undefined) ?? "agent";
@@ -147,6 +177,9 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
   const ts = new Date().toISOString();
 
   if (isHook) {
+    const payload = opts.data
+      ? (JSON.parse(opts.data as string) as Record<string, unknown>)
+      : {};
     const hookEvent: ClaudeHookEvent = {
       id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
       type: eventType as (typeof CLAUDE_HOOK_EVENT_TYPES)[number],
@@ -155,9 +188,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
       timestamp: ts,
       ...(sessionId ? { sessionId } : {}),
       ...(taskId ? { taskId } : {}),
-      payload: opts.data
-        ? (JSON.parse(opts.data as string) as Record<string, unknown>)
-        : {},
+      payload,
     };
 
     // Write to session JSONL
@@ -206,6 +237,21 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
       activityEntry.inputSummary = String(hookEvent.payload["input_summary"]).slice(0, 80);
     }
     appendToActivityLog(config, activityEntry);
+
+    // N68: daily JSONL backup + POST to /log/events. Both fire-and-forget so
+    // a stopped server (or missing workDir) never breaks the hook.
+    const hookEventPostPayload: Record<string, unknown> = {
+      id: randomUUID(),
+      timestamp: ts,
+      // The raw Claude Code hook event name (Stop, Notification, PreToolUse,
+      // …). Falls back to the derived `type` if no hook-name was provided.
+      type: hookName ?? eventType,
+      payload,
+      ...(sessionId ? { sessionId } : {}),
+      ...(taskId ? { taskId } : {}),
+    };
+    appendToDailyBackup(workDir, hookEventPostPayload);
+    postToLogEvents(config.server.port, hookEventPostPayload);
 
     process.stdout.write(
       JSON.stringify({ event: eventType, source: "hook", taskId: taskId ?? null, ts }) + "\n",

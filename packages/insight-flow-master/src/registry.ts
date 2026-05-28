@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { MasterProjectEntry, MasterProjectState } from "./types.js";
+import type { ClaudeProjectStatus, MasterProjectEntry, MasterProjectState } from "./types.js";
 
 const registry = new Map<string, MasterProjectEntry>();
 const projectIdIndex = new Map<string, string>(); // projectId → current UUID
@@ -46,14 +46,24 @@ export function update(id: string, state: MasterProjectState): boolean {
   return true;
 }
 
-const VALID_STATUSES = new Set(["active", "idle", "permission-required"]);
+// N68 round-4 fix: accept the four-state vocabulary alongside the legacy
+// three-state names so the project server can push `done` /
+// `awaiting-permission` without hitting a 400. Existing callers using `idle`
+// / `permission-required` continue to work unchanged.
+const VALID_STATUSES = new Set<ClaudeProjectStatus>([
+  "active",
+  "idle",
+  "permission-required",
+  "done",
+  "awaiting-permission",
+]);
 
 export function updateStatus(id: string, status: string): boolean {
-  if (!VALID_STATUSES.has(status)) return false;
+  if (!VALID_STATUSES.has(status as ClaudeProjectStatus)) return false;
   const entry = registry.get(id);
   if (!entry) return false;
   entry.lastSeenAt = new Date().toISOString();
-  entry.state.claudeStatus = status as "active" | "idle" | "permission-required";
+  entry.state.claudeStatus = status as ClaudeProjectStatus;
   return true;
 }
 

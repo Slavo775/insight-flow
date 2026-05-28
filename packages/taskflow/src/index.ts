@@ -30,6 +30,13 @@ export {
   parseTaskNum,
 } from "./storage.js";
 export { startServer } from "./server/index.js";
+export { deriveStatus, statusFromEvent, EventStore } from "./server/event-stream.js";
+export type {
+  HookEventInput,
+  ProjectStatus,
+  EventFrame,
+  StatusFrame,
+} from "./types.js";
 export { initProject } from "./init/index.js";
 export { resolveProjectRoot, resolvePackageAsset, TaskflowProjectNotFoundError } from "./paths.js";
 export {

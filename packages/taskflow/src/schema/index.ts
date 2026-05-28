@@ -215,6 +215,27 @@ export const EventsFileSchema = z.object({
   events: z.array(z.union([TaskEventSchema, ClaudeHookEventSchema])),
 });
 
+// ---------------------------------------------------------------------------
+// N68 — server-side hook event ingestion (`POST /log/events`)
+// ---------------------------------------------------------------------------
+
+export const ProjectStatusSchema = z.enum([
+  "active",
+  "awaiting-permission",
+  "idle",
+  "done",
+]);
+
+export const HookEventInputSchema = z.object({
+  id: z.string().min(1),
+  timestamp: z.string().min(1),
+  // type is free-form to forward-compat with new Claude Code hook events
+  type: z.string().min(1),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  sessionId: z.string().optional(),
+  taskId: z.string().optional(),
+});
+
 export class TaskflowValidationError extends Error {
   readonly file: string;
   readonly issuePath: string;
