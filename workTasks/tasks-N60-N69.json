@@ -416,7 +416,7 @@
       "title": "release v0.10.0 — security guardrails, master fixes, sound fix, README",
       "type": "chore",
       "priority": "high",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N63-release-v0-10-0-security-guardrails-master-fixes-s",
       "createdAt": "2026-05-28T07:42:04.039Z",
       "statusHistory": [
@@ -439,6 +439,21 @@
           "status": "implemented",
           "at": "2026-05-28T08:02:47.042Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T08:03:36.016Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T08:11:14.004Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T08:11:19.476Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -453,8 +468,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -468,6 +483,11 @@
           "at": "2026-05-28T07:43:48.366Z",
           "commitHash": "3f5b8b9",
           "commitMessage": "docs(tasks): N63 spec — release v0.10.0 changelog, README, version bump, npm publish"
+        },
+        {
+          "at": "2026-05-28T08:03:36.016Z",
+          "commitHash": "c002ebf",
+          "commitMessage": "chore(release): bump to v0.10.0 — changelog, README, version, npm publish"
         }
       ],
       "branch": "chore/N63-release-v0-10-0",
