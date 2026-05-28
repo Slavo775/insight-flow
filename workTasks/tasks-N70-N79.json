@@ -151,7 +151,7 @@
       "title": "browser notif: change 'Awaiting input' to 'Done' when agent finishes",
       "type": "fix",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N72-browser-notif-change-awaiting-input-to-done-when-a",
       "createdAt": "2026-05-28T20:36:06.746Z",
       "statusHistory": [
@@ -159,17 +159,59 @@
           "status": "ready",
           "at": "2026-05-28T20:36:06.746Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T20:38:29.280Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T20:39:45.318Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T20:40:44.363Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T20:57:04.588Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-28T20:58:25.080Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-28T21:01:11.898Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-28T21:01:34.068Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T21:02:02.991Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-28T20:39:45.317Z",
+        "completedAt": "2026-05-28T20:40:44.363Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -178,9 +220,20 @@
         "dashboard",
         "ux"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-28T20:38:29.279Z",
+          "commitHash": "18ed5ec",
+          "commitMessage": "chore(tasks): scaffold N72 — browser notif Done instead of Awaiting input"
+        },
+        {
+          "at": "2026-05-28T21:02:02.991Z",
+          "commitHash": "02f8c17",
+          "commitMessage": "fix(dashboard): N72 — notif title 'Done' replaces 'Awaiting input'"
+        }
+      ],
+      "branch": "fix/N72-browser-notif-awaiting-input-to-done",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/47",
       "mergedAt": null
     }
   ]
