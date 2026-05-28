@@ -221,7 +221,7 @@
       "title": "sound files empty in repo causing silent notifications since 0.9.0",
       "type": "fix",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "fixed",
       "folder": "workTasks/N62-sound-files-empty-in-repo-causing-silent-notificat",
       "createdAt": "2026-05-27T20:51:43.074Z",
       "statusHistory": [
@@ -279,6 +279,21 @@
           "status": "fix-needed",
           "at": "2026-05-28T07:05:56.005Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T07:06:29.891Z",
+          "by": "task-git"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-28T07:08:04.276Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-28T07:09:51.436Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
@@ -320,6 +335,11 @@
           "at": "2026-05-28T06:49:17.400Z",
           "commitHash": "c6df913",
           "commitMessage": "fix(dashboard,server): clean up dead sounds infrastructure"
+        },
+        {
+          "at": "2026-05-28T07:06:29.891Z",
+          "commitHash": "260e874",
+          "commitMessage": "docs(tasks): N62 human review — fix-needed"
         }
       ],
       "branch": "fix/N62-sound-files-empty-in-repo",

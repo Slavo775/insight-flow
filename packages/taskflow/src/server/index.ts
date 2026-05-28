@@ -24,6 +24,7 @@ import { detectActivityHookStatus, type ActivityHookStatus } from "../activity-h
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".mp3": "audio/mpeg",
 };
 
 const WATCH_DEBOUNCE_MS = 100;
@@ -564,6 +565,25 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       } catch {
         res.writeHead(500, { "Content-Type": MIME[".json"] });
         res.end(JSON.stringify({ error: "Failed to read session events" }));
+      }
+      return;
+    }
+
+    if (url.pathname.startsWith("/sounds/")) {
+      const soundFile = url.pathname.replace("/sounds/", "");
+      if (!soundFile || soundFile.includes("..") || !soundFile.endsWith(".mp3")) {
+        res.writeHead(404);
+        res.end();
+        return;
+      }
+      const soundPath = resolve(dirname(fileURLToPath(import.meta.url)), "sounds", soundFile);
+      try {
+        const data = readFileSync(soundPath);
+        res.writeHead(200, { "Content-Type": MIME[".mp3"] });
+        res.end(data);
+      } catch {
+        res.writeHead(404);
+        res.end();
       }
       return;
     }

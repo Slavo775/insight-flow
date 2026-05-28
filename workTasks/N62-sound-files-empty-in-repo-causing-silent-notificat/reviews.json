@@ -17,7 +17,20 @@
       "comment": "Blocker: /sounds/ endpoint and mp3 infrastructure removed but should be kept for future custom sounds. Restore endpoint + build copy + sounds dir; Web Audio API tones kept as fallback when no file present.",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-05-28T07:08:04.276Z",
+        "endedAt": "2026-05-28T07:09:51.435Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/src/server/sounds/idle-ping.mp3",
+          "packages/taskflow/src/server/sounds/permission-alert.mp3"
+        ],
+        "comment": "Restored /sounds/ endpoint, build copy, and placeholder files. playStatusSound() now tries mp3 via HEAD check first; falls back to Web Audio API tones when file is absent or empty.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
