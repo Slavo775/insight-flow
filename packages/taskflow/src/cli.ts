@@ -123,8 +123,8 @@ function printHelp(): void {
     batch-ui --add "<label>" <path>       Register a project by explicit path
     batch-ui --remove "<label>"           Remove a registered project by label
     batch-ui --list                       List all registered batch-ui projects
-    batch-ui --init [--force] [--examples]  Re-init all (or selected) registered projects
-    batch-ui --prompt-build               Re-sync role files in all (or selected) registered projects
+    bulk-init [--force] [--examples]      Re-init all (or selected) registered projects (run after upgrading)
+    bulk-prompt-build                     Re-sync role files in all (or selected) registered projects (run after upgrading)
 
     help                                  Show this help
     version                               Show version
@@ -186,13 +186,13 @@ async function run(): Promise<void> {
       cmdBatchUiAdd(opts);
     } else if (opts.remove) {
       cmdBatchUiRemove(opts);
-    } else if (opts.init) {
-      await cmdBatchInit(opts);
-    } else if (opts["prompt-build"]) {
-      await cmdBatchPromptBuild(opts);
     } else {
       await cmdBatchUi(opts);
     }
+  } else if (command === "bulk-init") {
+    await cmdBatchInit(opts);
+  } else if (command === "bulk-prompt-build") {
+    await cmdBatchPromptBuild(opts);
   } else {
     // All other commands need master.json
     const config = resolveConfig();

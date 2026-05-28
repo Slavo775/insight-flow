@@ -703,19 +703,34 @@ Run `insight-flow batch-ui` to start them again.
 
 `ui-batch-down` reads the PIDs written to `~/.insight-flow/batch-ui.json` during the last `batch-ui` launch, sends `SIGTERM` to each, and clears the list. Processes that have already exited are reported as "already stopped" (not an error). The PID list is cleared regardless, so running `ui-batch-down` twice is safe.
 
-### Batch operations
+---
 
-`batch-ui` can also run maintenance commands across all (or selected) registered projects in one shot — without spawning dashboards.
+## Upgrading insight-flow
 
-#### Re-init after upgrading
-
-When you install a new version of insight-flow, run `--init` to re-scaffold role files in every registered project:
+After installing a new version of insight-flow, run two commands to bring all your registered projects up to date:
 
 ```bash
-insight-flow batch-ui --init
+npm install -g insight-flow@latest   # 1. install the new version
+insight-flow bulk-init              # 2. re-scaffold role files in every registered project
+insight-flow bulk-prompt-build      # 3. sync AGENT_ENFORCEMENT.md + agents.extend into role files
 ```
 
-An interactive picker appears (same as the launch picker). Confirm with **enter** and each project's `init` runs in sequence:
+An interactive picker appears for each command so you can select which projects to update. To run against all projects without prompting (CI mode):
+
+```bash
+insight-flow bulk-init < /dev/null
+insight-flow bulk-prompt-build < /dev/null
+```
+
+### bulk-init
+
+Re-runs `insight-flow init` in every registered project to lay down updated role files and scaffolding:
+
+```bash
+insight-flow bulk-init
+```
+
+Output:
 
 ```
   ✓ my-app
@@ -729,22 +744,16 @@ An interactive picker appears (same as the launch picker). Confirm with **enter*
 Pass `--force` to overwrite existing role files, or `--examples` to add commented `agents.extend` stubs:
 
 ```bash
-insight-flow batch-ui --init --force
-insight-flow batch-ui --init --examples
+insight-flow bulk-init --force
+insight-flow bulk-init --examples
 ```
 
-Non-interactive / CI mode (all projects, no picker):
+### bulk-prompt-build
+
+Re-runs `insight-flow prompt-build --apply` in every registered project to sync `AGENT_ENFORCEMENT.md` and any `agents.extend` entries from `taskflow.config.json` into the project's role files:
 
 ```bash
-insight-flow batch-ui --init < /dev/null
-```
-
-#### Re-sync role files post-release
-
-After upgrading insight-flow, run `--prompt-build` to apply the updated enforcement block and any `agents.extend` content to every registered project's role files:
-
-```bash
-insight-flow batch-ui --prompt-build
+insight-flow bulk-prompt-build
 ```
 
 Output:
@@ -754,21 +763,6 @@ Output:
   ✓ another-app
 
 2/2 succeeded.
-```
-
-**Post-release workflow:**
-
-```bash
-npm install -g insight-flow@latest     # 1. upgrade the CLI
-insight-flow batch-ui --prompt-build   # 2. sync AGENT_ENFORCEMENT.md + role extensions everywhere
-```
-
-This is the canonical way to propagate `AGENT_ENFORCEMENT.md` and `agents.extend` changes to all your projects after a new release — no manual `cd` into each folder required.
-
-Non-interactive / CI mode:
-
-```bash
-insight-flow batch-ui --prompt-build < /dev/null
 ```
 
 ---
