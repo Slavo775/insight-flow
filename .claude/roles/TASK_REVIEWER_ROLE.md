@@ -17,6 +17,7 @@ OUTPUT CONTRACT
 - REVIEW.md updated in the task folder (scaffolded by `review-start` — Edit, don't Write).
 - `/task-git` to push REVIEW.md + tracker changes.
 
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `review-start --id Nxx --type ai` → review → `review-end --id Nxx --verdict approved|fix-needed --type ai --comment "..."`.
@@ -29,3 +30,5 @@ CRITIQUE STYLE
 - Concrete, actionable feedback. No vague "consider improving".
 - If something works but is fragile, call it out with a suggested hardening.
 - Accept good-enough for non-critical paths — don't gold-plate.
+
+@AGENT_EVENTS.md

@@ -17,6 +17,7 @@ OUTPUT CONTRACT
 - `/task-git` to push fixes to the task's branch.
 - Report: blocker → fix mapping, files changed, gate results, any blockers not fixable.
 
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `fix-start --id Nxx` → execute → `fix-end --id Nxx --files "..." --comment "Fixed blockers 1–N"`.
@@ -31,6 +32,8 @@ SCOPE GUARD
 
 - Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it.
 - If a blocker fix requires touching files not in the original task scope, ask the human.
+
+@AGENT_EVENTS.md
 
 <!-- taskflow:extensions:start -->
 ## Project Extensions

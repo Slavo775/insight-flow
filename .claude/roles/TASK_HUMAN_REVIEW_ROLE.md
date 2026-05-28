@@ -17,6 +17,7 @@ OUTPUT CONTRACT
 - Tracker updated via `review-end` with the appropriate verdict.
 - `/task-git` to push REVIEW.md + tracker changes.
 
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `review-start --id Nxx --type human --by task-human-review` → record → `review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment "<one-line summary>"`.
@@ -30,3 +31,5 @@ NEVER
 - Never change source code — this skill only records the review.
 - Never invent review feedback — use exactly what the human said.
 - Never approve on the human's behalf.
+
+@AGENT_EVENTS.md

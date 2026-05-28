@@ -34,7 +34,7 @@ import {
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
-import { cmdBatchUi, cmdBatchUiAdd, cmdBatchUiList, cmdBatchUiRemove, cmdUiBatchRegister, cmdUiBatchUnregister, cmdUiBatchDown } from "./commands/batch-ui.js";
+import { cmdBatchUi, cmdBatchUiAdd, cmdBatchUiList, cmdBatchUiRemove, cmdUiBatchRegister, cmdUiBatchUnregister, cmdUiBatchDown, cmdBatchInit, cmdBatchPromptBuild } from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
@@ -123,6 +123,8 @@ function printHelp(): void {
     batch-ui --add "<label>" <path>       Register a project by explicit path
     batch-ui --remove "<label>"           Remove a registered project by label
     batch-ui --list                       List all registered batch-ui projects
+    batch-ui --init [--force] [--examples]  Re-init all (or selected) registered projects
+    batch-ui --prompt-build               Re-sync role files in all (or selected) registered projects
 
     help                                  Show this help
     version                               Show version
@@ -184,6 +186,10 @@ async function run(): Promise<void> {
       cmdBatchUiAdd(opts);
     } else if (opts.remove) {
       cmdBatchUiRemove(opts);
+    } else if (opts.init) {
+      await cmdBatchInit(opts);
+    } else if (opts["prompt-build"]) {
+      await cmdBatchPromptBuild(opts);
     } else {
       await cmdBatchUi(opts);
     }
