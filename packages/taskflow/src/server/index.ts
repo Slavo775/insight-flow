@@ -579,7 +579,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const soundPath = resolve(dirname(fileURLToPath(import.meta.url)), "sounds", soundFile);
       try {
         const data = readFileSync(soundPath);
-        res.writeHead(200, { "Content-Type": MIME[".mp3"] });
+        res.writeHead(200, { "Content-Type": MIME[".mp3"], "Content-Length": String(data.length) });
         res.end(data);
       } catch {
         res.writeHead(404);

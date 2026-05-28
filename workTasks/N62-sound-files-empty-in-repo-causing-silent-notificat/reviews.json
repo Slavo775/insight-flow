@@ -1,0 +1,63 @@
+{
+  "taskId": "N62",
+  "reviews": [
+    {
+      "startedAt": "2026-05-28T06:29:15.683Z",
+      "endedAt": "2026-05-28T06:30:19.601Z",
+      "verdict": "approved",
+      "comment": "Web Audio API tones fix works correctly. Spec deviated from mp3-restoration plan (global install also 0B) — pragmatic and better outcome. Non-blocking: function-in-block style, dead sounds endpoint/files, stale spec. All gates pass.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-05-28T07:05:34.214Z",
+      "endedAt": "2026-05-28T07:05:56.004Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: /sounds/ endpoint and mp3 infrastructure removed but should be kept for future custom sounds. Restore endpoint + build copy + sounds dir; Web Audio API tones kept as fallback when no file present.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-28T07:08:04.276Z",
+        "endedAt": "2026-05-28T07:09:51.435Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/src/server/index.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/src/server/sounds/idle-ping.mp3",
+          "packages/taskflow/src/server/sounds/permission-alert.mp3"
+        ],
+        "comment": "Restored /sounds/ endpoint, build copy, and placeholder files. playStatusSound() now tries mp3 via HEAD check first; falls back to Web Audio API tones when file is absent or empty.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-28T07:14:53.481Z",
+      "endedAt": "2026-05-28T07:15:10.024Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: /sounds/ HEAD response missing Content-Length header — server omits it, so len check always returns 0 and fallback fires even with a real mp3. Fix: explicit Content-Length in res.writeHead().",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-28T07:16:26.788Z",
+        "endedAt": "2026-05-28T07:17:07.125Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/index.ts"
+        ],
+        "comment": "Added explicit Content-Length header to /sounds/ response so HEAD check in dashboard correctly detects non-empty custom mp3 files.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-28T07:20:10.330Z",
+      "endedAt": "2026-05-28T07:20:21.689Z",
+      "verdict": "approved",
+      "comment": "Approved for merge.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
