@@ -11,6 +11,11 @@
     "logFile": ".taskflow-activity.jsonl",
     "maxEvents": 200
   },
+  "notifications": {
+    "sounds": {
+      "enabled": true
+    }
+  },
   "agents": {
     "extend": {
       "taskmaster": [

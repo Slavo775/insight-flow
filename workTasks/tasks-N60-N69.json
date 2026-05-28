@@ -860,7 +860,7 @@
       "title": "rework hook notification flow: central /log/events endpoint with status derivation",
       "type": "rework",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N68-rework-hook-notification-flow-central-log-events-e",
       "createdAt": "2026-05-28T12:22:31.415Z",
       "statusHistory": [
@@ -978,6 +978,11 @@
           "status": "approved",
           "at": "2026-05-28T14:04:40.408Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-28T14:11:57.028Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -1004,7 +1009,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 109,
       "tags": [
         "hooks",
         "notifications",
@@ -1024,6 +1029,93 @@
       ],
       "branch": "rework/N68-rework-hook-notification-flow",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/46",
+      "mergedAt": "2026-05-28T14:11:57.028Z"
+    },
+    {
+      "id": "N69",
+      "title": "stateful status transitions: only agent-active leaves idle/done; any event leaves awaiting-permission",
+      "type": "rework",
+      "priority": "medium",
+      "status": "done",
+      "folder": "workTasks/N69-stateful-status-transitions-only-agent-active-leav",
+      "createdAt": "2026-05-28T14:20:31.148Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T14:20:31.148Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T14:32:36.374Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T14:36:38.713Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T14:45:36.000Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-28T14:46:06.390Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-28T14:47:10.961Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-28T14:54:43.327Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T14:58:18.414Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T15:00:44.482Z",
+          "by": "task-review"
+        },
+        {
+          "status": "done",
+          "at": "2026-05-28T15:09:14.749Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-28T14:32:36.374Z",
+        "completedAt": "2026-05-28T14:36:38.713Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/event-stream.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/event-stream.test.mjs",
+          "packages/taskflow/test/log-events-endpoint.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-05-28T15:09:14.749Z",
+      "totalDurationMinutes": 49,
+      "tags": [
+        "status",
+        "hooks",
+        "event-stream"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]

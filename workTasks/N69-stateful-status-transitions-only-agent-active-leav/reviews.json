@@ -1,0 +1,33 @@
+{
+  "taskId": "N69",
+  "reviews": [
+    {
+      "startedAt": "2026-05-28T14:45:36.001Z",
+      "endedAt": "2026-05-28T14:46:06.389Z",
+      "verdict": "fix-needed",
+      "comment": "stuck in active despite done — active→done transition not reaching the live store",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-05-28T14:47:10.962Z",
+        "endedAt": "2026-05-28T14:54:43.326Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/event-stream.ts",
+          "packages/taskflow/test/event-stream.test.mjs"
+        ],
+        "comment": "Fixed blocker 1: recognise raw hook names (UserPromptSubmit/PermissionRequest/SessionEnd/Notification) alongside derived dash-case names so the transition matrix actually fires on /log/events POSTs",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-28T14:58:18.415Z",
+      "endedAt": "2026-05-28T15:00:44.482Z",
+      "verdict": "approved",
+      "comment": "Round-2 fix addresses the raw/derived alias gap correctly; headline rule preserved; tests cover the matrix end-to-end. Three minor non-blocking notes; no blockers.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
