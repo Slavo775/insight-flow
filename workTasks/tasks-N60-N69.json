@@ -416,7 +416,7 @@
       "title": "release v0.10.0 — security guardrails, master fixes, sound fix, README",
       "type": "chore",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N63-release-v0-10-0-security-guardrails-master-fixes-s",
       "createdAt": "2026-05-28T07:42:04.039Z",
       "statusHistory": [
@@ -424,12 +424,32 @@
           "status": "ready",
           "at": "2026-05-28T07:42:04.040Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T07:43:48.367Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T08:01:25.981Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T08:02:47.042Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-28T08:01:25.980Z",
+        "completedAt": "2026-05-28T08:02:47.042Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/CHANGELOG.md",
+          "packages/taskflow/README.md",
+          "CHANGELOG.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -443,9 +463,15 @@
         "docs",
         "npm"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-28T07:43:48.366Z",
+          "commitHash": "3f5b8b9",
+          "commitMessage": "docs(tasks): N63 spec — release v0.10.0 changelog, README, version bump, npm publish"
+        }
+      ],
+      "branch": "chore/N63-release-v0-10-0",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/42",
       "mergedAt": null
     }
   ]

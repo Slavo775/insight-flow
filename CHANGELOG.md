@@ -5,6 +5,20 @@ Full history lives in [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANG
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-05-28
+
+### Security
+
+- **N59** — `AGENT_SECURITY.md` added at repo root with prompt-injection guardrail rules covering hidden-instruction suppression, URL exfiltration, action hijacking, and persona override. Imported via `AGENT_ENFORCEMENT.md` so all 8 agents receive the guardrails without individual edits. Synced to `packages/taskflow/templates/roles/AGENT_SECURITY.md`.
+
+### Fixed
+
+- **N60** — Master registry no longer generates a new UUID on every re-registration; project cards deduplicate correctly when a server restarts.
+- **N61** — Overview grid uses equal-width columns (`grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))`) with a single-column fallback below 400 px viewport width.
+- **N62** — `/sounds/` endpoint restored with explicit `Content-Length` header. `playStatusSound()` tries the mp3 via a `HEAD` check first; falls back to Web Audio API tones when no file is present or file is empty. Placeholder `idle-ping.mp3` and `permission-alert.mp3` shipped in package.
+
+See [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANGELOG.md) for the full entry.
+
 ## [0.7.0] — 2026-05-26
 
 ### Fixed

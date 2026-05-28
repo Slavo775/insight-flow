@@ -4,12 +4,12 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.9.1
+## What's new in 0.10.0
 
-- **Unregister projects** — `insight-flow ui-batch-unregister` (run inside a project folder) and `insight-flow batch-ui --remove "<label>"` remove entries from the batch-ui registry; both clean `lastSelected` to prevent ghost pre-checks on next run.
-- **`--list` shows config info** — `batch-ui --list` now resolves and displays the `projectName` and `workDir` from each entry's `taskflow.config.json`, making wrong-folder registrations immediately visible.
-- **Port-collision guard** — a `claimedPorts` set prevents the same port being assigned to two projects in one run; occupied ports are reported to stderr: `(port 6007 was occupied, skipped)`.
-- **No duplicate servers** — re-running `batch-ui` skips already-live servers with `[label] server on port N already running, skipped`; their PIDs are merged with new spawns so `ui-batch-down` remains effective.
+- **Prompt-injection guardrails** — `AGENT_SECURITY.md` ships with the package and propagates to all 8 agent roles via `AGENT_ENFORCEMENT.md`. Covers hidden-instruction suppression, URL exfiltration, action hijacking, and persona override.
+- **No duplicate project cards** — Master registry now preserves the existing project UUID on re-registration; project cards no longer duplicate when a server restarts.
+- **Overview grid layout** — Equal-width columns with a single-column fallback below 400 px viewport width.
+- **Custom sounds work** — `/sounds/` endpoint restored with `Content-Length` header; dashboard tries your custom mp3 first and falls back to Web Audio API tones when no file is present.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
