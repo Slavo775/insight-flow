@@ -40,3 +40,24 @@ No concerns. `bulk-init` / `bulk-prompt-build` delegate directly to `cmdBatchIni
 - `batch-init` / `batch-prompt-build` were only live in v0.11.0 for one day so the breaking rename is acceptable.
 - CHANGELOG migration note ("update any scripts or aliases") is correct and sufficient.
 - Follow-up: release v0.11.1 after merge.
+
+
+---
+
+## Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-28
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+approved merge it and publish then

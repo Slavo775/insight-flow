@@ -2069,6 +2069,123 @@
       "payload": {
         "tool_name": "Bash"
       }
+    },
+    {
+      "id": "evt_1779963538430_2637",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-05-28T10:18:58.430Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1779963545794_e71e",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-05-28T10:19:05.793Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {}
+    },
+    {
+      "id": "evt_1779964189197_83d6",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-05-28T10:29:49.197Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {}
+    },
+    {
+      "id": "evt_1779964193924_1949",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-05-28T10:29:53.924Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1779964194198_91f5",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-05-28T10:29:54.198Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1779964200767_a1c2",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-05-28T10:30:00.767Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1779964200933_4ee8",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-05-28T10:30:00.933Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/workTasks/N66-promote-batch-init-and-batch-prompt-build-to-top-l/REVIEW.md"
+      }
+    },
+    {
+      "id": "evt_1779964204852_e84d",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-05-28T10:30:04.851Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1779964205129_398f",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-05-28T10:30:05.128Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1779964211316_d8b5",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-05-28T10:30:11.316Z",
+      "sessionId": "392255b7-868a-4427-8b44-6fd048f1737a",
+      "taskId": "N66",
+      "payload": {
+        "tool_name": "Bash"
+      }
     }
   ]
 }
