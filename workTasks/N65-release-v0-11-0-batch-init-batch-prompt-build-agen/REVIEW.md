@@ -22,3 +22,24 @@ None.
 
 - "please also check readme and document all things in 0.11.0" — user's exact wording.
 - The implementation step already mentions README updates but the spec doesn't prescribe the exact section content. Implementer should add a `### Batch operations` subsection (or equivalent) to the Multi-project launcher section covering both new commands with full examples.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-28
+**Verdict:** approved
+
+### Blockers
+
+None.
+
+### Suggestions (non-blocking)
+
+None.
+
+### Notes
+
+- "done maerge it and then publish new version" — approved for merge and npm publish.

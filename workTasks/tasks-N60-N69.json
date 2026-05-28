@@ -601,7 +601,7 @@
       "title": "release v0.11.0 — batch-init, batch-prompt-build, AGENT_ENFORCEMENT in rolesDir",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "in-progress",
       "folder": "workTasks/N65-release-v0-11-0-batch-init-batch-prompt-build-agen",
       "createdAt": "2026-05-28T09:13:23.408Z",
       "statusHistory": [
@@ -634,17 +634,37 @@
           "status": "fixed",
           "at": "2026-05-28T09:20:46.869Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T09:21:22.468Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T09:35:40.861Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T09:35:52.272Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T09:35:56.964Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
+        "startedAt": "2026-05-28T09:35:56.964Z",
         "completedAt": null,
         "filesChanged": [],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -658,6 +678,11 @@
           "at": "2026-05-28T09:15:15.652Z",
           "commitHash": "2f3c431",
           "commitMessage": "chore(tasks): scaffold N65 — release v0.11.0"
+        },
+        {
+          "at": "2026-05-28T09:21:22.467Z",
+          "commitHash": "2ea871a",
+          "commitMessage": "docs(readme): add Batch operations section for --init and --prompt-build"
         }
       ],
       "branch": "chore/N65-release-v0-11-0",
