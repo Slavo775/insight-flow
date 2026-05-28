@@ -4,12 +4,12 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.10.0
+## What's new in 0.12.0
 
-- **Prompt-injection guardrails** — `AGENT_SECURITY.md` ships with the package and propagates to all 8 agent roles via `AGENT_ENFORCEMENT.md`. Covers hidden-instruction suppression, URL exfiltration, action hijacking, and persona override.
-- **No duplicate project cards** — Master registry now preserves the existing project UUID on re-registration; project cards no longer duplicate when a server restarts.
-- **Overview grid layout** — Equal-width columns with a single-column fallback below 400 px viewport width.
-- **Custom sounds work** — `/sounds/` endpoint restored with `Content-Length` header; dashboard tries your custom mp3 first and falls back to Web Audio API tones when no file is present.
+- **Central `POST /log/events` endpoint** — every hook posts its event here. Validated by Zod, mirrored to a daily JSONL backup at `workTasks/.events/<YYYY-MM-DD>.jsonl`, broadcast to subscribers via Socket.IO. `GET /log/status` returns `{status, events}` for inspection.
+- **Four-state project status** — `active` / `awaiting-permission` / `idle` / `done`, derived from the latest hook event in an in-memory `EventStore`. Dashboard pill, sound cues, and master overview all subscribe to a single `status` WebSocket frame.
+- **Browser notifications, per-browser opt-in** — new settings toggle (localStorage-backed) plus a "Request permission" button. Notifications fire only on `→ done` / `→ awaiting-permission` and only when the tab is unfocused.
+- **Master overview status pushes** — each project server forwards status transitions to the master, so the overview grid reflects live project state without scraping.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 

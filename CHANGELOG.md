@@ -5,6 +5,30 @@ Full history lives in [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANG
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-05-28
+
+### Added
+
+- **N68** — Central `POST /log/events` endpoint, in-memory `EventStore`, and a four-state project status model (`active` / `awaiting-permission` / `idle` / `done`) derived from hook events. New WebSocket `status` frames drive the dashboard pill, sounds (only on `→ done` / `→ awaiting-permission`), and a per-browser "Browser notifications" toggle gated by `document.hasFocus()`. Master overview receives the same status pushes from each project server.
+
+See [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANGELOG.md) for the full entry.
+
+## [0.11.2] — 2026-05-28
+
+### Fixed
+
+- **N67** — Hook scripts use `${CLAUDE_PROJECT_DIR}/.claude/hooks/<file>` instead of bare relative paths. Re-run `insight-flow init` after upgrading.
+
+See [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANGELOG.md) for the full entry.
+
+## [0.11.1] — 2026-05-28
+
+### Changed
+
+- **N66** — `batch-init` renamed to `bulk-init`; `batch-prompt-build` renamed to `bulk-prompt-build`. Behaviour unchanged.
+
+See [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANGELOG.md) for the full entry.
+
 ## [0.11.0] — 2026-05-28
 
 ### Added

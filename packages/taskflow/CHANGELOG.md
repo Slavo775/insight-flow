@@ -4,6 +4,26 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-05-28
+
+### Added
+
+- **N68** — `POST /log/events` endpoint on the project HTTP server. Accepts a Zod-validated `HookEventInput` (`{id, timestamp, type, payload, sessionId?, taskId?}`), persists a daily JSONL backup at `workTasks/.events/<YYYY-MM-DD>.jsonl`, and broadcasts an `event` frame on the Socket.IO connection. Hook scripts (`lifecycle-agent-active.sh`, `lifecycle-agent-idle.sh`, `lifecycle-pre-tool.sh`, `lifecycle-post-tool.sh`, `lifecycle-permission.sh`, `lifecycle-session-start.sh`) all POST to this endpoint via `insight-flow log-event`.
+- **N68** — Four-state project status model: `active` | `awaiting-permission` | `idle` | `done`. Status is derived from the latest event by timestamp in an in-memory `EventStore` (bounded ring buffer, N=200), with at-least-once dedup by `event.id`. Exposed via:
+  - `GET /log/status` — returns `{ status, events: HookEventInput[] }` for inspection.
+  - Socket.IO `status` frame — broadcast on every transition (`{ kind: "status", from, to, at, latestEventId }`).
+- **N68** — Browser notifications wiring in the dashboard. Per-browser "Browser notifications" toggle (localStorage-backed) + a "Request permission" button that calls `Notification.requestPermission()`. Notifications fire only on `→ done` / `→ awaiting-permission` transitions, and only when the tab is unfocused (`!document.hasFocus()`).
+- **N68** — Master overview now receives status pushes from each project server on transitions (`POST /api/projects/<uuid>/status` with `{status}`). Master integration unchanged from N20 — the project UUID lookup stays where it is.
+- **N68** — Public exports added to `packages/taskflow/src/index.ts`: `deriveStatus`, `statusFromEvent`, `EventStore`, plus the `HookEventInput`, `ProjectStatus`, `EventFrame`, `StatusFrame` types.
+
+### Changed
+
+- **N68** — Activity-engine `Event`-tool rows now also feed the `EventStore` so the master overview gets status updates even when hooks call an unmigrated (pre-N68) `insight-flow` binary that doesn't POST to `/log/events`. Both paths funnel through the same derivation, so the four-state vocabulary stays unified.
+
+### Notes
+
+- **N69** (`stateful status transitions: only agent-active leaves idle/done`) was scoped, prototyped, and rejected after live evaluation. No code ships in this release; the task folder is retained at `workTasks/N69-...` as a record of the tried-and-abandoned direction.
+
 ## [0.11.2] — 2026-05-28
 
 ### Fixed
