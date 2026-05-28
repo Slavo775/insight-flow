@@ -4,6 +4,12 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.11.2] — 2026-05-28
+
+### Fixed
+
+- **N67** — Hook scripts registered by `insight-flow init` and `install-activity-hook` now use `${CLAUDE_PROJECT_DIR}/.claude/hooks/<file>` instead of bare relative paths. Claude Code does not guarantee CWD equals the project root when firing hooks, so relative paths silently failed for `PostToolUse`, `PreToolUse`, and `Stop` events — every tool call produced a `/bin/sh: .claude/hooks/<file>: No such file or directory` error in the hook status bar. **Upgrade path:** after `npm install -g insight-flow@latest`, re-run `insight-flow init` in each project to rewrite `settings.local.json` with the corrected paths.
+
 ## [0.11.1] — 2026-05-28
 
 ### Changed

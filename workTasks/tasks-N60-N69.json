@@ -801,6 +801,59 @@
       "branch": "rework/N66-promote-batch-init-and-batch-prompt-build",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/45",
       "mergedAt": "2026-05-28T10:31:16.915Z"
+    },
+    {
+      "id": "N67",
+      "title": "fix hook paths: use CLAUDE_PROJECT_DIR for all enrichment hooks",
+      "type": "fix",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "workTasks/N67-fix-hook-paths-use-claude-project-dir-for-all-enri",
+      "createdAt": "2026-05-28T11:10:48.285Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T11:10:48.286Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T11:12:22.783Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T11:12:22.881Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-28T11:12:22.782Z",
+        "completedAt": "2026-05-28T11:12:22.881Z",
+        "filesChanged": [
+          "packages/taskflow/src/activity-hook.ts",
+          "packages/taskflow/src/notify-hook.ts",
+          ".claude/settings.local.json",
+          "packages/taskflow/package.json",
+          "packages/taskflow/CHANGELOG.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "hooks",
+        "cli",
+        "install"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }

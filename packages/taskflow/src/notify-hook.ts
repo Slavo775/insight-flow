@@ -152,7 +152,7 @@ export function installNotifyHook(cwd: string): InstallNotifyHookResult {
 
   let settingsUpdated = false;
   if (!alreadyRegistered) {
-    stop.push({ matcher: "", hooks: [{ type: "command", command: ".claude/hooks/taskflow-notify.sh", timeout: 5000 }] });
+    stop.push({ matcher: "", hooks: [{ type: "command", command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/taskflow-notify.sh", timeout: 5000 }] });
     hooks.Stop = stop;
     settings.hooks = hooks;
     if (!existsSync(resolve(cwd, ".claude"))) {

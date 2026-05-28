@@ -127,7 +127,7 @@ export function installActivityHook(cwd: string, logFile: string): InstallActivi
 
   let settingsUpdated = false;
   if (!alreadyRegistered) {
-    postToolUse.push({ matcher: "", hooks: [{ type: "command", command: ".claude/hooks/taskflow-activity.sh", timeout: 5000 }] });
+    postToolUse.push({ matcher: "", hooks: [{ type: "command", command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/taskflow-activity.sh", timeout: 5000 }] });
     hooks.PostToolUse = postToolUse;
     settings.hooks = hooks;
     if (!existsSync(resolve(cwd, ".claude"))) {
@@ -244,7 +244,7 @@ export function installEnrichmentHooks(
   let settingsUpdated = false;
 
   for (const { file, event } of hookDefs) {
-    const hookCmd = `.claude/hooks/${file}`;
+    const hookCmd = `\${CLAUDE_PROJECT_DIR}/.claude/hooks/${file}`;
     const existing = (hooks[event] ?? []) as Array<Record<string, unknown>>;
     const alreadyRegistered = existing.some((h) => {
       if (!h || typeof h !== "object") return false;
