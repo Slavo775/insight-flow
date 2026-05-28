@@ -601,7 +601,7 @@
       "title": "release v0.11.0 — batch-init, batch-prompt-build, AGENT_ENFORCEMENT in rolesDir",
       "type": "feat",
       "priority": "high",
-      "status": "in-progress",
+      "status": "merged",
       "folder": "workTasks/N65-release-v0-11-0-batch-init-batch-prompt-build-agen",
       "createdAt": "2026-05-28T09:13:23.408Z",
       "statusHistory": [
@@ -654,6 +654,11 @@
           "status": "in-progress",
           "at": "2026-05-28T09:35:56.964Z",
           "by": "task-implement"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-28T09:38:35.613Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -667,7 +672,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 25,
       "tags": [
         "release",
         "batch-ui",
@@ -687,6 +692,53 @@
       ],
       "branch": "chore/N65-release-v0-11-0",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/44",
+      "mergedAt": "2026-05-28T09:38:35.613Z"
+    },
+    {
+      "id": "N66",
+      "title": "promote batch-init and batch-prompt-build to top-level commands",
+      "type": "rework",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "workTasks/N66-promote-batch-init-and-batch-prompt-build-to-top-l",
+      "createdAt": "2026-05-28T09:46:05.868Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T09:46:05.868Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T09:51:22.022Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T09:51:22.139Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-28T09:51:22.022Z",
+        "completedAt": "2026-05-28T09:51:22.138Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "batch",
+        "rename"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]
