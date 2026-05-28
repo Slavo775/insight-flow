@@ -504,7 +504,7 @@
       "title": "batch-init and batch-prompt-build for registered projects",
       "type": "feat",
       "priority": "medium",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N64-batch-init-and-batch-prompt-build-for-registered-p",
       "createdAt": "2026-05-28T08:21:47.647Z",
       "statusHistory": [
@@ -552,6 +552,11 @@
           "status": "pushed",
           "at": "2026-05-28T09:08:39.988Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-28T09:10:27.935Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -568,7 +573,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 49,
       "tags": [
         "batch",
         "ui",
@@ -589,6 +594,43 @@
       ],
       "branch": "feat/N64-batch-init-and-batch-prompt-build",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/43",
+      "mergedAt": "2026-05-28T09:10:27.935Z"
+    },
+    {
+      "id": "N65",
+      "title": "release v0.11.0 — batch-init, batch-prompt-build, AGENT_ENFORCEMENT in rolesDir",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N65-release-v0-11-0-batch-init-batch-prompt-build-agen",
+      "createdAt": "2026-05-28T09:13:23.408Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T09:13:23.408Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "batch-ui",
+        "prompt-build"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]
