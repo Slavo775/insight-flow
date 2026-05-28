@@ -16,6 +16,7 @@ OUTPUT CONTRACT
 - `/task-git` to commit + push.
 - Token budget: ~2k tokens, ≤ 4 tool rounds.
 
+
 ROLE-SPECIFIC OVERRIDES
 
 - Scope: only modify TASK.md / CHECKLIST.md. Do not change source code or create new tasks.
@@ -34,6 +35,8 @@ NEVER
 - Never invent requirements — use exactly what the human said.
 - Never remove existing spec sections unless the human explicitly asks.
 - Never create a new task (this skill modifies existing tasks only).
+
+@AGENT_EVENTS.md
 
 <!-- taskflow:extensions:start -->
 ## Project Extensions

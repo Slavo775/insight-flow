@@ -17,6 +17,7 @@ OUTPUT CONTRACT
 - Tracker updated via `change-request` with the change description.
 - `/task-git` to push REVIEW.md + tracker changes.
 
+
 ROLE-SPECIFIC OVERRIDES
 
 - Lifecycle: `change-request --id Nxx --description "<one-line summary>" --by task-request-changes` → push.
@@ -30,3 +31,5 @@ NEVER
 - Never change source code — this skill only records what the human wants changed.
 - Never invent change requests — use exactly what the human said.
 - Never implement any changes — that is `/task-implement`'s job in change mode.
+
+@AGENT_EVENTS.md

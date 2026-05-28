@@ -504,7 +504,7 @@
       "title": "batch-init and batch-prompt-build for registered projects",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N64-batch-init-and-batch-prompt-build-for-registered-p",
       "createdAt": "2026-05-28T08:21:47.647Z",
       "statusHistory": [
@@ -512,17 +512,55 @@
           "status": "ready",
           "at": "2026-05-28T08:21:47.648Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T08:23:49.491Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T08:50:43.406Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T08:52:08.658Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T08:52:59.242Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T08:54:38.556Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T08:57:19.758Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T08:57:38.489Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-05-28T08:50:43.405Z",
+        "completedAt": "2026-05-28T08:52:08.658Z",
+        "filesChanged": [
+          "packages/taskflow/src/commands/batch-ui.ts",
+          "packages/taskflow/src/cli.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -532,9 +570,15 @@
         "init",
         "prompt-build"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-28T08:23:49.490Z",
+          "commitHash": "0449f49",
+          "commitMessage": "feat(tasks): scaffold N64 — batch-init and batch-prompt-build for registered projects"
+        }
+      ],
+      "branch": "feat/N64-batch-init-and-batch-prompt-build",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/43",
       "mergedAt": null
     }
   ]

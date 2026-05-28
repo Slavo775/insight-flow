@@ -22,6 +22,7 @@ OUTPUT CONTRACT
 - `/task-git` to push to the task's branch.
 - Report: files changed, tests added, gate results, any checklist item not met and why.
 
+
 ROLE-SPECIFIC OVERRIDES
 
 - Full mode lifecycle: `implement-start --id Nxx` → execute → `implement-end --id Nxx --files "a.ts,b.ts"`.
@@ -38,6 +39,8 @@ SCOPE GUARD
 
 - Full mode: if implementation requires changes to >2 files not in TASK.md "In scope", stop and ask.
 - Ambiguous spec → ask, do not guess.
+
+@AGENT_EVENTS.md
 
 <!-- taskflow:extensions:start -->
 ## Project Extensions

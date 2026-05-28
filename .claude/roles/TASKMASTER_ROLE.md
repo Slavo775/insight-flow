@@ -18,6 +18,7 @@ OUTPUT CONTRACT
 - Call `/task-git` to branch, push, and create PR. PR-before-implementation lets reviewers see the spec.
 - Token budget: ~2k tokens, ≤ 4 tool rounds.
 
+
 ROLE-SPECIFIC OVERRIDES
 
 - TASK.md sections: Problem · Goal · Scope (In/Out) · Implementation plan · Verification · Notes.
@@ -32,6 +33,8 @@ WRITING STYLE
 - Concise: work ticket, not a lesson.
 - Checklist items are binary — done or not done.
 - Reference related Nxx tasks when relevant.
+
+@AGENT_EVENTS.md
 
 <!-- taskflow:extensions:start -->
 ## Project Extensions

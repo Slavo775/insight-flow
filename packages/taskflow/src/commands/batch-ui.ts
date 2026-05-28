@@ -346,6 +346,77 @@ export function cmdUiBatchRegister(): void {
   console.log("Run `insight-flow batch-ui` to launch all registered projects.");
 }
 
+// ── batch-init / batch-prompt-build helpers ──────────────────────────────────
+
+function resolveInsightFlowBin(): string {
+  return process.platform === "win32" ? "insight-flow.cmd" : "insight-flow";
+}
+
+function runInProject(projectPath: string, args: string[]): Promise<{ok: boolean; output: string}> {
+  return new Promise((res) => {
+    const bin = resolveInsightFlowBin();
+    const child = spawn(bin, args, {cwd: projectPath, stdio: "pipe"});
+    const chunks: Buffer[] = [];
+    child.stdout.on("data", (d: Buffer) => chunks.push(d));
+    child.stderr.on("data", (d: Buffer) => chunks.push(d));
+    child.on("close", (code) => res({ok: code === 0, output: Buffer.concat(chunks).toString()}));
+  });
+}
+
+async function batchRun(
+  opts: ParsedArgs,
+  args: string[],
+  verb: string,
+): Promise<void> {
+  const entries = readBatchUiRegistry();
+  if (entries.length === 0) {
+    console.log("No projects registered. Run `insight-flow ui-batch-register` inside a project folder.");
+    return;
+  }
+
+  let chosen: BatchUiEntry[];
+  const isTTY = Boolean(process.stdin.isTTY);
+
+  if (!isTTY) {
+    chosen = entries;
+    console.log(`Non-interactive mode — running ${verb} in all ${entries.length} project(s).`);
+  } else {
+    chosen = await interactiveSelect(entries, readBatchUiLastSelected());
+    process.stdout.write("\n");
+  }
+
+  if (chosen.length === 0) {
+    console.log("No projects selected.");
+    return;
+  }
+
+  writeBatchUiLastSelected(chosen.map((e) => e.label));
+
+  let passed = 0;
+  for (const entry of chosen) {
+    const {ok, output} = await runInProject(entry.path, args);
+    if (ok) {
+      console.log(`  ✓ ${entry.label}`);
+      passed++;
+    } else {
+      console.log(`  ✗ ${entry.label}`);
+      if (output.trim()) console.log(output.trimEnd().replace(/^/gm, "    "));
+    }
+  }
+  console.log(`\n${passed}/${chosen.length} succeeded.`);
+}
+
+export async function cmdBatchInit(opts: ParsedArgs): Promise<void> {
+  const args = ["init"];
+  if (opts.force) args.push("--force");
+  if (opts.examples) args.push("--examples");
+  await batchRun(opts, args, "init");
+}
+
+export async function cmdBatchPromptBuild(opts: ParsedArgs): Promise<void> {
+  await batchRun(opts, ["prompt-build", "--apply"], "prompt-build");
+}
+
 export function cmdUiBatchDown(): void {
   const running = readBatchUiRunningPids();
   if (running.length === 0) {
