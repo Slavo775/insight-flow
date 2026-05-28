@@ -9,7 +9,7 @@
       "title": "release v0.12.0 — N68 central /log/events endpoint + four-state status model",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "workTasks/N70-release-v0-12-0-n68-central-log-events-endpoint-fo",
       "createdAt": "2026-05-28T15:29:26.486Z",
       "statusHistory": [
@@ -37,6 +37,21 @@
           "status": "approved",
           "at": "2026-05-28T15:38:47.149Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T15:40:12.170Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-28T15:40:12.263Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-05-28T15:40:12.360Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -54,12 +69,114 @@
       "reviewCount": 1,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-05-28T15:40:12.360Z",
+      "totalDurationMinutes": 11,
       "tags": [
         "release",
         "changelog",
         "npm"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-28T15:40:12.170Z",
+          "commitHash": "1d22e13",
+          "commitMessage": "chore(release): v0.12.0"
+        }
+      ],
+      "branch": "main",
+      "mrUrl": null,
+      "mergedAt": "2026-05-28T15:40:12.263Z"
+    },
+    {
+      "id": "N71",
+      "title": "master overview: drop live/down badge, gate claudeStatus highlight on liveness",
+      "type": "fix",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N71-master-overview-drop-live-down-badge-gate-claudest",
+      "createdAt": "2026-05-28T19:19:52.800Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T19:19:52.800Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T19:21:00.937Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T19:24:00.491Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T19:25:37.896Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T19:27:05.047Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-28T19:21:00.937Z",
+        "completedAt": "2026-05-28T19:24:00.490Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/overview.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "overview",
+        "ui"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N72",
+      "title": "browser notif: change 'Awaiting input' to 'Done' when agent finishes",
+      "type": "fix",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N72-browser-notif-change-awaiting-input-to-done-when-a",
+      "createdAt": "2026-05-28T20:36:06.746Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T20:36:06.746Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "notifications",
+        "dashboard",
+        "ux"
       ],
       "pushes": [],
       "branch": null,
