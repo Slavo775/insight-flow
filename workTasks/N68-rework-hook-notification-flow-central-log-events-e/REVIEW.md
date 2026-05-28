@@ -192,3 +192,16 @@ All three blockers raised across human-review rounds 3 are resolved. Notificatio
 - Status of REVIEW.md is getting long — Round 1 + Round 2 + three human-review entries + this. Once N68 merges, a follow-up could collapse the resolved sections into a single "history" footer.
 - Live verification on http://localhost:6006 + http://localhost:6100/overview: master accepts the new vocabulary; activity-engine path triggers status pushes; the project's card flips between `active` and `done`/`awaiting-permission` as expected.
 - All three open follow-ups from Round 2 non-blockers (dashboard indicator unification, hook alias selectivity, health probe) remain follow-up material — none became blocking.
+
+
+---
+
+## Human Review — Round 4 (final)
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-05-28
+**Verdict:** approved
+
+### Notes
+
+Quote: *"approved"*. Final human sign-off after all three blockers (false "agent done" notification wording, master status not updating, master rejecting four-state vocabulary) were resolved and verified live on http://localhost:6006 + http://localhost:6100/overview. Ready to merge.

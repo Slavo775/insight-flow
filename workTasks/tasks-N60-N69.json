@@ -963,6 +963,21 @@
           "status": "approved",
           "at": "2026-05-28T13:45:39.663Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T13:56:38.302Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T14:04:18.264Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T14:04:40.408Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -985,7 +1000,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 6,
+      "reviewCount": 7,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -1000,6 +1015,11 @@
           "at": "2026-05-28T12:42:53.505Z",
           "commitHash": "3e29c44",
           "commitMessage": "docs(tasks): scaffold N68 — rework hook notification flow with /log/events"
+        },
+        {
+          "at": "2026-05-28T13:56:38.301Z",
+          "commitHash": "d7f3ba4",
+          "commitMessage": "feat(N68): central /log/events endpoint + four-state status + frontend wiring"
         }
       ],
       "branch": "rework/N68-rework-hook-notification-flow",
