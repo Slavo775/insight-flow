@@ -9,7 +9,7 @@
       "title": "release v0.12.0 — N68 central /log/events endpoint + four-state status model",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "workTasks/N70-release-v0-12-0-n68-central-log-events-endpoint-fo",
       "createdAt": "2026-05-28T15:29:26.486Z",
       "statusHistory": [
@@ -37,6 +37,21 @@
           "status": "approved",
           "at": "2026-05-28T15:38:47.149Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T15:40:12.170Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-28T15:40:12.263Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-05-28T15:40:12.360Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -54,16 +69,171 @@
       "reviewCount": 1,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-05-28T15:40:12.360Z",
+      "totalDurationMinutes": 11,
       "tags": [
         "release",
         "changelog",
         "npm"
       ],
+      "pushes": [
+        {
+          "at": "2026-05-28T15:40:12.170Z",
+          "commitHash": "1d22e13",
+          "commitMessage": "chore(release): v0.12.0"
+        }
+      ],
+      "branch": "main",
+      "mrUrl": null,
+      "mergedAt": "2026-05-28T15:40:12.263Z"
+    },
+    {
+      "id": "N71",
+      "title": "master overview: drop live/down badge, gate claudeStatus highlight on liveness",
+      "type": "fix",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N71-master-overview-drop-live-down-badge-gate-claudest",
+      "createdAt": "2026-05-28T19:19:52.800Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T19:19:52.800Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T19:21:00.937Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T19:24:00.491Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T19:25:37.896Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-28T19:27:05.047Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-28T19:21:00.937Z",
+        "completedAt": "2026-05-28T19:24:00.490Z",
+        "filesChanged": [
+          "packages/insight-flow-master/src/overview.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "overview",
+        "ui"
+      ],
       "pushes": [],
       "branch": null,
       "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N72",
+      "title": "browser notif: change 'Awaiting input' to 'Done' when agent finishes",
+      "type": "fix",
+      "priority": "medium",
+      "status": "pushed",
+      "folder": "workTasks/N72-browser-notif-change-awaiting-input-to-done-when-a",
+      "createdAt": "2026-05-28T20:36:06.746Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-05-28T20:36:06.746Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T20:38:29.280Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-28T20:39:45.318Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-28T20:40:44.363Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-28T20:57:04.588Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-28T20:58:25.080Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-28T21:01:11.898Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-28T21:01:34.068Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-28T21:02:02.991Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-05-28T20:39:45.317Z",
+        "completedAt": "2026-05-28T20:40:44.363Z",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "notifications",
+        "dashboard",
+        "ux"
+      ],
+      "pushes": [
+        {
+          "at": "2026-05-28T20:38:29.279Z",
+          "commitHash": "18ed5ec",
+          "commitMessage": "chore(tasks): scaffold N72 — browser notif Done instead of Awaiting input"
+        },
+        {
+          "at": "2026-05-28T21:02:02.991Z",
+          "commitHash": "02f8c17",
+          "commitMessage": "fix(dashboard): N72 — notif title 'Done' replaces 'Awaiting input'"
+        }
+      ],
+      "branch": "fix/N72-browser-notif-awaiting-input-to-done",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/47",
       "mergedAt": null
     }
   ]

@@ -1,0 +1,23 @@
+{
+  "taskId": "N72",
+  "reviews": [
+    {
+      "startedAt": "2026-05-28T20:57:04.589Z",
+      "endedAt": "2026-05-28T20:58:25.080Z",
+      "verdict": "fix-needed",
+      "comment": "Code change is correct and matches spec; build+tests green. Blocker: implementation diff is uncommitted — PR #47 currently contains only the scaffold commit. Run /task-git to commit + push the dashboard.ts change, then re-review.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-28T21:01:11.898Z",
+        "endedAt": "2026-05-28T21:01:34.068Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts"
+        ],
+        "comment": "Blocker 1: working-tree dashboard.ts diff was correct but uncommitted — no code change needed, just ship it. Re-verified build (green) + tests (7/7) + grep check (0 matches for 'Awaiting input'). Ready for /task-git to commit + push.",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
