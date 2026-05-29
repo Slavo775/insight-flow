@@ -299,6 +299,21 @@
           "status": "approved",
           "at": "2026-05-29T19:34:02.956Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-29T20:04:25.355Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-29T20:26:22.252Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-29T20:26:44.275Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -319,7 +334,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -329,9 +344,15 @@
         "workflow",
         "analysis"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-29T20:04:25.355Z",
+          "commitHash": "edee126",
+          "commitMessage": "feat(agent): N73 — add /task-analyze strategist before /taskmaster"
+        }
+      ],
+      "branch": "feat/N73-task-analyze-strategist-agent-that-runs-before-tas",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/48",
       "mergedAt": null
     }
   ]
