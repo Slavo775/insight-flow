@@ -1,0 +1,14 @@
+{
+  "taskId": "N74",
+  "reviews": [
+    {
+      "startedAt": "2026-05-29T20:42:03.437Z",
+      "endedAt": "2026-05-29T20:45:08.210Z",
+      "verdict": "fix-needed",
+      "comment": "One blocker: CHANGELOG claims N71 (overview.ts liveness gate) ships in 0.13.0, but the file's N71 edits are uncommitted working-tree changes — not in branch HEAD (57dcb66) or tag v0.13.0. Master is a separate package not bundled in npm, so the npm 0.13.0 release is correct; fix is to commit overview.ts, force-update the v0.13.0 tag, and re-push. Two non-blocking items (unrelated dirty AGENT_ENFORCEMENT.md/N67 shard, missing N71 push/merge tracker entry). All other gates green (build/test/tarball/npm/grep). See REVIEW.md.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
