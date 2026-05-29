@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import type { AgentExtensions } from "./types.js";
 
 export const AGENT_ROLE_FILE_MAP: Record<string, string> = {
+  "task-analyze": "TASK_ANALYZER_ROLE.md",
   taskmaster: "TASKMASTER_ROLE.md",
   "task-implement": "TASK_IMPLEMENTER_ROLE.md",
   "task-review": "TASK_REVIEWER_ROLE.md",

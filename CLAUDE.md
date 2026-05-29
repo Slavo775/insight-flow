@@ -46,7 +46,7 @@ Package manager: **pnpm**. The repo is a workspace; `packages/taskflow` is the p
 
 **Schema validation:** `packages/taskflow/src/schema/index.ts` (Zod). Every read/write through `storage.ts` validates against these schemas.
 
-**Agent roles:** The 8 `TASK_*_ROLE.md` / `TASKMASTER_*_ROLE.md` files at repo root drive Claude Code slash commands (`/taskmaster`, `/task-implement`, `/task-review`, `/task-review-fix`, `/task-human-review`, `/task-request-changes`, `/task-incident`, `/taskmaster-change`, `/task-git`). Shared rules live in `AGENT_ENFORCEMENT.md` + `AGENT_PROTOCOL.md`. Host-specific PR API examples live in `PR_API.md` (technology-agnostic — examples only, no shipped defaults). The `packages/taskflow/scripts/sync-role-templates.mjs` script keeps `packages/taskflow/templates/roles/` in sync with the canonical root files before publish.
+**Agent roles:** The 9 `TASK_*_ROLE.md` / `TASKMASTER_*_ROLE.md` files at repo root drive Claude Code slash commands (`/task-analyze`, `/taskmaster`, `/task-implement`, `/task-review`, `/task-review-fix`, `/task-human-review`, `/task-request-changes`, `/task-incident`, `/taskmaster-change`, `/task-git`). `/task-analyze` runs **before** `/taskmaster` — it challenges weak briefs, surfaces alternatives, and only after the human confirms a path hands off to `/taskmaster` and writes an `ANALYSIS.md` audit trail into the new task folder. Shared rules live in `AGENT_ENFORCEMENT.md` + `AGENT_PROTOCOL.md`. Host-specific PR API examples live in `PR_API.md` (technology-agnostic — examples only, no shipped defaults). The `packages/taskflow/scripts/sync-role-templates.mjs` script keeps `packages/taskflow/templates/roles/` in sync with the canonical root files before publish.
 
 **Technology agnosticism:** insight-flow's agent prompts contain **no** specific package-manager, language-toolchain, or git-host commands. Project-specific commands (typecheck / lint / test / PR-create / comment-fetch / etc.) are user-supplied via the `agents.extend` mechanism shipped in N12. See "Extending agents with project-specific commands" below.
 
@@ -131,6 +131,7 @@ insight-flow                            # Launch dashboard at http://localhost:6
 
 | Command | Purpose |
 |---------|---------|
+| `/task-analyze` | Pre-taskmaster strategist: challenge the brief, propose alternatives, then hand off to `/taskmaster` |
 | `/taskmaster` | Create a new task spec (TASK.md + CHECKLIST.md) |
 | `/task-implement` | Implement a task from its spec |
 | `/task-review` | AI code review of implemented task |

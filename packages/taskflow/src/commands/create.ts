@@ -16,9 +16,11 @@ import { renderTemplate } from "../spec.js";
 function scaffoldTaskDocs(
   folderPath: string,
   vars: Record<string, string>,
-): { taskMdCreated: boolean; checklistMdCreated: boolean } {
+  options: { withAnalysis?: boolean } = {},
+): { taskMdCreated: boolean; checklistMdCreated: boolean; analysisMdCreated: boolean } {
   let taskMdCreated = false;
   let checklistMdCreated = false;
+  let analysisMdCreated = false;
 
   const taskMd = resolve(folderPath, "TASK.md");
   if (!existsSync(taskMd)) {
@@ -38,7 +40,18 @@ function scaffoldTaskDocs(
     }
   }
 
-  return { taskMdCreated, checklistMdCreated };
+  if (options.withAnalysis) {
+    const analysisMd = resolve(folderPath, "ANALYSIS.md");
+    if (!existsSync(analysisMd)) {
+      const tpl = resolvePackageAsset("templates/task/ANALYSIS.md.tpl");
+      if (existsSync(tpl)) {
+        writeFileSync(analysisMd, renderTemplate(tpl, vars));
+        analysisMdCreated = true;
+      }
+    }
+  }
+
+  return { taskMdCreated, checklistMdCreated, analysisMdCreated };
 }
 
 export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
@@ -104,13 +117,19 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
   master.meta.currentTaskId = id;
   saveMaster(config, master);
 
-  const scaffold = scaffoldTaskDocs(folderPath, {
-    ID: id,
-    TITLE: title,
-    TYPE: task.type,
-    PRIORITY: task.priority,
-    DATE: now().slice(0, 10),
-  });
+  const withAnalysis = opts["with-analysis"] === true || opts.withAnalysis === true;
+
+  const scaffold = scaffoldTaskDocs(
+    folderPath,
+    {
+      ID: id,
+      TITLE: title,
+      TYPE: task.type,
+      PRIORITY: task.priority,
+      DATE: now().slice(0, 10),
+    },
+    { withAnalysis },
+  );
 
   console.log(
     JSON.stringify({
@@ -119,6 +138,7 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
       folder: task.folder,
       taskMd: scaffold.taskMdCreated ? `${task.folder}/TASK.md` : null,
       checklistMd: scaffold.checklistMdCreated ? `${task.folder}/CHECKLIST.md` : null,
+      analysisMd: scaffold.analysisMdCreated ? `${task.folder}/ANALYSIS.md` : null,
     }),
   );
 }
