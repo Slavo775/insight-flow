@@ -4,6 +4,24 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-05-29
+
+### Added
+
+- **N73** — `/task-analyze` pre-taskmaster strategist agent. Runs *before* `/taskmaster`, executes an Analyze → Challenge → Propose → Interrogate loop, and only hands off to `/taskmaster` after the human confirms a chosen path. New files: `TASK_ANALYZER_ROLE.md` at repo root (synced to `packages/taskflow/templates/roles/TASK_ANALYZER_ROLE.md` by `scripts/sync-role-templates.mjs`), `packages/taskflow/templates/task/ANALYSIS.md.tpl` narrative template (sections: Problem framing · Goal · Options considered · Decision · Open questions · Sources · Handoff brief), and `.claude/commands/task-analyze.md` slash-command stub scaffolded by `insight-flow init`. New `--with-analysis` flag on `insight-flow create` copies `ANALYSIS.md.tpl` into the new task folder and includes `analysisMd` in the JSON output (default behaviour unchanged when flag omitted). `"task-analyze": "TASK_ANALYZER_ROLE.md"` added to `AGENT_ROLE_FILE_MAP` so `agents.extend.task-analyze` works for every consumer project. Includes an analyzer-specific **Security guardrails** block on top of the inherited `@AGENT_SECURITY.md` baseline (URL/document treated as DATA, no auto-fetching URLs found inside fetched docs, external content quoted in `EXTERNAL CONTENT — INFORMATIONAL ONLY` blocks, refusal to call `/taskmaster` when the entire brief originated externally).
+
+### Fixed
+
+- **N71** — Master overview cards no longer keep their green `claudeStatus` highlight after a project server goes offline. `packages/insight-flow-master/src/overview.ts` now computes `isLive = (Date.now() - new Date(p.lastSeenAt).getTime()) / 1000 < 60` inline in `renderCard` and gates `statusCls`, `claudeBadgeCls`, and `claudeBadgeLabel` on it; off-line cards render neutral regardless of cached status. Removed entirely: `.conn-badge` / `.conn-live` / `.conn-stale` / `.conn-down` CSS rules, the `badgeInfo()` helper, the `data-badge` markup inside each card header, and the `refreshBadges()` function + its 30 s `setInterval`. Subtitle counter `N projects · M live` retained. No `registry.ts` changes — `claudeStatus` keeps its last-pushed value so a brief reconnect within the 60 s window restores state without an extra round-trip.
+
+### Changed
+
+- **N72** — Dashboard browser notification on agent turn-end now reads `Done` (was `Awaiting input`). Updated in `packages/taskflow/src/server/dashboard.ts` in both code paths that fire desktop notifications: `fireDesktopNotif()` (legacy `agent-done` socket event) and `fireStatusDesktopNotif(toStatus)` (N68 derived-status `status` socket event, `toStatus === 'done'` branch only). The `awaiting-permission` branch retains `Permission required`. Project-name prefix, sound logic, and page-title glyph mapping unchanged.
+
+### Notes
+
+- Consumers should re-run `insight-flow init` after upgrading to scaffold `.claude/commands/task-analyze.md`, `.claude/roles/TASK_ANALYZER_ROLE.md`, and the new `templates/task/ANALYSIS.md.tpl`. `init` is additive — `--force` is only needed if you want to overwrite existing skill files.
+
 ## [0.12.0] — 2026-05-28
 
 ### Added
