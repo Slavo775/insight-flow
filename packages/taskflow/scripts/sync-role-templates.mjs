@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 const ROLE_FILES = [
   "TASKMASTER_ROLE.md",
   "TASKMASTER_CHANGE_ROLE.md",
+  "TASK_ANALYZER_ROLE.md",
   "TASK_IMPLEMENTER_ROLE.md",
   "TASK_REVIEWER_ROLE.md",
   "TASK_REVIEW_FIXER_ROLE.md",

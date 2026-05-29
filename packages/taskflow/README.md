@@ -49,6 +49,7 @@ Re-running `init` on an existing project is safe — it skips files that already
 | `taskflow.config.json` | Project config (port, activity engine, agent permissions, …) |
 | `workTasks/master.json` | Task metadata + shard index |
 | `workTasks/tasks-N00-N09.json` | First task shard |
+| `.claude/commands/task-analyze.md` | `/task-analyze` slash command (pre-taskmaster strategist) |
 | `.claude/commands/taskmaster.md` | `/taskmaster` slash command |
 | `.claude/commands/task-implement.md` | `/task-implement` slash command |
 | `.claude/commands/task-review.md` | `/task-review` slash command |
@@ -230,6 +231,7 @@ The block below shows every supported key with its default. Strip the `//` comme
   // ── Agent behaviour ─────────────────────────────────────────────────────────
   "agents": {
     "extend": {
+      "task-analyze": [],          // extra rules appended to task-analyze prompt
       "task-implement": [],        // extra rules appended to task-implement prompt
       "task-review": [],
       "task-review-fix": [],
@@ -385,12 +387,13 @@ When the panel is enabled but the hook is missing, the dashboard renders a clear
 
 ## Slash commands (Claude Code)
 
-`insight-flow init` writes nine slash commands to `.claude/commands/`:
+`insight-flow init` writes ten slash commands to `.claude/commands/`:
 
-| Command                 | Purpose                             |
-| ----------------------- | ----------------------------------- |
-| `/taskmaster`           | Create a new task spec              |
-| `/task-implement`       | Implement a task                    |
+| Command                 | Purpose                                                |
+| ----------------------- | ------------------------------------------------------ |
+| `/task-analyze`         | Pre-taskmaster strategist (challenge → propose → handoff) |
+| `/taskmaster`           | Create a new task spec                                 |
+| `/task-implement`       | Implement a task                                       |
 | `/task-review`          | AI code review                      |
 | `/task-human-review`    | Record human review feedback        |
 | `/task-review-fix`      | Fix issues from review              |
@@ -407,7 +410,7 @@ Add an `agents` key to your `taskflow.config.json` to inject project-specific ru
 
 `agents.extend` is a map of built-in agent names to arrays of extra rule strings. Each rule is appended to the corresponding role file under a `## Project Extensions` section. Re-running `insight-flow init` replaces (not duplicates) the section.
 
-Valid agent names: `taskmaster`, `task-implement`, `task-review`, `task-review-fix`, `task-human-review`, `task-git`, `task-incident`, `task-request-changes`, `taskmaster-change`.
+Valid agent names: `task-analyze`, `taskmaster`, `task-implement`, `task-review`, `task-review-fix`, `task-human-review`, `task-git`, `task-incident`, `task-request-changes`, `taskmaster-change`.
 
 ```json
 {
@@ -505,7 +508,7 @@ Individual flags override `remoteOps`. This config allows push but blocks everyt
 
 | Key | Purpose |
 |-----|---------|
-| `agents.extend` | Map of agent name → array of extra rule strings appended to that agent's prompt at `init` time. Re-running `init` replaces (not duplicates) the injected section. Valid agent names: `taskmaster`, `task-implement`, `task-review`, `task-review-fix`, `task-human-review`, `task-git`, `task-incident`, `task-request-changes`, `taskmaster-change`. |
+| `agents.extend` | Map of agent name → array of extra rule strings appended to that agent's prompt at `init` time. Re-running `init` replaces (not duplicates) the injected section. Valid agent names: `task-analyze`, `taskmaster`, `task-implement`, `task-review`, `task-review-fix`, `task-human-review`, `task-git`, `task-incident`, `task-request-changes`, `taskmaster-change`. |
 | `agents.custom` | Array of custom agent definitions (see [Registering custom agents](#registering-custom-agents)). Each entry generates a `.claude/commands/<name>.md` skill and a `CLAUDE.md` row. |
 | `agents.git.permissions` | Git operation flags for the `task-git` agent (see [Git permission gates](#git-permission-gates)). |
 

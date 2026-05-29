@@ -74,7 +74,7 @@ function printHelp(): void {
     init [--force] [--examples]           Initialize insight-flow in current project (--force overwrites existing role files; --examples adds commented agents.extend stubs)
     ui [--port 6006]                      Launch dashboard server
 
-    create --title "..." [--type feat] [--priority high] [--tags a,b]
+    create --title "..." [--type feat] [--priority high] [--tags a,b] [--with-analysis]
     status --id Nxx --status <status> [--by agent]
     list [--status ready]
     current
