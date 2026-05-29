@@ -92,7 +92,7 @@
       "title": "master overview: drop live/down badge, gate claudeStatus highlight on liveness",
       "type": "fix",
       "priority": "medium",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N71-master-overview-drop-live-down-badge-gate-claudest",
       "createdAt": "2026-05-28T19:19:52.800Z",
       "statusHistory": [
@@ -120,6 +120,11 @@
           "status": "approved",
           "at": "2026-05-28T19:27:05.047Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-29T20:48:08.561Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -141,8 +146,14 @@
         "overview",
         "ui"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-05-29T20:48:08.561Z",
+          "commitHash": "7364bd1",
+          "commitMessage": "fix(overview): N71 — gate claudeStatus visuals on liveness, drop conn badge"
+        }
+      ],
+      "branch": "feat/N74-release-v0-13-0-n71-master-overview-liveness-gatin",
       "mrUrl": null,
       "mergedAt": null
     },
@@ -370,7 +381,7 @@
       "title": "release v0.13.0 — N71 master overview liveness gating, N72 Done notification wording, N73 /task-analyze strategist",
       "type": "feat",
       "priority": "high",
-      "status": "fix-needed",
+      "status": "fixed",
       "folder": "workTasks/N74-release-v0-13-0-n71-master-overview-liveness-gatin",
       "createdAt": "2026-05-29T20:32:15.538Z",
       "statusHistory": [
@@ -408,6 +419,16 @@
           "status": "fix-needed",
           "at": "2026-05-29T20:45:08.210Z",
           "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-29T20:47:38.470Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-29T20:48:43.579Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
