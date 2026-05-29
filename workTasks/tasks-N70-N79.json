@@ -151,7 +151,7 @@
       "title": "browser notif: change 'Awaiting input' to 'Done' when agent finishes",
       "type": "fix",
       "priority": "medium",
-      "status": "pushed",
+      "status": "merged",
       "folder": "workTasks/N72-browser-notif-change-awaiting-input-to-done-when-a",
       "createdAt": "2026-05-28T20:36:06.746Z",
       "statusHistory": [
@@ -204,6 +204,11 @@
           "status": "pushed",
           "at": "2026-05-28T21:05:30.899Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-29T20:29:32.613Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -219,7 +224,7 @@
       "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 1433,
       "tags": [
         "notifications",
         "dashboard",
@@ -244,14 +249,14 @@
       ],
       "branch": "fix/N72-browser-notif-awaiting-input-to-done",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/47",
-      "mergedAt": null
+      "mergedAt": "2026-05-29T20:29:32.613Z"
     },
     {
       "id": "N73",
       "title": "task-analyze: strategist agent that runs before taskmaster to challenge assumptions and propose alternatives",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N73-task-analyze-strategist-agent-that-runs-before-tas",
       "createdAt": "2026-05-29T12:17:10.568Z",
       "statusHistory": [
@@ -314,6 +319,11 @@
           "status": "approved",
           "at": "2026-05-29T20:26:44.275Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-29T20:29:32.704Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -338,7 +348,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 492,
       "tags": [
         "agents",
         "workflow",
@@ -353,7 +363,7 @@
       ],
       "branch": "feat/N73-task-analyze-strategist-agent-that-runs-before-tas",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/48",
-      "mergedAt": null
+      "mergedAt": "2026-05-29T20:29:32.704Z"
     }
   ]
 }
