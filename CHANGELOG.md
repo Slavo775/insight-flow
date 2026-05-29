@@ -5,6 +5,22 @@ Full history lives in [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANG
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-05-29
+
+### Added
+
+- **N73** — `/task-analyze` pre-taskmaster strategist agent. Challenges weak briefs, surfaces alternatives, and only hands off to `/taskmaster` after the human confirms a path. Writes an `ANALYSIS.md` audit trail into the new task folder. Re-run `insight-flow init` after upgrading to scaffold `.claude/commands/task-analyze.md` and `.claude/roles/TASK_ANALYZER_ROLE.md`.
+
+### Fixed
+
+- **N71** — Master overview cards no longer keep their green `claudeStatus` highlight after a project server goes offline. Liveness gate (`lastSeenAt < 60 s`) drives status visuals; per-card `live`/`stale`/`down` badge removed.
+
+### Changed
+
+- **N72** — Dashboard browser notification on agent turn-end now reads `Done` (was `Awaiting input`). `Permission required` wording unchanged.
+
+See [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANGELOG.md) for the full entry.
+
 ## [0.12.0] — 2026-05-28
 
 ### Added

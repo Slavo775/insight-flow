@@ -62,10 +62,6 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
     .proj-card-header { display: flex; justify-content: space-between; align-items: center; }
     .proj-label { font-size: 14px; font-weight: 600; color: var(--text); }
-    .conn-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-    .conn-live { background: #0a3622; color: var(--green); }
-    .conn-stale { background: #3b2f06; color: var(--yellow); }
-    .conn-down { background: #3b1111; color: var(--red); }
     .proj-task { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
     .proj-task-id { font-size: 11px; font-weight: 700; color: var(--accent); }
     .proj-task-title { font-size: 12px; color: var(--text); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -117,6 +113,9 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
 
 function getScript(initialData: string): string {
   return `
+    // NOTE: this entire block is the body of a TS template literal. Do NOT
+    // use backticks anywhere below — including inside // comments — or the
+    // outer literal terminates. Use single quotes for any inline samples.
     var PROJECTS = ${initialData};
     var prevStatuses = {};
     var NOTIF_WATCHED = ['implemented','approved','fix-needed','merged','changes-requested'];
@@ -126,11 +125,8 @@ function getScript(initialData: string): string {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    function badgeInfo(lastSeenAt) {
-      var diff = (Date.now() - new Date(lastSeenAt).getTime()) / 1000;
-      if (diff < 60) return { cls: 'conn-live', label: 'live' };
-      if (diff < 120) return { cls: 'conn-stale', label: 'stale' };
-      return { cls: 'conn-down', label: 'down' };
+    function isProjectLive(lastSeenAt) {
+      return (Date.now() - new Date(lastSeenAt).getTime()) / 1000 < 60;
     }
 
     function statusBadgeCls(status) {
@@ -205,24 +201,35 @@ function getScript(initialData: string): string {
     }
 
     function renderCard(p) {
-      var bi = badgeInfo(p.lastSeenAt);
       var s = p.state || {};
+      // N71: gate every claudeStatus-driven visual on liveness. A project
+      // that hasn't checked in for 60s renders neutral, regardless of the
+      // last-pushed status — registry never clears the value on disconnect,
+      // so this is the only place stale 'active' / 'awaiting-permission'
+      // gets filtered out.
+      var live = isProjectLive(p.lastSeenAt);
+      var effectiveStatus = live ? s.claudeStatus : null;
       // N68: 'awaiting-permission' shares the alert card border with the
       // legacy 'permission-required'; 'done' borders nothing (it's a
       // not-actively-working state, same as 'idle').
-      var statusCls = s.claudeStatus === 'active' ? 'status-active'
-        : (s.claudeStatus === 'permission-required' || s.claudeStatus === 'awaiting-permission') ? 'status-permission'
+      var statusCls = effectiveStatus === 'active' ? 'status-active'
+        : (effectiveStatus === 'permission-required' || effectiveStatus === 'awaiting-permission') ? 'status-permission'
         : '';
-      var claudeBadgeCls = s.claudeStatus === 'active' ? 'claude-status-active'
-        : s.claudeStatus === 'permission-required' ? 'claude-status-permission'
-        : s.claudeStatus === 'awaiting-permission' ? 'claude-status-awaiting-permission'
-        : s.claudeStatus === 'done' ? 'claude-status-done'
-        : 'claude-status-idle';
-      var claudeBadgeLabel = s.claudeStatus === 'active' ? 'active'
-        : s.claudeStatus === 'permission-required' ? 'permission required'
-        : s.claudeStatus === 'awaiting-permission' ? 'awaiting permission'
-        : s.claudeStatus === 'done' ? 'done'
-        : s.claudeStatus === 'idle' ? 'idle'
+      // Empty-string default is intentional: claudeBadgeHtml below is gated
+      // on claudeBadgeLabel being non-empty, so an unknown / null status
+      // renders no badge at all. Do NOT add a 'claude-status-idle' fallback
+      // here — it would be unreachable (label='' short-circuits the render).
+      var claudeBadgeCls = effectiveStatus === 'active' ? 'claude-status-active'
+        : effectiveStatus === 'permission-required' ? 'claude-status-permission'
+        : effectiveStatus === 'awaiting-permission' ? 'claude-status-awaiting-permission'
+        : effectiveStatus === 'done' ? 'claude-status-done'
+        : effectiveStatus === 'idle' ? 'claude-status-idle'
+        : '';
+      var claudeBadgeLabel = effectiveStatus === 'active' ? 'active'
+        : effectiveStatus === 'permission-required' ? 'permission required'
+        : effectiveStatus === 'awaiting-permission' ? 'awaiting permission'
+        : effectiveStatus === 'done' ? 'done'
+        : effectiveStatus === 'idle' ? 'idle'
         : '';
       var claudeBadgeHtml = claudeBadgeLabel
         ? '<span class="claude-status-badge ' + claudeBadgeCls + '">' + claudeBadgeLabel + '</span>'
@@ -242,10 +249,7 @@ function getScript(initialData: string): string {
       return '<div class="proj-card' + (statusCls ? ' ' + statusCls : '') + '" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
           '<span class="proj-label">' + escHtml(p.label) + '</span>' +
-          '<div style="display:flex;gap:6px;align-items:center">' +
-            claudeBadgeHtml +
-            '<span class="conn-badge ' + bi.cls + '" data-badge>' + bi.label + '</span>' +
-          '</div>' +
+          (claudeBadgeHtml ? '<div style="display:flex;gap:6px;align-items:center">' + claudeBadgeHtml + '</div>' : '') +
         '</div>' +
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +
@@ -261,25 +265,21 @@ function getScript(initialData: string): string {
     }
 
     function updateSubtitle() {
-      var live = PROJECTS.filter(function(p) {
-        return (Date.now() - new Date(p.lastSeenAt).getTime()) / 1000 < 60;
-      }).length;
+      var live = PROJECTS.filter(function(p) { return isProjectLive(p.lastSeenAt); }).length;
       document.getElementById('subtitle').textContent =
         PROJECTS.length + ' project' + (PROJECTS.length !== 1 ? 's' : '') +
         ' · ' + live + ' live';
     }
 
-    function refreshBadges() {
-      var cards = document.querySelectorAll('.proj-card');
-      for (var i = 0; i < cards.length; i++) {
-        var card = cards[i];
-        var id = card.getAttribute('data-id');
-        var p = PROJECTS.find(function(x) { return x.id === id; });
-        if (!p) continue;
-        var bi = badgeInfo(p.lastSeenAt);
-        var badge = card.querySelector('[data-badge]');
-        if (badge) { badge.className = 'conn-badge ' + bi.cls; badge.textContent = bi.label; }
-      }
+    // N71: project cards auto-decay when a project goes stale. Re-render
+    // all cards every 30s so stale claudeStatus highlights drop off
+    // even when no other project pushes an update.
+    // TODO: full innerHTML replace drops in-flight CSS transitions / hover
+    // states. Fine for static colors today; if a pulsing border or other
+    // animation is added to .status-active, switch to per-card targeted
+    // updates or skip the rerender when no card crossed the 60s threshold.
+    function refreshStaleCards() {
+      document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
       updateSubtitle();
     }
 
@@ -414,5 +414,5 @@ function getScript(initialData: string): string {
     loadNotifSettings();
     requestNotifPermission();
     connectWS();
-    setInterval(refreshBadges, 30000);`;
+    setInterval(refreshStaleCards, 30000);`;
 }

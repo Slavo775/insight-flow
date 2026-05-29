@@ -1,0 +1,33 @@
+{
+  "taskId": "N74",
+  "reviews": [
+    {
+      "startedAt": "2026-05-29T20:42:03.437Z",
+      "endedAt": "2026-05-29T20:45:08.210Z",
+      "verdict": "fix-needed",
+      "comment": "One blocker: CHANGELOG claims N71 (overview.ts liveness gate) ships in 0.13.0, but the file's N71 edits are uncommitted working-tree changes — not in branch HEAD (57dcb66) or tag v0.13.0. Master is a separate package not bundled in npm, so the npm 0.13.0 release is correct; fix is to commit overview.ts, force-update the v0.13.0 tag, and re-push. Two non-blocking items (unrelated dirty AGENT_ENFORCEMENT.md/N67 shard, missing N71 push/merge tracker entry). All other gates green (build/test/tarball/npm/grep). See REVIEW.md.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-05-29T20:47:38.471Z",
+        "endedAt": "2026-05-29T20:48:43.579Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/insight-flow-master/src/overview.ts",
+          "workTasks/N71-master-overview-drop-live-down-badge-gate-claudest/"
+        ],
+        "comment": "Fixed blocker 1: committed N71's overview.ts implementation (isProjectLive liveness gate, removed conn-badge CSS/badgeInfo helper/refreshBadges setInterval/data-badge markup) plus N71's previously-untracked task folder (TASK.md, CHECKLIST.md, REVIEW.md, reviews.json) on this branch as 7364bd1. Master build green. N71 push recorded in tracker. Tag rewrite (v0.13.0 → 7364bd1 or PR-merge commit) deferred until PR #49 merges to main, per user instruction.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-05-29T20:50:24.588Z",
+      "endedAt": "2026-05-29T20:50:41.120Z",
+      "verdict": "approved",
+      "comment": "Human approved, requested merge + publish: 'approved please merge and publish it'",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

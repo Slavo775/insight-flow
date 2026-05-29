@@ -4,12 +4,12 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.12.0
+## What's new in 0.13.0
 
-- **Central `POST /log/events` endpoint** — every hook posts its event here. Validated by Zod, mirrored to a daily JSONL backup at `workTasks/.events/<YYYY-MM-DD>.jsonl`, broadcast to subscribers via Socket.IO. `GET /log/status` returns `{status, events}` for inspection.
-- **Four-state project status** — `active` / `awaiting-permission` / `idle` / `done`, derived from the latest hook event in an in-memory `EventStore`. Dashboard pill, sound cues, and master overview all subscribe to a single `status` WebSocket frame.
-- **Browser notifications, per-browser opt-in** — new settings toggle (localStorage-backed) plus a "Request permission" button. Notifications fire only on `→ done` / `→ awaiting-permission` and only when the tab is unfocused.
-- **Master overview status pushes** — each project server forwards status transitions to the master, so the overview grid reflects live project state without scraping.
+- **`/task-analyze` pre-taskmaster strategist agent** — challenges weak briefs, surfaces 1–2 alternatives, and only hands off to `/taskmaster` after you confirm a path. Writes an `ANALYSIS.md` audit trail (Problem framing · Options considered · Decision · Sources · Handoff brief) into the new task folder. `insight-flow create --with-analysis` scaffolds the file directly.
+- **Master overview liveness gating** — cards go neutral once `lastSeenAt > 60 s`. No more stale-green "Claude is working" highlight on offline projects. Per-card `live`/`stale`/`down` badge removed; subtitle `N projects · M live` counter retained.
+- **Browser notification reads "Done"** — agent turn-end notification title changed from `Awaiting input` to `Done` (clearer signal that the ball is in your court). `Permission required` wording unchanged.
+- **Re-run `insight-flow init` after upgrading** to scaffold `.claude/commands/task-analyze.md` and `.claude/roles/TASK_ANALYZER_ROLE.md` into your project.
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
