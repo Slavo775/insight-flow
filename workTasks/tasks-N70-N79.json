@@ -601,7 +601,7 @@
       "title": "Add provider identity (claude/cursor) to lifecycle events + dashboard",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N76-add-provider-identity-claude-cursor-to-lifecycle-e",
       "createdAt": "2026-06-01T13:55:13.302Z",
       "statusHistory": [
@@ -609,17 +609,46 @@
           "status": "ready",
           "at": "2026-06-01T13:55:13.303Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-01T15:09:22.160Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-01T15:15:44.261Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-01T16:22:09.508Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-01T18:18:41.697Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-01T15:09:22.159Z",
+        "completedAt": "2026-06-01T15:15:44.261Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/src/commands/log-event.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/test/log-event.test.mjs",
+          "packages/taskflow/test/provider-dashboard.test.mjs",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,

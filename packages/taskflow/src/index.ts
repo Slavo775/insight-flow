@@ -30,6 +30,7 @@ export {
   parseTaskNum,
 } from "./storage.js";
 export { startServer } from "./server/index.js";
+export { getDashboardHtml } from "./server/dashboard.js";
 export { deriveStatus, statusFromEvent, EventStore } from "./server/event-stream.js";
 export type {
   HookEventInput,

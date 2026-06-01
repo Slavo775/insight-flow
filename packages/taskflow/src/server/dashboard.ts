@@ -44,7 +44,7 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     (activityEnabled
       ? "      <div class=\"act-tabs\" id=\"act-tabs\">\n" +
         "        <div class=\"act-tab-bar\">\n" +
-        "          <button class=\"act-tab active\" data-pane=\"claude\" onclick=\"switchActTab('claude')\">Claude Activity <span class=\"activity-status\" id=\"activity-status\"></span></button>\n" +
+        "          <button class=\"act-tab active\" data-pane=\"claude\" onclick=\"switchActTab('claude')\">Agent Activity <span class=\"activity-status\" id=\"activity-status\"></span></button>\n" +
         "          <button class=\"act-tab\" data-pane=\"recent\" onclick=\"switchActTab('recent')\">Recent Activity</button>\n" +
         "        </div>\n" +
         "        <div class=\"act-pane\" id=\"act-pane-claude\">\n" +
@@ -144,6 +144,9 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .activity-badge-hook-muted { background: #1a1a1a; color: var(--text-muted); }
     .activity-badge-hook-blue { background: #1e3a5f; color: var(--cyan); }
     .activity-badge-hook-purple { background: #2d1b4e; color: var(--purple); }
+    .activity-badge-provider-claude { background: #1a1a2e; color: #c4b5fd; }
+    .activity-badge-provider-cursor { background: #07303a; color: #5eead4; }
+    .activity-badge-provider-other { background: #2a2a2a; color: #cbd5e1; }
     .activity-phase-msg { font-weight: 600; color: var(--text); }
     .activity-idle { color: var(--text-muted); text-align: center; padding: 24px 16px; font-size: 12px; }
     .stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
@@ -1123,6 +1126,16 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       }
     }
 
+    function providerBadge(ev) {
+      var p = ev && ev.provider;
+      // Default editor (claude / absent) is unbadged to keep single-editor
+      // projects clean; only a non-default provider gets a badge. Renders on
+      // every row type so cursor activity is tagged wherever it appears.
+      if (!p || p === 'claude') return '';
+      var cls = p === 'cursor' ? 'activity-badge-provider-cursor' : 'activity-badge-provider-other';
+      return '<span class="activity-badge ' + cls + '" title="' + escHtml(String(p)) + ' agent">' + escHtml(String(p)) + '</span> ';
+    }
+
     function renderActivityItemHtml(ev) {
       var tool = ev.tool || '?';
       var ts = ev.ts || '';
@@ -1131,6 +1144,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         var actMsg = escHtml(ev.message || '');
         return '<div class="activity-icon phase">&#9670;</div>' +
           '<div style="flex:1;min-width:0">' +
+            providerBadge(ev) +
             '<span class="activity-phase-msg">' + actMsg + '</span>' +
           '</div>' +
           '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
@@ -1179,6 +1193,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           }
           return '<div class="activity-icon ' + hIconCls + '">' + hIcon + '</div>' +
             '<div style="flex:1;min-width:0">' +
+              providerBadge(ev) +
               '<span class="activity-badge activity-badge-' + hBadgeCls + '">' + escHtml(evtType) + '</span>' +
               (hDetail ? ' <span class="activity-file-muted">' + hDetail + '</span>' : '') +
               (ev.taskId ? ' <span class="activity-file-muted" style="opacity:0.6">' + escHtml(String(ev.taskId)) + '</span>' : '') +
@@ -1192,6 +1207,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         var evtIcon = evtType === 'done' ? '&#10003;' : evtType === 'start' ? '&#9654;' : '&#9679;';
         return '<div class="activity-icon ' + evtIconClass + '">' + evtIcon + '</div>' +
           '<div style="flex:1;min-width:0">' +
+            providerBadge(ev) +
             '<span class="activity-badge ' + evtBadgeClass + '">' + escHtml(evtType) + '</span>' +
             (ev.taskId ? ' <span class="activity-file-muted">' + escHtml(ev.taskId) + '</span>' : '') +
           '</div>' +
@@ -1203,6 +1219,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         var phaseMsg = escHtml(ev.message || phaseAction);
         return '<div class="activity-icon phase">&#9670;</div>' +
           '<div style="flex:1;min-width:0">' +
+            providerBadge(ev) +
             '<span class="activity-badge activity-badge-phase">' + escHtml(phaseAction) + '</span> ' +
             '<span class="activity-phase-msg">' + phaseMsg + '</span>' +
           '</div>' +
@@ -1214,6 +1231,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         var skillAction = escHtml(ev.action || '');
         return '<div class="activity-icon skill">&#9889;</div>' +
           '<div style="flex:1;min-width:0">' +
+            providerBadge(ev) +
             '<span class="activity-badge activity-badge-skill">' + skillAction + '</span> ' +
             '<span class="activity-tool">/' + skillName + '</span>' +
           '</div>' +
@@ -1225,6 +1243,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         var rawHtml = ev.file ? '<div class="activity-file-muted">' + escHtml(ev.file.slice(0, 80)) + '</div>' : '';
         return '<div class="activity-icon bash">$</div>' +
           '<div style="flex:1;min-width:0">' +
+            providerBadge(ev) +
             '<span class="activity-tool">' + labelHtml + '</span>' + rawHtml +
           '</div>' +
           '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
@@ -1233,7 +1252,7 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       var icon = toolIcon(tool);
       var fileStr = ev.file ? '<div class="activity-file">' + escHtml(ev.file) + '</div>' : '';
       return '<div class="activity-icon ' + icon.cls + '">' + icon.icon + '</div>' +
-        '<div style="flex:1;min-width:0"><span class="activity-tool">' + escHtml(tool) + '</span> ' +
+        '<div style="flex:1;min-width:0">' + providerBadge(ev) + '<span class="activity-tool">' + escHtml(tool) + '</span> ' +
         '<span style="color:var(--text-muted);font-size:10px">' + escHtml(ev.action || '') + '</span>' +
         fileStr + '</div>' +
         '<span class="activity-time" data-ts="' + escHtml(ts) + '">' + relativeTime(ts) + '</span>';
