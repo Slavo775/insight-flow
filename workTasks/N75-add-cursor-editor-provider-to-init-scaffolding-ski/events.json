@@ -1964,6 +1964,40 @@
       "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
       "taskId": "N75",
       "payload": {}
+    },
+    {
+      "id": "evt_1780304893194_fab9",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-06-01T09:08:13.193Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N75",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780304912285_e991",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-01T09:08:32.285Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N75",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "type": "start",
+      "taskId": "N75",
+      "timestamp": "2026-06-01T12:23:55.295Z",
+      "source": "agent"
+    },
+    {
+      "type": "review-end",
+      "taskId": "N75",
+      "timestamp": "2026-06-01T12:24:25.749Z",
+      "source": "agent"
     }
   ]
 }

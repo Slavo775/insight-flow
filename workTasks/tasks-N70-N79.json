@@ -527,6 +527,21 @@
           "status": "approved",
           "at": "2026-06-01T07:52:55.246Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-01T08:59:05.691Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-01T12:23:55.198Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-01T12:24:25.645Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -548,7 +563,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -565,6 +580,11 @@
           "at": "2026-05-31T19:46:35.679Z",
           "commitHash": "d236cba",
           "commitMessage": "docs(tasks): N75 — Cursor editor provider spec (skills + AGENTS.md, Phase 1)"
+        },
+        {
+          "at": "2026-06-01T08:59:05.691Z",
+          "commitHash": "f0464b0",
+          "commitMessage": "feat(init): N75 — editor-provider seam + Cursor provider (Phase 1)"
         }
       ],
       "branch": "feat/N75-cursor-editor-provider",
