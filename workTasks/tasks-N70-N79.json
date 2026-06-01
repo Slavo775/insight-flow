@@ -494,7 +494,7 @@
       "title": "Add Cursor editor provider to init scaffolding (skills + rules) via a provider seam",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N75-add-cursor-editor-provider-to-init-scaffolding-ski",
       "createdAt": "2026-05-29T21:42:29.702Z",
       "statusHistory": [
@@ -502,17 +502,54 @@
           "status": "ready",
           "at": "2026-05-29T21:42:29.703Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-31T19:46:35.679Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-01T07:26:22.297Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-01T07:49:00.968Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-01T07:50:33.784Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-01T07:52:55.246Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-01T07:26:22.297Z",
+        "completedAt": "2026-06-01T07:49:00.968Z",
+        "filesChanged": [
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/init/providers/types.ts",
+          "packages/taskflow/src/init/providers/skills.ts",
+          "packages/taskflow/src/init/providers/context.ts",
+          "packages/taskflow/src/init/providers/claude.ts",
+          "packages/taskflow/src/init/providers/cursor.ts",
+          "packages/taskflow/src/init/providers/index.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/test/cursor-provider.test.mjs",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -523,9 +560,15 @@
         "init",
         "scaffolding"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-05-31T19:46:35.679Z",
+          "commitHash": "d236cba",
+          "commitMessage": "docs(tasks): N75 — Cursor editor provider spec (skills + AGENTS.md, Phase 1)"
+        }
+      ],
+      "branch": "feat/N75-cursor-editor-provider",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/50",
       "mergedAt": null
     }
   ]
