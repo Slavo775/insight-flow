@@ -155,11 +155,20 @@ export type MandatoryEventType = (typeof MANDATORY_EVENT_TYPES)[number];
 export type OptionalEventType = (typeof OPTIONAL_EVENT_TYPES)[number];
 export type EventType = (typeof EVENT_TYPES)[number];
 
+/**
+ * Which editor/agent produced a lifecycle event. Optional everywhere it
+ * appears; an absent value is treated as "claude" (back-compat — every event
+ * predating N76 has no provider). A future editor (e.g. "openai") is added
+ * here + to the matching Zod enums.
+ */
+export type Provider = "claude" | "cursor";
+
 export interface TaskEvent {
   type: EventType;
   taskId: string;
   timestamp: string;
   source?: "agent" | "hook";
+  provider?: Provider;
   data?: Record<string, unknown>;
 }
 
@@ -214,6 +223,7 @@ export interface ClaudeHookEvent {
   timestamp: string;
   sessionId?: string;
   taskId?: string;
+  provider?: Provider;
   payload: Record<string, unknown>;
 }
 
@@ -267,6 +277,8 @@ export interface HookEventInput {
   payload?: Record<string, unknown>;
   sessionId?: string;
   taskId?: string;
+  /** Free-form at the ingestion boundary (forward-compat with future editors); known values are `Provider`. */
+  provider?: string;
 }
 
 /** WebSocket frame: emitted on every accepted /log/events POST. */
@@ -307,6 +319,7 @@ export interface ActivityEvent {
   label?: string;
   message?: string;
   skill?: string;
+  provider?: Provider;
 }
 
 export interface ActivityEngineConfig {

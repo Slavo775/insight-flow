@@ -17,6 +17,7 @@ import type {
   TaskEvent,
   EventsFile,
   ClaudeHookEvent,
+  Provider,
 } from "../types.js";
 import { EVENT_TYPES, CLAUDE_HOOK_EVENT_TYPES } from "../types.js";
 import { EventsFileSchema } from "../schema/index.js";
@@ -72,6 +73,17 @@ function appendToActivityLog(
 
 function getSessionId(opts: ParsedArgs): string | null {
   return (opts["session-id"] as string | undefined) ?? process.env["CLAUDE_SESSION_ID"] ?? null;
+}
+
+/**
+ * Resolve `--provider`. Returns undefined when not supplied (or unrecognized)
+ * so existing Claude events stay byte-identical — readers treat an absent
+ * provider as "claude". Only a recognized value is stamped onto the event.
+ */
+function getProvider(opts: ParsedArgs): Provider | undefined {
+  return opts.provider === "cursor" || opts.provider === "claude"
+    ? (opts.provider as Provider)
+    : undefined;
 }
 
 function getActiveFlagPath(sessionId: string): string {
@@ -143,6 +155,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
   const hookName = opts["hook-name"] as string | undefined;
   const ifActive = Boolean(opts["if-active"]);
   const sessionId = getSessionId(opts);
+  const provider = getProvider(opts);
 
   // --if-active: exit 0 silently if no activation flag for this session
   if (ifActive) {
@@ -188,6 +201,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
       timestamp: ts,
       ...(sessionId ? { sessionId } : {}),
       ...(taskId ? { taskId } : {}),
+      ...(provider ? { provider } : {}),
       payload,
     };
 
@@ -226,6 +240,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
       hookName: hookEvent.hookName,
     };
     if (taskId) activityEntry.taskId = taskId;
+    if (provider) activityEntry.provider = provider;
     if (hookEvent.payload["tool_name"]) activityEntry.toolName = hookEvent.payload["tool_name"];
     if (hookEvent.payload["path"]) activityEntry.file = String(hookEvent.payload["path"]);
     if (hookEvent.payload["agent_type"]) activityEntry.agentType = hookEvent.payload["agent_type"];
@@ -249,6 +264,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
       payload,
       ...(sessionId ? { sessionId } : {}),
       ...(taskId ? { taskId } : {}),
+      ...(provider ? { provider } : {}),
     };
     appendToDailyBackup(workDir, hookEventPostPayload);
     postToLogEvents(config.server.port, hookEventPostPayload);
@@ -280,6 +296,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
     taskId: taskId ?? "",
     timestamp: ts,
     source: "agent",
+    ...(provider ? { provider } : {}),
     ...(opts.data ? { data: JSON.parse(opts.data as string) as Record<string, unknown> } : {}),
   };
 
@@ -298,6 +315,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
     tool: "Event",
     action: eventType,
     source: "agent",
+    ...(provider ? { provider } : {}),
     ...(taskId ? { taskId } : {}),
   });
 

@@ -146,6 +146,61 @@ test("log-event appends to activity log with tool=Event", () => {
   }
 });
 
+test("log-event --provider cursor stamps provider on event + activity log (N76)", () => {
+  const dir = makeTmpProject();
+  const folder = makeTaskFolder(dir, "N06");
+  try {
+    execFileSync(
+      process.execPath,
+      [CLI, "log-event", "start", "--task", "N06", "--provider", "cursor"],
+      { cwd: dir, timeout: 500 },
+    );
+    const stored = JSON.parse(readFileSync(resolve(folder, "events.json"), "utf-8"));
+    assert.strictEqual(stored.events[0].provider, "cursor", "event should be tagged cursor");
+
+    const log = readFileSync(resolve(dir, ".taskflow-activity.jsonl"), "utf-8").trim();
+    assert.strictEqual(JSON.parse(log).provider, "cursor", "activity entry should be tagged cursor");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("log-event without --provider omits provider (back-compat → claude) (N76)", () => {
+  const dir = makeTmpProject();
+  const folder = makeTaskFolder(dir, "N07");
+  try {
+    execFileSync(process.execPath, [CLI, "log-event", "start", "--task", "N07"], {
+      cwd: dir, timeout: 500,
+    });
+    const stored = JSON.parse(readFileSync(resolve(folder, "events.json"), "utf-8"));
+    assert.strictEqual(
+      stored.events[0].provider,
+      undefined,
+      "no provider field when --provider is absent (readers treat as claude)",
+    );
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("hook subcommand threads --provider cursor onto the event (N76)", () => {
+  const dir = makeTmpProject();
+  const folder = makeTaskFolder(dir, "N08");
+  try {
+    // `insight-flow hook PostToolUse` derives → tool-approved; --provider must flow.
+    execFileSync(
+      process.execPath,
+      [CLI, "hook", "PostToolUse", "--task", "N08", "--provider", "cursor"],
+      { cwd: dir, timeout: 1000 },
+    );
+    const stored = JSON.parse(readFileSync(resolve(folder, "events.json"), "utf-8"));
+    assert.strictEqual(stored.events[0].type, "tool-approved", "PostToolUse derives to tool-approved");
+    assert.strictEqual(stored.events[0].provider, "cursor", "hook subcommand should stamp provider");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
 test("log-event exits within 250ms", () => {
   const dir = makeTmpProject();
   makeTaskFolder(dir, "N05");
