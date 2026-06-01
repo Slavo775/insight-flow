@@ -1,0 +1,149 @@
+{
+  "taskId": "N77",
+  "events": [
+    {
+      "type": "done",
+      "taskId": "N77",
+      "timestamp": "2026-06-01T13:59:15.441Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1780322612775_fab3",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-06-01T14:03:32.775Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780322677890_5be4",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-01T14:04:37.889Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780322678230_6295",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-01T14:04:38.230Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780322720861_9634",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-01T14:05:20.860Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "AskUserQuestion"
+      }
+    },
+    {
+      "id": "evt_1780322720994_6712",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-01T14:05:20.993Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780322733295_1c12",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-01T14:05:33.295Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "AskUserQuestion"
+      }
+    },
+    {
+      "id": "evt_1780322763952_64c7",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-01T14:06:03.951Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780322764208_fe14",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-01T14:06:04.208Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780322782930_7240",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-01T14:06:22.930Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780322783077_f16a",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-01T14:06:23.076Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780322796881_1453",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-01T14:06:36.880Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780322860651_2083",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-01T14:07:40.651Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N77",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    }
+  ]
+}
