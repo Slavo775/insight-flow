@@ -601,7 +601,7 @@
       "title": "Add provider identity (claude/cursor) to lifecycle events + dashboard",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "pushed",
       "folder": "workTasks/N76-add-provider-identity-claude-cursor-to-lifecycle-e",
       "createdAt": "2026-06-01T13:55:13.302Z",
       "statusHistory": [
@@ -629,6 +629,11 @@
           "status": "approved",
           "at": "2026-06-01T18:18:41.697Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-01T19:42:37.596Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -659,8 +664,14 @@
         "events",
         "cursor"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-01T19:42:37.596Z",
+          "commitHash": "91e70f4",
+          "commitMessage": "feat(events): N76 — provider identity"
+        }
+      ],
+      "branch": "feat/N76-provider-identity",
       "mrUrl": null,
       "mergedAt": null
     },
