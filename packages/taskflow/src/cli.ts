@@ -71,7 +71,7 @@ function printHelp(): void {
     insight-flow <command> [options]      Run a task command
 
   COMMANDS
-    init [--force] [--examples]           Initialize insight-flow in current project (--force overwrites existing role files; --examples adds commented agents.extend stubs)
+    init [--force] [--examples] [--editor claude|cursor|all]  Initialize insight-flow in current project (--force overwrites existing files; --examples adds commented agents.extend stubs; --editor picks scaffolding targets, default auto-detect)
     ui [--port 6006]                      Launch dashboard server
 
     create --title "..." [--type feat] [--priority high] [--tags a,b] [--with-analysis]
@@ -146,7 +146,8 @@ async function run(): Promise<void> {
     startServer(config, port);
   } else if (command === "init") {
     const yesFlag = !!(opts.yes || opts.y) || (opts._ as string[]).includes("-y");
-    await initProject(process.cwd(), !!opts.force, { examples: !!opts.examples, yes: yesFlag });
+    const editor = typeof opts.editor === "string" ? opts.editor : undefined;
+    await initProject(process.cwd(), !!opts.force, { examples: !!opts.examples, yes: yesFlag, editor });
   } else if (command === "help" || command === "--help" || command === "-h") {
     printHelp();
   } else if (command === "version" || command === "--version" || command === "-v") {

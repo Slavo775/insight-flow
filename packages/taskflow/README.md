@@ -40,7 +40,19 @@ Add `--examples` to get commented `agents.extend` stubs in `taskflow.config.json
 insight-flow init --examples
 ```
 
-Re-running `init` on an existing project is safe — it skips files that already exist, updates the `insight-flow` section of `CLAUDE.md`, and always regenerates `AGENT_ENFORCEMENT.md` from the current config.
+#### Choosing your editor
+
+insight-flow scaffolds the same agent skills for one or more editors. By default `init` **auto-detects** based on which editor directory already exists (`.claude/` → Claude Code, `.cursor/` → Cursor); a fresh project defaults to Claude Code. Override with `--editor`:
+
+```bash
+insight-flow init --editor claude   # Claude Code only — .claude/commands/*.md + CLAUDE.md
+insight-flow init --editor cursor   # Cursor only — .cursor/skills/<name>/SKILL.md + AGENTS.md
+insight-flow init --editor all      # both
+```
+
+For **Cursor**, each skill is written as `.cursor/skills/<name>/SKILL.md` (invokable as `/<name>` in Cursor's agent chat) and the insight-flow context block is written to the root `AGENTS.md` — the cross-agent rules file Cursor reads. The skill prompts come from the same canonical source as the Claude commands. (Hooks and the live dashboard activity feed are Claude-only today; Cursor hook support is planned for a later release.)
+
+Re-running `init` on an existing project is safe — it skips files that already exist, updates the `insight-flow` section of `CLAUDE.md` / `AGENTS.md`, and always regenerates `AGENT_ENFORCEMENT.md` from the current config.
 
 ### 3. What init creates
 
@@ -68,6 +80,8 @@ Re-running `init` on an existing project is safe — it skips files that already
 | `.claude/hooks/taskflow-classify.sh` | PreToolUse hook — enriches events with tool classification |
 | `.claude/hooks/taskflow-notify.sh` | Stop hook — fires OS notification on notable task-status transitions |
 | `.taskflow-activity.jsonl` | Ephemeral activity log (auto-gitignored) |
+
+The table above shows the **Claude Code** layout. With `--editor cursor`, init instead writes `.cursor/skills/<name>/SKILL.md` (one folder per skill) and an `AGENTS.md` context block, and skips the `.claude/` roles + hooks. `--editor all` produces both.
 
 ### 4. Connect Claude Code
 
