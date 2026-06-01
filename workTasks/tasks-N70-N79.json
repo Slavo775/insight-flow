@@ -651,7 +651,7 @@
       "title": "Cursor lifecycle hooks to dashboard via binary payload parsing",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N77-cursor-lifecycle-hooks-to-dashboard-via-binary-pay",
       "createdAt": "2026-06-01T13:56:44.091Z",
       "statusHistory": [
@@ -659,6 +659,11 @@
           "status": "ready",
           "at": "2026-06-01T13:56:44.092Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-01T14:24:14.581Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -681,9 +686,15 @@
         "events",
         "notifications"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-01T14:24:14.581Z",
+          "commitHash": "81f892f",
+          "commitMessage": "docs(tasks): N77 spec — Cursor hooks → dashboard"
+        }
+      ],
+      "branch": "feat/N77-cursor-hooks-dashboard",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/53",
       "mergedAt": null
     }
   ]
