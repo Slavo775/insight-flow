@@ -25,7 +25,7 @@
     "build": "tsup && rm -rf dist/sounds && cp -r src/server/sounds dist/sounds",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm run build && node test/init.test.mjs && node test/cursor-provider.test.mjs && node test/migrate-reviews.test.mjs && node test/scaffold-and-bundle.test.mjs && node test/no-technology-tight.test.mjs && node test/activity-hook.test.mjs && node test/notify.test.mjs && node test/log-activity.test.mjs && node test/log-event.test.mjs && node test/event-stream.test.mjs && node test/log-events-endpoint.test.mjs && node test/provider-dashboard.test.mjs",
+    "test": "pnpm run build && node test/init.test.mjs && node test/cursor-provider.test.mjs && node test/migrate-reviews.test.mjs && node test/scaffold-and-bundle.test.mjs && node test/no-technology-tight.test.mjs && node test/activity-hook.test.mjs && node test/notify.test.mjs && node test/log-activity.test.mjs && node test/log-event.test.mjs && node test/event-stream.test.mjs && node test/log-events-endpoint.test.mjs && node test/provider-dashboard.test.mjs && node test/cursor-hooks.test.mjs",
     "sync-roles": "node scripts/sync-role-templates.mjs",
     "prepublishOnly": "npm run sync-roles && npm run build && npm run typecheck"
   },

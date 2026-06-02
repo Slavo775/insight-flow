@@ -32,6 +32,7 @@ export {
 export { startServer } from "./server/index.js";
 export { getDashboardHtml } from "./server/dashboard.js";
 export { deriveStatus, statusFromEvent, EventStore } from "./server/event-stream.js";
+export { CURSOR_EVENT_TO_DERIVED, cursorEventToDerived, parseCursorStdin } from "./hook-parse.js";
 export type {
   HookEventInput,
   ProjectStatus,

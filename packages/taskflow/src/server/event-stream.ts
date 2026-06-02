@@ -12,6 +12,8 @@ export function statusFromEvent(event: HookEventInput): ProjectStatus {
   const t = event.type;
   // Raw Claude Code hook names
   if (t === "Stop" || t === "SubagentStop") return "done";
+  // Raw Cursor hook names (camelCase) — N77. Cursor's `stop` ends a turn.
+  if (t === "stop" || t === "subagentStop" || t === "sessionEnd") return "done";
   if (t === "Notification") {
     const msg = String(event.payload?.message ?? "");
     if (PERMISSION_RE.test(msg)) return "awaiting-permission";

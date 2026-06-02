@@ -196,6 +196,11 @@ export async function initProject(
   for (const provider of providers) {
     provider.writeContext(providerCtx);
   }
+  // N77: editors with their own hook layer install it here (cursor → .cursor/hooks.json).
+  // Claude's hooks are installed by the dedicated installers in the block below.
+  for (const provider of providers) {
+    provider.writeHooks?.(providerCtx);
+  }
 
   // 6. Interactive prompts + Claude Code hooks (lifecycle / activity / notify).
   //    Hooks are Claude-specific; porting the live-dashboard event streaming to

@@ -50,7 +50,7 @@ insight-flow init --editor cursor   # Cursor only — .cursor/skills/<name>/SKIL
 insight-flow init --editor all      # both
 ```
 
-For **Cursor**, each skill is written as `.cursor/skills/<name>/SKILL.md` (invokable as `/<name>` in Cursor's agent chat) and the insight-flow context block is written to the root `AGENTS.md` — the cross-agent rules file Cursor reads. The skill prompts come from the same canonical source as the Claude commands. (Hooks and the live dashboard activity feed are Claude-only today; Cursor hook support is planned for a later release.)
+For **Cursor**, each skill is written as `.cursor/skills/<name>/SKILL.md` (invokable as `/<name>` in Cursor's agent chat) and the insight-flow context block is written to the root `AGENTS.md` — the cross-agent rules file Cursor reads. The skill prompts come from the same canonical source as the Claude commands. `--editor cursor` also installs `.cursor/hooks.json` + thin hook scripts so Cursor's lifecycle events (`stop`, `preToolUse`, …) stream into the dashboard — tagged with a `cursor` provider badge — and fire the same OS/browser notifications as Claude. The `beforeShellExecution` gate asks for confirmation on sensitive commands (`git push`, `rm -rf`, …). Caveats: Cursor cloud agents don't fire session/prompt-lifecycle hooks (so the live feed is partial there), and "approval required" is synthesized by the gate rather than a native event.
 
 Re-running `init` on an existing project is safe — it skips files that already exist, updates the `insight-flow` section of `CLAUDE.md` / `AGENTS.md`, and always regenerates `AGENT_ENFORCEMENT.md` from the current config.
 
