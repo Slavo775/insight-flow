@@ -595,6 +595,125 @@
       "branch": "feat/N75-cursor-editor-provider",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/50",
       "mergedAt": "2026-06-01T12:25:11.208Z"
+    },
+    {
+      "id": "N76",
+      "title": "Add provider identity (claude/cursor) to lifecycle events + dashboard",
+      "type": "feat",
+      "priority": "medium",
+      "status": "pushed",
+      "folder": "workTasks/N76-add-provider-identity-claude-cursor-to-lifecycle-e",
+      "createdAt": "2026-06-01T13:55:13.302Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-01T13:55:13.303Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-01T15:09:22.160Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-01T15:15:44.261Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-01T16:22:09.508Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-01T18:18:41.697Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-01T19:42:37.596Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-01T15:09:22.159Z",
+        "completedAt": "2026-06-01T15:15:44.261Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/schema/index.ts",
+          "packages/taskflow/src/commands/log-event.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/test/log-event.test.mjs",
+          "packages/taskflow/test/provider-dashboard.test.mjs",
+          "packages/taskflow/package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "multi-editor",
+        "providers",
+        "dashboard",
+        "events",
+        "cursor"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-01T19:42:37.596Z",
+          "commitHash": "91e70f4",
+          "commitMessage": "feat(events): N76 — provider identity"
+        }
+      ],
+      "branch": "feat/N76-provider-identity",
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N77",
+      "title": "Cursor lifecycle hooks to dashboard via binary payload parsing",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N77-cursor-lifecycle-hooks-to-dashboard-via-binary-pay",
+      "createdAt": "2026-06-01T13:56:44.091Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-01T13:56:44.092Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cursor",
+        "multi-editor",
+        "hooks",
+        "dashboard",
+        "events",
+        "notifications"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }

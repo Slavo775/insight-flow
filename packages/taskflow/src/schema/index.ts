@@ -163,11 +163,16 @@ export const EventTypeSchema = z.enum([
   "git-end",
 ]);
 
+// Which editor/agent produced an event (N76). Optional everywhere; absent is
+// treated as "claude". Extend the enum when a new editor provider lands.
+export const ProviderSchema = z.enum(["claude", "cursor"]);
+
 export const TaskEventSchema = z.object({
   type: EventTypeSchema,
   taskId: z.string(),
   timestamp: z.string(),
   source: z.enum(["agent", "hook"]).optional(),
+  provider: ProviderSchema.optional(),
   data: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -202,6 +207,7 @@ export const ClaudeHookEventSchema = z.object({
   timestamp: z.string(),
   sessionId: z.string().optional(),
   taskId: z.string().optional(),
+  provider: ProviderSchema.optional(),
   payload: z.record(z.string(), z.unknown()),
 });
 
@@ -234,6 +240,10 @@ export const HookEventInputSchema = z.object({
   payload: z.record(z.string(), z.unknown()).optional(),
   sessionId: z.string().optional(),
   taskId: z.string().optional(),
+  // Lenient at the ingestion boundary (like `type` above): a future provider
+  // POSTing /log/events is accepted rather than rejected 400. The internal
+  // TaskEvent / ClaudeHookEvent schemas keep the strict ProviderSchema enum.
+  provider: z.string().optional(),
 });
 
 export class TaskflowValidationError extends Error {
