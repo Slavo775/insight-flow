@@ -499,6 +499,16 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
+    // N79: direct browser permission toast (mirrors agent-done; Cursor approval gate).
+    if (url.pathname === "/api/agent-permission" && req.method === "POST") {
+      if (config.notifications?.browser !== false) {
+        io.emit("agent-permission", { ts: Date.now() });
+      }
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
     // N68: hook event ingestion. Hooks POST one event per fire; server orders
     // by `timestamp`, derives status, broadcasts an `event` frame on fresh
     // events and a `status` frame only on transitions, then forwards to

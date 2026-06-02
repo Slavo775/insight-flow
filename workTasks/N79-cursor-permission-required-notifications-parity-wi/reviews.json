@@ -1,0 +1,42 @@
+{
+  "taskId": "N79",
+  "reviews": [
+    {
+      "startedAt": "2026-06-02T17:27:26.607Z",
+      "endedAt": "2026-06-02T18:02:56.392Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: firePermissionAlert undefined when notifications.browser is false — status handler calls it outside the browserNotifications conditional. Hoist or branch before merge.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-02T18:21:03.570Z",
+        "endedAt": "2026-06-02T18:23:11.630Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/server/dashboard.ts",
+          "packages/taskflow/test/provider-dashboard.test.mjs"
+        ],
+        "comment": "Fixed blocker: hoisted firePermissionAlert outside browserNotifications block; guards fireStatusDesktopNotif with typeof. Added provider-dashboard regression test.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-02T18:23:37.706Z",
+      "endedAt": "2026-06-02T18:24:36.490Z",
+      "verdict": "approved",
+      "comment": "Round 2: firePermissionAlert hoisted + regression test; blocker cleared. Approved for merge.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-02T18:52:44.622Z",
+      "endedAt": "2026-06-02T18:55:30.542Z",
+      "verdict": "approved",
+      "comment": "Human approved for merge",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

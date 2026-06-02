@@ -2,21 +2,13 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 /**
- * Cursor lifecycle hook generation (N77). Writes `.cursor/hooks.json` (Cursor's
- * schema version 1, camelCase event names) plus thin scripts that pipe Cursor's
- * stdin JSON to `insight-flow hook <event> --provider cursor` — the binary does
- * the parsing (see hook-parse.ts). Mirrors the Claude hook installer in
- * activity-hook.ts but for Cursor's `.cursor/` layout. Phase-2 of the Cursor
- * integration (skills + AGENTS.md shipped in N75; provider-id in N76).
- *
- * Caveats (documented, not solved here): Cursor cloud agents don't fire
- * session/prompt-lifecycle hooks (command hooks do); Cursor has no
- * PermissionRequest event, so "approval required" is synthesized by the
- * beforeShellExecution gate returning `ask` on a conservative matcher.
+ * Cursor lifecycle hook generation (N77, N79). Writes `.cursor/hooks.json` plus
+ * thin scripts that pipe Cursor stdin to `insight-flow hook <event> --provider
+ * cursor`. Permission notifications use `POST /api/agent-permission` (mirrors
+ * Done's `/api/agent-done`) plus approval gates on beforeShellExecution,
+ * preToolUse, and beforeMCPExecution.
  */
 
-// Resolve the insight-flow binary the same way across every script: prefer a
-// project-local install, then the workspace dist, then a global install.
 const RESOLVE_BIN = `PROJECT_ROOT="\${CURSOR_PROJECT_DIR:-\$(cd "\$(dirname "\$0")/../.." && pwd)}"
 LOCAL_BIN="\$PROJECT_ROOT/node_modules/.bin/insight-flow"
 LOCAL_CLI="\$PROJECT_ROOT/packages/taskflow/dist/cli.js"
@@ -57,14 +49,12 @@ curl -sf -X POST "http://localhost:\${SERVER_PORT}/api/agent-done" >/dev/null 2>
 exit 0
 `;
 
+// N79: shared approval gate — \$1 = Cursor hook name (beforeShellExecution | preToolUse | beforeMCPExecution).
+// stdout must be only the permission JSON Cursor parses (hook logging redirected to /dev/null).
 const APPROVAL_SCRIPT = `#!/bin/bash
-# insight-flow Cursor approval gate — beforeShellExecution. Cursor has no
-# PermissionRequest event, so we synthesize "approval required": on a sensitive
-# command we emit approval-required + a notification and ask Cursor to prompt;
-# otherwise we allow. Cursor reads the {"permission":...} JSON from stdout.
-# Conservative matcher; never auto-denies. Tune the patterns to taste.
-# Hook logging must not write to stdout here — log-event prints JSON and would
-# corrupt the permission response Cursor parses.
+# insight-flow Cursor approval gate. Cursor has no PermissionRequest event; we
+# synthesize approval-required + OS/browser notifications and return ask/allow.
+HOOK_EVENT="\${1:-beforeShellExecution}"
 PROJECT_ROOT="\${CURSOR_PROJECT_DIR:-\$(cd "\$(dirname "\$0")/../.." && pwd)}"
 LOCAL_BIN="\$PROJECT_ROOT/node_modules/.bin/insight-flow"
 LOCAL_CLI="\$PROJECT_ROOT/packages/taskflow/dist/cli.js"
@@ -74,24 +64,52 @@ elif command -v insight-flow >/dev/null 2>&1; then IF_CMD="insight-flow"
 else IF_CMD=""; fi
 INPUT=\$(cat)
 CMD=\$(echo "\$INPUT" | grep -oE '"command"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | cut -d'"' -f4)
+TOOL=\$(echo "\$INPUT" | grep -oE '"tool_name"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | cut -d'"' -f4)
 SENSITIVE=0
-case "\$CMD" in
-  *"git push"*|*"git reset --hard"*|*"rm -rf"*|*"npm publish"*|*"--force"*|*deploy*) SENSITIVE=1 ;;
+case "\$HOOK_EVENT" in
+  beforeShellExecution)
+    case "\$CMD" in
+      *"git push"*|*"git reset --hard"*|*"rm -rf"*|*"npm publish"*|*"--force"*|*deploy*) SENSITIVE=1 ;;
+    esac
+    ;;
+  preToolUse)
+    case "\$TOOL" in
+      Shell|Bash|shell|terminal|Terminal|run_terminal_cmd|run_terminal_command) SENSITIVE=1 ;;
+    esac
+    if [ "\$SENSITIVE" = "0" ]; then
+      case "\$CMD" in
+        *"git push"*|*"git reset --hard"*|*"rm -rf"*|*"npm publish"*|*"--force"*|*deploy*) SENSITIVE=1 ;;
+      esac
+    fi
+    ;;
+  beforeMCPExecution)
+  # Cursor pauses MCP via this hook; gate all MCP executions (conservative).
+    SENSITIVE=1
+    ;;
 esac
 if [ "\$SENSITIVE" = "1" ]; then
   if [ -n "\$IF_CMD" ]; then
-    echo "\$INPUT" | $IF_CMD hook approval-required --provider cursor >/dev/null 2>/dev/null
+    echo "\$INPUT" | $IF_CMD hook approval-required --provider cursor >/dev/null 2>&1
     $IF_CMD notify "Approval required" 2>/dev/null || true
   fi
-  printf '{"permission":"ask","agent_message":"insight-flow flagged this command as sensitive."}'
+  SERVER_PORT=6006
+  CONFIG_FILE="\$PROJECT_ROOT/taskflow.config.json"
+  if [ -f "\$CONFIG_FILE" ]; then
+    _p=\$(grep -o '"port":[[:space:]]*[0-9]*' "\$CONFIG_FILE" | head -1 | grep -o '[0-9]*\$')
+    [ -n "\$_p" ] && SERVER_PORT="\$_p"
+  fi
+  curl -sf -X POST "http://localhost:\${SERVER_PORT}/api/agent-permission" >/dev/null 2>&1 || true
+  printf '{"permission":"ask","agent_message":"insight-flow flagged this operation as sensitive."}'
 else
-  if [ -n "\$IF_CMD" ]; then
-    echo "\$INPUT" | $IF_CMD hook beforeShellExecution --provider cursor >/dev/null 2>/dev/null
+  if [ "\$HOOK_EVENT" = "beforeShellExecution" ] && [ -n "\$IF_CMD" ]; then
+    echo "\$INPUT" | $IF_CMD hook beforeShellExecution --provider cursor >/dev/null 2>&1
   fi
   printf '{"permission":"allow"}'
 fi
 exit 0
 `;
+
+const APPROVAL_CMD = 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-approval.sh"';
 
 const CURSOR_HOOKS_JSON = {
   version: 1,
@@ -99,11 +117,15 @@ const CURSOR_HOOKS_JSON = {
     sessionStart: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" sessionStart' }],
     sessionEnd: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" sessionEnd' }],
     beforeSubmitPrompt: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" beforeSubmitPrompt' }],
-    preToolUse: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" preToolUse --if-active' }],
+    preToolUse: [
+      { command: `${APPROVAL_CMD} preToolUse` },
+      { command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" preToolUse --if-active' },
+    ],
     postToolUse: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" postToolUse --if-active' }],
     afterFileEdit: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" afterFileEdit --if-active' }],
     subagentStop: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" subagentStop --if-active' }],
-    beforeShellExecution: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-approval.sh"' }],
+    beforeMCPExecution: [{ command: `${APPROVAL_CMD} beforeMCPExecution` }],
+    beforeShellExecution: [{ command: `${APPROVAL_CMD} beforeShellExecution` }],
     stop: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-stop.sh"' }],
   },
 };

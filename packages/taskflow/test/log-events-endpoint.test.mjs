@@ -83,6 +83,26 @@ async function post(port, body) {
   });
 }
 
+test("POST /api/agent-permission returns 200", async () => {
+  await withServer(PORT + 1, async () => {
+    const res = await fetch(`http://127.0.0.1:${PORT + 1}/api/agent-permission`, {
+      method: "POST",
+    });
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.ok, true);
+  });
+});
+
+test("POST /api/agent-done returns 200", async () => {
+  await withServer(PORT + 2, async () => {
+    const res = await fetch(`http://127.0.0.1:${PORT + 2}/api/agent-done`, { method: "POST" });
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.ok, true);
+  });
+});
+
 test("POST /log/events: Stop event derives `done` and returns 200", async () => {
   await withServer(PORT, async () => {
     const res = await post(PORT, {
