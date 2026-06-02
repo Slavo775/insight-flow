@@ -131,7 +131,7 @@ insight-flow                            # Launch dashboard at http://localhost:6
 
 | Command | Purpose |
 |---------|---------|
-| `/task-analyze` | Pre-taskmaster strategist: challenge the brief, propose alternatives, then hand off to `/taskmaster` |
+| `/task-analyze` | Pre-taskmaster strategist: challenge the brief, propose alternatives, then hand off to /taskmaster |
 | `/taskmaster` | Create a new task spec (TASK.md + CHECKLIST.md) |
 | `/task-implement` | Implement a task from its spec |
 | `/task-review` | AI code review of implemented task |

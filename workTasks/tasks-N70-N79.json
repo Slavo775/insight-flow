@@ -798,6 +798,74 @@
       "branch": "feat/N77-cursor-hooks-dashboard",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/53",
       "mergedAt": "2026-06-02T08:28:44.377Z"
+    },
+    {
+      "id": "N78",
+      "title": "Rename batch→bulk CLI (deprecated aliases) + editor-aware init/bulk via config.editor",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N78-rename-batch-bulk-cli-deprecated-aliases-editor-aw",
+      "createdAt": "2026-06-02T09:31:12.620Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-02T09:31:12.620Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-02T10:07:34.514Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-02T10:46:50.656Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-02T10:50:09.161Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-02T11:05:17.329Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-02T10:07:34.513Z",
+        "completedAt": "2026-06-02T10:46:50.656Z",
+        "filesChanged": [
+          "packages/taskflow/src/types.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/src/commands/batch-ui.ts",
+          "packages/taskflow/test/bulk-editor.test.mjs",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "bulk",
+        "multi-editor",
+        "cursor",
+        "init",
+        "dx"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
