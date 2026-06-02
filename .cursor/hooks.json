@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh\" sessionStart"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh\" sessionEnd"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh\" beforeSubmitPrompt"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh\" preToolUse --if-active"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh\" postToolUse --if-active"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh\" afterFileEdit --if-active"
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh\" subagentStop --if-active"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-approval.sh\""
+      }
+    ],
+    "stop": [
+      {
+        "command": "bash \"$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-stop.sh\""
+      }
+    ]
+  }
+}

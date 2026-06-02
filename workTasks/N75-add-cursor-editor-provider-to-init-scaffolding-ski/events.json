@@ -1998,6 +1998,30 @@
       "taskId": "N75",
       "timestamp": "2026-06-01T12:24:25.749Z",
       "source": "agent"
+    },
+    {
+      "id": "evt_1780316846299_2fab",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-01T12:27:26.299Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N75",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780316857025_2df3",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-01T12:27:37.024Z",
+      "sessionId": "63fd5d92-06a9-495a-859f-b39c6c49319b",
+      "taskId": "N75",
+      "payload": {
+        "tool_name": "Bash"
+      }
     }
   ]
 }
