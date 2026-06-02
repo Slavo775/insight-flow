@@ -88,8 +88,10 @@ test("init --editor cursor generates .cursor/hooks.json + hook scripts", () => {
     assert.equal(hooks.version, 1, "Cursor hooks schema version 1");
     assert.ok(hooks.hooks.stop, "has a stop hook");
     assert.ok(hooks.hooks.beforeShellExecution, "has the approval gate hook");
-    // Tool events are gated to active sessions (--if-active); milestones are not.
-    assert.match(hooks.hooks.preToolUse[0].command, /--if-active/, "tool events gated");
+    assert.ok(hooks.hooks.beforeMCPExecution, "has MCP approval gate hook");
+    assert.equal(hooks.hooks.preToolUse.length, 2, "preToolUse: approval gate + event logger");
+    assert.match(hooks.hooks.preToolUse[0].command, /insight-flow-approval\.sh" preToolUse/);
+    assert.match(hooks.hooks.preToolUse[1].command, /--if-active/, "tool events gated");
     assert.ok(!/--if-active/.test(hooks.hooks.stop[0].command), "milestone stop not gated");
 
     for (const s of ["insight-flow-event.sh", "insight-flow-stop.sh", "insight-flow-approval.sh"]) {
@@ -99,6 +101,8 @@ test("init --editor cursor generates .cursor/hooks.json + hook scripts", () => {
     const approval = readFileSync(resolve(dir, ".cursor/hooks/insight-flow-approval.sh"), "utf-8");
     assert.match(approval, /"permission":"ask"/);
     assert.match(approval, /--provider cursor/);
+    assert.match(approval, /api\/agent-permission/, "N79 direct permission browser toast");
+    assert.match(approval, /beforeMCPExecution/);
     // log-event prints JSON to stdout; approval hook must discard it so Cursor parses permission JSON only
     assert.match(approval, /hook beforeShellExecution --provider cursor >\/dev\/null/);
     assert.match(approval, /printf '\{"permission":"allow"\}'/);

@@ -29,3 +29,20 @@ test("dashboard ships the providerBadge helper + claude/cursor badge CSS", () =>
   assert.match(html, /activity-badge-provider-claude/, "claude badge class present");
   assert.match(html, /activity-badge-provider-cursor/, "cursor badge class present");
 });
+
+test("firePermissionAlert is always defined when notifications.browser is false (N79)", () => {
+  const html = getDashboardHtml({
+    ...CONFIG,
+    notifications: { browser: false, cli: true },
+  });
+  assert.match(html, /function firePermissionAlert/, "status handler must not ReferenceError");
+  assert.ok(
+    !html.includes("function fireStatusDesktopNotif"),
+    "browser toast helper omitted when browser notifications disabled",
+  );
+  assert.match(
+    html,
+    /typeof fireStatusDesktopNotif === 'function'/,
+    "permission alert guards optional browser toast",
+  );
+});

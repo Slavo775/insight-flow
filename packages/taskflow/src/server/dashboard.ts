@@ -554,6 +554,19 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       }).catch(playTone);
     }
 
+    // N79: debounced permission alert — always emitted so the status WS handler
+    // never throws when notifications.browser is false (browser toast is optional).
+    var lastPermissionAlertAt = 0;
+    function firePermissionAlert() {
+      var now = Date.now();
+      if (now - lastPermissionAlertAt < 2000) return;
+      lastPermissionAlertAt = now;
+      playStatusSound('permission-needed');
+      if (typeof fireStatusDesktopNotif === 'function') {
+        fireStatusDesktopNotif('awaiting-permission');
+      }
+    }
+
     function updatePageTitle(state) {
       var base = 'Taskflow Dashboard';
       // Distinct glyphs per N68 state so the tab bar disambiguates
@@ -1012,14 +1025,16 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         // glyph mapping so done ✅ stays visually distinct from idle 💤.
         updatePageTitle(to);
         // Sound + notification only for actionable transitions.
-        if (to === 'done' || to === 'awaiting-permission') {
-          var soundState = to === 'done' ? 'idle' : 'permission-needed';
-          playStatusSound(soundState);` + (browserNotifications ? `
-          fireStatusDesktopNotif(to);` : ``) + `
+        if (to === 'done') {
+          playStatusSound('idle');` + (browserNotifications ? `
+          fireStatusDesktopNotif('done');` : ``) + `
+        } else if (to === 'awaiting-permission') {
+          firePermissionAlert();
         }
       });` + (browserNotifications ? `
 
-      sock.on('agent-done', function() { fireDesktopNotif(); });` : ``) + `
+      sock.on('agent-done', function() { fireDesktopNotif(); });
+      sock.on('agent-permission', function() { firePermissionAlert(); });` : ``) + `
     }`;
 
   // Activity panel JS (only if enabled)

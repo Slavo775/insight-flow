@@ -23,6 +23,10 @@ test("statusFromEvent: Stop → done", () => {
   assert.equal(statusFromEvent(ev({ type: "Stop" })), "done");
 });
 
+test("statusFromEvent: PermissionRequest → awaiting-permission", () => {
+  assert.equal(statusFromEvent(ev({ type: "PermissionRequest" })), "awaiting-permission");
+});
+
 test("statusFromEvent: SubagentStop → done", () => {
   assert.equal(statusFromEvent(ev({ type: "SubagentStop" })), "done");
 });
