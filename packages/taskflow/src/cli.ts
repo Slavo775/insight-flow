@@ -34,7 +34,7 @@ import {
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
-import { cmdBatchUi, cmdBatchUiAdd, cmdBatchUiList, cmdBatchUiRemove, cmdUiBatchRegister, cmdUiBatchUnregister, cmdUiBatchDown, cmdBatchInit, cmdBatchPromptBuild } from "./commands/batch-ui.js";
+import { cmdBulkUi, cmdBulkUiAdd, cmdBulkUiList, cmdBulkUiRemove, cmdBulkRegister, cmdBulkUnregister, cmdBulkDown, cmdBulkInit, cmdBulkPromptBuild } from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
@@ -120,15 +120,16 @@ function printHelp(): void {
     log-event <type> [--task Nxx] [--data <json>]       Emit a typed lifecycle event (mandatory: start|done; optional: active|idle|edit-start|edit-end|research-start|research-end|review-start|review-end|git-start|git-end)
     hook <ClaudeHookEventName> [--data <json>]          Sugar for log-event --source hook --hook-name <raw> (N68; accepts Stop|Notification|PreToolUse|PostToolUse|SessionStart|SessionEnd|UserPromptSubmit|SubagentStop|PermissionRequest)
 
-    ui-batch-register                     Register this folder as a batch-ui project (reads taskflow.config.json)
-    ui-batch-unregister                   Unregister this folder from batch-ui (mirror of ui-batch-register)
-    ui-batch-down                         Stop all servers started by the last batch-ui run
-    batch-ui [--no-open]                  Launch dashboards for multiple projects (interactive multi-select)
-    batch-ui --add "<label>" <path>       Register a project by explicit path
-    batch-ui --remove "<label>"           Remove a registered project by label
-    batch-ui --list                       List all registered batch-ui projects
-    bulk-init [--force] [--examples]      Re-init all (or selected) registered projects (run after upgrading)
-    bulk-prompt-build                     Re-sync role files in all (or selected) registered projects (run after upgrading)
+    bulk-register                         Register this folder for bulk ops (reads taskflow.config.json)
+    bulk-unregister                       Unregister this folder
+    bulk-down                             Stop all servers started by the last bulk-ui run
+    bulk-ui [--no-open]                   Launch dashboards for multiple projects (interactive multi-select)
+    bulk-ui --add "<label>" <path>        Register a project by explicit path
+    bulk-ui --remove "<label>"            Remove a registered project by label
+    bulk-ui --list                        List all registered projects
+    bulk-init [--force] [--examples] [--editor claude|cursor|all]  Re-init registered projects (per-project config.editor unless overridden)
+    bulk-prompt-build                     Re-sync role files in all (or selected) registered projects
+    (deprecated aliases: ui-batch-register / ui-batch-unregister / ui-batch-down / batch-ui → bulk-*)
 
     help                                  Show this help
     version                               Show version
@@ -136,8 +137,23 @@ function printHelp(): void {
 }
 
 const args = process.argv.slice(2);
-const command = args[0];
+let command = args[0];
 const opts = parseArgs(args.slice(1));
+
+// N78: the batch / ui-batch command family was renamed to `bulk-*`. The old
+// names keep working as deprecated aliases for one release — warn on stderr,
+// then dispatch to the canonical command.
+const DEPRECATED_COMMAND_ALIASES: Record<string, string> = {
+  "ui-batch-register": "bulk-register",
+  "ui-batch-unregister": "bulk-unregister",
+  "ui-batch-down": "bulk-down",
+  "batch-ui": "bulk-ui",
+};
+if (command && DEPRECATED_COMMAND_ALIASES[command]) {
+  const canonical = DEPRECATED_COMMAND_ALIASES[command];
+  process.stderr.write(`⚠ "${command}" is deprecated — use "${canonical}".\n`);
+  command = canonical;
+}
 
 async function run(): Promise<void> {
   // Commands that don't need master.json
@@ -238,26 +254,26 @@ async function run(): Promise<void> {
         "hook-name": raw,
       });
     }
-  } else if (command === "ui-batch-register") {
-    cmdUiBatchRegister();
-  } else if (command === "ui-batch-unregister") {
-    cmdUiBatchUnregister();
-  } else if (command === "ui-batch-down") {
-    cmdUiBatchDown();
-  } else if (command === "batch-ui") {
+  } else if (command === "bulk-register") {
+    cmdBulkRegister();
+  } else if (command === "bulk-unregister") {
+    cmdBulkUnregister();
+  } else if (command === "bulk-down") {
+    cmdBulkDown();
+  } else if (command === "bulk-ui") {
     if (opts.list) {
-      cmdBatchUiList();
+      cmdBulkUiList();
     } else if (opts.add) {
-      cmdBatchUiAdd(opts);
+      cmdBulkUiAdd(opts);
     } else if (opts.remove) {
-      cmdBatchUiRemove(opts);
+      cmdBulkUiRemove(opts);
     } else {
-      await cmdBatchUi(opts);
+      await cmdBulkUi(opts);
     }
   } else if (command === "bulk-init") {
-    await cmdBatchInit(opts);
+    await cmdBulkInit(opts);
   } else if (command === "bulk-prompt-build") {
-    await cmdBatchPromptBuild(opts);
+    await cmdBulkPromptBuild(opts);
   } else {
     // All other commands need master.json
     const config = resolveConfig();

@@ -40,6 +40,7 @@ export type {
   StatusFrame,
 } from "./types.js";
 export { initProject } from "./init/index.js";
+export { buildBulkInitArgs } from "./commands/batch-ui.js";
 export { resolveProjectRoot, resolvePackageAsset, TaskflowProjectNotFoundError } from "./paths.js";
 export {
   TaskSchema,

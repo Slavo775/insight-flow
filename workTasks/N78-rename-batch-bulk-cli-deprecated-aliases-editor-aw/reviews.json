@@ -1,0 +1,14 @@
+{
+  "taskId": "N78",
+  "reviews": [
+    {
+      "startedAt": "2026-06-02T10:50:09.161Z",
+      "endedAt": "2026-06-02T11:05:17.328Z",
+      "verdict": "approved",
+      "comment": "batch→bulk rename (deprecated aliases, registry untouched) + config.editor precedence + bulk-init --editor. 14 test files green; tsc clean; invalid editor fails closed before writes. Non-blocking: bulk-init --editor passthrough not directly tested; config.editor validated at selection not as early as flag; internal cmd* names still 'batch' (cosmetic).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

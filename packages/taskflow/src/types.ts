@@ -380,6 +380,11 @@ export interface TaskflowConfig {
   shardSize: number;
   projectName: string;
   rolesDir: string;
+  /**
+   * Which editor(s) `init` / `bulk-init` scaffold (N78). Optional; resolution
+   * precedence is `--editor` flag → `config.editor` → auto-detect → claude.
+   */
+  editor?: "claude" | "cursor" | "all";
   server: {
     port: number;
   };

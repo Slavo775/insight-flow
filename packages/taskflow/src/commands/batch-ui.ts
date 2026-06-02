@@ -129,11 +129,11 @@ function interactiveSelect(
 
 // ── commands ─────────────────────────────────────────────────────────────────
 
-export function cmdBatchUiAdd(opts: ParsedArgs): void {
+export function cmdBulkUiAdd(opts: ParsedArgs): void {
   const label = (opts.add as string).trim();
   const rawPath = (opts._ as string[])[0];
   if (!rawPath) {
-    console.error("Usage: insight-flow batch-ui --add \"<label>\" <path>");
+    console.error("Usage: insight-flow bulk-ui --add \"<label>\" <path>");
     process.exit(1);
   }
   const absPath = resolve(rawPath);
@@ -151,13 +151,13 @@ export function cmdBatchUiAdd(opts: ParsedArgs): void {
   console.log(`Registered "${label}" → ${absPath}`);
 }
 
-export function cmdBatchUiList(): void {
+export function cmdBulkUiList(): void {
   const entries = readBatchUiRegistry();
   if (entries.length === 0) {
-    console.log("No projects registered. Run `insight-flow ui-batch-register` inside a project folder.");
+    console.log("No projects registered. Run `insight-flow bulk-register` inside a project folder.");
     return;
   }
-  console.log(`\n  Registered batch-ui projects (${entries.length}):\n`);
+  console.log(`\n  Registered bulk-ui projects (${entries.length}):\n`);
   for (const e of entries) {
     const configPath = join(e.path, "taskflow.config.json");
     let projectName = "(no config)";
@@ -179,11 +179,11 @@ export function cmdBatchUiList(): void {
   console.log("");
 }
 
-export async function cmdBatchUi(opts: ParsedArgs): Promise<void> {
+export async function cmdBulkUi(opts: ParsedArgs): Promise<void> {
   const entries = readBatchUiRegistry();
   if (entries.length === 0) {
     console.log("No projects registered.");
-    console.log("Run `insight-flow ui-batch-register` inside each project folder, then retry.");
+    console.log("Run `insight-flow bulk-register` inside each project folder, then retry.");
     return;
   }
 
@@ -256,16 +256,16 @@ export async function cmdBatchUi(opts: ParsedArgs): Promise<void> {
   }
 }
 
-export function cmdBatchUiRemove(opts: ParsedArgs): void {
+export function cmdBulkUiRemove(opts: ParsedArgs): void {
   const label = typeof opts.remove === "string" ? opts.remove.trim() : "";
   if (!label) {
-    console.error("Usage: insight-flow batch-ui --remove \"<label>\"");
+    console.error("Usage: insight-flow bulk-ui --remove \"<label>\"");
     process.exit(1);
   }
   const entries = readBatchUiRegistry();
   const idx = entries.findIndex((e) => e.label === label);
   if (idx === -1) {
-    console.error(`No project registered with label "${label}". Run \`insight-flow batch-ui --list\` to see registered projects.`);
+    console.error(`No project registered with label "${label}". Run \`insight-flow bulk-ui --list\` to see registered projects.`);
     process.exit(1);
   }
   const removed = entries.splice(idx, 1)[0];
@@ -276,12 +276,12 @@ export function cmdBatchUiRemove(opts: ParsedArgs): void {
   console.log(`Unregistered "${removed.label}" → ${removed.path}`);
 }
 
-export function cmdUiBatchUnregister(): void {
+export function cmdBulkUnregister(): void {
   const cwd = process.cwd();
   const entries = readBatchUiRegistry();
   const idx = entries.findIndex((e) => e.path === cwd);
   if (idx === -1) {
-    console.error(`${cwd} is not registered. Run \`insight-flow batch-ui --list\` to see registered projects.`);
+    console.error(`${cwd} is not registered. Run \`insight-flow bulk-ui --list\` to see registered projects.`);
     process.exit(1);
   }
   const removed = entries.splice(idx, 1)[0];
@@ -291,7 +291,7 @@ export function cmdUiBatchUnregister(): void {
   console.log(`Unregistered "${removed.label}" → ${cwd}`);
 }
 
-export function cmdUiBatchRegister(): void {
+export function cmdBulkRegister(): void {
   const cwd = process.cwd();
   const configPath = join(cwd, "taskflow.config.json");
 
@@ -343,7 +343,7 @@ export function cmdUiBatchRegister(): void {
 
   // f) confirm
   console.log(`Registered "${label}" → ${cwd}`);
-  console.log("Run `insight-flow batch-ui` to launch all registered projects.");
+  console.log("Run `insight-flow bulk-ui` to launch all registered projects.");
 }
 
 // ── batch-init / batch-prompt-build helpers ──────────────────────────────────
@@ -370,7 +370,7 @@ async function batchRun(
 ): Promise<void> {
   const entries = readBatchUiRegistry();
   if (entries.length === 0) {
-    console.log("No projects registered. Run `insight-flow ui-batch-register` inside a project folder.");
+    console.log("No projects registered. Run `insight-flow bulk-register` inside a project folder.");
     return;
   }
 
@@ -406,22 +406,31 @@ async function batchRun(
   console.log(`\n${passed}/${chosen.length} succeeded.`);
 }
 
-export async function cmdBatchInit(opts: ParsedArgs): Promise<void> {
+// Build the per-project `init` args for bulk-init. Extracted so the
+// --editor passthrough (N78) is unit-testable without touching the global
+// registry. `--editor` is the fleet override; without it each project's own
+// config.editor (or auto-detect) decides.
+export function buildBulkInitArgs(opts: ParsedArgs): string[] {
   const args = ["init"];
   if (opts.force) args.push("--force");
   if (opts.examples) args.push("--examples");
-  await batchRun(opts, args, "init");
+  if (typeof opts.editor === "string") args.push("--editor", opts.editor);
+  return args;
 }
 
-export async function cmdBatchPromptBuild(opts: ParsedArgs): Promise<void> {
+export async function cmdBulkInit(opts: ParsedArgs): Promise<void> {
+  await batchRun(opts, buildBulkInitArgs(opts), "init");
+}
+
+export async function cmdBulkPromptBuild(opts: ParsedArgs): Promise<void> {
   await batchRun(opts, ["prompt-build", "--apply"], "prompt-build");
 }
 
-export function cmdUiBatchDown(): void {
+export function cmdBulkDown(): void {
   const running = readBatchUiRunningPids();
   if (running.length === 0) {
-    console.log("No batch-ui servers are currently tracked.");
-    console.log("Run `insight-flow batch-ui` to start them.");
+    console.log("No bulk-ui servers are currently tracked.");
+    console.log("Run `insight-flow bulk-ui` to start them.");
     return;
   }
 
@@ -455,5 +464,5 @@ export function cmdUiBatchDown(): void {
   }
 
   console.log(`\n${stopped.length + alreadyGone.length} server(s) stopped.`);
-  console.log("Run `insight-flow batch-ui` to start them again.");
+  console.log("Run `insight-flow bulk-ui` to start them again.");
 }

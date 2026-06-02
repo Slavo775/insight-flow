@@ -47,18 +47,13 @@ export async function initProject(
   force: boolean = false,
   options: { examples?: boolean; yes?: boolean; editor?: string } = {},
 ): Promise<void> {
-  // Resolve which editor providers to scaffold (claude / cursor / all, or
-  // auto-detect). Done up front so editor-specific steps below can gate on it.
-  let providers;
-  try {
-    providers = selectProviders(cwd, options.editor);
-  } catch (err) {
-    console.error((err as Error).message);
+  // Validate an explicit --editor *before* any writes so an unknown value fails
+  // closed without leaving a partial config (preserves N75 behavior; the actual
+  // provider selection — incl. config.editor precedence — happens after load).
+  if (options.editor && !["claude", "cursor", "all"].includes(options.editor)) {
+    console.error(`Unknown --editor "${options.editor}". Use claude | cursor | all.`);
     return;
   }
-  const claudeSelected = providers.some((p) => p.id === "claude");
-  console.log(`insight-flow init — editors: ${providers.map((p) => p.id).join(", ")}`);
-
   const configPath = resolve(cwd, "taskflow.config.json");
 
   // 1. Write config. insight-flow ships zero technology assumptions — when
@@ -87,6 +82,11 @@ export async function initProject(
       // ignore parse errors
     }
   } else {
+    // Persist an explicit --editor choice into the new config so future
+    // (bulk-)init runs honor it without re-passing the flag.
+    if (options.editor) {
+      config.editor = options.editor as "claude" | "cursor" | "all";
+    }
     const body = options.examples
       ? buildConfigWithExamples(config)
       : JSON.stringify(config, null, 2) + "\n";
@@ -97,6 +97,19 @@ export async function initProject(
         : "Created taskflow.config.json",
     );
   }
+
+  // Resolve which editor providers to scaffold. Precedence (N78):
+  // --editor flag → config.editor → auto-detect (.claude/.cursor) → claude.
+  const editorChoice = options.editor ?? config.editor;
+  let providers;
+  try {
+    providers = selectProviders(cwd, editorChoice);
+  } catch (err) {
+    console.error((err as Error).message);
+    return;
+  }
+  const claudeSelected = providers.some((p) => p.id === "claude");
+  console.log(`insight-flow init — editors: ${providers.map((p) => p.id).join(", ")}`);
 
   // 2. Create workTasks dir + master.json
   const workDir = resolve(cwd, config.workDir);

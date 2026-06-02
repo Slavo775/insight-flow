@@ -99,6 +99,9 @@ test("init --editor cursor generates .cursor/hooks.json + hook scripts", () => {
     const approval = readFileSync(resolve(dir, ".cursor/hooks/insight-flow-approval.sh"), "utf-8");
     assert.match(approval, /"permission":"ask"/);
     assert.match(approval, /--provider cursor/);
+    // log-event prints JSON to stdout; approval hook must discard it so Cursor parses permission JSON only
+    assert.match(approval, /hook beforeShellExecution --provider cursor >\/dev\/null/);
+    assert.match(approval, /printf '\{"permission":"allow"\}'/);
   } finally {
     rmSync(dir, { recursive: true });
   }
