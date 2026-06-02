@@ -1,0 +1,23 @@
+{
+  "taskId": "N67",
+  "reviews": [
+    {
+      "startedAt": "2026-05-28T16:23:15.680Z",
+      "endedAt": "2026-05-28T16:24:06.196Z",
+      "verdict": "approved",
+      "comment": "Tight 3-string fix matches spec line-for-line; already shipped in v0.11.2. Settings.local.json patched out-of-band via the documented insight-flow init upgrade path. 3 non-blocking notes (commit scope drift, missing regression test, HOOK_REL_PATH comment).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-02T15:32:00.917Z",
+      "endedAt": "2026-06-02T15:34:04.013Z",
+      "verdict": "approved",
+      "comment": "Re-verified on main: all CLAUDE_PROJECT_DIR hook paths intact, build green. Round 1 review was never synced to shard; tracker updated in Round 2.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
