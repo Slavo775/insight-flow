@@ -2854,9 +2854,129 @@
       "timestamp": "2026-06-02T15:44:39.156Z",
       "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
       "taskId": "N67",
-      "provider": "cursor",
       "payload": {
         "command": "cd /Users/ssedlak/Documents/personal_projects/insight-flow && rtk git add \\\n  .claude/commands/task-analyze.md \\\n  .claude/roles/TASK_ANALYZER_ROLE.md \\\n  .cursor/hooks.json \\\n  .cursor/hooks/insight-flow-event.sh \\\n  .cursor/hooks/insight-flow-stop.sh \\\n  .cursor/skills/ \\\n  workTasks/N67-fix-hook-paths-use-claude-project-dir-for-all-enri/events.json \\\n  workTasks/N73-task-analyze-strategist-agent-that-runs-before-tas/events.json \\\n  workTasks/N74-release-v0-13-0-n71-master-overview-liveness-gatin/events.json \\\n  workTasks/N75-add-cursor-editor-provider-to-init-scaffolding-ski/events.json && rtk git status"
+      }
+    },
+    {
+      "id": "evt_1780415079569_c819",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "postToolUse",
+      "timestamp": "2026-06-02T15:44:39.568Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415079648_1016",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-02T15:44:39.648Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415083179_f77f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "preToolUse",
+      "timestamp": "2026-06-02T15:44:43.179Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415083204_4c1f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-02T15:44:43.203Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415083295_6c2f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "beforeShellExecution",
+      "timestamp": "2026-06-02T15:44:43.294Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "command": "cd /Users/ssedlak/Documents/personal_projects/insight-flow && git commit --trailer \"Co-authored-by: Cursor <cursoragent@cursor.com>\" -m \"$(cat <<'EOF'\nchore: scaffold Cursor hooks/skills and Claude task-analyze command\n\nAdd remaining .cursor/ lifecycle hooks + agent skills, Claude Code\ntask-analyze slash command/role, and sync hook event logs for N67/N73/N74/N75.\n\nCo-Authored-By: Claude Code <noreply@anthropic.com>\nEOF\n)\" && git push origin main && git status && git log -1 --oneline"
+      }
+    },
+    {
+      "id": "evt_1780415190269_228d",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "postToolUse",
+      "timestamp": "2026-06-02T15:46:30.268Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415190337_fe9b",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-02T15:46:30.336Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415193474_322b",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "preToolUse",
+      "timestamp": "2026-06-02T15:46:33.473Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415193503_4198",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-02T15:46:33.502Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "payload": {
+        "tool_name": "Shell"
+      }
+    },
+    {
+      "id": "evt_1780415193596_ed36",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "beforeShellExecution",
+      "timestamp": "2026-06-02T15:46:33.595Z",
+      "sessionId": "bf7e333b-6a0c-410b-970d-b0a439069a8e",
+      "taskId": "N67",
+      "provider": "cursor",
+      "payload": {
+        "command": "cd /Users/ssedlak/Documents/personal_projects/insight-flow && git diff --stat workTasks/N67-fix-hook-paths-use-claude-project-dir-for-all-enri/events.json && git add workTasks/N67-fix-hook-paths-use-claude-project-dir-for-all-enri/events.json && git commit --trailer \"Co-authored-by: Cursor <cursoragent@cursor.com>\" -m \"$(cat <<'EOF'\nchore(tasks): sync N67 hook event log\n\nCo-Authored-By: Claude Code <noreply@anthropic.com>\nEOF\n)\" && git push origin main && git status"
       }
     }
   ]
