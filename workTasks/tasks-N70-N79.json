@@ -804,7 +804,7 @@
       "title": "Rename batch→bulk CLI (deprecated aliases) + editor-aware init/bulk via config.editor",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N78-rename-batch-bulk-cli-deprecated-aliases-editor-aw",
       "createdAt": "2026-06-02T09:31:12.620Z",
       "statusHistory": [
@@ -832,6 +832,16 @@
           "status": "approved",
           "at": "2026-06-02T11:05:17.329Z",
           "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-02T15:30:14.444Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-02T15:30:14.547Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -853,7 +863,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 359,
       "tags": [
         "cli",
         "bulk",
@@ -862,10 +872,16 @@
         "init",
         "dx"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-02T15:30:14.444Z",
+          "commitHash": "0d2f6a5",
+          "commitMessage": "feat(cli): N78 — rename batch→bulk + editor-aware bulk-init"
+        }
+      ],
+      "branch": "feat/N78-rename-batch-bulk-editor",
       "mrUrl": null,
-      "mergedAt": null
+      "mergedAt": "2026-06-02T15:30:14.546Z"
     }
   ]
 }
