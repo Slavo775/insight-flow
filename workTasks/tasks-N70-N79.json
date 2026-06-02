@@ -601,7 +601,7 @@
       "title": "Add provider identity (claude/cursor) to lifecycle events + dashboard",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N76-add-provider-identity-claude-cursor-to-lifecycle-e",
       "createdAt": "2026-06-01T13:55:13.302Z",
       "statusHistory": [
@@ -644,6 +644,11 @@
           "status": "approved",
           "at": "2026-06-02T08:26:22.500Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-02T08:28:44.272Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -666,7 +671,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 1114,
       "tags": [
         "multi-editor",
         "providers",
@@ -683,14 +688,14 @@
       ],
       "branch": "feat/N76-provider-identity",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/52",
-      "mergedAt": null
+      "mergedAt": "2026-06-02T08:28:44.271Z"
     },
     {
       "id": "N77",
       "title": "Cursor lifecycle hooks to dashboard via binary payload parsing",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "workTasks/N77-cursor-lifecycle-hooks-to-dashboard-via-binary-pay",
       "createdAt": "2026-06-01T13:56:44.091Z",
       "statusHistory": [
@@ -733,6 +738,16 @@
           "status": "approved",
           "at": "2026-06-02T08:24:57.762Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-02T08:26:46.759Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-02T08:28:44.377Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -759,7 +774,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 1112,
       "tags": [
         "cursor",
         "multi-editor",
@@ -773,11 +788,16 @@
           "at": "2026-06-01T19:51:23.053Z",
           "commitHash": "81f892f",
           "commitMessage": "docs(tasks): N77 spec"
+        },
+        {
+          "at": "2026-06-02T08:26:46.758Z",
+          "commitHash": "90c1961",
+          "commitMessage": "feat(cursor): N77 implementation"
         }
       ],
       "branch": "feat/N77-cursor-hooks-dashboard",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/53",
-      "mergedAt": null
+      "mergedAt": "2026-06-02T08:28:44.377Z"
     }
   ]
 }
