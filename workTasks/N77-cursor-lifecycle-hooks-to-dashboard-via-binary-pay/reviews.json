@@ -1,0 +1,23 @@
+{
+  "taskId": "N77",
+  "reviews": [
+    {
+      "startedAt": "2026-06-02T06:49:13.014Z",
+      "endedAt": "2026-06-02T06:50:04.077Z",
+      "verdict": "approved",
+      "comment": "Cursor live integration approved. Binary parsing + statusFromEvent + .cursor/hooks.json generation + notify + approval gate; 13 test files green; tsc clean; Claude path untouched. Non-blocking: cursor tool events not gated (volume), approval matcher assumes flat 'command' key (fail-open if wrong), readFileSync(0) latent block, bash scripts generation-tested only.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-02T08:24:34.703Z",
+      "endedAt": "2026-06-02T08:24:57.762Z",
+      "verdict": "approved",
+      "comment": "Human approved: 'approved done merge it! N77 N76'",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

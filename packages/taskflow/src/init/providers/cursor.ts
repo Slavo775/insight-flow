@@ -3,6 +3,7 @@ import { resolve, basename } from "node:path";
 import type { EditorProvider, ProviderContext, SkillDef } from "./types.js";
 import { generateContextSection, upsertMarkerSection } from "./context.js";
 import { toCursorBody } from "./skills.js";
+import { installCursorHooks } from "../../cursor-hooks.js";
 
 /**
  * Render one Cursor skill file: YAML frontmatter (`name`/`description`, per
@@ -57,5 +58,17 @@ export const cursorProvider: EditorProvider = {
     const section = generateContextSection(ctx.config, ctx.skills, { editorLabel: "Cursor" });
     const action = upsertMarkerSection(resolve(ctx.cwd, "AGENTS.md"), section);
     console.log(`[cursor] ${action} insight-flow section in AGENTS.md`);
+  },
+
+  writeHooks(ctx: ProviderContext): void {
+    const result = installCursorHooks(ctx.cwd, ctx.force);
+    if (result.configWritten || result.hooksWritten > 0) {
+      console.log(
+        `[cursor] Wrote .cursor/hooks.json + ${result.hooksWritten} hook script(s) (events, stop/notify, approval gate)`,
+      );
+      console.log("  → restart Cursor for the hooks to take effect");
+    } else {
+      console.log("[cursor] Cursor hooks already present, skipping.");
+    }
   },
 };

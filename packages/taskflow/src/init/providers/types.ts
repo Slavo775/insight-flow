@@ -49,4 +49,10 @@ export interface EditorProvider {
   writeSkills(ctx: ProviderContext): void;
   /** Write this editor's context/rules file (the insight-flow marker section). */
   writeContext(ctx: ProviderContext): void;
+  /**
+   * Optional: write this editor's lifecycle hooks (live dashboard + notifications).
+   * Claude installs hooks via its own installers in `initProject`; the cursor
+   * provider implements this (N77). Editors without hook support omit it.
+   */
+  writeHooks?(ctx: ProviderContext): void;
 }

@@ -601,7 +601,7 @@
       "title": "Add provider identity (claude/cursor) to lifecycle events + dashboard",
       "type": "feat",
       "priority": "medium",
-      "status": "pushed",
+      "status": "approved",
       "folder": "workTasks/N76-add-provider-identity-claude-cursor-to-lifecycle-e",
       "createdAt": "2026-06-01T13:55:13.302Z",
       "statusHistory": [
@@ -634,6 +634,16 @@
           "status": "pushed",
           "at": "2026-06-01T19:42:37.596Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-02T08:24:57.883Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-02T08:26:22.500Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -652,7 +662,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -672,7 +682,7 @@
         }
       ],
       "branch": "feat/N76-provider-identity",
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/52",
       "mergedAt": null
     },
     {
@@ -680,7 +690,7 @@
       "title": "Cursor lifecycle hooks to dashboard via binary payload parsing",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N77-cursor-lifecycle-hooks-to-dashboard-via-binary-pay",
       "createdAt": "2026-06-01T13:56:44.091Z",
       "statusHistory": [
@@ -688,17 +698,65 @@
           "status": "ready",
           "at": "2026-06-01T13:56:44.092Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-01T19:51:23.053Z",
+          "by": "task-git"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-01T20:01:10.825Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-01T20:11:07.711Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-02T06:49:13.013Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-02T06:50:04.077Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-02T08:24:34.702Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-02T08:24:57.762Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-01T20:01:10.825Z",
+        "completedAt": "2026-06-01T20:11:07.711Z",
+        "filesChanged": [
+          "packages/taskflow/src/hook-parse.ts",
+          "packages/taskflow/src/cursor-hooks.ts",
+          "packages/taskflow/src/cli.ts",
+          "packages/taskflow/src/server/event-stream.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/init/providers/types.ts",
+          "packages/taskflow/src/init/providers/cursor.ts",
+          "packages/taskflow/src/init/index.ts",
+          "packages/taskflow/test/cursor-hooks.test.mjs",
+          "packages/taskflow/test/log-event.test.mjs",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -710,9 +768,15 @@
         "events",
         "notifications"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-01T19:51:23.053Z",
+          "commitHash": "81f892f",
+          "commitMessage": "docs(tasks): N77 spec"
+        }
+      ],
+      "branch": "feat/N77-cursor-hooks-dashboard",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/53",
       "mergedAt": null
     }
   ]

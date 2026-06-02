@@ -187,14 +187,14 @@ test("hook subcommand threads --provider cursor onto the event (N76)", () => {
   const dir = makeTmpProject();
   const folder = makeTaskFolder(dir, "N08");
   try {
-    // `insight-flow hook PostToolUse` derives → tool-approved; --provider must flow.
+    // Cursor `hook postToolUse --provider cursor` derives → tool-approved; --provider must flow.
     execFileSync(
       process.execPath,
-      [CLI, "hook", "PostToolUse", "--task", "N08", "--provider", "cursor"],
+      [CLI, "hook", "postToolUse", "--task", "N08", "--provider", "cursor"],
       { cwd: dir, timeout: 1000 },
     );
     const stored = JSON.parse(readFileSync(resolve(folder, "events.json"), "utf-8"));
-    assert.strictEqual(stored.events[0].type, "tool-approved", "PostToolUse derives to tool-approved");
+    assert.strictEqual(stored.events[0].type, "tool-approved", "postToolUse derives to tool-approved");
     assert.strictEqual(stored.events[0].provider, "cursor", "hook subcommand should stamp provider");
   } finally {
     rmSync(dir, { recursive: true });

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, fstatSync } from "node:fs";
 import { resolveConfig, getMasterPath } from "./config.js";
 import { loadMaster } from "./storage.js";
 import { resolvePackageAsset, TaskflowProjectNotFoundError } from "./paths.js";
@@ -41,6 +41,7 @@ import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
 import { cmdLogActivity } from "./commands/log-activity.js";
 import { cmdLogEvent } from "./commands/log-event.js";
+import { parseCursorStdin, cursorEventToDerived, type ParsedCursorPayload } from "./hook-parse.js";
 import type { ParsedArgs } from "./types.js";
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -191,24 +192,52 @@ async function run(): Promise<void> {
       process.stderr.write("usage: insight-flow hook <ClaudeHookEventName>\n");
       process.exit(1);
     }
-    const RAW_TO_DERIVED: Record<string, string> = {
-      SessionStart: "session-start",
-      SessionEnd: "session-end",
-      Stop: "agent-idle",
-      SubagentStop: "subagent-done",
-      Notification: "notification",
-      PreToolUse: "tool-requested",
-      PostToolUse: "tool-approved",
-      UserPromptSubmit: "agent-active",
-      PermissionRequest: "approval-required",
-    };
-    const derived = RAW_TO_DERIVED[raw] ?? "notification";
-    cmdLogEvent(config, {
-      ...opts,
-      _: [derived, ...(opts._ as string[]).slice(1)],
-      source: "hook",
-      "hook-name": raw,
-    });
+    if (opts.provider === "cursor") {
+      // N77: Cursor hook scripts pipe Cursor's stdin JSON; parse it here (not
+      // in bash), map the camelCase Cursor event → derived type, and tag the
+      // event --provider cursor. The raw Cursor name is kept as hook-name so
+      // statusFromEvent can derive status from it.
+      const derived = cursorEventToDerived(raw);
+      let parsed: ParsedCursorPayload = { data: {} };
+      try {
+        // Only read stdin when it's a pipe / socket / file (all reach EOF when
+        // the writer closes) — never a tty, which would block the hook waiting
+        // for input. (Node uses socketpairs for stdio pipes on some platforms.)
+        const st = fstatSync(0);
+        if (st.isFIFO() || st.isFile() || st.isSocket()) {
+          parsed = parseCursorStdin(readFileSync(0, "utf-8"));
+        }
+      } catch {
+        /* fail-soft: a bad/empty payload must never break the hook */
+      }
+      cmdLogEvent(config, {
+        ...opts,
+        _: [derived, ...(opts._ as string[]).slice(1)],
+        source: "hook",
+        "hook-name": raw,
+        ...(parsed.sessionId ? { "session-id": parsed.sessionId } : {}),
+        ...(Object.keys(parsed.data).length ? { data: JSON.stringify(parsed.data) } : {}),
+      });
+    } else {
+      const RAW_TO_DERIVED: Record<string, string> = {
+        SessionStart: "session-start",
+        SessionEnd: "session-end",
+        Stop: "agent-idle",
+        SubagentStop: "subagent-done",
+        Notification: "notification",
+        PreToolUse: "tool-requested",
+        PostToolUse: "tool-approved",
+        UserPromptSubmit: "agent-active",
+        PermissionRequest: "approval-required",
+      };
+      const derived = RAW_TO_DERIVED[raw] ?? "notification";
+      cmdLogEvent(config, {
+        ...opts,
+        _: [derived, ...(opts._ as string[]).slice(1)],
+        source: "hook",
+        "hook-name": raw,
+      });
+    }
   } else if (command === "ui-batch-register") {
     cmdUiBatchRegister();
   } else if (command === "ui-batch-unregister") {
