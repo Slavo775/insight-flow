@@ -14,7 +14,7 @@ import { normalize, resolve, sep, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
-import { Server as IOServer, type Socket as IOSocket } from "socket.io";
+import { SocketIoTransport, type Transport } from "./transport.js";
 import type { TaskflowConfig, HookEventInput } from "../../core/types.js";
 import { getWorkDir } from "../../core/config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
@@ -493,7 +493,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     if (url.pathname === "/api/agent-done" && req.method === "POST") {
       if (config.notifications?.browser !== false) {
-        io.emit("agent-done", { ts: Date.now() });
+        transport.emit("agent-done", { ts: Date.now() });
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ ok: true }));
@@ -503,7 +503,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // N79: direct browser permission toast (mirrors agent-done; Cursor approval gate).
     if (url.pathname === "/api/agent-permission" && req.method === "POST") {
       if (config.notifications?.browser !== false) {
-        io.emit("agent-permission", { ts: Date.now() });
+        transport.emit("agent-permission", { ts: Date.now() });
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ ok: true }));
@@ -558,10 +558,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         // Skip socket emit on duplicates so retried hooks don't double-render
         // in the dashboard. Status frame still gated on a real transition.
         if (!duplicate) {
-          io.emit("event", { kind: "event", event });
+          transport.emit("event", { kind: "event", event });
           if (from !== to) {
             const statusAt = new Date().toISOString();
-            io.emit("status", {
+            transport.emit("status", {
               kind: "status",
               from,
               to,
@@ -698,14 +698,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   // reason (browser quirks, proxies, NAT), and handles reconnection /
   // heartbeat automatically. Path /socket.io is the default and is what the
   // socket.io-client library expects.
-  const io = new IOServer(server, {
+  const transport: Transport = new SocketIoTransport(server, {
     cors: { origin: "*", methods: ["GET"] },
     pingInterval: 25000,
     pingTimeout: 20000,
   });
 
-  io.on("connection", (sock: IOSocket) => {
-    sock.emit("snapshot", {
+  transport.onConnection((client) => {
+    client.emit("snapshot", {
       activity: activity.getRecentEvents(),
       hookStatus,
       configEnabled,
@@ -722,7 +722,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   let activityDebounceTimer: NodeJS.Timeout | null = null;
   let activitySeq = 0;
   activity.onEvent((event) => {
-    io.emit("activity", event);
+    transport.emit("activity", event);
 
     // Only forward Event-tool activity rows (hook-sourced) — Tool/Skill/Phase
     // activity rows don't carry hook-level state and would just add noise.
@@ -737,7 +737,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       };
       const { duplicate, from, to } = eventStore.insert(synthetic);
       if (!duplicate && from !== to) {
-        io.emit("status", {
+        transport.emit("status", {
           kind: "status",
           from,
           to,
@@ -761,7 +761,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
-      io.emit("file-change", null);
+      transport.emit("file-change", null);
       if (pushToMaster) void pushToMaster();
     }, WATCH_DEBOUNCE_MS);
   }
@@ -804,7 +804,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     activity.stop();
     watcher.close();
     if (debounceTimer) clearTimeout(debounceTimer);
-    io.close();
+    transport.close();
     try {
       if (existsSync(activityLogPath)) unlinkSync(activityLogPath);
     } catch {

@@ -92,7 +92,7 @@
       "title": "Consolidate insight-flow into one modular package + safety net + extension points",
       "type": "rework",
       "priority": "high",
-      "status": "in-progress",
+      "status": "implemented",
       "folder": "workTasks/N81-consolidate-insight-flow-into-one-modular-package-",
       "createdAt": "2026-06-03T10:19:32.080Z",
       "statusHistory": [
@@ -105,12 +105,35 @@
           "status": "in-progress",
           "at": "2026-06-03T10:43:17.777Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-03T13:52:54.091Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-03T10:43:17.777Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-03T13:52:54.091Z",
+        "filesChanged": [
+          "packages/taskflow/src/{core",
+          "cli",
+          "dashboard",
+          "master",
+          "agents}/** (43 files restructured)",
+          "src/dashboard/server/transport.ts",
+          "src/core/storage-port.ts",
+          "src/master/index.ts",
+          "src/cli/cli.ts",
+          "src/dashboard/server/index.ts",
+          "src/index.ts",
+          "tsup.config.ts",
+          "package.json",
+          "test/{published-surface",
+          "e2e-smoke",
+          "master-boot",
+          "seams}.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

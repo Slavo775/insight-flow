@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, fstatSync } from "node:fs";
 import { resolveConfig, getMasterPath } from "../core/config.js";
-import { loadMaster } from "../core/storage.js";
+import { jsonFileStorage } from "../core/storage-port.js";
 import { resolvePackageAsset, TaskflowProjectNotFoundError } from "../core/paths.js";
 import { TaskflowValidationError } from "../core/schema/index.js";
 import { initProject } from "../agents/init/index.js";
@@ -289,7 +289,7 @@ async function run(): Promise<void> {
       process.exit(1);
     }
 
-    const master = loadMaster(config);
+    const master = jsonFileStorage.loadMaster(config);
 
     switch (command) {
       case "create":
