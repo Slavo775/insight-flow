@@ -793,12 +793,12 @@ Output:
 
 ## Multi-project overview
 
-When you run multiple `insight-flow ui` instances (one per project), the `insight-flow-master` package provides a live overview page that aggregates all of them into a single card grid.
+When you run multiple `insight-flow ui` instances (one per project), the built-in master server (`insight-flow master`) provides a live overview page that aggregates all of them into a single card grid.
 
 ### How it works
 
 Project servers (push model):
-1. On startup, `insight-flow ui` auto-starts `insight-flow-master` locally (if not already running) and registers with it.
+1. On startup, `insight-flow ui` auto-starts the master server locally via `insight-flow master` (if not already running) and registers with it.
 2. On every file-change, the project server pushes its current state (current task, status counts, activity) to the master via HTTP POST.
 3. If the master restarts and loses its registry, the next push returns 401 — the project server silently re-registers and retries.
 
@@ -810,10 +810,8 @@ The master:
 ### Local setup
 
 ```bash
-# Build the master package (once)
-pnpm --dir packages/insight-flow-master run build
-
-# Start your projects — master auto-starts on the first one
+# The master ships inside insight-flow — no separate build needed.
+# Start your projects — the master auto-starts on the first one
 insight-flow ui                          # project A on :6006, master on :6100
 # (in another terminal, different project dir)
 insight-flow ui                          # project B on :6006, registers with existing master

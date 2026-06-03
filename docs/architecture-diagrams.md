@@ -103,7 +103,7 @@ The diagram shows how multiple project servers register with and push state to o
 
 COMPONENTS
 
-Master server  (insight-flow-master package, default port 6100)
+Master server  (the `insight-flow master` subcommand, default port 6100)
   - Runs as a long-lived singleton process.
   - Stores a lock file at ~/.insight-flow/master.lock  {pid, port, startedAt}.
   - Exposes HTTP routes:
@@ -113,9 +113,9 @@ Master server  (insight-flow-master package, default port 6100)
   - The overview page lists all registered projects with their last-pushed state (currentTaskId, currentTaskTitle, currentTaskStatus, taskCounts).
 
 Project server  (one per project, default port 6006, configurable)
-  - Runs `insight-flow ui` which calls startServer() in packages/taskflow/src/server/index.ts.
+  - Runs `insight-flow ui` which calls startServer() in packages/taskflow/src/dashboard/server/index.ts.
   - On startup:
-      1. Reads master.lock. If master is not alive → auto-spawns insight-flow-master binary (detached child process), waits up to 3 s for it to be ready.
+      1. Reads master.lock. If master is not alive → auto-spawns `insight-flow master` (detached child process), waits up to 3 s for it to be ready.
       2. Calls POST /api/register on master → receives masterId.
       3. Pushes initial state snapshot (currentTaskId, currentTaskTitle, currentTaskStatus, taskCounts, recentActivity[last 50]).
   - On every file-change in workTasks/ (debounced 100 ms via fs.watch):

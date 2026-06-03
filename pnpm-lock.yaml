@@ -8,25 +8,6 @@ importers:
 
   .: {}
 
-  packages/insight-flow-master:
-    dependencies:
-      socket.io:
-        specifier: ^4.8.3
-        version: 4.8.3
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      '@types/node':
-        specifier: ^22.16.5
-        version: 22.19.19
-      tsup:
-        specifier: ^8.4.0
-        version: 8.5.1(typescript@5.9.3)
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
-
   packages/taskflow:
     dependencies:
       socket.io:
