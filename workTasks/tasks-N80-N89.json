@@ -37,6 +37,21 @@
           "status": "merged",
           "at": "2026-06-03T08:43:51.958Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-03T08:47:07.498Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-03T08:47:41.606Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-03T08:47:41.827Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -52,11 +67,11 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": 739,
+      "totalDurationMinutes": 743,
       "tags": [
         "release",
         "docs"
@@ -70,7 +85,7 @@
       ],
       "branch": "feat/N80-release-insight-flow-1-0-0-ga",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/55",
-      "mergedAt": "2026-06-03T08:43:51.958Z"
+      "mergedAt": "2026-06-03T08:47:41.826Z"
     }
   ]
 }
