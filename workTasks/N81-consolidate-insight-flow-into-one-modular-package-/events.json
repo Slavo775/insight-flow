@@ -2782,6 +2782,40 @@
       "sessionId": "9cb943dd-a986-4828-a532-cbedce768534",
       "taskId": "N81",
       "payload": {}
+    },
+    {
+      "id": "evt_1780494801953_f750",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-03T13:53:21.953Z",
+      "sessionId": "9cb943dd-a986-4828-a532-cbedce768534",
+      "taskId": "N81",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780494813307_5993",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-03T13:53:33.307Z",
+      "sessionId": "9cb943dd-a986-4828-a532-cbedce768534",
+      "taskId": "N81",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780494813459_a6c3",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-03T13:53:33.459Z",
+      "sessionId": "9cb943dd-a986-4828-a532-cbedce768534",
+      "taskId": "N81",
+      "payload": {}
     }
   ]
 }

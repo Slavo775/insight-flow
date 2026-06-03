@@ -92,7 +92,7 @@
       "title": "Consolidate insight-flow into one modular package + safety net + extension points",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N81-consolidate-insight-flow-into-one-modular-package-",
       "createdAt": "2026-06-03T10:19:32.080Z",
       "statusHistory": [
@@ -110,6 +110,11 @@
           "status": "implemented",
           "at": "2026-06-03T13:52:54.091Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-03T13:53:41.820Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -149,8 +154,14 @@
         "testing",
         "extensibility"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-03T13:53:41.819Z",
+          "commitHash": "0bafdab95fe583853268cf2f00e0de864a24a6b5",
+          "commitMessage": "Consolidate into one modular package + fold master in + bounded seams (1a+1b+1c)"
+        }
+      ],
+      "branch": "rework/N81-consolidate-modular-package",
       "mrUrl": null,
       "mergedAt": null
     }
