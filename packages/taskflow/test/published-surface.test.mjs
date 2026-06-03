@@ -66,7 +66,7 @@ test("npm pack --dry-run: tarball keeps its top-level roots and required dist en
 test("bin: `insight-flow --help` exits 0 and enumerates the command surface", () => {
   const out = execFileSync(process.execPath, [CLI, "--help"], { encoding: "utf-8" });
   const commands = [
-    "init", "ui", "create", "status", "list", "current", "show", "stats",
+    "init", "ui", "master", "create", "status", "list", "current", "show", "stats",
     "next", "next-review", "next-fix", "next-change",
     "implement-start", "implement-end", "review-start", "review-end",
     "fix-start", "fix-end", "push", "mr-update", "merge", "done",

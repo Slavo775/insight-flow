@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "ui": "taskflow ui",
-    "init": "taskflow init",
-    "current": "taskflow current",
-    "stats": "taskflow stats"
+    "ui": "insight-flow ui",
+    "init": "insight-flow init",
+    "current": "insight-flow current",
+    "stats": "insight-flow stats"
   },
   "dependencies": {
-    "taskflow": "link:../packages/taskflow"
+    "insight-flow": "link:../packages/taskflow"
   }
 }

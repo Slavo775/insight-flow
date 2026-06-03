@@ -42,3 +42,13 @@ None.
 
 - Live `insight-flow master` cold-start was **not** exercised because a real master (pid 2165, started Jun 2 from the pre-N81 binary) was running on :6100; disturbing it was avoided. `runMaster` is a faithful port of that binary's `main()`, so confidence is high; the gap is the trivial CLI dispatch → `runMaster` glue, covered by code review + typecheck.
 - Follow-ups worth tracking: playground `taskflow`→`insight-flow` rename (finding 1), broaden storage-port adoption (finding 2), CHANGELOG entry (finding 4). The planned socket.io→native transport swap and the React dashboard remain separate future specs (the transport seam now exists to support the former).
+
+## Follow-up — non-blocking items addressed (post-approval)
+
+`/task-review-fix` applied the small, safe non-blocking findings without touching shipping `src/` logic, so the approved verdict stands (87 tests green, typecheck clean):
+
+- **Finding 1 (playground drift)** — `playground/package.json` scripts + dependency renamed `taskflow` → `insight-flow`; `pnpm install` relinked so `pnpm play` resolves the real bin.
+- **Finding 3** — `master` added to the `published-surface.test.mjs` `--help` command assertions.
+- **Finding 4** — CHANGELOG `[Unreleased]` entry added (Changed + Fixed).
+
+Deliberately **not** done here: **Finding 2** (broaden storage-port adoption across ~120 call sites) — too large/risky for a review-fix; recommended as its own task. **Finding 5** (`.claude/settings.local.json` pkill cleanup) — untracked local-only file, left to the user.
