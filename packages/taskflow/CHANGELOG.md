@@ -4,6 +4,29 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-06-02
+
+First stable (GA) release. The CLI surface is now considered stable; future breaking changes follow semver.
+
+### Added
+
+- **N75** — Cursor editor provider for `insight-flow init`. New `--editor claude|cursor|all` flag (auto-detected from an existing `.claude/` or `.cursor/` directory, default `claude`). For Cursor, each agent skill is written as `.cursor/skills/<name>/SKILL.md` (invokable as `/<name>` in Cursor's agent chat) and the insight-flow context block is written to the root `AGENTS.md`. Skill prompts come from the same canonical source as the Claude commands, via a provider seam so additional editors can be added without touching command logic.
+- **N76** — Provider identity (`claude` / `cursor`) on lifecycle events. Events carry a `provider` field, surfaced as a provider badge on both the dashboard activity feed and the master overview cards.
+- **N77** — Cursor lifecycle hooks → dashboard. `--editor cursor` installs `.cursor/hooks.json` + thin hook scripts that parse Cursor's binary hook payloads and stream `stop` / `preToolUse` / … events into the dashboard, firing the same OS/browser notifications as Claude.
+- **N79** — Permission-required notification parity for Cursor. Approval gates on `beforeShellExecution` (sensitive shell, e.g. `git push`), `preToolUse` (Shell-like tools), and `beforeMCPExecution` (all MCP) post to `POST /api/agent-permission` and fire the same `Permission required` toast as Claude; `Done` uses `POST /api/agent-done`. Gates return `{"permission":"ask"}` — never auto-deny. Matchers are insight-flow-defined and tunable in `.cursor/hooks/insight-flow-approval.sh`.
+
+### Changed
+
+- **N78** — Multi-project commands renamed `batch*` → `bulk*`: `bulk-register`, `bulk-unregister`, `bulk-down`, `bulk-ui`, `bulk-init`, `bulk-prompt-build`. The old `batch*` / `ui-batch-*` names still work for one more release but print a deprecation warning. `bulk-init` is editor-aware: each registered project's `taskflow.config.json` may set `"editor": "claude" | "cursor" | "all"`, honored per project; `bulk-init --editor <v>` overrides the whole fleet. Registry format unchanged, so registered projects are unaffected.
+
+### Fixed
+
+- **`/task-analyze`** — the pre-taskmaster strategist now requires an explicit human go-ahead (e.g. "create it") before handing off to `/taskmaster`. Answering its clarifying questions or picking an approach no longer counts as permission to create the task.
+
+### Notes
+
+- Consumers should re-run `insight-flow init` after upgrading to scaffold Cursor support (`--editor cursor` or `--editor all`). `init` is additive — `--force` is only needed to overwrite existing skill files.
+
 ## [0.13.0] — 2026-05-29
 
 ### Added

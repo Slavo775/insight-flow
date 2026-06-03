@@ -5,6 +5,25 @@ Full history lives in [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANG
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-06-02
+
+First stable (GA) release. The CLI surface is now considered stable.
+
+### Added
+
+- **N75 / N76 / N77** — Cursor editor support. `insight-flow init --editor cursor|all` scaffolds the agent skills as `.cursor/skills/<name>/SKILL.md` + an `AGENTS.md` context block and installs `.cursor/hooks.json` so Cursor's lifecycle events stream into the dashboard. Every lifecycle event now carries a `claude`/`cursor` provider identity, shown as a badge on the dashboard and master overview.
+- **N79** — Permission-required notification parity for Cursor: approval gates fire the same `Permission required` / `Done` notifications as Claude, with broader hook coverage.
+
+### Changed
+
+- **N78** — Multi-project commands renamed `batch*` → `bulk*` (`bulk-register`, `bulk-unregister`, `bulk-ui`, `bulk-init`, `bulk-prompt-build`, …). The old `batch*` names still work as **deprecated aliases** that print a warning; they will be removed in a future release. Registered projects are unaffected (registry format unchanged).
+
+### Fixed
+
+- **`/task-analyze`** — now requires an explicit human go-ahead before handing off to `/taskmaster` (consent gate); answering its questions no longer auto-creates a task.
+
+See [`packages/taskflow/CHANGELOG.md`](packages/taskflow/CHANGELOG.md) for the full entry.
+
 ## [0.13.0] — 2026-05-29
 
 ### Added
