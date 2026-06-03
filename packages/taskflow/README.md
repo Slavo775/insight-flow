@@ -4,12 +4,15 @@
 
 insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
 
-## What's new in 0.13.0
+## What's new in 1.0.0
 
-- **`/task-analyze` pre-taskmaster strategist agent** — challenges weak briefs, surfaces 1–2 alternatives, and only hands off to `/taskmaster` after you confirm a path. Writes an `ANALYSIS.md` audit trail (Problem framing · Options considered · Decision · Sources · Handoff brief) into the new task folder. `insight-flow create --with-analysis` scaffolds the file directly.
-- **Master overview liveness gating** — cards go neutral once `lastSeenAt > 60 s`. No more stale-green "Claude is working" highlight on offline projects. Per-card `live`/`stale`/`down` badge removed; subtitle `N projects · M live` counter retained.
-- **Browser notification reads "Done"** — agent turn-end notification title changed from `Awaiting input` to `Done` (clearer signal that the ball is in your court). `Permission required` wording unchanged.
-- **Re-run `insight-flow init` after upgrading** to scaffold `.claude/commands/task-analyze.md` and `.claude/roles/TASK_ANALYZER_ROLE.md` into your project.
+First stable (GA) release — the CLI surface is now considered stable.
+
+- **Cursor editor support** — `insight-flow init --editor cursor` (or `--editor all`) scaffolds the same agent skills for Cursor as `.cursor/skills/<name>/SKILL.md` + an `AGENTS.md` context block, and installs `.cursor/hooks.json` so Cursor's lifecycle events stream into the dashboard.
+- **Provider identity on events** — every lifecycle event is tagged `claude` or `cursor` and shown as a provider badge on the dashboard and master overview.
+- **Permission-required notifications for Cursor** — Cursor approval gates now fire the same `Permission required` / `Done` notifications as Claude.
+- **`batch*` → `bulk*` rename** — multi-project commands are now `bulk-register`, `bulk-ui`, `bulk-init`, etc. The old `batch*` names still work as deprecated aliases (with a warning) for one more release.
+- **Re-run `insight-flow init` after upgrading** to scaffold Cursor support (`--editor cursor` or `--editor all`).
 
 See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
 
