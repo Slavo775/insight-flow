@@ -539,6 +539,86 @@
       "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
       "taskId": "N80",
       "payload": {}
+    },
+    {
+      "id": "evt_1780472581058_7263",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-03T07:43:01.058Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N80",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780472599554_5022",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-03T07:43:19.554Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N80",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780472603569_f02e",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-03T07:43:23.569Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N80",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780472640152_9080",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-03T07:44:00.152Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N80",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780472640295_742d",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-03T07:44:00.295Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N80",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780472644808_117d",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-03T07:44:04.808Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N80",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780472669161_0b7a",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-03T07:44:29.161Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N80",
+      "payload": {}
     }
   ]
 }

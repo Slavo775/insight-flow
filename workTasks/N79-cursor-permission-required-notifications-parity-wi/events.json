@@ -6109,6 +6109,88 @@
       "sessionId": "df291f19-e2fd-4e52-b4bc-a12d1d85b2cd",
       "taskId": "N79",
       "payload": {}
+    },
+    {
+      "id": "evt_1780427110847_055e",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-02T19:05:10.846Z",
+      "sessionId": "df291f19-e2fd-4e52-b4bc-a12d1d85b2cd",
+      "taskId": "N79",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780427120595_1013",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-02T19:05:20.594Z",
+      "sessionId": "df291f19-e2fd-4e52-b4bc-a12d1d85b2cd",
+      "taskId": "N79",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "type": "done",
+      "taskId": "N79",
+      "timestamp": "2026-06-02T19:05:20.723Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1780427122654_d6be",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-02T19:05:22.654Z",
+      "sessionId": "df291f19-e2fd-4e52-b4bc-a12d1d85b2cd",
+      "taskId": "N79",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1780427139172_db53",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-02T19:05:39.172Z",
+      "sessionId": "df291f19-e2fd-4e52-b4bc-a12d1d85b2cd",
+      "taskId": "N79",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780427327483_74bd",
+      "type": "session-start",
+      "source": "hook",
+      "hookName": "SessionStart",
+      "timestamp": "2026-06-02T19:08:47.483Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N79",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780430463687_954b",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-06-02T20:01:03.687Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N79",
+      "payload": {}
+    },
+    {
+      "id": "evt_1780430479214_f963",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-02T20:01:19.214Z",
+      "sessionId": "1c631724-9e88-41b0-9cae-660b78ae374e",
+      "taskId": "N79",
+      "payload": {}
     }
   ]
 }

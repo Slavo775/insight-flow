@@ -9,7 +9,7 @@
       "title": "Release insight-flow 1.0.0 (GA)",
       "type": "feat",
       "priority": "high",
-      "status": "implemented",
+      "status": "merged",
       "folder": "workTasks/N80-release-insight-flow-1-0-0-ga",
       "createdAt": "2026-06-02T20:24:39.863Z",
       "statusHistory": [
@@ -27,6 +27,16 @@
           "status": "implemented",
           "at": "2026-06-03T05:37:06.404Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-03T07:44:04.576Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-03T08:43:51.958Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -46,15 +56,21 @@
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 739,
       "tags": [
         "release",
         "docs"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
-      "mergedAt": null
+      "pushes": [
+        {
+          "at": "2026-06-03T07:44:04.576Z",
+          "commitHash": "5fb409c",
+          "commitMessage": "chore(release): prepare insight-flow 1.0.0 (GA) (N80)"
+        }
+      ],
+      "branch": "feat/N80-release-insight-flow-1-0-0-ga",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/55",
+      "mergedAt": "2026-06-03T08:43:51.958Z"
     }
   ]
 }
