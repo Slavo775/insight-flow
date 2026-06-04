@@ -86,6 +86,104 @@
       "branch": "feat/N80-release-insight-flow-1-0-0-ga",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/55",
       "mergedAt": "2026-06-03T08:47:41.826Z"
+    },
+    {
+      "id": "N81",
+      "title": "Consolidate insight-flow into one modular package + safety net + extension points",
+      "type": "rework",
+      "priority": "high",
+      "status": "approved",
+      "folder": "workTasks/N81-consolidate-insight-flow-into-one-modular-package-",
+      "createdAt": "2026-06-03T10:19:32.080Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-03T10:19:32.081Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-03T10:43:17.777Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-03T13:52:54.091Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-03T13:53:41.820Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-03T14:54:48.133Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-03T14:58:32.285Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-04T12:14:09.770Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-04T12:14:59.187Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-03T10:43:17.777Z",
+        "completedAt": "2026-06-03T13:52:54.091Z",
+        "filesChanged": [
+          "packages/taskflow/src/{core",
+          "cli",
+          "dashboard",
+          "master",
+          "agents}/** (43 files restructured)",
+          "src/dashboard/server/transport.ts",
+          "src/core/storage-port.ts",
+          "src/master/index.ts",
+          "src/cli/cli.ts",
+          "src/dashboard/server/index.ts",
+          "src/index.ts",
+          "tsup.config.ts",
+          "package.json",
+          "test/{published-surface",
+          "e2e-smoke",
+          "master-boot",
+          "seams}.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "refactor",
+        "architecture",
+        "build",
+        "testing",
+        "extensibility"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-03T13:53:41.819Z",
+          "commitHash": "0bafdab95fe583853268cf2f00e0de864a24a6b5",
+          "commitMessage": "Consolidate into one modular package + fold master in + bounded seams (1a+1b+1c)"
+        }
+      ],
+      "branch": "rework/N81-consolidate-modular-package",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/56",
+      "mergedAt": null
     }
   ]
 }

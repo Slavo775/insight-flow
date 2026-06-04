@@ -4,6 +4,14 @@ All notable changes to `insight-flow` are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- **N81** — Consolidated into a single `insight-flow` package: `packages/taskflow/src` reorganized into `core / cli / dashboard / master / agents` module folders, and the former `insight-flow-master` package folded in as the `insight-flow master` subcommand (one published binary, no separate package). Added two bounded extension seams — `Transport` (`dashboard/server/transport.ts`, wrapping the dashboard's Socket.IO broadcast) and `Storage` (`core/storage-port.ts` + `jsonFileStorage`) — as swap points for the planned native transport / alternative storage backends. No public API removed; `socket.io` retained behind the transport seam.
+
+### Fixed
+
+- **N81** — Master overview auto-start silently failed on `npm i -g insight-flow`: `findMasterBin()` resolved a workspace-only sibling path (`../../insight-flow-master/dist/index.js`) that doesn't exist in an installed package, so auto-start was skipped. It now resolves the in-package CLI and launches the folded-in `insight-flow master` subcommand — works both in-repo and when globally installed.
+
 ## [1.0.0] — 2026-06-02
 
 First stable (GA) release. The CLI surface is now considered stable; future breaking changes follow semver.
