@@ -1,19 +1,13 @@
 import { readFileSync, existsSync, renameSync } from "node:fs";
 import { resolve } from "node:path";
 import type { MasterFile, Task, TaskflowConfig } from "../../core/types.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
 import {
   getWorkDir,
-  getShardFileName,
-  saveShard,
-  saveMaster,
   parseTaskNum,
-  loadMaster,
-  loadShard,
   loadTaskIncidentsHybrid,
   loadTaskReviewsHybrid,
   recomputeTaskSummary,
-  saveTaskIncidents,
-  saveTaskReviews,
 } from "../../core/storage.js";
 import { getMasterPath } from "../../core/config.js";
 
@@ -49,7 +43,7 @@ export function cmdMigrate(config: TaskflowConfig): void {
     if (!task.incidents) task.incidents = [];
 
     const num = parseTaskNum(task.id as string);
-    const shardFile = getShardFileName(num, config.shardSize);
+    const shardFile = jsonFileStorage.getShardFileName(num, config.shardSize);
 
     if (!shardMap[shardFile]) {
       const base = Math.floor(num / config.shardSize) * config.shardSize;
@@ -60,7 +54,7 @@ export function cmdMigrate(config: TaskflowConfig): void {
 
   for (const [shardFile, shardData] of Object.entries(shardMap)) {
     master.meta.shards.push(shardFile);
-    saveShard(
+    jsonFileStorage.saveShard(
       workDir,
       shardFile,
       shardData as { range: { from: number; to: number }; tasks: never[] },
@@ -72,10 +66,10 @@ export function cmdMigrate(config: TaskflowConfig): void {
   if (master.meta.shards.length === 0) {
     const shardFile = "tasks-N00-N09.json";
     master.meta.shards.push(shardFile);
-    saveShard(workDir, shardFile, { range: { from: 0, to: 9 }, tasks: [] });
+    jsonFileStorage.saveShard(workDir, shardFile, { range: { from: 0, to: 9 }, tasks: [] });
   }
 
-  saveMaster(config, master);
+  jsonFileStorage.saveMaster(config, master);
   renameSync(oldTrackerPath, oldTrackerPath + ".bak");
 
   console.log(
@@ -97,7 +91,7 @@ export function cmdMigrateReviews(config: TaskflowConfig): void {
   const workDir = getWorkDir(config);
   let master: MasterFile;
   try {
-    master = loadMaster(config);
+    master = jsonFileStorage.loadMaster(config);
   } catch (err) {
     console.error((err as Error).message);
     process.exit(1);
@@ -107,15 +101,15 @@ export function cmdMigrateReviews(config: TaskflowConfig): void {
   const shardsTouched: string[] = [];
 
   for (const shardFile of master.meta.shards) {
-    const shard = loadShard(workDir, shardFile);
+    const shard = jsonFileStorage.loadShard(workDir, shardFile);
     let shardChanged = false;
 
     for (const task of shard.tasks as Task[]) {
       const hadReviews = Array.isArray(task.reviews) && task.reviews.length > 0;
       const hadIncidents = Array.isArray(task.incidents) && task.incidents.length > 0;
 
-      if (hadReviews) saveTaskReviews(config, task, task.reviews ?? []);
-      if (hadIncidents) saveTaskIncidents(config, task, task.incidents ?? []);
+      if (hadReviews) jsonFileStorage.saveTaskReviews(config, task, task.reviews ?? []);
+      if (hadIncidents) jsonFileStorage.saveTaskIncidents(config, task, task.incidents ?? []);
 
       // Load from side files (or the just-saved inline arrays) so re-runs
       // recompute summary from the canonical source instead of the stripped
@@ -140,7 +134,7 @@ export function cmdMigrateReviews(config: TaskflowConfig): void {
     }
 
     if (shardChanged) {
-      saveShard(workDir, shardFile, shard);
+      jsonFileStorage.saveShard(workDir, shardFile, shard);
       shardsTouched.push(shardFile);
     }
   }

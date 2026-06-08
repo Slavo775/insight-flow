@@ -1,5 +1,6 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
-import { loadTaskById, saveShard, getWorkDir, now, resolveId } from "../../core/storage.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
+import { getWorkDir, now, resolveId } from "../../core/storage.js";
 
 export function cmdImplementStart(
   config: TaskflowConfig,
@@ -7,7 +8,7 @@ export function cmdImplementStart(
   opts: ParsedArgs,
 ): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   task.status = "in-progress";
   task.implementation.startedAt = now();
@@ -21,7 +22,7 @@ export function cmdImplementStart(
     task.implementation.tokensUsed = parseInt(opts.tokens as string, 10);
   }
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({ action: "implement-started", id, startedAt: task.implementation.startedAt }),
   );
@@ -33,7 +34,7 @@ export function cmdImplementEnd(
   opts: ParsedArgs,
 ): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   task.status = "implemented";
   task.implementation.completedAt = now();
@@ -52,7 +53,7 @@ export function cmdImplementEnd(
     task.implementation.tokensUsed = prev + parseInt(opts.tokens as string, 10);
   }
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "implement-ended",

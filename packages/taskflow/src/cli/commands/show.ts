@@ -1,15 +1,11 @@
 import type { MasterFile, ParsedArgs, TaskflowConfig } from "../../core/types.js";
-import {
-  loadTaskById,
-  loadTaskIncidentsHybrid,
-  loadTaskReviewsHybrid,
-  resolveId,
-} from "../../core/storage.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
+import { loadTaskIncidentsHybrid, loadTaskReviewsHybrid, resolveId } from "../../core/storage.js";
 import { loadSpec } from "../../core/spec.js";
 
 export function cmdShow(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task } = loadTaskById(config, master, id);
+  const { task } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (opts.summary) {
     const reviewCount = task.reviewCount ?? loadTaskReviewsHybrid(config, task).length;

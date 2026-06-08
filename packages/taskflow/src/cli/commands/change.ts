@@ -1,13 +1,6 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
-import {
-  loadTaskById,
-  loadAllTasks,
-  saveShard,
-  saveMaster,
-  getWorkDir,
-  now,
-  resolveId,
-} from "../../core/storage.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
+import { getWorkDir, now, resolveId } from "../../core/storage.js";
 
 export function cmdChangeRequest(
   config: TaskflowConfig,
@@ -15,7 +8,7 @@ export function cmdChangeRequest(
   opts: ParsedArgs,
 ): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!opts.description) {
     console.error("--description is required");
@@ -42,7 +35,7 @@ export function cmdChangeRequest(
     by: (opts.by as string) || "task-request-changes",
   });
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "change-requested",
@@ -55,7 +48,7 @@ export function cmdChangeRequest(
 
 export function cmdChangeStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!task.changesAfterImplementation || task.changesAfterImplementation.length === 0) {
     console.error("No change requests found. Run change-request first.");
@@ -76,7 +69,7 @@ export function cmdChangeStart(config: TaskflowConfig, master: MasterFile, opts:
     by: (opts.by as string) || "implement-changes",
   });
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "change-started",
@@ -88,7 +81,7 @@ export function cmdChangeStart(config: TaskflowConfig, master: MasterFile, opts:
 
 export function cmdChangeEnd(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!task.changesAfterImplementation || task.changesAfterImplementation.length === 0) {
     console.error("No change requests found. Run change-request first.");
@@ -117,7 +110,7 @@ export function cmdChangeEnd(config: TaskflowConfig, master: MasterFile, opts: P
     by: (opts.by as string) || "implement-changes",
   });
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "change-ended",
@@ -130,7 +123,7 @@ export function cmdChangeEnd(config: TaskflowConfig, master: MasterFile, opts: P
 
 export function cmdNextChange(config: TaskflowConfig, master: MasterFile): void {
   const PRIORITY_WEIGHT: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-  const tasks = loadAllTasks(config, master);
+  const tasks = jsonFileStorage.loadAllTasks(config, master);
   const changeable = tasks.filter((t) => t.status === "changes-requested");
 
   if (changeable.length === 0) {
@@ -147,7 +140,7 @@ export function cmdNextChange(config: TaskflowConfig, master: MasterFile): void 
 
   const pick = changeable[0];
   master.meta.currentTaskId = pick.id;
-  saveMaster(config, master);
+  jsonFileStorage.saveMaster(config, master);
 
   const lastChange = pick.changesAfterImplementation?.[pick.changesAfterImplementation.length - 1];
 
