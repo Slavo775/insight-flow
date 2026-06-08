@@ -340,7 +340,7 @@
       "title": "Adopt the Storage port across CLI commands — route call sites through jsonFileStorage",
       "type": "rework",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N84-adopt-the-storage-port-across-cli-commands-route-c",
       "createdAt": "2026-06-08T05:40:08.811Z",
       "statusHistory": [
@@ -358,6 +358,11 @@
           "status": "implemented",
           "at": "2026-06-08T17:23:36.434Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-08T17:28:14.567Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -389,8 +394,14 @@
         "storage",
         "extensibility"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-08T17:28:14.567Z",
+          "commitHash": "84fa6fb",
+          "commitMessage": "refactor(cli): adopt the Storage port across CLI commands (N84)"
+        }
+      ],
+      "branch": "rework/N84-storage-port-adoption",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/59",
       "mergedAt": null
     }
