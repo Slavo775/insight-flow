@@ -33,14 +33,21 @@ test("statusFromEvent: SubagentStop → done", () => {
 
 test("statusFromEvent: Notification with permission wording → awaiting-permission", () => {
   assert.equal(
-    statusFromEvent(ev({ type: "Notification", payload: { message: "Claude needs your permission to use Bash" } })),
+    statusFromEvent(
+      ev({
+        type: "Notification",
+        payload: { message: "Claude needs your permission to use Bash" },
+      }),
+    ),
     "awaiting-permission",
   );
 });
 
 test("statusFromEvent: Notification without permission wording → idle", () => {
   assert.equal(
-    statusFromEvent(ev({ type: "Notification", payload: { message: "Claude is waiting for your input" } })),
+    statusFromEvent(
+      ev({ type: "Notification", payload: { message: "Claude is waiting for your input" } }),
+    ),
     "idle",
   );
 });

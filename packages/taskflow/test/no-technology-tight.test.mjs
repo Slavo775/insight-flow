@@ -83,8 +83,7 @@ function stripExampleBlocks(content) {
   let recentMarkerLines = 0;
 
   for (const line of lines) {
-    const markerLine =
-      /^\s*<!--\s*example/i.test(line) || /^\s*Example:/i.test(line);
+    const markerLine = /^\s*<!--\s*example/i.test(line) || /^\s*Example:/i.test(line);
     if (markerLine) {
       recentMarkerLines = 8;
       out.push("/* example marker */");
@@ -124,10 +123,7 @@ function findForbiddenHits(content, file) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (line.startsWith("/* example")) continue;
-    const stripped = ALLOWED_SUBSTRINGS.reduce(
-      (acc, s) => acc.split(s).join(""),
-      line,
-    );
+    const stripped = ALLOWED_SUBSTRINGS.reduce((acc, s) => acc.split(s).join(""), line);
     for (const pattern of FORBIDDEN) {
       if (pattern.test(stripped)) {
         hits.push({ file, line: i + 1, content: line.trim(), pattern: pattern.source });

@@ -6,7 +6,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 
-const { getDashboardHtml } = await import(fileURLToPath(new URL("../dist/index.js", import.meta.url)));
+const { getDashboardHtml } = await import(
+  fileURLToPath(new URL("../dist/index.js", import.meta.url))
+);
 
 const CONFIG = {
   workDir: "workTasks",

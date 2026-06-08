@@ -345,15 +345,15 @@ export interface CustomAgent {
 export interface AgentGitPermissions {
   // shorthand: "deny" blocks push/forcePush/deleteBranchRemote/createPR unless overridden by individual flags
   remoteOps?: "allow" | "deny";
-  createBranch?: boolean;       // git checkout -b  (local)
-  checkout?: boolean;           // git checkout <existing branch>  (local)
-  commit?: boolean;             // git commit  (local)
-  push?: boolean;               // git push (to remote)
-  forcePush?: boolean;          // git push --force
-  merge?: boolean;              // git merge (to main)
-  deleteBranchLocal?: boolean;  // git branch -d  (local)
+  createBranch?: boolean; // git checkout -b  (local)
+  checkout?: boolean; // git checkout <existing branch>  (local)
+  commit?: boolean; // git commit  (local)
+  push?: boolean; // git push (to remote)
+  forcePush?: boolean; // git push --force
+  merge?: boolean; // git merge (to main)
+  deleteBranchLocal?: boolean; // git branch -d  (local)
   deleteBranchRemote?: boolean; // git push origin --delete
-  createPR?: boolean;           // gh / glab pr/mr create
+  createPR?: boolean; // gh / glab pr/mr create
 }
 
 export interface AgentsConfig {

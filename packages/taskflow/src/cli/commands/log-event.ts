@@ -57,10 +57,7 @@ function loadEvents(eventsPath: string): (TaskEvent | ClaudeHookEvent)[] {
   }
 }
 
-function appendToActivityLog(
-  config: TaskflowConfig,
-  entry: Record<string, unknown>,
-): void {
+function appendToActivityLog(config: TaskflowConfig, entry: Record<string, unknown>): void {
   const activityCfg = config.activityEngine;
   if (activityCfg?.enabled === false) return;
   const logFile = resolve(process.cwd(), activityCfg?.logFile ?? ".taskflow-activity.jsonl");
@@ -171,8 +168,11 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
 
   const isValidType = eventType && validTypes.includes(eventType);
   if (!isValidType) {
-    if (eventType) process.stderr.write(`error: unknown event type "${eventType}" for source "${source}"\n`);
-    process.stderr.write(`usage: insight-flow log-event <type> [--source hook] [--hook-name <name>] [--session-id <id>] [--if-active]\n`);
+    if (eventType)
+      process.stderr.write(`error: unknown event type "${eventType}" for source "${source}"\n`);
+    process.stderr.write(
+      `usage: insight-flow log-event <type> [--source hook] [--hook-name <name>] [--session-id <id>] [--if-active]\n`,
+    );
     if (isHook) {
       process.stderr.write(`hook types: ${CLAUDE_HOOK_EVENT_TYPES.join(" | ")}\n`);
     } else {
@@ -190,9 +190,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
   const ts = new Date().toISOString();
 
   if (isHook) {
-    const payload = opts.data
-      ? (JSON.parse(opts.data as string) as Record<string, unknown>)
-      : {};
+    const payload = opts.data ? (JSON.parse(opts.data as string) as Record<string, unknown>) : {};
     const hookEvent: ClaudeHookEvent = {
       id: `evt_${Date.now()}_${randomBytes(2).toString("hex")}`,
       type: eventType as (typeof CLAUDE_HOOK_EVENT_TYPES)[number],

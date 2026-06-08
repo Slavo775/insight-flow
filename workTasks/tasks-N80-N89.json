@@ -200,7 +200,7 @@
       "title": "Add code-quality toolchain — ESLint + Prettier + pre-commit hooks + quality gates",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N82-add-code-quality-toolchain-eslint-prettier-pre-com",
       "createdAt": "2026-06-08T05:40:08.589Z",
       "statusHistory": [
@@ -208,17 +208,64 @@
           "status": "ready",
           "at": "2026-06-08T05:40:08.589Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-08T06:50:36.182Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-08T07:41:27.444Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-08T07:42:13.684Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-08T10:08:39.858Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-08T10:11:48.177Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-08T10:13:20.293Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-08T10:13:49.929Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-08T06:50:36.181Z",
+        "completedAt": "2026-06-08T07:41:27.443Z",
+        "filesChanged": [
+          "packages/taskflow/eslint.config.js",
+          ".prettierrc.json",
+          ".prettierignore",
+          "package.json (scripts+deps)",
+          "root package.json (prepare+lint-staged)",
+          ".husky/pre-commit",
+          "taskflow.config.json (gates)",
+          "+ Prettier baseline across src/test",
+          "+ lint dead-code fixes in cli/commands/query.ts",
+          "dashboard/server/index.ts",
+          "master/server.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -229,8 +276,14 @@
         "hooks",
         "ci"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-08T07:42:13.683Z",
+          "commitHash": "55ff8f3d22d078f66779d2fc0e11ebbd13d5ca45",
+          "commitMessage": "N82 implementation: ESLint+Prettier+husky toolchain"
+        }
+      ],
+      "branch": "feat/N82-code-quality-toolchain",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/57",
       "mergedAt": null
     },

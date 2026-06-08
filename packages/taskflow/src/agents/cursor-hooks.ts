@@ -114,16 +114,43 @@ const APPROVAL_CMD = 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-appro
 const CURSOR_HOOKS_JSON = {
   version: 1,
   hooks: {
-    sessionStart: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" sessionStart' }],
-    sessionEnd: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" sessionEnd' }],
-    beforeSubmitPrompt: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" beforeSubmitPrompt' }],
+    sessionStart: [
+      { command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" sessionStart' },
+    ],
+    sessionEnd: [
+      { command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" sessionEnd' },
+    ],
+    beforeSubmitPrompt: [
+      {
+        command:
+          'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" beforeSubmitPrompt',
+      },
+    ],
     preToolUse: [
       { command: `${APPROVAL_CMD} preToolUse` },
-      { command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" preToolUse --if-active' },
+      {
+        command:
+          'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" preToolUse --if-active',
+      },
     ],
-    postToolUse: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" postToolUse --if-active' }],
-    afterFileEdit: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" afterFileEdit --if-active' }],
-    subagentStop: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" subagentStop --if-active' }],
+    postToolUse: [
+      {
+        command:
+          'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" postToolUse --if-active',
+      },
+    ],
+    afterFileEdit: [
+      {
+        command:
+          'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" afterFileEdit --if-active',
+      },
+    ],
+    subagentStop: [
+      {
+        command:
+          'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-event.sh" subagentStop --if-active',
+      },
+    ],
     beforeMCPExecution: [{ command: `${APPROVAL_CMD} beforeMCPExecution` }],
     beforeShellExecution: [{ command: `${APPROVAL_CMD} beforeShellExecution` }],
     stop: [{ command: 'bash "$CURSOR_PROJECT_DIR/.cursor/hooks/insight-flow-stop.sh"' }],

@@ -7,36 +7,40 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     .replace(/&/g, "\\u0026");
 
   return (
-    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n" +
-    "  <meta charset=\"UTF-8\">\n" +
-    "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+    '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
     "  <title>Insight Flow — Overview</title>\n" +
-    "  <style>\n" + CSS + "\n  </style>\n" +
+    "  <style>\n" +
+    CSS +
+    "\n  </style>\n" +
     "</head>\n<body>\n" +
-    "  <div class=\"top-bar\">\n" +
+    '  <div class="top-bar">\n' +
     "    <div>\n" +
-    "      <h1><span class=\"live-dot\" id=\"status-dot\"></span>Insight Flow Overview</h1>\n" +
-    "      <p class=\"subtitle\" id=\"subtitle\">Connecting...</p>\n" +
+    '      <h1><span class="live-dot" id="status-dot"></span>Insight Flow Overview</h1>\n' +
+    '      <p class="subtitle" id="subtitle">Connecting...</p>\n' +
     "    </div>\n" +
-    "    <div class=\"top-bar-actions\">\n" +
-    "      <div class=\"settings-wrap\"><button class=\"settings-btn\" id=\"settings-btn\" onclick=\"toggleSettings()\" title=\"Notification settings\">&#9881;</button>\n" +
-    "      <div class=\"settings-popover\" id=\"settings-popover\">\n" +
-    "        <div class=\"settings-header\">Notifications</div>\n" +
-    "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-implemented\" onchange=\"saveNotifSettings()\"> Task implemented</label>\n" +
-    "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-approved\" onchange=\"saveNotifSettings()\"> Review approved</label>\n" +
-    "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-fix-needed\" onchange=\"saveNotifSettings()\"> Fix needed</label>\n" +
-    "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-merged\" onchange=\"saveNotifSettings()\"> Merged</label>\n" +
-    "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-changes-requested\" onchange=\"saveNotifSettings()\"> Changes requested</label>\n" +
-    "        <div class=\"settings-divider\"></div>\n" +
-    "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-sound\" onchange=\"saveNotifSettings()\"> Sound</label>\n" +
-    "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-mute-focused\" onchange=\"saveNotifSettings()\"> Mute when tab focused</label>\n" +
-    "        <div id=\"notif-permission-hint\" class=\"settings-hint\"></div>\n" +
+    '    <div class="top-bar-actions">\n' +
+    '      <div class="settings-wrap"><button class="settings-btn" id="settings-btn" onclick="toggleSettings()" title="Notification settings">&#9881;</button>\n' +
+    '      <div class="settings-popover" id="settings-popover">\n' +
+    '        <div class="settings-header">Notifications</div>\n' +
+    '        <label class="settings-row"><input type="checkbox" id="notif-implemented" onchange="saveNotifSettings()"> Task implemented</label>\n' +
+    '        <label class="settings-row"><input type="checkbox" id="notif-approved" onchange="saveNotifSettings()"> Review approved</label>\n' +
+    '        <label class="settings-row"><input type="checkbox" id="notif-fix-needed" onchange="saveNotifSettings()"> Fix needed</label>\n' +
+    '        <label class="settings-row"><input type="checkbox" id="notif-merged" onchange="saveNotifSettings()"> Merged</label>\n' +
+    '        <label class="settings-row"><input type="checkbox" id="notif-changes-requested" onchange="saveNotifSettings()"> Changes requested</label>\n' +
+    '        <div class="settings-divider"></div>\n' +
+    '        <label class="settings-row"><input type="checkbox" id="notif-sound" onchange="saveNotifSettings()"> Sound</label>\n' +
+    '        <label class="settings-row"><input type="checkbox" id="notif-mute-focused" onchange="saveNotifSettings()"> Mute when tab focused</label>\n' +
+    '        <div id="notif-permission-hint" class="settings-hint"></div>\n' +
     "      </div></div>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    "  <div id=\"grid\" class=\"card-grid\"></div>\n" +
-    "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
-    "  <script>\n" + getScript(initialData) + "\n  </script>\n" +
+    '  <div id="grid" class="card-grid"></div>\n' +
+    '  <script src="/socket.io/socket.io.js"></script>\n' +
+    "  <script>\n" +
+    getScript(initialData) +
+    "\n  </script>\n" +
     "</body>\n</html>"
   );
 }

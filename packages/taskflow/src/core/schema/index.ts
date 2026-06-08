@@ -225,12 +225,7 @@ export const EventsFileSchema = z.object({
 // N68 — server-side hook event ingestion (`POST /log/events`)
 // ---------------------------------------------------------------------------
 
-export const ProjectStatusSchema = z.enum([
-  "active",
-  "awaiting-permission",
-  "idle",
-  "done",
-]);
+export const ProjectStatusSchema = z.enum(["active", "awaiting-permission", "idle", "done"]);
 
 export const HookEventInputSchema = z.object({
   id: z.string().min(1),

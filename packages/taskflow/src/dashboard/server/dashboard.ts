@@ -8,65 +8,71 @@ export function getDashboardHtml(config: TaskflowConfig): string {
   const projectName = config.projectName || "";
   const verbosity = config.activityEngine?.verbosity ?? "both";
 
-  return "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n" +
-    "  <meta charset=\"UTF-8\">\n" +
-    "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+  return (
+    '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
     "  <title>Taskflow Dashboard</title>\n" +
-    "  <style>\n" + CSS + "\n  </style>\n" +
+    "  <style>\n" +
+    CSS +
+    "\n  </style>\n" +
     "</head>\n<body>\n" +
     getNavHtml(projectName, "home") +
-    "  <div class=\"top-bar\">\n" +
+    '  <div class="top-bar">\n' +
     "    <div>\n" +
-    "      <h1><span class=\"live-dot\" id=\"status-dot\"></span>Taskflow Dashboard</h1>\n" +
-    "      <p class=\"subtitle\" id=\"project-name\">Loading...</p>\n" +
+    '      <h1><span class="live-dot" id="status-dot"></span>Taskflow Dashboard</h1>\n' +
+    '      <p class="subtitle" id="project-name">Loading...</p>\n' +
     "    </div>\n" +
-    "    <div class=\"top-bar-actions\">\n" +
+    '    <div class="top-bar-actions">\n' +
     (activityEnabled
       ? ""
-      : "      <span class=\"engine-chip engine-off\" title=\"Set activityEngine.enabled to true in taskflow.config.json to enable\">Engine: off (config)</span>\n") +
+      : '      <span class="engine-chip engine-off" title="Set activityEngine.enabled to true in taskflow.config.json to enable">Engine: off (config)</span>\n') +
     (browserNotifications
-      ? "      <div class=\"settings-wrap\"><button class=\"settings-btn\" id=\"settings-btn\" onclick=\"toggleSettings()\" title=\"Notification settings\">&#9881;</button>\n" +
-        "      <div class=\"settings-popover\" id=\"settings-popover\">\n" +
-        "        <div class=\"settings-header\">Notifications</div>\n" +
-        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-sound\" onchange=\"saveNotifSettings()\"> Sound</label>\n" +
-        "        <label class=\"settings-row\"><input type=\"checkbox\" id=\"notif-mute-focused\" onchange=\"saveNotifSettings()\"> Mute when tab focused</label>\n" +
-        "        <div id=\"notif-permission-hint\" class=\"settings-hint\"></div>\n" +
+      ? '      <div class="settings-wrap"><button class="settings-btn" id="settings-btn" onclick="toggleSettings()" title="Notification settings">&#9881;</button>\n' +
+        '      <div class="settings-popover" id="settings-popover">\n' +
+        '        <div class="settings-header">Notifications</div>\n' +
+        '        <label class="settings-row"><input type="checkbox" id="notif-sound" onchange="saveNotifSettings()"> Sound</label>\n' +
+        '        <label class="settings-row"><input type="checkbox" id="notif-mute-focused" onchange="saveNotifSettings()"> Mute when tab focused</label>\n' +
+        '        <div id="notif-permission-hint" class="settings-hint"></div>\n' +
         "      </div></div>\n"
       : "") +
     "    </div>\n" +
     "  </div>\n" +
     "\n" +
-    "  <div class=\"layout\">\n" +
-    "    <div class=\"main-content\">\n" +
-    "      <div class=\"shard-nav\" id=\"shard-nav\"></div>\n" +
-    "      <div class=\"stats\" id=\"stats\"></div>\n" +
-    "      <div class=\"kanban\" id=\"kanban\"></div>\n" +
+    '  <div class="layout">\n' +
+    '    <div class="main-content">\n' +
+    '      <div class="shard-nav" id="shard-nav"></div>\n' +
+    '      <div class="stats" id="stats"></div>\n' +
+    '      <div class="kanban" id="kanban"></div>\n' +
     (activityEnabled
-      ? "      <div class=\"act-tabs\" id=\"act-tabs\">\n" +
-        "        <div class=\"act-tab-bar\">\n" +
-        "          <button class=\"act-tab active\" data-pane=\"claude\" onclick=\"switchActTab('claude')\">Agent Activity <span class=\"activity-status\" id=\"activity-status\"></span></button>\n" +
-        "          <button class=\"act-tab\" data-pane=\"recent\" onclick=\"switchActTab('recent')\">Recent Activity</button>\n" +
+      ? '      <div class="act-tabs" id="act-tabs">\n' +
+        '        <div class="act-tab-bar">\n' +
+        '          <button class="act-tab active" data-pane="claude" onclick="switchActTab(\'claude\')">Agent Activity <span class="activity-status" id="activity-status"></span></button>\n' +
+        '          <button class="act-tab" data-pane="recent" onclick="switchActTab(\'recent\')">Recent Activity</button>\n' +
         "        </div>\n" +
-        "        <div class=\"act-pane\" id=\"act-pane-claude\">\n" +
-        "          <div class=\"activity-feed\" id=\"activity-feed\"></div>\n" +
+        '        <div class="act-pane" id="act-pane-claude">\n' +
+        '          <div class="activity-feed" id="activity-feed"></div>\n' +
         "        </div>\n" +
-        "        <div class=\"act-pane\" id=\"act-pane-recent\" style=\"display:none\">\n" +
-        "          <div id=\"timeline\"></div>\n" +
+        '        <div class="act-pane" id="act-pane-recent" style="display:none">\n' +
+        '          <div id="timeline"></div>\n' +
         "        </div>\n" +
         "      </div>\n"
-      : "      <div id=\"timeline\"></div>\n") +
+      : '      <div id="timeline"></div>\n') +
     "    </div>\n" +
     "  </div>\n" +
     "\n" +
-    "  <div class=\"detail-overlay\" id=\"overlay\" onclick=\"closeDetail()\"></div>\n" +
-    "  <div class=\"detail-panel\" id=\"detail\" style=\"display:none\">\n" +
-    "    <button class=\"close\" onclick=\"closeDetail()\">&times;</button>\n" +
-    "    <div id=\"detail-content\"></div>\n" +
+    '  <div class="detail-overlay" id="overlay" onclick="closeDetail()"></div>\n' +
+    '  <div class="detail-panel" id="detail" style="display:none">\n' +
+    '    <button class="close" onclick="closeDetail()">&times;</button>\n' +
+    '    <div id="detail-content"></div>\n' +
     "  </div>\n" +
     "\n" +
-    "  <script src=\"/socket.io/socket.io.js\"></script>\n" +
-    "  <script>\n" + getScript(activityEnabled, port, browserNotifications, projectName, verbosity, soundsEnabled) + "\n  </script>\n" +
-    "</body>\n</html>";
+    '  <script src="/socket.io/socket.io.js"></script>\n' +
+    "  <script>\n" +
+    getScript(activityEnabled, port, browserNotifications, projectName, verbosity, soundsEnabled) +
+    "\n  </script>\n" +
+    "</body>\n</html>"
+  );
 }
 
 const NAV_CSS = `    .top-nav { position: sticky; top: -24px; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; margin: -24px -24px 24px -24px; }
@@ -258,18 +264,35 @@ export function getNavCss(): string {
 }
 
 function escHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-export function getNavHtml(projectName: string, activePage: "home" | "overview" | "config"): string {
-  return "  <nav class=\"top-nav\">\n" +
-    "    <span class=\"nav-project\">" + escHtml(projectName || "insight-flow") + "</span>\n" +
-    "    <div class=\"nav-links\">\n" +
-    "      <a href=\"/\" class=\"nav-link" + (activePage === "home" ? " active" : "") + "\">Home</a>\n" +
-    "      <a href=\"/overview\" class=\"nav-link" + (activePage === "overview" ? " active" : "") + "\">Overview</a>\n" +
-    "      <a href=\"/config\" class=\"nav-link" + (activePage === "config" ? " active" : "") + "\">Config</a>\n" +
+export function getNavHtml(
+  projectName: string,
+  activePage: "home" | "overview" | "config",
+): string {
+  return (
+    '  <nav class="top-nav">\n' +
+    '    <span class="nav-project">' +
+    escHtml(projectName || "insight-flow") +
+    "</span>\n" +
+    '    <div class="nav-links">\n' +
+    '      <a href="/" class="nav-link' +
+    (activePage === "home" ? " active" : "") +
+    '">Home</a>\n' +
+    '      <a href="/overview" class="nav-link' +
+    (activePage === "overview" ? " active" : "") +
+    '">Overview</a>\n' +
+    '      <a href="/config" class="nav-link' +
+    (activePage === "config" ? " active" : "") +
+    '">Config</a>\n' +
     "    </div>\n" +
-    "  </nav>\n";
+    "  </nav>\n"
+  );
 }
 
 export function getConfigPageHtml(config: TaskflowConfig): string {
@@ -278,26 +301,46 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
   function cfgRow(key: string, displayVal: string, isDefault: boolean): string {
     const cls = isDefault ? "is-default" : "is-custom";
     const badge = isDefault
-      ? "<span class=\"config-badge default\">default</span>"
-      : "<span class=\"config-badge custom\">custom</span>";
-    return "    <div class=\"config-row\">" +
-      "<span class=\"config-key\">" + escHtml(key) + "</span>" +
-      "<span class=\"config-val " + cls + "\">" + escHtml(displayVal) + " " + badge + "</span>" +
-      "</div>\n";
+      ? '<span class="config-badge default">default</span>'
+      : '<span class="config-badge custom">custom</span>';
+    return (
+      '    <div class="config-row">' +
+      '<span class="config-key">' +
+      escHtml(key) +
+      "</span>" +
+      '<span class="config-val ' +
+      cls +
+      '">' +
+      escHtml(displayVal) +
+      " " +
+      badge +
+      "</span>" +
+      "</div>\n"
+    );
   }
 
   function cfgValRow(key: string, valHtml: string): string {
-    return "    <div class=\"config-row\">" +
-      "<span class=\"config-key\">" + escHtml(key) + "</span>" +
-      "<span class=\"config-val\">" + valHtml + "</span>" +
-      "</div>\n";
+    return (
+      '    <div class="config-row">' +
+      '<span class="config-key">' +
+      escHtml(key) +
+      "</span>" +
+      '<span class="config-val">' +
+      valHtml +
+      "</span>" +
+      "</div>\n"
+    );
   }
 
   function cfgSection(title: string, content: string): string {
-    return "    <div class=\"config-section\">\n" +
-      "      <h2>" + escHtml(title) + "</h2>\n" +
+    return (
+      '    <div class="config-section">\n' +
+      "      <h2>" +
+      escHtml(title) +
+      "</h2>\n" +
       content +
-      "    </div>\n";
+      "    </div>\n"
+    );
   }
 
   // General
@@ -308,17 +351,28 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
     cfgRow("rolesDir", config.rolesDir, config.rolesDir === ".claude/roles");
 
   // Server — default port must match config.ts DEFAULTS.server.port
-  const server =
-    cfgRow("server.port", String(config.server?.port ?? 6006), (config.server?.port ?? 6006) === 6006);
+  const server = cfgRow(
+    "server.port",
+    String(config.server?.port ?? 6006),
+    (config.server?.port ?? 6006) === 6006,
+  );
 
   // Activity Engine — defaults mirror config.ts ACTIVITY_DEFAULTS
   const ae = config.activityEngine;
   const activityRows =
     cfgRow("enabled", String(ae?.enabled ?? true), (ae?.enabled ?? true) === true) +
-    cfgRow("logFile", ae?.logFile ?? ".taskflow-activity.jsonl", (ae?.logFile ?? ".taskflow-activity.jsonl") === ".taskflow-activity.jsonl") +
+    cfgRow(
+      "logFile",
+      ae?.logFile ?? ".taskflow-activity.jsonl",
+      (ae?.logFile ?? ".taskflow-activity.jsonl") === ".taskflow-activity.jsonl",
+    ) +
     cfgRow("maxEvents", String(ae?.maxEvents ?? 200), (ae?.maxEvents ?? 200) === 200) +
     cfgRow("phaseMarkers", String(ae?.phaseMarkers ?? true), (ae?.phaseMarkers ?? true) === true) +
-    cfgRow("hookEnrichment", String(ae?.hookEnrichment ?? true), (ae?.hookEnrichment ?? true) === true) +
+    cfgRow(
+      "hookEnrichment",
+      String(ae?.hookEnrichment ?? true),
+      (ae?.hookEnrichment ?? true) === true,
+    ) +
     cfgRow("verbosity", ae?.verbosity ?? "both", (ae?.verbosity ?? "both") === "both");
 
   // Notifications
@@ -326,27 +380,48 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
   const notifRows =
     cfgRow("browser", String(notif?.browser ?? true), (notif?.browser ?? true) === true) +
     cfgRow("cli", String(notif?.cli ?? true), (notif?.cli ?? true) === true) +
-    cfgRow("sounds.enabled", String(notif?.sounds?.enabled ?? true), (notif?.sounds?.enabled ?? true) === true);
+    cfgRow(
+      "sounds.enabled",
+      String(notif?.sounds?.enabled ?? true),
+      (notif?.sounds?.enabled ?? true) === true,
+    );
 
   // Master
   const master = config.master;
   const masterRows =
-    cfgRow("url", master?.url ?? "http://localhost:6100", (master?.url ?? "http://localhost:6100") === "http://localhost:6100") +
+    cfgRow(
+      "url",
+      master?.url ?? "http://localhost:6100",
+      (master?.url ?? "http://localhost:6100") === "http://localhost:6100",
+    ) +
     cfgRow("port", String(master?.port ?? 6100), (master?.port ?? 6100) === 6100) +
-    cfgRow("standalone", String(master?.standalone ?? false), (master?.standalone ?? false) === false) +
-    cfgRow("startMasterLocally", String(master?.startMasterLocally ?? true), (master?.startMasterLocally ?? true) === true);
+    cfgRow(
+      "standalone",
+      String(master?.standalone ?? false),
+      (master?.standalone ?? false) === false,
+    ) +
+    cfgRow(
+      "startMasterLocally",
+      String(master?.startMasterLocally ?? true),
+      (master?.startMasterLocally ?? true) === true,
+    );
 
   // Events
   const evts = config.events;
-  let eventsRows =
-    cfgRow("dedupWindowSeconds", String(evts?.dedupWindowSeconds ?? 60), (evts?.dedupWindowSeconds ?? 60) === 60);
+  let eventsRows = cfgRow(
+    "dedupWindowSeconds",
+    String(evts?.dedupWindowSeconds ?? 60),
+    (evts?.dedupWindowSeconds ?? 60) === 60,
+  );
   if (evts?.hooks) {
     for (const [evtType, cmds] of Object.entries(evts.hooks)) {
       if (Array.isArray(cmds) && cmds.length > 0) {
         eventsRows += cfgValRow(
           "hooks." + evtType,
-          "<span class=\"config-badge custom\">custom</span>" +
-          "<pre class=\"config-code\">" + escHtml(cmds.join("\n")) + "</pre>"
+          '<span class="config-badge custom">custom</span>' +
+            '<pre class="config-code">' +
+            escHtml(cmds.join("\n")) +
+            "</pre>",
         );
       }
     }
@@ -358,7 +433,17 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
 
   const gitPerms = agents?.git?.permissions;
   if (gitPerms && Object.keys(gitPerms).length > 0) {
-    const boolKeys = ["createBranch", "checkout", "commit", "push", "forcePush", "merge", "deleteBranchLocal", "deleteBranchRemote", "createPR"];
+    const boolKeys = [
+      "createBranch",
+      "checkout",
+      "commit",
+      "push",
+      "forcePush",
+      "merge",
+      "deleteBranchLocal",
+      "deleteBranchRemote",
+      "createPR",
+    ];
     let subRows = "";
     if (gitPerms.remoteOps !== undefined) {
       const isDeny = gitPerms.remoteOps === "deny";
@@ -372,7 +457,9 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
     }
     agentsRows += cfgValRow(
       "git.permissions",
-      "<span class=\"config-badge custom\">custom</span><div class=\"config-sub\">" + subRows + "</div>"
+      '<span class="config-badge custom">custom</span><div class="config-sub">' +
+        subRows +
+        "</div>",
     );
   } else {
     agentsRows += cfgRow("git.permissions", "all allowed", true);
@@ -383,8 +470,10 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
     for (const [agentName, lines] of Object.entries(extend)) {
       agentsRows += cfgValRow(
         "extend." + agentName,
-        "<span class=\"config-badge custom\">custom</span>" +
-        "<pre class=\"config-code\">" + escHtml(lines.join("\n")) + "</pre>"
+        '<span class="config-badge custom">custom</span>' +
+          '<pre class="config-code">' +
+          escHtml(lines.join("\n")) +
+          "</pre>",
       );
     }
   } else {
@@ -396,22 +485,25 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
     for (const ca of custom) {
       agentsRows += cfgValRow(
         "custom." + ca.name,
-        "<span class=\"config-badge custom\">custom</span> " + escHtml(ca.description || ca.role)
+        '<span class="config-badge custom">custom</span> ' + escHtml(ca.description || ca.role),
       );
     }
   }
 
-  return "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n" +
-    "  <meta charset=\"UTF-8\">\n" +
-    "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+  return (
+    '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
     "  <title>Config — Taskflow</title>\n" +
-    "  <style>\n" + CONFIG_PAGE_CSS + "\n  </style>\n" +
+    "  <style>\n" +
+    CONFIG_PAGE_CSS +
+    "\n  </style>\n" +
     "</head>\n<body>\n" +
     getNavHtml(projectName, "config") +
-    "  <div class=\"config-page\">\n" +
+    '  <div class="config-page">\n' +
     "    <h1>Configuration</h1>\n" +
-    "    <p class=\"config-subtitle\">Active settings from <code>taskflow.config.json</code></p>\n" +
-    "    <div class=\"config-sections\">\n" +
+    '    <p class="config-subtitle">Active settings from <code>taskflow.config.json</code></p>\n' +
+    '    <div class="config-sections">\n' +
     cfgSection("General", general) +
     cfgSection("Server", server) +
     cfgSection("Activity Engine", activityRows) +
@@ -421,12 +513,21 @@ export function getConfigPageHtml(config: TaskflowConfig): string {
     cfgSection("Events", eventsRows) +
     "    </div>\n" +
     "  </div>\n" +
-    "</body>\n</html>";
+    "</body>\n</html>"
+  );
 }
 
-function getScript(activityEnabled: boolean, _port: number, browserNotifications: boolean, projectName: string, verbosity: string, soundsEnabled: boolean): string {
+function getScript(
+  activityEnabled: boolean,
+  _port: number,
+  browserNotifications: boolean,
+  projectName: string,
+  verbosity: string,
+  soundsEnabled: boolean,
+): string {
   // Base dashboard JS (Kanban, stats, timeline, detail panel, shard nav)
-  let script = `
+  let script =
+    `
     var CONFIG_SOUNDS_ENABLED = ${soundsEnabled ? "true" : "false"};
     var PROJECT_NAME = ${JSON.stringify(projectName)};
     var COLUMNS = [
@@ -836,7 +937,9 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
       dot.className = 'live-dot';
       if (status === 'disconnected') dot.classList.add('disconnected');
       else if (status === 'reconnecting') dot.classList.add('reconnecting');
-    }` + (browserNotifications ? `
+    }` +
+    (browserNotifications
+      ? `
 
     var notifSettings = { sound: true, muteFocused: false };
 
@@ -951,7 +1054,9 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
           try { localStorage.setItem('tf-notif-asked', '1'); } catch(e) {}
         }
       }
-    })();` : ``) + `
+    })();`
+      : ``) +
+    `
 
     function connectWS() {
       // socket.io-client is loaded by /socket.io/socket.io.js (served by the
@@ -1026,15 +1131,23 @@ function getScript(activityEnabled: boolean, _port: number, browserNotifications
         updatePageTitle(to);
         // Sound + notification only for actionable transitions.
         if (to === 'done') {
-          playStatusSound('idle');` + (browserNotifications ? `
-          fireStatusDesktopNotif('done');` : ``) + `
+          playStatusSound('idle');` +
+    (browserNotifications
+      ? `
+          fireStatusDesktopNotif('done');`
+      : ``) +
+    `
         } else if (to === 'awaiting-permission') {
           firePermissionAlert();
         }
-      });` + (browserNotifications ? `
+      });` +
+    (browserNotifications
+      ? `
 
       sock.on('agent-done', function() { fireDesktopNotif(); });
-      sock.on('agent-permission', function() { firePermissionAlert(); });` : ``) + `
+      sock.on('agent-permission', function() { firePermissionAlert(); });`
+      : ``) +
+    `
     }`;
 
   // Activity panel JS (only if enabled)

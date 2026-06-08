@@ -12,12 +12,26 @@ import { jsonFileStorage, SocketIoTransport } from "../dist/index.js";
 
 test("jsonFileStorage implements the Storage port surface", () => {
   for (const m of [
-    "loadMaster", "saveMaster", "loadShard", "saveShard", "loadTaskById",
-    "loadAllTasks", "getShardFileName", "getShardPath", "ensureShardExists",
-    "ensureWorkDir", "loadTaskReviews", "saveTaskReviews", "loadTaskIncidents",
+    "loadMaster",
+    "saveMaster",
+    "loadShard",
+    "saveShard",
+    "loadTaskById",
+    "loadAllTasks",
+    "getShardFileName",
+    "getShardPath",
+    "ensureShardExists",
+    "ensureWorkDir",
+    "loadTaskReviews",
+    "saveTaskReviews",
+    "loadTaskIncidents",
     "saveTaskIncidents",
   ]) {
-    assert.equal(typeof jsonFileStorage[m], "function", `jsonFileStorage.${m} should be a function`);
+    assert.equal(
+      typeof jsonFileStorage[m],
+      "function",
+      `jsonFileStorage.${m} should be a function`,
+    );
   }
 });
 

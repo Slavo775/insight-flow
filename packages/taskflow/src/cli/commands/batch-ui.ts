@@ -49,11 +49,7 @@ function openUrl(url: string): void {
 
 // ── interactive multi-select ─────────────────────────────────────────────────
 
-function renderLines(
-  entries: BatchUiEntry[],
-  selected: Set<number>,
-  cursor: number,
-): string[] {
+function renderLines(entries: BatchUiEntry[], selected: Set<number>, cursor: number): string[] {
   return [
     "Select projects to launch (↑↓ navigate, space toggle, enter confirm):",
     "",
@@ -133,7 +129,7 @@ export function cmdBulkUiAdd(opts: ParsedArgs): void {
   const label = (opts.add as string).trim();
   const rawPath = (opts._ as string[])[0];
   if (!rawPath) {
-    console.error("Usage: insight-flow bulk-ui --add \"<label>\" <path>");
+    console.error('Usage: insight-flow bulk-ui --add "<label>" <path>');
     process.exit(1);
   }
   const absPath = resolve(rawPath);
@@ -143,7 +139,9 @@ export function cmdBulkUiAdd(opts: ParsedArgs): void {
   }
   const entries = readBatchUiRegistry();
   if (entries.some((e) => e.path === absPath)) {
-    console.log(`Already registered as "${entries.find((e) => e.path === absPath)!.label}" → ${absPath}`);
+    console.log(
+      `Already registered as "${entries.find((e) => e.path === absPath)!.label}" → ${absPath}`,
+    );
     return;
   }
   entries.push({ label, path: absPath });
@@ -154,7 +152,9 @@ export function cmdBulkUiAdd(opts: ParsedArgs): void {
 export function cmdBulkUiList(): void {
   const entries = readBatchUiRegistry();
   if (entries.length === 0) {
-    console.log("No projects registered. Run `insight-flow bulk-register` inside a project folder.");
+    console.log(
+      "No projects registered. Run `insight-flow bulk-register` inside a project folder.",
+    );
     return;
   }
   console.log(`\n  Registered bulk-ui projects (${entries.length}):\n`);
@@ -259,13 +259,15 @@ export async function cmdBulkUi(opts: ParsedArgs): Promise<void> {
 export function cmdBulkUiRemove(opts: ParsedArgs): void {
   const label = typeof opts.remove === "string" ? opts.remove.trim() : "";
   if (!label) {
-    console.error("Usage: insight-flow bulk-ui --remove \"<label>\"");
+    console.error('Usage: insight-flow bulk-ui --remove "<label>"');
     process.exit(1);
   }
   const entries = readBatchUiRegistry();
   const idx = entries.findIndex((e) => e.label === label);
   if (idx === -1) {
-    console.error(`No project registered with label "${label}". Run \`insight-flow bulk-ui --list\` to see registered projects.`);
+    console.error(
+      `No project registered with label "${label}". Run \`insight-flow bulk-ui --list\` to see registered projects.`,
+    );
     process.exit(1);
   }
   const removed = entries.splice(idx, 1)[0];
@@ -281,7 +283,9 @@ export function cmdBulkUnregister(): void {
   const entries = readBatchUiRegistry();
   const idx = entries.findIndex((e) => e.path === cwd);
   if (idx === -1) {
-    console.error(`${cwd} is not registered. Run \`insight-flow bulk-ui --list\` to see registered projects.`);
+    console.error(
+      `${cwd} is not registered. Run \`insight-flow bulk-ui --list\` to see registered projects.`,
+    );
     process.exit(1);
   }
   const removed = entries.splice(idx, 1)[0];
@@ -352,25 +356,26 @@ function resolveInsightFlowBin(): string {
   return process.platform === "win32" ? "insight-flow.cmd" : "insight-flow";
 }
 
-function runInProject(projectPath: string, args: string[]): Promise<{ok: boolean; output: string}> {
+function runInProject(
+  projectPath: string,
+  args: string[],
+): Promise<{ ok: boolean; output: string }> {
   return new Promise((res) => {
     const bin = resolveInsightFlowBin();
-    const child = spawn(bin, args, {cwd: projectPath, stdio: "pipe"});
+    const child = spawn(bin, args, { cwd: projectPath, stdio: "pipe" });
     const chunks: Buffer[] = [];
     child.stdout.on("data", (d: Buffer) => chunks.push(d));
     child.stderr.on("data", (d: Buffer) => chunks.push(d));
-    child.on("close", (code) => res({ok: code === 0, output: Buffer.concat(chunks).toString()}));
+    child.on("close", (code) => res({ ok: code === 0, output: Buffer.concat(chunks).toString() }));
   });
 }
 
-async function batchRun(
-  opts: ParsedArgs,
-  args: string[],
-  verb: string,
-): Promise<void> {
+async function batchRun(opts: ParsedArgs, args: string[], verb: string): Promise<void> {
   const entries = readBatchUiRegistry();
   if (entries.length === 0) {
-    console.log("No projects registered. Run `insight-flow bulk-register` inside a project folder.");
+    console.log(
+      "No projects registered. Run `insight-flow bulk-register` inside a project folder.",
+    );
     return;
   }
 
@@ -394,7 +399,7 @@ async function batchRun(
 
   let passed = 0;
   for (const entry of chosen) {
-    const {ok, output} = await runInProject(entry.path, args);
+    const { ok, output } = await runInProject(entry.path, args);
     if (ok) {
       console.log(`  ✓ ${entry.label}`);
       passed++;
