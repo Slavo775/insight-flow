@@ -47,7 +47,5 @@ export function cmdInstallActivityHook(
   // Claude Code reads .claude/settings.local.json at session start. If the
   // user installed the hook from inside an existing Claude Code session,
   // their events will only start flowing after they relaunch the session.
-  console.error(
-    "Note: restart your Claude Code session to start streaming activity events.",
-  );
+  console.error("Note: restart your Claude Code session to start streaming activity events.");
 }

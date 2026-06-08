@@ -162,7 +162,10 @@ test("install-activity-hook preserves existing unrelated PostToolUse hooks", () 
       );
     }
     assert.ok(hasCmd(settings.hooks.PostToolUse, "other.sh"), "existing hook must remain");
-    assert.ok(hasCmd(settings.hooks.PostToolUse, "taskflow-activity.sh"), "new hook must be appended");
+    assert.ok(
+      hasCmd(settings.hooks.PostToolUse, "taskflow-activity.sh"),
+      "new hook must be appended",
+    );
   } finally {
     rmSync(dir, { recursive: true });
   }

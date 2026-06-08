@@ -11,11 +11,14 @@ import { resolve } from "node:path";
 import type { TaskflowConfig } from "../../core/types.js";
 import { resolvePackageAsset } from "../../core/paths.js";
 import { applyAgentExtensions } from "../agents.js";
-import { installActivityHook, installEnrichmentHooks, installLifecycleHooks } from "../activity-hook.js";
+import {
+  installActivityHook,
+  installEnrichmentHooks,
+  installLifecycleHooks,
+} from "../activity-hook.js";
 import { installNotifyHook } from "../notify-hook.js";
 import { applyEnforcement } from "../../cli/commands/prompt-build.js";
 import { buildSkillList, selectProviders, type ProviderContext } from "./providers/index.js";
-
 
 async function promptUser(question: string, defaultYes: boolean): Promise<boolean> {
   if (!process.stdout.isTTY) return defaultYes;
@@ -36,7 +39,11 @@ function lifecycleHooksRegistered(cwd: string): boolean {
     const path = resolve(cwd, rel);
     if (!existsSync(path)) continue;
     let raw: string;
-    try { raw = readFileSync(path, "utf-8"); } catch { continue; }
+    try {
+      raw = readFileSync(path, "utf-8");
+    } catch {
+      continue;
+    }
     if (raw.includes("lifecycle-session-start.sh")) return true;
   }
   return false;
@@ -222,7 +229,8 @@ export async function initProject(
   if (claudeSelected) {
     const useDefaults = options.yes || !process.stdout.isTTY;
     const lifecycleAlreadyInstalled = configExisted && lifecycleHooksRegistered(cwd);
-    const activityAlreadyConfigured = configExisted && onDiskConfig?.activityEngine?.enabled !== undefined;
+    const activityAlreadyConfigured =
+      configExisted && onDiskConfig?.activityEngine?.enabled !== undefined;
 
     // Question 1: lifecycle hooks (default yes)
     let installLifecycle = true;
@@ -231,7 +239,9 @@ export async function initProject(
     } else if (useDefaults) {
       installLifecycle = true;
     } else {
-      console.log("\n  Lifecycle hooks write task status changes to events.json (zero token cost).");
+      console.log(
+        "\n  Lifecycle hooks write task status changes to events.json (zero token cost).",
+      );
       installLifecycle = await promptUser("  Enable task lifecycle events? (Y/n) ", true);
     }
 
@@ -242,19 +252,30 @@ export async function initProject(
     } else if (useDefaults) {
       enableActivity = false;
     } else {
-      console.log("\n  Activity tracking shows agent phase markers in the dashboard (adds ~50 tokens/turn).");
+      console.log(
+        "\n  Activity tracking shows agent phase markers in the dashboard (adds ~50 tokens/turn).",
+      );
       enableActivity = await promptUser("  Enable agent activity tracking? (y/N) ", false);
     }
 
     // Update config on disk if activity enabled and not already configured
     if (!activityAlreadyConfigured && enableActivity) {
       let diskData: Record<string, unknown> = {};
-      try { diskData = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>; } catch { /* ignore */ }
-      const ae = ((diskData.activityEngine ?? {}) as Record<string, unknown>);
+      try {
+        diskData = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>;
+      } catch {
+        /* ignore */
+      }
+      const ae = (diskData.activityEngine ?? {}) as Record<string, unknown>;
       ae.enabled = true;
       diskData.activityEngine = ae;
       writeFileSync(configPath, JSON.stringify(diskData, null, 2) + "\n");
-      config.activityEngine = { logFile: ".taskflow-activity.jsonl", maxEvents: 200, ...config.activityEngine, enabled: true };
+      config.activityEngine = {
+        logFile: ".taskflow-activity.jsonl",
+        maxEvents: 200,
+        ...config.activityEngine,
+        enabled: true,
+      };
       console.log("Updated taskflow.config.json with activityEngine.enabled: true");
     }
 
@@ -312,7 +333,9 @@ function generateEnrichmentHooks(cwd: string, config: TaskflowConfig): void {
   const logFile = config.activityEngine?.logFile || ".taskflow-activity.jsonl";
   const result = installEnrichmentHooks(cwd, logFile);
   if (result.hooksWritten > 0 || result.settingsUpdated) {
-    console.log(`Generated ${result.hooksWritten} enrichment hook(s) (UserPromptSubmit, Stop, PreToolUse) in .claude/hooks/`);
+    console.log(
+      `Generated ${result.hooksWritten} enrichment hook(s) (UserPromptSubmit, Stop, PreToolUse) in .claude/hooks/`,
+    );
     console.log("  → restart your Claude Code session for the hooks to take effect");
   } else {
     console.log("Enrichment hooks already registered, skipping.");
@@ -322,7 +345,9 @@ function generateEnrichmentHooks(cwd: string, config: TaskflowConfig): void {
 function generateLifecycleHooks(cwd: string): void {
   const result = installLifecycleHooks(cwd);
   if (result.hooksWritten > 0 || result.settingsUpdated) {
-    console.log(`Generated ${result.hooksWritten} lifecycle hook(s) (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) in .claude/hooks/`);
+    console.log(
+      `Generated ${result.hooksWritten} lifecycle hook(s) (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) in .claude/hooks/`,
+    );
     console.log("  → restart your Claude Code session to activate lifecycle event streaming");
   } else {
     console.log("Lifecycle hooks already registered, skipping.");
@@ -332,7 +357,9 @@ function generateLifecycleHooks(cwd: string): void {
 function generateNotifyHook(cwd: string): void {
   const result = installNotifyHook(cwd);
   if (result.hookWritten || result.settingsUpdated) {
-    console.log("Generated notify hook in .claude/hooks/ and registered Stop hook in settings.local.json");
+    console.log(
+      "Generated notify hook in .claude/hooks/ and registered Stop hook in settings.local.json",
+    );
     console.log("  → restart your Claude Code session for the hook to take effect");
   } else {
     console.log("Notify hook already registered, skipping.");

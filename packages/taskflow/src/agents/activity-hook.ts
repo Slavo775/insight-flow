@@ -73,9 +73,10 @@ function settingsRegistersHook(cwd: string): boolean {
       const cmd = (entry.command as string) || "";
       if (cmd.includes("taskflow-activity.sh")) return true;
       const inner = (entry.hooks as Array<Record<string, unknown>>) || [];
-      return inner.some((h) =>
-        typeof (h?.command as string | undefined) === "string" &&
-        (h.command as string).includes("taskflow-activity.sh"),
+      return inner.some(
+        (h) =>
+          typeof (h?.command as string | undefined) === "string" &&
+          (h.command as string).includes("taskflow-activity.sh"),
       );
     });
     if (found) return true;
@@ -139,7 +140,16 @@ export function installActivityHook(cwd: string, logFile: string): InstallActivi
 
   let settingsUpdated = false;
   if (!alreadyRegistered) {
-    postToolUse.push({ matcher: "", hooks: [{ type: "command", command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/taskflow-activity.sh", timeout: 5000 }] });
+    postToolUse.push({
+      matcher: "",
+      hooks: [
+        {
+          type: "command",
+          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/taskflow-activity.sh",
+          timeout: 5000,
+        },
+      ],
+    });
     hooks.PostToolUse = postToolUse;
     settings.hooks = hooks;
     if (!existsSync(resolve(cwd, ".claude"))) {
@@ -218,10 +228,7 @@ export interface InstallEnrichmentHooksResult {
   settingsUpdated: boolean;
 }
 
-export function installEnrichmentHooks(
-  cwd: string,
-  logFile: string,
-): InstallEnrichmentHooksResult {
+export function installEnrichmentHooks(cwd: string, logFile: string): InstallEnrichmentHooksResult {
   const hooksDir = resolve(cwd, ".claude", "hooks");
   if (!existsSync(hooksDir)) {
     mkdirSync(hooksDir, { recursive: true });
@@ -396,12 +403,24 @@ export function installLifecycleHooks(
   }
 
   const hookDefs = [
-    { file: "lifecycle-session-start.sh", script: LIFECYCLE_SESSION_START_SCRIPT, event: "SessionStart" },
-    { file: "lifecycle-agent-active.sh", script: LIFECYCLE_AGENT_ACTIVE_SCRIPT, event: "UserPromptSubmit" },
+    {
+      file: "lifecycle-session-start.sh",
+      script: LIFECYCLE_SESSION_START_SCRIPT,
+      event: "SessionStart",
+    },
+    {
+      file: "lifecycle-agent-active.sh",
+      script: LIFECYCLE_AGENT_ACTIVE_SCRIPT,
+      event: "UserPromptSubmit",
+    },
     { file: "lifecycle-agent-idle.sh", script: LIFECYCLE_AGENT_IDLE_SCRIPT, event: "Stop" },
     { file: "lifecycle-pre-tool.sh", script: LIFECYCLE_PRE_TOOL_SCRIPT, event: "PreToolUse" },
     { file: "lifecycle-post-tool.sh", script: LIFECYCLE_POST_TOOL_SCRIPT, event: "PostToolUse" },
-    { file: "lifecycle-permission.sh", script: LIFECYCLE_PERMISSION_SCRIPT, event: "PermissionRequest" },
+    {
+      file: "lifecycle-permission.sh",
+      script: LIFECYCLE_PERMISSION_SCRIPT,
+      event: "PermissionRequest",
+    },
   ];
 
   let hooksWritten = 0;
@@ -449,7 +468,7 @@ export function installLifecycleHooks(
       if (((h.command as string) || "").includes(file)) return (h.command as string) || "";
       const inner = (h.hooks as Array<Record<string, unknown>> | undefined) ?? [];
       const match = inner.find((e) => ((e?.command as string) || "").includes(file));
-      return match ? ((match.command as string) || "") : "";
+      return match ? (match.command as string) || "" : "";
     };
 
     const staleIdx = existing.findIndex((h) => {
@@ -490,4 +509,3 @@ export function installLifecycleHooks(
 
   return { hooksWritten, settingsUpdated };
 }
-

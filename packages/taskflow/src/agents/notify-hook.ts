@@ -125,7 +125,15 @@ export function installNotifyHook(cwd: string): InstallNotifyHookResult {
 
   const hookPath = resolve(hooksDir, "taskflow-notify.sh");
   let hookWritten = false;
-  const currentContent = existsSync(hookPath) ? (() => { try { return readFileSync(hookPath, "utf-8"); } catch { return ""; } })() : "";
+  const currentContent = existsSync(hookPath)
+    ? (() => {
+        try {
+          return readFileSync(hookPath, "utf-8");
+        } catch {
+          return "";
+        }
+      })()
+    : "";
   if (currentContent !== NOTIFY_HOOK_SCRIPT) {
     writeFileSync(hookPath, NOTIFY_HOOK_SCRIPT, { mode: 0o755 });
     hookWritten = true;
@@ -152,7 +160,16 @@ export function installNotifyHook(cwd: string): InstallNotifyHookResult {
 
   let settingsUpdated = false;
   if (!alreadyRegistered) {
-    stop.push({ matcher: "", hooks: [{ type: "command", command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/taskflow-notify.sh", timeout: 5000 }] });
+    stop.push({
+      matcher: "",
+      hooks: [
+        {
+          type: "command",
+          command: "${CLAUDE_PROJECT_DIR}/.claude/hooks/taskflow-notify.sh",
+          timeout: 5000,
+        },
+      ],
+    });
     hooks.Stop = stop;
     settings.hooks = hooks;
     if (!existsSync(resolve(cwd, ".claude"))) {

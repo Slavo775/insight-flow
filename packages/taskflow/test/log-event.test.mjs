@@ -4,9 +4,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, existsSync,
-} from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -32,7 +30,11 @@ function makeTmpProject(extraConfig = {}) {
   // Create minimal master.json with no current task
   writeFileSync(
     resolve(dir, "workTasks", "master.json"),
-    JSON.stringify({ meta: { nextId: 1, currentTaskId: null, nextIncidentId: 1, shards: [] } }, null, 2),
+    JSON.stringify(
+      { meta: { nextId: 1, currentTaskId: null, nextIncidentId: 1, shards: [] } },
+      null,
+      2,
+    ),
   );
   return dir;
 }
@@ -48,11 +50,11 @@ test("log-event happy path — writes events.json and prints JSON to stdout", ()
   const dir = makeTmpProject();
   const folder = makeTaskFolder(dir, "N01");
   try {
-    const result = execFileSync(
-      process.execPath,
-      [CLI, "log-event", "start", "--task", "N01"],
-      { cwd: dir, timeout: 500, encoding: "utf-8" },
-    );
+    const result = execFileSync(process.execPath, [CLI, "log-event", "start", "--task", "N01"], {
+      cwd: dir,
+      timeout: 500,
+      encoding: "utf-8",
+    });
     const out = JSON.parse(result.trim());
     assert.strictEqual(out.event, "start");
     assert.strictEqual(out.taskId, "N01");
@@ -91,14 +93,15 @@ test("log-event dedup — second call within window is silently dropped", () => 
   const folder = makeTaskFolder(dir, "N02");
   try {
     execFileSync(process.execPath, [CLI, "log-event", "done", "--task", "N02"], {
-      cwd: dir, timeout: 500,
+      cwd: dir,
+      timeout: 500,
     });
     // Second call immediately — should be deduped
-    const result = spawnSync(
-      process.execPath,
-      [CLI, "log-event", "done", "--task", "N02"],
-      { cwd: dir, timeout: 500, encoding: "utf-8" },
-    );
+    const result = spawnSync(process.execPath, [CLI, "log-event", "done", "--task", "N02"], {
+      cwd: dir,
+      timeout: 500,
+      encoding: "utf-8",
+    });
     assert.strictEqual(result.status, 0, "should exit 0 silently");
     assert.strictEqual(result.stdout.trim(), "", "should produce no output on dedup");
 
@@ -115,10 +118,12 @@ test("log-event dedup disabled — both calls write", () => {
   const folder = makeTaskFolder(dir, "N03");
   try {
     execFileSync(process.execPath, [CLI, "log-event", "start", "--task", "N03"], {
-      cwd: dir, timeout: 500,
+      cwd: dir,
+      timeout: 500,
     });
     execFileSync(process.execPath, [CLI, "log-event", "start", "--task", "N03"], {
-      cwd: dir, timeout: 500,
+      cwd: dir,
+      timeout: 500,
     });
     const eventsPath = resolve(folder, "events.json");
     const stored = JSON.parse(readFileSync(eventsPath, "utf-8"));
@@ -133,7 +138,8 @@ test("log-event appends to activity log with tool=Event", () => {
   makeTaskFolder(dir, "N04");
   try {
     execFileSync(process.execPath, [CLI, "log-event", "edit-start", "--task", "N04"], {
-      cwd: dir, timeout: 500,
+      cwd: dir,
+      timeout: 500,
     });
     const logPath = resolve(dir, ".taskflow-activity.jsonl");
     assert.ok(existsSync(logPath), "activity log should exist");
@@ -159,7 +165,11 @@ test("log-event --provider cursor stamps provider on event + activity log (N76)"
     assert.strictEqual(stored.events[0].provider, "cursor", "event should be tagged cursor");
 
     const log = readFileSync(resolve(dir, ".taskflow-activity.jsonl"), "utf-8").trim();
-    assert.strictEqual(JSON.parse(log).provider, "cursor", "activity entry should be tagged cursor");
+    assert.strictEqual(
+      JSON.parse(log).provider,
+      "cursor",
+      "activity entry should be tagged cursor",
+    );
   } finally {
     rmSync(dir, { recursive: true });
   }
@@ -170,7 +180,8 @@ test("log-event without --provider omits provider (back-compat → claude) (N76)
   const folder = makeTaskFolder(dir, "N07");
   try {
     execFileSync(process.execPath, [CLI, "log-event", "start", "--task", "N07"], {
-      cwd: dir, timeout: 500,
+      cwd: dir,
+      timeout: 500,
     });
     const stored = JSON.parse(readFileSync(resolve(folder, "events.json"), "utf-8"));
     assert.strictEqual(
@@ -194,8 +205,16 @@ test("hook subcommand threads --provider cursor onto the event (N76)", () => {
       { cwd: dir, timeout: 1000 },
     );
     const stored = JSON.parse(readFileSync(resolve(folder, "events.json"), "utf-8"));
-    assert.strictEqual(stored.events[0].type, "tool-approved", "postToolUse derives to tool-approved");
-    assert.strictEqual(stored.events[0].provider, "cursor", "hook subcommand should stamp provider");
+    assert.strictEqual(
+      stored.events[0].type,
+      "tool-approved",
+      "postToolUse derives to tool-approved",
+    );
+    assert.strictEqual(
+      stored.events[0].provider,
+      "cursor",
+      "hook subcommand should stamp provider",
+    );
   } finally {
     rmSync(dir, { recursive: true });
   }
@@ -207,7 +226,8 @@ test("log-event exits within 250ms", () => {
   try {
     const start = Date.now();
     execFileSync(process.execPath, [CLI, "log-event", "done", "--task", "N05"], {
-      cwd: dir, timeout: 500,
+      cwd: dir,
+      timeout: 500,
     });
     const elapsed = Date.now() - start;
     assert.ok(elapsed < 250, `Expected <250ms but took ${elapsed}ms`);

@@ -1,13 +1,11 @@
 import { createServer } from "node:http";
 import {
   readFileSync,
-  writeFileSync,
   unlinkSync,
   existsSync,
   readdirSync,
   statSync,
   watch,
-  mkdirSync,
   type FSWatcher,
 } from "node:fs";
 import { normalize, resolve, sep, dirname } from "node:path";
@@ -19,7 +17,11 @@ import type { TaskflowConfig, HookEventInput } from "../../core/types.js";
 import { getWorkDir } from "../../core/config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
 import { getDashboardHtml, getNavHtml, getNavCss, getConfigPageHtml } from "./dashboard.js";
-import { detectActivityHookStatus, type ActivityHookStatus, BUNDLED_HOOKS_VERSION } from "../../agents/activity-hook.js";
+import {
+  detectActivityHookStatus,
+  type ActivityHookStatus,
+  BUNDLED_HOOKS_VERSION,
+} from "../../agents/activity-hook.js";
 import { EventStore } from "./event-stream.js";
 import { HookEventInputSchema } from "../../core/schema/index.js";
 
@@ -140,7 +142,11 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
     const seen = new Set(subdirs);
     for (const [path, w] of subdirWatchers) {
       if (!seen.has(path)) {
-        try { w.close(); } catch { /* ignore */ }
+        try {
+          w.close();
+        } catch {
+          /* ignore */
+        }
         subdirWatchers.delete(path);
         watchers.delete(w);
       }
@@ -162,7 +168,11 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
   return {
     close: () => {
       for (const w of watchers) {
-        try { w.close(); } catch { /* ignore */ }
+        try {
+          w.close();
+        } catch {
+          /* ignore */
+        }
       }
       watchers.clear();
       subdirWatchers.clear();
@@ -177,23 +187,34 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
 const MASTER_LOCK_DIR = resolve(homedir(), ".insight-flow");
 const MASTER_LOCK_PATH = resolve(MASTER_LOCK_DIR, "master.lock");
 
-interface MasterLock { pid: number; port: number; }
-
-function readMasterLock(): MasterLock | null {
-  try { return JSON.parse(readFileSync(MASTER_LOCK_PATH, "utf-8")) as MasterLock; } catch { return null; }
+interface MasterLock {
+  pid: number;
+  port: number;
 }
 
-function writeMasterLock(pid: number, port: number): void {
-  mkdirSync(MASTER_LOCK_DIR, { recursive: true });
-  writeFileSync(MASTER_LOCK_PATH, JSON.stringify({ pid, port, startedAt: new Date().toISOString() }, null, 2));
+function readMasterLock(): MasterLock | null {
+  try {
+    return JSON.parse(readFileSync(MASTER_LOCK_PATH, "utf-8")) as MasterLock;
+  } catch {
+    return null;
+  }
 }
 
 function clearMasterLock(): void {
-  try { unlinkSync(MASTER_LOCK_PATH); } catch { /* ignore */ }
+  try {
+    unlinkSync(MASTER_LOCK_PATH);
+  } catch {
+    /* ignore */
+  }
 }
 
 function isMasterPidAlive(pid: number): boolean {
-  try { process.kill(pid, 0); return true; } catch { return false; }
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function findMasterBin(): string | null {
@@ -213,7 +234,9 @@ async function waitForMaster(port: number): Promise<boolean> {
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(500) });
       if (res.ok || res.status === 404) return true;
-    } catch { /* not ready */ }
+    } catch {
+      /* not ready */
+    }
   }
   return false;
 }
@@ -227,7 +250,12 @@ function pushStatusToMaster(masterUrl: string, id: string, status: string): void
   }).catch(() => {});
 }
 
-async function registerWithMaster(masterUrl: string, projectId: string, label: string, projectUrl: string): Promise<string | null> {
+async function registerWithMaster(
+  masterUrl: string,
+  projectId: string,
+  label: string,
+  projectUrl: string,
+): Promise<string | null> {
   try {
     const res = await fetch(`${masterUrl}/api/register`, {
       method: "POST",
@@ -236,9 +264,11 @@ async function registerWithMaster(masterUrl: string, projectId: string, label: s
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
-    const data = await res.json() as { id?: string };
+    const data = (await res.json()) as { id?: string };
     return data.id ?? null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 async function pushStateToMaster(
@@ -254,7 +284,9 @@ async function pushStateToMaster(
       signal: AbortSignal.timeout(3000),
     });
     return res.status;
-  } catch { return 0; }
+  } catch {
+    return 0;
+  }
 }
 
 function buildProjectState(
@@ -268,9 +300,9 @@ function buildProjectState(
   const taskCounts: Record<string, number> = {};
 
   try {
-    const masterJson = JSON.parse(
-      readFileSync(resolve(workDir, "master.json"), "utf-8"),
-    ) as { meta?: { currentTaskId?: string; shards?: string[] } };
+    const masterJson = JSON.parse(readFileSync(resolve(workDir, "master.json"), "utf-8")) as {
+      meta?: { currentTaskId?: string; shards?: string[] };
+    };
     currentTaskId = masterJson.meta?.currentTaskId ?? null;
 
     for (const shardFile of masterJson.meta?.shards ?? []) {
@@ -287,7 +319,9 @@ function buildProjectState(
         }
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   return {
     currentTaskId,
@@ -334,9 +368,16 @@ async function setupMasterIntegration(
 
   // Register with master
   const projectUrl = `http://localhost:${serverPort}`;
-  masterId = await registerWithMaster(masterUrl, config.projectName, config.projectName, projectUrl);
+  masterId = await registerWithMaster(
+    masterUrl,
+    config.projectName,
+    config.projectName,
+    projectUrl,
+  );
   if (!masterId) {
-    console.log("  [master] Could not register with master at " + masterUrl + " — overview disabled");
+    console.log(
+      "  [master] Could not register with master at " + masterUrl + " — overview disabled",
+    );
     return null;
   }
 
@@ -353,7 +394,12 @@ async function setupMasterIntegration(
     const s = buildProjectState(config, activity);
     const status = await pushStateToMaster(masterUrl, masterId, s);
     if (status === 401) {
-      masterId = await registerWithMaster(masterUrl, config.projectName, config.projectName, projectUrl);
+      masterId = await registerWithMaster(
+        masterUrl,
+        config.projectName,
+        config.projectName,
+        projectUrl,
+      );
       if (masterId) await pushStateToMaster(masterUrl, masterId, s);
     }
   };
@@ -424,12 +470,16 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         getNavCss() +
         ".top-nav{margin:0;top:0;}";
       const iframeHtml =
-        "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">" +
-        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
-        "<style>" + overviewCss + "</style>" +
+        '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+        "<style>" +
+        overviewCss +
+        "</style>" +
         "</head><body>" +
         getNavHtml(config.projectName || "", "overview") +
-        "<iframe src=\"" + masterUrl + "/overview\" style=\"width:100%;height:calc(100vh - 48px);border:none;display:block\"></iframe>" +
+        '<iframe src="' +
+        masterUrl +
+        '/overview" style="width:100%;height:calc(100vh - 48px);border:none;display:block"></iframe>' +
         "</body></html>";
       res.writeHead(200, { "Content-Type": MIME[".html"] });
       res.end(iframeHtml);
@@ -784,9 +834,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     const installedHooksVersion = typeof config.hooksVersion === "number" ? config.hooksVersion : 0;
     if (installedHooksVersion < BUNDLED_HOOKS_VERSION) {
       console.log(
-        "  Hooks:   installed v" + installedHooksVersion +
-        " < bundled v" + BUNDLED_HOOKS_VERSION +
-        " — run `insight-flow migrate-hooks` to upgrade",
+        "  Hooks:   installed v" +
+          installedHooksVersion +
+          " < bundled v" +
+          BUNDLED_HOOKS_VERSION +
+          " — run `insight-flow migrate-hooks` to upgrade",
       );
     }
     console.log("");
@@ -795,7 +847,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // — e.g. tests, CI, or headless environments. Default behavior is unchanged.
     if (process.env.INSIGHT_FLOW_NO_OPEN !== "1") {
       const openCmd =
-        process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+        process.platform === "darwin"
+          ? "open"
+          : process.platform === "win32"
+            ? "start"
+            : "xdg-open";
       exec(openCmd + " http://localhost:" + serverPort);
     }
   });

@@ -35,14 +35,28 @@ import {
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
-import { cmdBulkUi, cmdBulkUiAdd, cmdBulkUiList, cmdBulkUiRemove, cmdBulkRegister, cmdBulkUnregister, cmdBulkDown, cmdBulkInit, cmdBulkPromptBuild } from "./commands/batch-ui.js";
+import {
+  cmdBulkUi,
+  cmdBulkUiAdd,
+  cmdBulkUiList,
+  cmdBulkUiRemove,
+  cmdBulkRegister,
+  cmdBulkUnregister,
+  cmdBulkDown,
+  cmdBulkInit,
+  cmdBulkPromptBuild,
+} from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
 import { cmdLogActivity } from "./commands/log-activity.js";
 import { cmdLogEvent } from "./commands/log-event.js";
-import { parseCursorStdin, cursorEventToDerived, type ParsedCursorPayload } from "../agents/hook-parse.js";
+import {
+  parseCursorStdin,
+  cursorEventToDerived,
+  type ParsedCursorPayload,
+} from "../agents/hook-parse.js";
 import type { ParsedArgs } from "../core/types.js";
 
 function parseArgs(args: string[]): ParsedArgs {
@@ -166,7 +180,11 @@ async function run(): Promise<void> {
   } else if (command === "init") {
     const yesFlag = !!(opts.yes || opts.y) || (opts._ as string[]).includes("-y");
     const editor = typeof opts.editor === "string" ? opts.editor : undefined;
-    await initProject(process.cwd(), !!opts.force, { examples: !!opts.examples, yes: yesFlag, editor });
+    await initProject(process.cwd(), !!opts.force, {
+      examples: !!opts.examples,
+      yes: yesFlag,
+      editor,
+    });
   } else if (command === "master") {
     const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
     await runMaster(port);

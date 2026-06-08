@@ -26,7 +26,10 @@ export function upsertMarkerSection(filePath: string, section: string): MarkerSe
     writeFileSync(filePath, before + MARKER + "\n" + section + MARKER_END + after);
     return "updated";
   }
-  writeFileSync(filePath, existing.trimEnd() + "\n\n" + MARKER + "\n" + section + MARKER_END + "\n");
+  writeFileSync(
+    filePath,
+    existing.trimEnd() + "\n\n" + MARKER + "\n" + section + MARKER_END + "\n",
+  );
   return "appended";
 }
 

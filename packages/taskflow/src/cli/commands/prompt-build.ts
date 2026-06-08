@@ -1,12 +1,8 @@
-import {existsSync, readFileSync, readdirSync, writeFileSync} from "node:fs";
-import {join, resolve} from "node:path";
-import type {
-  ParsedArgs,
-  TaskflowConfig,
-  AgentGitPermissions,
-} from "../../core/types.js";
-import {applyAgentExtensions} from "../../agents/agents.js";
-import {resolveProjectRoot} from "../../core/paths.js";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import type { ParsedArgs, TaskflowConfig, AgentGitPermissions } from "../../core/types.js";
+import { applyAgentExtensions } from "../../agents/agents.js";
+import { resolveProjectRoot } from "../../core/paths.js";
 
 function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
   const lines: string[] = [];
@@ -23,28 +19,20 @@ function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
   lines.push(
     '- Running the script is MANDATORY — there are no exceptions, even for "minor" field updates',
   );
-  lines.push(
-    "- Violation: direct file edit bypasses validation, ID sequencing, and audit trail",
-  );
+  lines.push("- Violation: direct file edit bypasses validation, ID sequencing, and audit trail");
   lines.push("");
   lines.push("GIT RULE");
   lines.push("");
-  lines.push(
-    "- Use `git` for branch creation, commits, and push (universal — works on any host).",
-  );
+  lines.push("- Use `git` for branch creation, commits, and push (universal — works on any host).");
   lines.push(
     "- PR creation: use the command defined in `taskflow.config.json.agents.extend.task-git` for your project. insight-flow does not ship a default. See `@PR_API.md` for examples by host (GitHub `gh`, GitLab `glab`, no-CLI compare URL).",
   );
   lines.push("- Branch naming: <type>/<task-id>-<slug>");
-  lines.push(
-    "- Verify all CHECKLIST.md items before marking implemented or done",
-  );
+  lines.push("- Verify all CHECKLIST.md items before marking implemented or done");
 
   if (rawGitPerms) {
     if (rawGitPerms.remoteOps === "deny") {
-      lines.push(
-        "- All remote operations (push, createPR, deleteBranchRemote) are NOT permitted.",
-      );
+      lines.push("- All remote operations (push, createPR, deleteBranchRemote) are NOT permitted.");
       // Also surface any local ops that were explicitly denied alongside remoteOps: "deny"
       const localOps = [
         "createBranch",
@@ -104,10 +92,7 @@ function patchRoleFileWithRef(filePath: string): boolean {
     const afterBlock = content.indexOf("\n---\n", gitStart);
     if (afterBlock === -1) return false;
     const updated =
-      content.slice(0, strictStart) +
-      AGENT_REF +
-      "\n" +
-      content.slice(afterBlock + 1);
+      content.slice(0, strictStart) + AGENT_REF + "\n" + content.slice(afterBlock + 1);
     writeFileSync(filePath, updated, "utf-8");
     return true;
   }
@@ -117,8 +102,7 @@ function patchRoleFileWithRef(filePath: string): boolean {
   if (firstSep === -1) return false;
   const insertAt = firstSep + 5; // after "\n---\n"
   const rest = content.slice(insertAt).replace(/^\n/, ""); // consume the blank line that follows ---
-  const updated =
-    content.slice(0, insertAt) + "\n" + AGENT_REF + "\n\n---\n\n" + rest;
+  const updated = content.slice(0, insertAt) + "\n" + AGENT_REF + "\n\n---\n\n" + rest;
   writeFileSync(filePath, updated, "utf-8");
   return true;
 }
@@ -145,7 +129,7 @@ function readRawGitPerms(cwd: string): AgentGitPermissions | undefined {
   if (!existsSync(configPath)) return undefined;
   try {
     const raw = JSON.parse(readFileSync(configPath, "utf-8")) as {
-      agents?: {git?: {permissions?: AgentGitPermissions}};
+      agents?: { git?: { permissions?: AgentGitPermissions } };
     };
     return raw.agents?.git?.permissions;
   } catch {
@@ -159,12 +143,15 @@ function readRawGitPerms(cwd: string): AgentGitPermissions | undefined {
 export function applyEnforcement(
   config: TaskflowConfig,
   cwd: string,
-): {created: boolean; patched: string[]; skipped: string[]} {
+): { created: boolean; patched: string[]; skipped: string[] } {
   const block = buildEnforcementBlock(readRawGitPerms(cwd));
   const resolvedRolesDir = config.rolesDir ? resolve(cwd, config.rolesDir) : null;
   const hasRootRoles = ROLE_FILES.some((f) => existsSync(join(cwd, f)));
   const enforcementDir =
-    !hasRootRoles && resolvedRolesDir && resolvedRolesDir !== resolve(cwd) && existsSync(resolvedRolesDir)
+    !hasRootRoles &&
+    resolvedRolesDir &&
+    resolvedRolesDir !== resolve(cwd) &&
+    existsSync(resolvedRolesDir)
       ? resolvedRolesDir
       : cwd;
   const enforcementPath = join(enforcementDir, "AGENT_ENFORCEMENT.md");
@@ -174,8 +161,7 @@ export function applyEnforcement(
   const patched: string[] = [];
   const skipped: string[] = [];
 
-  const track = (name: string, wasPatched: boolean) =>
-    (wasPatched ? patched : skipped).push(name);
+  const track = (name: string, wasPatched: boolean) => (wasPatched ? patched : skipped).push(name);
 
   // Patch root-level role files (covers insight-flow's own setup)
   for (const name of ROLE_FILES) {
@@ -186,15 +172,13 @@ export function applyEnforcement(
   if (config.rolesDir) {
     const rolesDir = resolve(cwd, config.rolesDir);
     if (existsSync(rolesDir) && rolesDir !== cwd) {
-      for (const file of readdirSync(rolesDir).filter((f) =>
-        f.endsWith(".md"),
-      )) {
+      for (const file of readdirSync(rolesDir).filter((f) => f.endsWith(".md"))) {
         track(file, patchRoleFileWithRef(resolve(rolesDir, file)));
       }
     }
   }
 
-  return {created, patched, skipped};
+  return { created, patched, skipped };
 }
 
 export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
@@ -210,7 +194,7 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
     return;
   }
 
-  const {patched, skipped} = applyEnforcement(config, cwd);
+  const { patched, skipped } = applyEnforcement(config, cwd);
 
   // Apply agents.extend into role files in rolesDir
   const extend = config.agents?.extend;

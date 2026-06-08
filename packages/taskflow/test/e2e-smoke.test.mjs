@@ -42,7 +42,9 @@ function makeProject() {
   writeFileSync(
     resolve(workDir, "master.json"),
     JSON.stringify(
-      { meta: { nextId: 0, currentTaskId: null, nextIncidentId: 1, shards: ["tasks-N00-N09.json"] } },
+      {
+        meta: { nextId: 0, currentTaskId: null, nextIncidentId: 1, shards: ["tasks-N00-N09.json"] },
+      },
       null,
       2,
     ) + "\n",
