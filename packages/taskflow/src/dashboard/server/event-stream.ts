@@ -66,9 +66,7 @@ export class EventStore {
 
     // Insert in timestamp order. Most arrivals are append; binary search
     // fallback handles out-of-order cases cheaply enough at N=200.
-    const lastTs = this.events.length
-      ? this.events[this.events.length - 1].timestamp
-      : "";
+    const lastTs = this.events.length ? this.events[this.events.length - 1].timestamp : "";
     if (event.timestamp >= lastTs) {
       this.events.push(event);
     } else {

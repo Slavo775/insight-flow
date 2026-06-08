@@ -3,10 +3,6 @@ import {
   loadTaskById,
   loadAllTasks,
   saveMaster,
-  parseTaskNum,
-  getShardFileName,
-  loadShard,
-  getWorkDir,
   loadTaskReviewsHybrid,
   loadTaskIncidentsHybrid,
 } from "../../core/storage.js";
@@ -258,11 +254,7 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: Parsed
   console.log(JSON.stringify(payload));
 }
 
-export function cmdNextReview(
-  config: TaskflowConfig,
-  master: MasterFile,
-  opts: ParsedArgs,
-): void {
+export function cmdNextReview(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const tasks = loadAllTasks(config, master);
   const reviewable = tasks.filter((t) => ["implemented", "pushed", "fixed"].includes(t.status));
 

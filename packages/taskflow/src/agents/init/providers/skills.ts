@@ -177,16 +177,37 @@ $ARGUMENTS
 
 /** Canonical built-in skills, in the order they appear in the context-section table. */
 const BUILTIN_SKILLS: ReadonlyArray<SkillDef> = [
-  { name: "task-analyze", body: SKILL_TASK_ANALYZE, description: "Pre-taskmaster strategist: challenge the brief, propose alternatives, then hand off to /taskmaster" },
-  { name: "taskmaster", body: SKILL_TASKMASTER, description: "Create a new task spec (TASK.md + CHECKLIST.md)" },
+  {
+    name: "task-analyze",
+    body: SKILL_TASK_ANALYZE,
+    description:
+      "Pre-taskmaster strategist: challenge the brief, propose alternatives, then hand off to /taskmaster",
+  },
+  {
+    name: "taskmaster",
+    body: SKILL_TASKMASTER,
+    description: "Create a new task spec (TASK.md + CHECKLIST.md)",
+  },
   { name: "task-implement", body: SKILL_IMPLEMENT, description: "Implement a task from its spec" },
   { name: "task-review", body: SKILL_REVIEW, description: "AI code review of implemented task" },
-  { name: "task-human-review", body: SKILL_HUMAN_REVIEW, description: "Record human review feedback" },
+  {
+    name: "task-human-review",
+    body: SKILL_HUMAN_REVIEW,
+    description: "Record human review feedback",
+  },
   { name: "task-review-fix", body: SKILL_REVIEW_FIX, description: "Fix issues from review" },
   { name: "task-git", body: SKILL_GIT, description: "Branch, commit, push, PR, merge" },
   { name: "task-incident", body: SKILL_INCIDENT, description: "Track production incidents" },
-  { name: "task-request-changes", body: SKILL_REQUEST_CHANGES, description: "Request post-implementation changes" },
-  { name: "taskmaster-change", body: SKILL_TASKMASTER_CHANGE, description: "Modify an existing task spec" },
+  {
+    name: "task-request-changes",
+    body: SKILL_REQUEST_CHANGES,
+    description: "Request post-implementation changes",
+  },
+  {
+    name: "taskmaster-change",
+    body: SKILL_TASKMASTER_CHANGE,
+    description: "Modify an existing task spec",
+  },
 ];
 
 /**

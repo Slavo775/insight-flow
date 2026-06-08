@@ -9,6 +9,17 @@
     "play": "pnpm --dir playground run ui",
     "ui": "node packages/taskflow/dist/cli.js ui",
     "master": "node packages/taskflow/dist/cli.js master",
-    "master:dev": "pnpm --dir packages/taskflow run build && node packages/taskflow/dist/cli.js master"
+    "master:dev": "pnpm --dir packages/taskflow run build && node packages/taskflow/dist/cli.js master",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "packages/taskflow/src/**/*.ts": [
+      "pnpm --dir packages/taskflow exec prettier --write",
+      "pnpm --dir packages/taskflow exec eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7"
   }
 }

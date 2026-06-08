@@ -71,13 +71,21 @@ test("init --editor cursor writes SKILL.md files + AGENTS.md and no .claude", ()
 
     const agents = readFileSync(resolve(dir, "AGENTS.md"), "utf-8");
     assert.match(agents, /<!-- taskflow:start -->/, "AGENTS.md should carry the taskflow marker");
-    assert.match(agents, /## Slash Commands \(Cursor Skills\)/, "AGENTS.md heading should say Cursor");
+    assert.match(
+      agents,
+      /## Slash Commands \(Cursor Skills\)/,
+      "AGENTS.md heading should say Cursor",
+    );
 
     for (const name of SKILL_NAMES) {
       const skillPath = resolve(dir, ".cursor/skills", name, "SKILL.md");
       assert.ok(existsSync(skillPath), `.cursor/skills/${name}/SKILL.md should exist`);
       const body = readFileSync(skillPath, "utf-8");
-      assert.match(body, new RegExp(`^---\\nname: ${name}\\ndescription: "`), `bad frontmatter for ${name}`);
+      assert.match(
+        body,
+        new RegExp(`^---\\nname: ${name}\\ndescription: "`),
+        `bad frontmatter for ${name}`,
+      );
       assert.ok(!body.includes("$ARGUMENTS"), `${name} SKILL.md must not contain $ARGUMENTS`);
       assert.ok(!/^@[A-Za-z_]+\.md$/m.test(body), `${name} SKILL.md must not contain @-includes`);
     }
@@ -107,7 +115,10 @@ test("bare init auto-detects cursor when only .cursor/ is present", () => {
     runInit(dir);
 
     assert.ok(existsSync(resolve(dir, ".cursor/skills")), "should scaffold .cursor/skills");
-    assert.ok(!existsSync(resolve(dir, ".claude/commands")), "should not scaffold .claude/commands");
+    assert.ok(
+      !existsSync(resolve(dir, ".claude/commands")),
+      "should not scaffold .claude/commands",
+    );
   } finally {
     rmSync(dir, { recursive: true });
   }
@@ -117,7 +128,10 @@ test("bare init falls back to claude when neither editor dir exists", () => {
   const dir = makeTempDir();
   try {
     runInit(dir);
-    assert.ok(existsSync(resolve(dir, ".claude/commands")), "fresh project should default to claude");
+    assert.ok(
+      existsSync(resolve(dir, ".claude/commands")),
+      "fresh project should default to claude",
+    );
     assert.ok(!existsSync(resolve(dir, ".cursor")), "should not scaffold cursor by default");
   } finally {
     rmSync(dir, { recursive: true });

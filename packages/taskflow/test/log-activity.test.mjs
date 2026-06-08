@@ -78,11 +78,11 @@ test("log-activity --phase flag is rejected", () => {
 test("log-activity is silent and writes nothing when activityEngine.enabled is false", () => {
   const dir = makeTmpProject({ enabled: false });
   try {
-    const result = execFileSync(
-      process.execPath,
-      [CLI, "log-activity", "should be ignored"],
-      { cwd: dir, timeout: 500, encoding: "utf-8" },
-    );
+    const result = execFileSync(process.execPath, [CLI, "log-activity", "should be ignored"], {
+      cwd: dir,
+      timeout: 500,
+      encoding: "utf-8",
+    });
     assert.strictEqual(result.trim(), "", "should produce no output");
     assert.ok(!existsSync(resolve(dir, LOG_FILE)), "log file should not be created");
   } finally {

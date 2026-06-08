@@ -19,8 +19,7 @@ function fireNotification(title: string, message: string): void {
   const platform = process.platform;
   try {
     if (platform === "darwin") {
-      const script =
-        `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)}`;
+      const script = `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)}`;
       const child = execFile("osascript", ["-e", script]);
       child.unref();
     } else if (platform === "linux") {

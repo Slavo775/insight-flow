@@ -50,8 +50,12 @@ test("`insight-flow hook <cursorEvent> --provider cursor` parses stdin + tags pr
     writeFileSync(
       resolve(dir, "taskflow.config.json"),
       JSON.stringify({
-        workDir: "workTasks", shardSize: 10, projectName: "t", rolesDir: ".claude/roles",
-        server: { port: 6099 }, activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
+        workDir: "workTasks",
+        shardSize: 10,
+        projectName: "t",
+        rolesDir: ".claude/roles",
+        server: { port: 6099 },
+        activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
       }),
     );
     mkdirSync(resolve(dir, "workTasks"), { recursive: true });
@@ -80,7 +84,10 @@ test("`insight-flow hook <cursorEvent> --provider cursor` parses stdin + tags pr
 test("init --editor cursor generates .cursor/hooks.json + hook scripts", () => {
   const dir = mkdtempSync(join(tmpdir(), "taskflow-cursor-hooks-init-"));
   try {
-    execFileSync(process.execPath, [CLI, "init", "--editor", "cursor"], { cwd: dir, encoding: "utf-8" });
+    execFileSync(process.execPath, [CLI, "init", "--editor", "cursor"], {
+      cwd: dir,
+      encoding: "utf-8",
+    });
 
     const hooksJsonPath = resolve(dir, ".cursor/hooks.json");
     assert.ok(existsSync(hooksJsonPath), ".cursor/hooks.json should exist");
