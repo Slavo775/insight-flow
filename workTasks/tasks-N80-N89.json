@@ -194,6 +194,120 @@
       "branch": "rework/N81-consolidate-modular-package",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/56",
       "mergedAt": "2026-06-04T12:38:10.313Z"
+    },
+    {
+      "id": "N82",
+      "title": "Add code-quality toolchain — ESLint + Prettier + pre-commit hooks + quality gates",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N82-add-code-quality-toolchain-eslint-prettier-pre-com",
+      "createdAt": "2026-06-08T05:40:08.589Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-08T05:40:08.589Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "tooling",
+        "lint",
+        "quality",
+        "hooks",
+        "ci"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/57",
+      "mergedAt": null
+    },
+    {
+      "id": "N83",
+      "title": "Replace socket.io with a native WebSocket/SSE transport behind the Transport seam",
+      "type": "rework",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N83-replace-socket-io-with-a-native-websocket-sse-tran",
+      "createdAt": "2026-06-08T05:40:08.697Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-08T05:40:08.698Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "refactor",
+        "transport",
+        "dependencies",
+        "performance"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/58",
+      "mergedAt": null
+    },
+    {
+      "id": "N84",
+      "title": "Adopt the Storage port across CLI commands — route call sites through jsonFileStorage",
+      "type": "rework",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "workTasks/N84-adopt-the-storage-port-across-cli-commands-route-c",
+      "createdAt": "2026-06-08T05:40:08.811Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-08T05:40:08.812Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "refactor",
+        "storage",
+        "extensibility"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/59",
+      "mergedAt": null
     }
   ]
 }
