@@ -302,7 +302,7 @@
       "title": "Replace socket.io with a native WebSocket/SSE transport behind the Transport seam",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N83-replace-socket-io-with-a-native-websocket-sse-tran",
       "createdAt": "2026-06-08T05:40:08.697Z",
       "statusHistory": [
@@ -320,6 +320,11 @@
           "status": "implemented",
           "at": "2026-06-08T13:11:25.985Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-08T13:11:46.230Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -349,8 +354,14 @@
         "dependencies",
         "performance"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-08T13:11:46.230Z",
+          "commitHash": "ffbecc45f47b0376af40c3aa60a8791885c09199",
+          "commitMessage": "N83: native SSE transport, socket.io dropped"
+        }
+      ],
+      "branch": "rework/N83-native-transport",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/58",
       "mergedAt": null
     },
