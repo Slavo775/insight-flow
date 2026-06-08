@@ -61,5 +61,5 @@ export {
 export { runMaster, startMasterServer } from "./master/index.js";
 export { jsonFileStorage } from "./core/storage-port.js";
 export type { Storage } from "./core/storage-port.js";
-export { SocketIoTransport } from "./dashboard/server/transport.js";
+export { SseTransport } from "./dashboard/server/transport.js";
 export type { Transport, TransportClient } from "./dashboard/server/transport.js";

@@ -302,7 +302,7 @@
       "title": "Replace socket.io with a native WebSocket/SSE transport behind the Transport seam",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N83-replace-socket-io-with-a-native-websocket-sse-tran",
       "createdAt": "2026-06-08T05:40:08.697Z",
       "statusHistory": [
@@ -310,12 +310,31 @@
           "status": "ready",
           "at": "2026-06-08T05:40:08.698Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-08T12:45:43.331Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-08T13:11:25.985Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-08T12:45:43.330Z",
+        "completedAt": "2026-06-08T13:11:25.984Z",
+        "filesChanged": [
+          "src/dashboard/server/transport.ts (SseTransport)",
+          "dashboard/server/index.ts (SSE route)",
+          "dashboard/server/dashboard.ts (EventSource client)",
+          "master/server.ts (SSE /events)",
+          "master/overview.ts (EventSource)",
+          "index.ts (barrel)",
+          "test/seams.test.mjs",
+          "package.json (drop socket.io)"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

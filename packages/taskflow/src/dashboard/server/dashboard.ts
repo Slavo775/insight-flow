@@ -67,7 +67,6 @@ export function getDashboardHtml(config: TaskflowConfig): string {
     '    <div id="detail-content"></div>\n' +
     "  </div>\n" +
     "\n" +
-    '  <script src="/socket.io/socket.io.js"></script>\n' +
     "  <script>\n" +
     getScript(activityEnabled, port, browserNotifications, projectName, verbosity, soundsEnabled) +
     "\n  </script>\n" +
@@ -542,7 +541,6 @@ function getScript(
     var tasks = [];
     var shards = [];
     var currentShard = null;
-    var sock = null;
     var hookStatus = 'ok';
     var configEnabled = true;
     var hasSyncedOnce = false;
@@ -1059,12 +1057,12 @@ function getScript(
     `
 
     function connectWS() {
-      // socket.io-client is loaded by /socket.io/socket.io.js (served by the
-      // Socket.IO server). Falls back to long-polling automatically if WS
-      // upgrade fails for any reason. Reconnection is built-in.
-      sock = io({ transports: ['websocket', 'polling'], reconnectionDelay: 1000 });
+      // N83: native Server-Sent Events (replaced socket.io). EventSource
+      // reconnects automatically; the server re-sends a 'snapshot' on every
+      // (re)connect so state lost during a disconnect window is recovered.
+      var es = new EventSource('/sse');
 
-      sock.on('connect', function() {
+      es.onopen = function() {
         setConnectionStatus('connected');
         if (hasSyncedOnce && currentShard) {
           // Re-fetch state on every reconnect so anything that happened
@@ -1074,19 +1072,18 @@ function getScript(
           });
         }
         hasSyncedOnce = true;
-      });
+      };
 
-      sock.on('disconnect', function() { setConnectionStatus('reconnecting'); });
-      sock.on('reconnect_attempt', function() { setConnectionStatus('reconnecting'); });
-      sock.on('connect_error', function() { setConnectionStatus('reconnecting'); });
+      es.onerror = function() { setConnectionStatus('reconnecting'); };
 
-      sock.on('snapshot', function(data) {
+      es.addEventListener('snapshot', function(e) {
+        var data = JSON.parse(e.data);
         if (data && typeof data.hookStatus === 'string') hookStatus = data.hookStatus;
         if (data && typeof data.configEnabled === 'boolean') configEnabled = data.configEnabled;
         if (data && data.activity && typeof addActivityEvent === 'function') {
           // Reset feed to server's authoritative state on every snapshot
           // (including reconnects) so stale client-side events are not
-          // duplicated each time Socket.IO re-establishes the connection.
+          // duplicated each time the stream re-establishes.
           activityEvents = [];
           if (typeof seenEventKeys !== 'undefined') seenEventKeys.clear();
           var feed = document.getElementById('activity-feed');
@@ -1103,14 +1100,15 @@ function getScript(
         if (typeof refreshTimestamps === 'function') refreshTimestamps();
       });
 
-      sock.on('file-change', function() {
+      es.addEventListener('file-change', function() {
         loadShardIndex().then(function() {
           if (currentShard) return loadShard(currentShard);
         });
         if (typeof refreshTimestamps === 'function') refreshTimestamps();
       });
 
-      sock.on('activity', function(ev) {
+      es.addEventListener('activity', function(e) {
+        var ev = JSON.parse(e.data);
         if (typeof addActivityEvent === 'function') addActivityEvent(ev);
         if (typeof refreshTimestamps === 'function') refreshTimestamps();
       });
@@ -1119,11 +1117,12 @@ function getScript(
       // dashboard does not currently render these directly — the activity
       // feed is still hydrated from the legacy activity engine — but the
       // hook is here so future UI (live event log, etc.) can subscribe.
-      sock.on('event', function(_frame) { /* reserved for future UI */ });
+      es.addEventListener('event', function() { /* reserved for future UI */ });
 
       // N68: derived status transitions. Server emits this only when the
       // latest event by timestamp flips the project status.
-      sock.on('status', function(frame) {
+      es.addEventListener('status', function(e) {
+        var frame = JSON.parse(e.data);
         if (!frame || typeof frame.to !== 'string') return;
         var to = frame.to;
         // Pass the raw four-state value through; updatePageTitle owns the
@@ -1144,8 +1143,8 @@ function getScript(
     (browserNotifications
       ? `
 
-      sock.on('agent-done', function() { fireDesktopNotif(); });
-      sock.on('agent-permission', function() { firePermissionAlert(); });`
+      es.addEventListener('agent-done', function() { fireDesktopNotif(); });
+      es.addEventListener('agent-permission', function() { firePermissionAlert(); });`
       : ``) +
     `
     }`;

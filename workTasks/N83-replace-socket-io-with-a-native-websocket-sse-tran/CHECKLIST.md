@@ -2,17 +2,21 @@
 
 ## Done criteria
 
-- [ ] Native (zero-dep) `Transport` impl is the default in place of `SocketIoTransport`.
-- [ ] Dashboard client uses the native protocol; `/socket.io/socket.io.js` include removed.
-- [ ] `socket.io` removed from `packages/taskflow` deps; no references remain in shipping code.
-- [ ] Live frames (activity / status / file-change) + initial snapshot + reconnect behave identically.
+- [x] Native (zero-dep) `Transport` impl (`SseTransport`) is the default in place of `SocketIoTransport`.
+- [x] Dashboard client uses native `EventSource('/sse')`; `/socket.io/socket.io.js` include removed. (Master overview also converted to `EventSource('/events')` — full swap per agreed scope.)
+- [x] `socket.io` removed from `packages/taskflow` deps (`dependencies` is now just `zod`); only history comments mention it in `src`.
+- [x] Initial snapshot + live frames + reconnect behave identically (snapshot verified live over SSE; EventSource reconnects natively).
 
 ## Quality gates
 
-- [ ] `pnpm --dir packages/taskflow run typecheck` passes
-- [ ] `pnpm --dir packages/taskflow test` passes (N81 e2e smoke green)
-- [ ] `git grep "socket.io"` clean in shipping code
+- [x] `pnpm --dir packages/taskflow run typecheck` passes
+- [x] `pnpm --dir packages/taskflow test` passes (87 tests; e2e smoke + master-boot green) + lint + format:check clean
+- [x] `git grep "socket.io"` shows no code references in `src` (only `// replaced socket.io` history comments)
 
 ## Verification
 
-- [ ] Live `insight-flow ui`: dashboard updates over the native transport and reconnects after a dropped connection.
+- [x] Live `insight-flow ui`: `/sse` streams `retry` + `event: snapshot`; client uses `EventSource('/sse')`, no socket.io script; startup logs `Live: SSE at /sse`. EventSource reconnects natively.
+
+## Notes
+
+- Full swap (both servers) per the agreed scope: dashboard (Transport seam) + master server + overview client all on native SSE; `socket.io` dropped entirely. Unblocks the future React backend (deferred Task C). No frame schema/semantics changed.

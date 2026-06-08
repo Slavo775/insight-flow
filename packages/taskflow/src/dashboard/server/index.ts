@@ -12,7 +12,7 @@ import { normalize, resolve, sep, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
-import { SocketIoTransport, type Transport } from "./transport.js";
+import { SseTransport, type Transport } from "./transport.js";
 import type { TaskflowConfig, HookEventInput } from "../../core/types.js";
 import { getWorkDir } from "../../core/config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
@@ -446,6 +446,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   const server = createServer((req, res) => {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);
 
+    // N83: native SSE stream (replaced socket.io). Hand matching requests off
+    // to the transport, which takes over the response and keeps it open.
+    if (transport.handleRequest(req, res)) return;
+
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
 
@@ -743,16 +747,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     res.end(getDashboardHtml(config));
   });
 
-  // Socket.IO replaces the hand-rolled WS upgrade handler. It transparently
-  // falls back to long-polling if the WebSocket handshake fails for any
-  // reason (browser quirks, proxies, NAT), and handles reconnection /
-  // heartbeat automatically. Path /socket.io is the default and is what the
-  // socket.io-client library expects.
-  const transport: Transport = new SocketIoTransport(server, {
-    cors: { origin: "*", methods: ["GET"] },
-    pingInterval: 25000,
-    pingTimeout: 20000,
-  });
+  // N83: native Server-Sent Events (replaced socket.io). The browser subscribes
+  // with EventSource('/sse'); requests are routed in via transport.handleRequest
+  // at the top of the HTTP handler. EventSource handles reconnection natively.
+  const transport: Transport = new SseTransport();
 
   transport.onConnection((client) => {
     client.emit("snapshot", {
@@ -823,7 +821,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     console.log("\n  Taskflow Dashboard\n");
     console.log("  Local:   http://localhost:" + serverPort);
     console.log("  Data:    " + workDir);
-    console.log("  Live:    Socket.IO at /socket.io (WS + long-poll fallback)");
+    console.log("  Live:    SSE at /sse");
     console.log("  Engine:  " + engineStatus);
     if (configEnabled) {
       console.log("  Hook:    " + hookStatus);
