@@ -200,7 +200,7 @@
       "title": "Add code-quality toolchain — ESLint + Prettier + pre-commit hooks + quality gates",
       "type": "feat",
       "priority": "high",
-      "status": "in-progress",
+      "status": "implemented",
       "folder": "workTasks/N82-add-code-quality-toolchain-eslint-prettier-pre-com",
       "createdAt": "2026-06-08T05:40:08.589Z",
       "statusHistory": [
@@ -213,12 +213,29 @@
           "status": "in-progress",
           "at": "2026-06-08T06:50:36.182Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-08T07:41:27.444Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-08T06:50:36.181Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-08T07:41:27.443Z",
+        "filesChanged": [
+          "packages/taskflow/eslint.config.js",
+          ".prettierrc.json",
+          ".prettierignore",
+          "package.json (scripts+deps)",
+          "root package.json (prepare+lint-staged)",
+          ".husky/pre-commit",
+          "taskflow.config.json (gates)",
+          "+ Prettier baseline across src/test",
+          "+ lint dead-code fixes in cli/commands/query.ts",
+          "dashboard/server/index.ts",
+          "master/server.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
