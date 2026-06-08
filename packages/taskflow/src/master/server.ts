@@ -1,5 +1,4 @@
-import { createServer, type IncomingMessage } from "node:http";
-import { Server as IOServer } from "socket.io";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { MasterServerConfig, MasterProjectState } from "./types.js";
 import * as registry from "./registry.js";
 import { getOverviewHtml } from "./overview.js";
@@ -23,15 +22,21 @@ export async function startMasterServer(
 ): Promise<{ close(): void }> {
   const server = createServer();
 
-  const io = new IOServer(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] },
-    pingInterval: 25000,
-    pingTimeout: 20000,
-  });
+  // N83: native Server-Sent Events (replaced socket.io). Overview clients
+  // subscribe with EventSource('/events'); project-update frames broadcast here.
+  const sseClients = new Set<ServerResponse>();
+  function broadcast(event: string, payload: unknown): void {
+    const frame = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
+    for (const client of sseClients) {
+      try {
+        client.write(frame);
+      } catch {
+        /* stream gone */
+      }
+    }
+  }
 
   server.on("request", async (req, res) => {
-    // Socket.IO handles its own requests first (prependListener); skip if already responded.
-    if (res.headersSent) return;
     try {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -44,6 +49,31 @@ export async function startMasterServer(
       }
 
       const url = new URL(req.url ?? "/", `http://localhost:${config.port}`);
+
+      // GET /events — SSE stream for overview clients (N83, replaced socket.io).
+      if (req.method === "GET" && url.pathname === "/events") {
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "Access-Control-Allow-Origin": "*",
+          "X-Accel-Buffering": "no",
+        });
+        res.write("retry: 1000\n\n");
+        sseClients.add(res);
+        const heartbeat = setInterval(() => {
+          try {
+            res.write(": ping\n\n");
+          } catch {
+            /* stream gone */
+          }
+        }, 25000);
+        req.on("close", () => {
+          clearInterval(heartbeat);
+          sseClients.delete(res);
+        });
+        return;
+      }
 
       // POST /api/register
       if (req.method === "POST" && url.pathname === "/api/register") {
@@ -66,7 +96,7 @@ export async function startMasterServer(
         const projectId = String(parsed.projectId ?? parsed.label ?? "unknown");
         const id = registry.upsert(projectId, label, projectUrl);
         const entry = registry.getById(id);
-        if (entry) io.emit("project-update", entry);
+        if (entry) broadcast("project-update", entry);
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ id }));
         return;
@@ -92,7 +122,7 @@ export async function startMasterServer(
           return;
         }
         const entry = registry.getById(id);
-        if (entry) io.emit("project-update", entry);
+        if (entry) broadcast("project-update", entry);
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ ok: true }));
         return;
@@ -136,7 +166,7 @@ export async function startMasterServer(
           return;
         }
         const entry = registry.getById(id);
-        if (entry) io.emit("project-update", entry);
+        if (entry) broadcast("project-update", entry);
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ ok: true }));
         return;
@@ -181,7 +211,13 @@ export async function startMasterServer(
 
   return {
     close() {
-      io.close();
+      for (const client of sseClients) {
+        try {
+          client.end();
+        } catch {
+          /* ignore */
+        }
+      }
       server.close();
     },
   };

@@ -1,14 +1,12 @@
 /**
  * N81 (1c) — the two bounded extension seams are real and swappable:
  *   - jsonFileStorage implements the Storage port (the JSON-file backend).
- *   - SocketIoTransport implements the Transport contract and attaches to a
- *     plain http server.
+ *   - SseTransport implements the Transport contract (native SSE; replaced socket.io).
  * Both are exported from the package's public API. Requires a prior build.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createServer } from "node:http";
-import { jsonFileStorage, SocketIoTransport } from "../dist/index.js";
+import { jsonFileStorage, SseTransport } from "../dist/index.js";
 
 test("jsonFileStorage implements the Storage port surface", () => {
   for (const m of [
@@ -35,19 +33,14 @@ test("jsonFileStorage implements the Storage port surface", () => {
   }
 });
 
-test("SocketIoTransport satisfies the Transport contract and attaches to http", async () => {
-  const server = createServer();
-  await new Promise((resolve) => server.listen(0, resolve));
-  const transport = new SocketIoTransport(server);
-  try {
-    assert.equal(typeof transport.emit, "function");
-    assert.equal(typeof transport.onConnection, "function");
-    assert.equal(typeof transport.close, "function");
-    // emitting with no connected clients must be a harmless no-op
-    transport.emit("ping", { ok: true });
-    transport.onConnection(() => {});
-  } finally {
-    transport.close();
-    await new Promise((resolve) => server.close(resolve));
-  }
+test("SseTransport satisfies the Transport contract", () => {
+  const transport = new SseTransport();
+  assert.equal(typeof transport.handleRequest, "function");
+  assert.equal(typeof transport.emit, "function");
+  assert.equal(typeof transport.onConnection, "function");
+  assert.equal(typeof transport.close, "function");
+  // emitting / registering with no connected clients must be harmless no-ops
+  transport.onConnection(() => {});
+  transport.emit("ping", { ok: true });
+  transport.close();
 });

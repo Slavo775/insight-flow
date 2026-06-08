@@ -37,7 +37,6 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     "    </div>\n" +
     "  </div>\n" +
     '  <div id="grid" class="card-grid"></div>\n' +
-    '  <script src="/socket.io/socket.io.js"></script>\n' +
     "  <script>\n" +
     getScript(initialData) +
     "\n  </script>\n" +
@@ -393,22 +392,20 @@ function getScript(initialData: string): string {
       }
     });
 
-    function connectWS() {
-      var sock = io({ transports: ['websocket', 'polling'], reconnectionDelay: 1000 });
+    function connectStream() {
+      var es = new EventSource('/events');
       var dot = document.getElementById('status-dot');
 
-      sock.on('connect', function() {
+      es.onopen = function() {
         if (dot) { dot.className = 'live-dot'; }
         updateSubtitle();
-      });
-      sock.on('disconnect', function() {
+      };
+      es.onerror = function() {
         if (dot) { dot.className = 'live-dot reconnecting'; }
-      });
-      sock.on('connect_error', function() {
-        if (dot) { dot.className = 'live-dot reconnecting'; }
-      });
+      };
 
-      sock.on('project-update', function(p) {
+      es.addEventListener('project-update', function(e) {
+        var p = JSON.parse(e.data);
         checkStatusTransitions(p);
         upsertProject(p);
       });
@@ -417,6 +414,6 @@ function getScript(initialData: string): string {
     renderAll();
     loadNotifSettings();
     requestNotifPermission();
-    connectWS();
+    connectStream();
     setInterval(refreshStaleCards, 30000);`;
 }

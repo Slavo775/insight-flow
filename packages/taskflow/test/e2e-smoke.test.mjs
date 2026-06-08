@@ -72,6 +72,33 @@ async function waitForOk(url, timeoutMs = 15000) {
   throw new Error("server not ready at " + url + ": " + (lastErr?.message ?? "timeout"));
 }
 
+// Reads an SSE stream until it sees the snapshot frame (or times out), then
+// cancels — so the test never hangs on the perpetually-open stream.
+async function readSse(url, timeoutMs = 3000) {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), timeoutMs);
+  let text = "";
+  try {
+    const res = await fetch(url, { headers: { accept: "text/event-stream" }, signal: ac.signal });
+    if (res.status !== 200) throw new Error("SSE status " + res.status);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      text += decoder.decode(value, { stream: true });
+      if (text.includes("event: snapshot")) break;
+    }
+    await reader.cancel().catch(() => {});
+  } catch (err) {
+    if (err.name !== "AbortError") throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+  return text;
+}
+
 test("ui server boots and answers /, /api/work-tasks, /api/activity", async () => {
   const dir = makeProject();
   const port = 6800 + Math.floor(Math.random() * 1000);
@@ -98,6 +125,11 @@ test("ui server boots and answers /, /api/work-tasks, /api/activity", async () =
 
     const activity = await fetch(base + "/api/activity");
     assert.equal(activity.status, 200, "/api/activity should answer 200");
+
+    // N83: the SSE stream must deliver the initial snapshot frame.
+    const sseText = await readSse(base + "/sse", 3000);
+    assert.match(sseText, /event: snapshot/, "/sse should stream a snapshot frame");
+    assert.match(sseText, /data: \{/, "/sse snapshot should carry a JSON data line");
   } finally {
     child.kill("SIGINT");
     await new Promise((r) => setTimeout(r, 200));
