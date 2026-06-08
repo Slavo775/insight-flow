@@ -1056,10 +1056,7 @@ function getScript(
       : ``) +
     `
 
-    function connectWS() {
-      // N83: native Server-Sent Events (replaced socket.io). EventSource
-      // reconnects automatically; the server re-sends a 'snapshot' on every
-      // (re)connect so state lost during a disconnect window is recovered.
+    function connectStream() {
       var es = new EventSource('/sse');
 
       es.onopen = function() {
@@ -1501,7 +1498,7 @@ function getScript(
     loadShardIndex().then(function() {
       if (currentShard) loadShard(currentShard);
     });
-    connectWS();`;
+    connectStream();`;
 
   return script;
 }

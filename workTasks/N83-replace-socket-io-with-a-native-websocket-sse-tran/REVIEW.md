@@ -40,3 +40,11 @@ None.
 - Verified live on **both** servers: dashboard `/sse` streams `retry` + `event: snapshot`; master `/events` opens `text/event-stream` 200 with the overview client on `EventSource('/events')`.
 - **Unblocks the deferred React dashboard (Task C)** — socket.io is fully gone, so a lean React backend is now viable.
 - The N82 pre-commit hook (lint + typecheck) guarded every commit of this work.
+
+## Follow-up — non-blocking items addressed (post-approval)
+
+`/task-review-fix` applied all three non-blocking findings (no behavior change; verdict stands — 87 tests + typecheck + lint + format:check green):
+
+- **Finding 1** — added an automated SSE-stream assertion to `e2e-smoke.test.mjs`: it now connects to `/sse` and asserts the `snapshot` frame arrives (closes the manual-only gap; this is the meaningful one).
+- **Finding 2** — renamed `connectWS` → `connectStream` in the dashboard + overview clients.
+- **Finding 3** — removed the `// replaced socket.io` history comments from the served inline JS.

@@ -392,8 +392,7 @@ function getScript(initialData: string): string {
       }
     });
 
-    function connectWS() {
-      // N83: native Server-Sent Events (replaced socket.io).
+    function connectStream() {
       var es = new EventSource('/events');
       var dot = document.getElementById('status-dot');
 
@@ -415,6 +414,6 @@ function getScript(initialData: string): string {
     renderAll();
     loadNotifSettings();
     requestNotifPermission();
-    connectWS();
+    connectStream();
     setInterval(refreshStaleCards, 30000);`;
 }
