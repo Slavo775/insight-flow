@@ -842,6 +842,13 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       activity: activity.getRecentEvents(),
       hookStatus,
       configEnabled,
+      // N85: read-only config flags the React SPA needs (the legacy dashboard
+      // had these injected server-side into getDashboardHtml). Sent on every
+      // (re)connect alongside the existing snapshot fields.
+      projectName: config.projectName || "",
+      browserNotifications: config.notifications?.browser !== false,
+      soundsEnabled: config.notifications?.sounds?.enabled !== false,
+      verbosity: config.activityEngine?.verbosity ?? "both",
     });
   });
 
