@@ -1,15 +1,11 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
 import {
-  loadTaskById,
-  loadAllTasks,
-  saveShard,
-  saveMaster,
   getWorkDir,
   now,
   resolveId,
   loadTaskIncidentsHybrid,
   loadTaskReviewsHybrid,
-  saveTaskIncidents,
   recomputeTaskSummary,
 } from "../../core/storage.js";
 
@@ -19,7 +15,7 @@ export function cmdIncidentCreate(
   opts: ParsedArgs,
 ): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!opts.title) {
     console.error("--title is required");
@@ -48,12 +44,12 @@ export function cmdIncidentCreate(
     fix: null,
     statusHistory: [{ status: "reported", at: now(), by: (opts.by as string) || "task-incident" }],
   });
-  saveTaskIncidents(config, task, incidents);
+  jsonFileStorage.saveTaskIncidents(config, task, incidents);
 
   recomputeTaskSummary(task, loadTaskReviewsHybrid(config, task), incidents);
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   master.meta.nextIncidentId = (master.meta.nextIncidentId || 1) + 1;
-  saveMaster(config, master);
+  jsonFileStorage.saveMaster(config, master);
 
   const created = incidents[incidents.length - 1];
   console.log(
@@ -73,7 +69,7 @@ export function cmdIncidentStatus(
   opts: ParsedArgs,
 ): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!opts.incident) {
     console.error("--incident is required (e.g., INC-001)");
@@ -97,10 +93,10 @@ export function cmdIncidentStatus(
     at: now(),
     by: (opts.by as string) || "task-incident",
   });
-  saveTaskIncidents(config, task, incidents);
+  jsonFileStorage.saveTaskIncidents(config, task, incidents);
 
   recomputeTaskSummary(task, loadTaskReviewsHybrid(config, task), incidents);
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "incident-status-updated",
@@ -117,7 +113,7 @@ export function cmdIncidentResolve(
   opts: ParsedArgs,
 ): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!opts.incident) {
     console.error("--incident is required (e.g., INC-001)");
@@ -140,10 +136,10 @@ export function cmdIncidentResolve(
     at: now(),
     by: (opts.by as string) || "task-incident",
   });
-  saveTaskIncidents(config, task, incidents);
+  jsonFileStorage.saveTaskIncidents(config, task, incidents);
 
   recomputeTaskSummary(task, loadTaskReviewsHybrid(config, task), incidents);
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "incident-resolved",
@@ -160,8 +156,8 @@ export function cmdIncidentList(
   opts: ParsedArgs,
 ): void {
   const tasks = opts.id
-    ? [loadTaskById(config, master, opts.id as string).task]
-    : loadAllTasks(config, master);
+    ? [jsonFileStorage.loadTaskById(config, master, opts.id as string).task]
+    : jsonFileStorage.loadAllTasks(config, master);
 
   const incidents: Array<Record<string, unknown>> = [];
   for (const task of tasks) {

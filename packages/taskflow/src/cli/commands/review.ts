@@ -1,20 +1,18 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
 import {
-  loadTaskById,
-  saveShard,
   getWorkDir,
   now,
   resolveId,
   loadTaskReviewsHybrid,
   loadTaskIncidentsHybrid,
-  saveTaskReviews,
   recomputeTaskSummary,
 } from "../../core/storage.js";
 import { scaffoldReviewMd } from "../../core/spec.js";
 
 export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   task.status = "reviewing";
   task.statusHistory.push({
@@ -33,10 +31,10 @@ export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts:
     by: (opts.by as string) || "task-review",
     fix: null,
   });
-  saveTaskReviews(config, task, reviews);
+  jsonFileStorage.saveTaskReviews(config, task, reviews);
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
 
   const scaffold = scaffoldReviewMd(config, task, {
     reviewer:
@@ -63,7 +61,7 @@ export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts:
 
 export function cmdReviewEnd(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!opts.verdict) {
     console.error("--verdict is required (approved | fix-needed)");
@@ -82,7 +80,7 @@ export function cmdReviewEnd(config: TaskflowConfig, master: MasterFile, opts: P
   review.comment = (opts.comment as string) || null;
   if (opts.type) review.type = opts.type as "ai" | "human";
   if (opts.by) review.by = opts.by as string;
-  saveTaskReviews(config, task, reviews);
+  jsonFileStorage.saveTaskReviews(config, task, reviews);
 
   task.status = opts.verdict as string;
   task.statusHistory.push({
@@ -92,6 +90,6 @@ export function cmdReviewEnd(config: TaskflowConfig, master: MasterFile, opts: P
   });
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(JSON.stringify({ action: "review-ended", id, verdict: opts.verdict }));
 }

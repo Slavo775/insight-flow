@@ -1,9 +1,10 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
-import { loadTaskById, saveShard, getWorkDir, now, resolveId } from "../../core/storage.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
+import { getWorkDir, now, resolveId } from "../../core/storage.js";
 
 export function cmdPush(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!opts.commit) {
     console.error("--commit is required (commit hash)");
@@ -27,7 +28,7 @@ export function cmdPush(config: TaskflowConfig, master: MasterFile, opts: Parsed
   task.status = "pushed";
   task.statusHistory.push({ status: "pushed", at: now(), by: (opts.by as string) || "task-git" });
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "pushed",
@@ -41,7 +42,7 @@ export function cmdPush(config: TaskflowConfig, master: MasterFile, opts: Parsed
 
 export function cmdMrUpdate(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   if (!opts.url) {
     console.error("--url is required (merge request URL)");
@@ -49,13 +50,13 @@ export function cmdMrUpdate(config: TaskflowConfig, master: MasterFile, opts: Pa
   }
 
   task.mrUrl = opts.url as string;
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(JSON.stringify({ action: "mr-updated", id, mrUrl: opts.url }));
 }
 
 export function cmdMerge(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   task.status = "merged";
   task.mergedAt = now();
@@ -65,7 +66,7 @@ export function cmdMerge(config: TaskflowConfig, master: MasterFile, opts: Parse
   const end = new Date(task.mergedAt);
   task.totalDurationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "merged",
@@ -78,7 +79,7 @@ export function cmdMerge(config: TaskflowConfig, master: MasterFile, opts: Parse
 
 export function cmdDone(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   task.status = "done";
   task.committedAt = now();
@@ -88,7 +89,7 @@ export function cmdDone(config: TaskflowConfig, master: MasterFile, opts: Parsed
   const end = new Date(task.committedAt);
   task.totalDurationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
 
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "done",

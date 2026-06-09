@@ -1,19 +1,17 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
 import {
-  loadTaskById,
-  saveShard,
   getWorkDir,
   now,
   resolveId,
   loadTaskReviewsHybrid,
   loadTaskIncidentsHybrid,
-  saveTaskReviews,
   recomputeTaskSummary,
 } from "../../core/storage.js";
 
 export function cmdFixStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   const reviews = loadTaskReviewsHybrid(config, task);
   const lastReview = reviews[reviews.length - 1];
@@ -37,16 +35,16 @@ export function cmdFixStart(config: TaskflowConfig, master: MasterFile, opts: Pa
     comment: null,
     by: (opts.by as string) || "task-review-fix",
   };
-  saveTaskReviews(config, task, reviews);
+  jsonFileStorage.saveTaskReviews(config, task, reviews);
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(JSON.stringify({ action: "fix-started", id, reviewIndex: reviews.length - 1 }));
 }
 
 export function cmdFixEnd(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
-  const { task, shard, shardFile } = loadTaskById(config, master, id);
+  const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
   const reviews = loadTaskReviewsHybrid(config, task);
   const lastReview = reviews[reviews.length - 1];
@@ -62,7 +60,7 @@ export function cmdFixEnd(config: TaskflowConfig, master: MasterFile, opts: Pars
   if (opts.files) {
     lastReview.fix.filesChanged = (opts.files as string).split(",").map((f) => f.trim());
   }
-  saveTaskReviews(config, task, reviews);
+  jsonFileStorage.saveTaskReviews(config, task, reviews);
 
   task.status = "fixed";
   task.statusHistory.push({
@@ -72,7 +70,7 @@ export function cmdFixEnd(config: TaskflowConfig, master: MasterFile, opts: Pars
   });
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
-  saveShard(getWorkDir(config), shardFile, shard);
+  jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
     JSON.stringify({
       action: "fix-ended",

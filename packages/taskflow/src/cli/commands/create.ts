@@ -1,15 +1,8 @@
 import { mkdirSync, existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
-import {
-  getShardFileName,
-  loadShard,
-  saveShard,
-  saveMaster,
-  ensureShardExists,
-  getWorkDir,
-  now,
-} from "../../core/storage.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
+import { getWorkDir, now } from "../../core/storage.js";
 import { resolvePackageAsset } from "../../core/paths.js";
 import { renderTemplate } from "../../core/spec.js";
 
@@ -69,8 +62,8 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
     .replace(/^-|-$/g, "")
     .slice(0, 50);
 
-  const shardFile = getShardFileName(num, config.shardSize);
-  ensureShardExists(config, master, shardFile, num);
+  const shardFile = jsonFileStorage.getShardFileName(num, config.shardSize);
+  jsonFileStorage.ensureShardExists(config, master, shardFile, num);
 
   const workDir = getWorkDir(config);
   const folder = `${config.workDir}/${id}-${slug}`;
@@ -109,13 +102,13 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
     mergedAt: null,
   };
 
-  const shard = loadShard(workDir, shardFile);
+  const shard = jsonFileStorage.loadShard(workDir, shardFile);
   shard.tasks.push(task);
-  saveShard(workDir, shardFile, shard);
+  jsonFileStorage.saveShard(workDir, shardFile, shard);
 
   master.meta.nextId++;
   master.meta.currentTaskId = id;
-  saveMaster(config, master);
+  jsonFileStorage.saveMaster(config, master);
 
   const withAnalysis = opts["with-analysis"] === true || opts.withAnalysis === true;
 

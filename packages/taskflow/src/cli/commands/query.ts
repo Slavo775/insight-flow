@@ -1,11 +1,6 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs, Task } from "../../core/types.js";
-import {
-  loadTaskById,
-  loadAllTasks,
-  saveMaster,
-  loadTaskReviewsHybrid,
-  loadTaskIncidentsHybrid,
-} from "../../core/storage.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
+import { loadTaskReviewsHybrid, loadTaskIncidentsHybrid } from "../../core/storage.js";
 import { loadSpec } from "../../core/spec.js";
 
 function appendSpec(
@@ -27,7 +22,7 @@ export function cmdCurrent(config: TaskflowConfig, master: MasterFile): void {
     return;
   }
   try {
-    const { task } = loadTaskById(config, master, id);
+    const { task } = jsonFileStorage.loadTaskById(config, master, id);
     console.log(
       JSON.stringify({
         currentTaskId: id,
@@ -42,7 +37,7 @@ export function cmdCurrent(config: TaskflowConfig, master: MasterFile): void {
 }
 
 export function cmdList(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
-  let tasks = loadAllTasks(config, master);
+  let tasks = jsonFileStorage.loadAllTasks(config, master);
   if (opts.status) {
     tasks = tasks.filter((t) => t.status === opts.status);
   }
@@ -88,7 +83,7 @@ function tokenStats(values: number[]): {
 }
 
 export function cmdStats(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
-  const tasks = loadAllTasks(config, master);
+  const tasks = jsonFileStorage.loadAllTasks(config, master);
   const total = tasks.length;
 
   if (opts.tokens) {
@@ -201,7 +196,7 @@ const STATUS_WEIGHT: Record<string, number> = {
 };
 
 export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
-  const tasks = loadAllTasks(config, master);
+  const tasks = jsonFileStorage.loadAllTasks(config, master);
   const actionable = tasks.filter((t) =>
     ["fix-needed", "changes-requested", "ready", "in-progress", "changes-implementing"].includes(
       t.status,
@@ -230,7 +225,7 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: Parsed
 
   const pick = actionable[0];
   master.meta.currentTaskId = pick.id;
-  saveMaster(config, master);
+  jsonFileStorage.saveMaster(config, master);
 
   const payload: Record<string, unknown> = {
     next: pick.id,
@@ -255,7 +250,7 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: Parsed
 }
 
 export function cmdNextReview(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
-  const tasks = loadAllTasks(config, master);
+  const tasks = jsonFileStorage.loadAllTasks(config, master);
   const reviewable = tasks.filter((t) => ["implemented", "pushed", "fixed"].includes(t.status));
 
   if (reviewable.length === 0) {
@@ -275,7 +270,7 @@ export function cmdNextReview(config: TaskflowConfig, master: MasterFile, opts: 
 
   const pick = reviewable[0];
   master.meta.currentTaskId = pick.id;
-  saveMaster(config, master);
+  jsonFileStorage.saveMaster(config, master);
 
   const reviewCount = pick.reviewCount ?? loadTaskReviewsHybrid(config, pick).length;
   const payload: Record<string, unknown> = {
@@ -296,7 +291,7 @@ export function cmdNextReview(config: TaskflowConfig, master: MasterFile, opts: 
 }
 
 export function cmdNextFix(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
-  const tasks = loadAllTasks(config, master);
+  const tasks = jsonFileStorage.loadAllTasks(config, master);
   const fixable = tasks.filter((t) => t.status === "fix-needed");
 
   if (fixable.length === 0) {
@@ -313,7 +308,7 @@ export function cmdNextFix(config: TaskflowConfig, master: MasterFile, opts: Par
 
   const pick = fixable[0];
   master.meta.currentTaskId = pick.id;
-  saveMaster(config, master);
+  jsonFileStorage.saveMaster(config, master);
 
   const reviews = loadTaskReviewsHybrid(config, pick);
   const lastReview = reviews[reviews.length - 1];

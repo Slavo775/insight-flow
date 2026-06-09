@@ -380,7 +380,7 @@
       "title": "Adopt the Storage port across CLI commands — route call sites through jsonFileStorage",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N84-adopt-the-storage-port-across-cli-commands-route-c",
       "createdAt": "2026-06-08T05:40:08.811Z",
       "statusHistory": [
@@ -388,17 +388,54 @@
           "status": "ready",
           "at": "2026-06-08T05:40:08.812Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-08T17:13:04.184Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-08T17:23:36.434Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-08T17:28:14.567Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-09T05:23:49.763Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-09T05:25:34.191Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-08T17:13:04.184Z",
+        "completedAt": "2026-06-08T17:23:36.434Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/push.ts",
+          "packages/taskflow/src/cli/commands/status.ts",
+          "packages/taskflow/src/cli/commands/implement.ts",
+          "packages/taskflow/src/cli/commands/show.ts",
+          "packages/taskflow/src/cli/commands/change.ts",
+          "packages/taskflow/src/cli/commands/fix.ts",
+          "packages/taskflow/src/cli/commands/review.ts",
+          "packages/taskflow/src/cli/commands/incident.ts",
+          "packages/taskflow/src/cli/commands/query.ts",
+          "packages/taskflow/src/cli/commands/create.ts",
+          "packages/taskflow/src/cli/commands/migrate.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -407,8 +444,14 @@
         "storage",
         "extensibility"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-08T17:28:14.567Z",
+          "commitHash": "84fa6fb",
+          "commitMessage": "refactor(cli): adopt the Storage port across CLI commands (N84)"
+        }
+      ],
+      "branch": "rework/N84-storage-port-adoption",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/59",
       "mergedAt": null
     }
