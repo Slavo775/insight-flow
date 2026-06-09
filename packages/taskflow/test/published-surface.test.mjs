@@ -58,9 +58,17 @@ test("npm pack --dry-run: tarball keeps its top-level roots and required dist en
     "dist/index.d.ts",
     "dist/sounds/idle-ping.mp3",
     "dist/sounds/permission-alert.mp3",
+    // N85: the React dashboard SPA shell must ship.
+    "dist/dashboard/index.html",
   ]) {
     assert.ok(paths.includes(f), `tarball must contain '${f}'`);
   }
+  // N85: the hashed SPA assets (JS/CSS) must ship — names are content-hashed,
+  // so assert the directory is populated rather than exact filenames.
+  assert.ok(
+    paths.some((p) => p.startsWith("dist/dashboard/assets/")),
+    "tarball must ship the dashboard SPA assets (dist/dashboard/assets/*)",
+  );
 });
 
 test("bin: `insight-flow --help` exits 0 and enumerates the command surface", () => {

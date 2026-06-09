@@ -16,7 +16,7 @@ import { SseTransport, type Transport } from "./transport.js";
 import type { TaskflowConfig, HookEventInput } from "../../core/types.js";
 import { getWorkDir } from "../../core/config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
-import { getDashboardHtml, getNavHtml, getNavCss, getConfigPageHtml } from "./dashboard.js";
+import { getNavHtml, getNavCss, getConfigPageHtml } from "./dashboard.js";
 import {
   detectActivityHookStatus,
   type ActivityHookStatus,
@@ -464,8 +464,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
 
     // N85: React dashboard (Vite build in dist/dashboard), served on the same
-    // port. Hashed assets at /assets/*; the SPA shell at /next (parallel to the
-    // legacy server-rendered dashboard at / until the parity cutover).
+    // port. Hashed assets at /assets/*; the SPA shell is served by the catch-all
+    // fallthrough at the end of this handler (so / and any client route resolve
+    // to it). API/SSE/config/overview routes return before reaching it.
     if (url.pathname.startsWith("/assets/")) {
       const assetPath = resolve(DASHBOARD_DIR, url.pathname.replace(/^\/+/, ""));
       if (assetPath !== DASHBOARD_DIR && !assetPath.startsWith(DASHBOARD_DIR + sep)) {
@@ -484,18 +485,6 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       } catch {
         res.writeHead(404);
         res.end();
-      }
-      return;
-    }
-
-    if (url.pathname === "/next" || url.pathname.startsWith("/next/")) {
-      try {
-        const html = readFileSync(resolve(DASHBOARD_DIR, "index.html"), "utf-8");
-        res.writeHead(200, { "Content-Type": MIME[".html"] });
-        res.end(html);
-      } catch {
-        res.writeHead(404, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Dashboard build not found. Run `pnpm build`." }));
       }
       return;
     }
@@ -828,8 +817,16 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    res.writeHead(200, { "Content-Type": MIME[".html"] });
-    res.end(getDashboardHtml(config));
+    // N85 cutover: / (and any unmatched route) serves the React SPA shell from
+    // dist/dashboard. The client owns view state; all API/SSE/asset/config routes
+    // above return before reaching this fallthrough.
+    try {
+      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.end(readFileSync(resolve(DASHBOARD_DIR, "index.html"), "utf-8"));
+    } catch {
+      res.writeHead(500, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ error: "Dashboard build not found. Run `pnpm build`." }));
+    }
   });
 
   // N83: native Server-Sent Events (replaced socket.io). The browser subscribes

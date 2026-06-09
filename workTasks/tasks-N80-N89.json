@@ -480,7 +480,7 @@
       "title": "Rewrite the project dashboard in React + Vite (same-port, read-only, parity) + markdown rendering of task files",
       "type": "rework",
       "priority": "medium",
-      "status": "in-progress",
+      "status": "implemented",
       "folder": "workTasks/N85-rewrite-the-project-dashboard-in-react-vite-same-p",
       "createdAt": "2026-06-09T10:08:19.428Z",
       "statusHistory": [
@@ -493,12 +493,28 @@
           "status": "in-progress",
           "at": "2026-06-09T10:39:00.236Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-09T15:02:11.842Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-09T10:39:00.236Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-09T15:02:11.842Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/* (React+Vite SPA)",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/server/dashboard.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/vite.config.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/tsconfig.json",
+          "test/{published-surface",
+          "e2e-smoke",
+          "provider-dashboard}.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

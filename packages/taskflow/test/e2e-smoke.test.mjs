@@ -119,9 +119,16 @@ test("ui server boots and answers /, /api/work-tasks, /api/activity", async () =
     assert.equal(root.status, 200);
     const html = await root.text();
     assert.match(html, /<html|<!doctype/i, "/ should serve an HTML document");
+    // N85 cutover: / serves the React SPA shell (dist/dashboard) with a hashed asset.
+    assert.match(html, /id="root"/, "/ should serve the React SPA shell");
+    assert.match(html, /\/assets\/index-.*\.(js|css)/, "/ shell should reference built assets");
 
     const tasks = await fetch(base + "/api/work-tasks");
     assert.equal(tasks.status, 200, "/api/work-tasks should answer 200");
+
+    // N85: the read-only markdown endpoint rejects non-whitelisted doc names.
+    const badDoc = await fetch(base + "/api/task-doc?folder=workTasks&name=HACK");
+    assert.equal(badDoc.status, 400, "/api/task-doc must reject non-whitelisted names");
 
     const activity = await fetch(base + "/api/activity");
     assert.equal(activity.status, 200, "/api/activity should answer 200");

@@ -30,7 +30,6 @@ export {
   parseTaskNum,
 } from "./core/storage.js";
 export { startServer } from "./dashboard/server/index.js";
-export { getDashboardHtml } from "./dashboard/server/dashboard.js";
 export { deriveStatus, statusFromEvent, EventStore } from "./dashboard/server/event-stream.js";
 export {
   CURSOR_EVENT_TO_DERIVED,
