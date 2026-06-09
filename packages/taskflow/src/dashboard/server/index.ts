@@ -29,7 +29,17 @@ const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".mp3": "audio/mpeg",
+  // N85: assets emitted by the Vite dashboard build (dist/dashboard).
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".woff2": "font/woff2",
+  ".ico": "image/x-icon",
 };
+
+// N85: the Vite-built dashboard SPA ships in dist/dashboard alongside the bundled
+// cli.js (import.meta.url resolves to dist/ at runtime), served on the same port.
+const DASHBOARD_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "dashboard");
 
 const WATCH_DEBOUNCE_MS = 100;
 
@@ -452,6 +462,81 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+
+    // N85: React dashboard (Vite build in dist/dashboard), served on the same
+    // port. Hashed assets at /assets/*; the SPA shell at /next (parallel to the
+    // legacy server-rendered dashboard at / until the parity cutover).
+    if (url.pathname.startsWith("/assets/")) {
+      const assetPath = resolve(DASHBOARD_DIR, url.pathname.replace(/^\/+/, ""));
+      if (assetPath !== DASHBOARD_DIR && !assetPath.startsWith(DASHBOARD_DIR + sep)) {
+        res.writeHead(403);
+        res.end();
+        return;
+      }
+      try {
+        const data = readFileSync(assetPath);
+        const ext = assetPath.slice(assetPath.lastIndexOf("."));
+        res.writeHead(200, {
+          "Content-Type": MIME[ext] || "application/octet-stream",
+          "Cache-Control": "public, max-age=31536000, immutable",
+        });
+        res.end(data);
+      } catch {
+        res.writeHead(404);
+        res.end();
+      }
+      return;
+    }
+
+    if (url.pathname === "/next" || url.pathname.startsWith("/next/")) {
+      try {
+        const html = readFileSync(resolve(DASHBOARD_DIR, "index.html"), "utf-8");
+        res.writeHead(200, { "Content-Type": MIME[".html"] });
+        res.end(html);
+      } catch {
+        res.writeHead(404, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "Dashboard build not found. Run `pnpm build`." }));
+      }
+      return;
+    }
+
+    // N85: read-only markdown for a task's generated docs. `folder` is the task's
+    // tracker folder (e.g. workTasks/N85-...); resolved against cwd and required
+    // to stay inside workDir (traversal guard). Names are whitelisted.
+    if (url.pathname === "/api/task-doc") {
+      const DOC_WHITELIST: Record<string, string> = {
+        TASK: "TASK.md",
+        CHECKLIST: "CHECKLIST.md",
+        REVIEW: "REVIEW.md",
+        ANALYSIS: "ANALYSIS.md",
+      };
+      const fileName = DOC_WHITELIST[url.searchParams.get("name") || ""];
+      const folder = url.searchParams.get("folder") || "";
+      if (!fileName) {
+        res.writeHead(400, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "name must be one of TASK|CHECKLIST|REVIEW|ANALYSIS" }));
+        return;
+      }
+      const docPath = resolve(process.cwd(), folder, fileName);
+      if (docPath !== workDir && !docPath.startsWith(workDir + sep)) {
+        res.writeHead(400, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "folder outside work directory" }));
+        return;
+      }
+      if (!existsSync(docPath)) {
+        res.writeHead(404, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: fileName + " not found" }));
+        return;
+      }
+      try {
+        res.writeHead(200, { "Content-Type": "text/markdown; charset=utf-8" });
+        res.end(readFileSync(docPath, "utf-8"));
+      } catch {
+        res.writeHead(500, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "Failed to read doc" }));
+      }
+      return;
+    }
 
     // /config — project config viewer
     if (url.pathname === "/config") {
