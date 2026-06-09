@@ -24,7 +24,7 @@ Three-phase React + Vite rewrite of the project dashboard, served same-port from
 
 ## Non-blocking
 
-1. **Stale architecture docs (should fix before merge).** `docs/architecture-diagrams.md` still says `GET / → server-rendered dashboard HTML` (line 127), "the project dashboard at / is fully server-rendered HTML + vanilla JS (no React)" (line 135), and references `src/server/dashboard.ts` for the activity feed (line 260). These now assert the *opposite* of reality. TASK.md flagged updating Diagram 2; it wasn't done. **Fix:** update those lines to describe the React+Vite SPA delivery (`/` → SPA shell, `/assets/*`, `/api/task-doc`).
+1. **Stale architecture docs (should fix before merge).** `docs/architecture-diagrams.md` still says `GET / → server-rendered dashboard HTML` (line 127), "the project dashboard at / is fully server-rendered HTML + vanilla JS (no React)" (line 135), and references `src/server/dashboard.ts` for the activity feed (line 260). These now assert the *opposite* of reality. TASK.md flagged updating Diagram 2; it wasn't done. **Fix:** update those lines to describe the React+Vite SPA delivery (`/` → SPA shell, `/assets/*`, `/api/task-doc`). — ✅ **Resolved** (`/task-review-fix`): `docs/architecture-diagrams.md` updated — `/` → SPA shell, added `/assets/*` + `/api/task-doc` + `/config`, replaced the stale `socket.io` line with `/sse` frames, and corrected the UI-composition + activity-feed source paths.
 2. **Activity timestamps don't auto-tick.** The legacy dashboard refreshed `relativeTime` every 30 s; the React feed recomputes only on re-render (new event/snapshot), so "2m" can freeze between events. Minor. **Fix (optional):** a 30 s interval bumping a state counter.
 3. **Empty-state grace removed.** Legacy delayed the "waiting for activity" state ~3 s when `hookStatus === ok`; the React feed shows it immediately. Cosmetic.
 4. **Nav project name flashes empty** until the first `/sse` snapshot arrives (it was server-injected before). Sub-second; harmless.
@@ -41,4 +41,4 @@ Three-phase React + Vite rewrite of the project dashboard, served same-port from
 
 - Decided + sequenced via `/task-analyze`; React (over Preact/modularize) and parallel-until-parity were explicit owner choices. Out-of-scope items (UI writes, custom workflows, agent-modules, master/`/config` rewrite) were correctly left untouched.
 - Client is excluded from the CLI `tsc` and type-checked via its own tsconfig (`typecheck` runs both) — sound separation; no `any`/`@ts-ignore`/`console.*` in the client.
-- Follow-up: address finding #1 (docs) — small, recommend folding into this PR.
+- Follow-up: finding #1 (docs) resolved in this PR via `/task-review-fix`. Findings #2–#5 remain as optional cosmetic polish (not actioned — non-blocking, not authorized).
