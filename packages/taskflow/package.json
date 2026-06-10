@@ -22,13 +22,15 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup && rm -rf dist/sounds && cp -r src/dashboard/server/sounds dist/sounds",
+    "build": "tsup && vite build && rm -rf dist/sounds && cp -r src/dashboard/server/sounds dist/sounds",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
+    "dev:dashboard": "vite",
+    "typecheck": "tsc --noEmit && tsc -p src/dashboard/client/tsconfig.json --noEmit",
+    "typecheck:client": "tsc -p src/dashboard/client/tsconfig.json --noEmit",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.mjs\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.mjs\"",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\" \"test/**/*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"src/**/*.tsx\" \"test/**/*.mjs\"",
     "test": "pnpm run build && pnpm run test:node",
     "test:node": "node --test --test-concurrency=1 test/*.test.mjs",
     "sync-roles": "node scripts/sync-role-templates.mjs",
@@ -36,13 +38,17 @@
   },
   "devDependencies": {
     "@types/node": "^22.16.5",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.6.0",
     "prettier": "^3.8.3",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.60.1"
+    "typescript-eslint": "^8.60.1",
+    "vite": "^5.4.21"
   },
   "engines": {
     "node": ">=18"
@@ -71,6 +77,11 @@
     "cli"
   ],
   "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^9.1.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
     "zod": "^4.4.3"
   }
 }

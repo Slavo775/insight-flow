@@ -124,15 +124,18 @@ Project server  (one per project, default port 6006, configurable)
   - config.master.standalone = true → skips all master integration.
 
 Project server HTTP routes:
-  GET  /                          → server-rendered dashboard HTML (Kanban + timeline + detail panel)
+  GET  /                          → React + Vite SPA shell (dist/dashboard); any unmatched route falls through to it
+  GET  /assets/*                  → hashed SPA assets (js/css) from dist/dashboard/assets
   GET  /overview                  → iframe proxy: serves an HTML page containing <iframe src="http://localhost:6100/overview">
+  GET  /config                    → server-rendered config viewer (still HTML; not part of the SPA)
   GET  /api/work-tasks            → lists shard JSON files in workTasks/
   GET  /api/work-tasks/:file      → returns hydrated shard JSON (reviews.json + incidents.json merged in on-the-fly)
   GET  /api/activity              → returns recent activity events (last N from ActivityEngine ring buffer)
-  WebSocket /  (socket.io)        → pushes live "update" events to browser clients on file-change
+  GET  /api/task-doc              → read-only markdown for a task's TASK/CHECKLIST/REVIEW/ANALYSIS (whitelisted + traversal-guarded)
+  GET  /sse  (Server-Sent Events) → pushes snapshot / activity / file-change / status frames to the SPA
 
 UI composition:
-  - The project dashboard at / is fully server-rendered HTML + vanilla JS (no React). It has a nav link to /overview.
+  - The project dashboard at / is a React + Vite SPA (source in packages/taskflow/src/dashboard/client, built into dist/dashboard, served same-port). It has a nav link to /overview. (/config + /overview remain server-rendered HTML.)
   - /overview returns a minimal HTML page that embeds the master server's overview UI in a full-viewport <iframe>.
   - This means the master UI is injected into the project server's browser session without any JavaScript cross-origin calls — the iframe loads the master's own HTML directly.
 
@@ -257,9 +260,9 @@ WebSocket push  (socket.io, project server)
 /api/activity endpoint
   - GET /api/activity → returns ActivityEngine.getRecentEvents() (up to maxEvents, filtered by verbosity).
 
-Dashboard activity feed  (packages/taskflow/src/server/dashboard.ts)
-  - On page load: fetches /api/activity, renders event list.
-  - On WebSocket "activity" event: appends new event to the feed in real-time, no full reload.
+Dashboard activity feed  (packages/taskflow/src/dashboard/client/ActivityFeed.tsx + activity.ts)
+  - On /sse "snapshot" frame: seeds the feed from the server's recent events.
+  - On /sse "activity" frame: prepends the new event to the feed in real-time, no full reload.
   - Events show: timestamp, phase badge (color-coded), message, optional taskId chip.
 
 State push to master

@@ -1,50 +1,39 @@
 /**
- * N76 — dashboard renders the unified "Agent Activity" feed + provider badge.
- * Run: node test/provider-dashboard.test.mjs   (build must run first)
+ * N76 feature (provider badge + "Agent Activity" feed), re-pinned for the N85
+ * React rewrite. The dashboard is no longer server-rendered HTML — these features
+ * now live in the Vite-built SPA (dist/dashboard). We assert against the built
+ * bundle: string literals and CSS class names survive minification, so they are
+ * stable anchors. Requires a prior build (dist/ present).
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const { getDashboardHtml } = await import(
-  fileURLToPath(new URL("../dist/index.js", import.meta.url))
-);
+const ASSETS_DIR = fileURLToPath(new URL("../dist/dashboard/assets", import.meta.url));
 
-const CONFIG = {
-  workDir: "workTasks",
-  shardSize: 10,
-  projectName: "provider-test",
-  rolesDir: ".claude/roles",
-  server: { port: 6006 },
-  activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
-};
+function readAssets(ext) {
+  return readdirSync(ASSETS_DIR)
+    .filter((f) => f.endsWith(ext))
+    .map((f) => readFileSync(resolve(ASSETS_DIR, f), "utf-8"))
+    .join("\n");
+}
 
-test("dashboard pane is relabeled to 'Agent Activity' (not Claude-specific)", () => {
-  const html = getDashboardHtml(CONFIG);
-  assert.match(html, /Agent Activity/, "pane should be relabeled");
-  assert.ok(!html.includes("Claude Activity"), "old 'Claude Activity' label should be gone");
+const JS = readAssets(".js");
+const CSS = readAssets(".css");
+
+test("SPA bundle ships the unified 'Agent Activity' feed label (not Claude-specific)", () => {
+  assert.match(JS, /Agent Activity/, "'Agent Activity' label present in the SPA bundle");
+  assert.ok(!JS.includes("Claude Activity"), "old 'Claude Activity' label should be gone");
 });
 
-test("dashboard ships the providerBadge helper + claude/cursor badge CSS", () => {
-  const html = getDashboardHtml(CONFIG);
-  assert.match(html, /function providerBadge/, "providerBadge helper present");
-  assert.match(html, /activity-badge-provider-claude/, "claude badge class present");
-  assert.match(html, /activity-badge-provider-cursor/, "cursor badge class present");
+test("SPA ships the provider badge classes (claude + cursor)", () => {
+  assert.match(CSS, /activity-badge-provider-claude/, "claude provider badge class present");
+  assert.match(CSS, /activity-badge-provider-cursor/, "cursor provider badge class present");
 });
 
-test("firePermissionAlert is always defined when notifications.browser is false (N79)", () => {
-  const html = getDashboardHtml({
-    ...CONFIG,
-    notifications: { browser: false, cli: true },
-  });
-  assert.match(html, /function firePermissionAlert/, "status handler must not ReferenceError");
-  assert.ok(
-    !html.includes("function fireStatusDesktopNotif"),
-    "browser toast helper omitted when browser notifications disabled",
-  );
-  assert.match(
-    html,
-    /typeof fireStatusDesktopNotif === 'function'/,
-    "permission alert guards optional browser toast",
-  );
+test("SPA ships the notification/sound layer (permission-alert sound + status glyphs)", () => {
+  assert.match(JS, /permission-alert\.mp3/, "permission-alert sound wired in the SPA");
+  assert.match(JS, /Taskflow Dashboard/, "page-title base string present");
 });
