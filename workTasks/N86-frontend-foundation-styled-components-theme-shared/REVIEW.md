@@ -62,3 +62,36 @@ Project Owner requested a structural change to the new component library: the si
 
 - Pure refactor (file organization) — no visual/behavior change intended.
 - AI review (Round 1) approved; this human round supersedes with one structural blocker.
+
+
+---
+
+## Round 3 — AI re-review (post-fix)
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-06-10
+**Verdict:** approved
+
+### Summary
+
+Re-review of the Round-2 human blocker fix. `components.tsx` was split into a `components/` folder with one file per primitive (`Button` 82, `Badge` 32, `Severity` 19, `Card` 34, `Chip` 10, `Text` 26, `Section` 45 lines) + an `index.ts` barrel; `App`/`ui`/`DetailPanel` import from `./components/index.js`. Pure file-organization change.
+
+### Checklist verification
+
+- [x] **Blocker resolved** — no single big component file; `components.tsx` deleted; 7 single-purpose files + barrel. Verified on disk.
+- [x] Imports repointed (`App`/`ui`/`DetailPanel` → `./components/index.js`); no stale `./components.js` import remains.
+- [x] **Behavior preserved** — the built JS/CSS bundle hashes are **byte-identical** to pre-split (`index-CDvuSe6s.js` / `index-CuRUuCKU.css`), conclusively proving zero behavior/visual change.
+- [x] Gates: typecheck (CLI + client), lint, format, **87/87 tests** — re-run independently, green.
+
+### Blockers
+
+None — the Round-2 blocker is fully resolved.
+
+### Non-blocking
+
+- Carried over from Round 1 (still non-blocking): visual-regression coverage is absent (human eyeball at `/` recommended before merge); Vitest deferred. The split itself adds no new concerns.
+
+### Notes
+
+- Round history: R1 AI = approved · R2 Human = fix-needed (split file) · **R3 AI = approved** (fix verified).
+- Ready to merge once the human is satisfied with the on-screen parity.
