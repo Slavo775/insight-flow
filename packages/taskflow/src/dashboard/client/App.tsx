@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClaudeStatus } from "./activity.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { DetailPanel } from "./DetailPanel.js";
-import { Button } from "./components.js";
+import { Button, Text } from "./components.js";
 import {
   loadNotifSettings,
   maybeRequestPermissionOnce,
@@ -118,11 +118,13 @@ export function App() {
       <Nav projectName={snapshot?.projectName || ""} />
       <div className="top-bar">
         <div>
-          <h1>
+          <Text as="h1" $variant="h1">
             <span className={dot} id="status-dot" />
             Taskflow Dashboard
-          </h1>
-          <p className="subtitle">{label}</p>
+          </Text>
+          <Text as="p" $variant="subtitle">
+            {label}
+          </Text>
         </div>
         <div className="top-bar-actions">
           {snapshot && !activityEnabled ? (

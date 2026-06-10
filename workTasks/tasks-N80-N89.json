@@ -561,7 +561,7 @@
       "title": "Frontend foundation — styled-components theme + shared component library + Zustand store",
       "type": "rework",
       "priority": "medium",
-      "status": "in-progress",
+      "status": "implemented",
       "folder": "workTasks/N86-frontend-foundation-styled-components-theme-shared",
       "createdAt": "2026-06-10T07:27:24.882Z",
       "statusHistory": [
@@ -574,12 +574,31 @@
           "status": "in-progress",
           "at": "2026-06-10T07:37:45.639Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-10T08:40:24.282Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-10T07:37:45.639Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-10T08:40:24.282Z",
+        "filesChanged": [
+          "src/dashboard/client/theme.ts",
+          "src/dashboard/client/GlobalStyle.tsx",
+          "src/dashboard/client/components.tsx",
+          "src/dashboard/client/store.ts",
+          "src/dashboard/client/useDashboardStream.ts",
+          "src/dashboard/client/{App",
+          "ui",
+          "DetailPanel",
+          "main}.tsx",
+          "src/dashboard/client/{lib",
+          "activity}.ts",
+          "src/dashboard/client/styles.css",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

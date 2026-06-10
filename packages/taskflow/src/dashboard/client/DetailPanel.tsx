@@ -2,32 +2,11 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
-import type { ReactNode } from "react";
 import type { DocName } from "./api.js";
 import { fetchTaskDoc } from "./api.js";
 import type { Implementation, Incident, Push, Review, StatusHistoryEntry, Task } from "./lib.js";
 import { formatTime } from "./lib.js";
-import { Badge, Button, Chip, Severity } from "./components.js";
-
-function Section({
-  title,
-  count,
-  children,
-}: {
-  title: string;
-  count?: number;
-  children: ReactNode;
-}) {
-  return (
-    <div className="detail-section">
-      <h3>
-        {title}
-        {typeof count === "number" ? <span className="count">{count}</span> : null}
-      </h3>
-      {children}
-    </div>
-  );
-}
+import { Badge, Button, Chip, Section, Severity, Text } from "./components.js";
 
 function FileChips({ files }: { files?: string[] }) {
   if (!files || !files.length) return null;
@@ -328,9 +307,9 @@ export function DetailPanel({ task, onClose }: { task: Task | null; onClose: () 
             ×
           </Button>
           <div>
-            <h2>
+            <Text as="h2" $variant="h2">
               {task.id} — {task.title}
-            </h2>
+            </Text>
             <Section title="Info">
               <Info task={task} />
             </Section>
