@@ -79,3 +79,10 @@ export type Tokens = typeof tokens;
 
 /** The value handed to styled-components' ThemeProvider. */
 export const theme = tokens;
+
+// Type the styled-components theme as our token object, so `props.theme.*` is
+// fully type-checked in every styled component (no casts).
+declare module "styled-components" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  export interface DefaultTheme extends Tokens {}
+}

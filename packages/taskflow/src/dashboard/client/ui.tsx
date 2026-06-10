@@ -1,5 +1,6 @@
 import type { Task } from "./lib.js";
-import { COLUMNS, badgeClass, formatTime, hexToRgb, taskStatusColor } from "./lib.js";
+import { COLUMNS, formatTime, hexToRgb, taskStatusColor } from "./lib.js";
+import { Badge, Button, Card, CardId, CardMeta, CardTitle } from "./components.js";
 
 export function Nav({ projectName }: { projectName: string }) {
   return (
@@ -45,19 +46,19 @@ export function Stats({ tasks }: { tasks: Task[] }) {
   );
 }
 
-function Card({ task, onOpen }: { task: Task; onOpen: (id: string) => void }) {
+function TaskCard({ task, onOpen }: { task: Task; onOpen: (id: string) => void }) {
   return (
-    <div className="card" onClick={() => onOpen(task.id)}>
-      <div className="card-id">
-        {task.id} <span className={"badge " + badgeClass(task.status)}>{task.status}</span>
-      </div>
-      <div className="card-title">{task.title}</div>
-      <div className="card-meta">
+    <Card onClick={() => onOpen(task.id)}>
+      <CardId>
+        {task.id} <Badge status={task.status} />
+      </CardId>
+      <CardTitle>{task.title}</CardTitle>
+      <CardMeta>
         <span>{task.type}</span>
         <span>{task.priority}</span>
         <span>{formatTime(task.createdAt)}</span>
-      </div>
-    </div>
+      </CardMeta>
+    </Card>
   );
 }
 
@@ -75,7 +76,7 @@ export function Kanban({ tasks, onOpen }: { tasks: Task[]; onOpen: (id: string) 
             {colTasks.length === 0 ? (
               <div className="empty">No tasks</div>
             ) : (
-              colTasks.map((t) => <Card key={t.id} task={t} onOpen={onOpen} />)
+              colTasks.map((t) => <TaskCard key={t.id} task={t} onOpen={onOpen} />)
             )}
           </div>
         );
@@ -171,15 +172,19 @@ export function ShardNav({
   const label = (current || "...").replace("tasks-", "").replace(".json", "");
   return (
     <div className="shard-nav">
-      <button disabled={idx <= 0} onClick={() => onSelect(shards[idx - 1])}>
+      <Button $variant="nav" disabled={idx <= 0} onClick={() => onSelect(shards[idx - 1])}>
         &laquo; Newer
-      </button>
+      </Button>
       <span>
         {label} ({idx + 1}/{shards.length})
       </span>
-      <button disabled={idx >= shards.length - 1} onClick={() => onSelect(shards[idx + 1])}>
+      <Button
+        $variant="nav"
+        disabled={idx >= shards.length - 1}
+        onClick={() => onSelect(shards[idx + 1])}
+      >
         Older &raquo;
-      </button>
+      </Button>
     </div>
   );
 }

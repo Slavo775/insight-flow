@@ -4,6 +4,7 @@ import type { MasterResponse } from "./api.js";
 import { fetchMaster, fetchShard, fetchShardIndex } from "./api.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { DetailPanel } from "./DetailPanel.js";
+import { Button } from "./components.js";
 import type { Task } from "./lib.js";
 import {
   loadNotifSettings,
@@ -47,13 +48,14 @@ function SettingsPopover() {
 
   return (
     <div className="settings-wrap" ref={wrapRef}>
-      <button
-        className="settings-btn"
+      <Button
+        $variant="icon"
+        type="button"
         title="Notification settings"
         onClick={() => setOpen((o) => !o)}
       >
         ⚙
-      </button>
+      </Button>
       <div className={"settings-popover" + (open ? " open" : "")}>
         <div className="settings-header">Notifications</div>
         <label className="settings-row">
@@ -171,18 +173,20 @@ export function App() {
           {activityEnabled ? (
             <div className="act-tabs">
               <div className="act-tab-bar">
-                <button
-                  className={"act-tab" + (actTab === "claude" ? " active" : "")}
+                <Button
+                  $variant="tab"
+                  $active={actTab === "claude"}
                   onClick={() => setActTab("claude")}
                 >
                   Agent Activity <span className={st.cls}>{st.text}</span>
-                </button>
-                <button
-                  className={"act-tab" + (actTab === "recent" ? " active" : "")}
+                </Button>
+                <Button
+                  $variant="tab"
+                  $active={actTab === "recent"}
                   onClick={() => setActTab("recent")}
                 >
                   Recent Activity
-                </button>
+                </Button>
               </div>
               <div className="act-pane" style={{ display: actTab === "claude" ? "" : "none" }}>
                 <ActivityFeed
