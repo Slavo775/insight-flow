@@ -56,7 +56,7 @@ Project Owner requested a structural change to the new component library: the si
 
 ### Blockers
 
-1. **Split `packages/taskflow/src/dashboard/client/components.tsx` into multiple component files — no one big component file.** Owner verbatim: "packages/taskflow/src/dashboard/client/components.tsx split to multiple component no one big component". **Fix:** break `components.tsx` (currently holds Button, Badge/Severity, Card+CardId/CardTitle/CardMeta, Chip, Text, Section) into one file per component/group (e.g. a `components/` folder: `Button.tsx`, `Badge.tsx`, `Card.tsx`, `Chip.tsx`, `Text.tsx`, `Section.tsx`, with a barrel `index.ts`), update imports across `App`/`ui`/`DetailPanel`, keep behavior identical. Gates must stay green.
+1. **Split `packages/taskflow/src/dashboard/client/components.tsx` into multiple component files — no one big component file.** Owner verbatim: "packages/taskflow/src/dashboard/client/components.tsx split to multiple component no one big component". **Fix:** break `components.tsx` (currently holds Button, Badge/Severity, Card+CardId/CardTitle/CardMeta, Chip, Text, Section) into one file per component/group (e.g. a `components/` folder: `Button.tsx`, `Badge.tsx`, `Card.tsx`, `Chip.tsx`, `Text.tsx`, `Section.tsx`, with a barrel `index.ts`), update imports across `App`/`ui`/`DetailPanel`, keep behavior identical. Gates must stay green. — ✅ **Resolved** (`/task-review-fix`): `components.tsx` deleted; created `components/{Button,Badge,Severity,Card,Chip,Text,Section}.tsx` + `index.ts` barrel; imports in `App`/`ui`/`DetailPanel` repointed to `./components/index.js`. Pure file-organization split — the built JS/CSS bundle hashes are byte-identical to before, typecheck/lint/format + 87 tests green.
 
 ### Notes
 

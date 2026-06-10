@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClaudeStatus } from "./activity.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { DetailPanel } from "./DetailPanel.js";
-import { Button, Text } from "./components.js";
+import { Button, Text } from "./components/index.js";
 import {
   loadNotifSettings,
   maybeRequestPermissionOnce,

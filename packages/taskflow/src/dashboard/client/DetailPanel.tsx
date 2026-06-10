@@ -6,7 +6,7 @@ import type { DocName } from "./api.js";
 import { fetchTaskDoc } from "./api.js";
 import type { Implementation, Incident, Push, Review, StatusHistoryEntry, Task } from "./lib.js";
 import { formatTime } from "./lib.js";
-import { Badge, Button, Chip, Section, Severity, Text } from "./components.js";
+import { Badge, Button, Chip, Section, Severity, Text } from "./components/index.js";
 
 function FileChips({ files }: { files?: string[] }) {
   if (!files || !files.length) return null;

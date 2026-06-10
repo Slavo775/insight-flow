@@ -1,6 +1,6 @@
 import type { Task } from "./lib.js";
 import { COLUMNS, formatTime, hexToRgb, taskStatusColor } from "./lib.js";
-import { Badge, Button, Card, CardId, CardMeta, CardTitle } from "./components.js";
+import { Badge, Button, Card, CardId, CardMeta, CardTitle } from "./components/index.js";
 
 export function Nav({ projectName }: { projectName: string }) {
   return (
