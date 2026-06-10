@@ -2,40 +2,18 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
-import type { ReactNode } from "react";
 import type { DocName } from "./api.js";
 import { fetchTaskDoc } from "./api.js";
 import type { Implementation, Incident, Push, Review, StatusHistoryEntry, Task } from "./lib.js";
-import { SEVERITY_CLASS, badgeClass, formatTime } from "./lib.js";
-
-function Section({
-  title,
-  count,
-  children,
-}: {
-  title: string;
-  count?: number;
-  children: ReactNode;
-}) {
-  return (
-    <div className="detail-section">
-      <h3>
-        {title}
-        {typeof count === "number" ? <span className="count">{count}</span> : null}
-      </h3>
-      {children}
-    </div>
-  );
-}
+import { formatTime } from "./lib.js";
+import { Badge, Button, Chip, Section, Severity, Text } from "./components/index.js";
 
 function FileChips({ files }: { files?: string[] }) {
   if (!files || !files.length) return null;
   return (
     <div className="files">
       {files.map((f, i) => (
-        <span className="file-chip" key={f + i}>
-          {f}
-        </span>
+        <Chip key={f + i}>{f}</Chip>
       ))}
     </div>
   );
@@ -54,7 +32,7 @@ function Info({ task }: { task: Task }) {
       </dd>
       <dt>Status</dt>
       <dd>
-        <span className={"badge " + badgeClass(task.status)}>{task.status}</span>
+        <Badge status={task.status} />
       </dd>
       <dt>Created</dt>
       <dd>
@@ -75,11 +53,7 @@ function Info({ task }: { task: Task }) {
       <dt>Tags</dt>
       <dd>
         {task.tags && task.tags.length ? (
-          task.tags.map((x) => (
-            <span className="file-chip" key={x}>
-              #{x}
-            </span>
-          ))
+          task.tags.map((x) => <Chip key={x}>#{x}</Chip>)
         ) : (
           <span className="muted">—</span>
         )}
@@ -153,7 +127,7 @@ function ReviewItem({ review, round }: { review: Review; round: number }) {
     <div className="item">
       <div className="item-head">
         <strong>Round {round}</strong>
-        <span className={"badge " + badgeClass(verdict)}>{verdict}</span>
+        <Badge status={verdict} />
         <span className="who">{(review.type || "ai") + " · " + (review.by || "?")}</span>
         <span className="when">
           {formatTime(review.startedAt)}
@@ -169,10 +143,7 @@ function ReviewItem({ review, round }: { review: Review; round: number }) {
         <>
           <div className="item-foot">
             <span>
-              fix:{" "}
-              <span className={"badge " + badgeClass(review.fix.status || "")}>
-                {review.fix.status}
-              </span>
+              fix: <Badge status={review.fix.status || ""} />
             </span>
             <span className="who">by {review.fix.by || "?"}</span>
             {fixMinutes !== null ? <span>{fixMinutes} min</span> : null}
@@ -198,17 +169,11 @@ function IncidentItem({ inc }: { inc: Incident }) {
       <dl className="kv">
         <dt>Severity</dt>
         <dd>
-          <span
-            className={
-              "severity " + (SEVERITY_CLASS[inc.severity || "medium"] || "severity-medium")
-            }
-          >
-            {inc.severity || "medium"}
-          </span>
+          <Severity $level={inc.severity || "medium"}>{inc.severity || "medium"}</Severity>
         </dd>
         <dt>Status</dt>
         <dd>
-          <span className={"badge " + badgeClass(inc.status)}>{inc.status}</span>
+          <Badge status={inc.status} />
         </dd>
         <dt>Reported</dt>
         <dd>{formatTime(inc.reportedAt)}</dd>
@@ -264,7 +229,7 @@ function StatusHistory({ hist }: { hist?: StatusHistoryEntry[] }) {
         .map((h, i) => (
           <div className="timeline-mini-item" key={h.at + i}>
             <span className="t-when">{formatTime(h.at)}</span>
-            <span className={"badge " + badgeClass(h.status)}>{h.status}</span>
+            <Badge status={h.status} />
             <span className="t-who">by {h.by || "?"}</span>
           </div>
         ))}
@@ -305,13 +270,14 @@ function DocViewer({ folder }: { folder: string }) {
     <div>
       <div className="doc-tabs">
         {DOC_TABS.map((name) => (
-          <button
+          <Button
             key={name}
-            className={"doc-tab" + (active === name ? " active" : "")}
+            $variant="docTab"
+            $active={active === name}
             onClick={() => setActive(name)}
           >
             {name}
-          </button>
+          </Button>
         ))}
       </div>
       {state === "loading" ? (
@@ -337,13 +303,13 @@ export function DetailPanel({ task, onClose }: { task: Task | null; onClose: () 
       <div className={"detail-overlay" + (task ? " open" : "")} onClick={onClose} />
       {task ? (
         <div className="detail-panel">
-          <button className="close" onClick={onClose}>
+          <Button $variant="close" type="button" onClick={onClose}>
             ×
-          </button>
+          </Button>
           <div>
-            <h2>
+            <Text as="h2" $variant="h2">
               {task.id} — {task.title}
-            </h2>
+            </Text>
             <Section title="Info">
               <Info task={task} />
             </Section>

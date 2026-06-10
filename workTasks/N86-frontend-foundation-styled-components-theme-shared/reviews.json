@@ -1,0 +1,52 @@
+{
+  "taskId": "N86",
+  "reviews": [
+    {
+      "startedAt": "2026-06-10T08:43:49.453Z",
+      "endedAt": "2026-06-10T08:45:42.583Z",
+      "verdict": "approved",
+      "comment": "Behavior-preserving design-system + Zustand refactor; tokens single-source, primitives adopted, no leftover raw markup; typecheck/lint/format/87 tests green; read-only + escaping preserved. Non-blocking: no visual-regression test (needs human eyeball at /), Vitest deferred (droppable), bundle +~13KB gz expected.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-10T09:47:11.460Z",
+      "endedAt": "2026-06-10T09:47:35.776Z",
+      "verdict": "fix-needed",
+      "comment": "Split components.tsx into per-component files (no one big file).",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-10T10:47:31.527Z",
+        "endedAt": "2026-06-10T10:49:52.926Z",
+        "status": "fixed",
+        "filesChanged": [
+          "src/dashboard/client/components/{Button",
+          "Badge",
+          "Severity",
+          "Card",
+          "Chip",
+          "Text",
+          "Section}.tsx",
+          "src/dashboard/client/components/index.ts",
+          "src/dashboard/client/{App",
+          "ui",
+          "DetailPanel}.tsx (imports)",
+          "removed components.tsx"
+        ],
+        "comment": "Fixed blocker 1: split components.tsx into per-component files under components/ + barrel; updated imports; byte-identical bundle, 87 tests green.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-10T11:03:25.068Z",
+      "endedAt": "2026-06-10T11:04:36.672Z",
+      "verdict": "approved",
+      "comment": "Re-review (R3): components.tsx split into components/ (7 files + barrel); blocker resolved; built bundle byte-identical, typecheck/lint/format + 87 tests green.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

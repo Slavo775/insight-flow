@@ -555,6 +555,111 @@
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/60",
       "mergedAt": "2026-06-10T07:11:08.285Z"
+    },
+    {
+      "id": "N86",
+      "title": "Frontend foundation — styled-components theme + shared component library + Zustand store",
+      "type": "rework",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N86-frontend-foundation-styled-components-theme-shared",
+      "createdAt": "2026-06-10T07:27:24.882Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-10T07:27:24.883Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-10T07:37:45.639Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-10T08:40:24.282Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-10T08:43:49.453Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-10T08:45:42.584Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-10T09:47:11.460Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-10T09:47:35.777Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-10T10:47:31.527Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-10T10:49:52.927Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-10T11:03:25.067Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-10T11:04:36.673Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-10T07:37:45.639Z",
+        "completedAt": "2026-06-10T08:40:24.282Z",
+        "filesChanged": [
+          "src/dashboard/client/theme.ts",
+          "src/dashboard/client/GlobalStyle.tsx",
+          "src/dashboard/client/components.tsx",
+          "src/dashboard/client/store.ts",
+          "src/dashboard/client/useDashboardStream.ts",
+          "src/dashboard/client/{App",
+          "ui",
+          "DetailPanel",
+          "main}.tsx",
+          "src/dashboard/client/{lib",
+          "activity}.ts",
+          "src/dashboard/client/styles.css",
+          "packages/taskflow/package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "frontend",
+        "design-system",
+        "theme",
+        "styled-components",
+        "zustand",
+        "state",
+        "refactor"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/61",
+      "mergedAt": null
     }
   ]
 }

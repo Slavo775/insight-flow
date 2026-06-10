@@ -1,6 +1,7 @@
 // Local view-model types mirroring the shard JSON the server returns (with
 // reviews/incidents hydrated from side files by /api/work-tasks/:shard). Kept
 // local so the client bundle stays decoupled from the core/server modules.
+import { tokens } from "./theme.js";
 
 export interface StatusHistoryEntry {
   status: string;
@@ -108,24 +109,8 @@ export function badgeClass(status: string): string {
   return "badge-pushed";
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  ready: "#94a3b8",
-  "in-progress": "#f59e0b",
-  implemented: "#06b6d4",
-  reviewing: "#a855f7",
-  approved: "#22c55e",
-  "fix-needed": "#ef4444",
-  fixing: "#dc2626",
-  fixed: "#22c55e",
-  pushed: "#16a34a",
-  merged: "#10b981",
-  "changes-requested": "#f97316",
-  "changes-implementing": "#fb923c",
-  "changes-implemented": "#14b8a6",
-};
-
 export function taskStatusColor(status: string): string {
-  return STATUS_COLORS[status] || "#737373";
+  return tokens.status[status] || tokens.color.textMuted;
 }
 
 export function hexToRgb(hex: string): string {

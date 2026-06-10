@@ -2,6 +2,7 @@
 // is built as a string (escaped) and injected via dangerouslySetInnerHTML so the
 // rich icon/badge taxonomy matches the legacy dashboard exactly.
 import { hexToRgb } from "./lib.js";
+import { tokens } from "./theme.js";
 
 export interface ActivityEvent {
   id?: string;
@@ -81,23 +82,23 @@ function toolIcon(tool?: string): { cls: string; icon: string } {
 }
 
 function hookEventColor(evtType: string): string {
-  if (evtType === "approval-required") return "#eab308";
+  if (evtType === "approval-required") return tokens.color.yellow;
   if (["approval-denied", "tool-blocked", "turn-failed", "tool-failed"].includes(evtType))
-    return "#ef4444";
-  if (evtType === "approval-granted" || evtType === "tool-approved") return "#22c55e";
-  if (evtType === "subagent-start" || evtType === "subagent-done") return "#a855f7";
-  if (evtType === "agent-active" || evtType === "tool-requested") return "#06b6d4";
-  if (evtType === "file-written" || evtType === "file-edited") return "#06b6d4";
-  return "#737373";
+    return tokens.color.red;
+  if (evtType === "approval-granted" || evtType === "tool-approved") return tokens.color.green;
+  if (evtType === "subagent-start" || evtType === "subagent-done") return tokens.color.purple;
+  if (evtType === "agent-active" || evtType === "tool-requested") return tokens.color.cyan;
+  if (evtType === "file-written" || evtType === "file-edited") return tokens.color.cyan;
+  return tokens.color.textMuted;
 }
 
 export function eventColor(ev: ActivityEvent): string {
   if (ev.tool === "Event" && ev.source === "hook") return hookEventColor(ev.action || "");
-  if (ev.tool === "Skill") return "#a855f7";
-  if (ev.tool === "Phase") return "#06b6d4";
-  if (ev.tool === "Activity") return "#f59e0b";
-  if (ev.tool === "Tool") return "#22c55e";
-  return "#737373";
+  if (ev.tool === "Skill") return tokens.color.purple;
+  if (ev.tool === "Phase") return tokens.color.cyan;
+  if (ev.tool === "Activity") return tokens.color.amber;
+  if (ev.tool === "Tool") return tokens.color.green;
+  return tokens.color.textMuted;
 }
 
 export function itemBackground(ev: ActivityEvent): {
