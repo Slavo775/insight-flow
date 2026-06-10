@@ -1,11 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClaudeStatus } from "./activity.js";
-import type { MasterResponse } from "./api.js";
-import { fetchMaster, fetchShard, fetchShardIndex } from "./api.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { DetailPanel } from "./DetailPanel.js";
 import { Button } from "./components.js";
-import type { Task } from "./lib.js";
 import {
   loadNotifSettings,
   maybeRequestPermissionOnce,
@@ -14,6 +11,7 @@ import {
   saveNotifSettings,
   updatePageTitle,
 } from "./notifications.js";
+import { useDashboardStore } from "./store.js";
 import { useDashboardStream } from "./useDashboardStream.js";
 import { Kanban, Nav, ShardNav, Stats, Timeline } from "./ui.js";
 
@@ -81,62 +79,39 @@ function SettingsPopover() {
 }
 
 export function App() {
-  const [shards, setShards] = useState<string[]>([]);
-  const [currentShard, setCurrentShard] = useState<string | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [label, setLabel] = useState<string>("Loading...");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [actTab, setActTab] = useState<"claude" | "recent">("claude");
 
-  const currentShardRef = useRef<string | null>(null);
+  // Global state from the Zustand store (fed by the SSE stream).
+  const connection = useDashboardStore((s) => s.connection);
+  const agentStatus = useDashboardStore((s) => s.agentStatus);
+  const snapshot = useDashboardStore((s) => s.snapshot);
+  const activityEvents = useDashboardStore((s) => s.activityEvents);
+  const shards = useDashboardStore((s) => s.shards);
+  const currentShard = useDashboardStore((s) => s.currentShard);
+  const tasks = useDashboardStore((s) => s.tasks);
+  const label = useDashboardStore((s) => s.label);
+  const selectedTaskId = useDashboardStore((s) => s.selectedTaskId);
+  const loadShard = useDashboardStore((s) => s.loadShard);
+  const selectTask = useDashboardStore((s) => s.selectTask);
 
-  const loadShard = useCallback(async (name: string) => {
-    setCurrentShard(name);
-    currentShardRef.current = name;
-    const [shardTasks, master] = await Promise.all([
-      fetchShard(name),
-      fetchMaster().catch((): MasterResponse => ({})),
-    ]);
-    setTasks(shardTasks);
-    const current = master?.meta?.currentTaskId ?? null;
-    let next =
-      "Shard: " +
-      name.replace("tasks-", "").replace(".json", "") +
-      " · " +
-      shardTasks.length +
-      " tasks";
-    if (current) next += " · current " + current;
-    setLabel(next);
-  }, []);
-
-  // file-change / reconnect → re-fetch shard index + the current shard.
-  const sync = useCallback(async () => {
-    const index = await fetchShardIndex();
-    setShards(index);
-    const name = currentShardRef.current || index[0];
-    if (name) await loadShard(name);
-  }, [loadShard]);
-
-  const { status, snapshot, activityEvents, claudeStatus } = useDashboardStream({
-    onSync: () => void sync(),
-  });
+  useDashboardStream();
 
   useEffect(() => {
     loadNotifSettings();
     maybeRequestPermissionOnce();
     updatePageTitle("idle");
-    void sync();
-  }, [sync]);
+    void useDashboardStore.getState().sync();
+  }, []);
 
   const selected = useMemo(
-    () => tasks.find((t) => t.id === selectedId) ?? null,
-    [tasks, selectedId],
+    () => tasks.find((t) => t.id === selectedTaskId) ?? null,
+    [tasks, selectedTaskId],
   );
 
-  const dot = "live-dot" + (status === "reconnecting" ? " reconnecting" : "");
+  const dot = "live-dot" + (connection === "reconnecting" ? " reconnecting" : "");
   const activityEnabled = snapshot?.activityEnabled === true;
   const browserNotifications = snapshot?.browserNotifications !== false;
-  const st = activityStatusView(claudeStatus);
+  const st = activityStatusView(agentStatus);
 
   return (
     <>
@@ -168,7 +143,7 @@ export function App() {
             <ShardNav shards={shards} current={currentShard} onSelect={(n) => void loadShard(n)} />
           ) : null}
           <Stats tasks={tasks} />
-          <Kanban tasks={tasks} onOpen={setSelectedId} />
+          <Kanban tasks={tasks} onOpen={selectTask} />
 
           {activityEnabled ? (
             <div className="act-tabs">
@@ -207,7 +182,7 @@ export function App() {
         </div>
       </div>
 
-      <DetailPanel task={selected} onClose={() => setSelectedId(null)} />
+      <DetailPanel task={selected} onClose={() => selectTask(null)} />
     </>
   );
 }
