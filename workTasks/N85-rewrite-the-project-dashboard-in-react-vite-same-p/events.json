@@ -2292,6 +2292,84 @@
       "taskId": "N85",
       "timestamp": "2026-06-09T18:52:28.957Z",
       "source": "agent"
+    },
+    {
+      "id": "evt_1781031154029_68ce",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-09T18:52:34.028Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N85",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781031167890_502c",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-09T18:52:47.890Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N85",
+      "payload": {}
+    },
+    {
+      "id": "evt_1781040332447_916d",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-06-09T21:25:32.447Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N85",
+      "payload": {}
+    },
+    {
+      "id": "evt_1781040347934_c96b",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-09T21:25:47.933Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N85",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781040348336_f805",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-09T21:25:48.336Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N85",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781040360182_b7d1",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-09T21:26:00.181Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N85",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781040360328_69f9",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-09T21:26:00.328Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N85",
+      "payload": {}
     }
   ]
 }
