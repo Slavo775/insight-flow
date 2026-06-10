@@ -686,7 +686,7 @@
       "title": "Dashboard task detail — wider panel + dedicated /task/:id page (react-router) + reading mode",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "approved",
       "folder": "workTasks/N87-dashboard-task-detail-wider-panel-dedicated-task-i",
       "createdAt": "2026-06-10T12:38:21.712Z",
       "statusHistory": [
@@ -704,6 +704,16 @@
           "status": "implemented",
           "at": "2026-06-10T13:18:50.301Z",
           "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-10T14:44:26.495Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-10T14:46:00.331Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -722,8 +732,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
