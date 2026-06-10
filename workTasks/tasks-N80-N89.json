@@ -686,7 +686,7 @@
       "title": "Dashboard task detail — wider panel + dedicated /task/:id page (react-router) + reading mode",
       "type": "feat",
       "priority": "medium",
-      "status": "in-progress",
+      "status": "implemented",
       "folder": "workTasks/N87-dashboard-task-detail-wider-panel-dedicated-task-i",
       "createdAt": "2026-06-10T12:38:21.712Z",
       "statusHistory": [
@@ -699,12 +699,26 @@
           "status": "in-progress",
           "at": "2026-06-10T13:10:08.686Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-10T13:18:50.301Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-10T13:10:08.686Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-10T13:18:50.301Z",
+        "filesChanged": [
+          "src/dashboard/client/theme.ts",
+          "src/dashboard/client/store.ts",
+          "src/dashboard/client/DetailPanel.tsx",
+          "src/dashboard/client/TaskDetailPage.tsx",
+          "src/dashboard/client/App.tsx",
+          "src/dashboard/client/main.tsx",
+          "src/dashboard/client/styles.css",
+          "packages/taskflow/package.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
