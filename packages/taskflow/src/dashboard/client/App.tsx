@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClaudeStatus } from "./activity.js";
 import { ActivityFeed } from "./ActivityFeed.js";
+import { Route, Routes } from "react-router-dom";
 import { DetailPanel } from "./DetailPanel.js";
+import { TaskDetailPage } from "./TaskDetailPage.js";
 import { Button, Text } from "./components/index.js";
 import {
   loadNotifSettings,
@@ -78,7 +80,7 @@ function SettingsPopover() {
   );
 }
 
-export function App() {
+function DashboardView() {
   const [actTab, setActTab] = useState<"claude" | "recent">("claude");
 
   // Global state from the Zustand store (fed by the SSE stream).
@@ -93,15 +95,6 @@ export function App() {
   const selectedTaskId = useDashboardStore((s) => s.selectedTaskId);
   const loadShard = useDashboardStore((s) => s.loadShard);
   const selectTask = useDashboardStore((s) => s.selectTask);
-
-  useDashboardStream();
-
-  useEffect(() => {
-    loadNotifSettings();
-    maybeRequestPermissionOnce();
-    updatePageTitle("idle");
-    void useDashboardStore.getState().sync();
-  }, []);
 
   const selected = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
@@ -186,5 +179,24 @@ export function App() {
 
       <DetailPanel task={selected} onClose={() => selectTask(null)} />
     </>
+  );
+}
+
+export function App() {
+  // App-level: the SSE stream + one-time bootstrap run once across routes.
+  useDashboardStream();
+
+  useEffect(() => {
+    loadNotifSettings();
+    maybeRequestPermissionOnce();
+    updatePageTitle("idle");
+    void useDashboardStore.getState().sync();
+  }, []);
+
+  return (
+    <Routes>
+      <Route path="/" element={<DashboardView />} />
+      <Route path="/task/:id" element={<TaskDetailPage />} />
+    </Routes>
   );
 }

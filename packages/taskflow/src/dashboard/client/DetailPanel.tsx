@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
+import { useNavigate } from "react-router-dom";
+import { ThemeProvider } from "styled-components";
+import { readingTheme } from "./theme.js";
 import type { DocName } from "./api.js";
 import { fetchTaskDoc } from "./api.js";
 import type { Implementation, Incident, Push, Review, StatusHistoryEntry, Task } from "./lib.js";
@@ -297,7 +300,66 @@ function DocViewer({ folder }: { folder: string }) {
   );
 }
 
+/**
+ * The detail body, reused by the slide-over panel and the /task/:id page. Wrapped
+ * in the N87 reading-mode theme (larger type/space) + a `.reading` scope so the
+ * markdown docs are comfortable; the dense dashboard outside is unaffected.
+ */
+export function TaskDetail({ task }: { task: Task }) {
+  return (
+    <ThemeProvider theme={readingTheme}>
+      <div className="reading">
+        <Text as="h2" $variant="h2">
+          {task.id} — {task.title}
+        </Text>
+        <Section title="Info">
+          <Info task={task} />
+        </Section>
+        <Section title="Implementation">
+          <ImplementationView impl={task.implementation} />
+        </Section>
+        {task.reviews && task.reviews.length ? (
+          <Section title="Reviews" count={task.reviews.length}>
+            <div className="item-list">
+              {task.reviews.map((r, i) => (
+                <ReviewItem key={i} review={r} round={i + 1} />
+              ))}
+            </div>
+          </Section>
+        ) : null}
+        {task.pushes && task.pushes.length ? (
+          <Section title="Pushes" count={task.pushes.length}>
+            <div className="commit-list">
+              {task.pushes.map((p, i) => (
+                <PushItem key={i} push={p} />
+              ))}
+            </div>
+          </Section>
+        ) : null}
+        {task.incidents && task.incidents.length ? (
+          <Section title="Incidents" count={task.incidents.length}>
+            <div className="item-list">
+              {task.incidents.map((inc) => (
+                <IncidentItem key={inc.id} inc={inc} />
+              ))}
+            </div>
+          </Section>
+        ) : null}
+        <Section title="Status history" count={(task.statusHistory || []).length}>
+          <StatusHistory hist={task.statusHistory} />
+        </Section>
+        {task.folder ? (
+          <Section title="Documents">
+            <DocViewer folder={task.folder} />
+          </Section>
+        ) : null}
+      </div>
+    </ThemeProvider>
+  );
+}
+
 export function DetailPanel({ task, onClose }: { task: Task | null; onClose: () => void }) {
+  const navigate = useNavigate();
   return (
     <>
       <div className={"detail-overlay" + (task ? " open" : "")} onClick={onClose} />
@@ -306,52 +368,12 @@ export function DetailPanel({ task, onClose }: { task: Task | null; onClose: () 
           <Button $variant="close" type="button" onClick={onClose}>
             ×
           </Button>
-          <div>
-            <Text as="h2" $variant="h2">
-              {task.id} — {task.title}
-            </Text>
-            <Section title="Info">
-              <Info task={task} />
-            </Section>
-            <Section title="Implementation">
-              <ImplementationView impl={task.implementation} />
-            </Section>
-            {task.reviews && task.reviews.length ? (
-              <Section title="Reviews" count={task.reviews.length}>
-                <div className="item-list">
-                  {task.reviews.map((r, i) => (
-                    <ReviewItem key={i} review={r} round={i + 1} />
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-            {task.pushes && task.pushes.length ? (
-              <Section title="Pushes" count={task.pushes.length}>
-                <div className="commit-list">
-                  {task.pushes.map((p, i) => (
-                    <PushItem key={i} push={p} />
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-            {task.incidents && task.incidents.length ? (
-              <Section title="Incidents" count={task.incidents.length}>
-                <div className="item-list">
-                  {task.incidents.map((inc) => (
-                    <IncidentItem key={inc.id} inc={inc} />
-                  ))}
-                </div>
-              </Section>
-            ) : null}
-            <Section title="Status history" count={(task.statusHistory || []).length}>
-              <StatusHistory hist={task.statusHistory} />
-            </Section>
-            {task.folder ? (
-              <Section title="Documents">
-                <DocViewer folder={task.folder} />
-              </Section>
-            ) : null}
+          <div className="detail-panel-actions">
+            <Button $variant="nav" type="button" onClick={() => navigate(`/task/${task.id}`)}>
+              Open full page →
+            </Button>
           </div>
+          <TaskDetail task={task} />
         </div>
       ) : null}
     </>

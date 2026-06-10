@@ -41,6 +41,7 @@ interface DashboardStore {
   selectTask: (id: string | null) => void;
   loadShard: (name: string) => Promise<void>;
   sync: () => Promise<void>;
+  ensureTask: (id: string) => Promise<void>;
 }
 
 // Module-level dedupe set for activity events (mirrors the old hook's seenRef).
@@ -105,5 +106,22 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
     set({ shards: index });
     const name = get().currentShard || index[0];
     if (name) await get().loadShard(name);
+  },
+
+  // N87: ensure the task for `id` is loaded — it may live in a different shard
+  // than the current one (used by the /task/:id detail page). Picks the shard
+  // whose parsed range contains the id's number.
+  ensureTask: async (id) => {
+    if (get().tasks.some((t) => t.id === id)) return;
+    const index = get().shards.length ? get().shards : await fetchShardIndex();
+    const num = parseInt(id.replace(/\D/g, ""), 10);
+    const target = index.find((f) => {
+      const m = f.match(/tasks-N(\d+)-N(\d+)\.json/);
+      return !!m && num >= Number(m[1]) && num <= Number(m[2]);
+    });
+    if (target) {
+      set({ shards: index });
+      await get().loadShard(target);
+    }
   },
 }));

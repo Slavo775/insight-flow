@@ -680,6 +680,75 @@
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/61",
       "mergedAt": "2026-06-10T11:25:16.760Z"
+    },
+    {
+      "id": "N87",
+      "title": "Dashboard task detail — wider panel + dedicated /task/:id page (react-router) + reading mode",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N87-dashboard-task-detail-wider-panel-dedicated-task-i",
+      "createdAt": "2026-06-10T12:38:21.712Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-10T12:38:21.712Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-10T13:10:08.686Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-10T13:18:50.301Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-10T14:44:26.495Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-10T14:46:00.331Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-10T13:10:08.686Z",
+        "completedAt": "2026-06-10T13:18:50.301Z",
+        "filesChanged": [
+          "src/dashboard/client/theme.ts",
+          "src/dashboard/client/store.ts",
+          "src/dashboard/client/DetailPanel.tsx",
+          "src/dashboard/client/TaskDetailPage.tsx",
+          "src/dashboard/client/App.tsx",
+          "src/dashboard/client/main.tsx",
+          "src/dashboard/client/styles.css",
+          "packages/taskflow/package.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "frontend",
+        "react-router",
+        "routing",
+        "ux",
+        "detail"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/62",
+      "mergedAt": null
     }
   ]
 }

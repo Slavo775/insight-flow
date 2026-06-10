@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { App } from "./App.js";
 import { GlobalStyle } from "./GlobalStyle.js";
@@ -12,7 +13,9 @@ if (rootEl) {
     <StrictMode>
       <ThemeProvider theme={theme}>
         <GlobalStyle />
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </ThemeProvider>
     </StrictMode>,
   );
