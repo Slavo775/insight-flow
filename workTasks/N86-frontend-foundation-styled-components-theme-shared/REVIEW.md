@@ -40,3 +40,25 @@ Frontend-foundation refactor of the N85 dashboard: a typed styled-components the
 - Decided + sequenced via `/task-analyze` (styled-components over Preact/Tailwind/extend-CSS-vars; one cohesive task; refactor + light polish). Builds on N85 (merged).
 - WIP marker on PR #61 can be dropped now that the task is `implemented`.
 - Follow-up candidates: Vitest (#2); fuller typography migration (mono/muted utilities) if a stricter "no utility CSS" bar is wanted.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-10
+**Verdict:** fix-needed
+
+### Summary
+
+Project Owner requested a structural change to the new component library: the single `components.tsx` should be split into per-component files rather than one big file.
+
+### Blockers
+
+1. **Split `packages/taskflow/src/dashboard/client/components.tsx` into multiple component files — no one big component file.** Owner verbatim: "packages/taskflow/src/dashboard/client/components.tsx split to multiple component no one big component". **Fix:** break `components.tsx` (currently holds Button, Badge/Severity, Card+CardId/CardTitle/CardMeta, Chip, Text, Section) into one file per component/group (e.g. a `components/` folder: `Button.tsx`, `Badge.tsx`, `Card.tsx`, `Chip.tsx`, `Text.tsx`, `Section.tsx`, with a barrel `index.ts`), update imports across `App`/`ui`/`DetailPanel`, keep behavior identical. Gates must stay green.
+
+### Notes
+
+- Pure refactor (file organization) — no visual/behavior change intended.
+- AI review (Round 1) approved; this human round supersedes with one structural blocker.

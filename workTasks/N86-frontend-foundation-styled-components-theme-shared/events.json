@@ -3482,6 +3482,151 @@
       "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
       "taskId": "N86",
       "payload": {}
+    },
+    {
+      "id": "evt_1781084690700_7d92",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-10T09:44:50.699Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781084706825_b54a",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-10T09:45:06.825Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {}
+    },
+    {
+      "id": "evt_1781084812243_3196",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-06-10T09:46:52.242Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {}
+    },
+    {
+      "id": "evt_1781084831226_bde4",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-10T09:47:11.226Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "type": "start",
+      "taskId": "N86",
+      "timestamp": "2026-06-10T09:47:11.351Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1781084831617_ccc8",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-10T09:47:11.617Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781084846121_968c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-10T09:47:26.120Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1781084846298_0b34",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-10T09:47:26.297Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/workTasks/N86-frontend-foundation-styled-components-theme-shared/REVIEW.md"
+      }
+    },
+    {
+      "id": "evt_1781084855635_0f1e",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-10T09:47:35.634Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "type": "review-end",
+      "taskId": "N86",
+      "timestamp": "2026-06-10T09:47:35.876Z",
+      "source": "agent"
+    },
+    {
+      "type": "done",
+      "taskId": "N86",
+      "timestamp": "2026-06-10T09:47:35.987Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1781084856242_930c",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-10T09:47:36.242Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781084865536_914d",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-10T09:47:45.536Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781084865689_645c",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-10T09:47:45.688Z",
+      "sessionId": "47a925a5-9b40-4f13-b744-0c1c6d910033",
+      "taskId": "N86",
+      "payload": {}
     }
   ]
 }
