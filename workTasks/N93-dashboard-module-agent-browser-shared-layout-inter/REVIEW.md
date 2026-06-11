@@ -20,3 +20,30 @@ Human's exact comment:
 - Round 1 change requests after manual testing of the N93 implementation (PR #69).
 - A link to the full module page can remain available from inside the modal — the complaint is about the forced navigation, not the page's existence.
 - `/task-implement` picks this up in change mode (`changes-requested`).
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-11
+**Verdict:** fix-needed
+
+### Summary
+
+Manual testing of the R1 changes (agent map module modal). The human clicked an **include-module node** (screenshot: the `@AGENT_ENFORCEMENT.md` node in the composition map) and wants it to open the modal with the referenced markdown file's content rendered. Human's exact comment:
+
+> reference as this [screenshot: @AGENT_ENFORCEMENT.md node] should also open the modal and show the md file in preview mode like formatted i mean
+
+### Blockers
+
+1. **Include-module nodes must open the modal with the referenced MD rendered.** Clicking an include node (e.g. `@AGENT_ENFORCEMENT.md`) in the agent composition map should open the same module info modal, and the modal (and module detail page) should show the **content of the referenced `.md` file rendered as formatted markdown** ("preview mode"), not just the bare `@ref` line. Implies a server endpoint that reads the include target — restricted to refs registered in `MODULE_REGISTRY` (no arbitrary file reads).
+
+### Suggestions (non-blocking)
+
+None this round.
+
+### Notes
+
+- `/task-review-fix` picks this up.
