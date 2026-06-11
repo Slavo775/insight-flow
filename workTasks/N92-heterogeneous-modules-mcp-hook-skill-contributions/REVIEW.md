@@ -60,3 +60,38 @@ Round 4 (PR #68, commit `f9e1700`): `mcp-server`/`hook`/`skill` module kinds, th
 6. **Collateral fix (disclosed, found while verifying):** running `--compose --apply` inside a *consumer* project used to **create** the 9 root role files there (observed live in the playground). The apply path now only updates role files that already exist (`skipped <file> (not present in this project)` otherwise) — no behavior change in the canonical repo, where they always exist. Stray files created during verification were removed.
 
 **Gates:** build ✅ · tests **112/112** (regression + collision + key-order tests added) ✅ · lint at main baseline ✅ · role files byte-stable · playground end-to-end re-verified (apply → routine regen → pilot intact → reapply unchanged).
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-11
+**Verdict:** approved
+
+### Summary
+
+Human accepted the fixed task and merged PR #68; task closed to `done`. Human's exact comment:
+
+> fixed done i already merged it
+
+### Checklist verification
+
+- Re-review of the fix cycle: the manifest-clobbering blocker and all non-blocking items confirmed addressed (see Fix section above); gates green (build, 112/112, lint at baseline, role files byte-stable).
+
+### Blockers
+
+None — approved.
+
+### Non-blocking
+
+None this round.
+
+### Security & edge cases
+
+None this round.
+
+### Notes
+
+- Round 4 of the composer line lands: heterogeneous modules + testing pilot. Remaining roadmap: Round 5 (dashboard agent-creator UI) + the integration catalogue (jira/figma/chrome, incl. multi-def `--def` revisit).
