@@ -354,7 +354,7 @@
       "title": "Dashboard module & agent browser — shared layout + interactive composition maps",
       "type": "feat",
       "priority": "medium",
-      "status": "pushed",
+      "status": "changes-requested",
       "folder": "workTasks/N93-dashboard-module-agent-browser-shared-layout-inter",
       "createdAt": "2026-06-11T15:00:43.870Z",
       "statusHistory": [
@@ -377,6 +377,11 @@
           "status": "pushed",
           "at": "2026-06-11T15:46:36.411Z",
           "by": "task-git"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-11T15:49:03.023Z",
+          "by": "task-request-changes"
         }
       ],
       "implementation": {
@@ -398,7 +403,18 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-11T15:49:03.022Z",
+          "description": "Agent map: open module info in a modal instead of navigating; render markdown content; add short description field to every module + agent in the JSON registry and show it",
+          "requestedBy": "task-request-changes",
+          "status": "requested",
+          "implementedAt": null,
+          "filesChanged": [],
+          "comment": null,
+          "implementedBy": null
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
