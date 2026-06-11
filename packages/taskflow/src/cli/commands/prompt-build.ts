@@ -189,22 +189,35 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
   //   `prompt-build --compose [<agent-id>] [--out <dir>] [--apply]`.
   // With no id, composes every known agent. With --out, writes <id>.composed.md
   // files; with --apply, writes each agent's canonical role file (the committed
-  // *_ROLE.md at the project root) and reports changed/unchanged per file.
-  // Without either, prints to stdout. Returns early — does not run enforcement.
+  // *_ROLE.md at the project root, resolved independently of cwd) and reports
+  // changed/unchanged per file. Without either, prints to stdout.
+  // Returns early — does not run enforcement.
   if (opts.compose) {
     const id = typeof opts.compose === "string" ? opts.compose : null;
     const ids = id ? [id] : listComposedAgents();
     const outDir = typeof opts.out === "string" ? resolve(cwd, opts.out) : null;
     if (outDir && !existsSync(outDir)) mkdirSync(outDir, { recursive: true });
+    let projectRoot: string;
+    try {
+      projectRoot = resolveProjectRoot(cwd);
+    } catch {
+      projectRoot = cwd;
+    }
     for (const agentId of ids) {
-      const md = composeAgentById(agentId);
+      let md: string;
+      try {
+        md = composeAgentById(agentId);
+      } catch (err) {
+        console.error(err instanceof Error ? err.message : String(err));
+        process.exit(1);
+      }
       if (opts.apply) {
         const fileName = AGENT_ROLE_FILE_MAP[agentId];
         if (!fileName) {
           console.error(`No role file mapping for composed agent '${agentId}' — skipping.`);
           continue;
         }
-        const target = join(cwd, fileName);
+        const target = join(projectRoot, fileName);
         const previous = existsSync(target) ? readFileSync(target, "utf-8") : null;
         if (previous === md) {
           console.log(`unchanged ${fileName}`);

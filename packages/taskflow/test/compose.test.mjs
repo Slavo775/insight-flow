@@ -120,6 +120,22 @@ test("bodies render exactly: trailing newline in a body encodes an extra blank l
   assert.equal(md, "ONE\n\nx\n\n\nTWO\n\ny\n", "double blank line preserved");
 });
 
+test("shared section modules compose a custom agent against the real registry", () => {
+  // minimal-diff / scope-guard / recorder-discipline have no shipped referents
+  // since the byte-exact migration; this keeps them exercised as composable units.
+  const md = composeAgent({
+    id: "custom-recorder",
+    title: "Custom Recorder",
+    modules: ["task-human-review/identity", "enforcement", "minimal-diff", "scope-guard", "recorder-discipline", "events"],
+  });
+  assert.match(md, /^ROLE: Insight-Flow Human Review Recorder/);
+  assert.ok(md.includes("@AGENT_ENFORCEMENT.md"));
+  assert.ok(md.includes("Never change code unrelated to the task at hand."), "minimal-diff renders");
+  assert.ok(md.includes("Ambiguous spec → ask, do not guess."), "scope-guard renders");
+  assert.ok(md.includes("Preserve the human's exact wording — do not rephrase or soften."), "recorder-discipline renders");
+  assert.ok(md.endsWith("@AGENT_EVENTS.md\n"));
+});
+
 test("repeated module refs are deduped (first occurrence wins)", () => {
   const def = {
     ...COMPOSED_AGENTS["task-implement"],

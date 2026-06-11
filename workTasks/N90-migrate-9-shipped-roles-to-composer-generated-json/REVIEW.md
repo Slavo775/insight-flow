@@ -46,3 +46,57 @@ None — approved.
 - 49 role-scoped modules and **zero cross-role byte-level section duplication** — empirically confirms the N88 audit; the composer's value is now structural (one model, one renderer, registry) rather than text dedup. Real text sharing arrives when wording is intentionally unified (the deferred wording task).
 - Reviewer caveat: implemented and reviewed in the same session; human review on PR #65 is the independent gate.
 - Roadmap: Round 4 — heterogeneous modules (MCP/hook/skill contributions, one real integration pilot); Round 5 — dashboard agent-creator UI. Plus the deferred wording-unification task now that drift is guarded.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-11
+**Verdict:** fix-needed
+
+### Summary
+
+Human directed that all five non-blocking items from the AI round be addressed now rather than deferred to Round 4. Human's exact comment:
+
+> fix all non blocking issues
+
+### Checklist verification
+
+- AI round accepted; this round converts its Non-blocking list (#1–#5) into the fix scope.
+
+### Blockers
+
+1. AI-round Non-blocking #1 — `--compose --apply` must resolve the project root, not `cwd`.
+2. AI-round Non-blocking #2 — commit the decomposition/migration script for the audit trail.
+3. AI-round Non-blocking #3 — manual consumer-project `init` smoke test.
+4. AI-round Non-blocking #4 — unknown-agent failure as proper CLI error (`console.error` + exit 1), not a raw throw.
+5. AI-round Non-blocking #5 — exercise the zero-referent shared modules (`minimal-diff`, `scope-guard`, `recorder-discipline`) against the real registry.
+
+### Non-blocking
+
+None this round.
+
+### Security & edge cases
+
+None this round.
+
+### Notes
+
+- `/task-review-fix` picks up all five in one cycle.
+
+
+---
+
+## Fix — Round 2 items resolved
+
+**By:** task-review-fix · **Date:** 2026-06-11
+
+1. **Project-root apply** ✅ — `prompt-build --compose --apply` resolves the target via `resolveProjectRoot(cwd)` (cwd fallback); verified from `packages/taskflow/`: reports `unchanged`, creates nothing in the subdirectory.
+2. **Migration script committed** ✅ — `packages/taskflow/scripts/decompose-roles.mjs`, with a `--force` guard refusing to run by default (JSON is canonical; the script would overwrite it from MD).
+3. **Init smoke test** ✅ — fresh `/tmp` consumer dir: `init --yes` scaffolds all 9 roles + 6 `AGENT_*.md` partials, every standalone `@include` resolves, and the scaffolded `TASK_IMPLEMENTER_ROLE.md` is byte-identical to the generated root file.
+4. **Clean CLI error** ✅ — unknown agent now prints the one-line "Unknown composed agent…" message and exits 1 (no stack trace).
+5. **Shared modules exercised** ✅ — new test composes a custom agent from `minimal-diff` + `scope-guard` + `recorder-discipline` (+ a role identity and includes) against the real registry.
+
+**Gates:** build ✅ · tests 100/100 (one new) ✅ · lint at main baseline ✅ · role files untouched (drift suite still green).
