@@ -2,7 +2,9 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { join, resolve } from "node:path";
 import type { ParsedArgs, TaskflowConfig, AgentGitPermissions } from "../../core/types.js";
 import { applyAgentExtensions, AGENT_ROLE_FILE_MAP } from "../../agents/agents.js";
-import { composeAgentById, listComposedAgents } from "../../agents/compose.js";
+import { composeAgent, collectArtifacts, COMPOSED_AGENTS } from "../../agents/compose.js";
+import { applyArtifacts } from "../../agents/emit.js";
+import { ComposedAgentSchema } from "../../core/schema/index.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 
 function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
@@ -185,16 +187,17 @@ export function applyEnforcement(
 export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
   const cwd = process.cwd();
 
-  // N90 — agent-module composer (JSON canonical):
-  //   `prompt-build --compose [<agent-id>] [--out <dir>] [--apply]`.
-  // With no id, composes every known agent. With --out, writes <id>.composed.md
-  // files; with --apply, writes each agent's canonical role file (the committed
-  // *_ROLE.md at the project root, resolved independently of cwd) and reports
-  // changed/unchanged per file. Without either, prints to stdout.
-  // Returns early — does not run enforcement.
+  // N90/N92 — agent-module composer (JSON canonical):
+  //   `prompt-build --compose [<agent-id>] [--def <file.json>] [--out <dir>] [--apply]`.
+  // With no id, composes every known agent; `--def` loads an additional
+  // project-local composed-agent definition (Zod-validated) — the affordance
+  // that lets a consumer adopt integration modules without shipping a new
+  // built-in agent. With --out, writes <id>.composed.md files; with --apply,
+  // writes each agent's canonical role file (when a mapping exists) and emits
+  // the agent's mcp-server/hook/skill artifacts to the project root, all
+  // idempotently with per-target reporting. Returns early — no enforcement.
   if (opts.compose) {
     const id = typeof opts.compose === "string" ? opts.compose : null;
-    const ids = id ? [id] : listComposedAgents();
     const outDir = typeof opts.out === "string" ? resolve(cwd, opts.out) : null;
     if (outDir && !existsSync(outDir)) mkdirSync(outDir, { recursive: true });
     let projectRoot: string;
@@ -203,27 +206,57 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
     } catch {
       projectRoot = cwd;
     }
+
+    const defs = { ...COMPOSED_AGENTS };
+    try {
+      if (typeof opts.def === "string") {
+        const raw = JSON.parse(readFileSync(resolve(cwd, opts.def), "utf-8")) as unknown;
+        const custom = ComposedAgentSchema.parse(raw);
+        defs[custom.id] = custom;
+      }
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : String(err));
+      process.exit(1);
+    }
+    const ids = id ? [id] : Object.keys(defs);
+
     for (const agentId of ids) {
       let md: string;
+      let def: (typeof defs)[string];
       try {
-        md = composeAgentById(agentId);
+        def = defs[agentId];
+        if (!def) throw new Error(`Unknown composed agent '${agentId}'. Known: ${ids.join(", ")}`);
+        md = composeAgent(def);
       } catch (err) {
         console.error(err instanceof Error ? err.message : String(err));
         process.exit(1);
       }
       if (opts.apply) {
         const fileName = AGENT_ROLE_FILE_MAP[agentId];
-        if (!fileName) {
-          console.error(`No role file mapping for composed agent '${agentId}' — skipping.`);
-          continue;
-        }
-        const target = join(projectRoot, fileName);
-        const previous = existsSync(target) ? readFileSync(target, "utf-8") : null;
-        if (previous === md) {
-          console.log(`unchanged ${fileName}`);
+        const target = fileName ? join(projectRoot, fileName) : null;
+        if (target && existsSync(target)) {
+          const previous = readFileSync(target, "utf-8");
+          if (previous === md) {
+            console.log(`unchanged ${fileName}`);
+          } else {
+            writeFileSync(target, md);
+            console.log(`updated   ${fileName}`);
+          }
+        } else if (target) {
+          // Only update existing role files: the canonical repo always has
+          // them; consumer projects keep roles in rolesDir and must not get
+          // root-level copies created by a routine apply.
+          console.log(`skipped   ${fileName} (not present in this project)`);
         } else {
-          writeFileSync(target, md);
-          console.log(`${previous === null ? "created" : "updated"}   ${fileName}`);
+          console.log(`no role-file mapping for '${agentId}' — MD not written (artifacts only)`);
+        }
+        try {
+          for (const report of applyArtifacts(collectArtifacts(def), projectRoot, def.id)) {
+            console.log(`${report.action} ${report.target}`);
+          }
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : String(err));
+          process.exit(1);
         }
       } else if (outDir) {
         const target = join(outDir, `${agentId}.composed.md`);

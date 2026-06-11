@@ -6,20 +6,23 @@
 // stay byte-identical to the composer output (enforced by test/compose.test.mjs).
 // Edit the JSON, re-run compose-apply, commit both — never hand-edit role MD.
 //
-// A composed agent is a single ordered list of registered module ids rendered
-// as a pure sequence: each module emits one standalone block, in declared
-// order. Two module kinds:
+// A composed agent is a single ordered list of registered module ids. Text
+// kinds render as a pure sequence — each module emits one standalone block,
+// in declared order:
 //   - `section` — optional heading + body. Bodies are emitted exactly as
 //     authored (no trimming/squeezing) so generated files can be byte-exact;
 //     a trailing "\n" in a body encodes an extra blank line before the next
-//     block. A body-only section module directly following a section block
-//     joins it without a blank line (list/prose continuation).
+//     block. A body-only section module after a body-carrying section joins
+//     it without a blank line (list continuation); after a heading-only
+//     section it opens the section with a blank line.
 //   - `include` — a verbatim `@<ref>` line. Consecutive include modules are
 //     grouped without blank lines.
+// Non-text kinds (`mcp-server` | `hook` | `skill`, N92) are ignored by MD
+// composition and collected by `collectArtifacts` for agents/emit.ts.
 //
 // Registry: shared modules use flat ids ("enforcement"); role-scoped modules
-// are namespaced "<role>/<slug>" ("task-implement/input-contract").
-// No MCP/hook/skill contributions yet (Round 4).
+// are namespaced "<role>/<slug>" ("task-implement/input-contract");
+// integration modules "<integration>/<slug>" ("testing/hook").
 import type { z } from "zod";
 import { AgentModuleSchema, ComposedAgentSchema } from "../core/schema/index.js";
 
@@ -38,6 +41,7 @@ import taskReviewFixModules from "./modules/roles/task-review-fix.json";
 import taskHumanReviewModules from "./modules/roles/task-human-review.json";
 import taskIncidentModules from "./modules/roles/task-incident.json";
 import taskRequestChangesModules from "./modules/roles/task-request-changes.json";
+import testingModules from "./modules/integrations/testing.json";
 import taskAnalyze from "./composed/task-analyze.json";
 import taskmaster from "./composed/taskmaster.json";
 import taskmasterChange from "./composed/taskmaster-change.json";
@@ -83,6 +87,7 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     ...taskHumanReviewModules,
     ...taskIncidentModules,
     ...taskRequestChangesModules,
+    ...testingModules,
   ],
   AgentModuleSchema,
 );
@@ -106,18 +111,9 @@ export function listComposedAgents(): string[] {
   return Object.keys(COMPOSED_AGENTS);
 }
 
-/**
- * Compose a single agent definition into role Markdown.
- * Pure sequence: resolves `def.modules` against the registry (dedup by id,
- * declared order, unknown id throws before any output is produced) and emits
- * one block per module, byte-exactly. Separators: consecutive `include`
- * blocks join with "\n"; a body-only `section` block after a section joins
- * with "\n" (continuation); everything else joins with "\n\n".
- */
-export function composeAgent(
-  def: ComposedAgent,
-  registry: Record<string, AgentModule> = MODULE_REGISTRY,
-): string {
+// Resolve a def's module ids against the registry: dedup by id (first wins),
+// declared order, unknown id throws before any output is produced.
+function resolveModules(def: ComposedAgent, registry: Record<string, AgentModule>): AgentModule[] {
   const seen = new Set<string>();
   const mods: AgentModule[] = [];
   for (const id of def.modules) {
@@ -127,6 +123,47 @@ export function composeAgent(
     if (!mod) throw new Error(`Unknown module '${id}' referenced by agent '${def.id}'`);
     mods.push(mod);
   }
+  return mods;
+}
+
+/** The non-text contributions of a composed agent, in declared order. */
+export interface AgentArtifacts {
+  mcpServers: { name: string; config: Record<string, unknown> }[];
+  hooks: { event: string; matcher?: string; command: string }[];
+  skills: { name: string; content: string }[];
+}
+
+/** Collect an agent's `mcp-server` / `hook` / `skill` contributions (N92). */
+export function collectArtifacts(
+  def: ComposedAgent,
+  registry: Record<string, AgentModule> = MODULE_REGISTRY,
+): AgentArtifacts {
+  const out: AgentArtifacts = { mcpServers: [], hooks: [], skills: [] };
+  for (const mod of resolveModules(def, registry)) {
+    if (mod.kind === "mcp-server") out.mcpServers.push({ name: mod.name, config: mod.config });
+    else if (mod.kind === "hook")
+      out.hooks.push({ event: mod.event, matcher: mod.matcher, command: mod.command });
+    else if (mod.kind === "skill") out.skills.push({ name: mod.name, content: mod.content });
+  }
+  return out;
+}
+
+/**
+ * Compose a single agent definition into role Markdown.
+ * Pure sequence over the text kinds (`section` | `include`); non-text kinds
+ * are skipped here and surfaced via `collectArtifacts`. Separators:
+ * consecutive `include` blocks join with "\n"; a body-only `section` block
+ * after a body-carrying section joins with "\n" (continuation) and after a
+ * heading-only section with "\n\n" (opens it); everything else "\n\n".
+ */
+export function composeAgent(
+  def: ComposedAgent,
+  registry: Record<string, AgentModule> = MODULE_REGISTRY,
+): string {
+  const mods = resolveModules(def, registry).filter(
+    (m): m is Extract<AgentModule, { kind: "section" | "include" }> =>
+      m.kind === "section" || m.kind === "include",
+  );
 
   let out = "";
   mods.forEach((mod, i) => {

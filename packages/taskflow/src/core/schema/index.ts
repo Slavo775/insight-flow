@@ -242,12 +242,15 @@ export const HookEventInputSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// N89 — agent-module composition v2: everything is a module. A composed agent
+// N89/N92 — agent-module composition: everything is a module. A composed agent
 // is a single ordered list of registered module ids rendered as a pure
 // sequence (each module = one standalone block, no heading-targeted merging).
 // Shared modules use flat ids ("minimal-diff"); role-scoped modules are
-// namespaced as "<role>/<slug>" ("task-implement/input-contract").
-// Text-only for this round (no MCP/hook/skill contributions yet).
+// namespaced as "<role>/<slug>" ("task-implement/input-contract");
+// integration modules as "<integration>/<slug>" ("testing/hook").
+// N92 adds heterogeneous kinds: one contribution per module (siblings group an
+// integration), so MD composition stays a pure text sequence while `mcp-server`
+// / `hook` / `skill` modules feed the artifact emitter (agents/emit.ts).
 // ---------------------------------------------------------------------------
 
 const agentModuleBase = {
@@ -277,6 +280,34 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
     ...agentModuleBase,
     kind: z.literal("include"),
     ref: z.string().min(1),
+  }),
+  // MCP-server module: merged into the project's .mcp.json under
+  // `mcpServers[name]`, deduped by name (same-name different-config errors).
+  z.object({
+    ...agentModuleBase,
+    kind: z.literal("mcp-server"),
+    name: z.string().min(1),
+    config: z.record(z.string(), z.unknown()),
+  }),
+  // Hook module: a Claude Code settings hook registration, reconciled into
+  // `.claude/settings.json` via the taskflow-managed manifest.
+  z.object({
+    ...agentModuleBase,
+    kind: z.literal("hook"),
+    event: z.string().min(1),
+    matcher: z.string().optional(),
+    command: z.string().min(1),
+  }),
+  // Skill module: written to `.claude/skills/<name>/SKILL.md`. The name is a
+  // path segment — restrict it so it can never traverse.
+  z.object({
+    ...agentModuleBase,
+    kind: z.literal("skill"),
+    name: z
+      .string()
+      .min(1)
+      .regex(/^[a-z0-9][a-z0-9-]*$/, "skill name must be a safe path segment"),
+    content: z.string().min(1),
   }),
 ]);
 

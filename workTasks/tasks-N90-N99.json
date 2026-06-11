@@ -243,7 +243,7 @@
       "title": "Heterogeneous modules — MCP/hook/skill contributions + testing pilot",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "fixed",
       "folder": "workTasks/N92-heterogeneous-modules-mcp-hook-skill-contributions",
       "createdAt": "2026-06-11T11:59:33.595Z",
       "statusHistory": [
@@ -251,17 +251,64 @@
           "status": "ready",
           "at": "2026-06-11T11:59:33.595Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T13:10:30.773Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T13:22:10.378Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T13:22:41.288Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-11T13:33:51.172Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-11T13:35:19.002Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-11T13:36:21.578Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-11T13:41:01.130Z",
+          "by": "task-review-fix"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T13:10:30.773Z",
+        "completedAt": "2026-06-11T13:22:10.378Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/modules/integrations/testing.json",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/emit.test.mjs",
+          "playground/agents/test-runner.json",
+          "playground/.claude/settings.json",
+          "playground/.claude/skills/taskflow-run-tests/SKILL.md",
+          "playground/.claude/taskflow-managed.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -271,9 +318,15 @@
         "schema",
         "integrations"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/66",
+      "pushes": [
+        {
+          "at": "2026-06-11T13:22:41.287Z",
+          "commitHash": "f9e1700",
+          "commitMessage": "feat(N92): heterogeneous modules — mcp-server/hook/skill kinds + testing pilot"
+        }
+      ],
+      "branch": "feat/N92-heterogeneous-modules",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/68",
       "mergedAt": null
     }
   ]

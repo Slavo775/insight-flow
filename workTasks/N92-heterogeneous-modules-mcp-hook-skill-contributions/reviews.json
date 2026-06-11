@@ -1,0 +1,28 @@
+{
+  "taskId": "N92",
+  "reviews": [
+    {
+      "startedAt": "2026-06-11T13:33:51.173Z",
+      "endedAt": "2026-06-11T13:35:19.002Z",
+      "verdict": "fix-needed",
+      "comment": "Fix-needed — manifest is agent-agnostic: routine compose-apply deletes previously installed integration artifacts (reproduced); fix = per-agent manifest buckets + regression test",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-11T13:36:21.579Z",
+        "endedAt": "2026-06-11T13:41:01.130Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/test/emit.test.mjs",
+          "packages/taskflow/README.md",
+          "playground/.claude/taskflow-managed.json",
+          "playground/.claude/settings.json"
+        ],
+        "comment": "Fixed blocker (per-agent manifest buckets + regression test) and all 3 non-blocking items; collateral fix: compose-apply no longer creates role files in consumer projects",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
