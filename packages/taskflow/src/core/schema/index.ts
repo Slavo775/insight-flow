@@ -241,6 +241,44 @@ export const HookEventInputSchema = z.object({
   provider: z.string().optional(),
 });
 
+// ---------------------------------------------------------------------------
+// N88 — agent-module composition (spike). A module contributes prompt bullets
+// to a named section; a composed agent = core identity + shared @includes +
+// ordered role sections + referenced module ids. Text-only for this round
+// (no MCP/hook/skill contributions yet).
+// ---------------------------------------------------------------------------
+
+export const ModuleContributionSchema = z.object({
+  // Heading the bullets attach to in the composed prompt, e.g. "NEVER".
+  section: z.string().min(1),
+  bullets: z.array(z.string().min(1)).min(1),
+});
+
+export const AgentModuleSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  source: z.enum(["builtin", "custom"]).default("builtin"),
+  kind: z.literal("prompt").default("prompt"),
+  contribution: ModuleContributionSchema,
+});
+
+export const ComposedAgentSectionSchema = z.object({
+  heading: z.string().min(1),
+  // Pre-formatted role-specific lines/bullets. May be empty to reserve the
+  // section's position for a module's contribution.
+  body: z.string(),
+});
+
+export const ComposedAgentSchema = z.object({
+  id: z.string().min(1),
+  roleLine: z.string().min(1),
+  intro: z.string().min(1),
+  includes: z.array(z.string()).default([]),
+  sections: z.array(ComposedAgentSectionSchema).default([]),
+  modules: z.array(z.string()).default([]),
+  trailingIncludes: z.array(z.string()).default([]),
+});
+
 export class TaskflowValidationError extends Error {
   readonly file: string;
   readonly issuePath: string;

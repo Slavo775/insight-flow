@@ -759,6 +759,65 @@
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/62",
       "mergedAt": "2026-06-10T16:56:56.042Z"
+    },
+    {
+      "id": "N88",
+      "title": "Agent-module composer spike",
+      "type": "feat",
+      "priority": "medium",
+      "status": "implemented",
+      "folder": "workTasks/N88-agent-module-composer-spike",
+      "createdAt": "2026-06-10T19:02:18.010Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-10T19:02:18.010Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-10T19:13:07.719Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T05:24:16.925Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-10T19:13:07.719Z",
+        "completedAt": "2026-06-11T05:24:16.925Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/minimal-diff.json",
+          "packages/taskflow/src/agents/modules/scope-guard.json",
+          "packages/taskflow/src/agents/composed/task-implement.json",
+          "packages/taskflow/src/agents/composed/task-review-fix.json",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/tsconfig.json",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "composer",
+        "schema"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
