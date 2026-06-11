@@ -135,7 +135,7 @@
       "title": "Unify near-duplicate role wording onto shared modules",
       "type": "rework",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N91-unify-near-duplicate-role-wording-onto-shared-modu",
       "createdAt": "2026-06-11T11:57:57.972Z",
       "statusHistory": [
@@ -153,6 +153,11 @@
           "status": "implemented",
           "at": "2026-06-11T12:12:23.894Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T12:12:53.606Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -192,9 +197,15 @@
         "prompts",
         "wording"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/66",
+      "pushes": [
+        {
+          "at": "2026-06-11T12:12:53.606Z",
+          "commitHash": "955ba04",
+          "commitMessage": "rework(N91): unify near-duplicate role wording onto shared modules"
+        }
+      ],
+      "branch": "rework/N91-unify-role-wording",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/67",
       "mergedAt": null
     },
     {
