@@ -153,3 +153,45 @@ None this round.
 - **R2 (DRY)** ✅ — extracted `indexById<T>(items, schema)` in `src/agents/compose.ts`; both `MODULE_REGISTRY` and `COMPOSED_AGENTS` build through it. Behaviour preserved (last-wins on id collision). The dup-id *guard* (AI non-blocking #4) was **not** added — it changes behaviour and wasn't authorised, so left out per scope guard.
 - **R3 (includes-as-modules)** ✅ — `ModuleContributionSchema` is now a discriminated union on `kind` (`prompt` | `include`). Added two include-modules: `enforcement` (`@AGENT_ENFORCEMENT.md`) and `protocol` (`@AGENT_PROTOCOL.md`), one per file as requested. Both composed agents drop their literal `includes` array and reference the modules; the composer renders include-modules in the includes region (deduped, in declared order). `@AGENT_EVENTS.md` left as `trailingIncludes` (not in scope, per the human's note). Sections unchanged.
 - **Gates:** typecheck + lint clean; 96/96 tests (incl. 2 new include-module tests). Composed MD diff vs the hand-written roles is unchanged (same semantic-only deltas) — reproduction still holds.
+
+
+---
+
+## Round 4 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-11
+**Verdict:** approved
+
+### Summary
+
+Human asked what distinguishes sections from modules and proposed unifying everything into modules (sections become `kind: "section"`; `includes`/`trailingIncludes` removed — only `modules`). Resolved as a **Round 2 direction**, not a blocker. N88 **approved** as-is — the spike proved the core model and the R2 + R3 fixes are in.
+
+### Checklist verification
+
+- Re-review of the fixed task: R2 (DRY via `indexById`) + R3 (includes-as-modules) confirmed addressed; gates green (typecheck/lint, 96/96 tests); composed-MD reproduction unchanged.
+- [ ] Behavioral validation still open — carried forward (acceptable for a spike).
+
+### Blockers
+
+None — approved.
+
+### Non-blocking
+
+None this round.
+
+### Security & edge cases
+
+None this round.
+
+### Notes — Round 2 direction: "everything is a module"
+
+Human's exact comment:
+
+> whats is different between sections and modules? shouldnt be sections also the module but kind section? also includes shouldnt be exist it should exist only modules
+
+Resolved direction (from clarifying Q&A — not a rephrase; **for the Round 2 task spec, not N88**):
+- **Unify into modules** — a composed-agent becomes a single ordered `modules` list. Sections become `kind: "section"` modules; `includes` + `trailingIncludes` are removed (every include/event is a module). One primitive, one ordered list → makes the eventual drag-and-drop UI trivial.
+- **Merge model: pure sequence** — each module renders as a standalone block in declared order. Drop the "target a heading and merge bullets" behavior; the author controls placement explicitly. (This collapses the current `prompt`-vs-`section` split toward ordered blocks.)
+- **Open design note (flagged, not human-decided):** to avoid registry bloat from single-use bespoke content, let the `modules` list mix shared id-refs with inline module objects. Decide in the Round 2 spec.
+- **Scope:** Round 2 (registry / model-redesign round), explicitly **not** N88. This **supersedes the Round 3 "sections stay as-is" decision** going forward.
