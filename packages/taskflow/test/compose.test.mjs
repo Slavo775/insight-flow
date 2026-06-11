@@ -1,9 +1,9 @@
 /**
  * N88 — agent-module composer spike.
- * Validates the "core + stacked modules" model: schema-valid data, reuse of
- * shared modules across two agents, merge vs module-only sections, dedup, and
- * semantic reproduction of the hand-written role files. Requires a prior build
- * (tests import from ../dist/index.js).
+ * Validates the "core + stacked modules" model: schema-valid data, two
+ * contribution kinds (prompt + include), reuse of shared modules across two
+ * agents, merge vs module-only sections, dedup, and semantic reproduction of
+ * the hand-written role files. Requires a prior build (imports from dist).
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -22,8 +22,14 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, "../../.."); // packages/taskflow/test → repo root
 
 test("registry + agents load and are schema-valid", () => {
-  assert.ok(MODULE_REGISTRY["minimal-diff"], "minimal-diff module present");
-  assert.ok(MODULE_REGISTRY["scope-guard"], "scope-guard module present");
+  for (const id of ["minimal-diff", "scope-guard", "enforcement", "protocol"]) {
+    assert.ok(MODULE_REGISTRY[id], `${id} module present`);
+  }
+  // include-modules carry a verbatim ref; prompt-modules carry bullets
+  assert.equal(MODULE_REGISTRY["enforcement"].contribution.kind, "include");
+  assert.equal(MODULE_REGISTRY["enforcement"].contribution.ref, "AGENT_ENFORCEMENT.md");
+  assert.equal(MODULE_REGISTRY["protocol"].contribution.ref, "AGENT_PROTOCOL.md");
+  assert.equal(MODULE_REGISTRY["minimal-diff"].contribution.kind, "prompt");
   assert.deepEqual(listComposedAgents().sort(), ["task-implement", "task-review-fix"]);
 });
 
@@ -42,13 +48,31 @@ test("composed task-implement reproduces role structure + merged modules", () =>
   ]) {
     assert.ok(md.includes(h), `missing section ${h}`);
   }
-  // role-specific bullet preserved alongside the merged shared module bullets
   assert.ok(md.includes('Never implement items listed under TASK.md "Out of scope".'));
   assert.ok(md.includes("Never refactor"), "minimal-diff module merged into NEVER");
   assert.ok(md.includes("Ambiguous spec → ask, do not guess."), "scope-guard merged into SCOPE GUARD");
 });
 
-test("both agents reuse the same shared modules (reuse proven)", () => {
+test("@includes now come from include-modules, not the literal includes array", () => {
+  // both shared includes were migrated to modules; the literal `includes` is empty
+  assert.deepEqual(COMPOSED_AGENTS["task-implement"].includes, []);
+  assert.deepEqual(COMPOSED_AGENTS["task-review-fix"].includes, []);
+  for (const id of ["task-implement", "task-review-fix"]) {
+    const md = composeAgentById(id);
+    assert.ok(md.includes("@AGENT_ENFORCEMENT.md"), `${id} missing enforcement include`);
+    assert.ok(md.includes("@AGENT_PROTOCOL.md"), `${id} missing protocol include`);
+    assert.equal(md.split("@AGENT_ENFORCEMENT.md").length - 1, 1, "include ref appears once");
+  }
+});
+
+test("include-module refs are deduped", () => {
+  const def = { ...COMPOSED_AGENTS["task-implement"], modules: ["enforcement", "enforcement", "protocol"] };
+  const md = composeAgent(def);
+  assert.equal(md.split("@AGENT_ENFORCEMENT.md").length - 1, 1, "enforcement ref deduped");
+  assert.equal(md.split("@AGENT_PROTOCOL.md").length - 1, 1);
+});
+
+test("both agents reuse the same shared prompt-modules", () => {
   const sharedNever = MODULE_REGISTRY["minimal-diff"].contribution.bullets[0];
   const sharedScope = MODULE_REGISTRY["scope-guard"].contribution.bullets[0];
   for (const id of ["task-implement", "task-review-fix"]) {
@@ -58,23 +82,20 @@ test("both agents reuse the same shared modules (reuse proven)", () => {
   }
 });
 
-test("module fills a reserved empty section (fixer NEVER is module-only)", () => {
+test("prompt-module fills a reserved empty section (fixer NEVER is module-only)", () => {
   const md = composeAgentById("task-review-fix");
-  // fixer declares NEVER with an empty body; minimal-diff supplies its content
-  const neverIdx = md.indexOf("NEVER");
-  assert.ok(neverIdx > -1, "NEVER heading present");
+  assert.ok(md.includes("NEVER"), "NEVER heading present");
   assert.ok(md.includes(MODULE_REGISTRY["minimal-diff"].contribution.bullets[1]));
 });
 
-test("duplicate module refs are deduped", () => {
+test("duplicate prompt-module refs are deduped", () => {
   const def = {
     ...COMPOSED_AGENTS["task-implement"],
     modules: ["minimal-diff", "minimal-diff", "scope-guard"],
   };
   const md = composeAgent(def);
   const needle = MODULE_REGISTRY["minimal-diff"].contribution.bullets[0];
-  const count = md.split(needle).length - 1;
-  assert.equal(count, 1, "deduped module bullet should appear exactly once");
+  assert.equal(md.split(needle).length - 1, 1, "deduped module bullet should appear exactly once");
 });
 
 test("unknown module ref throws", () => {

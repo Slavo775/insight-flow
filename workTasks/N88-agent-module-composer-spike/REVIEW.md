@@ -142,3 +142,14 @@ None this round.
 - This expands N88 beyond a pure spike (the module schema gains a second contribution kind). Accepted by the human.
 - **Not invented / out of this blocker:** the human specified only `AGENT_ENFORCEMENT.md` + `AGENT_PROTOCOL.md`. `@AGENT_EVENTS.md` (the `trailingIncludes` entry) was **not** mentioned — fixer should leave it as-is unless the human says otherwise.
 - Fixer now has **two blockers**: (1) Round 2 — DRY the registry construction; (2) Round 3 — include-modules. `/task-review-fix` should address both in one cycle.
+
+
+---
+
+## Fix — Rounds 2 & 3 blockers resolved
+
+**By:** task-review-fix · **Date:** 2026-06-11
+
+- **R2 (DRY)** ✅ — extracted `indexById<T>(items, schema)` in `src/agents/compose.ts`; both `MODULE_REGISTRY` and `COMPOSED_AGENTS` build through it. Behaviour preserved (last-wins on id collision). The dup-id *guard* (AI non-blocking #4) was **not** added — it changes behaviour and wasn't authorised, so left out per scope guard.
+- **R3 (includes-as-modules)** ✅ — `ModuleContributionSchema` is now a discriminated union on `kind` (`prompt` | `include`). Added two include-modules: `enforcement` (`@AGENT_ENFORCEMENT.md`) and `protocol` (`@AGENT_PROTOCOL.md`), one per file as requested. Both composed agents drop their literal `includes` array and reference the modules; the composer renders include-modules in the includes region (deduped, in declared order). `@AGENT_EVENTS.md` left as `trailingIncludes` (not in scope, per the human's note). Sections unchanged.
+- **Gates:** typecheck + lint clean; 96/96 tests (incl. 2 new include-module tests). Composed MD diff vs the hand-written roles is unchanged (same semantic-only deltas) — reproduction still holds.

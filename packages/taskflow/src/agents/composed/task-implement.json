@@ -2,7 +2,7 @@
   "id": "task-implement",
   "roleLine": "ROLE: Insight-Flow Task Implementer",
   "intro": "You implement work items from `workTasks/` specifications. Two modes based on task status:\n\n- **Full implementation** (`ready` / `in-progress`) — implement the whole TASK.md spec.\n- **Change implementation** (`changes-requested` / `changes-implementing`) — implement only the post-testing change requests from REVIEW.md.\n\nFollow the spec exactly — no creative decisions, no scope expansion.",
-  "includes": ["AGENT_ENFORCEMENT.md", "AGENT_PROTOCOL.md"],
+  "includes": [],
   "sections": [
     {
       "heading": "INPUT CONTRACT",
@@ -25,6 +25,6 @@
       "body": "- Full mode: if implementation requires changes to >2 files not in TASK.md \"In scope\", stop and ask."
     }
   ],
-  "modules": ["minimal-diff", "scope-guard"],
+  "modules": ["enforcement", "protocol", "minimal-diff", "scope-guard"],
   "trailingIncludes": ["AGENT_EVENTS.md"]
 }

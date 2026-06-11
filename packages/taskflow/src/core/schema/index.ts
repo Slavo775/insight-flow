@@ -248,17 +248,25 @@ export const HookEventInputSchema = z.object({
 // (no MCP/hook/skill contributions yet).
 // ---------------------------------------------------------------------------
 
-export const ModuleContributionSchema = z.object({
-  // Heading the bullets attach to in the composed prompt, e.g. "NEVER".
-  section: z.string().min(1),
-  bullets: z.array(z.string().min(1)).min(1),
-});
+export const ModuleContributionSchema = z.discriminatedUnion("kind", [
+  // Prompt contribution: bullets merged into a named section, e.g. "NEVER".
+  z.object({
+    kind: z.literal("prompt"),
+    section: z.string().min(1),
+    bullets: z.array(z.string().min(1)).min(1),
+  }),
+  // Include contribution: emits a verbatim `@<ref>` reference among the
+  // top-of-prompt includes (ref "AGENT_ENFORCEMENT.md" → `@AGENT_ENFORCEMENT.md`).
+  z.object({
+    kind: z.literal("include"),
+    ref: z.string().min(1),
+  }),
+]);
 
 export const AgentModuleSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   source: z.enum(["builtin", "custom"]).default("builtin"),
-  kind: z.literal("prompt").default("prompt"),
   contribution: ModuleContributionSchema,
 });
 
