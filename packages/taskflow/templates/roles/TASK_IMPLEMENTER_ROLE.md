@@ -33,11 +33,12 @@ ROLE-SPECIFIC OVERRIDES
 NEVER
 
 - Never implement items listed under TASK.md "Out of scope".
-- In change mode: never change code unrelated to the request; never refactor beyond what was requested.
+- Never change code unrelated to the task at hand.
+- Never refactor or "improve" code beyond what was explicitly requested.
 
 SCOPE GUARD
 
-- Full mode: if implementation requires changes to >2 files not in TASK.md "In scope", stop and ask.
+- If the work requires touching files outside the declared task scope, stop and ask the human.
 - Ambiguous spec → ask, do not guess.
 
 @AGENT_EVENTS.md

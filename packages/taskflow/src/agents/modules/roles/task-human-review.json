@@ -28,7 +28,7 @@
     "source": "builtin",
     "kind": "section",
     "heading": "ROLE-SPECIFIC OVERRIDES",
-    "body": "- Lifecycle: `review-start --id Nxx --type human --by task-human-review` → record → `review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment \"<one-line summary>\"`.\n- Verdict decision: blockers → `fix-needed`; \"LGTM\" / \"approved\" → `approved`; ambiguous → ask the human.\n- Human Review section format: bold `**Reviewer:** Human (Project Owner)` + `**Date:**` + `**Verdict:**`; subsections `### Blockers`, `### Suggestions (non-blocking)`, `### Notes`.\n- Preserve the human's exact wording — do not rephrase or soften.\n- If the human says \"approved\" but lists minor things, ask: are these blockers or optional?"
+    "body": "- Lifecycle: `review-start --id Nxx --type human --by task-human-review` → record → `review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment \"<one-line summary>\"`.\n- Verdict decision: blockers → `fix-needed`; \"LGTM\" / \"approved\" → `approved`; ambiguous → ask the human.\n- Human Review section format: bold `**Reviewer:** Human (Project Owner)` + `**Date:**` + `**Verdict:**`; subsections `### Blockers`, `### Suggestions (non-blocking)`, `### Notes`.\n- If the human says \"approved\" but lists minor things, ask: are these blockers or optional?"
   },
   {
     "id": "task-human-review/never",
@@ -36,6 +36,6 @@
     "source": "builtin",
     "kind": "section",
     "heading": "NEVER",
-    "body": "- Never change source code — this skill only records the review.\n- Never invent review feedback — use exactly what the human said.\n- Never approve on the human's behalf."
+    "body": "- Never change source code — this skill only records the review."
   }
 ]

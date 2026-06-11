@@ -102,6 +102,25 @@ test("consecutive include modules render adjacent, like hand-written roles", () 
   assert.ok(md.includes("@AGENT_ENFORCEMENT.md\n@AGENT_PROTOCOL.md"), "includes grouped");
 });
 
+test("shared discipline modules are each referenced by ≥2 composed agents (N91)", () => {
+  for (const shared of ["minimal-diff", "scope-guard", "recorder-discipline"]) {
+    const referents = Object.values(COMPOSED_AGENTS).filter((d) => d.modules.includes(shared));
+    assert.ok(
+      referents.length >= 2,
+      `${shared} referenced by ${referents.length} agents — wording unification regressed`,
+    );
+  }
+});
+
+test("heading-only section module opens its section with a blank line before the shared body", () => {
+  const registry = {
+    head: { id: "head", title: "H", source: "builtin", kind: "section", heading: "NEVER" },
+    cont: { id: "cont", title: "C", source: "builtin", kind: "section", body: "- shared bullet" },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["head", "cont"] }, registry);
+  assert.equal(md, "NEVER\n\n- shared bullet\n");
+});
+
 test("continuation rule: body-only section module joins the previous section without a blank line", () => {
   const registry = {
     head: { id: "head", title: "H", source: "builtin", kind: "section", heading: "NEVER", body: "- own bullet" },
