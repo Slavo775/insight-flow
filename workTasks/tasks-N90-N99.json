@@ -556,7 +556,7 @@
       "title": "Bundle module kind — modules composed of modules",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N95-bundle-module-kind-modules-composed-of-modules",
       "createdAt": "2026-06-11T20:27:05.905Z",
       "statusHistory": [
@@ -574,6 +574,11 @@
           "status": "implemented",
           "at": "2026-06-11T20:38:45.365Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T20:39:30.245Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -604,9 +609,15 @@
         "schema",
         "bundles"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/71",
+      "pushes": [
+        {
+          "at": "2026-06-11T20:39:30.244Z",
+          "commitHash": "2beac58",
+          "commitMessage": "feat(N95): bundle module kind"
+        }
+      ],
+      "branch": "feat/N95-bundle-module-kind",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/72",
       "mergedAt": null
     },
     {
