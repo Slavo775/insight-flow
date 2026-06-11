@@ -9,7 +9,7 @@
       "title": "Migrate 9 shipped roles to composer-generated (JSON canonical)",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N90-migrate-9-shipped-roles-to-composer-generated-json",
       "createdAt": "2026-06-11T09:35:23.637Z",
       "statusHistory": [
@@ -27,6 +27,11 @@
           "status": "implemented",
           "at": "2026-06-11T09:48:06.061Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T09:49:13.506Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -69,8 +74,14 @@
         "migration",
         "registry"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-11T09:49:13.506Z",
+          "commitHash": "b2011b6",
+          "commitMessage": "feat(N90): migrate 9 shipped roles to composer-generated (JSON canonical)"
+        }
+      ],
+      "branch": "feat/N90-migrate-roles-to-composer-generated",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/65",
       "mergedAt": null
     }
