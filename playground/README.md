@@ -43,3 +43,7 @@ To prove the `workDir` is configurable, edit `taskflow.config.json`:
 ```
 
 and the dashboard will read from that directory instead.
+
+## Composed-agent validation
+
+This playground was driven by the N89 composed `task-implement` prompt on 2026-06-11 (behavioral validation run).

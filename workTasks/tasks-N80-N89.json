@@ -905,7 +905,7 @@
       "title": "Agent composition model v2 — everything is a module + registry",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N89-agent-composition-model-v2-everything-is-a-module-",
       "createdAt": "2026-06-11T07:16:19.496Z",
       "statusHistory": [
@@ -913,12 +913,38 @@
           "status": "ready",
           "at": "2026-06-11T07:16:19.496Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T07:21:18.463Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T07:30:10.391Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T07:21:18.462Z",
+        "completedAt": "2026-06-11T07:30:10.390Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/enforcement.json",
+          "packages/taskflow/src/agents/modules/protocol.json",
+          "packages/taskflow/src/agents/modules/events.json",
+          "packages/taskflow/src/agents/modules/minimal-diff.json",
+          "packages/taskflow/src/agents/modules/scope-guard.json",
+          "packages/taskflow/src/agents/modules/recorder-discipline.json",
+          "packages/taskflow/src/agents/modules/roles/task-implement.json",
+          "packages/taskflow/src/agents/modules/roles/task-review-fix.json",
+          "packages/taskflow/src/agents/composed/task-implement.json",
+          "packages/taskflow/src/agents/composed/task-review-fix.json",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/compose.test.mjs",
+          "playground/README.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

@@ -1,5 +1,8 @@
 {
-  "range": { "from": 0, "to": 9 },
+  "range": {
+    "from": 0,
+    "to": 9
+  },
   "tasks": [
     {
       "id": "N00",
@@ -10,17 +13,43 @@
       "folder": "workTasks/N00-document-upload-feedback",
       "createdAt": "2026-05-01T19:58:00Z",
       "statusHistory": [
-        { "status": "ready", "at": "2026-05-01T19:58:00Z", "by": "taskmaster" },
-        { "status": "in-progress", "at": "2026-05-01T18:31:28.187Z", "by": "task-implement" },
-        { "status": "reviewing", "at": "2026-05-01T18:59:03.482Z", "by": "task-review" },
-        { "status": "approved", "at": "2026-05-01T19:01:39.663Z", "by": "task-review" },
-        { "status": "pushed", "at": "2026-05-01T19:15:29.935Z", "by": "task-git" },
-        { "status": "merged", "at": "2026-05-01T19:17:55.563Z", "by": "task-git" }
+        {
+          "status": "ready",
+          "at": "2026-05-01T19:58:00Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-01T18:31:28.187Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-01T18:59:03.482Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-01T19:01:39.663Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-05-01T19:15:29.935Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-01T19:17:55.563Z",
+          "by": "task-git"
+        }
       ],
       "implementation": {
         "startedAt": "2026-05-01T18:31:28.186Z",
         "completedAt": "2026-05-01T18:33:43.184Z",
-        "filesChanged": ["apps/web/src/components/documents/document-list-client.tsx"],
+        "filesChanged": [
+          "apps/web/src/components/documents/document-list-client.tsx"
+        ],
         "tokensUsed": null
       },
       "reviews": [
@@ -38,7 +67,11 @@
       "incidents": [],
       "committedAt": null,
       "totalDurationMinutes": -40,
-      "tags": ["web", "ux", "documents"],
+      "tags": [
+        "web",
+        "ux",
+        "documents"
+      ],
       "pushes": [
         {
           "at": "2026-05-01T19:15:29.935Z",
@@ -59,16 +92,56 @@
       "folder": "workTasks/N01-fix-s3-minio-presigned-url-and-cors-issues",
       "createdAt": "2026-05-01T19:36:11.346Z",
       "statusHistory": [
-        { "status": "ready", "at": "2026-05-01T19:36:11.346Z", "by": "taskmaster" },
-        { "status": "in-progress", "at": "2026-05-01T19:38:59.023Z", "by": "task-implement" },
-        { "status": "implemented", "at": "2026-05-01T19:43:39.578Z", "by": "task-implement" },
-        { "status": "reviewing", "at": "2026-05-01T19:49:45.284Z", "by": "task-review" },
-        { "status": "approved", "at": "2026-05-01T19:51:13.987Z", "by": "task-review" },
-        { "status": "fix-needed", "at": "2026-05-01T20:11:18.370Z", "by": "task-review" },
-        { "status": "fixing", "at": "2026-05-01T20:17:18.574Z", "by": "task-review-fix" },
-        { "status": "fixed", "at": "2026-05-01T20:19:40.568Z", "by": "task-review-fix" },
-        { "status": "approved", "at": "2026-05-01T20:28:55.555Z", "by": "task-human-review" },
-        { "status": "merged", "at": "2026-05-01T20:34:01.223Z", "by": "task-git" }
+        {
+          "status": "ready",
+          "at": "2026-05-01T19:36:11.346Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-01T19:38:59.023Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-01T19:43:39.578Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-01T19:49:45.284Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-01T19:51:13.987Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-01T20:11:18.370Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-01T20:17:18.574Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-01T20:19:40.568Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-01T20:28:55.555Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-01T20:34:01.223Z",
+          "by": "task-git"
+        }
       ],
       "implementation": {
         "startedAt": "2026-05-01T19:38:59.022Z",
@@ -124,7 +197,12 @@
       "incidents": [],
       "committedAt": null,
       "totalDurationMinutes": 58,
-      "tags": ["storage", "minio", "s3", "documents"],
+      "tags": [
+        "storage",
+        "minio",
+        "s3",
+        "documents"
+      ],
       "pushes": [
         {
           "at": "2026-05-01T19:44:38.083Z",
@@ -150,17 +228,44 @@
       "folder": "workTasks/N02-fix-socket-io-websocket-proxy-and-reconnect-toast",
       "createdAt": "2026-05-01T20:40:53.825Z",
       "statusHistory": [
-        { "status": "ready", "at": "2026-05-01T20:40:53.826Z", "by": "taskmaster" },
-        { "status": "in-progress", "at": "2026-05-01T20:44:32.275Z", "by": "task-implement" },
-        { "status": "implemented", "at": "2026-05-01T20:45:49.206Z", "by": "task-implement" },
-        { "status": "reviewing", "at": "2026-05-01T20:47:52.734Z", "by": "task-review" },
-        { "status": "approved", "at": "2026-05-01T20:56:08.716Z", "by": "task-review" },
-        { "status": "merged", "at": "2026-05-01T20:58:00.718Z", "by": "task-git" }
+        {
+          "status": "ready",
+          "at": "2026-05-01T20:40:53.826Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-01T20:44:32.275Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-01T20:45:49.206Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-01T20:47:52.734Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-05-01T20:56:08.716Z",
+          "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-05-01T20:58:00.718Z",
+          "by": "task-git"
+        }
       ],
       "implementation": {
         "startedAt": "2026-05-01T20:44:32.274Z",
         "completedAt": "2026-05-01T20:45:49.205Z",
-        "filesChanged": ["infra/caddy/Caddyfile", "apps/web/src/hooks/useRealTimeNotifications.ts"],
+        "filesChanged": [
+          "infra/caddy/Caddyfile",
+          "apps/web/src/hooks/useRealTimeNotifications.ts"
+        ],
         "tokensUsed": null
       },
       "reviews": [
@@ -187,7 +292,12 @@
       "incidents": [],
       "committedAt": null,
       "totalDurationMinutes": 17,
-      "tags": ["caddy", "socket.io", "websocket", "web"],
+      "tags": [
+        "caddy",
+        "socket.io",
+        "websocket",
+        "web"
+      ],
       "pushes": [
         {
           "at": "2026-05-01T20:46:31.731Z",
@@ -208,14 +318,46 @@
       "folder": "workTasks/N03-add-multi-file-attachment-upload-to-expense-detail",
       "createdAt": "2026-05-01T21:08:47.381Z",
       "statusHistory": [
-        { "status": "ready", "at": "2026-05-01T21:08:47.382Z", "by": "taskmaster" },
-        { "status": "in-progress", "at": "2026-05-01T21:16:51.257Z", "by": "task-implement" },
-        { "status": "implemented", "at": "2026-05-01T21:24:22.878Z", "by": "task-implement" },
-        { "status": "reviewing", "at": "2026-05-01T21:38:20.201Z", "by": "task-human-review" },
-        { "status": "fix-needed", "at": "2026-05-01T21:38:37.824Z", "by": "task-human-review" },
-        { "status": "fixing", "at": "2026-05-01T22:01:00.490Z", "by": "task-review-fix" },
-        { "status": "fixed", "at": "2026-05-02T08:15:20.011Z", "by": "task-review-fix" },
-        { "status": "fix-needed", "at": "2026-05-02T08:19:35.281Z", "by": "task-human-review" }
+        {
+          "status": "ready",
+          "at": "2026-05-01T21:08:47.382Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-05-01T21:16:51.257Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-05-01T21:24:22.878Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-05-01T21:38:20.201Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-01T21:38:37.824Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-05-01T22:01:00.490Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-05-02T08:15:20.011Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-05-02T08:19:35.281Z",
+          "by": "task-human-review"
+        }
       ],
       "implementation": {
         "startedAt": "2026-05-01T21:16:51.256Z",
@@ -265,7 +407,12 @@
       ],
       "committedAt": null,
       "totalDurationMinutes": null,
-      "tags": ["web", "api", "s3", "expenses"],
+      "tags": [
+        "web",
+        "api",
+        "s3",
+        "expenses"
+      ],
       "pushes": [
         {
           "at": "2026-05-01T21:25:18.275Z",
@@ -280,6 +427,54 @@
       ],
       "branch": "feat/N03-expense-attachment-upload",
       "mrUrl": "https://github.com/example/repo/pull/38",
+      "mergedAt": null
+    },
+    {
+      "id": "N04",
+      "title": "Add composed-agent validation note to README",
+      "type": "feat",
+      "priority": "low",
+      "status": "implemented",
+      "folder": "workTasks/N04-add-composed-agent-validation-note-to-readme",
+      "createdAt": "2026-06-11T07:28:46.573Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-11T07:28:46.573Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T07:29:29.910Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T07:29:39.410Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-11T07:29:29.909Z",
+        "completedAt": "2026-06-11T07:29:39.410Z",
+        "filesChanged": [
+          "README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "n89",
+        "validation"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null
     }
   ]

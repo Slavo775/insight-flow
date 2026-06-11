@@ -242,49 +242,49 @@ export const HookEventInputSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// N88 — agent-module composition (spike). A module contributes prompt bullets
-// to a named section; a composed agent = core identity + shared @includes +
-// ordered role sections + referenced module ids. Text-only for this round
-// (no MCP/hook/skill contributions yet).
+// N89 — agent-module composition v2: everything is a module. A composed agent
+// is a single ordered list of registered module ids rendered as a pure
+// sequence (each module = one standalone block, no heading-targeted merging).
+// Shared modules use flat ids ("minimal-diff"); role-scoped modules are
+// namespaced as "<role>/<slug>" ("task-implement/input-contract").
+// Text-only for this round (no MCP/hook/skill contributions yet).
 // ---------------------------------------------------------------------------
 
-export const ModuleContributionSchema = z.discriminatedUnion("kind", [
-  // Prompt contribution: bullets merged into a named section, e.g. "NEVER".
+const agentModuleBase = {
+  id: z.string().min(1),
+  title: z.string().min(1),
+  source: z.enum(["builtin", "custom"]).default("builtin"),
+};
+
+export const AgentModuleSchema = z.discriminatedUnion("kind", [
+  // Section module: an optional heading line + pre-formatted body. A module
+  // may be heading-only (reserves the section; following modules continue it)
+  // or body-only (continues the previous block, e.g. shared bullets appended
+  // under the preceding module's heading).
+  z
+    .object({
+      ...agentModuleBase,
+      kind: z.literal("section"),
+      heading: z.string().optional(),
+      body: z.string().default(""),
+    })
+    .refine((m) => (m.heading ?? "").length > 0 || m.body.trim().length > 0, {
+      message: "section module needs a heading or a non-empty body",
+    }),
+  // Include module: emits a verbatim `@<ref>` reference line
+  // (ref "AGENT_ENFORCEMENT.md" → `@AGENT_ENFORCEMENT.md`).
   z.object({
-    kind: z.literal("prompt"),
-    section: z.string().min(1),
-    bullets: z.array(z.string().min(1)).min(1),
-  }),
-  // Include contribution: emits a verbatim `@<ref>` reference among the
-  // top-of-prompt includes (ref "AGENT_ENFORCEMENT.md" → `@AGENT_ENFORCEMENT.md`).
-  z.object({
+    ...agentModuleBase,
     kind: z.literal("include"),
     ref: z.string().min(1),
   }),
 ]);
 
-export const AgentModuleSchema = z.object({
-  id: z.string().min(1),
-  title: z.string().min(1),
-  source: z.enum(["builtin", "custom"]).default("builtin"),
-  contribution: ModuleContributionSchema,
-});
-
-export const ComposedAgentSectionSchema = z.object({
-  heading: z.string().min(1),
-  // Pre-formatted role-specific lines/bullets. May be empty to reserve the
-  // section's position for a module's contribution.
-  body: z.string(),
-});
-
 export const ComposedAgentSchema = z.object({
   id: z.string().min(1),
-  roleLine: z.string().min(1),
-  intro: z.string().min(1),
-  includes: z.array(z.string()).default([]),
-  sections: z.array(ComposedAgentSectionSchema).default([]),
-  modules: z.array(z.string()).default([]),
-  trailingIncludes: z.array(z.string()).default([]),
+  title: z.string().min(1),
+  // Ordered registry ids; the author controls placement explicitly.
+  modules: z.array(z.string().min(1)).min(1),
 });
 
 export class TaskflowValidationError extends Error {
