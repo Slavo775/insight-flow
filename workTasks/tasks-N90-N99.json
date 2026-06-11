@@ -9,7 +9,7 @@
       "title": "Migrate 9 shipped roles to composer-generated (JSON canonical)",
       "type": "feat",
       "priority": "medium",
-      "status": "pushed",
+      "status": "approved",
       "folder": "workTasks/N90-migrate-9-shipped-roles-to-composer-generated-json",
       "createdAt": "2026-06-11T09:35:23.637Z",
       "statusHistory": [
@@ -32,6 +32,16 @@
           "status": "pushed",
           "at": "2026-06-11T09:49:13.506Z",
           "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-11T11:38:09.876Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-11T11:39:26.782Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -63,8 +73,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
