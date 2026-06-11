@@ -25,6 +25,7 @@ import {
 import { EventStore } from "./event-stream.js";
 import { HookEventInputSchema } from "../../core/schema/index.js";
 import { MODULE_REGISTRY, COMPOSED_AGENTS } from "../../agents/compose.js";
+import { DEFAULT_PROJECT } from "../../agents/project.js";
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -617,6 +618,23 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // filter it here before serialising rather than relying on CORS alone.
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(config, null, 2));
+      return;
+    }
+
+    // N96 — the project layer: agents, flow edges, global install.
+    if (url.pathname === "/api/project") {
+      const agentTitle = (id: string): string => COMPOSED_AGENTS[id]?.title ?? id;
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(
+        JSON.stringify({
+          ...DEFAULT_PROJECT,
+          agentTitles: Object.fromEntries(DEFAULT_PROJECT.agents.map((a) => [a, agentTitle(a)])),
+          installModules: DEFAULT_PROJECT.install.map((id) => {
+            const mod = MODULE_REGISTRY[id];
+            return { id, title: mod?.title ?? id, kind: mod?.kind ?? "unknown" };
+          }),
+        }),
+      );
       return;
     }
 

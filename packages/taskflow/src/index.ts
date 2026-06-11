@@ -62,7 +62,7 @@ export { jsonFileStorage } from "./core/storage-port.js";
 export type { Storage } from "./core/storage-port.js";
 export { SseTransport } from "./dashboard/server/transport.js";
 export type { Transport, TransportClient } from "./dashboard/server/transport.js";
-export { AgentModuleSchema, ComposedAgentSchema } from "./core/schema/index.js";
+export { AgentModuleSchema, ComposedAgentSchema, ProjectSchema } from "./core/schema/index.js";
 export {
   composeAgent,
   composeAgentById,
@@ -71,8 +71,9 @@ export {
   indexById,
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
-  ACTIVITY_AGENT,
 } from "./agents/compose.js";
 export type { AgentModule, ComposedAgent, AgentArtifacts } from "./agents/compose.js";
-export { applyArtifacts } from "./agents/emit.js";
+export { applyArtifacts, renameManifestBucket } from "./agents/emit.js";
 export type { EmitReport, EmitAction } from "./agents/emit.js";
+export { DEFAULT_PROJECT, projectBucketId, collectProjectInstall } from "./agents/project.js";
+export type { Project } from "./agents/project.js";

@@ -346,6 +346,36 @@ export const ComposedAgentSchema = z.object({
   modules: z.array(z.string().min(1)).min(1),
 });
 
+// ---------------------------------------------------------------------------
+// N96 — project layer (the atomic-design top tier): which agents a project
+// uses, how they relate (the lifecycle flow), and what it installs globally.
+// DESCRIPTIVE this iteration: the flow visualizes/audits behavior that is
+// still enforced by the status machine, the next* pickers, and role prompts.
+// A later iteration flips it prescriptive (those read FROM this data).
+// Triggers reuse TaskStatusSchema so a status rename breaks tests loudly
+// instead of letting the diagram drift silently.
+// ---------------------------------------------------------------------------
+
+export const ProjectFlowEdgeSchema = z.object({
+  from: z.string().min(1),
+  to: z.string().min(1),
+  // The status/verdict that moves work along this edge; omitted = direct
+  // handoff (e.g. analyzer → taskmaster on human go-ahead).
+  on: TaskStatusSchema.optional(),
+});
+
+export const ProjectSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().optional(),
+  // Composed-agent ids this project uses (validated against COMPOSED_AGENTS
+  // at load, not here — the schema stays registry-agnostic).
+  agents: z.array(z.string().min(1)).min(1),
+  flow: z.array(ProjectFlowEdgeSchema).default([]),
+  // Module/bundle ids installed at project level (hooks, skills, MCP).
+  install: z.array(z.string().min(1)).default([]),
+});
+
 export class TaskflowValidationError extends Error {
   readonly file: string;
   readonly issuePath: string;

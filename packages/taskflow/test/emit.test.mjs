@@ -154,11 +154,17 @@ test("skill name collisions across agents throw instead of silently overwriting"
   );
 });
 
-test("N94: script-carrying hooks — write 0755, substitute vars, remove with the module", async () => {
-  const { ACTIVITY_AGENT, MODULE_REGISTRY } = await import("../dist/index.js");
+test("N94/N96: script-carrying hooks — write 0755, substitute vars, remove with the module", async () => {
+  const { DEFAULT_PROJECT, collectProjectInstall, projectBucketId, MODULE_REGISTRY } =
+    await import("../dist/index.js");
   const { statSync } = await import("node:fs");
   const dir = tmp();
-  const artifacts = collectArtifacts(ACTIVITY_AGENT);
+  const ACTIVITY_AGENT = {
+    id: projectBucketId(DEFAULT_PROJECT),
+    title: "install",
+    modules: DEFAULT_PROJECT.install,
+  };
+  const artifacts = collectProjectInstall(DEFAULT_PROJECT);
   const reports = applyArtifacts(artifacts, dir, ACTIVITY_AGENT.id, {
     INSIGHT_FLOW_BIN: "npx insight-flow",
   });
@@ -180,9 +186,10 @@ test("N94: script-carrying hooks — write 0755, substitute vars, remove with th
   assert.ok(second.every((r) => r.action === "unchanged"), JSON.stringify(second));
 
   // removing a module removes its script + entry, keeps the rest
+  // (the install is the `activity` bundle — drop one child by listing the rest)
   const without = {
     ...ACTIVITY_AGENT,
-    modules: ACTIVITY_AGENT.modules.filter((m) => m !== "activity/agent-idle"),
+    modules: MODULE_REGISTRY["activity"].modules.filter((m) => m !== "activity/agent-idle"),
   };
   applyArtifacts(collectArtifacts(without), dir, ACTIVITY_AGENT.id, {
     INSIGHT_FLOW_BIN: "npx insight-flow",
@@ -192,6 +199,24 @@ test("N94: script-carrying hooks — write 0755, substitute vars, remove with th
   assert.equal(after.hooks.Stop, undefined, "Stop entry removed");
   assert.ok(after.hooks.SessionStart, "other lifecycle entries intact");
   assert.ok(MODULE_REGISTRY["activity/agent-idle"], "module still registered");
+});
+
+test("N96: the legacy 'activity' manifest bucket migrates to the project bucket once", async () => {
+  const { renameManifestBucket } = await import("../dist/index.js");
+  const { mkdirSync: mkdir } = await import("node:fs");
+  const dir = tmp();
+  mkdir(join(dir, ".claude"), { recursive: true });
+  writeFileSync(
+    join(dir, ".claude/taskflow-managed.json"),
+    JSON.stringify({ agents: { activity: { hooks: [], scripts: ["x.sh"], skills: [] } } }),
+  );
+  renameManifestBucket(dir, "activity", "project:default");
+  const m = readJson(join(dir, ".claude/taskflow-managed.json"));
+  assert.equal(m.agents.activity, undefined);
+  assert.deepEqual(m.agents["project:default"].scripts, ["x.sh"]);
+  // idempotent / no clobber when target exists
+  renameManifestBucket(dir, "activity", "project:default");
+  assert.deepEqual(readJson(join(dir, ".claude/taskflow-managed.json")), m);
 });
 
 test("N95: adopting the testing bundle yields identical artifacts to listing the siblings", () => {

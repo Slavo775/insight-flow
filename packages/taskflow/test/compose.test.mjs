@@ -174,18 +174,35 @@ test("N94: every shipped role inlines the actions block instead of including AGE
   }
 });
 
-test("N94: ACTIVITY_AGENT groups the lifecycle hook modules but is not a composed role", async () => {
-  const { ACTIVITY_AGENT } = await import("../dist/index.js");
-  assert.equal(ACTIVITY_AGENT.id, "activity");
-  assert.equal(ACTIVITY_AGENT.modules.length, 6);
-  for (const id of ACTIVITY_AGENT.modules) {
-    assert.equal(MODULE_REGISTRY[id]?.kind, "hook", `${id} is a hook module`);
-    assert.ok(
-      MODULE_REGISTRY[id].script?.content.includes("__INSIGHT_FLOW_BIN__"),
-      `${id} script is templated`,
-    );
+test("N96: the default project installs the activity bundle; hooks are templated; no pseudo-agent", async () => {
+  const { DEFAULT_PROJECT, collectProjectInstall } = await import("../dist/index.js");
+  assert.equal(DEFAULT_PROJECT.id, "default");
+  assert.deepEqual(DEFAULT_PROJECT.install, ["activity"]);
+  assert.equal(MODULE_REGISTRY["activity"]?.kind, "bundle");
+  const artifacts = collectProjectInstall(DEFAULT_PROJECT);
+  assert.equal(artifacts.hooks.length, 6, "bundle expands to the six lifecycle hooks");
+  for (const h of artifacts.hooks) {
+    assert.ok(h.script?.content.includes("__INSIGHT_FLOW_BIN__"), "script is templated");
   }
   assert.ok(!listComposedAgents().includes("activity"), "compose-apply must not install hooks");
+});
+
+test("N96: project flow is referentially sound and triggers are real statuses", async () => {
+  const { DEFAULT_PROJECT, COMPOSED_AGENTS: agents, ProjectSchema } = await import("../dist/index.js");
+  for (const a of DEFAULT_PROJECT.agents) assert.ok(agents[a], `agent ${a} exists`);
+  for (const e of DEFAULT_PROJECT.flow) {
+    assert.ok(DEFAULT_PROJECT.agents.includes(e.from) && DEFAULT_PROJECT.agents.includes(e.to));
+  }
+  // an invalid trigger fails schema validation (loud break on status renames)
+  assert.throws(() =>
+    ProjectSchema.parse({
+      id: "x",
+      title: "X",
+      agents: ["task-implement"],
+      flow: [{ from: "task-implement", to: "task-implement", on: "approvedd" }],
+      install: [],
+    }),
+  );
 });
 
 test("N95: bundles expand recursively at their declared position", () => {

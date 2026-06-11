@@ -2,21 +2,21 @@
   "hooks": {
     "PostToolUse": [
       {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[taskflow:testing] source changed — run the test suite before handoff'"
+          }
+        ]
+      },
+      {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-post-tool.sh",
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo '[taskflow:testing] source changed — run the test suite before handoff'"
           }
         ]
       }

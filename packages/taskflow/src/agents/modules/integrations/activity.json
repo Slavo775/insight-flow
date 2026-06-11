@@ -88,5 +88,20 @@
       "name": "lifecycle-permission.sh",
       "content": "#!/bin/bash\n# insight-flow lifecycle — PermissionRequest → approval-required (if active) + bell + notification\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\n__INSIGHT_FLOW_BIN__ log-event approval-required --source hook --hook-name PermissionRequest --session-id \"$SESSION_ID\" --if-active 2>/dev/null &\nprintf '\\a'\n__INSIGHT_FLOW_BIN__ notify \"Approval required\" 2>/dev/null &\n"
     }
+  },
+  {
+    "id": "activity",
+    "title": "Activity telemetry",
+    "description": "Bundle: the six lifecycle logging hooks — harness-observed events, no model involvement.",
+    "source": "builtin",
+    "kind": "bundle",
+    "modules": [
+      "activity/session-start",
+      "activity/agent-active",
+      "activity/agent-idle",
+      "activity/pre-tool",
+      "activity/post-tool",
+      "activity/permission"
+    ]
   }
 ]

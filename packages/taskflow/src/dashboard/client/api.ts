@@ -75,6 +75,23 @@ export async function fetchModules(): Promise<ModulesResponse> {
   return res.json();
 }
 
+export interface ProjectDto {
+  id: string;
+  title: string;
+  description?: string;
+  agents: string[];
+  flow: { from: string; to: string; on?: string }[];
+  install: string[];
+  agentTitles: Record<string, string>;
+  installModules: { id: string; title: string; kind: string }[];
+}
+
+export async function fetchProject(): Promise<ProjectDto> {
+  const res = await fetch("/api/project");
+  if (!res.ok) throw new Error("Failed to load project (" + res.status + ")");
+  return res.json();
+}
+
 /** Markdown content behind an include module's @ref, or null if not present. */
 export async function fetchIncludeDoc(ref: string): Promise<string | null> {
   const res = await fetch("/api/include-doc?ref=" + encodeURIComponent(ref));
