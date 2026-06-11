@@ -702,7 +702,7 @@
       "title": "Onboard task-git into the composer, registry, and project flow",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N97-onboard-task-git-into-the-composer-registry-and-pr",
       "createdAt": "2026-06-11T21:10:46.933Z",
       "statusHistory": [
@@ -710,12 +710,34 @@
           "status": "ready",
           "at": "2026-06-11T21:10:46.933Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T21:16:01.623Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T21:20:38.289Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T21:16:01.623Z",
+        "completedAt": "2026-06-11T21:20:38.289Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/task-git.json",
+          "packages/taskflow/src/agents/modules/notify.json",
+          "packages/taskflow/src/agents/modules/config.json",
+          "packages/taskflow/src/agents/composed/task-git.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/project/default.json",
+          "packages/taskflow/scripts/sync-role-templates.mjs",
+          "TASK_GIT_ROLE.md",
+          ".claude/commands/task-git.md",
+          "packages/taskflow/templates/roles",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

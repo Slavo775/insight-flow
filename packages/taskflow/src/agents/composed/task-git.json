@@ -1,0 +1,21 @@
+{
+  "id": "task-git",
+  "title": "Task Git Agent",
+  "description": "Handles git operations for work tasks: branch, commit, push, PR creation, and merge.",
+  "modules": [
+    "notify",
+    "config",
+    "task-git/identity",
+    "task-git/input-contract",
+    "task-git/conventions",
+    "task-git/permission-gates",
+    "task-git/workflow-push",
+    "task-git/workflow-create-pull-request",
+    "task-git/workflow-merge",
+    "task-git/edge-cases",
+    "task-git/safety",
+    "task-git/token-efficiency",
+    "task-git/examples-appendix",
+    "actions"
+  ]
+}

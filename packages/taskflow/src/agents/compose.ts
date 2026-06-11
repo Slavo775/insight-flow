@@ -28,6 +28,8 @@ import { AgentModuleSchema, ComposedAgentSchema } from "../core/schema/index.js"
 
 import enforcement from "./modules/enforcement.json";
 import protocol from "./modules/protocol.json";
+import notify from "./modules/notify.json";
+import config from "./modules/config.json";
 import actions from "./modules/actions.json";
 import minimalDiff from "./modules/minimal-diff.json";
 import scopeGuard from "./modules/scope-guard.json";
@@ -41,6 +43,7 @@ import taskReviewFixModules from "./modules/roles/task-review-fix.json";
 import taskHumanReviewModules from "./modules/roles/task-human-review.json";
 import taskIncidentModules from "./modules/roles/task-incident.json";
 import taskRequestChangesModules from "./modules/roles/task-request-changes.json";
+import taskGitModules from "./modules/roles/task-git.json";
 import testingModules from "./modules/integrations/testing.json";
 import activityModules from "./modules/integrations/activity.json";
 import taskAnalyze from "./composed/task-analyze.json";
@@ -52,6 +55,7 @@ import taskReviewFix from "./composed/task-review-fix.json";
 import taskHumanReview from "./composed/task-human-review.json";
 import taskIncident from "./composed/task-incident.json";
 import taskRequestChanges from "./composed/task-request-changes.json";
+import taskGit from "./composed/task-git.json";
 
 export type AgentModule = z.infer<typeof AgentModuleSchema>;
 export type ComposedAgent = z.infer<typeof ComposedAgentSchema>;
@@ -75,6 +79,8 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
   [
     enforcement,
     protocol,
+    notify,
+    config,
     actions,
     minimalDiff,
     scopeGuard,
@@ -88,6 +94,7 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     ...taskHumanReviewModules,
     ...taskIncidentModules,
     ...taskRequestChangesModules,
+    ...taskGitModules,
     ...testingModules,
     ...activityModules,
   ],
@@ -109,6 +116,7 @@ export const COMPOSED_AGENTS: Record<string, ComposedAgent> = indexById(
     taskHumanReview,
     taskIncident,
     taskRequestChanges,
+    taskGit,
   ],
   ComposedAgentSchema,
 );

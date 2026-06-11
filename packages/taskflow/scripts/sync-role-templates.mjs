@@ -16,10 +16,13 @@ const ROLE_FILES = [
   "TASK_HUMAN_REVIEW_ROLE.md",
   "TASK_INCIDENT_ROLE.md",
   "TASK_REQUEST_CHANGES_ROLE.md",
-  // Shared files referenced by every role. (AGENT_EVENTS.md was inlined into
-  // the generated roles as the `actions` module in N94.)
+  "TASK_GIT_ROLE.md",
+  // Shared files referenced by roles. (AGENT_EVENTS.md was inlined into the
+  // generated roles as the `actions` module in N94.)
   "AGENT_PROTOCOL.md",
   "AGENT_SECURITY.md",
+  "AGENT_NOTIFY.md",
+  "AGENT_CONFIG.md",
 ];
 
 const __filename = fileURLToPath(import.meta.url);
