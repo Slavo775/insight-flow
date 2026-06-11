@@ -33,6 +33,8 @@ export interface EmitReport {
 
 interface ManagedEntry {
   hooks: { event: string; matcher?: string; command: string }[];
+  /** Hook script files owned by this agent (under .claude/hooks/). */
+  scripts?: string[];
   skills: string[];
 }
 
@@ -44,7 +46,7 @@ const MANIFEST_PATH = ".claude/taskflow-managed.json";
 
 interface HookGroup {
   matcher?: string;
-  hooks: { type: "command"; command: string }[];
+  hooks: { type: "command"; command: string; timeout?: number }[];
   [key: string]: unknown;
 }
 
@@ -101,7 +103,39 @@ function applyHooks(
   owned: ManagedEntry,
   reports: EmitReport[],
 ): void {
-  if (!hooks.length && !owned.hooks.length) return;
+  const ownedScripts = owned.scripts ?? [];
+  if (!hooks.length && !owned.hooks.length && !ownedScripts.length) return;
+
+  // Hook script files (N94): remove scripts this agent no longer contributes,
+  // then write the current set (0755).
+  const currentScripts = hooks.flatMap((h) => (h.script ? [h.script.name] : []));
+  for (const name of ownedScripts) {
+    if (currentScripts.includes(name)) continue;
+    const scriptPath = join(projectRoot, ".claude/hooks", name);
+    if (existsSync(scriptPath)) {
+      rmSync(scriptPath);
+      reports.push({ target: `.claude/hooks/${name}`, action: "removed" });
+    }
+  }
+  for (const hook of hooks) {
+    if (!hook.script) continue;
+    const scriptPath = join(projectRoot, ".claude/hooks", hook.script.name);
+    const body = hook.script.content.endsWith("\n")
+      ? hook.script.content
+      : hook.script.content + "\n";
+    const prev = existsSync(scriptPath) ? readFileSync(scriptPath, "utf-8") : null;
+    if (prev === body) {
+      reports.push({ target: `.claude/hooks/${hook.script.name}`, action: "unchanged" });
+    } else {
+      mkdirSync(dirname(scriptPath), { recursive: true });
+      writeFileSync(scriptPath, body, { mode: 0o755 });
+      reports.push({
+        target: `.claude/hooks/${hook.script.name}`,
+        action: prev === null ? "created" : "updated",
+      });
+    }
+  }
+
   const path = join(projectRoot, ".claude/settings.json");
   const settings = readJson<{ hooks?: Record<string, HookGroup[]>; [k: string]: unknown }>(
     path,
@@ -109,8 +143,15 @@ function applyHooks(
   );
   settings.hooks ??= {};
 
-  // Remove this agent's previously-managed entries, then insert the current set.
-  for (const old of owned.hooks) {
+  // Remove this agent's previously-managed entries, then insert the current
+  // set. Incoming hooks also "adopt" exact-matching unmanaged entries (event +
+  // matcher + command) so pre-manifest installs (the bespoke pre-N94 lifecycle
+  // installer) migrate without duplicating.
+  const toClear = [
+    ...owned.hooks,
+    ...hooks.map((h) => ({ event: h.event, matcher: h.matcher, command: h.command })),
+  ];
+  for (const old of toClear) {
     const groups = settings.hooks[old.event];
     if (!groups) continue;
     settings.hooks[old.event] = groups.filter(
@@ -125,7 +166,13 @@ function applyHooks(
   for (const hook of hooks) {
     const group: HookGroup = {
       ...(hook.matcher !== undefined ? { matcher: hook.matcher } : {}),
-      hooks: [{ type: "command", command: hook.command }],
+      hooks: [
+        {
+          type: "command",
+          command: hook.command,
+          ...(hook.timeout !== undefined ? { timeout: hook.timeout } : {}),
+        },
+      ],
     };
     (settings.hooks[hook.event] ??= []).push(group);
   }
@@ -137,6 +184,7 @@ function applyHooks(
     action: action === "unchanged" ? "unchanged" : hooks.length ? action : "removed",
   });
   owned.hooks = hooks.map((h) => ({ event: h.event, matcher: h.matcher, command: h.command }));
+  owned.scripts = currentScripts;
 }
 
 function applySkills(
@@ -189,13 +237,23 @@ function applySkills(
  * Apply `agentId`'s artifacts to `projectRoot`. Idempotent per agent: a
  * second apply with the same artifacts reports every target as `unchanged`;
  * artifacts the agent no longer contributes are removed. Other agents'
- * managed artifacts are never touched.
+ * managed artifacts are never touched. `vars` substitutes `__KEY__` tokens in
+ * hook commands and script contents (e.g. INSIGHT_FLOW_BIN — N94).
  */
 export function applyArtifacts(
   artifacts: AgentArtifacts,
   projectRoot: string,
   agentId: string,
+  vars?: Record<string, string>,
 ): EmitReport[] {
+  const sub = (text: string): string =>
+    vars ? Object.entries(vars).reduce((acc, [k, v]) => acc.split(`__${k}__`).join(v), text) : text;
+  const hooks = artifacts.hooks.map((h) => ({
+    ...h,
+    command: sub(h.command),
+    script: h.script ? { name: h.script.name, content: sub(h.script.content) } : undefined,
+  }));
+
   const reports: EmitReport[] = [];
   const manifestPath = join(projectRoot, MANIFEST_PATH);
   // Rebuild the manifest from the parsed file so unknown/legacy keys
@@ -207,10 +265,11 @@ export function applyArtifacts(
   owned.skills ??= [];
 
   applyMcpServers(projectRoot, artifacts.mcpServers, reports);
-  applyHooks(projectRoot, artifacts.hooks, owned, reports);
+  applyHooks(projectRoot, hooks, owned, reports);
   applySkills(projectRoot, agentId, artifacts.skills, manifest, owned, reports);
 
-  if (owned.hooks.length || owned.skills.length) manifest.agents[agentId] = owned;
+  if (owned.hooks.length || owned.skills.length || owned.scripts?.length)
+    manifest.agents[agentId] = owned;
   else delete manifest.agents[agentId];
 
   if (Object.keys(manifest.agents).length) {

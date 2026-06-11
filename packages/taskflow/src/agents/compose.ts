@@ -28,7 +28,7 @@ import { AgentModuleSchema, ComposedAgentSchema } from "../core/schema/index.js"
 
 import enforcement from "./modules/enforcement.json";
 import protocol from "./modules/protocol.json";
-import events from "./modules/events.json";
+import actions from "./modules/actions.json";
 import minimalDiff from "./modules/minimal-diff.json";
 import scopeGuard from "./modules/scope-guard.json";
 import recorderDiscipline from "./modules/recorder-discipline.json";
@@ -42,6 +42,8 @@ import taskHumanReviewModules from "./modules/roles/task-human-review.json";
 import taskIncidentModules from "./modules/roles/task-incident.json";
 import taskRequestChangesModules from "./modules/roles/task-request-changes.json";
 import testingModules from "./modules/integrations/testing.json";
+import activityModules from "./modules/integrations/activity.json";
+import activityAgent from "./composed/activity.json";
 import taskAnalyze from "./composed/task-analyze.json";
 import taskmaster from "./composed/taskmaster.json";
 import taskmasterChange from "./composed/taskmaster-change.json";
@@ -74,7 +76,7 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
   [
     enforcement,
     protocol,
-    events,
+    actions,
     minimalDiff,
     scopeGuard,
     recorderDiscipline,
@@ -88,9 +90,19 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     ...taskIncidentModules,
     ...taskRequestChangesModules,
     ...testingModules,
+    ...activityModules,
   ],
   AgentModuleSchema,
 );
+
+/**
+ * The activity-telemetry pseudo-agent (N94): groups the lifecycle hook modules
+ * for installation through the emitter (init / migrate-hooks). Deliberately
+ * NOT part of COMPOSED_AGENTS — it produces no role MD, and `prompt-build
+ * --compose --apply` must not install hooks into the canonical repo as a side
+ * effect of regenerating roles.
+ */
+export const ACTIVITY_AGENT: ComposedAgent = ComposedAgentSchema.parse(activityAgent);
 
 export const COMPOSED_AGENTS: Record<string, ComposedAgent> = indexById(
   [
@@ -129,7 +141,13 @@ function resolveModules(def: ComposedAgent, registry: Record<string, AgentModule
 /** The non-text contributions of a composed agent, in declared order. */
 export interface AgentArtifacts {
   mcpServers: { name: string; config: Record<string, unknown> }[];
-  hooks: { event: string; matcher?: string; command: string }[];
+  hooks: {
+    event: string;
+    matcher?: string;
+    command: string;
+    timeout?: number;
+    script?: { name: string; content: string };
+  }[];
   skills: { name: string; content: string }[];
 }
 
@@ -142,7 +160,13 @@ export function collectArtifacts(
   for (const mod of resolveModules(def, registry)) {
     if (mod.kind === "mcp-server") out.mcpServers.push({ name: mod.name, config: mod.config });
     else if (mod.kind === "hook")
-      out.hooks.push({ event: mod.event, matcher: mod.matcher, command: mod.command });
+      out.hooks.push({
+        event: mod.event,
+        matcher: mod.matcher,
+        command: mod.command,
+        timeout: mod.timeout,
+        script: mod.script,
+      });
     else if (mod.kind === "skill") out.skills.push({ name: mod.name, content: mod.content });
   }
   return out;

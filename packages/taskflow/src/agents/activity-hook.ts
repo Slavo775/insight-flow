@@ -1,5 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { ACTIVITY_AGENT, collectArtifacts } from "./compose.js";
+import { applyArtifacts } from "./emit.js";
 
 /**
  * Bumped whenever the bundled hook layout changes in a way that requires
@@ -10,8 +12,12 @@ import { resolve } from "node:path";
  *   1 — initial lifecycle hooks (N28).
  *   2 — N68 hook scripts also POST to /log/events via the CLI; daily JSONL
  *       backup at <workDir>/.events/<YYYY-MM-DD>.jsonl.
+ *   3 — N94 lifecycle hooks are registry modules (`activity/…`) installed via
+ *       the artifact emitter's managed manifest; script content is canonical
+ *       in modules/integrations/activity.json. A version bump now simply means
+ *       the module data changed (the emitter rewrites on content difference).
  */
-export const BUNDLED_HOOKS_VERSION = 2;
+export const BUNDLED_HOOKS_VERSION = 3;
 
 export type ActivityHookStatus = "ok" | "hook-missing" | "settings-missing" | "both-missing";
 
@@ -290,101 +296,11 @@ export function installEnrichmentHooks(cwd: string, logFile: string): InstallEnr
 }
 
 // ---------------------------------------------------------------------------
-// Lifecycle hooks (N28) — hook into Claude Code's event stream
+// Lifecycle hooks — N94: canonical as `activity/…` registry modules
+// (modules/integrations/activity.json); installed through the artifact
+// emitter's managed manifest. This function remains as a thin delegate so
+// init and `migrate-hooks` keep their call sites.
 // ---------------------------------------------------------------------------
-
-const LIFECYCLE_SESSION_START_SCRIPT = `#!/bin/bash
-# insight-flow lifecycle — SessionStart → session-start event (no --if-active: fires for all sessions)
-INPUT=$(cat)
-SESSION_ID="\${CLAUDE_SESSION_ID:-}"
-if [ -z "$SESSION_ID" ]; then
-  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-fi
-[ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event session-start --source hook --hook-name SessionStart --session-id "$SESSION_ID" 2>/dev/null &
-`;
-
-const LIFECYCLE_AGENT_ACTIVE_SCRIPT = `#!/bin/bash
-# insight-flow lifecycle — UserPromptSubmit → agent-active (only for insight-flow skills)
-INPUT=$(cat)
-SESSION_ID="\${CLAUDE_SESSION_ID:-}"
-if [ -z "$SESSION_ID" ]; then
-  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-fi
-[ -z "$SESSION_ID" ] && exit 0
-PROMPT=$(echo "$INPUT" | grep -o '"prompt":"[^"]*"' | head -1 | cut -d'"' -f4)
-SKILL=$(echo "$PROMPT" | grep -o '^/[a-zA-Z][a-zA-Z0-9_-]*' | head -1 | cut -c2-)
-case "$SKILL" in
-  task-implement|task-review|task-review-fix|task-human-review|taskmaster|taskmaster-change|task-git|task-incident|task-request-changes|complete-task)
-    __INSIGHT_FLOW_BIN__ log-event agent-active --source hook --hook-name UserPromptSubmit --session-id "$SESSION_ID" 2>/dev/null &
-    ;;
-  *)
-    exit 0
-    ;;
-esac
-`;
-
-const LIFECYCLE_AGENT_IDLE_SCRIPT = `#!/bin/bash
-# insight-flow lifecycle — Stop → agent-idle (if active)
-INPUT=$(cat)
-SESSION_ID="\${CLAUDE_SESSION_ID:-}"
-if [ -z "$SESSION_ID" ]; then
-  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-fi
-[ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event agent-idle --source hook --hook-name Stop --session-id "$SESSION_ID" --if-active 2>/dev/null &
-__INSIGHT_FLOW_BIN__ notify "Agent idle" 2>/dev/null &
-`;
-
-const LIFECYCLE_PRE_TOOL_SCRIPT = `#!/bin/bash
-# insight-flow lifecycle — PreToolUse → tool-requested (if active)
-INPUT=$(cat)
-SESSION_ID="\${CLAUDE_SESSION_ID:-}"
-if [ -z "$SESSION_ID" ]; then
-  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-fi
-[ -z "$SESSION_ID" ] && exit 0
-TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
-[ -z "$TOOL" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"$TOOL\\"}" --if-active 2>/dev/null &
-`;
-
-const LIFECYCLE_POST_TOOL_SCRIPT = `#!/bin/bash
-# insight-flow lifecycle — PostToolUse → tool-approved / file-written / file-edited (if active)
-INPUT=$(cat)
-SESSION_ID="\${CLAUDE_SESSION_ID:-}"
-if [ -z "$SESSION_ID" ]; then
-  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-fi
-[ -z "$SESSION_ID" ] && exit 0
-TOOL=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
-[ -z "$TOOL" ] && exit 0
-FILE_PATH=$(echo "$INPUT" | grep -o '"file_path":"[^"]*"' | head -1 | cut -d'"' -f4)
-case "$TOOL" in
-  Write)
-    __INSIGHT_FLOW_BIN__ log-event file-written --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"Write\\",\\"path\\":\\"$FILE_PATH\\"}" --if-active 2>/dev/null &
-    ;;
-  Edit|MultiEdit)
-    __INSIGHT_FLOW_BIN__ log-event file-edited --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"$TOOL\\",\\"path\\":\\"$FILE_PATH\\"}" --if-active 2>/dev/null &
-    ;;
-  *)
-    __INSIGHT_FLOW_BIN__ log-event tool-approved --source hook --hook-name PostToolUse --session-id "$SESSION_ID" --data "{\\"tool_name\\":\\"$TOOL\\"}" --if-active 2>/dev/null &
-    ;;
-esac
-`;
-
-const LIFECYCLE_PERMISSION_SCRIPT = `#!/bin/bash
-# insight-flow lifecycle — PermissionRequest → approval-required (if active) + bell + notification
-INPUT=$(cat)
-SESSION_ID="\${CLAUDE_SESSION_ID:-}"
-if [ -z "$SESSION_ID" ]; then
-  SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-fi
-[ -z "$SESSION_ID" ] && exit 0
-__INSIGHT_FLOW_BIN__ log-event approval-required --source hook --hook-name PermissionRequest --session-id "$SESSION_ID" --if-active 2>/dev/null &
-printf '\\a'
-__INSIGHT_FLOW_BIN__ notify "Approval required" 2>/dev/null &
-`;
 
 export interface InstallLifecycleHooksResult {
   hooksWritten: number;
@@ -394,118 +310,20 @@ export interface InstallLifecycleHooksResult {
 export function installLifecycleHooks(
   cwd: string,
   insightFlowBin: string = "insight-flow",
-  options: { force?: boolean } = {},
+  // `force` is obsolete since N94: the emitter rewrites whenever the on-disk
+  // content differs from the module data, and is a no-op otherwise.
+  _options: { force?: boolean } = {},
 ): InstallLifecycleHooksResult {
-  const force = options.force === true;
-  const hooksDir = resolve(cwd, ".claude", "hooks");
-  if (!existsSync(hooksDir)) {
-    mkdirSync(hooksDir, { recursive: true });
-  }
-
-  const hookDefs = [
-    {
-      file: "lifecycle-session-start.sh",
-      script: LIFECYCLE_SESSION_START_SCRIPT,
-      event: "SessionStart",
-    },
-    {
-      file: "lifecycle-agent-active.sh",
-      script: LIFECYCLE_AGENT_ACTIVE_SCRIPT,
-      event: "UserPromptSubmit",
-    },
-    { file: "lifecycle-agent-idle.sh", script: LIFECYCLE_AGENT_IDLE_SCRIPT, event: "Stop" },
-    { file: "lifecycle-pre-tool.sh", script: LIFECYCLE_PRE_TOOL_SCRIPT, event: "PreToolUse" },
-    { file: "lifecycle-post-tool.sh", script: LIFECYCLE_POST_TOOL_SCRIPT, event: "PostToolUse" },
-    {
-      file: "lifecycle-permission.sh",
-      script: LIFECYCLE_PERMISSION_SCRIPT,
-      event: "PermissionRequest",
-    },
-  ];
-
-  let hooksWritten = 0;
-  for (const { file, script } of hookDefs) {
-    const hookPath = resolve(hooksDir, file);
-    const expected = script.replace(/__INSIGHT_FLOW_BIN__/g, insightFlowBin);
-    if (!existsSync(hookPath)) {
-      writeFileSync(hookPath, expected, { mode: 0o755 });
-      hooksWritten++;
-    } else if (force) {
-      // N68 migration: rewrite an existing script only when the on-disk
-      // content differs from what we'd emit now (lets repeated migrations
-      // remain a no-op when nothing's changed).
-      let current = "";
-      try {
-        current = readFileSync(hookPath, "utf-8");
-      } catch {
-        current = "";
-      }
-      if (current !== expected) {
-        writeFileSync(hookPath, expected, { mode: 0o755 });
-        hooksWritten++;
-      }
-    }
-  }
-
-  const settingsPath = resolve(cwd, ".claude", "settings.json");
-  let settings: Record<string, unknown> = {};
-  if (existsSync(settingsPath)) {
-    try {
-      settings = JSON.parse(readFileSync(settingsPath, "utf-8")) as Record<string, unknown>;
-    } catch {
-      settings = {};
-    }
-  }
-
-  const hooks = (settings.hooks ?? {}) as Record<string, unknown[]>;
-  let settingsUpdated = false;
-
-  for (const { file, event } of hookDefs) {
-    const hookCmd = `\${CLAUDE_PROJECT_DIR}/.claude/hooks/${file}`;
-    const existing = (hooks[event] ?? []) as Array<Record<string, unknown>>;
-
-    const getCmd = (h: Record<string, unknown>): string => {
-      if (((h.command as string) || "").includes(file)) return (h.command as string) || "";
-      const inner = (h.hooks as Array<Record<string, unknown>> | undefined) ?? [];
-      const match = inner.find((e) => ((e?.command as string) || "").includes(file));
-      return match ? (match.command as string) || "" : "";
-    };
-
-    const staleIdx = existing.findIndex((h) => {
-      if (!h || typeof h !== "object") return false;
-      const cmd = getCmd(h);
-      return cmd.includes(file) && !cmd.includes("CLAUDE_PROJECT_DIR");
-    });
-
-    if (staleIdx !== -1) {
-      const entry = existing[staleIdx] as Record<string, unknown>;
-      const inner = (entry.hooks as Array<Record<string, unknown>> | undefined) ?? [];
-      if (inner.length) {
-        inner[0] = { ...inner[0], command: hookCmd };
-        existing[staleIdx] = { ...entry, hooks: inner };
-      }
-      hooks[event] = existing;
-      settingsUpdated = true;
-    } else {
-      const alreadyRegistered = existing.some((h) => {
-        if (!h || typeof h !== "object") return false;
-        return getCmd(h).includes(file);
-      });
-      if (!alreadyRegistered) {
-        existing.push({ matcher: "", hooks: [{ type: "command", command: hookCmd, timeout: 10 }] });
-        hooks[event] = existing;
-        settingsUpdated = true;
-      }
-    }
-  }
-
-  if (settingsUpdated) {
-    settings.hooks = hooks;
-    if (!existsSync(resolve(cwd, ".claude"))) {
-      mkdirSync(resolve(cwd, ".claude"), { recursive: true });
-    }
-    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
-  }
-
-  return { hooksWritten, settingsUpdated };
+  const reports = applyArtifacts(collectArtifacts(ACTIVITY_AGENT), cwd, ACTIVITY_AGENT.id, {
+    INSIGHT_FLOW_BIN: insightFlowBin,
+  });
+  return {
+    hooksWritten: reports.filter(
+      (r) =>
+        r.target.startsWith(".claude/hooks/") && (r.action === "created" || r.action === "updated"),
+    ).length,
+    settingsUpdated: reports.some(
+      (r) => r.target === ".claude/settings.json" && r.action !== "unchanged",
+    ),
+  };
 }
