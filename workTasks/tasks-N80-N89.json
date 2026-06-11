@@ -905,7 +905,7 @@
       "title": "Agent composition model v2 — everything is a module + registry",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N89-agent-composition-model-v2-everything-is-a-module-",
       "createdAt": "2026-06-11T07:16:19.496Z",
       "statusHistory": [
@@ -923,6 +923,11 @@
           "status": "implemented",
           "at": "2026-06-11T07:30:10.391Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T07:30:53.058Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -959,8 +964,14 @@
         "schema",
         "registry"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-11T07:30:53.057Z",
+          "commitHash": "ac1c52f",
+          "commitMessage": "feat(N89): agent composition model v2 — everything is a module + registry"
+        }
+      ],
+      "branch": "feat/N89-agent-composition-model-v2",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/64",
       "mergedAt": null
     }
