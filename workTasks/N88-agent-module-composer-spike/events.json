@@ -734,6 +734,94 @@
       "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
       "taskId": "N88",
       "payload": {}
+    },
+    {
+      "id": "evt_1781155516363_c366",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-11T05:25:16.363Z",
+      "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
+      "taskId": "N88",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781155524644_e5e5",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-11T05:25:24.644Z",
+      "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
+      "taskId": "N88",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781155529363_db9a",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-11T05:25:29.362Z",
+      "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
+      "taskId": "N88",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781155544759_3f12",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-11T05:25:44.758Z",
+      "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
+      "taskId": "N88",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781155544909_bd2b",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-11T05:25:44.908Z",
+      "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
+      "taskId": "N88",
+      "payload": {}
+    },
+    {
+      "type": "done",
+      "taskId": "N88",
+      "timestamp": "2026-06-11T05:26:32.664Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1781155592915_f285",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-11T05:26:32.914Z",
+      "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
+      "taskId": "N88",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781155618488_f21b",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-11T05:26:58.487Z",
+      "sessionId": "9fe60c16-05ba-469e-bd98-15d7f9fb54ba",
+      "taskId": "N88",
+      "payload": {
+        "tool_name": "Bash"
+      }
     }
   ]
 }
