@@ -556,7 +556,7 @@
       "title": "Bundle module kind — modules composed of modules",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N95-bundle-module-kind-modules-composed-of-modules",
       "createdAt": "2026-06-11T20:27:05.905Z",
       "statusHistory": [
@@ -564,12 +564,32 @@
           "status": "ready",
           "at": "2026-06-11T20:27:05.905Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T20:34:47.885Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T20:38:45.365Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T20:34:47.885Z",
+        "completedAt": "2026-06-11T20:38:45.365Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/integrations/testing.json",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+          "packages/taskflow/test/compose.test.mjs",
+          "packages/taskflow/test/emit.test.mjs",
+          "playground/agents/test-runner.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

@@ -26,5 +26,17 @@
     "kind": "skill",
     "name": "taskflow-run-tests",
     "content": "---\nname: taskflow-run-tests\ndescription: Run the project's test suite and report results verbatim\n---\n\nRun the project's configured test command (see `taskflow.config.json.agents.extend` or the project README — insight-flow ships no default). Report the summary line and every failing test verbatim. Do not paraphrase or truncate failure output. If no test command is configured, say so and stop.\n"
+  },
+  {
+    "id": "testing",
+    "title": "Testing integration",
+    "description": "Bundle: the full testing integration — discipline prompt, post-edit reminder hook, and run-tests skill — as one reference.",
+    "source": "builtin",
+    "kind": "bundle",
+    "modules": [
+      "testing/prompt",
+      "testing/hook",
+      "testing/skill"
+    ]
   }
 ]

@@ -124,17 +124,32 @@ export function listComposedAgents(): string[] {
 }
 
 // Resolve a def's module ids against the registry: dedup by id (first wins),
-// declared order, unknown id throws before any output is produced.
+// declared order, unknown id throws before any output is produced. Bundle
+// modules (N95) expand recursively in place — their children splice at the
+// bundle's declared position; the bundle itself contributes nothing. A bundle
+// reachable from its own expansion throws (cycle guard).
 function resolveModules(def: ComposedAgent, registry: Record<string, AgentModule>): AgentModule[] {
   const seen = new Set<string>();
   const mods: AgentModule[] = [];
-  for (const id of def.modules) {
-    if (seen.has(id)) continue; // dedup repeated refs
-    seen.add(id);
-    const mod = registry[id];
-    if (!mod) throw new Error(`Unknown module '${id}' referenced by agent '${def.id}'`);
-    mods.push(mod);
-  }
+  const expand = (ids: readonly string[], path: readonly string[]): void => {
+    for (const id of ids) {
+      const mod = registry[id];
+      if (!mod) throw new Error(`Unknown module '${id}' referenced by agent '${def.id}'`);
+      if (mod.kind === "bundle") {
+        if (path.includes(id)) {
+          throw new Error(`Bundle cycle: ${[...path, id].join(" → ")}`);
+        }
+        if (seen.has(id)) continue; // dedup repeated bundle refs
+        seen.add(id);
+        expand(mod.modules, [...path, id]);
+      } else {
+        if (seen.has(id)) continue; // dedup repeated refs
+        seen.add(id);
+        mods.push(mod);
+      }
+    }
+  };
+  expand(def.modules, []);
   return mods;
 }
 
