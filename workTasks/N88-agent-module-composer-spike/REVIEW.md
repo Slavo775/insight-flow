@@ -99,3 +99,46 @@ None this round.
 
 - Fixer hint (not human wording): extract a generic helper, e.g. `indexById<T extends { id: string }>(items: unknown[], schema): Record<string, T>` that parses each item and keys by `parsed.id`, then build both registries through it. Doing so also resolves AI-review Non-blocking #4 (add the duplicate-id guard inside the helper).
 - Next: `/task-review-fix` picks up this `fix-needed` blocker.
+
+
+---
+
+## Round 3 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-11
+**Verdict:** fix-needed
+
+### Summary
+
+Human review of the composed-agent model: the shared `@includes` should themselves be modules, while the section structure stays. Verdict: **fix-needed** — fold into the current N88 fix cycle.
+
+### Checklist verification
+
+- Carries forward the open behavioral-validation item from the AI round.
+
+### Blockers
+
+2. **`@includes` should be modules** — `AGENT_ENFORCEMENT.md` and `AGENT_PROTOCOL.md` must be represented as modules (not hard-coded in the `includes` array), emitted **verbatim "as is"** (the `@FILE.md` reference, not inlined content). Human's exact comment:
+
+   > please input output contract shouldnt be also module? + AGENT_ENFORCEMENT.md", "AGENT_PROTOCOL.md should also be the module no? the section structure i like it bude maybe we can have also AGENT_ENFORCEMENT.md", "AGENT_PROTOCOL.md as a section without heading but body can be the url to okej non no no no no no no please AGENT_ENFORCEMENT.md", "AGENT_PROTOCOL.md should be also modules section leave as is and create module for this two but it should be define as is
+
+   Resolved decisions (from clarifying Q&A — not a rephrase of the above):
+   - **Sections stay as-is** — INPUT/OUTPUT CONTRACT etc. remain sections, **not** modules.
+   - **One module per include** — two new include-modules (e.g. `enforcement`, `protocol`), each emitting its own `@FILE.md` reference verbatim.
+   - Requires a **new module contribution kind** (e.g. `kind: "include"` with a `ref`) + composer support to render include-modules in the top-of-prompt includes region. Both composed agents drop their literal `includes: [...]` in favour of referencing these modules.
+   - Scope: **blocker on N88** (this fix cycle), not deferred to Round 2.
+
+### Non-blocking
+
+None this round.
+
+### Security & edge cases
+
+None this round.
+
+### Notes
+
+- This expands N88 beyond a pure spike (the module schema gains a second contribution kind). Accepted by the human.
+- **Not invented / out of this blocker:** the human specified only `AGENT_ENFORCEMENT.md` + `AGENT_PROTOCOL.md`. `@AGENT_EVENTS.md` (the `trailingIncludes` entry) was **not** mentioned — fixer should leave it as-is unless the human says otherwise.
+- Fixer now has **two blockers**: (1) Round 2 — DRY the registry construction; (2) Round 3 — include-modules. `/task-review-fix` should address both in one cycle.
