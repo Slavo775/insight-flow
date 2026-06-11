@@ -1,7 +1,8 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { ParsedArgs, TaskflowConfig, AgentGitPermissions } from "../../core/types.js";
 import { applyAgentExtensions } from "../../agents/agents.js";
+import { composeAgentById, listComposedAgents } from "../../agents/compose.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 
 function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
@@ -183,6 +184,28 @@ export function applyEnforcement(
 
 export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
   const cwd = process.cwd();
+
+  // N88 — agent-module composer (spike): `prompt-build --compose [<agent-id>] [--out <dir>]`.
+  // With no id, composes every known agent. With --out, writes <id>.composed.md
+  // files; otherwise prints to stdout. Returns early — does not run enforcement.
+  if (opts.compose) {
+    const id = typeof opts.compose === "string" ? opts.compose : null;
+    const ids = id ? [id] : listComposedAgents();
+    const outDir = typeof opts.out === "string" ? resolve(cwd, opts.out) : null;
+    if (outDir && !existsSync(outDir)) mkdirSync(outDir, { recursive: true });
+    for (const agentId of ids) {
+      const md = composeAgentById(agentId);
+      if (outDir) {
+        const target = join(outDir, `${agentId}.composed.md`);
+        writeFileSync(target, md);
+        console.log(`Composed ${agentId} → ${target}`);
+      } else {
+        console.log(`\n=== composed: ${agentId} ===\n`);
+        console.log(md);
+      }
+    }
+    return;
+  }
 
   if (!opts.apply) {
     const block = buildEnforcementBlock(readRawGitPerms(cwd));

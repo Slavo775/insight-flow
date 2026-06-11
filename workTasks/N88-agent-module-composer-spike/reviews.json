@@ -1,0 +1,58 @@
+{
+  "taskId": "N88",
+  "reviews": [
+    {
+      "startedAt": "2026-06-11T05:30:13.284Z",
+      "endedAt": "2026-06-11T05:32:42.477Z",
+      "verdict": "approved",
+      "comment": "Approved — additive composer spike, all gates green, composed MD semantically reproduces hand-written roles; non-blocking drift/test notes only",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-11T05:44:32.048Z",
+      "endedAt": "2026-06-11T05:46:46.964Z",
+      "verdict": "fix-needed",
+      "comment": "DRY the compose.ts registry construction into one shared indexById helper",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-11T05:53:16.081Z",
+      "endedAt": "2026-06-11T05:54:05.129Z",
+      "verdict": "fix-needed",
+      "comment": "Include @AGENT_ENFORCEMENT/@AGENT_PROTOCOL as two include-modules (new contribution kind); sections stay as-is",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-11T05:57:08.887Z",
+        "endedAt": "2026-06-11T06:00:28.292Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/enforcement.json",
+          "packages/taskflow/src/agents/modules/protocol.json",
+          "packages/taskflow/src/agents/modules/minimal-diff.json",
+          "packages/taskflow/src/agents/modules/scope-guard.json",
+          "packages/taskflow/src/agents/composed/task-implement.json",
+          "packages/taskflow/src/agents/composed/task-review-fix.json",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "comment": "Fixed blockers: R2 DRY via indexById helper; R3 includes-as-modules (discriminated-union 'include' kind + enforcement/protocol modules)",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-11T06:06:40.765Z",
+      "endedAt": "2026-06-11T06:07:30.640Z",
+      "verdict": "approved",
+      "comment": "Approved as-is; 'everything is a module' + pure-sequence unification recorded as Round 2 direction (not a blocker)",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

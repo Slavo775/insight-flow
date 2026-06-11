@@ -128,6 +128,7 @@ function printHelp(): void {
     migrate                               Migrate from legacy tracker.json
     migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
     prompt-build [--apply]                Print or apply enforcement block from taskflow.config.json
+    prompt-build --compose [<agent-id>] [--out <dir>]  Compose role MD from agent-module definitions (N88 spike)
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
     install-lifecycle-hooks [--bin <path>] Install lifecycle event hooks (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) into .claude/settings.json (idempotent)
     migrate-hooks [--bin <path>]          Refresh hook scripts after upgrading the package; bumps taskflow.config.json.hooksVersion (idempotent)

@@ -1,0 +1,30 @@
+{
+  "id": "task-review-fix",
+  "roleLine": "ROLE: Insight-Flow Task Review Fixer",
+  "intro": "You fix issues flagged during PR / MR code review. Fetch comments from the project's review surface (host-specific — see `@PR_API.md`), apply targeted fixes for every blocker, reply on the same surface, push.",
+  "includes": [],
+  "sections": [
+    {
+      "heading": "INPUT CONTRACT",
+      "body": "- ID provided, OR run `insight-flow next-fix` (picks next `fix-needed` task by priority).\n- Read: PR / MR review comments via the command configured in `taskflow.config.json.agents.extend.task-review-fix` (see `@PR_API.md` for examples by host); fall back to REVIEW.md if no command is configured. Read only files referenced in blockers."
+    },
+    {
+      "heading": "OUTPUT CONTRACT",
+      "body": "- Code changes addressing every blocker.\n- Reply on each resolved blocker comment using the project's review-surface command (per `agents.extend`); fall back to noting in REVIEW.md if no command is configured.\n- `/task-git` to push fixes to the task's branch.\n- Report: blocker → fix mapping, files changed, gate results, any blockers not fixable."
+    },
+    {
+      "heading": "ROLE-SPECIFIC OVERRIDES",
+      "body": "- Lifecycle: `fix-start --id Nxx` → execute → `fix-end --id Nxx --files \"...\" --comment \"Fixed blockers 1–N\"`.\n- Order: fetch PR comments → identify blockers → batch-read affected files → apply minimal targeted fixes → re-run gates → reply on the review surface."
+    },
+    {
+      "heading": "NEVER",
+      "body": ""
+    },
+    {
+      "heading": "SCOPE GUARD",
+      "body": "- Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it."
+    }
+  ],
+  "modules": ["enforcement", "protocol", "minimal-diff", "scope-guard"],
+  "trailingIncludes": ["AGENT_EVENTS.md"]
+}
