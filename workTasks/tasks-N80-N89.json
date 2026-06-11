@@ -905,7 +905,7 @@
       "title": "Agent composition model v2 — everything is a module + registry",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "workTasks/N89-agent-composition-model-v2-everything-is-a-module-",
       "createdAt": "2026-06-11T07:16:19.496Z",
       "statusHistory": [
@@ -938,6 +938,26 @@
           "status": "approved",
           "at": "2026-06-11T07:38:27.466Z",
           "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-11T09:25:01.831Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-11T09:25:40.263Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-11T09:25:40.376Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-11T09:25:40.501Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -963,11 +983,11 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-11T09:25:40.501Z",
+      "totalDurationMinutes": 129,
       "tags": [
         "agents",
         "composer",
@@ -983,7 +1003,7 @@
       ],
       "branch": "feat/N89-agent-composition-model-v2",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/64",
-      "mergedAt": null
+      "mergedAt": "2026-06-11T09:25:40.376Z"
     }
   ]
 }
