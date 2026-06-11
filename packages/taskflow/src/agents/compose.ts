@@ -133,12 +133,16 @@ export function composeAgent(
     if (i > 0) {
       const prev = mods[i - 1];
       if (prev.kind === "include" && mod.kind === "include") out += "\n";
-      else if (prev.kind === "section" && mod.kind === "section" && !mod.heading) out += "\n";
-      else out += "\n\n";
+      else if (prev.kind === "section" && mod.kind === "section" && !mod.heading) {
+        // Body-only continuation: a heading-only predecessor opens the section
+        // (blank line after the heading, house style); a predecessor with body
+        // is continued directly (no blank line mid-list).
+        out += prev.heading && !prev.body?.length ? "\n\n" : "\n";
+      } else out += "\n\n";
     }
     if (mod.kind === "include") {
       out += `@${mod.ref}`;
-    } else if (mod.heading && mod.body.length) {
+    } else if (mod.heading && mod.body?.length) {
       out += mod.heading + "\n\n" + mod.body;
     } else {
       out += mod.heading || mod.body;

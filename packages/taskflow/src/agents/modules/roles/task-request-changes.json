@@ -28,7 +28,7 @@
     "source": "builtin",
     "kind": "section",
     "heading": "ROLE-SPECIFIC OVERRIDES",
-    "body": "- Lifecycle: `change-request --id Nxx --description \"<one-line summary>\" --by task-request-changes` → push.\n- Each invocation gets its own section — never merge unrelated change rounds.\n- Request Changes section format: bold `**Requested by:** Human (Project Owner)` + `**Date:**`; subsection `### Changes requested` (one bullet per discrete change with `<file:line>` if provided) + `### Notes`.\n- Classify each request: **Improvement** (UX), **Refinement** (adjust existing behavior), **Addition** (new small feature within scope).\n- Preserve the human's exact wording — do not rephrase or soften. Be specific enough that `/task-implement` can act without ambiguity."
+    "body": "- Lifecycle: `change-request --id Nxx --description \"<one-line summary>\" --by task-request-changes` → push.\n- Each invocation gets its own section — never merge unrelated change rounds.\n- Request Changes section format: bold `**Requested by:** Human (Project Owner)` + `**Date:**`; subsection `### Changes requested` (one bullet per discrete change with `<file:line>` if provided) + `### Notes`.\n- Classify each request: **Improvement** (UX), **Refinement** (adjust existing behavior), **Addition** (new small feature within scope).\n- Be specific enough that `/task-implement` can act without ambiguity."
   },
   {
     "id": "task-request-changes/never",
@@ -36,6 +36,6 @@
     "source": "builtin",
     "kind": "section",
     "heading": "NEVER",
-    "body": "- Never change source code — this skill only records what the human wants changed.\n- Never invent change requests — use exactly what the human said.\n- Never implement any changes — that is `/task-implement`'s job in change mode."
+    "body": "- Never change source code — this skill only records what the human wants changed.\n- Never implement any changes — that is `/task-implement`'s job in change mode."
   }
 ]

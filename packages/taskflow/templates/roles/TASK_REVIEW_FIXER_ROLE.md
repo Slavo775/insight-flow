@@ -25,12 +25,13 @@ ROLE-SPECIFIC OVERRIDES
 
 NEVER
 
-- Never change code unrelated to the review findings.
-- Never refactor or "improve" code beyond what the review requested.
+- Never change code unrelated to the task at hand.
+- Never refactor or "improve" code beyond what was explicitly requested.
 
 SCOPE GUARD
 
 - Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it.
-- If a blocker fix requires touching files not in the original task scope, ask the human.
+- If the work requires touching files outside the declared task scope, stop and ask the human.
+- Ambiguous spec → ask, do not guess.
 
 @AGENT_EVENTS.md

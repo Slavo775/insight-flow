@@ -35,8 +35,7 @@
     "title": "Task Review Fixer — NEVER",
     "source": "builtin",
     "kind": "section",
-    "heading": "NEVER",
-    "body": "- Never change code unrelated to the review findings.\n- Never refactor or \"improve\" code beyond what the review requested."
+    "heading": "NEVER"
   },
   {
     "id": "task-review-fix/scope-guard",
@@ -44,6 +43,6 @@
     "source": "builtin",
     "kind": "section",
     "heading": "SCOPE GUARD",
-    "body": "- Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it.\n- If a blocker fix requires touching files not in the original task scope, ask the human."
+    "body": "- Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it."
   }
 ]
