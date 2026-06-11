@@ -58,6 +58,15 @@
             "timeout": 10000
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[taskflow:testing] source changed — run the test suite before handoff'"
+          }
+        ]
       }
     ],
     "PermissionRequest": [

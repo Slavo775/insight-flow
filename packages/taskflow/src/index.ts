@@ -66,9 +66,12 @@ export { AgentModuleSchema, ComposedAgentSchema } from "./core/schema/index.js";
 export {
   composeAgent,
   composeAgentById,
+  collectArtifacts,
   listComposedAgents,
   indexById,
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
 } from "./agents/compose.js";
-export type { AgentModule, ComposedAgent } from "./agents/compose.js";
+export type { AgentModule, ComposedAgent, AgentArtifacts } from "./agents/compose.js";
+export { applyArtifacts } from "./agents/emit.js";
+export type { EmitReport, EmitAction } from "./agents/emit.js";

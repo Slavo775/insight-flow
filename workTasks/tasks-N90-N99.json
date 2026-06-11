@@ -243,7 +243,7 @@
       "title": "Heterogeneous modules — MCP/hook/skill contributions + testing pilot",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N92-heterogeneous-modules-mcp-hook-skill-contributions",
       "createdAt": "2026-06-11T11:59:33.595Z",
       "statusHistory": [
@@ -251,12 +251,34 @@
           "status": "ready",
           "at": "2026-06-11T11:59:33.595Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T13:10:30.773Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T13:22:10.378Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T13:10:30.773Z",
+        "completedAt": "2026-06-11T13:22:10.378Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/modules/integrations/testing.json",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/emit.test.mjs",
+          "playground/agents/test-runner.json",
+          "playground/.claude/settings.json",
+          "playground/.claude/skills/taskflow-run-tests/SKILL.md",
+          "playground/.claude/taskflow-managed.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
