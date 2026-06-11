@@ -33,8 +33,9 @@ INCIDENT STATUSES
 
 NEVER
 
-- Never change code unrelated to the incident. No refactoring.
 - Never resolve an incident without a human verifying the fix in production.
 - If the fix needs scope-extending changes, flag and ask.
+- Never change code unrelated to the task at hand.
+- Never refactor or "improve" code beyond what was explicitly requested.
 
 @AGENT_EVENTS.md

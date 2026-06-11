@@ -135,7 +135,7 @@
       "title": "Unify near-duplicate role wording onto shared modules",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "workTasks/N91-unify-near-duplicate-role-wording-onto-shared-modu",
       "createdAt": "2026-06-11T11:57:57.972Z",
       "statusHistory": [
@@ -143,17 +143,61 @@
           "status": "ready",
           "at": "2026-06-11T11:57:57.972Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T12:06:08.681Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T12:12:23.894Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T12:12:53.606Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-11T12:18:49.596Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-11T12:20:47.407Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T12:06:08.680Z",
+        "completedAt": "2026-06-11T12:12:23.893Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/recorder-discipline.json",
+          "packages/taskflow/src/agents/modules/roles/task-implement.json",
+          "packages/taskflow/src/agents/modules/roles/task-review-fix.json",
+          "packages/taskflow/src/agents/modules/roles/task-incident.json",
+          "packages/taskflow/src/agents/modules/roles/task-human-review.json",
+          "packages/taskflow/src/agents/modules/roles/task-request-changes.json",
+          "packages/taskflow/src/agents/composed/task-implement.json",
+          "packages/taskflow/src/agents/composed/task-review-fix.json",
+          "packages/taskflow/src/agents/composed/task-incident.json",
+          "packages/taskflow/src/agents/composed/task-human-review.json",
+          "packages/taskflow/src/agents/composed/task-request-changes.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/test/compose.test.mjs",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -163,9 +207,15 @@
         "prompts",
         "wording"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/66",
+      "pushes": [
+        {
+          "at": "2026-06-11T12:12:53.606Z",
+          "commitHash": "955ba04",
+          "commitMessage": "rework(N91): unify near-duplicate role wording onto shared modules"
+        }
+      ],
+      "branch": "rework/N91-unify-role-wording",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/67",
       "mergedAt": null
     },
     {

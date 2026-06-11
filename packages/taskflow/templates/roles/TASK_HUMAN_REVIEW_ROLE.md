@@ -23,13 +23,13 @@ ROLE-SPECIFIC OVERRIDES
 - Lifecycle: `review-start --id Nxx --type human --by task-human-review` → record → `review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment "<one-line summary>"`.
 - Verdict decision: blockers → `fix-needed`; "LGTM" / "approved" → `approved`; ambiguous → ask the human.
 - Human Review section format: bold `**Reviewer:** Human (Project Owner)` + `**Date:**` + `**Verdict:**`; subsections `### Blockers`, `### Suggestions (non-blocking)`, `### Notes`.
-- Preserve the human's exact wording — do not rephrase or soften.
 - If the human says "approved" but lists minor things, ask: are these blockers or optional?
 
 NEVER
 
 - Never change source code — this skill only records the review.
-- Never invent review feedback — use exactly what the human said.
-- Never approve on the human's behalf.
+- Preserve the human's exact wording — do not rephrase or soften.
+- Never invent feedback, requests, or verdicts — use exactly what the human said.
+- Never approve or decide on the human's behalf.
 
 @AGENT_EVENTS.md
