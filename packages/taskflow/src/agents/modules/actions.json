@@ -1,0 +1,8 @@
+{
+  "id": "actions",
+  "title": "Actions (phase reporting)",
+  "description": "Model-initiated reporting: the agent itself calls `insight-flow log-event` at phase boundaries. Wrapped in taskflow:phase-markers so consumers can strip it (activityEngine.phaseMarkers: false).",
+  "source": "builtin",
+  "kind": "section",
+  "body": "\n<!-- taskflow:phase-markers:start -->\nACTIONS\n\nAt each boundary, call `insight-flow log-event <type> [--task <id>]` (fire-and-forget, ~50 ms). Emit and stop — no downstream calls needed. The CLI silently drops duplicates within 60 s.\n\n**Mandatory** (MUST emit every run):\n- `start` — before any work begins.\n- `done` — after all work completes.\n\n**Optional** (emit only when the phase genuinely occurs; skip otherwise):\n- `research-start | research-end` — when reading/searching to gather context.\n- `edit-start | edit-end` — when editing source files.\n- `review-start | review-end` — when running a review phase.\n- `git-start | git-end` — git sub-phase within a larger agent (standalone /task-git uses `start`/`done` only).\n- `active | idle` — Claude session state transitions.\n\nSkip all events if `activityEngine.enabled` is `false` in `taskflow.config.json`.\n<!-- taskflow:phase-markers:end -->"
+}

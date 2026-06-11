@@ -293,13 +293,28 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
     config: z.record(z.string(), z.unknown()),
   }),
   // Hook module: a Claude Code settings hook registration, reconciled into
-  // `.claude/settings.json` via the taskflow-managed manifest.
+  // `.claude/settings.json` via the taskflow-managed manifest. A hook may ship
+  // its own script (written to `.claude/hooks/<script.name>`, 0755) — the
+  // command then typically references it via ${CLAUDE_PROJECT_DIR}. Script
+  // names are path-segment-restricted, like skill names. `__VAR__` tokens in
+  // command/script content are substituted by the emitter (e.g.
+  // __INSIGHT_FLOW_BIN__ for the project's CLI invocation).
   z.object({
     ...agentModuleBase,
     kind: z.literal("hook"),
     event: z.string().min(1),
     matcher: z.string().optional(),
     command: z.string().min(1),
+    timeout: z.number().int().positive().optional(),
+    script: z
+      .object({
+        name: z
+          .string()
+          .min(1)
+          .regex(/^[a-z0-9][a-z0-9.-]*$/, "hook script name must be a safe path segment"),
+        content: z.string().min(1),
+      })
+      .optional(),
   }),
   // Skill module: written to `.claude/skills/<name>/SKILL.md`. The name is a
   // path segment — restrict it so it can never traverse.

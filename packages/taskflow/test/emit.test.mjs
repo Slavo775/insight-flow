@@ -154,6 +154,46 @@ test("skill name collisions across agents throw instead of silently overwriting"
   );
 });
 
+test("N94: script-carrying hooks — write 0755, substitute vars, remove with the module", async () => {
+  const { ACTIVITY_AGENT, MODULE_REGISTRY } = await import("../dist/index.js");
+  const { statSync } = await import("node:fs");
+  const dir = tmp();
+  const artifacts = collectArtifacts(ACTIVITY_AGENT);
+  const reports = applyArtifacts(artifacts, dir, ACTIVITY_AGENT.id, {
+    INSIGHT_FLOW_BIN: "npx insight-flow",
+  });
+  // 6 scripts + settings
+  const scriptPath = join(dir, ".claude/hooks/lifecycle-agent-idle.sh");
+  assert.ok(existsSync(scriptPath), "lifecycle script written");
+  assert.equal(statSync(scriptPath).mode & 0o111, 0o111, "script is executable");
+  const content = readFileSync(scriptPath, "utf-8");
+  assert.ok(content.includes("npx insight-flow log-event"), "bin var substituted");
+  assert.ok(!content.includes("__INSIGHT_FLOW_BIN__"), "no tokens left");
+  const settings = readJson(join(dir, ".claude/settings.json"));
+  assert.equal(Object.keys(settings.hooks).length, 6, "six events registered");
+  assert.equal(settings.hooks.Stop[0].hooks[0].timeout, 10, "timeout preserved");
+
+  // idempotent with same vars
+  const second = applyArtifacts(artifacts, dir, ACTIVITY_AGENT.id, {
+    INSIGHT_FLOW_BIN: "npx insight-flow",
+  });
+  assert.ok(second.every((r) => r.action === "unchanged"), JSON.stringify(second));
+
+  // removing a module removes its script + entry, keeps the rest
+  const without = {
+    ...ACTIVITY_AGENT,
+    modules: ACTIVITY_AGENT.modules.filter((m) => m !== "activity/agent-idle"),
+  };
+  applyArtifacts(collectArtifacts(without), dir, ACTIVITY_AGENT.id, {
+    INSIGHT_FLOW_BIN: "npx insight-flow",
+  });
+  assert.ok(!existsSync(scriptPath), "removed script deleted");
+  const after = readJson(join(dir, ".claude/settings.json"));
+  assert.equal(after.hooks.Stop, undefined, "Stop entry removed");
+  assert.ok(after.hooks.SessionStart, "other lifecycle entries intact");
+  assert.ok(MODULE_REGISTRY["activity/agent-idle"], "module still registered");
+});
+
 test("schema rejects unsafe skill names (path traversal)", async () => {
   const { AgentModuleSchema } = await import("../dist/index.js");
   for (const bad of ["../evil", "a/b", ".hidden", "UPPER"]) {

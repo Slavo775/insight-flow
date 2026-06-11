@@ -71,6 +71,7 @@ export {
   indexById,
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
+  ACTIVITY_AGENT,
 } from "./agents/compose.js";
 export type { AgentModule, ComposedAgent, AgentArtifacts } from "./agents/compose.js";
 export { applyArtifacts } from "./agents/emit.js";
