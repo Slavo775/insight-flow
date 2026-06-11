@@ -24,6 +24,7 @@ import {
 } from "../../agents/activity-hook.js";
 import { EventStore } from "./event-stream.js";
 import { HookEventInputSchema } from "../../core/schema/index.js";
+import { MODULE_REGISTRY, COMPOSED_AGENTS } from "../../agents/compose.js";
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -616,6 +617,32 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // filter it here before serialising rather than relying on CORS alone.
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(config, null, 2));
+      return;
+    }
+
+    // N93 — composer registry browser. Read-only views over the built-in
+    // module registry + composed agents (src/agents/compose.ts).
+    if (url.pathname === "/api/modules") {
+      const referencedBy: Record<string, string[]> = {};
+      for (const def of Object.values(COMPOSED_AGENTS)) {
+        for (const id of def.modules) (referencedBy[id] ??= []).push(def.id);
+      }
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ modules: Object.values(MODULE_REGISTRY), referencedBy }));
+      return;
+    }
+
+    if (url.pathname === "/api/agents") {
+      const agents = Object.values(COMPOSED_AGENTS).map((def) => ({
+        id: def.id,
+        title: def.title,
+        modules: def.modules.map((id) => {
+          const mod = MODULE_REGISTRY[id];
+          return { id, title: mod?.title ?? id, kind: mod?.kind ?? "unknown" };
+        }),
+      }));
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ agents }));
       return;
     }
 

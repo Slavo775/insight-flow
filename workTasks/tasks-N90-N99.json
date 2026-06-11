@@ -354,7 +354,7 @@
       "title": "Dashboard module & agent browser — shared layout + interactive composition maps",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N93-dashboard-module-agent-browser-shared-layout-inter",
       "createdAt": "2026-06-11T15:00:43.870Z",
       "statusHistory": [
@@ -362,12 +362,35 @@
           "status": "ready",
           "at": "2026-06-11T15:00:43.870Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T15:32:56.308Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T15:45:10.745Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T15:32:56.308Z",
+        "completedAt": "2026-06-11T15:45:10.744Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/registry.ts",
+          "packages/taskflow/src/dashboard/client/components/SideLayout.tsx",
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+          "packages/taskflow/src/dashboard/client/ModulesPage.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/AgentsPage.tsx",
+          "packages/taskflow/src/dashboard/client/AgentDetail.tsx",
+          "packages/taskflow/src/dashboard/client/App.tsx",
+          "packages/taskflow/src/dashboard/client/ui.tsx"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
