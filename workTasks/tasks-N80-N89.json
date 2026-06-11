@@ -899,6 +899,91 @@
       "branch": "feat/N88-agent-module-composer-spike",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/63",
       "mergedAt": "2026-06-11T07:13:51.836Z"
+    },
+    {
+      "id": "N89",
+      "title": "Agent composition model v2 — everything is a module + registry",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "workTasks/N89-agent-composition-model-v2-everything-is-a-module-",
+      "createdAt": "2026-06-11T07:16:19.496Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-11T07:16:19.496Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T07:21:18.463Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T07:30:10.391Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T07:30:53.058Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-11T07:36:56.132Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-11T07:38:27.466Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-11T07:21:18.462Z",
+        "completedAt": "2026-06-11T07:30:10.390Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/enforcement.json",
+          "packages/taskflow/src/agents/modules/protocol.json",
+          "packages/taskflow/src/agents/modules/events.json",
+          "packages/taskflow/src/agents/modules/minimal-diff.json",
+          "packages/taskflow/src/agents/modules/scope-guard.json",
+          "packages/taskflow/src/agents/modules/recorder-discipline.json",
+          "packages/taskflow/src/agents/modules/roles/task-implement.json",
+          "packages/taskflow/src/agents/modules/roles/task-review-fix.json",
+          "packages/taskflow/src/agents/composed/task-implement.json",
+          "packages/taskflow/src/agents/composed/task-review-fix.json",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/compose.test.mjs",
+          "playground/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "composer",
+        "schema",
+        "registry"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-11T07:30:53.057Z",
+          "commitHash": "ac1c52f",
+          "commitMessage": "feat(N89): agent composition model v2 — everything is a module + registry"
+        }
+      ],
+      "branch": "feat/N89-agent-composition-model-v2",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/64",
+      "mergedAt": null
     }
   ]
 }

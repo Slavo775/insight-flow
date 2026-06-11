@@ -1,44 +1,66 @@
-// N88 — agent-module composer (spike).
+// N89 — agent-module composer v2 ("everything is a module").
 //
-// Proves the "agent = core + stacked modules" model. A module's contribution is
-// one of two kinds:
-//   - `prompt`  — bullets merged into a named section (e.g. minimal-diff → NEVER);
-//   - `include` — a verbatim `@<ref>` reference emitted among the top includes
-//                 (e.g. enforcement → @AGENT_ENFORCEMENT.md).
-// A `composed-agent` declares its core identity, ordered sections (some
-// reserved/empty for modules), referenced module ids, and any literal includes.
-// `composeAgent` resolves + dedups module refs, emits include-modules in the
-// includes region, merges prompt-modules into their sections, and returns role MD.
+// A composed agent is a single ordered list of registered module ids rendered
+// as a pure sequence: each module emits one standalone block, in declared
+// order. There is no heading-targeted merging — the author controls placement
+// by ordering the list. Two module kinds:
+//   - `section` — optional heading + pre-formatted body. Heading-only modules
+//     open a section that following body-only modules continue; body-only
+//     modules (e.g. shared `minimal-diff` bullets) render under the previous
+//     module's heading.
+//   - `include` — a verbatim `@<ref>` line. Consecutive include modules are
+//     grouped without blank lines, matching hand-written role layout.
 //
-// No MCP/hook/skill contributions yet (see N88 ANALYSIS "What's next").
+// Registry: shared modules use flat ids ("minimal-diff"); role-scoped modules
+// are namespaced "<role>/<slug>" ("task-implement/input-contract").
+//
+// NOTE: the hand-written TASK_*_ROLE.md files remain the canonical shipped
+// prompts. This JSON model + composer is a parallel implementation slated to
+// become canonical in Round 3 (role migration); until then nothing consumes
+// the composed output. No MCP/hook/skill contributions yet (Round 4).
 import type { z } from "zod";
 import { AgentModuleSchema, ComposedAgentSchema } from "../core/schema/index.js";
 
 import enforcement from "./modules/enforcement.json";
 import protocol from "./modules/protocol.json";
+import events from "./modules/events.json";
 import minimalDiff from "./modules/minimal-diff.json";
 import scopeGuard from "./modules/scope-guard.json";
+import recorderDiscipline from "./modules/recorder-discipline.json";
+import taskImplementModules from "./modules/roles/task-implement.json";
+import taskReviewFixModules from "./modules/roles/task-review-fix.json";
 import taskImplement from "./composed/task-implement.json";
 import taskReviewFix from "./composed/task-review-fix.json";
 
 export type AgentModule = z.infer<typeof AgentModuleSchema>;
 export type ComposedAgent = z.infer<typeof ComposedAgentSchema>;
 
-// Validate authored data at load and key it by id. Malformed JSON fails fast.
-function indexById<T extends { id: string }>(
+// Validate authored data at load and key it by id. Malformed JSON fails fast;
+// duplicate ids throw rather than silently last-winning.
+export function indexById<T extends { id: string }>(
   items: unknown[],
   schema: z.ZodType<T>,
 ): Record<string, T> {
-  return Object.fromEntries(
-    items.map((item) => {
-      const parsed = schema.parse(item);
-      return [parsed.id, parsed];
-    }),
-  ) as Record<string, T>;
+  const out: Record<string, T> = {};
+  for (const item of items) {
+    const parsed = schema.parse(item);
+    if (out[parsed.id]) throw new Error(`Duplicate id '${parsed.id}' in registry`);
+    out[parsed.id] = parsed;
+  }
+  return out;
 }
 
 export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
-  [enforcement, protocol, minimalDiff, scopeGuard],
+  [
+    enforcement,
+    protocol,
+    events,
+    minimalDiff,
+    scopeGuard,
+    recorderDiscipline,
+    ...taskImplementModules,
+    ...taskReviewFixModules,
+  ],
   AgentModuleSchema,
 );
 
@@ -53,64 +75,44 @@ export function listComposedAgents(): string[] {
 
 /**
  * Compose a single agent definition into role Markdown.
- * - Resolves `def.modules` against the registry, deduping by id in declared order.
- * - `include` modules contribute a verbatim `@<ref>` line in the includes region
- *   (deduped); `prompt` modules contribute bullets merged into their section.
- * - Renders core identity → includes → sections (role body + merged module
- *   bullets, skipping empties) → trailing includes.
+ * Pure sequence: resolves `def.modules` against the registry (dedup by id,
+ * declared order, unknown id throws before any output is produced) and emits
+ * one block per module. Blocks are separated by a blank line, except
+ * consecutive `include` blocks which stay adjacent.
  */
 export function composeAgent(
   def: ComposedAgent,
   registry: Record<string, AgentModule> = MODULE_REGISTRY,
 ): string {
   const seen = new Set<string>();
-  const includeRefs: string[] = [...def.includes];
-  const moduleBulletsBySection = new Map<string, string[]>();
+  const blocks: { kind: AgentModule["kind"]; text: string }[] = [];
   for (const id of def.modules) {
     if (seen.has(id)) continue; // dedup repeated refs
     seen.add(id);
     const mod = registry[id];
     if (!mod) throw new Error(`Unknown module '${id}' referenced by agent '${def.id}'`);
-    const c = mod.contribution;
-    if (c.kind === "include") {
-      if (!includeRefs.includes(c.ref)) includeRefs.push(c.ref);
+    if (mod.kind === "include") {
+      blocks.push({ kind: "include", text: `@${mod.ref}` });
     } else {
-      const list = moduleBulletsBySection.get(c.section) ?? [];
-      list.push(...c.bullets);
-      moduleBulletsBySection.set(c.section, list);
+      const body = mod.body.trim();
+      const lines: string[] = [];
+      if (mod.heading) lines.push(mod.heading);
+      if (mod.heading && body) lines.push("");
+      if (body) lines.push(body);
+      blocks.push({ kind: "section", text: lines.join("\n") });
     }
   }
 
-  const out: string[] = [def.roleLine, "", def.intro, ""];
-  for (const ref of includeRefs) out.push(`@${ref}`);
-  if (includeRefs.length) out.push("");
+  let out = "";
+  blocks.forEach((b, i) => {
+    if (i > 0) {
+      const adjacentIncludes = b.kind === "include" && blocks[i - 1].kind === "include";
+      out += adjacentIncludes ? "\n" : "\n\n";
+    }
+    out += b.text;
+  });
 
-  const rendered = new Set<string>();
-  for (const section of def.sections) {
-    const moduleBullets = moduleBulletsBySection.get(section.heading) ?? [];
-    const body = section.body.trim();
-    if (!body && moduleBullets.length === 0) continue; // reserved-but-unused → skip
-    const lines: string[] = [];
-    if (body) lines.push(body);
-    for (const b of moduleBullets) lines.push(`- ${b}`);
-    out.push(section.heading, "", lines.join("\n"), "");
-    rendered.add(section.heading);
-  }
-
-  // Safety net: a prompt-module targeting a section the agent never declared.
-  for (const [heading, bullets] of moduleBulletsBySection) {
-    if (rendered.has(heading)) continue;
-    out.push(heading, "", bullets.map((b) => `- ${b}`).join("\n"), "");
-  }
-
-  for (const inc of def.trailingIncludes) out.push(`@${inc}`);
-
-  return (
-    out
-      .join("\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trimEnd() + "\n"
-  );
+  return out.replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
 }
 
 export function composeAgentById(
