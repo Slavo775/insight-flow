@@ -3,6 +3,7 @@
 **Type:** feat
 **Priority:** medium
 **Created:** 2026-06-11
+**Modified:** 2026-06-11
 
 ## Problem
 
@@ -14,7 +15,8 @@
 2. `/module` + `/module/:id` — sidebar lists all registry modules grouped (shared / role-scoped / integration); content shows the full module record (kind-specific: section heading+body, include ref, MCP name+config, hook event/matcher/command, skill name+content) plus referencing agents, with an interactive map view.
 3. `/agent` + `/agent/:id` — sidebar lists the composed agents; content is an interactive React Flow map of the agent's ordered composition (pretty titles); module nodes navigate to `/module/:id`.
 4. `/api/agents` + `/api/modules` server endpoints exposing `COMPOSED_AGENTS` + `MODULE_REGISTRY`.
-5. Existing dashboard pages (kanban / timeline / task detail) unchanged.
+5. **Mobile-accessible** (change request 2026-06-11): on small viewports the sidebar collapses into a hamburger menu opening a fullscreen overlay; the content pane (detail panels and the composition maps) remains usable on mobile.
+6. Existing dashboard pages (kanban / timeline / task detail) unchanged.
 
 ## Scope
 
@@ -36,10 +38,10 @@
 ## Implementation plan
 
 1. **API endpoints** (`server/index.ts`) — import `MODULE_REGISTRY` / `COMPOSED_AGENTS`; `/api/modules` returns `{ modules: AgentModule[], referencedBy: Record<moduleId, agentId[]> }`; `/api/agents` returns `{ agents: { id, title, modules: { id, title, kind }[] }[] }`. Ensure the server's SPA fallback serves index.html for `/module/*` and `/agent/*`.
-2. **Shared layout** — `SideLayout` (sidebar slot + content slot, styled-components, theme-consistent; active item highlight via `NavLink`).
+2. **Shared layout** — `SideLayout` (sidebar slot + content slot, styled-components, theme-consistent; active item highlight via `NavLink`). **Responsive**: below a theme breakpoint (~768px) the sidebar is hidden behind a hamburger button in the layout header; tapping it opens a fullscreen overlay menu (same sidebar content, large touch targets, close button + close-on-navigate); content takes full width.
 3. **Modules pages** — sidebar groups: Shared (flat ids), per-role (`<role>/…`), Integrations (`testing/…`); `/module` redirects to the first module. Detail content: title, id, kind badge, source, kind-specific panels (body rendered as markdown-ish pre, JSON viewer for MCP config, hook table, skill content block), "Referenced by" agent chips linking to `/agent/:id`.
 4. **Agents pages** — sidebar lists 9 agents with pretty titles; `/agent` redirects to first. Detail: header (title, id, module count) + `CompositionMap`.
-5. **CompositionMap (React Flow)** — nodes = ordered modules (kind-colored, numbered by sequence position) flowing into the agent node; pan/zoom + minimap; `onNodeClick` → `navigate("/module/<id>")`. Module-detail variant: center module node, edges to its contribution facets and referencing agents.
+5. **CompositionMap (React Flow)** — nodes = ordered modules (kind-colored, numbered by sequence position) flowing into the agent node; pan/zoom + minimap; `onNodeClick` → `navigate("/module/<id>")`. Module-detail variant: center module node, edges to its contribution facets and referencing agents. **Mobile**: map container sized to the viewport (no horizontal page scroll), touch pan/pinch-zoom enabled (React Flow supports touch out of the box), `fitView` on load, minimap hidden on small screens; detail panels stack vertically and wrap long content (pre/code blocks scroll within their box).
 6. **Wire routes + nav** — `Routes` entries for the four paths; add "Agents" / "Modules" links to the existing dashboard header/nav.
 7. **Build + smoke** — `pnpm build` (Vite bundle), playground `insight-flow ui` manual check: navigate menu, click module nodes, verify existing kanban/task-detail untouched.
 
@@ -47,6 +49,7 @@
 
 - `pnpm build` green (Vite + tsc); `pnpm --filter insight-flow test` green (no server test regressions).
 - Playground: `/agent/task-implement` renders the map with 11 ordered module nodes; clicking `minimal-diff` lands on `/module/minimal-diff` showing body + "referenced by" implement/review-fix/incident; `/module/testing/hook` shows event/matcher/command (note: module ids contain `/` — route must match nested segments, e.g. `path="module/*"` with splat parsing).
+- Mobile (narrow viewport / devtools device emulation ~375px): hamburger visible, overlay menu opens fullscreen and closes on selection; module detail readable without horizontal page scroll; agent map pannable/zoomable by touch with `fitView` on load.
 - Existing routes (`/`, task detail) behave exactly as before.
 
 ## Notes
