@@ -1,9 +1,10 @@
 /**
- * N89 — agent-module composer v2 ("everything is a module").
- * Validates the unified model: one ordered `modules` list per agent, section +
- * include module kinds, pure-sequence rendering, registry namespacing,
- * duplicate-id guard, and normalized section-set reproduction of the
- * hand-written role files. Requires a prior build (imports from dist).
+ * N90 — agent-module composer (JSON canonical).
+ * The 9 committed *_ROLE.md files are generated from the JSON module registry;
+ * the headline test asserts byte-equality between composer output and each
+ * committed file (drift guard: hand-editing MD or editing JSON without
+ * re-running `prompt-build --compose --apply` fails CI). Structural tests
+ * cover the v3 renderer rules. Requires a prior build (imports from dist).
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -24,47 +25,57 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, "../../.."); // packages/taskflow/test → repo root
 
 const ROLE_FILES = {
+  "task-analyze": "TASK_ANALYZER_ROLE.md",
+  taskmaster: "TASKMASTER_ROLE.md",
+  "taskmaster-change": "TASKMASTER_CHANGE_ROLE.md",
   "task-implement": "TASK_IMPLEMENTER_ROLE.md",
+  "task-review": "TASK_REVIEWER_ROLE.md",
   "task-review-fix": "TASK_REVIEW_FIXER_ROLE.md",
+  "task-human-review": "TASK_HUMAN_REVIEW_ROLE.md",
+  "task-incident": "TASK_INCIDENT_ROLE.md",
+  "task-request-changes": "TASK_REQUEST_CHANGES_ROLE.md",
 };
 
-// ALL-CAPS heading lines ("INPUT CONTRACT", "ROLE-SPECIFIC OVERRIDES", …);
-// excludes the "ROLE: …" identity line and @include lines.
-function headingSequence(text) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => /^[A-Z][A-Z -]+$/.test(l) && l.length > 2);
-}
+test("drift guard: composer output is byte-identical to every committed role file", () => {
+  for (const [id, file] of Object.entries(ROLE_FILES)) {
+    const composed = composeAgentById(id);
+    const committed = readFileSync(resolve(repoRoot, file), "utf-8");
+    assert.equal(
+      composed,
+      committed,
+      `${file} differs from composeAgentById("${id}") — run \`prompt-build --compose --apply\` (JSON edited) or revert the hand-edit (MD edited)`,
+    );
+  }
+});
 
-function includeSequence(text) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.startsWith("@"));
-}
+test("all 9 shipped roles are registered as composed agents", () => {
+  assert.deepEqual(listComposedAgents().sort(), Object.keys(ROLE_FILES).sort());
+});
 
-test("registry holds shared + role-scoped modules with the right kinds", () => {
+test("registry holds shared include + section modules and role-scoped modules", () => {
   for (const id of ["enforcement", "protocol", "events"]) {
     assert.equal(MODULE_REGISTRY[id]?.kind, "include", `${id} is an include module`);
   }
+  assert.equal(MODULE_REGISTRY["enforcement"].ref, "AGENT_ENFORCEMENT.md");
+  assert.equal(MODULE_REGISTRY["events"].ref, "AGENT_EVENTS.md");
+  // shared section modules stay registered for future/custom composition
   for (const id of ["minimal-diff", "scope-guard", "recorder-discipline"]) {
     assert.equal(MODULE_REGISTRY[id]?.kind, "section", `${id} is a section module`);
   }
-  assert.equal(MODULE_REGISTRY["enforcement"].ref, "AGENT_ENFORCEMENT.md");
-  assert.equal(MODULE_REGISTRY["events"].ref, "AGENT_EVENTS.md");
-  // role-scoped modules are namespaced <role>/<slug>
-  for (const role of Object.keys(ROLE_FILES)) {
-    for (const slug of ["identity", "input-contract", "output-contract", "overrides", "never", "scope-guard"]) {
-      assert.ok(MODULE_REGISTRY[`${role}/${slug}`], `missing ${role}/${slug}`);
+  // every composed agent resolves entirely against the registry, namespaced <role>/<slug>
+  for (const [agentId, def] of Object.entries(COMPOSED_AGENTS)) {
+    for (const modId of def.modules) {
+      assert.ok(MODULE_REGISTRY[modId], `${agentId} references unknown module ${modId}`);
+      if (modId.includes("/")) {
+        assert.ok(modId.startsWith(`${agentId}/`), `${modId} is scoped to a different role`);
+      }
     }
+    assert.ok(def.modules.some((m) => m === `${agentId}/identity`), `${agentId} has an identity module`);
   }
-  assert.deepEqual(listComposedAgents().sort(), ["task-implement", "task-review-fix"]);
 });
 
-test("composed agents are a single ordered modules list (no sections/includes fields)", () => {
-  for (const id of Object.keys(ROLE_FILES)) {
-    const def = COMPOSED_AGENTS[id];
+test("composed agents are a single ordered modules list (no v1 fields)", () => {
+  for (const def of Object.values(COMPOSED_AGENTS)) {
     assert.ok(Array.isArray(def.modules) && def.modules.length > 0);
     assert.equal(def.sections, undefined, "v1 sections field gone");
     assert.equal(def.includes, undefined, "v1 includes field gone");
@@ -72,86 +83,18 @@ test("composed agents are a single ordered modules list (no sections/includes fi
   }
 });
 
-test("normalized section-set reproduction: heading sequence matches the hand-written role", () => {
-  for (const [id, file] of Object.entries(ROLE_FILES)) {
-    const md = composeAgentById(id);
-    const role = readFileSync(resolve(repoRoot, file), "utf-8");
-    assert.deepEqual(
-      headingSequence(md),
-      headingSequence(role),
-      `${id}: composed headings must match ${file} in set and order`,
-    );
-  }
-});
-
-test("include sequence matches the hand-written role (enforcement/protocol top, events trailing)", () => {
-  for (const [id, file] of Object.entries(ROLE_FILES)) {
-    const md = composeAgentById(id);
-    const role = readFileSync(resolve(repoRoot, file), "utf-8");
-    assert.deepEqual(includeSequence(md), includeSequence(role), `${id}: include lines`);
-    assert.equal(md.split("@AGENT_ENFORCEMENT.md").length - 1, 1, "include ref appears once");
-  }
-});
-
-test("no dropped role-specific content (distinctive phrases per section)", () => {
-  const phrasesByAgent = {
-    "task-implement": [
-      "ROLE: Insight-Flow Task Implementer",
-      "Follow the spec exactly — no creative decisions, no scope expansion.",
-      "Mode detection: `ready`/`in-progress` → full",
-      "Code changes satisfying every CHECKLIST item",
-      "implement-start --id Nxx",
-      "Self-verify each CHECKLIST item",
-      'Never implement items listed under TASK.md "Out of scope".',
-      "Full mode: if implementation requires changes to >2 files",
-    ],
-    "task-review-fix": [
-      "ROLE: Insight-Flow Task Review Fixer",
-      "apply targeted fixes for every blocker",
-      "insight-flow next-fix",
-      "Code changes addressing every blocker.",
-      "fix-start --id Nxx",
-      "Only fix what the review explicitly flagged as a blocker.",
-    ],
-  };
-  for (const [id, phrases] of Object.entries(phrasesByAgent)) {
-    const md = composeAgentById(id);
-    const role = readFileSync(resolve(repoRoot, ROLE_FILES[id]), "utf-8");
-    for (const phrase of phrases) {
-      assert.ok(role.includes(phrase), `precondition: ${ROLE_FILES[id]} contains "${phrase}"`);
-      assert.ok(md.includes(phrase), `${id} composed output missing "${phrase}"`);
-    }
-  }
-});
-
-test("both agents reuse the same shared section modules", () => {
-  const sharedNever = "Never change code unrelated to the task at hand.";
-  const sharedScope = "Ambiguous spec → ask, do not guess.";
-  for (const id of Object.keys(ROLE_FILES)) {
-    const md = composeAgentById(id);
-    assert.ok(md.includes(sharedNever), `${id} missing shared minimal-diff bullet`);
-    assert.ok(md.includes(sharedScope), `${id} missing shared scope-guard bullet`);
-  }
-});
-
 test("pure sequence: blocks render in declared order", () => {
   const md = composeAgentById("task-implement");
-  const order = COMPOSED_AGENTS["task-implement"].modules.map((id) => {
+  const markers = COMPOSED_AGENTS["task-implement"].modules.map((id) => {
     const mod = MODULE_REGISTRY[id];
     return mod.kind === "include" ? `@${mod.ref}` : (mod.heading ?? mod.body.split("\n")[0]);
   });
   let pos = -1;
-  for (const marker of order) {
+  for (const marker of markers) {
     const next = md.indexOf(marker, pos + 1);
     assert.ok(next > pos, `marker "${marker}" out of declared order`);
     pos = next;
   }
-});
-
-test("heading-only module opens a section that the next body-only module continues", () => {
-  const md = composeAgentById("task-review-fix");
-  // fixer NEVER is heading-only; minimal-diff bullets follow directly after it
-  assert.match(md, /NEVER\n\n- Never change code unrelated to the task at hand\./);
 });
 
 test("consecutive include modules render adjacent, like hand-written roles", () => {
@@ -159,19 +102,37 @@ test("consecutive include modules render adjacent, like hand-written roles", () 
   assert.ok(md.includes("@AGENT_ENFORCEMENT.md\n@AGENT_PROTOCOL.md"), "includes grouped");
 });
 
+test("continuation rule: body-only section module joins the previous section without a blank line", () => {
+  const registry = {
+    head: { id: "head", title: "H", source: "builtin", kind: "section", heading: "NEVER", body: "- own bullet" },
+    cont: { id: "cont", title: "C", source: "builtin", kind: "section", body: "- shared bullet" },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["head", "cont"] }, registry);
+  assert.equal(md, "NEVER\n\n- own bullet\n- shared bullet\n");
+});
+
+test("bodies render exactly: trailing newline in a body encodes an extra blank line", () => {
+  const registry = {
+    a: { id: "a", title: "A", source: "builtin", kind: "section", heading: "ONE", body: "x\n" },
+    b: { id: "b", title: "B", source: "builtin", kind: "section", heading: "TWO", body: "y" },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["a", "b"] }, registry);
+  assert.equal(md, "ONE\n\nx\n\n\nTWO\n\ny\n", "double blank line preserved");
+});
+
 test("repeated module refs are deduped (first occurrence wins)", () => {
   const def = {
     ...COMPOSED_AGENTS["task-implement"],
-    modules: [...COMPOSED_AGENTS["task-implement"].modules, "minimal-diff", "enforcement"],
+    modules: [...COMPOSED_AGENTS["task-implement"].modules, "task-implement/never", "enforcement"],
   };
   const md = composeAgent(def);
-  assert.equal(md.split("Never change code unrelated to the task at hand.").length - 1, 1);
-  assert.equal(md.split("@AGENT_ENFORCEMENT.md").length - 1, 1);
+  assert.equal(md, composeAgentById("task-implement"), "duplicates change nothing");
 });
 
-test("unknown module ref throws before any output", () => {
+test("unknown module ref and unknown agent throw", () => {
   const def = { ...COMPOSED_AGENTS["task-implement"], modules: ["does-not-exist"] };
   assert.throws(() => composeAgent(def), /Unknown module 'does-not-exist'/);
+  assert.throws(() => composeAgentById("nope"), /Unknown composed agent 'nope'/);
 });
 
 test("indexById throws on duplicate id instead of silently last-winning", () => {
@@ -182,7 +143,6 @@ test("indexById throws on duplicate id instead of silently last-winning", () => 
 
 test("section module without heading or body is rejected by the schema", () => {
   assert.throws(() => AgentModuleSchema.parse({ id: "x", title: "X", kind: "section" }));
-  // heading-only and body-only are both valid
   AgentModuleSchema.parse({ id: "x", title: "X", kind: "section", heading: "NEVER" });
   AgentModuleSchema.parse({ id: "y", title: "Y", kind: "section", body: "- bullet" });
 });

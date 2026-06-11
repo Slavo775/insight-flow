@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { ParsedArgs, TaskflowConfig, AgentGitPermissions } from "../../core/types.js";
-import { applyAgentExtensions } from "../../agents/agents.js";
+import { applyAgentExtensions, AGENT_ROLE_FILE_MAP } from "../../agents/agents.js";
 import { composeAgentById, listComposedAgents } from "../../agents/compose.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 
@@ -185,9 +185,12 @@ export function applyEnforcement(
 export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
   const cwd = process.cwd();
 
-  // N88 — agent-module composer (spike): `prompt-build --compose [<agent-id>] [--out <dir>]`.
+  // N90 — agent-module composer (JSON canonical):
+  //   `prompt-build --compose [<agent-id>] [--out <dir>] [--apply]`.
   // With no id, composes every known agent. With --out, writes <id>.composed.md
-  // files; otherwise prints to stdout. Returns early — does not run enforcement.
+  // files; with --apply, writes each agent's canonical role file (the committed
+  // *_ROLE.md at the project root) and reports changed/unchanged per file.
+  // Without either, prints to stdout. Returns early — does not run enforcement.
   if (opts.compose) {
     const id = typeof opts.compose === "string" ? opts.compose : null;
     const ids = id ? [id] : listComposedAgents();
@@ -195,7 +198,21 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
     if (outDir && !existsSync(outDir)) mkdirSync(outDir, { recursive: true });
     for (const agentId of ids) {
       const md = composeAgentById(agentId);
-      if (outDir) {
+      if (opts.apply) {
+        const fileName = AGENT_ROLE_FILE_MAP[agentId];
+        if (!fileName) {
+          console.error(`No role file mapping for composed agent '${agentId}' — skipping.`);
+          continue;
+        }
+        const target = join(cwd, fileName);
+        const previous = existsSync(target) ? readFileSync(target, "utf-8") : null;
+        if (previous === md) {
+          console.log(`unchanged ${fileName}`);
+        } else {
+          writeFileSync(target, md);
+          console.log(`${previous === null ? "created" : "updated"}   ${fileName}`);
+        }
+      } else if (outDir) {
         const target = join(outDir, `${agentId}.composed.md`);
         writeFileSync(target, md);
         console.log(`Composed ${agentId} → ${target}`);

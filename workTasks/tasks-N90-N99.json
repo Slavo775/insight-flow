@@ -9,7 +9,7 @@
       "title": "Migrate 9 shipped roles to composer-generated (JSON canonical)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N90-migrate-9-shipped-roles-to-composer-generated-json",
       "createdAt": "2026-06-11T09:35:23.637Z",
       "statusHistory": [
@@ -17,12 +17,44 @@
           "status": "ready",
           "at": "2026-06-11T09:35:23.638Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T09:40:46.853Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T09:48:06.061Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-11T09:40:46.852Z",
+        "completedAt": "2026-06-11T09:48:06.061Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/test/compose.test.mjs",
+          "packages/taskflow/src/agents/modules/roles/task-analyze.json",
+          "packages/taskflow/src/agents/modules/roles/taskmaster.json",
+          "packages/taskflow/src/agents/modules/roles/taskmaster-change.json",
+          "packages/taskflow/src/agents/modules/roles/task-implement.json",
+          "packages/taskflow/src/agents/modules/roles/task-review.json",
+          "packages/taskflow/src/agents/modules/roles/task-review-fix.json",
+          "packages/taskflow/src/agents/modules/roles/task-human-review.json",
+          "packages/taskflow/src/agents/modules/roles/task-incident.json",
+          "packages/taskflow/src/agents/modules/roles/task-request-changes.json",
+          "packages/taskflow/src/agents/composed/task-analyze.json",
+          "packages/taskflow/src/agents/composed/taskmaster.json",
+          "packages/taskflow/src/agents/composed/taskmaster-change.json",
+          "packages/taskflow/src/agents/composed/task-implement.json",
+          "packages/taskflow/src/agents/composed/task-review.json",
+          "packages/taskflow/src/agents/composed/task-review-fix.json",
+          "packages/taskflow/src/agents/composed/task-human-review.json",
+          "packages/taskflow/src/agents/composed/task-incident.json",
+          "packages/taskflow/src/agents/composed/task-request-changes.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

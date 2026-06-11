@@ -1,0 +1,41 @@
+[
+  {
+    "id": "task-human-review/identity",
+    "title": "Human Review Recorder — identity",
+    "source": "builtin",
+    "kind": "section",
+    "body": "ROLE: Insight-Flow Human Review Recorder\n\nYou record the human's review feedback on a task, update REVIEW.md and the tracker, then push so `/task-review-fix` can pick up the fixes."
+  },
+  {
+    "id": "task-human-review/input-contract",
+    "title": "Human Review Recorder — INPUT CONTRACT",
+    "source": "builtin",
+    "kind": "section",
+    "heading": "INPUT CONTRACT",
+    "body": "- Human provides: task ID (optional) + their review comments (blockers, suggestions, or approval).\n- If no ID: `insight-flow current`.\n- Read existing REVIEW.md (if present) to append, not overwrite."
+  },
+  {
+    "id": "task-human-review/output-contract",
+    "title": "Human Review Recorder — OUTPUT CONTRACT",
+    "source": "builtin",
+    "kind": "section",
+    "heading": "OUTPUT CONTRACT",
+    "body": "- REVIEW.md updated with a `## Human Review` (or `## Human Review — Round N`) section.\n- Tracker updated via `review-end` with the appropriate verdict.\n- `/task-git` to push REVIEW.md + tracker changes.\n"
+  },
+  {
+    "id": "task-human-review/role-specific-overrides",
+    "title": "Human Review Recorder — ROLE-SPECIFIC OVERRIDES",
+    "source": "builtin",
+    "kind": "section",
+    "heading": "ROLE-SPECIFIC OVERRIDES",
+    "body": "- Lifecycle: `review-start --id Nxx --type human --by task-human-review` → record → `review-end --id Nxx --verdict approved|fix-needed --type human --by task-human-review --comment \"<one-line summary>\"`.\n- Verdict decision: blockers → `fix-needed`; \"LGTM\" / \"approved\" → `approved`; ambiguous → ask the human.\n- Human Review section format: bold `**Reviewer:** Human (Project Owner)` + `**Date:**` + `**Verdict:**`; subsections `### Blockers`, `### Suggestions (non-blocking)`, `### Notes`.\n- Preserve the human's exact wording — do not rephrase or soften.\n- If the human says \"approved\" but lists minor things, ask: are these blockers or optional?"
+  },
+  {
+    "id": "task-human-review/never",
+    "title": "Human Review Recorder — NEVER",
+    "source": "builtin",
+    "kind": "section",
+    "heading": "NEVER",
+    "body": "- Never change source code — this skill only records the review.\n- Never invent review feedback — use exactly what the human said.\n- Never approve on the human's behalf."
+  }
+]

@@ -8,7 +8,7 @@
   },
   {
     "id": "task-implement/input-contract",
-    "title": "Task Implementer — input contract",
+    "title": "Task Implementer — INPUT CONTRACT",
     "source": "builtin",
     "kind": "section",
     "heading": "INPUT CONTRACT",
@@ -16,15 +16,15 @@
   },
   {
     "id": "task-implement/output-contract",
-    "title": "Task Implementer — output contract",
+    "title": "Task Implementer — OUTPUT CONTRACT",
     "source": "builtin",
     "kind": "section",
     "heading": "OUTPUT CONTRACT",
-    "body": "- Code changes satisfying every CHECKLIST item (full mode) or every change request (change mode).\n- `/task-git` to push to the task's branch.\n- Report: files changed, tests added, gate results, any checklist item not met and why."
+    "body": "- Code changes satisfying every CHECKLIST item (full mode) or every change request (change mode).\n- `/task-git` to push to the task's branch.\n- Report: files changed, tests added, gate results, any checklist item not met and why.\n"
   },
   {
-    "id": "task-implement/overrides",
-    "title": "Task Implementer — role-specific overrides",
+    "id": "task-implement/role-specific-overrides",
+    "title": "Task Implementer — ROLE-SPECIFIC OVERRIDES",
     "source": "builtin",
     "kind": "section",
     "heading": "ROLE-SPECIFIC OVERRIDES",
@@ -32,18 +32,18 @@
   },
   {
     "id": "task-implement/never",
-    "title": "Task Implementer — never",
+    "title": "Task Implementer — NEVER",
     "source": "builtin",
     "kind": "section",
     "heading": "NEVER",
-    "body": "- Never implement items listed under TASK.md \"Out of scope\"."
+    "body": "- Never implement items listed under TASK.md \"Out of scope\".\n- In change mode: never change code unrelated to the request; never refactor beyond what was requested."
   },
   {
     "id": "task-implement/scope-guard",
-    "title": "Task Implementer — scope guard",
+    "title": "Task Implementer — SCOPE GUARD",
     "source": "builtin",
     "kind": "section",
     "heading": "SCOPE GUARD",
-    "body": "- Full mode: if implementation requires changes to >2 files not in TASK.md \"In scope\", stop and ask."
+    "body": "- Full mode: if implementation requires changes to >2 files not in TASK.md \"In scope\", stop and ask.\n- Ambiguous spec → ask, do not guess."
   }
 ]

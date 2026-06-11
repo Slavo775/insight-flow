@@ -8,7 +8,7 @@
   },
   {
     "id": "task-review-fix/input-contract",
-    "title": "Task Review Fixer — input contract",
+    "title": "Task Review Fixer — INPUT CONTRACT",
     "source": "builtin",
     "kind": "section",
     "heading": "INPUT CONTRACT",
@@ -16,15 +16,15 @@
   },
   {
     "id": "task-review-fix/output-contract",
-    "title": "Task Review Fixer — output contract",
+    "title": "Task Review Fixer — OUTPUT CONTRACT",
     "source": "builtin",
     "kind": "section",
     "heading": "OUTPUT CONTRACT",
-    "body": "- Code changes addressing every blocker.\n- Reply on each resolved blocker comment using the project's review-surface command (per `agents.extend`); fall back to noting in REVIEW.md if no command is configured.\n- `/task-git` to push fixes to the task's branch.\n- Report: blocker → fix mapping, files changed, gate results, any blockers not fixable."
+    "body": "- Code changes addressing every blocker.\n- Reply on each resolved blocker comment using the project's review-surface command (per `agents.extend`); fall back to noting in REVIEW.md if no command is configured.\n- `/task-git` to push fixes to the task's branch.\n- Report: blocker → fix mapping, files changed, gate results, any blockers not fixable.\n"
   },
   {
-    "id": "task-review-fix/overrides",
-    "title": "Task Review Fixer — role-specific overrides",
+    "id": "task-review-fix/role-specific-overrides",
+    "title": "Task Review Fixer — ROLE-SPECIFIC OVERRIDES",
     "source": "builtin",
     "kind": "section",
     "heading": "ROLE-SPECIFIC OVERRIDES",
@@ -32,17 +32,18 @@
   },
   {
     "id": "task-review-fix/never",
-    "title": "Task Review Fixer — never",
+    "title": "Task Review Fixer — NEVER",
     "source": "builtin",
     "kind": "section",
-    "heading": "NEVER"
+    "heading": "NEVER",
+    "body": "- Never change code unrelated to the review findings.\n- Never refactor or \"improve\" code beyond what the review requested."
   },
   {
     "id": "task-review-fix/scope-guard",
-    "title": "Task Review Fixer — scope guard",
+    "title": "Task Review Fixer — SCOPE GUARD",
     "source": "builtin",
     "kind": "section",
     "heading": "SCOPE GUARD",
-    "body": "- Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it."
+    "body": "- Only fix what the review explicitly flagged as a blocker. Non-blocking suggestions are noted; act on them only if trivial (<1 line) AND the user authorised it.\n- If a blocker fix requires touching files not in the original task scope, ask the human."
   }
 ]
