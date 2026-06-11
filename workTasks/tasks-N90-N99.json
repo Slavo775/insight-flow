@@ -243,7 +243,7 @@
       "title": "Heterogeneous modules — MCP/hook/skill contributions + testing pilot",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N92-heterogeneous-modules-mcp-hook-skill-contributions",
       "createdAt": "2026-06-11T11:59:33.595Z",
       "statusHistory": [
@@ -261,6 +261,11 @@
           "status": "implemented",
           "at": "2026-06-11T13:22:10.378Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T13:22:41.288Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -293,9 +298,15 @@
         "schema",
         "integrations"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/66",
+      "pushes": [
+        {
+          "at": "2026-06-11T13:22:41.287Z",
+          "commitHash": "f9e1700",
+          "commitMessage": "feat(N92): heterogeneous modules — mcp-server/hook/skill kinds + testing pilot"
+        }
+      ],
+      "branch": "feat/N92-heterogeneous-modules",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/68",
       "mergedAt": null
     }
   ]
