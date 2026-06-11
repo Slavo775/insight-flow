@@ -47,3 +47,14 @@ None this round.
 ### Notes
 
 - `/task-review-fix` picks this up.
+
+
+---
+
+## Fix — Round 2 blocker resolved
+
+**By:** task-review-fix · **Date:** 2026-06-11
+
+- **Include preview** ✅ — new `GET /api/include-doc?ref=…`, strictly whitelisted to refs registered as include modules in `MODULE_REGISTRY` (traversal attempts and unregistered `.md` names return 404 — live-verified). Resolution order: project root, then `config.rolesDir` (consumer projects). The include panels (shared by the module page **and** the agent-map modal) now show the `@ref` line plus the referenced file rendered as formatted markdown, with loading and file-not-found states.
+- **Clickable reference nodes** ✅ — the facet node from the screenshot (`@AGENT_ENFORCEMENT.md` on the module map) now opens the module info modal; include module nodes in the agent map already opened it and now show the rendered preview inside.
+- **Gates:** build ✅ · 112/112 ✅ · lint at baseline · live check: `AGENT_PROTOCOL.md` served + rendered path verified in playground; files absent from a project degrade to "File not found in this project".

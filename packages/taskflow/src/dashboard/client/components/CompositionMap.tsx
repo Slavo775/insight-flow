@@ -167,6 +167,10 @@ export function CompositionMap({
             else navigate(`/module/${spec.id}`);
           } else if (spec.role === "agent") {
             navigate(`/agent/${spec.id.replace(/^agent:/, "")}`);
+          } else if (spec.role === "facet" && onModuleClick) {
+            // Facet nodes (e.g. the “@AGENT_ENFORCEMENT.md” node on the module
+            // map) open the module modal too (human review R2).
+            onModuleClick(spec.id.replace(/^facet:/, ""));
           }
         }}
         colorMode="dark"

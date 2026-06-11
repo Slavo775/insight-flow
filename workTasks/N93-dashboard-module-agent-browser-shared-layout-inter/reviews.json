@@ -8,7 +8,19 @@
       "comment": "Include-module nodes must open the modal with the referenced MD file rendered as formatted markdown preview",
       "type": "human",
       "by": "task-human-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-06-11T16:21:33.975Z",
+        "endedAt": "2026-06-11T16:44:13.150Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx"
+        ],
+        "comment": "Include nodes open the modal; modal + page render the referenced MD as formatted preview via whitelisted /api/include-doc",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

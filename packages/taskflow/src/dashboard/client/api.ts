@@ -73,6 +73,13 @@ export async function fetchModules(): Promise<ModulesResponse> {
   return res.json();
 }
 
+/** Markdown content behind an include module's @ref, or null if not present. */
+export async function fetchIncludeDoc(ref: string): Promise<string | null> {
+  const res = await fetch("/api/include-doc?ref=" + encodeURIComponent(ref));
+  if (!res.ok) return null;
+  return res.text();
+}
+
 export async function fetchAgents(): Promise<AgentDto[]> {
   const res = await fetch("/api/agents");
   if (!res.ok) throw new Error("Failed to load agents (" + res.status + ")");

@@ -4,13 +4,15 @@
 // is markdown, per change request R1), referencing-agent chips, and an
 // interactive map. `KindPanels` and the header bits are exported for reuse by
 // the agent page's module modal.
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import styled, { useTheme } from "styled-components";
-import type { ModuleDto } from "./api.js";
+import { fetchIncludeDoc, type ModuleDto } from "./api.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
+import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
 
 const Header = styled.div`
@@ -112,6 +114,51 @@ const KV = styled.dl`
   }
 `;
 
+/**
+ * Include module panels (human review R2): the @ref line plus the referenced
+ * markdown file's content rendered as a formatted preview, fetched from the
+ * whitelisted /api/include-doc endpoint.
+ */
+function IncludePanels({ module }: { module: ModuleDto }) {
+  // undefined = loading, null = file not found in this project
+  const [doc, setDoc] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    let alive = true;
+    setDoc(undefined);
+    if (!module.ref) {
+      setDoc(null);
+      return;
+    }
+    fetchIncludeDoc(module.ref).then(
+      (text) => alive && setDoc(text),
+      () => alive && setDoc(null),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [module.ref]);
+
+  return (
+    <>
+      <Panel>
+        <PanelTitle>Include reference</PanelTitle>
+        <Pre>@{module.ref}</Pre>
+      </Panel>
+      <Panel>
+        <PanelTitle>{module.ref} — preview</PanelTitle>
+        {doc === undefined ? (
+          <Muted>Loading preview…</Muted>
+        ) : doc === null ? (
+          <Muted>File not found in this project.</Muted>
+        ) : (
+          <MarkdownBlock text={doc} />
+        )}
+      </Panel>
+    </>
+  );
+}
+
 /** Markdown-rendered block (change request R1: "if we have md so text in md"). */
 function MarkdownBlock({ text }: { text: string }) {
   return (
@@ -144,12 +191,7 @@ export function KindPanels({ module }: { module: ModuleDto }) {
         </>
       );
     case "include":
-      return (
-        <Panel>
-          <PanelTitle>Include reference</PanelTitle>
-          <Pre>@{module.ref}</Pre>
-        </Panel>
-      );
+      return <IncludePanels module={module} />;
     case "mcp-server":
       return (
         <Panel>
@@ -220,6 +262,7 @@ function facetLabel(module: ModuleDto): string {
 }
 
 export function ModuleDetail({ module, registry }: { module: ModuleDto; registry: Registry }) {
+  const [modalId, setModalId] = useState<string | null>(null);
   const refs = registry.referencedBy[module.id] ?? [];
   const agentTitle = (id: string): string =>
     registry.agents.find((a) => a.id === id)?.title ?? id;
@@ -264,8 +307,15 @@ export function ModuleDetail({ module, registry }: { module: ModuleDto; registry
 
       <Panel>
         <PanelTitle>Map</PanelTitle>
-        <CompositionMap nodes={nodes} edges={edges} />
+        <CompositionMap nodes={nodes} edges={edges} onModuleClick={setModalId} />
       </Panel>
+
+      {modalId ? (
+        <ModuleInfoModal
+          module={registry.modules.find((m) => m.id === modalId) ?? module}
+          onClose={() => setModalId(null)}
+        />
+      ) : null}
     </>
   );
 }
