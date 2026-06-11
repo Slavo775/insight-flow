@@ -10,6 +10,50 @@
       ],
       "skills": [
         "taskflow-run-tests"
+      ],
+      "scripts": []
+    },
+    "activity": {
+      "hooks": [
+        {
+          "event": "SessionStart",
+          "matcher": "",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-session-start.sh"
+        },
+        {
+          "event": "UserPromptSubmit",
+          "matcher": "",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-agent-active.sh"
+        },
+        {
+          "event": "Stop",
+          "matcher": "",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-agent-idle.sh"
+        },
+        {
+          "event": "PreToolUse",
+          "matcher": "",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-pre-tool.sh"
+        },
+        {
+          "event": "PostToolUse",
+          "matcher": "",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-post-tool.sh"
+        },
+        {
+          "event": "PermissionRequest",
+          "matcher": "",
+          "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-permission.sh"
+        }
+      ],
+      "skills": [],
+      "scripts": [
+        "lifecycle-session-start.sh",
+        "lifecycle-agent-active.sh",
+        "lifecycle-agent-idle.sh",
+        "lifecycle-pre-tool.sh",
+        "lifecycle-post-tool.sh",
+        "lifecycle-permission.sh"
       ]
     }
   }

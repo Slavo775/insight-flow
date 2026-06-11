@@ -327,6 +327,14 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
       .regex(/^[a-z0-9][a-z0-9-]*$/, "skill name must be a safe path segment"),
     content: z.string().min(1),
   }),
+  // Bundle module (N95): a module composed of other registry modules — the
+  // "molecule" tier (e.g. an integration = its MCP + prompt + hook atoms).
+  // Expanded recursively at resolution time; contributes nothing itself.
+  z.object({
+    ...agentModuleBase,
+    kind: z.literal("bundle"),
+    modules: z.array(z.string().min(1)).min(1),
+  }),
 ]);
 
 export const ComposedAgentSchema = z.object({

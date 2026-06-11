@@ -188,6 +188,52 @@ test("N94: ACTIVITY_AGENT groups the lifecycle hook modules but is not a compose
   assert.ok(!listComposedAgents().includes("activity"), "compose-apply must not install hooks");
 });
 
+test("N95: bundles expand recursively at their declared position", () => {
+  const registry = {
+    a: { id: "a", title: "A", source: "builtin", kind: "section", heading: "ONE", body: "1" },
+    b: { id: "b", title: "B", source: "builtin", kind: "section", heading: "TWO", body: "2" },
+    c: { id: "c", title: "C", source: "builtin", kind: "section", heading: "THREE", body: "3" },
+    inner: { id: "inner", title: "I", source: "builtin", kind: "bundle", modules: ["b"] },
+    outer: { id: "outer", title: "O", source: "builtin", kind: "bundle", modules: ["inner", "c"] },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["a", "outer"] }, registry);
+  assert.equal(md, "ONE\n\n1\n\nTWO\n\n2\n\nTHREE\n\n3\n", "nested bundle children splice in order");
+});
+
+test("N95: dedup spans bundle and direct refs (first occurrence wins)", () => {
+  const registry = {
+    a: { id: "a", title: "A", source: "builtin", kind: "section", heading: "ONE", body: "1" },
+    bun: { id: "bun", title: "B", source: "builtin", kind: "bundle", modules: ["a"] },
+  };
+  // direct ref first, bundle second — and the reverse — both render once
+  for (const order of [["a", "bun"], ["bun", "a"]]) {
+    const md = composeAgent({ id: "x", title: "X", modules: order }, registry);
+    assert.equal(md.split("ONE").length - 1, 1, `order ${order.join(",")} dedups`);
+  }
+});
+
+test("N95: bundle cycles and unknown children throw with actionable messages", () => {
+  const registry = {
+    a: { id: "a", title: "A", source: "builtin", kind: "bundle", modules: ["b"] },
+    b: { id: "b", title: "B", source: "builtin", kind: "bundle", modules: ["a"] },
+    broken: { id: "broken", title: "X", source: "builtin", kind: "bundle", modules: ["ghost"] },
+  };
+  assert.throws(
+    () => composeAgent({ id: "x", title: "X", modules: ["a"] }, registry),
+    /Bundle cycle: a → b → a/,
+  );
+  assert.throws(
+    () => composeAgent({ id: "x", title: "X", modules: ["broken"] }, registry),
+    /Unknown module 'ghost'/,
+  );
+});
+
+test("N95: the shipped testing bundle wraps the three siblings", () => {
+  const bundle = MODULE_REGISTRY["testing"];
+  assert.equal(bundle?.kind, "bundle");
+  assert.deepEqual(bundle.modules, ["testing/prompt", "testing/hook", "testing/skill"]);
+});
+
 test("repeated module refs are deduped (first occurrence wins)", () => {
   const def = {
     ...COMPOSED_AGENTS["task-implement"],
