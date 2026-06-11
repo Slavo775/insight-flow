@@ -1,12 +1,16 @@
 {
-  "hooks": [
-    {
-      "event": "PostToolUse",
-      "matcher": "Edit|Write",
-      "command": "echo '[taskflow:testing] source changed — run the test suite before handoff'"
+  "agents": {
+    "playground-test-runner": {
+      "hooks": [
+        {
+          "event": "PostToolUse",
+          "matcher": "Edit|Write",
+          "command": "echo '[taskflow:testing] source changed — run the test suite before handoff'"
+        }
+      ],
+      "skills": [
+        "taskflow-run-tests"
+      ]
     }
-  ],
-  "skills": [
-    "taskflow-run-tests"
-  ]
+  }
 }

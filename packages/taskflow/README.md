@@ -562,6 +562,10 @@ Example — run a script when any task starts and send a desktop notification wh
 }
 ```
 
+### Integration artifacts (composer modules)
+
+Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and `skill` modules are emitted by `insight-flow prompt-build --compose --apply` into `.mcp.json`, `.claude/settings.json`, and `.claude/skills/` respectively. Managed entries are tracked per agent in `.claude/taskflow-managed.json` — re-applies replace cleanly, removing a module removes its artifact, and hooks you wrote yourself are never touched. Note: the first managed write normalizes the touched JSON file to 2-space formatting (content and key order are preserved). Use `--def <file.json>` to compose a project-local agent definition that adopts integration modules.
+
 ## Programmatic API
 
 ```ts

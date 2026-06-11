@@ -233,20 +233,25 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
       }
       if (opts.apply) {
         const fileName = AGENT_ROLE_FILE_MAP[agentId];
-        if (fileName) {
-          const target = join(projectRoot, fileName);
-          const previous = existsSync(target) ? readFileSync(target, "utf-8") : null;
+        const target = fileName ? join(projectRoot, fileName) : null;
+        if (target && existsSync(target)) {
+          const previous = readFileSync(target, "utf-8");
           if (previous === md) {
             console.log(`unchanged ${fileName}`);
           } else {
             writeFileSync(target, md);
-            console.log(`${previous === null ? "created" : "updated"}   ${fileName}`);
+            console.log(`updated   ${fileName}`);
           }
+        } else if (target) {
+          // Only update existing role files: the canonical repo always has
+          // them; consumer projects keep roles in rolesDir and must not get
+          // root-level copies created by a routine apply.
+          console.log(`skipped   ${fileName} (not present in this project)`);
         } else {
           console.log(`no role-file mapping for '${agentId}' — MD not written (artifacts only)`);
         }
         try {
-          for (const report of applyArtifacts(collectArtifacts(def), projectRoot)) {
+          for (const report of applyArtifacts(collectArtifacts(def), projectRoot, def.id)) {
             console.log(`${report.action} ${report.target}`);
           }
         } catch (err) {

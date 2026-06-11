@@ -4,17 +4,23 @@
 // with per-kind merge rules, idempotently:
 //   - mcp-server → `.mcp.json` `mcpServers[name]`, deduped by name; a
 //     same-name contribution with a different config throws (never silently
-//     overwrite someone's server definition).
+//     overwrite someone's server definition). Configs are compared with
+//     sorted-key stringification, so key order never causes a false conflict.
 //   - hook → `.claude/settings.json` `hooks[event]` matcher groups. JSON has
 //     no comment markers, so managed entries are tracked in a sidecar
-//     manifest (`.claude/taskflow-managed.json`): every apply removes the
-//     previously-managed entries and inserts the current set, so re-applies
-//     replace cleanly and removing a module from the agent removes its hook.
+//     manifest (`.claude/taskflow-managed.json`), **bucketed per agent id**:
+//     applying agent A only reconciles A's own entries — installing,
+//     re-applying, or regenerating other agents never touches them. Removing
+//     a module from an agent removes its hook on the next apply.
 //   - skill → `.claude/skills/<name>/SKILL.md` (name is schema-restricted to
-//     a safe path segment). Managed names are tracked in the same manifest;
-//     skills no longer contributed are deleted.
-// Every write is change-detected; `apply` reports created/updated/unchanged/
-// removed per target so a second run prints only `unchanged`.
+//     a safe path segment). Skill names are claimed per agent in the same
+//     manifest; a second agent contributing an already-claimed name throws.
+//     Skills an agent no longer contributes are deleted.
+// Every write is change-detected; `applyArtifacts` reports created/updated/
+// unchanged/removed per target so a second identical run prints `unchanged`.
+//
+// Note: the parse → stringify round-trip normalizes the touched JSON files to
+// 2-space formatting; content and key order are preserved.
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { AgentArtifacts } from "./compose.js";
@@ -25,9 +31,13 @@ export interface EmitReport {
   action: EmitAction;
 }
 
-interface ManagedManifest {
+interface ManagedEntry {
   hooks: { event: string; matcher?: string; command: string }[];
   skills: string[];
+}
+
+interface ManagedManifest {
+  agents: Record<string, ManagedEntry>;
 }
 
 const MANIFEST_PATH = ".claude/taskflow-managed.json";
@@ -41,6 +51,18 @@ interface HookGroup {
 function readJson<T>(path: string, fallback: T): T {
   if (!existsSync(path)) return fallback;
   return JSON.parse(readFileSync(path, "utf-8")) as T;
+}
+
+// Deterministic deep-stringify (sorted object keys) for config equality.
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  if (value !== null && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`);
+    return `{${entries.join(",")}}`;
+  }
+  return JSON.stringify(value);
 }
 
 function writeJsonIfChanged(path: string, value: unknown): EmitAction {
@@ -63,7 +85,7 @@ function applyMcpServers(
   doc.mcpServers ??= {};
   for (const { name, config } of servers) {
     const existing = doc.mcpServers[name];
-    if (existing !== undefined && JSON.stringify(existing) !== JSON.stringify(config)) {
+    if (existing !== undefined && stableStringify(existing) !== stableStringify(config)) {
       throw new Error(
         `.mcp.json already defines server '${name}' with a different config — refusing to overwrite`,
       );
@@ -76,9 +98,10 @@ function applyMcpServers(
 function applyHooks(
   projectRoot: string,
   hooks: AgentArtifacts["hooks"],
-  managed: ManagedManifest,
+  owned: ManagedEntry,
   reports: EmitReport[],
 ): void {
+  if (!hooks.length && !owned.hooks.length) return;
   const path = join(projectRoot, ".claude/settings.json");
   const settings = readJson<{ hooks?: Record<string, HookGroup[]>; [k: string]: unknown }>(
     path,
@@ -86,8 +109,8 @@ function applyHooks(
   );
   settings.hooks ??= {};
 
-  // Remove every previously-managed entry, then insert the current set.
-  for (const old of managed.hooks) {
+  // Remove this agent's previously-managed entries, then insert the current set.
+  for (const old of owned.hooks) {
     const groups = settings.hooks[old.event];
     if (!groups) continue;
     settings.hooks[old.event] = groups.filter(
@@ -108,24 +131,35 @@ function applyHooks(
   }
   if (!Object.keys(settings.hooks).length) delete settings.hooks;
 
-  const hadWork = hooks.length > 0 || managed.hooks.length > 0;
-  if (!hadWork) return;
   const action = writeJsonIfChanged(path, settings);
   reports.push({
     target: ".claude/settings.json",
     action: action === "unchanged" ? "unchanged" : hooks.length ? action : "removed",
   });
-  managed.hooks = hooks.map((h) => ({ event: h.event, matcher: h.matcher, command: h.command }));
+  owned.hooks = hooks.map((h) => ({ event: h.event, matcher: h.matcher, command: h.command }));
 }
 
 function applySkills(
   projectRoot: string,
+  agentId: string,
   skills: AgentArtifacts["skills"],
-  managed: ManagedManifest,
+  manifest: ManagedManifest,
+  owned: ManagedEntry,
   reports: EmitReport[],
 ): void {
+  // A skill name is claimed by exactly one agent.
+  for (const { name } of skills) {
+    for (const [otherId, entry] of Object.entries(manifest.agents)) {
+      if (otherId !== agentId && entry.skills.includes(name)) {
+        throw new Error(
+          `skill '${name}' is already managed by agent '${otherId}' — refusing to overwrite`,
+        );
+      }
+    }
+  }
+
   const current = new Set(skills.map((s) => s.name));
-  for (const name of managed.skills) {
+  for (const name of owned.skills) {
     if (current.has(name)) continue;
     const dir = join(projectRoot, ".claude/skills", name);
     if (existsSync(dir)) {
@@ -148,35 +182,41 @@ function applySkills(
       action: prev === null ? "created" : "updated",
     });
   }
-  managed.skills = [...current];
+  owned.skills = [...current];
 }
 
 /**
- * Apply an agent's artifacts to `projectRoot`. Idempotent: a second apply
- * with the same artifacts reports every target as `unchanged`; artifacts no
- * longer contributed (per the managed manifest) are removed.
+ * Apply `agentId`'s artifacts to `projectRoot`. Idempotent per agent: a
+ * second apply with the same artifacts reports every target as `unchanged`;
+ * artifacts the agent no longer contributes are removed. Other agents'
+ * managed artifacts are never touched.
  */
-export function applyArtifacts(artifacts: AgentArtifacts, projectRoot: string): EmitReport[] {
+export function applyArtifacts(
+  artifacts: AgentArtifacts,
+  projectRoot: string,
+  agentId: string,
+): EmitReport[] {
   const reports: EmitReport[] = [];
   const manifestPath = join(projectRoot, MANIFEST_PATH);
-  const managed = readJson<ManagedManifest>(manifestPath, { hooks: [], skills: [] });
-  managed.hooks ??= [];
-  managed.skills ??= [];
-  const before = JSON.stringify(managed);
+  // Rebuild the manifest from the parsed file so unknown/legacy keys
+  // (e.g. the pre-release agent-agnostic shape) are dropped on next write.
+  const parsed = readJson<Partial<ManagedManifest>>(manifestPath, {});
+  const manifest: ManagedManifest = { agents: parsed.agents ?? {} };
+  const owned = manifest.agents[agentId] ?? { hooks: [], skills: [] };
+  owned.hooks ??= [];
+  owned.skills ??= [];
 
   applyMcpServers(projectRoot, artifacts.mcpServers, reports);
-  applyHooks(projectRoot, artifacts.hooks, managed, reports);
-  applySkills(projectRoot, artifacts.skills, managed, reports);
+  applyHooks(projectRoot, artifacts.hooks, owned, reports);
+  applySkills(projectRoot, agentId, artifacts.skills, manifest, owned, reports);
 
-  const hasManaged = managed.hooks.length > 0 || managed.skills.length > 0;
-  if (hasManaged || existsSync(manifestPath)) {
-    if (hasManaged) {
-      if (JSON.stringify(managed) !== before || !existsSync(manifestPath)) {
-        writeJsonIfChanged(manifestPath, managed);
-      }
-    } else {
-      rmSync(manifestPath);
-    }
+  if (owned.hooks.length || owned.skills.length) manifest.agents[agentId] = owned;
+  else delete manifest.agents[agentId];
+
+  if (Object.keys(manifest.agents).length) {
+    writeJsonIfChanged(manifestPath, manifest);
+  } else if (existsSync(manifestPath)) {
+    rmSync(manifestPath);
   }
   return reports;
 }

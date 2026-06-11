@@ -44,3 +44,19 @@ Round 4 (PR #68, commit `f9e1700`): `mcp-server`/`hook`/`skill` module kinds, th
 - The blocker is an interaction bug, not a design flaw — the per-agent manifest bucket is a contained fix in `emit.ts` + `prompt-build.ts` call site + tests.
 - Reviewer caveat: implemented and reviewed in the same session, but the blocker was found by adversarial re-testing during review, which is the process working as intended.
 - After the fix: `/task-review-fix` → re-review → human gate on PR #68.
+
+
+---
+
+## Fix — Round 1 blocker + non-blocking items resolved
+
+**By:** task-review-fix · **Date:** 2026-06-11 · human authorized "fix all issues"
+
+1. **Blocker (manifest clobbering)** ✅ — manifest re-keyed per agent (`{ "agents": { "<id>": { hooks, skills } } }`); `applyArtifacts(artifacts, projectRoot, agentId)` reconciles only that agent's bucket. Regression test reproduces the exact review scenario (pilot install → all 9 built-ins applied → pilot hook + skill intact, reapply still idempotent). Legacy pre-release manifest keys are dropped on next write. Live-verified in the playground: the routine `--compose --apply` no longer removes the pilot's artifacts.
+2. **Non-blocking #1 (key-order false conflict)** ✅ — `stableStringify` (recursive sorted-key) comparison for MCP configs, with a test asserting reordered-key configs don't conflict.
+3. **Non-blocking #2 (settings reformatting)** ✅ — documented: emitter header note + README "Integration artifacts (composer modules)" subsection under Customizing agents.
+4. **Non-blocking #3 (`--def` single file)** — deferred by design per the review's own wording ("revisit with the integration catalogue"); repeated runs already compose multiple defs.
+5. **Skill-name collision check** (suggested with the blocker fix) ✅ — a skill name claimed by another agent's bucket throws instead of silently overwriting; tested.
+6. **Collateral fix (disclosed, found while verifying):** running `--compose --apply` inside a *consumer* project used to **create** the 9 root role files there (observed live in the playground). The apply path now only updates role files that already exist (`skipped <file> (not present in this project)` otherwise) — no behavior change in the canonical repo, where they always exist. Stray files created during verification were removed.
+
+**Gates:** build ✅ · tests **112/112** (regression + collision + key-order tests added) ✅ · lint at main baseline ✅ · role files byte-stable · playground end-to-end re-verified (apply → routine regen → pilot intact → reapply unchanged).
