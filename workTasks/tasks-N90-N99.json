@@ -484,7 +484,7 @@
       "title": "Actions/events taxonomy — inline actions module + activity hooks via emitter",
       "type": "rework",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N94-actions-events-taxonomy-inline-actions-module-acti",
       "createdAt": "2026-06-11T18:53:27.010Z",
       "statusHistory": [
@@ -502,6 +502,11 @@
           "status": "implemented",
           "at": "2026-06-11T19:42:20.196Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T19:43:06.874Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -535,8 +540,14 @@
         "hooks",
         "activity"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-11T19:43:06.873Z",
+          "commitHash": "d473d70",
+          "commitMessage": "rework(N94): actions/events taxonomy — inline actions module + activity hooks via emitter"
+        }
+      ],
+      "branch": "rework/N94-actions-events-taxonomy",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/70",
       "mergedAt": null
     }
