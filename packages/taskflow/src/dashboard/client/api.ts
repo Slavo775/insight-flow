@@ -33,6 +33,7 @@ export async function fetchMaster(): Promise<MasterResponse> {
 export interface ModuleDto {
   id: string;
   title: string;
+  description?: string;
   source: "builtin" | "custom";
   kind: "section" | "include" | "mcp-server" | "hook" | "skill";
   heading?: string;
@@ -56,11 +57,13 @@ export interface AgentModuleRef {
   id: string;
   title: string;
   kind: string;
+  description?: string;
 }
 
 export interface AgentDto {
   id: string;
   title: string;
+  description?: string;
   modules: AgentModuleRef[];
 }
 

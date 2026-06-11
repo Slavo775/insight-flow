@@ -1,9 +1,12 @@
-// N93 — agent detail: pretty header + the interactive composition map.
-// The agent's ordered modules (sequence-numbered, kind-colored) flow into the
-// agent node; clicking a module node opens /module/<id>.
+// N93 — agent detail: pretty header (+ description) and the interactive
+// composition map. Change request R1: clicking a module node opens an info
+// modal in place (no navigation); the modal links to the full module page.
+import { useMemo, useState } from "react";
 import styled, { useTheme } from "styled-components";
 import type { AgentDto } from "./api.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
+import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
+import type { Registry } from "./registry.js";
 
 const Header = styled.div`
   margin-bottom: ${(p) => p.theme.space["2xl"]};
@@ -12,6 +15,12 @@ const Header = styled.div`
 const Title = styled.h2`
   color: ${(p) => p.theme.color.text};
   font-size: ${(p) => p.theme.font.size["2xl"]};
+  margin: 0 0 ${(p) => p.theme.space.sm};
+`;
+
+const Description = styled.p`
+  color: ${(p) => p.theme.color.text};
+  font-size: ${(p) => p.theme.font.size.md};
   margin: 0 0 ${(p) => p.theme.space.sm};
 `;
 
@@ -40,8 +49,9 @@ const LegendItem = styled.span<{ $color: string }>`
 
 const KINDS = ["section", "include", "mcp-server", "hook", "skill"] as const;
 
-export function AgentDetail({ agent }: { agent: AgentDto }) {
+export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Registry }) {
   const theme = useTheme();
+  const [openModuleId, setOpenModuleId] = useState<string | null>(null);
 
   const nodes: MapNodeSpec[] = [
     ...agent.modules.map((m, i) => ({
@@ -63,10 +73,16 @@ export function AgentDetail({ agent }: { agent: AgentDto }) {
   const usedKinds = KINDS.filter((k) => agent.modules.some((m) => m.kind === k));
   const sharedCount = agent.modules.filter((m) => !m.id.includes("/")).length;
 
+  const openModule = useMemo(
+    () => (openModuleId ? (registry.modules.find((m) => m.id === openModuleId) ?? null) : null),
+    [openModuleId, registry],
+  );
+
   return (
     <>
       <Header>
         <Title>⚙ {agent.title}</Title>
+        {agent.description ? <Description>{agent.description}</Description> : null}
         <Sub>
           {agent.id} · {agent.modules.length} modules in sequence · {sharedCount} shared
         </Sub>
@@ -78,7 +94,10 @@ export function AgentDetail({ agent }: { agent: AgentDto }) {
           </LegendItem>
         ))}
       </Legend>
-      <CompositionMap nodes={nodes} edges={edges} />
+      <CompositionMap nodes={nodes} edges={edges} onModuleClick={setOpenModuleId} />
+      {openModule ? (
+        <ModuleInfoModal module={openModule} onClose={() => setOpenModuleId(null)} />
+      ) : null}
     </>
   );
 }

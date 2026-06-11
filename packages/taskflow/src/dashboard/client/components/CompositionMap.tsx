@@ -94,12 +94,16 @@ export function CompositionMap({
   nodes: specs,
   /** Directed pairs [fromId, toId]. */
   edges: pairs,
-  /** Layout: left column = all non-emphasis nodes, right = emphasis node(s). */
-  direction = "fan-in",
+  /**
+   * Module-node click handler. Defaults to navigating to /module/<id>;
+   * the agent page passes a modal opener instead (change request R1 —
+   * "click to module its so annoying").
+   */
+  onModuleClick,
 }: {
   nodes: MapNodeSpec[];
   edges: [string, string][];
-  direction?: "fan-in" | "fan-out";
+  onModuleClick?: (moduleId: string) => void;
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -158,8 +162,12 @@ export function CompositionMap({
         onNodeClick={(_, node) => {
           const spec = byId.get(node.id);
           if (!spec) return;
-          if (spec.role === "module") navigate(`/module/${spec.id}`);
-          else if (spec.role === "agent") navigate(`/agent/${spec.id.replace(/^agent:/, "")}`);
+          if (spec.role === "module") {
+            if (onModuleClick) onModuleClick(spec.id);
+            else navigate(`/module/${spec.id}`);
+          } else if (spec.role === "agent") {
+            navigate(`/agent/${spec.id.replace(/^agent:/, "")}`);
+          }
         }}
         colorMode="dark"
       >

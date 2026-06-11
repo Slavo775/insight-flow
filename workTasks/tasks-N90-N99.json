@@ -354,7 +354,7 @@
       "title": "Dashboard module & agent browser — shared layout + interactive composition maps",
       "type": "feat",
       "priority": "medium",
-      "status": "changes-requested",
+      "status": "changes-implemented",
       "folder": "workTasks/N93-dashboard-module-agent-browser-shared-layout-inter",
       "createdAt": "2026-06-11T15:00:43.870Z",
       "statusHistory": [
@@ -382,6 +382,16 @@
           "status": "changes-requested",
           "at": "2026-06-11T15:49:03.023Z",
           "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-11T15:50:49.867Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-11T15:55:17.052Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
@@ -408,11 +418,23 @@
           "requestedAt": "2026-06-11T15:49:03.022Z",
           "description": "Agent map: open module info in a modal instead of navigating; render markdown content; add short description field to every module + agent in the JSON registry and show it",
           "requestedBy": "task-request-changes",
-          "status": "requested",
-          "implementedAt": null,
-          "filesChanged": [],
-          "comment": null,
-          "implementedBy": null
+          "status": "implemented",
+          "implementedAt": "2026-06-11T15:55:17.052Z",
+          "filesChanged": [
+            "packages/taskflow/src/core/schema/index.ts",
+            "packages/taskflow/src/agents/modules",
+            "packages/taskflow/src/agents/composed",
+            "packages/taskflow/src/dashboard/server/index.ts",
+            "packages/taskflow/src/dashboard/client/api.ts",
+            "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+            "packages/taskflow/src/dashboard/client/AgentDetail.tsx",
+            "packages/taskflow/src/dashboard/client/AgentsPage.tsx",
+            "packages/taskflow/src/dashboard/client/ModulesPage.tsx",
+            "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+            "packages/taskflow/src/dashboard/client/components/ModuleInfoModal.tsx"
+          ],
+          "comment": "R1 changes: module info modal in agent map (no forced navigation), markdown rendering for section/skill content, description field across the registry + UI",
+          "implementedBy": "task-implement"
         }
       ],
       "reviewCount": 0,

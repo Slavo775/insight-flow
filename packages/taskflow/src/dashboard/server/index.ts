@@ -636,9 +636,15 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const agents = Object.values(COMPOSED_AGENTS).map((def) => ({
         id: def.id,
         title: def.title,
+        description: def.description,
         modules: def.modules.map((id) => {
           const mod = MODULE_REGISTRY[id];
-          return { id, title: mod?.title ?? id, kind: mod?.kind ?? "unknown" };
+          return {
+            id,
+            title: mod?.title ?? id,
+            kind: mod?.kind ?? "unknown",
+            description: mod?.description,
+          };
         }),
       }));
       res.writeHead(200, { "Content-Type": MIME[".json"] });

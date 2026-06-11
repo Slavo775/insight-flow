@@ -102,7 +102,7 @@ export function ModulesPage() {
         const m = byId.get(id);
         if (!m) return null;
         return (
-          <MenuLink key={id} to={`/module/${id}`}>
+          <MenuLink key={id} to={`/module/${id}`} title={m.description}>
             <KindDot $color={kindColor(tokens, m.kind)} />
             {m.id}
           </MenuLink>

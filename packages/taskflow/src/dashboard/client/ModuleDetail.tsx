@@ -1,8 +1,13 @@
 // N93 — module detail: everything about one registry module. Kind badge +
-// source, kind-specific panels (section body, include ref, MCP config JSON,
-// hook table, skill content), referencing-agent chips, and an interactive map
-// (module ←→ its facet + referencing agents).
+// source + description, kind-specific panels (section body, include ref, MCP
+// config JSON, hook table, skill content — markdown-rendered where the content
+// is markdown, per change request R1), referencing-agent chips, and an
+// interactive map. `KindPanels` and the header bits are exported for reuse by
+// the agent page's module modal.
 import { Link } from "react-router-dom";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 import styled, { useTheme } from "styled-components";
 import type { ModuleDto } from "./api.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
@@ -13,7 +18,7 @@ const Header = styled.div`
   flex-wrap: wrap;
   align-items: baseline;
   gap: ${(p) => p.theme.space.lg};
-  margin-bottom: ${(p) => p.theme.space.lg};
+  margin-bottom: ${(p) => p.theme.space.sm};
 `;
 
 const Title = styled.h2`
@@ -22,7 +27,7 @@ const Title = styled.h2`
   margin: 0;
 `;
 
-const Badge = styled.span<{ $color: string }>`
+export const Badge = styled.span<{ $color: string }>`
   border: 1px solid ${(p) => p.$color};
   color: ${(p) => p.$color};
   border-radius: ${(p) => p.theme.radius.pill};
@@ -37,7 +42,13 @@ const Muted = styled.span`
   font-size: ${(p) => p.theme.font.size.sm};
 `;
 
-const Panel = styled.section`
+export const Description = styled.p`
+  color: ${(p) => p.theme.color.textMuted};
+  font-size: ${(p) => p.theme.font.size.md};
+  margin: 0 0 ${(p) => p.theme.space["2xl"]};
+`;
+
+export const Panel = styled.section`
   background: ${(p) => p.theme.color.surface};
   border: 1px solid ${(p) => p.theme.color.border};
   border-radius: ${(p) => p.theme.radius.xl};
@@ -46,7 +57,7 @@ const Panel = styled.section`
   min-width: 0;
 `;
 
-const PanelTitle = styled.h3`
+export const PanelTitle = styled.h3`
   color: ${(p) => p.theme.color.textMuted};
   font-size: ${(p) => p.theme.font.size.sm};
   text-transform: uppercase;
@@ -101,7 +112,19 @@ const KV = styled.dl`
   }
 `;
 
-function KindPanels({ module }: { module: ModuleDto }) {
+/** Markdown-rendered block (change request R1: "if we have md so text in md"). */
+function MarkdownBlock({ text }: { text: string }) {
+  return (
+    <div className="markdown-body">
+      <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+        {text}
+      </Markdown>
+    </div>
+  );
+}
+
+/** Kind-specific information panels — shared by the module page and the agent-map modal. */
+export function KindPanels({ module }: { module: ModuleDto }) {
   switch (module.kind) {
     case "section":
       return (
@@ -115,7 +138,7 @@ function KindPanels({ module }: { module: ModuleDto }) {
           {module.body ? (
             <Panel>
               <PanelTitle>Body (prompt text)</PanelTitle>
-              <Pre>{module.body}</Pre>
+              <MarkdownBlock text={module.body} />
             </Panel>
           ) : null}
         </>
@@ -154,12 +177,29 @@ function KindPanels({ module }: { module: ModuleDto }) {
       return (
         <Panel>
           <PanelTitle>Skill — .claude/skills/{module.name}/SKILL.md</PanelTitle>
-          <Pre>{module.content}</Pre>
+          <MarkdownBlock text={module.content ?? ""} />
         </Panel>
       );
     default:
       return null;
   }
+}
+
+/** Header line (title + kind badge + id/source) — shared with the modal. */
+export function ModuleHeader({ module }: { module: ModuleDto }) {
+  const theme = useTheme();
+  return (
+    <>
+      <Header>
+        <Title>{module.title}</Title>
+        <Badge $color={kindColor(theme, module.kind)}>{module.kind}</Badge>
+        <Muted>
+          {module.id} · {module.source}
+        </Muted>
+      </Header>
+      {module.description ? <Description>{module.description}</Description> : null}
+    </>
+  );
 }
 
 function facetLabel(module: ModuleDto): string {
@@ -180,7 +220,6 @@ function facetLabel(module: ModuleDto): string {
 }
 
 export function ModuleDetail({ module, registry }: { module: ModuleDto; registry: Registry }) {
-  const theme = useTheme();
   const refs = registry.referencedBy[module.id] ?? [];
   const agentTitle = (id: string): string =>
     registry.agents.find((a) => a.id === id)?.title ?? id;
@@ -202,18 +241,14 @@ export function ModuleDetail({ module, registry }: { module: ModuleDto; registry
 
   return (
     <>
-      <Header>
-        <Title>{module.title}</Title>
-        <Badge $color={kindColor(theme, module.kind)}>{module.kind}</Badge>
-        <Muted>
-          {module.id} · {module.source}
-        </Muted>
-      </Header>
+      <ModuleHeader module={module} />
 
       <KindPanels module={module} />
 
       <Panel>
-        <PanelTitle>Referenced by {refs.length} agent{refs.length === 1 ? "" : "s"}</PanelTitle>
+        <PanelTitle>
+          Referenced by {refs.length} agent{refs.length === 1 ? "" : "s"}
+        </PanelTitle>
         {refs.length ? (
           <Chips>
             {refs.map((a) => (

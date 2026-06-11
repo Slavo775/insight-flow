@@ -256,6 +256,9 @@ export const HookEventInputSchema = z.object({
 const agentModuleBase = {
   id: z.string().min(1),
   title: z.string().min(1),
+  // Short human-readable summary for browsing UIs (N93). Ignored by the
+  // composer/emitter — never rendered into role MD or artifacts.
+  description: z.string().optional(),
   source: z.enum(["builtin", "custom"]).default("builtin"),
 };
 
@@ -314,6 +317,8 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
 export const ComposedAgentSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
+  // Short human-readable summary for browsing UIs (N93); not part of the MD.
+  description: z.string().optional(),
   // Ordered registry ids; the author controls placement explicitly.
   modules: z.array(z.string().min(1)).min(1),
 });
