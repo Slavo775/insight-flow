@@ -46,3 +46,56 @@ None — approved.
 - Behavioral validation belongs to `/task-human-review` (drive a real task with a composed prompt).
 - Roadmap: Round 2 (registry + `recorder-discipline`), Round 3 (migrate roles → JSON canonical) per `ANALYSIS.md` "What's next".
 - Incidental (out of scope here): `CLAUDE.md` claims "No ESLint/Prettier configured" but the package configures both — worth a separate doc fix.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-11
+**Verdict:** fix-needed
+
+### Summary
+
+Human review of `src/agents/compose.ts`: the registry-construction code is repetitive and must be DRY'd before merge. Verdict: **fix-needed**.
+
+### Checklist verification
+
+- Behavioral validation (the open AI-round item) was not exercised this round; human review focused on code quality. Carry forward.
+
+### Blockers
+
+1. **DRY the registry construction** (`src/agents/compose.ts`) — the `MODULE_REGISTRY` and `COMPOSED_AGENTS` builders are near-identical; collapse them into one shared helper. Human's exact comment:
+
+```ts
+// Validate authored data at load — malformed module/agent JSON fails fast.
+export const MODULE_REGISTRY: Record<string, AgentModule> = Object.fromEntries(
+  [minimalDiff, scopeGuard].map((m) => {
+    const parsed = AgentModuleSchema.parse(m);
+    return [parsed.id, parsed];
+  }),
+);
+
+export const COMPOSED_AGENTS: Record<string, ComposedAgent> = Object.fromEntries(
+  [taskImplement, taskReviewFix].map((a) => {
+    const parsed = ComposedAgentSchema.parse(a);
+    return [parsed.id, parsed];
+  }),
+);
+```
+
+> DRY
+
+### Non-blocking
+
+None this round.
+
+### Security & edge cases
+
+None this round.
+
+### Notes
+
+- Fixer hint (not human wording): extract a generic helper, e.g. `indexById<T extends { id: string }>(items: unknown[], schema): Record<string, T>` that parses each item and keys by `parsed.id`, then build both registries through it. Doing so also resolves AI-review Non-blocking #4 (add the duplicate-id guard inside the helper).
+- Next: `/task-review-fix` picks up this `fix-needed` blocker.
