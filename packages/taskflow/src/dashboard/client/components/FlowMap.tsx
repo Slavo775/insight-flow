@@ -49,7 +49,14 @@ function layerAgents(project: ProjectDto): Map<string, number> {
   return depth;
 }
 
-export function FlowMap({ project }: { project: ProjectDto }) {
+export function FlowMap({
+  project,
+  highlightNodes,
+}: {
+  project: ProjectDto;
+  /** N104: node ids rendered with the "task is here" accent (📍 badge). */
+  highlightNodes?: string[];
+}) {
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -67,14 +74,17 @@ export function FlowMap({ project }: { project: ProjectDto }) {
       const col = depth.get(a) ?? 0;
       const siblings = byColumn.get(col) ?? [a];
       const row = siblings.indexOf(a);
+      const isCurrent = highlightNodes?.includes(a) ?? false;
       return {
         id: a,
         position: { x: col * COL_W, y: row * ROW_H },
-        data: { label: `⚙ ${project.agentTitles[a] ?? a}` },
+        data: { label: `${isCurrent ? "📍 " : ""}⚙ ${project.agentTitles[a] ?? a}` },
         style: {
-          background: theme.color.bg,
+          background: isCurrent ? `${theme.color.accent}2e` : theme.color.bg,
           color: theme.color.text,
-          border: `1px solid ${theme.color.accent}`,
+          border: isCurrent
+            ? `2px solid ${theme.color.accent}`
+            : `1px solid ${theme.color.accent}`,
           borderRadius: theme.radius.xl,
           fontFamily: theme.font.family,
           fontSize: theme.font.size.md,
@@ -98,7 +108,7 @@ export function FlowMap({ project }: { project: ProjectDto }) {
     }));
 
     return { nodes, edges };
-  }, [project, theme]);
+  }, [project, theme, highlightNodes]);
 
   return (
     <MapBox>
