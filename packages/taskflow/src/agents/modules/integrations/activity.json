@@ -1,0 +1,92 @@
+[
+  {
+    "id": "activity/session-start",
+    "title": "Activity — session start",
+    "description": "Emits session-start when a Claude Code session begins.",
+    "source": "builtin",
+    "kind": "hook",
+    "event": "SessionStart",
+    "matcher": "",
+    "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-session-start.sh",
+    "timeout": 10,
+    "script": {
+      "name": "lifecycle-session-start.sh",
+      "content": "#!/bin/bash\n# insight-flow lifecycle — SessionStart → session-start event (no --if-active: fires for all sessions)\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\n__INSIGHT_FLOW_BIN__ log-event session-start --source hook --hook-name SessionStart --session-id \"$SESSION_ID\" 2>/dev/null &\n"
+    }
+  },
+  {
+    "id": "activity/agent-active",
+    "title": "Activity — agent active",
+    "description": "Emits agent-active when an insight-flow skill prompt is submitted.",
+    "source": "builtin",
+    "kind": "hook",
+    "event": "UserPromptSubmit",
+    "matcher": "",
+    "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-agent-active.sh",
+    "timeout": 10,
+    "script": {
+      "name": "lifecycle-agent-active.sh",
+      "content": "#!/bin/bash\n# insight-flow lifecycle — UserPromptSubmit → agent-active (only for insight-flow skills)\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\nPROMPT=$(echo \"$INPUT\" | grep -o '\"prompt\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nSKILL=$(echo \"$PROMPT\" | grep -o '^/[a-zA-Z][a-zA-Z0-9_-]*' | head -1 | cut -c2-)\ncase \"$SKILL\" in\n  task-implement|task-review|task-review-fix|task-human-review|taskmaster|taskmaster-change|task-git|task-incident|task-request-changes|complete-task)\n    __INSIGHT_FLOW_BIN__ log-event agent-active --source hook --hook-name UserPromptSubmit --session-id \"$SESSION_ID\" 2>/dev/null &\n    ;;\n  *)\n    exit 0\n    ;;\nesac\n"
+    }
+  },
+  {
+    "id": "activity/agent-idle",
+    "title": "Activity — agent idle",
+    "description": "Emits agent-idle (and notifies) when the agent stops.",
+    "source": "builtin",
+    "kind": "hook",
+    "event": "Stop",
+    "matcher": "",
+    "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-agent-idle.sh",
+    "timeout": 10,
+    "script": {
+      "name": "lifecycle-agent-idle.sh",
+      "content": "#!/bin/bash\n# insight-flow lifecycle — Stop → agent-idle (if active)\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\n__INSIGHT_FLOW_BIN__ log-event agent-idle --source hook --hook-name Stop --session-id \"$SESSION_ID\" --if-active 2>/dev/null &\n__INSIGHT_FLOW_BIN__ notify \"Agent idle\" 2>/dev/null &\n"
+    }
+  },
+  {
+    "id": "activity/pre-tool",
+    "title": "Activity — pre tool",
+    "description": "Emits tool-requested before each tool call while active.",
+    "source": "builtin",
+    "kind": "hook",
+    "event": "PreToolUse",
+    "matcher": "",
+    "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-pre-tool.sh",
+    "timeout": 10,
+    "script": {
+      "name": "lifecycle-pre-tool.sh",
+      "content": "#!/bin/bash\n# insight-flow lifecycle — PreToolUse → tool-requested (if active)\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\nTOOL=$(echo \"$INPUT\" | grep -o '\"tool_name\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\n[ -z \"$TOOL\" ] && exit 0\n__INSIGHT_FLOW_BIN__ log-event tool-requested --source hook --hook-name PreToolUse --session-id \"$SESSION_ID\" --data \"{\\\"tool_name\\\":\\\"$TOOL\\\"}\" --if-active 2>/dev/null &\n"
+    }
+  },
+  {
+    "id": "activity/post-tool",
+    "title": "Activity — post tool",
+    "description": "Emits tool-approved / file-written / file-edited after tool calls.",
+    "source": "builtin",
+    "kind": "hook",
+    "event": "PostToolUse",
+    "matcher": "",
+    "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-post-tool.sh",
+    "timeout": 10,
+    "script": {
+      "name": "lifecycle-post-tool.sh",
+      "content": "#!/bin/bash\n# insight-flow lifecycle — PostToolUse → tool-approved / file-written / file-edited (if active)\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\nTOOL=$(echo \"$INPUT\" | grep -o '\"tool_name\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\n[ -z \"$TOOL\" ] && exit 0\nFILE_PATH=$(echo \"$INPUT\" | grep -o '\"file_path\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\ncase \"$TOOL\" in\n  Write)\n    __INSIGHT_FLOW_BIN__ log-event file-written --source hook --hook-name PostToolUse --session-id \"$SESSION_ID\" --data \"{\\\"tool_name\\\":\\\"Write\\\",\\\"path\\\":\\\"$FILE_PATH\\\"}\" --if-active 2>/dev/null &\n    ;;\n  Edit|MultiEdit)\n    __INSIGHT_FLOW_BIN__ log-event file-edited --source hook --hook-name PostToolUse --session-id \"$SESSION_ID\" --data \"{\\\"tool_name\\\":\\\"$TOOL\\\",\\\"path\\\":\\\"$FILE_PATH\\\"}\" --if-active 2>/dev/null &\n    ;;\n  *)\n    __INSIGHT_FLOW_BIN__ log-event tool-approved --source hook --hook-name PostToolUse --session-id \"$SESSION_ID\" --data \"{\\\"tool_name\\\":\\\"$TOOL\\\"}\" --if-active 2>/dev/null &\n    ;;\nesac\n"
+    }
+  },
+  {
+    "id": "activity/permission",
+    "title": "Activity — permission",
+    "description": "Emits approval-required (+ bell + notification) on permission requests.",
+    "source": "builtin",
+    "kind": "hook",
+    "event": "PermissionRequest",
+    "matcher": "",
+    "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/lifecycle-permission.sh",
+    "timeout": 10,
+    "script": {
+      "name": "lifecycle-permission.sh",
+      "content": "#!/bin/bash\n# insight-flow lifecycle — PermissionRequest → approval-required (if active) + bell + notification\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\n__INSIGHT_FLOW_BIN__ log-event approval-required --source hook --hook-name PermissionRequest --session-id \"$SESSION_ID\" --if-active 2>/dev/null &\nprintf '\\a'\n__INSIGHT_FLOW_BIN__ notify \"Approval required\" 2>/dev/null &\n"
+    }
+  }
+]

@@ -53,11 +53,17 @@ test("all 9 shipped roles are registered as composed agents", () => {
 });
 
 test("registry holds shared include + section modules and role-scoped modules", () => {
-  for (const id of ["enforcement", "protocol", "events"]) {
+  for (const id of ["enforcement", "protocol"]) {
     assert.equal(MODULE_REGISTRY[id]?.kind, "include", `${id} is an include module`);
   }
   assert.equal(MODULE_REGISTRY["enforcement"].ref, "AGENT_ENFORCEMENT.md");
-  assert.equal(MODULE_REGISTRY["events"].ref, "AGENT_EVENTS.md");
+  // N94: the events include became the inline `actions` section module.
+  assert.equal(MODULE_REGISTRY["events"], undefined, "events include module is gone");
+  assert.equal(MODULE_REGISTRY["actions"]?.kind, "section");
+  assert.ok(
+    MODULE_REGISTRY["actions"].body.includes("<!-- taskflow:phase-markers:start -->"),
+    "actions module carries the phase markers",
+  );
   // shared section modules stay registered for future/custom composition
   for (const id of ["minimal-diff", "scope-guard", "recorder-discipline"]) {
     assert.equal(MODULE_REGISTRY[id]?.kind, "section", `${id} is a section module`);
@@ -145,14 +151,41 @@ test("shared section modules compose a custom agent against the real registry", 
   const md = composeAgent({
     id: "custom-recorder",
     title: "Custom Recorder",
-    modules: ["task-human-review/identity", "enforcement", "minimal-diff", "scope-guard", "recorder-discipline", "events"],
+    modules: ["task-human-review/identity", "enforcement", "minimal-diff", "scope-guard", "recorder-discipline", "actions"],
   });
   assert.match(md, /^ROLE: Insight-Flow Human Review Recorder/);
   assert.ok(md.includes("@AGENT_ENFORCEMENT.md"));
   assert.ok(md.includes("Never change code unrelated to the task at hand."), "minimal-diff renders");
   assert.ok(md.includes("Ambiguous spec → ask, do not guess."), "scope-guard renders");
   assert.ok(md.includes("Preserve the human's exact wording — do not rephrase or soften."), "recorder-discipline renders");
-  assert.ok(md.endsWith("@AGENT_EVENTS.md\n"));
+  assert.ok(md.endsWith("<!-- taskflow:phase-markers:end -->\n"), "actions block terminates the file");
+});
+
+test("N94: every shipped role inlines the actions block instead of including AGENT_EVENTS.md", () => {
+  for (const [id, file] of Object.entries(ROLE_FILES)) {
+    const committed = readFileSync(resolve(repoRoot, file), "utf-8");
+    assert.ok(!committed.includes("@AGENT_EVENTS.md"), `${file} has no events include`);
+    assert.ok(
+      committed.includes("<!-- taskflow:phase-markers:start -->") &&
+        committed.includes("<!-- taskflow:phase-markers:end -->"),
+      `${file} carries the strippable actions block`,
+    );
+    assert.ok(COMPOSED_AGENTS[id].modules.includes("actions"), `${id} references actions`);
+  }
+});
+
+test("N94: ACTIVITY_AGENT groups the lifecycle hook modules but is not a composed role", async () => {
+  const { ACTIVITY_AGENT } = await import("../dist/index.js");
+  assert.equal(ACTIVITY_AGENT.id, "activity");
+  assert.equal(ACTIVITY_AGENT.modules.length, 6);
+  for (const id of ACTIVITY_AGENT.modules) {
+    assert.equal(MODULE_REGISTRY[id]?.kind, "hook", `${id} is a hook module`);
+    assert.ok(
+      MODULE_REGISTRY[id].script?.content.includes("__INSIGHT_FLOW_BIN__"),
+      `${id} script is templated`,
+    );
+  }
+  assert.ok(!listComposedAgents().includes("activity"), "compose-apply must not install hooks");
 });
 
 test("repeated module refs are deduped (first occurrence wins)", () => {

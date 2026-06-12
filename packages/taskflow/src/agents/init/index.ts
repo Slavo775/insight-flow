@@ -376,7 +376,26 @@ function stripWhenToNotify(rolesDir: string): void {
   }
 }
 
+// N94: the phase-marker contract is inlined into each generated role file (the
+// `actions` module) instead of living in AGENT_EVENTS.md. The opt-out strips
+// the marked block from every role file in rolesDir. Legacy projects that
+// still have AGENT_EVENTS.md get it blanked as before.
+const PM_START = "<!-- taskflow:phase-markers:start -->";
+const PM_END = "<!-- taskflow:phase-markers:end -->";
+
 function stripPhaseMarkers(rolesDir: string): void {
+  if (!existsSync(rolesDir)) return;
+  for (const file of readdirSync(rolesDir).filter((f) => f.endsWith(".md"))) {
+    const path = resolve(rolesDir, file);
+    const content = readFileSync(path, "utf-8");
+    const start = content.indexOf(PM_START);
+    const end = content.indexOf(PM_END);
+    if (start === -1 || end === -1 || end < start) continue;
+    const before = content.slice(0, start).replace(/\n+$/, "\n");
+    const after = content.slice(end + PM_END.length).replace(/^\n+/, "");
+    writeFileSync(path, (before + after).replace(/\n+$/, "") + "\n");
+  }
+  // Legacy consumers (pre-N94) keep an AGENT_EVENTS.md include target.
   const agentEventsPath = resolve(rolesDir, "AGENT_EVENTS.md");
   if (existsSync(agentEventsPath)) {
     writeFileSync(agentEventsPath, "");

@@ -478,6 +478,78 @@
       "branch": "feat/N93-dashboard-module-agent-browser",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/69",
       "mergedAt": null
+    },
+    {
+      "id": "N94",
+      "title": "Actions/events taxonomy — inline actions module + activity hooks via emitter",
+      "type": "rework",
+      "priority": "medium",
+      "status": "pushed",
+      "folder": "workTasks/N94-actions-events-taxonomy-inline-actions-module-acti",
+      "createdAt": "2026-06-11T18:53:27.010Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-11T18:53:27.010Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T18:58:22.497Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T19:42:20.196Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T19:43:06.874Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-11T18:58:22.497Z",
+        "completedAt": "2026-06-11T19:42:20.196Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/actions.json",
+          "packages/taskflow/src/agents/modules/integrations/activity.json",
+          "packages/taskflow/src/agents/composed/activity.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/activity-hook.ts",
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/scripts/sync-role-templates.mjs",
+          "packages/taskflow/test/compose.test.mjs",
+          "packages/taskflow/test/emit.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "composer",
+        "hooks",
+        "activity"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-11T19:43:06.873Z",
+          "commitHash": "d473d70",
+          "commitMessage": "rework(N94): actions/events taxonomy — inline actions module + activity hooks via emitter"
+        }
+      ],
+      "branch": "rework/N94-actions-events-taxonomy",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/70",
+      "mergedAt": null
     }
   ]
 }
