@@ -21,7 +21,7 @@ import type {
 } from "../../core/types.js";
 import { EVENT_TYPES, CLAUDE_HOOK_EVENT_TYPES } from "../../core/types.js";
 import { EventsFileSchema } from "../../core/schema/index.js";
-import { getWorkDir, getMasterPath } from "../../core/config.js";
+import { getWorkDir, getEventsDir, getMasterPath } from "../../core/config.js";
 
 const INSIGHT_FLOW_DIR = resolve(homedir(), ".insight-flow");
 
@@ -117,13 +117,13 @@ function appendToSessionLog(sessionId: string, event: ClaudeHookEvent): void {
 }
 
 /**
- * Append the raw hook event to a rolling daily JSONL backup at
- * `<workDir>/.events/<YYYY-MM-DD>.jsonl`. Independent of any specific task —
- * hooks fire before a task is picked. Fail-silent.
+ * Append the raw hook event to a rolling daily JSONL backup in the project's
+ * events dir (layout-resolved: `insightFlow/events/` or legacy
+ * `<workDir>/.events/`). Independent of any specific task — hooks fire before
+ * a task is picked. Fail-silent.
  */
-function appendToDailyBackup(workDir: string, payload: Record<string, unknown>): void {
+function appendToDailyBackup(eventsDir: string, payload: Record<string, unknown>): void {
   try {
-    const eventsDir = resolve(workDir, ".events");
     mkdirSync(eventsDir, { recursive: true });
     const day = new Date().toISOString().slice(0, 10);
     appendFileSync(resolve(eventsDir, `${day}.jsonl`), JSON.stringify(payload) + "\n");
@@ -264,7 +264,7 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
       ...(taskId ? { taskId } : {}),
       ...(provider ? { provider } : {}),
     };
-    appendToDailyBackup(workDir, hookEventPostPayload);
+    appendToDailyBackup(getEventsDir(config), hookEventPostPayload);
     postToLogEvents(config.server.port, hookEventPostPayload);
 
     process.stdout.write(

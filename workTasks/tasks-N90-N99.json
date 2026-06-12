@@ -1050,7 +1050,7 @@
       "title": "insightFlow layout — path indirection + back-compat shim",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N99-insightflow-layout-path-indirection-back-compat-sh",
       "createdAt": "2026-06-12T11:28:52.665Z",
       "statusHistory": [
@@ -1058,12 +1058,33 @@
           "status": "ready",
           "at": "2026-06-12T11:28:52.665Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T11:48:05.512Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T12:01:07.247Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T12:01:14.904Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T11:48:05.511Z",
+        "completedAt": "2026-06-12T12:01:07.246Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/paths.ts",
+          "packages/taskflow/src/core/config.ts",
+          "packages/taskflow/src/cli/commands/log-event.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/flow-root.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -1077,9 +1098,15 @@
         "migration",
         "core"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/77",
+      "pushes": [
+        {
+          "at": "2026-06-12T12:01:14.904Z",
+          "commitHash": "2be5a45",
+          "commitMessage": "rework(core): N99 insightFlow layout resolver + shim"
+        }
+      ],
+      "branch": "rework/N99-insightflow-layout-path-indirection",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/78",
       "mergedAt": null
     }
   ]
