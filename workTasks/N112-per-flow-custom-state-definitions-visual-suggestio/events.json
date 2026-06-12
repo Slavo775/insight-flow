@@ -96,6 +96,76 @@
       "payload": {
         "tool_name": "Bash"
       }
+    },
+    {
+      "id": "evt_1781264841260_f914",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-12T11:47:21.260Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N112",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781264841487_3ac4",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-12T11:47:21.486Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N112",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781264849603_2abd",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-12T11:47:29.603Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N112",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781264849735_0e57",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-12T11:47:29.735Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N112",
+      "payload": {}
+    },
+    {
+      "id": "evt_1781264854134_51e8",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-12T11:47:34.134Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N112",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781264861475_cbae",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-12T11:47:41.474Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N112",
+      "payload": {
+        "tool_name": "Bash"
+      }
     }
   ]
 }
