@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClaudeStatus } from "./activity.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { Route, Routes } from "react-router-dom";
+import { AgentsPage } from "./AgentsPage.js";
 import { DetailPanel } from "./DetailPanel.js";
+import { ModulesPage } from "./ModulesPage.js";
 import { TaskDetailPage } from "./TaskDetailPage.js";
 import { Button, Text } from "./components/index.js";
 import {
@@ -197,6 +199,12 @@ export function App() {
     <Routes>
       <Route path="/" element={<DashboardView />} />
       <Route path="/task/:id" element={<TaskDetailPage />} />
+      {/* N93 — composer registry browser. Module ids contain "/"
+          (task-implement/never), so the module route is a splat. */}
+      <Route path="/module" element={<ModulesPage />} />
+      <Route path="/module/*" element={<ModulesPage />} />
+      <Route path="/agent" element={<AgentsPage />} />
+      <Route path="/agent/:id" element={<AgentsPage />} />
     </Routes>
   );
 }

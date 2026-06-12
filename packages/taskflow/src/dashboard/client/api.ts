@@ -27,6 +27,66 @@ export async function fetchMaster(): Promise<MasterResponse> {
   return res.json();
 }
 
+// N93 — composer registry browser ------------------------------------------
+
+/** One registry module; kind-specific fields are optional on the wire. */
+export interface ModuleDto {
+  id: string;
+  title: string;
+  description?: string;
+  source: "builtin" | "custom";
+  kind: "section" | "include" | "mcp-server" | "hook" | "skill";
+  heading?: string;
+  body?: string;
+  ref?: string;
+  name?: string;
+  config?: Record<string, unknown>;
+  event?: string;
+  matcher?: string;
+  command?: string;
+  content?: string;
+}
+
+export interface ModulesResponse {
+  modules: ModuleDto[];
+  /** moduleId → ids of composed agents that reference it. */
+  referencedBy: Record<string, string[]>;
+}
+
+export interface AgentModuleRef {
+  id: string;
+  title: string;
+  kind: string;
+  description?: string;
+}
+
+export interface AgentDto {
+  id: string;
+  title: string;
+  description?: string;
+  modules: AgentModuleRef[];
+}
+
+export async function fetchModules(): Promise<ModulesResponse> {
+  const res = await fetch("/api/modules");
+  if (!res.ok) throw new Error("Failed to load modules (" + res.status + ")");
+  return res.json();
+}
+
+/** Markdown content behind an include module's @ref, or null if not present. */
+export async function fetchIncludeDoc(ref: string): Promise<string | null> {
+  const res = await fetch("/api/include-doc?ref=" + encodeURIComponent(ref));
+  if (!res.ok) return null;
+  return res.text();
+}
+
+export async function fetchAgents(): Promise<AgentDto[]> {
+  const res = await fetch("/api/agents");
+  if (!res.ok) throw new Error("Failed to load agents (" + res.status + ")");
+  const data: { agents: AgentDto[] } = await res.json();
+  return data.agents;
+}
+
 export type DocName = "TASK" | "CHECKLIST" | "REVIEW" | "ANALYSIS";
 
 /**

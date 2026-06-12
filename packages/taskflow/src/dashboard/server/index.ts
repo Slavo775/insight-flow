@@ -24,6 +24,7 @@ import {
 } from "../../agents/activity-hook.js";
 import { EventStore } from "./event-stream.js";
 import { HookEventInputSchema } from "../../core/schema/index.js";
+import { MODULE_REGISTRY, COMPOSED_AGENTS } from "../../agents/compose.js";
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -616,6 +617,70 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // filter it here before serialising rather than relying on CORS alone.
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(config, null, 2));
+      return;
+    }
+
+    // N93 — composer registry browser. Read-only views over the built-in
+    // module registry + composed agents (src/agents/compose.ts).
+    if (url.pathname === "/api/modules") {
+      const referencedBy: Record<string, string[]> = {};
+      for (const def of Object.values(COMPOSED_AGENTS)) {
+        for (const id of def.modules) (referencedBy[id] ??= []).push(def.id);
+      }
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ modules: Object.values(MODULE_REGISTRY), referencedBy }));
+      return;
+    }
+
+    if (url.pathname === "/api/agents") {
+      const agents = Object.values(COMPOSED_AGENTS).map((def) => ({
+        id: def.id,
+        title: def.title,
+        description: def.description,
+        modules: def.modules.map((id) => {
+          const mod = MODULE_REGISTRY[id];
+          return {
+            id,
+            title: mod?.title ?? id,
+            kind: mod?.kind ?? "unknown",
+            description: mod?.description,
+          };
+        }),
+      }));
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ agents }));
+      return;
+    }
+
+    // N93 R2 — serve the markdown content behind an include module's @ref so
+    // the UI can render a formatted preview. Strictly whitelisted: only refs
+    // registered as include modules are readable (never arbitrary paths).
+    if (url.pathname === "/api/include-doc") {
+      const ref = url.searchParams.get("ref") || "";
+      const allowed = new Set(
+        Object.values(MODULE_REGISTRY)
+          .filter((m) => m.kind === "include")
+          .map((m) => (m.kind === "include" ? m.ref : "")),
+      );
+      if (!allowed.has(ref)) {
+        res.writeHead(404, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "Unknown include ref" }));
+        return;
+      }
+      // The include target lives at the project root (canonical repo) or in
+      // rolesDir (consumer projects scaffolded by init).
+      const candidates = [
+        resolve(process.cwd(), ref),
+        config.rolesDir ? resolve(process.cwd(), config.rolesDir, ref) : null,
+      ].filter((p): p is string => p !== null);
+      for (const path of candidates) {
+        if (!existsSync(path)) continue;
+        res.writeHead(200, { "Content-Type": "text/markdown; charset=utf-8" });
+        res.end(readFileSync(path, "utf-8"));
+        return;
+      }
+      res.writeHead(404, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ error: "Include file not found in this project" }));
       return;
     }
 

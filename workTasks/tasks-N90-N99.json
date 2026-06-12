@@ -348,6 +348,136 @@
       "branch": "feat/N92-heterogeneous-modules",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/68",
       "mergedAt": "2026-06-11T14:37:24.777Z"
+    },
+    {
+      "id": "N93",
+      "title": "Dashboard module & agent browser — shared layout + interactive composition maps",
+      "type": "feat",
+      "priority": "medium",
+      "status": "fixed",
+      "folder": "workTasks/N93-dashboard-module-agent-browser-shared-layout-inter",
+      "createdAt": "2026-06-11T15:00:43.870Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-11T15:00:43.870Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-11T15:32:56.308Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-11T15:45:10.745Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-11T15:46:36.411Z",
+          "by": "task-git"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-11T15:49:03.023Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-11T15:50:49.867Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-11T15:55:17.052Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-11T16:00:03.621Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-11T16:00:29.041Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-11T16:21:33.975Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-11T16:44:13.151Z",
+          "by": "task-review-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-11T15:32:56.308Z",
+        "completedAt": "2026-06-11T15:45:10.744Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/registry.ts",
+          "packages/taskflow/src/dashboard/client/components/SideLayout.tsx",
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+          "packages/taskflow/src/dashboard/client/ModulesPage.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/AgentsPage.tsx",
+          "packages/taskflow/src/dashboard/client/AgentDetail.tsx",
+          "packages/taskflow/src/dashboard/client/App.tsx",
+          "packages/taskflow/src/dashboard/client/ui.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-11T15:49:03.022Z",
+          "description": "Agent map: open module info in a modal instead of navigating; render markdown content; add short description field to every module + agent in the JSON registry and show it",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-11T15:55:17.052Z",
+          "filesChanged": [
+            "packages/taskflow/src/core/schema/index.ts",
+            "packages/taskflow/src/agents/modules",
+            "packages/taskflow/src/agents/composed",
+            "packages/taskflow/src/dashboard/server/index.ts",
+            "packages/taskflow/src/dashboard/client/api.ts",
+            "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+            "packages/taskflow/src/dashboard/client/AgentDetail.tsx",
+            "packages/taskflow/src/dashboard/client/AgentsPage.tsx",
+            "packages/taskflow/src/dashboard/client/ModulesPage.tsx",
+            "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+            "packages/taskflow/src/dashboard/client/components/ModuleInfoModal.tsx"
+          ],
+          "comment": "R1 changes: module info modal in agent map (no forced navigation), markdown rendering for section/skill content, description field across the registry + UI",
+          "implementedBy": "task-implement"
+        }
+      ],
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "ui",
+        "agents",
+        "composer"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-11T15:46:36.410Z",
+          "commitHash": "b22438e",
+          "commitMessage": "feat(N93): dashboard module & agent browser — shared layout + composition maps"
+        }
+      ],
+      "branch": "feat/N93-dashboard-module-agent-browser",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/69",
+      "mergedAt": null
     }
   ]
 }

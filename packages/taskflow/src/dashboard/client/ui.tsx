@@ -10,6 +10,12 @@ export function Nav({ projectName }: { projectName: string }) {
         <a href="/" className="nav-link">
           Home
         </a>
+        <a href="/agent" className="nav-link">
+          Agents
+        </a>
+        <a href="/module" className="nav-link">
+          Modules
+        </a>
         <a href="/overview" className="nav-link">
           Overview
         </a>

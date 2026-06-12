@@ -2,6 +2,7 @@
   {
     "id": "testing/prompt",
     "title": "Testing integration — discipline",
+    "description": "Prompt discipline: run the suite after changes, report failures verbatim.",
     "source": "builtin",
     "kind": "section",
     "heading": "TESTING",
@@ -10,6 +11,7 @@
   {
     "id": "testing/hook",
     "title": "Testing integration — post-edit reminder hook",
+    "description": "PostToolUse reminder hook: nudges to run tests after Edit/Write.",
     "source": "builtin",
     "kind": "hook",
     "event": "PostToolUse",
@@ -19,6 +21,7 @@
   {
     "id": "testing/skill",
     "title": "Testing integration — run-tests skill",
+    "description": "Skill that runs the project's test command and reports results verbatim.",
     "source": "builtin",
     "kind": "skill",
     "name": "taskflow-run-tests",
