@@ -52,10 +52,13 @@ function layerAgents(project: ProjectDto): Map<string, number> {
 export function FlowMap({
   project,
   highlightNodes,
+  secondaryHighlightNodes,
 }: {
   project: ProjectDto;
   /** N104: node ids rendered with the "task is here" accent (📍 badge). */
   highlightNodes?: string[];
+  /** N105: suggested next agents — dashed accent (▶ badge). */
+  secondaryHighlightNodes?: string[];
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -75,16 +78,20 @@ export function FlowMap({
       const siblings = byColumn.get(col) ?? [a];
       const row = siblings.indexOf(a);
       const isCurrent = highlightNodes?.includes(a) ?? false;
+      const isSuggested = !isCurrent && (secondaryHighlightNodes?.includes(a) ?? false);
+      const badge = isCurrent ? "📍 " : isSuggested ? "▶ " : "";
       return {
         id: a,
         position: { x: col * COL_W, y: row * ROW_H },
-        data: { label: `${isCurrent ? "📍 " : ""}⚙ ${project.agentTitles[a] ?? a}` },
+        data: { label: `${badge}⚙ ${project.agentTitles[a] ?? a}` },
         style: {
           background: isCurrent ? `${theme.color.accent}2e` : theme.color.bg,
           color: theme.color.text,
           border: isCurrent
             ? `2px solid ${theme.color.accent}`
-            : `1px solid ${theme.color.accent}`,
+            : isSuggested
+              ? `2px dashed ${theme.color.accent}`
+              : `1px solid ${theme.color.accent}`,
           borderRadius: theme.radius.xl,
           fontFamily: theme.font.family,
           fontSize: theme.font.size.md,
@@ -108,7 +115,7 @@ export function FlowMap({
     }));
 
     return { nodes, edges };
-  }, [project, theme, highlightNodes]);
+  }, [project, theme, highlightNodes, secondaryHighlightNodes]);
 
   return (
     <MapBox>
