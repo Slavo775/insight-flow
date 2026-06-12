@@ -454,7 +454,7 @@
       "title": "Module create/edit form (kind-specific, Claude+Cursor targets)",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N106-module-create-edit-form-kind-specific-claude-curso",
       "createdAt": "2026-06-12T11:29:04.433Z",
       "statusHistory": [
@@ -472,6 +472,11 @@
           "status": "implemented",
           "at": "2026-06-12T14:53:37.688Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T14:54:05.734Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -501,9 +506,15 @@
         "composer",
         "forms"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T14:54:05.733Z",
+          "commitHash": "0e53d92",
+          "commitMessage": "feat(dashboard): N106 module form"
+        }
+      ],
+      "branch": "feat/N106-module-form",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/85",
       "mergedAt": null
     },
     {
