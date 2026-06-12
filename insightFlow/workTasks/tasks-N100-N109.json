@@ -532,7 +532,7 @@
       "title": "Agent composer form — add/remove/reorder modules",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N107-agent-composer-form-add-remove-reorder-modules",
       "createdAt": "2026-06-12T11:29:04.531Z",
       "statusHistory": [
@@ -550,6 +550,11 @@
           "status": "implemented",
           "at": "2026-06-12T15:06:50.776Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T15:06:58.394Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -576,9 +581,15 @@
         "composer",
         "forms"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T15:06:58.393Z",
+          "commitHash": "c66b725",
+          "commitMessage": "feat(dashboard): N107 agent composer form"
+        }
+      ],
+      "branch": "feat/N107-agent-form",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/86",
       "mergedAt": null
     },
     {
