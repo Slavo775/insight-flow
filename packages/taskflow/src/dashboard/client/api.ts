@@ -94,11 +94,16 @@ export async function saveDefinition(
   kind: DefinitionKind,
   record: { id: string },
   isUpdate: boolean,
+  opts: { revision?: string } = {},
 ): Promise<void> {
   const path = isUpdate ? `/api/${kind}/${encodeURIComponent(record.id)}` : `/api/${kind}`;
   const res = await fetch(path, {
     method: isUpdate ? "PUT" : "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // N111 — stale-write guard: echo the revision the record was loaded at.
+      ...(opts.revision ? { "x-revision": opts.revision } : {}),
+    },
     body: JSON.stringify(record),
   });
   if (!res.ok) await throwApiError(res);
@@ -148,6 +153,8 @@ export interface ProjectDto {
   install: string[];
   /** N109 — hand-arranged node positions; absent = auto-layout. */
   layout?: Record<string, { x: number; y: number }>;
+  /** N111 — optimistic-concurrency token for custom flows. */
+  revision?: string;
   agentTitles: Record<string, string>;
   installModules: { id: string; title: string; kind: string }[];
 }

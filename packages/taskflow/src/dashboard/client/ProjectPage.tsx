@@ -136,6 +136,22 @@ export function ProjectPage() {
     setDirty(false);
   };
 
+  // N111 — map server Zod issue paths ("flow.3.on") onto the draft's edges so
+  // the error panel names the offending connection instead of a JSON path.
+  const describeIssues = (issues: { path: string; message: string }[]): string =>
+    issues
+      .map((issue) => {
+        const m = issue.path.match(/^flow\.(\d+)/);
+        if (m && draft) {
+          const edge = draft.flow[Number(m[1])];
+          if (edge) {
+            return `edge ${edge.from} → ${edge.to} (${edge.on ?? "handoff"}): ${issue.message}`;
+          }
+        }
+        return `${issue.path}: ${issue.message}`;
+      })
+      .join(" · ");
+
   const saveDraft = async (): Promise<void> => {
     if (!draft) return;
     setTopError(null);
@@ -152,14 +168,28 @@ export function ProjectPage() {
         install: project.install,
         layout: draft.positions,
       };
-      await saveDefinition("projects", record, true);
+      await saveDefinition("projects", record, true, { revision: project.revision });
       // Re-render from server truth.
       const fresh = await fetchProject(project.id);
       setProject(fresh);
       setDraft(null);
       setDirty(false);
     } catch (err) {
-      setTopError(err instanceof Error ? err.message : String(err));
+      // Validation/stale failures keep the draft so the user can fix and retry.
+      if (err instanceof ApiError && err.status === 409 && /stale revision/.test(err.message)) {
+        if (window.confirm("This flow changed on the server. Reload it (discarding your edits)?")) {
+          const fresh = await fetchProject(project.id);
+          setProject(fresh);
+          setDraft(null);
+          setDirty(false);
+        } else {
+          setTopError("Stale revision — your edits are preserved; reload to save.");
+        }
+      } else if (err instanceof ApiError && err.issues?.length) {
+        setTopError(`Validation failed: ${describeIssues(err.issues)}`);
+      } else {
+        setTopError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
       setBusy(false);
     }

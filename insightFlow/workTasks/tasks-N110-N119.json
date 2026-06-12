@@ -85,7 +85,7 @@
       "title": "Flow editor — save/load round-trip via CRUD API",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N111-flow-editor-save-load-round-trip-via-crud-api",
       "createdAt": "2026-06-12T11:29:04.918Z",
       "statusHistory": [
@@ -93,12 +93,28 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.919Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T17:08:32.620Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T17:13:15.467Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T17:08:32.619Z",
+        "completedAt": "2026-06-12T17:13:15.467Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
