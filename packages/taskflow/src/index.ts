@@ -48,6 +48,9 @@ export {
 export type { FlowRoot } from "./core/paths.js";
 export { currentFlowNodes, suggestNextSteps } from "./core/flow-status.js";
 export type { FlowEdge, NextStep } from "./core/flow-status.js";
+// (TaskStatus the type already exports from core/types; only the const here.)
+export { TASK_STATUSES } from "./core/statuses.js";
+export { validateEdgeAddition, edgeKey } from "./core/flow-edit.js";
 export {
   loadUserRegistries,
   mergedModuleRegistry,
