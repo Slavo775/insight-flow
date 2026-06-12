@@ -682,7 +682,7 @@
       "title": "Flow editor — draggable nodes with persisted layout",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N109-flow-editor-draggable-nodes-with-persisted-layout",
       "createdAt": "2026-06-12T11:29:04.710Z",
       "statusHistory": [
@@ -700,6 +700,11 @@
           "status": "implemented",
           "at": "2026-06-12T17:00:44.524Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T17:00:51.895Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -726,9 +731,15 @@
         "flow",
         "editor"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T17:00:51.894Z",
+          "commitHash": "79ef481",
+          "commitMessage": "feat(dashboard): N109 draggable layout"
+        }
+      ],
+      "branch": "feat/N109-flow-layout",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/88",
       "mergedAt": null
     }
   ]
