@@ -237,7 +237,7 @@
       "title": "CRUD API for custom definitions",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N103-crud-api-for-custom-definitions",
       "createdAt": "2026-06-12T11:29:04.137Z",
       "statusHistory": [
@@ -245,12 +245,31 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.137Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T14:23:44.947Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T14:27:50.779Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T14:27:58.234Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T14:23:44.947Z",
+        "completedAt": "2026-06-12T14:27:50.778Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -263,9 +282,15 @@
         "composer",
         "api"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T14:27:58.234Z",
+          "commitHash": "e7fa7dc",
+          "commitMessage": "feat(server): N103 CRUD API for custom definitions"
+        }
+      ],
+      "branch": "feat/N103-crud-api",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/84",
       "mergedAt": null
     },
     {
