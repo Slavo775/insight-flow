@@ -9,7 +9,7 @@
       "title": "Flow editor — connectable ports (inputs left, outputs right)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N110-flow-editor-connectable-ports-inputs-left-outputs-",
       "createdAt": "2026-06-12T11:29:04.807Z",
       "statusHistory": [
@@ -17,12 +17,35 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.807Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T17:02:24.532Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T17:06:20.368Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T17:06:44.969Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T17:02:24.532Z",
+        "completedAt": "2026-06-12T17:06:20.368Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/statuses.ts",
+          "packages/taskflow/src/core/flow-edit.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/flow-edit.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -36,9 +59,15 @@
         "flow",
         "editor"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T17:06:44.968Z",
+          "commitHash": "0e4f0c5",
+          "commitMessage": "feat(dashboard): N110 connectable ports"
+        }
+      ],
+      "branch": "feat/N110-connectable-ports",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/89",
       "mergedAt": null
     },
     {

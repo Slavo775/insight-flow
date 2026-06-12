@@ -1,22 +1,34 @@
 // N109 — the editable flow canvas for custom flows: draggable nodes whose
-// positions report up for persistence into the flow definition's `layout`
-// field. Edges render read-only here; connect/disconnect arrives with N110.
-import { useCallback, useMemo } from "react";
+// positions report up for persistence into the flow definition's `layout`.
+// N110 — connectable ports: every node takes inputs on its LEFT handle and
+// emits outputs on its RIGHT handle (body centered). Drawing a connection
+// opens a trigger picker constrained to the canonical status enum (plus the
+// legal trigger-less direct handoff); self-loops and duplicate (from,to,on)
+// triples are blocked; edges are selectable and Backspace/Delete-removable.
+import { useCallback, useMemo, useState } from "react";
 import {
   Background,
   Controls,
   Position,
   ReactFlow,
+  useEdgesState,
   useNodesState,
+  type Connection,
   type Edge,
+  type EdgeChange,
   type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import styled, { useTheme } from "styled-components";
+import { TASK_STATUSES } from "../../../core/statuses.js";
+import { validateEdgeAddition } from "../../../core/flow-edit.js";
+import type { FlowEdge } from "../../../core/flow-status.js";
 import type { ProjectDto } from "../api.js";
 import { computePositions } from "./FlowMap.js";
+import { Button } from "./Button.js";
 
 const EditBox = styled.div`
+  position: relative;
   height: 620px;
   background: ${(p) => p.theme.color.surface};
   border: 1px dashed ${(p) => p.theme.color.accent};
@@ -28,17 +40,85 @@ const EditBox = styled.div`
   }
 `;
 
+const PickerOverlay = styled.div`
+  position: absolute;
+  top: ${(p) => p.theme.space.lg};
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: ${(p) => p.theme.space.md};
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.accent};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.md} ${(p) => p.theme.space.lg};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.text};
+
+  select {
+    background: ${(p) => p.theme.color.surface};
+    color: ${(p) => p.theme.color.text};
+    border: 1px solid ${(p) => p.theme.color.border};
+    border-radius: ${(p) => p.theme.radius.md};
+    padding: 4px 8px;
+    font-family: ${(p) => p.theme.font.family};
+  }
+`;
+
+const EditorError = styled.div`
+  position: absolute;
+  bottom: ${(p) => p.theme.space.lg};
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.red};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.md} ${(p) => p.theme.space.lg};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.red};
+`;
+
 export type FlowPositions = Record<string, { x: number; y: number }>;
+
+export interface FlowDraft {
+  positions: FlowPositions;
+  flow: FlowEdge[];
+}
+
+const DIRECT_HANDOFF = "__direct__";
+
+function toReactFlowEdge(e: FlowEdge, theme: ReturnType<typeof useTheme>): Edge {
+  return {
+    id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
+    source: e.from,
+    target: e.to,
+    label: e.on ?? "",
+    data: { on: e.on },
+    labelStyle: { fill: theme.color.textMuted, fontFamily: theme.font.family, fontSize: 10 },
+    labelBgStyle: { fill: theme.color.surface },
+    style: { stroke: theme.color.border },
+  };
+}
+
+function toFlowEdge(e: Edge): FlowEdge {
+  const on = (e.data as { on?: string } | undefined)?.on;
+  return { from: e.source, to: e.target, ...(on ? { on } : {}) };
+}
 
 export function FlowEditor({
   project,
-  onPositionsChange,
+  onDraftChange,
 }: {
   project: ProjectDto;
-  /** Fired after every drag stop with the full current position map. */
-  onPositionsChange: (positions: FlowPositions) => void;
+  /** Fired after every position or edge change with the full draft. */
+  onDraftChange: (draft: FlowDraft) => void;
 }) {
   const theme = useTheme();
+  const [pending, setPending] = useState<Connection | null>(null);
+  const [pendingTrigger, setPendingTrigger] = useState<string>(DIRECT_HANDOFF);
+  const [editorError, setEditorError] = useState<string | null>(null);
 
   const initialNodes: Node[] = useMemo(() => {
     const positions = computePositions(project);
@@ -56,6 +136,7 @@ export function FlowEditor({
         padding: "10px 14px",
         width: 220,
       },
+      // N110 — the port convention: inputs enter LEFT, outputs leave RIGHT.
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
     }));
@@ -63,44 +144,105 @@ export function FlowEditor({
     // so theme/title changes intentionally don't re-seed dragged positions.
   }, [project.id]); // eslint-disable-line
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-
-  const edges: Edge[] = useMemo(
-    () =>
-      project.flow.map((e) => ({
-        id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
-        source: e.from,
-        target: e.to,
-        label: e.on ?? "",
-        labelStyle: { fill: theme.color.textMuted, fontFamily: theme.font.family, fontSize: 10 },
-        labelBgStyle: { fill: theme.color.surface },
-        style: { stroke: theme.color.border },
-      })),
-    [project, theme],
+  const initialEdges: Edge[] = useMemo(
+    () => project.flow.map((e) => toReactFlowEdge(e, theme)),
+    // Seeded once per project identity, like the nodes.
+    // eslint-disable-next-line
+    [project.id],
   );
 
-  const reportPositions = useCallback(
-    (currentNodes: Node[]): void => {
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  const report = useCallback(
+    (currentNodes: Node[], currentEdges: Edge[]): void => {
       const positions: FlowPositions = {};
       for (const node of currentNodes) {
         positions[node.id] = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
       }
-      onPositionsChange(positions);
+      onDraftChange({ positions, flow: currentEdges.map(toFlowEdge) });
     },
-    [onPositionsChange],
+    [onDraftChange],
   );
+
+  const confirmPending = (): void => {
+    if (!pending) return;
+    const on = pendingTrigger === DIRECT_HANDOFF ? undefined : pendingTrigger;
+    const candidate: FlowEdge = {
+      from: pending.source,
+      to: pending.target,
+      ...(on ? { on } : {}),
+    };
+    const rejection = validateEdgeAddition(edges.map(toFlowEdge), candidate);
+    if (rejection) {
+      setEditorError(rejection);
+      setPending(null);
+      return;
+    }
+    const next = [...edges, toReactFlowEdge(candidate, theme)];
+    setEdges(next);
+    setPending(null);
+    setEditorError(null);
+    report(nodes, next);
+  };
+
+  const handleEdgesChange = (changes: EdgeChange[]): void => {
+    onEdgesChange(changes);
+    if (changes.some((c) => c.type === "remove")) {
+      const removed = new Set(
+        changes.filter((c) => c.type === "remove").map((c) => (c as { id: string }).id),
+      );
+      report(
+        nodes,
+        edges.filter((e) => !removed.has(e.id)),
+      );
+    }
+  };
 
   return (
     <EditBox>
+      {pending ? (
+        <PickerOverlay>
+          {pending.source} → {pending.target} on
+          <select value={pendingTrigger} onChange={(e) => setPendingTrigger(e.target.value)}>
+            <option value={DIRECT_HANDOFF}>(direct handoff)</option>
+            {TASK_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <Button type="button" $variant="primary" onClick={confirmPending}>
+            Add edge
+          </Button>
+          <Button type="button" $variant="nav" onClick={() => setPending(null)}>
+            Cancel
+          </Button>
+        </PickerOverlay>
+      ) : null}
+      {editorError ? <EditorError role="alert">{editorError}</EditorError> : null}
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
-        onNodeDragStop={() => reportPositions(nodes)}
+        onEdgesChange={handleEdgesChange}
+        onNodeDragStop={() => report(nodes, edges)}
+        onConnect={(connection) => {
+          setEditorError(null);
+          if (connection.source === connection.target) {
+            setEditorError("self-loops are not allowed");
+            return;
+          }
+          setPendingTrigger(DIRECT_HANDOFF);
+          setPending(connection);
+        }}
+        isValidConnection={(c) => c.source !== c.target}
         fitView
         minZoom={0.2}
-        nodesConnectable={false}
+        nodesConnectable
         nodesDraggable
+        edgesFocusable
+        deleteKeyCode={["Backspace", "Delete"]}
         colorMode="dark"
       >
         <Background gap={24} />

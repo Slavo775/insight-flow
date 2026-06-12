@@ -1,22 +1,7 @@
 import { z, type ZodError } from "zod";
+import { TASK_STATUSES } from "../statuses.js";
 
-export const TaskStatusSchema = z.enum([
-  "ready",
-  "in-progress",
-  "implemented",
-  "reviewing",
-  "approved",
-  "fix-needed",
-  "fixing",
-  "fixed",
-  "pushed",
-  "merged",
-  "done",
-  "request-changes",
-  "changes-requested",
-  "changes-implementing",
-  "changes-implemented",
-]);
+export const TaskStatusSchema = z.enum(TASK_STATUSES);
 
 export const StatusHistoryEntrySchema = z.object({
   status: z.string(),
@@ -368,20 +353,37 @@ export const ProjectFlowEdgeSchema = z.object({
   on: TaskStatusSchema.optional(),
 });
 
-export const ProjectSchema = z.object({
-  id: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().optional(),
-  // Composed-agent ids this project uses (validated against COMPOSED_AGENTS
-  // at load, not here — the schema stays registry-agnostic).
-  agents: z.array(z.string().min(1)).min(1),
-  flow: z.array(ProjectFlowEdgeSchema).default([]),
-  // Module/bundle ids installed at project level (hooks, skills, MCP).
-  install: z.array(z.string().min(1)).default([]),
-  // N109 — hand-arranged map positions keyed by agent id. Optional: absent
-  // entries (or the whole field) fall back to the auto-layout.
-  layout: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(),
-});
+export const ProjectSchema = z
+  .object({
+    id: z.string().min(1),
+    title: z.string().min(1),
+    description: z.string().optional(),
+    // Composed-agent ids this project uses (validated against COMPOSED_AGENTS
+    // at load, not here — the schema stays registry-agnostic).
+    agents: z.array(z.string().min(1)).min(1),
+    flow: z.array(ProjectFlowEdgeSchema).default([]),
+    // Module/bundle ids installed at project level (hooks, skills, MCP).
+    install: z.array(z.string().min(1)).default([]),
+    // N109 — hand-arranged map positions keyed by agent id. Optional: absent
+    // entries (or the whole field) fall back to the auto-layout.
+    layout: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(),
+  })
+  .superRefine((project, ctx) => {
+    // N110 — duplicate (from, to, on) triples are editor mistakes; reject them
+    // on save the same way the editor blocks them live.
+    const seen = new Set<string>();
+    project.flow.forEach((edge, index) => {
+      const key = `${edge.from}→${edge.to}:${edge.on ?? ""}`;
+      if (seen.has(key)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["flow", index],
+          message: `duplicate flow edge ${edge.from} → ${edge.to} on '${edge.on ?? "handoff"}'`,
+        });
+      }
+      seen.add(key);
+    });
+  });
 
 export class TaskflowValidationError extends Error {
   readonly file: string;
