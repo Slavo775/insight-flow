@@ -1015,6 +1015,54 @@
       "taskId": "N97",
       "timestamp": "2026-06-12T05:19:25.110Z",
       "source": "agent"
+    },
+    {
+      "id": "evt_1781243531555_f518",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-12T05:52:11.555Z",
+      "sessionId": "dec4d88a-4bee-4b80-bb36-d1f71e267f36",
+      "taskId": "N97",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781243543037_e065",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-12T05:52:23.037Z",
+      "sessionId": "dec4d88a-4bee-4b80-bb36-d1f71e267f36",
+      "taskId": "N97",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781243543262_96a7",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-12T05:52:23.262Z",
+      "sessionId": "dec4d88a-4bee-4b80-bb36-d1f71e267f36",
+      "taskId": "N97",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781243566405_d2fd",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-12T05:52:46.405Z",
+      "sessionId": "dec4d88a-4bee-4b80-bb36-d1f71e267f36",
+      "taskId": "N97",
+      "payload": {
+        "tool_name": "Bash"
+      }
     }
   ]
 }
