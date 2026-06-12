@@ -33,6 +33,7 @@ import {
   cmdIncidentList,
 } from "./commands/incident.js";
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
+import { cmdMigrateLayout } from "./commands/migrate-layout.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
 import {
@@ -127,6 +128,7 @@ function printHelp(): void {
 
     migrate                               Migrate from legacy tracker.json
     migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
+    migrate-layout [--dry-run]            Move workTasks/ + .events into the consolidated insightFlow/ root (idempotent; N100)
     prompt-build [--apply]                Print or apply enforcement block from taskflow.config.json
     prompt-build --compose [<agent-id>] [--out <dir>]  Compose role MD from agent-module definitions (N88 spike)
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
@@ -201,6 +203,9 @@ async function run(): Promise<void> {
   } else if (command === "migrate-reviews") {
     const config = resolveConfig();
     cmdMigrateReviews(config);
+  } else if (command === "migrate-layout") {
+    const config = resolveConfig();
+    cmdMigrateLayout(config, opts);
   } else if (command === "prompt-build") {
     const config = resolveConfig();
     cmdPromptBuild(config, opts);
