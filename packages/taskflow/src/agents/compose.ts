@@ -132,7 +132,10 @@ export function listComposedAgents(): string[] {
 // modules (N95) expand recursively in place — their children splice at the
 // bundle's declared position; the bundle itself contributes nothing. A bundle
 // reachable from its own expansion throws (cycle guard).
-function resolveModules(def: ComposedAgent, registry: Record<string, AgentModule>): AgentModule[] {
+export function resolveModules(
+  def: ComposedAgent,
+  registry: Record<string, AgentModule>,
+): AgentModule[] {
   const seen = new Set<string>();
   const mods: AgentModule[] = [];
   const expand = (ids: readonly string[], path: readonly string[]): void => {

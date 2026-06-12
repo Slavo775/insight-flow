@@ -162,7 +162,7 @@
       "title": "User-space registries for custom modules/agents/projects",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N102-user-space-registries-for-custom-modules-agents-pr",
       "createdAt": "2026-06-12T11:29:04.030Z",
       "statusHistory": [
@@ -170,12 +170,35 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.030Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T14:01:27.710Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T14:22:30.251Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T14:22:38.044Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T14:01:27.709Z",
+        "completedAt": "2026-06-12T14:22:30.251Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/cli/commands/migrate-layout.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/user-registry.test.mjs",
+          "packages/taskflow/test/migrate-layout.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -188,9 +211,15 @@
         "composer",
         "storage"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T14:22:38.043Z",
+          "commitHash": "675c24e",
+          "commitMessage": "feat(agents): N102 user-space registries"
+        }
+      ],
+      "branch": "feat/N102-user-space-registries",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/83",
       "mergedAt": null
     },
     {

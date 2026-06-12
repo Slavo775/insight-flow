@@ -24,8 +24,39 @@ import {
 } from "../../agents/activity-hook.js";
 import { EventStore } from "./event-stream.js";
 import { HookEventInputSchema } from "../../core/schema/index.js";
-import { MODULE_REGISTRY, COMPOSED_AGENTS } from "../../agents/compose.js";
+import {
+  MODULE_REGISTRY,
+  COMPOSED_AGENTS,
+  type AgentModule,
+  type ComposedAgent,
+} from "../../agents/compose.js";
 import { DEFAULT_PROJECT } from "../../agents/project.js";
+import { loadUserRegistries } from "../../agents/user-registry.js";
+
+/**
+ * N102 — built-ins + the project's user-space registries, loaded per call so
+ * file changes appear without a restart. A broken user space never kills the
+ * read APIs: degrade to built-ins and surface the error message.
+ */
+function mergedView(): {
+  modules: Record<string, AgentModule>;
+  agents: Record<string, ComposedAgent>;
+  userSpaceError?: string;
+} {
+  try {
+    const user = loadUserRegistries();
+    return {
+      modules: { ...MODULE_REGISTRY, ...user.modules },
+      agents: { ...COMPOSED_AGENTS, ...user.agents },
+    };
+  } catch (err) {
+    return {
+      modules: MODULE_REGISTRY,
+      agents: COMPOSED_AGENTS,
+      userSpaceError: (err as Error).message,
+    };
+  }
+}
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -643,25 +674,36 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    // N93 — composer registry browser. Read-only views over the built-in
-    // module registry + composed agents (src/agents/compose.ts).
+    // N93 — composer registry browser; N102 — merged with the project's
+    // user-space registries (insightFlow/{modules,agents}), reloaded per
+    // request so CRUD writes appear live. An invalid user space degrades to
+    // built-ins with the error surfaced, never a dead endpoint.
     if (url.pathname === "/api/modules") {
+      const { modules: moduleRegistry, agents: composedAgents, userSpaceError } = mergedView();
       const referencedBy: Record<string, string[]> = {};
-      for (const def of Object.values(COMPOSED_AGENTS)) {
+      for (const def of Object.values(composedAgents)) {
         for (const id of def.modules) (referencedBy[id] ??= []).push(def.id);
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ modules: Object.values(MODULE_REGISTRY), referencedBy }));
+      res.end(
+        JSON.stringify({
+          modules: Object.values(moduleRegistry),
+          referencedBy,
+          ...(userSpaceError ? { userSpaceError } : {}),
+        }),
+      );
       return;
     }
 
     if (url.pathname === "/api/agents") {
-      const agents = Object.values(COMPOSED_AGENTS).map((def) => ({
+      const { modules: moduleRegistry, agents: composedAgents, userSpaceError } = mergedView();
+      const agents = Object.values(composedAgents).map((def) => ({
         id: def.id,
         title: def.title,
         description: def.description,
+        source: def.id.startsWith("custom:") ? "custom" : "builtin",
         modules: def.modules.map((id) => {
-          const mod = MODULE_REGISTRY[id];
+          const mod = moduleRegistry[id];
           return {
             id,
             title: mod?.title ?? id,
@@ -671,7 +713,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         }),
       }));
       res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ agents }));
+      res.end(JSON.stringify({ agents, ...(userSpaceError ? { userSpaceError } : {}) }));
       return;
     }
 

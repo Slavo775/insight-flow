@@ -1,4 +1,4 @@
-import { existsSync, renameSync, mkdirSync, cpSync, rmSync } from "node:fs";
+import { existsSync, renameSync, mkdirSync, cpSync, rmSync, readdirSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import type { TaskflowConfig } from "../../core/types.js";
 import { resolveProjectRoot, resolveFlowRoot } from "../../core/paths.js";
@@ -40,13 +40,21 @@ export function cmdMigrateLayout(config: TaskflowConfig, opts: Record<string, un
 
   // Partial state: insightFlow/ exists (without workTasks/, or layout detection
   // would have said "insightFlow") — a previous run was interrupted or the dir
-  // was created by hand. Refuse rather than guess.
+  // was created by hand. Refuse rather than guess. Exception (N102): the
+  // user-space registry dirs (modules/agents/projects) legitimately exist
+  // before migration — they don't make the layout ambiguous.
   if (existsSync(insightRoot)) {
-    fail(
-      `partial insightFlow/ layout detected at ${insightRoot} (no workTasks/ inside). ` +
-        `Inspect its contents: either remove the directory and re-run, or finish the move ` +
-        `by hand (mv ${rel(projectRoot, sourceTasksDir)} ${rel(projectRoot, targetTasksDir)}).`,
+    const REGISTRY_DIRS = new Set(["modules", "agents", "projects"]);
+    const stray = readdirSync(insightRoot).filter(
+      (entry) => !REGISTRY_DIRS.has(entry) && entry !== ".DS_Store",
     );
+    if (stray.length > 0) {
+      fail(
+        `partial insightFlow/ layout detected at ${insightRoot} (no workTasks/ inside; found: ${stray.join(", ")}). ` +
+          `Inspect its contents: either remove the directory and re-run, or finish the move ` +
+          `by hand (mv ${rel(projectRoot, sourceTasksDir)} ${rel(projectRoot, targetTasksDir)}).`,
+      );
+    }
   }
 
   if (!existsSync(sourceTasksDir)) {

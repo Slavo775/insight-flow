@@ -49,6 +49,16 @@ export type { FlowRoot } from "./core/paths.js";
 export { currentFlowNodes, suggestNextSteps } from "./core/flow-status.js";
 export type { FlowEdge, NextStep } from "./core/flow-status.js";
 export {
+  loadUserRegistries,
+  mergedModuleRegistry,
+  mergedComposedAgents,
+  mergedProjects,
+  userSpaceRoot,
+  UserRegistryError,
+  CUSTOM_ID_PREFIX,
+} from "./agents/user-registry.js";
+export type { UserRegistries } from "./agents/user-registry.js";
+export {
   TaskSchema,
   ReviewSchema,
   ReviewFixSchema,
