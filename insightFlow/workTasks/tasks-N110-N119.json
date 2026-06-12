@@ -159,7 +159,7 @@
       "title": "Per-flow custom state definitions (visual + suggestions)",
       "type": "feat",
       "priority": "low",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N112-per-flow-custom-state-definitions-visual-suggestio",
       "createdAt": "2026-06-12T11:29:05.016Z",
       "statusHistory": [
@@ -177,6 +177,11 @@
           "status": "implemented",
           "at": "2026-06-12T17:41:53.979Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T17:42:23.617Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -207,9 +212,15 @@
         "flow",
         "schema"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T17:42:23.617Z",
+          "commitHash": "c6e2b76",
+          "commitMessage": "feat(flow): N112 per-flow custom states"
+        }
+      ],
+      "branch": "feat/N112-custom-states",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/91",
       "mergedAt": null
     }
   ]
