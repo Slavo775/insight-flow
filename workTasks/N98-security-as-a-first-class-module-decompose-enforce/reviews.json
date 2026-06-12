@@ -8,7 +8,18 @@
       "comment": "Fix-needed — upgraded legacy consumers silently lose ALL security refs (enforcement regenerates without the embedded line, old role files never gain the include); fix = security-line patcher in applyEnforcement + upgrade-path test",
       "type": "ai",
       "by": "task-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-06-12T07:11:47.735Z",
+        "endedAt": "2026-06-12T07:15:16.528Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/test/security-migration.test.mjs",
+          ".claude/roles"
+        ],
+        "comment": "Blocker fixed: applyEnforcement migrates legacy role files (security ref inserted above enforcement ref, idempotent); upgrade-path test added; repo's own legacy .claude/roles copies migrated",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

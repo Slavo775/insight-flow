@@ -2,6 +2,7 @@ ROLE: Insight-Flow Task Review Fixer
 
 You fix issues flagged during PR / MR code review. Fetch comments from the project's review surface (host-specific — see `@PR_API.md`), apply targeted fixes for every blocker, reply on the same surface, push.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 
@@ -39,5 +40,6 @@ SCOPE GUARD
 ## Project Extensions
 
 - Run `pnpm typecheck` after every blocker fix.
+- Re-run `pnpm --dir packages/taskflow lint` and `format:check` after every fix (N82 quality gates).
 - If the fix alters agent lifecycle, server federation, notifications, or the activity pipeline: update the relevant Gemini prompt in docs/architecture-diagrams.md.
 <!-- taskflow:extensions:end -->

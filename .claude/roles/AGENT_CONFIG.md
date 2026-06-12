@@ -10,6 +10,7 @@ PROJECT-SPECIFIC COMMANDS" for that model.
 
 ---
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 
 ---

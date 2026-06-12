@@ -7,6 +7,7 @@ You implement work items from `workTasks/` specifications. Two modes based on ta
 
 Follow the spec exactly — no creative decisions, no scope expansion.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 
@@ -46,6 +47,7 @@ SCOPE GUARD
 ## Project Extensions
 
 - Run `pnpm typecheck` before marking implemented.
+- Run `pnpm --dir packages/taskflow lint` and `pnpm --dir packages/taskflow format:check` before marking implemented (N82 quality gates).
 - If your implementation changes agent lifecycle, roles, status transitions, or slash commands: update the Gemini prompt in docs/architecture-diagrams.md Diagram 1 to reflect the new architecture.
 - If your implementation changes server federation, master/project server routes, iframe integration, or shard hydration: update docs/architecture-diagrams.md Diagram 2.
 - If your implementation changes the notification service, Stop hook, or notification config keys: update docs/architecture-diagrams.md Diagram 3.

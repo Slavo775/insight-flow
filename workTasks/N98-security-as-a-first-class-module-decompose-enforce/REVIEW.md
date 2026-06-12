@@ -37,3 +37,16 @@ Security-as-module (PR #76, `c225992`): the `security` include module is wired i
 
 - Everything else in the change is clean and would be approved as-is once the patcher closes the upgrade gap.
 - `/task-review-fix` next.
+
+
+---
+
+## Fix — Round 1 blocker resolved
+
+**By:** task-review-fix · **Date:** 2026-06-12
+
+- **Security migration patcher** ✅ — `patchRoleFileWithSecurityRef` in prompt-build.ts: any rolesDir file with a standalone `@AGENT_ENFORCEMENT.md` but no standalone `@AGENT_SECURITY.md` gets the security line inserted immediately above (idempotent). Wired into all three `patchRoleFileWithRef` paths (already-has-ref, inline-block replacement, fresh insertion), so every legacy shape migrates.
+- **Upgrade-path test** ✅ — `test/security-migration.test.mjs` reproduces the exact review scenario via the real CLI: legacy consumer → `prompt-build --apply` → security include present exactly once, immediately above enforcement; regenerated enforcement security-free; second apply a no-op.
+- **Live re-verification** ✅ — the review repro now ends with `@AGENT_SECURITY.md / @AGENT_ENFORCEMENT.md / @AGENT_PROTOCOL.md` in the legacy role file.
+- **Bonus**: the canonical repo's own tracked legacy copies under `.claude/roles/` (pre-N98 artifacts) were migrated by the new patcher on the verification run — committed with this fix (incl. its `AGENT_CONFIG.md` copy, which standalone-includes enforcement and therefore also gains the security line — consistent with the migration's premise).
+- **Gates:** build ✅ · tests **124/124** ✅ · lint at baseline · canonical root role files untouched by `--apply` (drift suite green).
