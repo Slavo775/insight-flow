@@ -240,7 +240,7 @@
     },
     {
       "id": "N92",
-      "title": "Heterogeneous modules — MCP/hook/skill contributions + testing pilot",
+      "title": "Heterogeneous modules \u2014 MCP/hook/skill contributions + testing pilot",
       "type": "feat",
       "priority": "medium",
       "status": "done",
@@ -342,7 +342,7 @@
         {
           "at": "2026-06-11T13:22:41.287Z",
           "commitHash": "f9e1700",
-          "commitMessage": "feat(N92): heterogeneous modules — mcp-server/hook/skill kinds + testing pilot"
+          "commitMessage": "feat(N92): heterogeneous modules \u2014 mcp-server/hook/skill kinds + testing pilot"
         }
       ],
       "branch": "feat/N92-heterogeneous-modules",
@@ -351,7 +351,7 @@
     },
     {
       "id": "N93",
-      "title": "Dashboard module & agent browser — shared layout + interactive composition maps",
+      "title": "Dashboard module & agent browser \u2014 shared layout + interactive composition maps",
       "type": "feat",
       "priority": "medium",
       "status": "done",
@@ -502,7 +502,7 @@
         {
           "at": "2026-06-11T15:46:36.410Z",
           "commitHash": "b22438e",
-          "commitMessage": "feat(N93): dashboard module & agent browser — shared layout + composition maps"
+          "commitMessage": "feat(N93): dashboard module & agent browser \u2014 shared layout + composition maps"
         }
       ],
       "branch": "feat/N93-dashboard-module-agent-browser",
@@ -511,7 +511,7 @@
     },
     {
       "id": "N94",
-      "title": "Actions/events taxonomy — inline actions module + activity hooks via emitter",
+      "title": "Actions/events taxonomy \u2014 inline actions module + activity hooks via emitter",
       "type": "rework",
       "priority": "medium",
       "status": "done",
@@ -604,7 +604,7 @@
         {
           "at": "2026-06-11T19:43:06.873Z",
           "commitHash": "d473d70",
-          "commitMessage": "rework(N94): actions/events taxonomy — inline actions module + activity hooks via emitter"
+          "commitMessage": "rework(N94): actions/events taxonomy \u2014 inline actions module + activity hooks via emitter"
         }
       ],
       "branch": "rework/N94-actions-events-taxonomy",
@@ -613,7 +613,7 @@
     },
     {
       "id": "N95",
-      "title": "Bundle module kind — modules composed of modules",
+      "title": "Bundle module kind \u2014 modules composed of modules",
       "type": "feat",
       "priority": "medium",
       "status": "done",
@@ -712,7 +712,7 @@
     },
     {
       "id": "N96",
-      "title": "Project layer — agent flow map + global install",
+      "title": "Project layer \u2014 agent flow map + global install",
       "type": "feat",
       "priority": "medium",
       "status": "done",
@@ -810,7 +810,7 @@
         {
           "at": "2026-06-11T20:54:59.973Z",
           "commitHash": "d9ab94a",
-          "commitMessage": "feat(N96): project layer — agent flow map + global install"
+          "commitMessage": "feat(N96): project layer \u2014 agent flow map + global install"
         }
       ],
       "branch": "feat/N96-project-layer",
@@ -921,7 +921,7 @@
         {
           "at": "2026-06-11T21:25:09.026Z",
           "commitHash": "9f2e16a",
-          "commitMessage": "rework(N97): onboard task-git — the 10th composed agent + flow backbone"
+          "commitMessage": "rework(N97): onboard task-git \u2014 the 10th composed agent + flow backbone"
         }
       ],
       "branch": "rework/N97-onboard-task-git",
@@ -930,10 +930,10 @@
     },
     {
       "id": "N98",
-      "title": "Security as a first-class module — decompose enforcement, baseline trio on every agent",
+      "title": "Security as a first-class module \u2014 decompose enforcement, baseline trio on every agent",
       "type": "rework",
       "priority": "medium",
-      "status": "fixed",
+      "status": "approved",
       "folder": "workTasks/N98-security-as-a-first-class-module-decompose-enforce",
       "createdAt": "2026-06-12T06:43:46.677Z",
       "statusHistory": [
@@ -976,6 +976,16 @@
           "status": "fixed",
           "at": "2026-06-12T07:15:16.529Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-12T11:43:47.411Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-12T11:45:37.102Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -1003,8 +1013,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 1,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -1018,7 +1028,7 @@
         {
           "at": "2026-06-12T06:57:24.963Z",
           "commitHash": "c225992",
-          "commitMessage": "rework(N98): security as a first-class module — baseline trio on every agent"
+          "commitMessage": "rework(N98): security as a first-class module \u2014 baseline trio on every agent"
         }
       ],
       "branch": "rework/N98-security-module",
@@ -1027,7 +1037,7 @@
     },
     {
       "id": "N99",
-      "title": "insightFlow layout — path indirection + back-compat shim",
+      "title": "insightFlow layout \u2014 path indirection + back-compat shim",
       "type": "rework",
       "priority": "high",
       "status": "ready",

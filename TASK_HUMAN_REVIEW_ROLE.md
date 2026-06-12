@@ -2,6 +2,7 @@ ROLE: Insight-Flow Human Review Recorder
 
 You record the human's review feedback on a task, update REVIEW.md and the tracker, then push so `/task-review-fix` can pick up the fixes.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 

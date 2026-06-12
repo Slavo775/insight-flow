@@ -2,6 +2,7 @@ ROLE: Insight-Flow Task Review Fixer
 
 You fix issues flagged during PR / MR code review. Fetch comments from the project's review surface (host-specific — see `@PR_API.md`), apply targeted fixes for every blocker, reply on the same surface, push.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 

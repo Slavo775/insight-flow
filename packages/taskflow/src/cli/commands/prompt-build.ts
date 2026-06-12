@@ -10,7 +10,8 @@ import { resolveProjectRoot } from "../../core/paths.js";
 function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
   const lines: string[] = [];
 
-  lines.push("@AGENT_SECURITY.md");
+  // N98: @AGENT_SECURITY.md is no longer embedded here — security is a
+  // first-class include module referenced by every composed agent directly.
   lines.push("STRICT ENFORCEMENT — TASK FILE MUTATIONS");
   lines.push("");
   lines.push(
@@ -74,6 +75,25 @@ const ENFORCEMENT_START = "STRICT ENFORCEMENT — TASK FILE MUTATIONS";
 const GIT_RULE_START = "GIT RULE";
 const LEGACY_GIT_RULE_START = "GIT / GH TOOL RULE";
 const AGENT_REF = "@AGENT_ENFORCEMENT.md";
+const SECURITY_REF = "@AGENT_SECURITY.md";
+
+// N98 migration: security used to reach agents via a line embedded in the
+// generated AGENT_ENFORCEMENT.md; it is now a standalone include on every
+// role. Legacy consumer role files reference enforcement but not security —
+// without this patch, regenerating their enforcement file would silently
+// drop the security guardrails from every prompt. Inserts the security line
+// immediately above the enforcement reference (idempotent).
+function patchRoleFileWithSecurityRef(filePath: string): boolean {
+  if (!existsSync(filePath)) return false;
+  const content = readFileSync(filePath, "utf-8");
+  const lines = content.split("\n");
+  if (lines.includes(SECURITY_REF)) return false; // standalone ref present
+  const refIdx = lines.indexOf(AGENT_REF);
+  if (refIdx === -1) return false; // no enforcement ref to anchor on
+  lines.splice(refIdx, 0, SECURITY_REF);
+  writeFileSync(filePath, lines.join("\n"), "utf-8");
+  return true;
+}
 
 // Replace inline enforcement block (or insert @reference) with @AGENT_ENFORCEMENT.md.
 // Returns true if the file was modified.
@@ -81,8 +101,8 @@ function patchRoleFileWithRef(filePath: string): boolean {
   if (!existsSync(filePath)) return false;
   const content = readFileSync(filePath, "utf-8");
 
-  // Already has the @reference — nothing to do
-  if (content.includes(AGENT_REF)) return false;
+  // Already has the @reference — only the N98 security migration may apply.
+  if (content.includes(AGENT_REF)) return patchRoleFileWithSecurityRef(filePath);
 
   // Has inline enforcement block — replace with @reference. Accept both the
   // current "GIT RULE" heading and the legacy "GIT / GH TOOL RULE" heading
@@ -97,6 +117,7 @@ function patchRoleFileWithRef(filePath: string): boolean {
     const updated =
       content.slice(0, strictStart) + AGENT_REF + "\n" + content.slice(afterBlock + 1);
     writeFileSync(filePath, updated, "utf-8");
+    patchRoleFileWithSecurityRef(filePath);
     return true;
   }
 
@@ -107,6 +128,7 @@ function patchRoleFileWithRef(filePath: string): boolean {
   const rest = content.slice(insertAt).replace(/^\n/, ""); // consume the blank line that follows ---
   const updated = content.slice(0, insertAt) + "\n" + AGENT_REF + "\n\n---\n\n" + rest;
   writeFileSync(filePath, updated, "utf-8");
+  patchRoleFileWithSecurityRef(filePath);
   return true;
 }
 

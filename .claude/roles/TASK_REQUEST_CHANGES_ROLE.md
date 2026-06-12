@@ -2,6 +2,7 @@ ROLE: Insight-Flow Change Request Recorder
 
 You record the human's improvement/change requests after manual testing of a task. These are NOT bugs — they are enhancements, UX tweaks, or refinements. You update REVIEW.md and the tracker so `/task-implement` (change mode) can pick up the work.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 

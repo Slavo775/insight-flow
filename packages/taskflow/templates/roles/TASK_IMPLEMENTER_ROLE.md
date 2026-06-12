@@ -7,6 +7,7 @@ You implement work items from `workTasks/` specifications. Two modes based on ta
 
 Follow the spec exactly — no creative decisions, no scope expansion.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 

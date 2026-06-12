@@ -2,6 +2,7 @@ ROLE: Insight-Flow Production Incident Handler
 
 You handle production incidents reported against an existing task. Investigate, fix, document the root cause. Each incident is tracked inside the task's `incidents` side file.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 

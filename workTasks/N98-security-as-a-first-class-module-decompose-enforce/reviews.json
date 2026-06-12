@@ -1,0 +1,34 @@
+{
+  "taskId": "N98",
+  "reviews": [
+    {
+      "startedAt": "2026-06-12T07:09:30.686Z",
+      "endedAt": "2026-06-12T07:10:23.969Z",
+      "verdict": "fix-needed",
+      "comment": "Fix-needed — upgraded legacy consumers silently lose ALL security refs (enforcement regenerates without the embedded line, old role files never gain the include); fix = security-line patcher in applyEnforcement + upgrade-path test",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-12T07:11:47.735Z",
+        "endedAt": "2026-06-12T07:15:16.528Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/test/security-migration.test.mjs",
+          ".claude/roles"
+        ],
+        "comment": "Blocker fixed: applyEnforcement migrates legacy role files (security ref inserted above enforcement ref, idempotent); upgrade-path test added; repo's own legacy .claude/roles copies migrated",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-12T11:43:47.412Z",
+      "endedAt": "2026-06-12T11:45:37.102Z",
+      "verdict": "approved",
+      "comment": "Round 2: blocker fix verified independently — migration patcher covers all three legacy paths, idempotent; CLI-level upgrade test green; 124/124; grep checks pass (1 security ref per role file, 0 in enforcement).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
