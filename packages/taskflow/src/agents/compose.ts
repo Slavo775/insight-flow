@@ -43,7 +43,6 @@ import taskIncidentModules from "./modules/roles/task-incident.json";
 import taskRequestChangesModules from "./modules/roles/task-request-changes.json";
 import testingModules from "./modules/integrations/testing.json";
 import activityModules from "./modules/integrations/activity.json";
-import activityAgent from "./composed/activity.json";
 import taskAnalyze from "./composed/task-analyze.json";
 import taskmaster from "./composed/taskmaster.json";
 import taskmasterChange from "./composed/taskmaster-change.json";
@@ -95,14 +94,9 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
   AgentModuleSchema,
 );
 
-/**
- * The activity-telemetry pseudo-agent (N94): groups the lifecycle hook modules
- * for installation through the emitter (init / migrate-hooks). Deliberately
- * NOT part of COMPOSED_AGENTS — it produces no role MD, and `prompt-build
- * --compose --apply` must not install hooks into the canonical repo as a side
- * effect of regenerating roles.
- */
-export const ACTIVITY_AGENT: ComposedAgent = ComposedAgentSchema.parse(activityAgent);
+// N96: the N94-era ACTIVITY_AGENT pseudo-agent dissolved into the project
+// layer — the lifecycle hooks are installed via project/default.json's
+// `install` list (see agents/project.ts).
 
 export const COMPOSED_AGENTS: Record<string, ComposedAgent> = indexById(
   [

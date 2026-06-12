@@ -5,6 +5,7 @@ import { Route, Routes } from "react-router-dom";
 import { AgentsPage } from "./AgentsPage.js";
 import { DetailPanel } from "./DetailPanel.js";
 import { ModulesPage } from "./ModulesPage.js";
+import { ProjectPage } from "./ProjectPage.js";
 import { TaskDetailPage } from "./TaskDetailPage.js";
 import { Button, Text } from "./components/index.js";
 import {
@@ -205,6 +206,7 @@ export function App() {
       <Route path="/module/*" element={<ModulesPage />} />
       <Route path="/agent" element={<AgentsPage />} />
       <Route path="/agent/:id" element={<AgentsPage />} />
+      <Route path="/project" element={<ProjectPage />} />
     </Routes>
   );
 }

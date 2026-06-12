@@ -234,6 +234,21 @@ function applySkills(
 }
 
 /**
+ * Rename a manifest bucket (N96: the N94-era `activity` bucket becomes the
+ * project bucket `project:default`). No-op when `from` is absent or `to`
+ * already exists.
+ */
+export function renameManifestBucket(projectRoot: string, from: string, to: string): void {
+  const manifestPath = join(projectRoot, MANIFEST_PATH);
+  const parsed = readJson<Partial<ManagedManifest>>(manifestPath, {});
+  const agents = parsed.agents ?? {};
+  if (!agents[from] || agents[to]) return;
+  agents[to] = agents[from];
+  delete agents[from];
+  writeJsonIfChanged(manifestPath, { agents });
+}
+
+/**
  * Apply `agentId`'s artifacts to `projectRoot`. Idempotent per agent: a
  * second apply with the same artifacts reports every target as `unchanged`;
  * artifacts the agent no longer contributes are removed. Other agents'

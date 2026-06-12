@@ -562,6 +562,10 @@ Example — run a script when any task starts and send a desktop notification wh
 }
 ```
 
+### Project layer (agents · flow · install)
+
+`src/agents/project/default.json` is the atomic-design top tier: which agents the project uses, how work flows between them (edges triggered by real task statuses — validated, so a status rename fails tests instead of silently outdating the diagram), and what gets installed globally (module/bundle ids, e.g. the `activity` telemetry bundle). Browse it at `/project` in the dashboard. **Descriptive for now**: the flow visualizes the lifecycle; behavior is still enforced by the status machine, the `next*` pickers, and the role prompts. A later iteration flips it prescriptive.
+
 ### Integration artifacts (composer modules)
 
 Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and `skill` modules are emitted by `insight-flow prompt-build --compose --apply` into `.mcp.json`, `.claude/settings.json`, and `.claude/skills/` respectively. Managed entries are tracked per agent in `.claude/taskflow-managed.json` — re-applies replace cleanly, removing a module removes its artifact, and hooks you wrote yourself are never touched. Note: the first managed write normalizes the touched JSON file to 2-space formatting (content and key order are preserved). Use `--def <file.json>` to compose a project-local agent definition that adopts integration modules.

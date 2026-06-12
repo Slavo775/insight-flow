@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { ACTIVITY_AGENT, collectArtifacts } from "./compose.js";
-import { applyArtifacts } from "./emit.js";
+import { DEFAULT_PROJECT, collectProjectInstall, projectBucketId } from "./project.js";
+import { applyArtifacts, renameManifestBucket } from "./emit.js";
 
 /**
  * Bumped whenever the bundled hook layout changes in a way that requires
@@ -296,10 +296,11 @@ export function installEnrichmentHooks(cwd: string, logFile: string): InstallEnr
 }
 
 // ---------------------------------------------------------------------------
-// Lifecycle hooks — N94: canonical as `activity/…` registry modules
-// (modules/integrations/activity.json); installed through the artifact
-// emitter's managed manifest. This function remains as a thin delegate so
-// init and `migrate-hooks` keep their call sites.
+// Lifecycle hooks — N94 made them `activity/…` registry modules; N96 installs
+// them via the project layer: project/default.json's `install` list, applied
+// under the project's manifest bucket. This function remains as a thin
+// delegate so init and `migrate-hooks` keep their call sites. The N94-era
+// `activity` manifest bucket is renamed to the project bucket on first run.
 // ---------------------------------------------------------------------------
 
 export interface InstallLifecycleHooksResult {
@@ -314,7 +315,9 @@ export function installLifecycleHooks(
   // content differs from the module data, and is a no-op otherwise.
   _options: { force?: boolean } = {},
 ): InstallLifecycleHooksResult {
-  const reports = applyArtifacts(collectArtifacts(ACTIVITY_AGENT), cwd, ACTIVITY_AGENT.id, {
+  const bucket = projectBucketId(DEFAULT_PROJECT);
+  renameManifestBucket(cwd, "activity", bucket);
+  const reports = applyArtifacts(collectProjectInstall(DEFAULT_PROJECT), cwd, bucket, {
     INSIGHT_FLOW_BIN: insightFlowBin,
   });
   return {

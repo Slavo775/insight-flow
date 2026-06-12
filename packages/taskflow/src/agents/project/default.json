@@ -1,0 +1,30 @@
+{
+  "id": "default",
+  "title": "insight-flow default project",
+  "description": "The canonical task lifecycle: strategy → spec → implementation → review loop → human gate, with change-request and incident side-flows. Installs the activity telemetry hooks.",
+  "agents": [
+    "task-analyze",
+    "taskmaster",
+    "taskmaster-change",
+    "task-implement",
+    "task-review",
+    "task-review-fix",
+    "task-human-review",
+    "task-request-changes",
+    "task-incident"
+  ],
+  "flow": [
+    { "from": "task-analyze", "to": "taskmaster" },
+    { "from": "taskmaster", "to": "task-implement", "on": "ready" },
+    { "from": "taskmaster-change", "to": "task-implement", "on": "ready" },
+    { "from": "task-implement", "to": "task-review", "on": "implemented" },
+    { "from": "task-review", "to": "task-human-review", "on": "approved" },
+    { "from": "task-review", "to": "task-review-fix", "on": "fix-needed" },
+    { "from": "task-review-fix", "to": "task-review", "on": "fixed" },
+    { "from": "task-human-review", "to": "task-review-fix", "on": "fix-needed" },
+    { "from": "task-human-review", "to": "task-request-changes", "on": "done" },
+    { "from": "task-request-changes", "to": "task-implement", "on": "changes-requested" },
+    { "from": "task-implement", "to": "task-review", "on": "changes-implemented" }
+  ],
+  "install": ["activity"]
+}
