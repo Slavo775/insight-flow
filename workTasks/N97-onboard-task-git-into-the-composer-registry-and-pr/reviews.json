@@ -1,0 +1,34 @@
+{
+  "taskId": "N97",
+  "reviews": [
+    {
+      "startedAt": "2026-06-12T05:17:58.114Z",
+      "endedAt": "2026-06-12T05:19:25.017Z",
+      "verdict": "fix-needed",
+      "comment": "Fix-needed — consumer prompt-build injects @AGENT_ENFORCEMENT.md into TASK_GIT_ROLE.md (canon/consumer divergence); fix: adopt enforcement in canon (recommended) or exempt the file",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-12T05:34:22.266Z",
+        "endedAt": "2026-06-12T05:35:16.302Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composed/task-git.json",
+          "TASK_GIT_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_GIT_ROLE.md"
+        ],
+        "comment": "Blocker fixed via option (a): enforcement adopted in canonical task-git; patcher now no-ops in consumers (repro verified)",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-12T05:42:10.673Z",
+      "endedAt": "2026-06-12T05:42:58.784Z",
+      "verdict": "approved",
+      "comment": "Batch approval N93-N97; merge the full PR stack via task-git",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

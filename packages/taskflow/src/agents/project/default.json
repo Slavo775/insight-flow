@@ -11,20 +11,23 @@
     "task-review-fix",
     "task-human-review",
     "task-request-changes",
-    "task-incident"
+    "task-incident",
+    "task-git"
   ],
   "flow": [
     { "from": "task-analyze", "to": "taskmaster" },
     { "from": "taskmaster", "to": "task-implement", "on": "ready" },
     { "from": "taskmaster-change", "to": "task-implement", "on": "ready" },
-    { "from": "task-implement", "to": "task-review", "on": "implemented" },
+    { "from": "task-implement", "to": "task-git", "on": "implemented" },
+    { "from": "task-git", "to": "task-review", "on": "pushed" },
     { "from": "task-review", "to": "task-human-review", "on": "approved" },
     { "from": "task-review", "to": "task-review-fix", "on": "fix-needed" },
     { "from": "task-review-fix", "to": "task-review", "on": "fixed" },
     { "from": "task-human-review", "to": "task-review-fix", "on": "fix-needed" },
+    { "from": "task-human-review", "to": "task-git", "on": "approved" },
     { "from": "task-human-review", "to": "task-request-changes", "on": "done" },
     { "from": "task-request-changes", "to": "task-implement", "on": "changes-requested" },
-    { "from": "task-implement", "to": "task-review", "on": "changes-implemented" }
+    { "from": "task-implement", "to": "task-git", "on": "changes-implemented" }
   ],
   "install": ["activity"]
 }

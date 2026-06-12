@@ -34,6 +34,7 @@ const ROLE_FILES = {
   "task-human-review": "TASK_HUMAN_REVIEW_ROLE.md",
   "task-incident": "TASK_INCIDENT_ROLE.md",
   "task-request-changes": "TASK_REQUEST_CHANGES_ROLE.md",
+  "task-git": "TASK_GIT_ROLE.md",
 };
 
 test("drift guard: composer output is byte-identical to every committed role file", () => {

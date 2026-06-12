@@ -58,3 +58,60 @@ None this round.
 - **Include preview** ✅ — new `GET /api/include-doc?ref=…`, strictly whitelisted to refs registered as include modules in `MODULE_REGISTRY` (traversal attempts and unregistered `.md` names return 404 — live-verified). Resolution order: project root, then `config.rolesDir` (consumer projects). The include panels (shared by the module page **and** the agent-map modal) now show the `@ref` line plus the referenced file rendered as formatted markdown, with loading and file-not-found states.
 - **Clickable reference nodes** ✅ — the facet node from the screenshot (`@AGENT_ENFORCEMENT.md` on the module map) now opens the module info modal; include module nodes in the agent map already opened it and now show the rendered preview inside.
 - **Gates:** build ✅ · 112/112 ✅ · lint at baseline · live check: `AGENT_PROTOCOL.md` served + rendered path verified in playground; files absent from a project degrade to "File not found in this project".
+
+
+---
+
+## Round 3 — AI Re-review
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-06-12
+**Verdict:** approved
+
+### Summary
+
+Re-review of the R2 fix (include nodes → modal with rendered MD preview, commit `373107b`). The blocker is resolved as specified and the security posture re-checked: `/api/include-doc` is whitelisted to refs registered as include modules (traversal `../package.json` and unregistered names were live-tested → 404), resolution is project-root-then-rolesDir, and the UI degrades gracefully when a partial is absent from a project. Facet/reference nodes open the modal; the include panels are shared by page and modal so both render the preview. Verdict: **approved** — full task (browser + R1 changes + R2 fix) ready for the human gate on PR #69.
+
+### Checklist verification
+
+- R2 blocker (include modal + formatted preview): fixed and live-verified (`AGENT_PROTOCOL.md` served + rendered in playground).
+- Original checklist + R1 changes: unchanged since the prior rounds; suite green (122/122 on the current stack tip, which includes N93).
+
+### Blockers
+
+None — approved.
+
+### Non-blocking
+
+1. The whitelist is built per-request from `MODULE_REGISTRY` — trivial cost at this scale; if the registry ever becomes project-extensible, hoist it once at server start.
+
+### Security & edge cases
+
+- Whitelist-before-path-resolution confirmed in code order; no user-controlled path segments reach `readFileSync`.
+
+### Notes
+
+- Note for the human: the playground's `.claude/roles/` is missing a couple of partials (removed in earlier test cleanup), so "File not found in this project" appears there for those — correct behavior, not a regression.
+
+
+---
+
+## Round 4 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-12
+**Verdict:** approved
+
+### Summary
+
+Batch approval of N93–N97 with instruction to merge the full PR stack. Human's exact comment:
+
+> please approved all of this task create invoke task git and merge via gh all 6 mrs
+
+### Blockers
+
+None — approved.
+
+### Notes
+
+- Merged via /task-git as part of the #69→#74 stack.
