@@ -349,8 +349,20 @@ export const ProjectFlowEdgeSchema = z.object({
   from: z.string().min(1),
   to: z.string().min(1),
   // The status/verdict that moves work along this edge; omitted = direct
-  // handoff (e.g. analyzer → taskmaster on human go-ahead).
-  on: TaskStatusSchema.optional(),
+  // handoff (e.g. analyzer → taskmaster on human go-ahead). N112: free-form
+  // at the field level — the per-project superRefine constrains it to the
+  // canonical enum ∪ the flow's own custom state ids.
+  on: z.string().min(1).optional(),
+});
+
+// N112 — a per-flow custom state: a display alias for exactly one canonical
+// status. Visual + suggestion layer only — tasks never store these ids and
+// the pickers/state machine stay canonical (prescriptive is a future round).
+export const ProjectStateSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  color: z.string().optional(),
+  mapsTo: TaskStatusSchema,
 });
 
 export const ProjectSchema = z
@@ -367,12 +379,42 @@ export const ProjectSchema = z
     // N109 — hand-arranged map positions keyed by agent id. Optional: absent
     // entries (or the whole field) fall back to the auto-layout.
     layout: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(),
+    // N112 — per-flow custom states (aliases onto canonical statuses).
+    states: z.array(ProjectStateSchema).default([]),
   })
   .superRefine((project, ctx) => {
-    // N110 — duplicate (from, to, on) triples are editor mistakes; reject them
-    // on save the same way the editor blocks them live.
+    // N112 — state ids must be unique and must not shadow canonical statuses.
+    const canonical = new Set<string>(TASK_STATUSES);
+    const stateIds = new Set<string>();
+    project.states.forEach((state, index) => {
+      if (canonical.has(state.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["states", index, "id"],
+          message: `state id '${state.id}' shadows a canonical status`,
+        });
+      }
+      if (stateIds.has(state.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["states", index, "id"],
+          message: `duplicate state id '${state.id}'`,
+        });
+      }
+      stateIds.add(state.id);
+    });
+
+    // N110/N112 — edge triggers must be canonical or a state defined by THIS
+    // flow; duplicates of the (from, to, on) triple are editor mistakes.
     const seen = new Set<string>();
     project.flow.forEach((edge, index) => {
+      if (edge.on && !canonical.has(edge.on) && !stateIds.has(edge.on)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["flow", index, "on"],
+          message: `unknown trigger '${edge.on}' (not a canonical status or a state of this flow)`,
+        });
+      }
       const key = `${edge.from}→${edge.to}:${edge.on ?? ""}`;
       if (seen.has(key)) {
         ctx.addIssue({

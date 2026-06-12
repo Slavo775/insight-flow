@@ -63,7 +63,7 @@ function NextStepChips({
   steps,
   agentTitles,
 }: {
-  steps: { agentId: string; on: string }[];
+  steps: { agentId: string; on: string; label: string }[];
   agentTitles: Record<string, string>;
 }) {
   if (!steps.length) return null;
@@ -71,7 +71,7 @@ function NextStepChips({
     <SuggestionRow>
       <FlowNote as="span">Suggested next:</FlowNote>
       {steps.map((s) => (
-        <SuggestionChip key={s.agentId} to={`/agent/${s.agentId}`}>
+        <SuggestionChip key={s.agentId} to={`/agent/${s.agentId}`} title={`on ${s.label}`}>
           ▶ {agentTitles[s.agentId] ?? s.agentId}
           <SlashCommand
             title="Copy slash command"
@@ -100,8 +100,10 @@ function TaskFlowPosition({ status }: { status: string }) {
   }, []);
 
   if (!project) return null;
-  const current = currentFlowNodes(project.flow, status);
-  const nextSteps = suggestNextSteps(project.flow, status);
+  // N112 — custom states alias onto canonical statuses; the task's status is
+  // always canonical, the flow's triggers may not be.
+  const current = currentFlowNodes(project.flow, status, project.states);
+  const nextSteps = suggestNextSteps(project.flow, status, project.states);
 
   return (
     <FlowSection open={typeof window === "undefined" || window.innerWidth > 768}>

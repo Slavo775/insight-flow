@@ -21,7 +21,10 @@ import { FlowMap } from "./components/FlowMap.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { kindColor } from "./components/CompositionMap.js";
 import { KindDot, MenuLink } from "./ModulesPage.js";
+import { TASK_STATUSES } from "../../core/statuses.js";
 import { tokens } from "./theme.js";
+
+const TASK_STATUS_OPTIONS: readonly string[] = TASK_STATUSES;
 import { useDashboardStore } from "./store.js";
 import { Nav } from "./ui.js";
 
@@ -80,6 +83,35 @@ const TopError = styled.div`
   font-size: ${(p) => p.theme.font.size.sm};
 `;
 
+// N112 — minimal custom-states list editor shown in flow-edit mode.
+const StatesPanel = styled.div`
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.lg};
+  margin-bottom: ${(p) => p.theme.space.lg};
+`;
+
+const StateRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${(p) => p.theme.space.md};
+  margin-bottom: ${(p) => p.theme.space.sm};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.text};
+
+  input,
+  select {
+    background: ${(p) => p.theme.color.bg};
+    color: ${(p) => p.theme.color.text};
+    border: 1px solid ${(p) => p.theme.color.border};
+    border-radius: ${(p) => p.theme.radius.md};
+    padding: 4px 8px;
+    font-family: ${(p) => p.theme.font.family};
+    font-size: ${(p) => p.theme.font.size.sm};
+  }
+`;
+
 export function ProjectPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -90,6 +122,10 @@ export function ProjectPage() {
   // N109/N110 — flow edit mode (custom flows only): the draft (positions +
   // edges) lives here until an explicit Save; null = not editing.
   const [draft, setDraft] = useState<FlowDraft | null>(null);
+  // N112 — the draft's custom states (aliases onto canonical statuses).
+  const [draftStates, setDraftStates] = useState<
+    { id: string; title: string; color?: string; mapsTo: string }[]
+  >([]);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const projectName = useDashboardStore((s) => s.snapshot?.projectName || "");
@@ -127,6 +163,7 @@ export function ProjectPage() {
 
   const startEdit = (): void => {
     setDraft({ positions: { ...(project.layout ?? {}) }, flow: project.flow });
+    setDraftStates(project.states ?? []);
     setDirty(false);
   };
 
@@ -167,6 +204,7 @@ export function ProjectPage() {
         flow: draft.flow,
         install: project.install,
         layout: draft.positions,
+        states: draftStates,
       };
       await saveDefinition("projects", record, true, { revision: project.revision });
       // Re-render from server truth.
@@ -282,13 +320,83 @@ export function ProjectPage() {
         </Header>
         {project.description ? <Description>{project.description}</Description> : null}
         {editing ? (
-          <FlowEditor
-            project={project}
-            onDraftChange={(next) => {
-              setDraft(next);
-              setDirty(true);
-            }}
-          />
+          <>
+            <StatesPanel>
+              <GroupTitle>Custom states (alias → canonical status)</GroupTitle>
+              {draftStates.map((state, i) => {
+                const inUse = (draft?.flow ?? project.flow).some((e) => e.on === state.id);
+                const update = (
+                  patch: Partial<{ id: string; title: string; color?: string; mapsTo: string }>,
+                ): void => {
+                  setDraftStates(draftStates.map((s, j) => (j === i ? { ...s, ...patch } : s)));
+                  setDirty(true);
+                };
+                return (
+                  <StateRow key={i}>
+                    <input
+                      value={state.id}
+                      placeholder="qa-verify"
+                      disabled={inUse}
+                      title={inUse ? "id locked while edges use this state" : "state id"}
+                      onChange={(e) => update({ id: e.target.value })}
+                    />
+                    <input
+                      value={state.title}
+                      placeholder="Title"
+                      onChange={(e) => update({ title: e.target.value })}
+                    />
+                    <input
+                      value={state.color ?? ""}
+                      placeholder="#a78bfa"
+                      style={{ width: 90 }}
+                      onChange={(e) => update({ color: e.target.value || undefined })}
+                    />
+                    →
+                    <select
+                      value={state.mapsTo}
+                      onChange={(e) => update({ mapsTo: e.target.value })}
+                    >
+                      {TASK_STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      type="button"
+                      $variant="nav"
+                      disabled={inUse}
+                      title={inUse ? "remove the edges using this state first" : "remove"}
+                      onClick={() => {
+                        setDraftStates(draftStates.filter((_, j) => j !== i));
+                        setDirty(true);
+                      }}
+                    >
+                      ✕
+                    </Button>
+                  </StateRow>
+                );
+              })}
+              <Button
+                type="button"
+                $variant="nav"
+                onClick={() => {
+                  setDraftStates([...draftStates, { id: "", title: "", mapsTo: "approved" }]);
+                  setDirty(true);
+                }}
+              >
+                ＋ Add state
+              </Button>
+            </StatesPanel>
+            <FlowEditor
+              project={project}
+              states={draftStates.filter((s) => s.id && s.title)}
+              onDraftChange={(next) => {
+                setDraft(next);
+                setDirty(true);
+              }}
+            />
+          </>
         ) : (
           <FlowMap project={project} />
         )}

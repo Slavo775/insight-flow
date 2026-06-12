@@ -57,3 +57,50 @@ test("ProjectSchema rejects duplicate (from,to,on) triples on save", () => {
   assert.equal(result.success, false);
   assert.match(result.error.issues[0].message, /duplicate flow edge/);
 });
+
+// N112 — schema: states validated, custom triggers legal only when defined.
+test("ProjectSchema states: duplicates, canonical shadowing, unknown mapsTo, trigger legality", () => {
+  const base = { id: "custom:s", title: "S", agents: ["a", "b"], install: [] };
+  const qa = { id: "qa-verify", title: "QA", mapsTo: "approved" };
+
+  // happy: custom trigger defined by this flow
+  assert.equal(
+    ProjectSchema.safeParse({
+      ...base,
+      states: [qa],
+      flow: [{ from: "a", to: "b", on: "qa-verify" }],
+    }).success,
+    true,
+  );
+  // custom trigger NOT defined → rejected
+  const undef = ProjectSchema.safeParse({
+    ...base,
+    states: [],
+    flow: [{ from: "a", to: "b", on: "qa-verify" }],
+  });
+  assert.equal(undef.success, false);
+  assert.match(undef.error.issues[0].message, /unknown trigger/);
+  // duplicate state ids
+  assert.equal(
+    ProjectSchema.safeParse({ ...base, states: [qa, { ...qa, title: "Other" }], flow: [] }).success,
+    false,
+  );
+  // shadowing a canonical status
+  assert.equal(
+    ProjectSchema.safeParse({
+      ...base,
+      states: [{ id: "approved", title: "X", mapsTo: "approved" }],
+      flow: [],
+    }).success,
+    false,
+  );
+  // unknown mapsTo
+  assert.equal(
+    ProjectSchema.safeParse({
+      ...base,
+      states: [{ id: "qa", title: "X", mapsTo: "approvedd" }],
+      flow: [],
+    }).success,
+    false,
+  );
+});

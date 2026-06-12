@@ -159,7 +159,7 @@
       "title": "Per-flow custom state definitions (visual + suggestions)",
       "type": "feat",
       "priority": "low",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N112-per-flow-custom-state-definitions-visual-suggestio",
       "createdAt": "2026-06-12T11:29:05.016Z",
       "statusHistory": [
@@ -167,12 +167,39 @@
           "status": "ready",
           "at": "2026-06-12T11:29:05.017Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T17:16:20.023Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T17:41:53.979Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T17:42:23.617Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T17:16:20.023Z",
+        "completedAt": "2026-06-12T17:41:53.978Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/flow-status.ts",
+          "packages/taskflow/src/dashboard/client/TaskDetailPage.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/flow-status.test.mjs",
+          "packages/taskflow/test/flow-edit.test.mjs",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -185,9 +212,15 @@
         "flow",
         "schema"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T17:42:23.617Z",
+          "commitHash": "c6e2b76",
+          "commitMessage": "feat(flow): N112 per-flow custom states"
+        }
+      ],
+      "branch": "feat/N112-custom-states",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/91",
       "mergedAt": null
     }
   ]

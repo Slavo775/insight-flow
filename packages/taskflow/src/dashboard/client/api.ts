@@ -155,6 +155,8 @@ export interface ProjectDto {
   layout?: Record<string, { x: number; y: number }>;
   /** N111 — optimistic-concurrency token for custom flows. */
   revision?: string;
+  /** N112 — per-flow custom states (display aliases onto canonical statuses). */
+  states?: { id: string; title: string; color?: string; mapsTo: string }[];
   agentTitles: Record<string, string>;
   installModules: { id: string; title: string; kind: string }[];
 }
