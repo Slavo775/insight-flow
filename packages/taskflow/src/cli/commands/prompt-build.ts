@@ -10,7 +10,8 @@ import { resolveProjectRoot } from "../../core/paths.js";
 function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
   const lines: string[] = [];
 
-  lines.push("@AGENT_SECURITY.md");
+  // N98: @AGENT_SECURITY.md is no longer embedded here — security is a
+  // first-class include module referenced by every composed agent directly.
   lines.push("STRICT ENFORCEMENT — TASK FILE MUTATIONS");
   lines.push("");
   lines.push(

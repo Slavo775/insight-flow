@@ -933,7 +933,7 @@
       "title": "Security as a first-class module — decompose enforcement, baseline trio on every agent",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N98-security-as-a-first-class-module-decompose-enforce",
       "createdAt": "2026-06-12T06:43:46.677Z",
       "statusHistory": [
@@ -941,12 +941,40 @@
           "status": "ready",
           "at": "2026-06-12T06:43:46.677Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T06:49:23.156Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T06:53:55.081Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T06:49:23.156Z",
+        "completedAt": "2026-06-12T06:53:55.080Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/security.json",
+          "packages/taskflow/src/agents/composed",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "AGENT_ENFORCEMENT.md",
+          "TASK_ANALYZER_ROLE.md",
+          "TASKMASTER_ROLE.md",
+          "TASKMASTER_CHANGE_ROLE.md",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md",
+          "TASK_GIT_ROLE.md",
+          "packages/taskflow/templates/roles",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

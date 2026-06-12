@@ -26,6 +26,7 @@
 import type { z } from "zod";
 import { AgentModuleSchema, ComposedAgentSchema } from "../core/schema/index.js";
 
+import security from "./modules/security.json";
 import enforcement from "./modules/enforcement.json";
 import protocol from "./modules/protocol.json";
 import notify from "./modules/notify.json";
@@ -77,6 +78,7 @@ export function indexById<T extends { id: string }>(
 
 export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
   [
+    security,
     enforcement,
     protocol,
     notify,

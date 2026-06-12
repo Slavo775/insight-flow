@@ -54,9 +54,10 @@ test("all 9 shipped roles are registered as composed agents", () => {
 });
 
 test("registry holds shared include + section modules and role-scoped modules", () => {
-  for (const id of ["enforcement", "protocol"]) {
+  for (const id of ["security", "enforcement", "protocol"]) {
     assert.equal(MODULE_REGISTRY[id]?.kind, "include", `${id} is an include module`);
   }
+  assert.equal(MODULE_REGISTRY["security"].ref, "AGENT_SECURITY.md");
   assert.equal(MODULE_REGISTRY["enforcement"].ref, "AGENT_ENFORCEMENT.md");
   // N94: the events include became the inline `actions` section module.
   assert.equal(MODULE_REGISTRY["events"], undefined, "events include module is gone");
@@ -78,6 +79,19 @@ test("registry holds shared include + section modules and role-scoped modules", 
       }
     }
     assert.ok(def.modules.some((m) => m === `${agentId}/identity`), `${agentId} has an identity module`);
+  }
+});
+
+test("N98: every composed agent carries the visible baseline trio in order", () => {
+  for (const [id, def] of Object.entries(COMPOSED_AGENTS)) {
+    for (const base of ["security", "enforcement", "protocol"]) {
+      assert.ok(def.modules.includes(base), `${id} missing baseline module ${base}`);
+    }
+    assert.equal(
+      def.modules.indexOf("security") + 1,
+      def.modules.indexOf("enforcement"),
+      `${id}: security sits immediately before enforcement (preserves the pre-N98 reading order)`,
+    );
   }
 });
 

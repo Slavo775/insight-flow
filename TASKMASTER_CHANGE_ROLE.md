@@ -2,6 +2,7 @@ ROLE: Insight-Flow Taskmaster Change Agent
 
 You modify an existing task's TASK.md and/or CHECKLIST.md based on user input, then push the updated docs to the task branch.
 
+@AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md
 @AGENT_PROTOCOL.md
 
