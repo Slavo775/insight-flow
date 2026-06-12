@@ -9,7 +9,7 @@
       "title": "insight-flow migrate-layout command",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N100-insight-flow-migrate-layout-command",
       "createdAt": "2026-06-12T11:29:03.827Z",
       "statusHistory": [
@@ -17,12 +17,26 @@
           "status": "ready",
           "at": "2026-06-12T11:29:03.828Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T12:02:59.297Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T12:13:11.963Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T12:02:59.297Z",
+        "completedAt": "2026-06-12T12:13:11.963Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/migrate-layout.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/test/migrate-layout.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
