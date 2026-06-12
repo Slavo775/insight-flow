@@ -81,7 +81,7 @@
       "title": "insightFlow layout — ecosystem sweep (init, hooks, master, docs)",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N101-insightflow-layout-ecosystem-sweep-init-hooks-mast",
       "createdAt": "2026-06-12T11:29:03.928Z",
       "statusHistory": [
@@ -99,6 +99,11 @@
           "status": "implemented",
           "at": "2026-06-12T12:37:36.265Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T12:37:41.962Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -131,9 +136,15 @@
         "migration",
         "docs"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T12:37:41.962Z",
+          "commitHash": "3b3ee59",
+          "commitMessage": "rework(agents): N101 ecosystem sweep + dogfood migration"
+        }
+      ],
+      "branch": "rework/N101-insightflow-ecosystem-sweep",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/80",
       "mergedAt": null
     },
     {
