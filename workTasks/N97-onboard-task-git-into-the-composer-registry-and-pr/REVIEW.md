@@ -50,3 +50,26 @@ task-git onboarding (PR #74, `9f2e16a`): byte-faithful decomposition verified (r
 - **Option (a) implemented** — `enforcement` adopted into `composed/task-git.json` (after `config`); `TASK_GIT_ROLE.md` regenerated (includes now `@AGENT_NOTIFY.md` / `@AGENT_CONFIG.md` / `@AGENT_ENFORCEMENT.md`), template re-synced. Canon == consumer everywhere: re-ran the exact review repro — fresh init → `prompt-build --apply` → **file byte-identical before/after** (patcher finds the ref and skips), exactly one enforcement reference (from generation, line 3).
 - This is a deliberate, human-visible prompt change (task-git now carries the enforcement baseline) — the patcher's design invariant ("every role references enforcement") now holds for all 10 roles by construction.
 - **Gates:** build ✅ · 122/122 ✅ · lint at baseline · drift suite green (×10, regenerated file committed).
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-06-12
+**Verdict:** approved
+
+### Summary
+
+Batch approval of N93–N97 with instruction to merge the full PR stack — accepting the fix-cycle resolution (enforcement adopted in canonical task-git). Human's exact comment:
+
+> please approved all of this task create invoke task git and merge via gh all 6 mrs
+
+### Blockers
+
+None — approved.
+
+### Notes
+
+- Merged via /task-git as part of the #69→#74 stack.
