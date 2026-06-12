@@ -269,7 +269,10 @@ export function ModuleHeader({ module }: { module: ModuleDto }) {
         <Badge $color={kindColor(theme, module.kind)}>{module.kind}</Badge>
         <Muted>
           {module.id} · {module.source}
+          {module.target ? ` · ${module.target}` : ""}
         </Muted>
+        {/* N106 — built-ins are immutable; only custom modules are editable. */}
+        {module.source === "custom" ? <Link to={`/module/edit/${module.id}`}>Edit</Link> : null}
       </Header>
       {module.description ? <Description>{module.description}</Description> : null}
     </>
@@ -298,8 +301,7 @@ function facetLabel(module: ModuleDto): string {
 export function ModuleDetail({ module, registry }: { module: ModuleDto; registry: Registry }) {
   const [modalId, setModalId] = useState<string | null>(null);
   const refs = registry.referencedBy[module.id] ?? [];
-  const agentTitle = (id: string): string =>
-    registry.agents.find((a) => a.id === id)?.title ?? id;
+  const agentTitle = (id: string): string => registry.agents.find((a) => a.id === id)?.title ?? id;
 
   // Bundles map to their children (clickable, open the modal); other kinds
   // show their single contribution facet.

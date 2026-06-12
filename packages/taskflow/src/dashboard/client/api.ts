@@ -35,6 +35,8 @@ export interface ModuleDto {
   title: string;
   description?: string;
   source: "builtin" | "custom";
+  /** N106 — harness target (descriptive this round). Absent = both. */
+  target?: "claude" | "cursor" | "both";
   kind: "section" | "include" | "mcp-server" | "hook" | "skill" | "bundle";
   heading?: string;
   body?: string;
@@ -44,9 +46,67 @@ export interface ModuleDto {
   event?: string;
   matcher?: string;
   command?: string;
+  timeout?: number;
+  script?: { name: string; content: string };
   content?: string;
   /** bundle kind: ids of the contained modules. */
   modules?: string[];
+}
+
+// N103/N106 — writes to the custom-definition CRUD API -----------------------
+
+export interface ApiIssue {
+  path: string;
+  message: string;
+}
+
+export class ApiError extends Error {
+  status: number;
+  issues?: ApiIssue[];
+  referencedBy?: string[];
+  constructor(status: number, message: string, issues?: ApiIssue[], referencedBy?: string[]) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.issues = issues;
+    this.referencedBy = referencedBy;
+  }
+}
+
+export type DefinitionKind = "modules" | "agents" | "projects";
+
+async function throwApiError(res: Response): Promise<never> {
+  let payload: { error?: string; issues?: ApiIssue[]; referencedBy?: string[] } = {};
+  try {
+    payload = await res.json();
+  } catch {
+    /* non-JSON error body */
+  }
+  throw new ApiError(
+    res.status,
+    payload.error ?? `request failed (${res.status})`,
+    payload.issues,
+    payload.referencedBy,
+  );
+}
+
+export async function saveDefinition(
+  kind: DefinitionKind,
+  record: { id: string },
+  isUpdate: boolean,
+): Promise<void> {
+  const path = isUpdate ? `/api/${kind}/${encodeURIComponent(record.id)}` : `/api/${kind}`;
+  const res = await fetch(path, {
+    method: isUpdate ? "PUT" : "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(record),
+  });
+  if (!res.ok) await throwApiError(res);
+}
+
+export async function deleteDefinition(kind: DefinitionKind, id: string): Promise<void> {
+  const res = await fetch(`/api/${kind}/${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!res.ok) await throwApiError(res);
 }
 
 export interface ModulesResponse {

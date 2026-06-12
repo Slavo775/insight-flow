@@ -21,6 +21,11 @@ function load(): Promise<Registry> {
   return cached;
 }
 
+/** N106 — drop the cache after a CRUD write so the next mount refetches. */
+export function invalidateRegistry(): void {
+  cached = null;
+}
+
 export function useRegistry(): { registry: Registry | null; error: string | null } {
   const [registry, setRegistry] = useState<Registry | null>(null);
   const [error, setError] = useState<string | null>(null);
