@@ -8,7 +8,18 @@
       "comment": "Fix-needed — consumer prompt-build injects @AGENT_ENFORCEMENT.md into TASK_GIT_ROLE.md (canon/consumer divergence); fix: adopt enforcement in canon (recommended) or exempt the file",
       "type": "ai",
       "by": "task-review",
-      "fix": null
+      "fix": {
+        "startedAt": "2026-06-12T05:34:22.266Z",
+        "endedAt": "2026-06-12T05:35:16.302Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composed/task-git.json",
+          "TASK_GIT_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_GIT_ROLE.md"
+        ],
+        "comment": "Blocker fixed via option (a): enforcement adopted in canonical task-git; patcher now no-ops in consumers (repro verified)",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

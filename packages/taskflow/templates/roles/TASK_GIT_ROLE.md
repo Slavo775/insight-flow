@@ -1,5 +1,6 @@
 @AGENT_NOTIFY.md
 @AGENT_CONFIG.md
+@AGENT_ENFORCEMENT.md
 
 ROLE: Task Git Agent — Insight Flow
 
