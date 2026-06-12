@@ -126,6 +126,8 @@ export interface AgentDto {
   id: string;
   title: string;
   description?: string;
+  /** N102 — "custom" for user-space agents; absent/builtin for shipped ones. */
+  source?: "builtin" | "custom";
   modules: AgentModuleRef[];
 }
 
