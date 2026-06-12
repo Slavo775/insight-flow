@@ -607,7 +607,7 @@
       "title": "Projects list + multiple named flows",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "workTasks/N108-projects-list-multiple-named-flows",
       "createdAt": "2026-06-12T11:29:04.617Z",
       "statusHistory": [
@@ -615,12 +615,29 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.617Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T15:52:08.424Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T16:30:58.436Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T15:52:08.423Z",
+        "completedAt": "2026-06-12T16:30:58.436Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/dashboard/client/ProjectForm.tsx",
+          "packages/taskflow/src/dashboard/client/App.tsx",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
