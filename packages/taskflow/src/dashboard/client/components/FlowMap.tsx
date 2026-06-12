@@ -4,7 +4,15 @@
 // Clicking an agent navigates to /agent/:id. Read-only this iteration.
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Background, Controls, MiniMap, Position, ReactFlow, type Edge, type Node } from "@xyflow/react";
+import {
+  Background,
+  Controls,
+  MiniMap,
+  Position,
+  ReactFlow,
+  type Edge,
+  type Node,
+} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import styled, { useTheme } from "styled-components";
 import type { ProjectDto } from "../api.js";
@@ -49,6 +57,30 @@ function layerAgents(project: ProjectDto): Map<string, number> {
   return depth;
 }
 
+const COL_W = 280;
+const ROW_H = 110;
+
+/**
+ * N109 — resolved node positions: the stored hand-arranged layout wins,
+ * missing entries fall back to the BFS auto-layout. Shared by the read-only
+ * map and the edit canvas so both render identically.
+ */
+export function computePositions(project: ProjectDto): Record<string, { x: number; y: number }> {
+  const depth = layerAgents(project);
+  const byColumn = new Map<number, string[]>();
+  for (const a of project.agents) {
+    const col = depth.get(a) ?? 0;
+    (byColumn.get(col) ?? byColumn.set(col, []).get(col)!).push(a);
+  }
+  const out: Record<string, { x: number; y: number }> = {};
+  for (const a of project.agents) {
+    const col = depth.get(a) ?? 0;
+    const row = (byColumn.get(col) ?? [a]).indexOf(a);
+    out[a] = project.layout?.[a] ?? { x: col * COL_W, y: row * ROW_H };
+  }
+  return out;
+}
+
 export function FlowMap({
   project,
   highlightNodes,
@@ -64,25 +96,15 @@ export function FlowMap({
   const navigate = useNavigate();
 
   const { nodes, edges } = useMemo(() => {
-    const depth = layerAgents(project);
-    const byColumn = new Map<number, string[]>();
-    for (const a of project.agents) {
-      const col = depth.get(a) ?? 0;
-      (byColumn.get(col) ?? byColumn.set(col, []).get(col)!).push(a);
-    }
+    const positions = computePositions(project);
 
-    const COL_W = 280;
-    const ROW_H = 110;
     const nodes: Node[] = project.agents.map((a) => {
-      const col = depth.get(a) ?? 0;
-      const siblings = byColumn.get(col) ?? [a];
-      const row = siblings.indexOf(a);
       const isCurrent = highlightNodes?.includes(a) ?? false;
       const isSuggested = !isCurrent && (secondaryHighlightNodes?.includes(a) ?? false);
       const badge = isCurrent ? "📍 " : isSuggested ? "▶ " : "";
       return {
         id: a,
-        position: { x: col * COL_W, y: row * ROW_H },
+        position: positions[a],
         data: { label: `${badge}⚙ ${project.agentTitles[a] ?? a}` },
         style: {
           background: isCurrent ? `${theme.color.accent}2e` : theme.color.bg,

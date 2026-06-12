@@ -257,3 +257,31 @@ test("projects list and ?id= lookup", async () => {
     assert.equal(defAgain.id, "default");
   });
 });
+
+// N109 — layout field round-trips; bad coordinates rejected.
+test("project layout persists through PUT and bad coords fail validation", async () => {
+  await withServer(async () => {
+    const def = await (await api("/api/project", "GET")).json();
+    const flow = {
+      id: "custom:laidout",
+      title: "Laid out",
+      agents: def.agents,
+      flow: def.flow,
+      install: [],
+    };
+    assert.equal((await api("/api/projects", "POST", flow)).status, 201);
+
+    const layout = { "task-implement": { x: 40, y: 80 }, "task-git": { x: 320, y: 80 } };
+    const r = await api("/api/projects/custom:laidout", "PUT", { ...flow, layout });
+    assert.equal(r.status, 200);
+    const fetched = await (await api("/api/project?id=custom%3Alaidout", "GET")).json();
+    assert.deepEqual(fetched.layout, layout);
+
+    const bad = await api("/api/projects/custom:laidout", "PUT", {
+      ...flow,
+      layout: { "task-implement": { x: "left", y: 0 } },
+    });
+    assert.equal(bad.status, 400);
+    assert.ok((await bad.json()).issues.some((i) => i.path.includes("layout")));
+  });
+});

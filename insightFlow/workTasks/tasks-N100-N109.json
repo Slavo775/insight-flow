@@ -682,7 +682,7 @@
       "title": "Flow editor — draggable nodes with persisted layout",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N109-flow-editor-draggable-nodes-with-persisted-layout",
       "createdAt": "2026-06-12T11:29:04.710Z",
       "statusHistory": [
@@ -690,12 +690,34 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.710Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T16:34:18.290Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T17:00:44.524Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T17:00:51.895Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T16:34:18.289Z",
+        "completedAt": "2026-06-12T17:00:44.523Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -709,9 +731,15 @@
         "flow",
         "editor"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T17:00:51.894Z",
+          "commitHash": "79ef481",
+          "commitMessage": "feat(dashboard): N109 draggable layout"
+        }
+      ],
+      "branch": "feat/N109-flow-layout",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/88",
       "mergedAt": null
     }
   ]

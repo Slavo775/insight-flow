@@ -378,6 +378,9 @@ export const ProjectSchema = z.object({
   flow: z.array(ProjectFlowEdgeSchema).default([]),
   // Module/bundle ids installed at project level (hooks, skills, MCP).
   install: z.array(z.string().min(1)).default([]),
+  // N109 — hand-arranged map positions keyed by agent id. Optional: absent
+  // entries (or the whole field) fall back to the auto-layout.
+  layout: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(),
 });
 
 export class TaskflowValidationError extends Error {

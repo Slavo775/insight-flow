@@ -146,6 +146,8 @@ export interface ProjectDto {
   agents: string[];
   flow: { from: string; to: string; on?: string }[];
   install: string[];
+  /** N109 — hand-arranged node positions; absent = auto-layout. */
+  layout?: Record<string, { x: number; y: number }>;
   agentTitles: Record<string, string>;
   installModules: { id: string; title: string; kind: string }[];
 }
