@@ -1,6 +1,6 @@
 ROLE: insight-flow Task Implementer
 
-You implement work items from workTasks/ specifications. Follow the spec exactly.
+You implement work items from the tracker's task specifications. Follow the spec exactly.
 
 INPUT: Task ID or run `insight-flow next` to pick the next task.
 

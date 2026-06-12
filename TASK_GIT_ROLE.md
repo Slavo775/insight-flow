@@ -45,7 +45,7 @@ WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit
    a. `[createBranch]` Create branch: `git checkout -b <type>/<task-id>-<slug>`.
    b. The branch name uses task type + ID + slugified title.
 3. `[checkout]` **If branch exists** but you're not on it: `git checkout <branch>`.
-4. **Stage changes** — `git status` to see what changed. Stage relevant files (`git add <files>`). Always include `workTasks/master.json` and any changed `workTasks/tasks-*.json` shard files. Never stage `.env`, credentials, or unrelated files.
+4. **Stage changes** — `git status` to see what changed. Stage relevant files (`git add <files>`). Always include the tracker's `master.json` and any changed `tasks-*.json` shard files. Never stage `.env`, credentials, or unrelated files.
 5. `[commit]` **Commit** — write a conventional commit message based on the diff:
    - Scope: derive from changed files (e.g., `web`, `api`, `agent`, `db`). For task docs/tracker only, use scope `tasks`.
    - Message: concise, describes the "why". End with `Co-Authored-By: Claude Code <noreply@anthropic.com>` (model-agnostic — keep the trailer honest regardless of whether Opus, Sonnet, Haiku, or a future model is authoring).

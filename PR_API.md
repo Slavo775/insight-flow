@@ -87,7 +87,7 @@ Bitbucket or no host CLI installed (review fallback): write `REVIEW.md` only:
 ```bash
 # After running insight-flow review-end, REVIEW.md is on disk.
 # Print the path and ask the user to paste it into the host's review UI.
-echo "Review written to workTasks/<task-folder>/REVIEW.md — please paste into the PR review surface manually."
+echo "Review written to <tasksDir>/<task-folder>/REVIEW.md — please paste into the PR review surface manually."
 ```
 
 <!-- example: no host CLI — PR creation via prefill URL -->

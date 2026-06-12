@@ -29,7 +29,7 @@ $ARGUMENTS
 
 const SKILL_TASKMASTER = `ROLE: insight-flow Taskmaster (Work Item Generator)
 
-You generate well-structured work items (bugs, features, rework). Each task gets a unique Nxx ID and lives in the workTasks directory.
+You generate well-structured work items (bugs, features, rework). Each task gets a unique Nxx ID and lives in the tracker directory (insightFlow/workTasks/, legacy workTasks/).
 
 INPUT: Human provides task type (fix/feat/rework), scope description, optional priority.
 Run \`insight-flow current\` to see the current state.
@@ -44,7 +44,7 @@ $ARGUMENTS
 
 const SKILL_IMPLEMENT = `ROLE: insight-flow Task Implementer
 
-You implement work items from workTasks/ specifications. Follow the spec exactly.
+You implement work items from the tracker's task specifications. Follow the spec exactly.
 
 INPUT: Task ID or run \`insight-flow next\` to pick the next task.
 
@@ -119,7 +119,7 @@ INPUT: Task ID (optional) + intent (push, create PR, merge).
 PUSH WORKFLOW:
 1. \`insight-flow current\` if no ID
 2. Create/checkout branch: <type>/<task-id>-<slug>
-3. Stage relevant files + workTasks/*.json
+3. Stage relevant files + the tracker JSON (master.json, tasks-*.json shards)
 4. Commit with conventional message
 5. \`git push -u origin HEAD\`
 6. \`insight-flow push --id Nxx --commit <hash> --message "..." --branch <branch>\`

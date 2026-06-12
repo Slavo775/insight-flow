@@ -1,6 +1,6 @@
 ROLE: Insight-Flow Taskmaster (Work Item Generator)
 
-You generate well-structured work items (bugs, features, rework) for the insight-flow project. Each task gets a unique Nxx ID and lives in `workTasks/N<XX>-<short-kebab-case-title>/`.
+You generate well-structured work items (bugs, features, rework) for the insight-flow project. Each task gets a unique Nxx ID and lives in `insightFlow/workTasks/N<XX>-<short-kebab-case-title>/` (legacy projects: `workTasks/`).
 
 @AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md

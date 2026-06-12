@@ -39,10 +39,12 @@ After `insight-flow init`, your project has:
 ```
 your-project/
 ├── taskflow.config.json        # Configuration
-├── workTasks/
-│   ├── master.json             # Meta + shard index
-│   ├── tasks-N00-N09.json      # Task shard (tasks 0-9)
-│   └── N00-my-task/            # Task folder (TASK.md, CHECKLIST.md)
+├── insightFlow/
+│   ├── workTasks/
+│   │   ├── master.json         # Meta + shard index
+│   │   ├── tasks-N00-N09.json  # Task shard (tasks 0-9)
+│   │   └── N00-my-task/        # Task folder (TASK.md, CHECKLIST.md)
+│   └── events/                 # Daily JSONL event backups
 └── .claude/
     ├── commands/               # Slash commands (/taskmaster, /task-implement, …)
     ├── roles/                  # Agent role templates (for Claude Code)
@@ -61,7 +63,7 @@ The built-in dev server:
 
 - Serves task JSON as a REST API (`/api/work-tasks`, `/api/work-tasks/:file`)
 - Renders a Kanban board, stats, timeline, and task detail panels
-- Watches `workTasks/` for changes and live-reloads via Socket.IO (auto-reconnect, long-polling fallback)
+- Watches the tracker directory (`insightFlow/workTasks/`, legacy `workTasks/`) for changes and live-reloads via Socket.IO (auto-reconnect, long-polling fallback)
 - Auto-opens the browser
 
 ## CLI Reference
@@ -151,7 +153,7 @@ insight-flow version          # Show version
 
 | Key             | Default                         | Description                               |
 | --------------- | ------------------------------- | ----------------------------------------- |
-| `workDir`       | `workTasks`                     | Directory for task data files             |
+| `workDir`       | `workTasks`                     | Legacy tasks dir (ignored once `insightFlow/` exists) |
 | `shardSize`     | `10`                            | Tasks per shard file (N00-N09, etc.)      |
 | `projectName`   | from `package.json` or dir name | Shown in dashboard header                 |
 | `rolesDir`      | `.claude/roles`                 | Where role templates are copied on `init` |
