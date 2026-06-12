@@ -133,3 +133,22 @@ test("partial insightFlow/ dir is refused with guidance, nothing moved", () => {
   );
   assert.ok(existsSync(join(dir, "workTasks/master.json")), "legacy tree untouched");
 });
+
+test("pre-existing user-space registry dirs (N102) do not block migration", () => {
+  const dir = legacyProject();
+  mkdirSync(join(dir, "insightFlow/modules"), { recursive: true });
+  writeFileSync(
+    join(dir, "insightFlow/modules/greeting.json"),
+    JSON.stringify({
+      id: "custom:greeting",
+      title: "Greeting",
+      kind: "section",
+      heading: "G",
+      body: "x",
+    }),
+  );
+  const out = JSON.parse(run(dir, ["migrate-layout"]));
+  assert.equal(out.result, "migrated");
+  assert.ok(existsSync(join(dir, "insightFlow/workTasks/master.json")));
+  assert.ok(existsSync(join(dir, "insightFlow/modules/greeting.json")), "registry dir untouched");
+});

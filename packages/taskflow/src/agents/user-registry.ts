@@ -1,0 +1,156 @@
+// N102 — user-space definition registries. Projects author their own modules,
+// composed agents, and project flows as JSON files under the consolidated
+// root — `insightFlow/modules/`, `insightFlow/agents/`, `insightFlow/projects/`
+// — validated with the exact same Zod schemas as the built-ins. Custom ids are
+// namespaced (`custom:` prefix, enforced on load); built-ins are immutable —
+// user space can add, never shadow.
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { ZodError, type z } from "zod";
+import { AgentModuleSchema, ComposedAgentSchema, ProjectSchema } from "../core/schema/index.js";
+import { resolveProjectRoot } from "../core/paths.js";
+import {
+  COMPOSED_AGENTS,
+  MODULE_REGISTRY,
+  resolveModules,
+  type AgentModule,
+  type ComposedAgent,
+} from "./compose.js";
+import { DEFAULT_PROJECT, type Project } from "./project.js";
+
+export const CUSTOM_ID_PREFIX = "custom:";
+export const USER_SPACE_DIRS = ["modules", "agents", "projects"] as const;
+
+export interface UserRegistries {
+  modules: Record<string, AgentModule>;
+  agents: Record<string, ComposedAgent>;
+  projects: Record<string, Project>;
+}
+
+export class UserRegistryError extends Error {
+  constructor(file: string, detail: string) {
+    super(`Invalid user-space definition ${file}: ${detail}`);
+    this.name = "UserRegistryError";
+  }
+}
+
+function readKind<T extends { id: string }>(
+  dir: string,
+  schema: z.ZodType<T>,
+  builtinIds: Set<string>,
+): { items: Record<string, T>; files: Record<string, string> } {
+  const out: Record<string, T> = {};
+  const files: Record<string, string> = {};
+  if (!existsSync(dir)) return { items: out, files };
+  for (const file of readdirSync(dir)
+    .filter((f) => f.endsWith(".json"))
+    .sort()) {
+    const path = resolve(dir, file);
+    let raw: unknown;
+    try {
+      raw = JSON.parse(readFileSync(path, "utf-8"));
+    } catch (err) {
+      throw new UserRegistryError(path, `malformed JSON (${(err as Error).message})`);
+    }
+    let parsed: T;
+    try {
+      parsed = schema.parse(raw);
+    } catch (err) {
+      const detail =
+        err instanceof ZodError
+          ? err.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")
+          : (err as Error).message;
+      throw new UserRegistryError(path, detail);
+    }
+    if (!parsed.id.startsWith(CUSTOM_ID_PREFIX)) {
+      throw new UserRegistryError(path, `id '${parsed.id}' must start with '${CUSTOM_ID_PREFIX}'`);
+    }
+    if (builtinIds.has(parsed.id)) {
+      throw new UserRegistryError(path, `id '${parsed.id}' collides with a built-in`);
+    }
+    if (out[parsed.id]) {
+      throw new UserRegistryError(path, `duplicate custom id '${parsed.id}'`);
+    }
+    out[parsed.id] = parsed;
+    files[parsed.id] = path;
+  }
+  return { items: out, files };
+}
+
+/** User-space root: always `<projectRoot>/insightFlow`, on either layout. */
+export function userSpaceRoot(projectDir: string = resolveProjectRoot()): string {
+  return resolve(projectDir, "insightFlow");
+}
+
+export function loadUserRegistries(projectDir: string = resolveProjectRoot()): UserRegistries {
+  const root = userSpaceRoot(projectDir);
+
+  const { items: modules } = readKind(
+    resolve(root, "modules"),
+    AgentModuleSchema,
+    new Set(Object.keys(MODULE_REGISTRY)),
+  );
+  for (const mod of Object.values(modules)) {
+    // Schema defaults source to "builtin"; user space is canonical "custom".
+    (mod as { source: string }).source = "custom";
+  }
+  const mergedModules = { ...MODULE_REGISTRY, ...modules };
+
+  const { items: agents, files: agentFiles } = readKind(
+    resolve(root, "agents"),
+    ComposedAgentSchema,
+    new Set(Object.keys(COMPOSED_AGENTS)),
+  );
+  for (const def of Object.values(agents)) {
+    try {
+      resolveModules(def, mergedModules); // dangling refs + bundle cycles throw
+    } catch (err) {
+      throw new UserRegistryError(agentFiles[def.id], (err as Error).message);
+    }
+  }
+  const mergedAgents = { ...COMPOSED_AGENTS, ...agents };
+
+  const { items: projects, files: projectFiles } = readKind(
+    resolve(root, "projects"),
+    ProjectSchema,
+    new Set([DEFAULT_PROJECT.id]),
+  );
+  for (const project of Object.values(projects)) {
+    const file = projectFiles[project.id];
+    for (const id of project.agents) {
+      if (!mergedAgents[id]) {
+        throw new UserRegistryError(file, `references unknown agent '${id}'`);
+      }
+    }
+    for (const edge of project.flow) {
+      for (const end of [edge.from, edge.to]) {
+        if (!project.agents.includes(end)) {
+          throw new UserRegistryError(
+            file,
+            `flow edge ${edge.from} → ${edge.to} references undeclared agent '${end}'`,
+          );
+        }
+      }
+    }
+    for (const id of project.install) {
+      if (!mergedModules[id]) {
+        throw new UserRegistryError(file, `install references unknown module '${id}'`);
+      }
+    }
+  }
+
+  return { modules, agents, projects };
+}
+
+/** Built-ins + user space, user entries never shadowing (collisions throw at load). */
+export function mergedModuleRegistry(projectDir?: string): Record<string, AgentModule> {
+  return { ...MODULE_REGISTRY, ...loadUserRegistries(projectDir).modules };
+}
+
+export function mergedComposedAgents(projectDir?: string): Record<string, ComposedAgent> {
+  return { ...COMPOSED_AGENTS, ...loadUserRegistries(projectDir).agents };
+}
+
+export function mergedProjects(projectDir?: string): Record<string, Project> {
+  return { [DEFAULT_PROJECT.id]: DEFAULT_PROJECT, ...loadUserRegistries(projectDir).projects };
+}
