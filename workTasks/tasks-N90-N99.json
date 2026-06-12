@@ -933,7 +933,7 @@
       "title": "Security as a first-class module — decompose enforcement, baseline trio on every agent",
       "type": "rework",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N98-security-as-a-first-class-module-decompose-enforce",
       "createdAt": "2026-06-12T06:43:46.677Z",
       "statusHistory": [
@@ -951,6 +951,11 @@
           "status": "implemented",
           "at": "2026-06-12T06:53:55.081Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T06:57:24.963Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -989,8 +994,14 @@
         "security",
         "modules"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T06:57:24.963Z",
+          "commitHash": "c225992",
+          "commitMessage": "rework(N98): security as a first-class module — baseline trio on every agent"
+        }
+      ],
+      "branch": "rework/N98-security-module",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/76",
       "mergedAt": null
     }
