@@ -32,6 +32,7 @@ import {
 } from "../../agents/compose.js";
 import { DEFAULT_PROJECT } from "../../agents/project.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
+import { handleCustomDefsRequest } from "./custom-defs.js";
 
 /**
  * N102 — built-ins + the project's user-space registries, loaded per call so
@@ -671,6 +672,20 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           }),
         }),
       );
+      return;
+    }
+
+    // N103 — CRUD for custom definitions (POST/PUT/DELETE on
+    // /api/{modules,agents,projects}). Reads fall through to the handlers
+    // below; successful writes notify connected dashboards.
+    if (
+      handleCustomDefsRequest(req, res, url, () =>
+        transport.emit("event", {
+          kind: "custom-defs-changed",
+          at: new Date().toISOString(),
+        }),
+      )
+    ) {
       return;
     }
 
