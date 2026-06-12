@@ -222,10 +222,42 @@ export function KindPanels({ module }: { module: ModuleDto }) {
           <MarkdownBlock text={module.content ?? ""} />
         </Panel>
       );
+    case "bundle":
+      return (
+        <Panel>
+          <PanelTitle>Contains {module.modules?.length ?? 0} modules</PanelTitle>
+          <BundleChips>
+            {(module.modules ?? []).map((id) => (
+              <BundleChip key={id} to={`/module/${id}`}>
+                {id}
+              </BundleChip>
+            ))}
+          </BundleChips>
+        </Panel>
+      );
     default:
       return null;
   }
 }
+
+const BundleChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${(p) => p.theme.space.lg};
+`;
+
+const BundleChip = styled(Link)`
+  color: ${(p) => p.theme.color.amber};
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.pill};
+  text-decoration: none;
+  font-size: ${(p) => p.theme.font.size.sm};
+  padding: ${(p) => p.theme.space.sm} ${(p) => p.theme.space.xl};
+
+  &:hover {
+    border-color: ${(p) => p.theme.color.amber};
+  }
+`;
 
 /** Header line (title + kind badge + id/source) — shared with the modal. */
 export function ModuleHeader({ module }: { module: ModuleDto }) {
@@ -256,6 +288,8 @@ function facetLabel(module: ModuleDto): string {
       return `${module.event} hook`;
     case "skill":
       return `skill: ${module.name}`;
+    case "bundle":
+      return `${module.modules?.length ?? 0} bundled modules`;
     default:
       return module.kind;
   }
@@ -267,9 +301,27 @@ export function ModuleDetail({ module, registry }: { module: ModuleDto; registry
   const agentTitle = (id: string): string =>
     registry.agents.find((a) => a.id === id)?.title ?? id;
 
+  // Bundles map to their children (clickable, open the modal); other kinds
+  // show their single contribution facet.
+  const childIds = module.kind === "bundle" ? (module.modules ?? []) : [];
+  const children: MapNodeSpec[] = childIds.map((id) => ({
+    id,
+    label: registry.modules.find((m) => m.id === id)?.title ?? id,
+    kind: registry.modules.find((m) => m.id === id)?.kind ?? "unknown",
+    role: "module" as const,
+  }));
   const nodes: MapNodeSpec[] = [
     { id: module.id, label: module.title, kind: module.kind, role: "facet", emphasis: true },
-    { id: `facet:${module.id}`, label: facetLabel(module), kind: module.kind, role: "facet" },
+    ...(module.kind === "bundle"
+      ? children
+      : [
+          {
+            id: `facet:${module.id}`,
+            label: facetLabel(module),
+            kind: module.kind,
+            role: "facet" as const,
+          },
+        ]),
     ...refs.map((a) => ({
       id: `agent:${a}`,
       label: `⚙ ${agentTitle(a)}`,
@@ -278,7 +330,9 @@ export function ModuleDetail({ module, registry }: { module: ModuleDto; registry
     })),
   ];
   const edges: [string, string][] = [
-    [`facet:${module.id}`, module.id],
+    ...(module.kind === "bundle"
+      ? childIds.map((c): [string, string] => [c, module.id])
+      : [[`facet:${module.id}`, module.id] as [string, string]]),
     ...refs.map((a): [string, string] => [module.id, `agent:${a}`]),
   ];
 

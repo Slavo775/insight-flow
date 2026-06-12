@@ -35,7 +35,7 @@ export interface ModuleDto {
   title: string;
   description?: string;
   source: "builtin" | "custom";
-  kind: "section" | "include" | "mcp-server" | "hook" | "skill";
+  kind: "section" | "include" | "mcp-server" | "hook" | "skill" | "bundle";
   heading?: string;
   body?: string;
   ref?: string;
@@ -45,6 +45,8 @@ export interface ModuleDto {
   matcher?: string;
   command?: string;
   content?: string;
+  /** bundle kind: ids of the contained modules. */
+  modules?: string[];
 }
 
 export interface ModulesResponse {

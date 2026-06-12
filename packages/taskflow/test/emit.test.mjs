@@ -194,6 +194,21 @@ test("N94: script-carrying hooks — write 0755, substitute vars, remove with th
   assert.ok(MODULE_REGISTRY["activity/agent-idle"], "module still registered");
 });
 
+test("N95: adopting the testing bundle yields identical artifacts to listing the siblings", () => {
+  const viaBundle = collectArtifacts({ id: "p", title: "P", modules: ["testing"] });
+  const viaSiblings = collectArtifacts({
+    id: "p",
+    title: "P",
+    modules: ["testing/prompt", "testing/hook", "testing/skill"],
+  });
+  assert.deepEqual(viaBundle, viaSiblings);
+  // and applying via the bundle is idempotent like any other apply
+  const dir = tmp();
+  applyArtifacts(viaBundle, dir, "p");
+  const second = applyArtifacts(viaBundle, dir, "p");
+  assert.ok(second.every((r) => r.action === "unchanged"), JSON.stringify(second));
+});
+
 test("schema rejects unsafe skill names (path traversal)", async () => {
   const { AgentModuleSchema } = await import("../dist/index.js");
   for (const bad of ["../evil", "a/b", ".hidden", "UPPER"]) {

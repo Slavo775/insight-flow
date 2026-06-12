@@ -49,6 +49,8 @@ export function kindColor(theme: Theme, kind: string): string {
       return theme.color.yellow;
     case "skill":
       return theme.color.green;
+    case "bundle":
+      return theme.color.amber;
     default:
       return theme.color.textMuted;
   }
