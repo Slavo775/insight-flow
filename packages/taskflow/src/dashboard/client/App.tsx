@@ -7,6 +7,7 @@ import { AgentsPage } from "./AgentsPage.js";
 import { DetailPanel } from "./DetailPanel.js";
 import { ModuleForm } from "./ModuleForm.js";
 import { ModulesPage } from "./ModulesPage.js";
+import { ProjectForm } from "./ProjectForm.js";
 import { ProjectPage } from "./ProjectPage.js";
 import { TaskDetailPage } from "./TaskDetailPage.js";
 import { Button, Text } from "./components/index.js";
@@ -215,6 +216,9 @@ export function App() {
       <Route path="/agent/edit/:id" element={<AgentForm />} />
       <Route path="/agent/:id" element={<AgentsPage />} />
       <Route path="/project" element={<ProjectPage />} />
+      {/* N108 — multiple named flows; /new wins over the :id route. */}
+      <Route path="/project/new" element={<ProjectForm />} />
+      <Route path="/project/:id" element={<ProjectPage />} />
     </Routes>
   );
 }

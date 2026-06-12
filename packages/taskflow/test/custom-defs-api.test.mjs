@@ -218,3 +218,42 @@ test("agent module order round-trips through PUT", async () => {
     assert.equal(agent.source, "custom");
   });
 });
+
+// N108 — flows list + per-id project lookup.
+test("projects list and ?id= lookup", async () => {
+  await withServer(async () => {
+    let list = await (await api("/api/projects", "GET")).json();
+    assert.equal(list.projects.length, 1);
+    assert.equal(list.projects[0].id, "default");
+    assert.equal(list.projects[0].source, "builtin");
+
+    const def = await (await api("/api/project", "GET")).json();
+    const dup = {
+      id: "custom:hotfix2",
+      title: "Hotfix 2",
+      agents: def.agents,
+      flow: def.flow,
+      install: def.install,
+    };
+    assert.equal((await api("/api/projects", "POST", dup)).status, 201);
+
+    list = await (await api("/api/projects", "GET")).json();
+    assert.equal(list.projects.length, 2);
+    const custom = list.projects.find((p) => p.id === "custom:hotfix2");
+    assert.equal(custom.source, "custom");
+    assert.equal(custom.flowCount, def.flow.length);
+
+    const fetched = await (await api("/api/project?id=custom%3Ahotfix2", "GET")).json();
+    assert.equal(fetched.title, "Hotfix 2");
+    assert.equal(fetched.source, "custom");
+    assert.deepEqual(fetched.flow, def.flow);
+    assert.ok(fetched.agentTitles["task-implement"]);
+
+    assert.equal((await api("/api/project?id=custom%3Aghost", "GET")).status, 404);
+    assert.equal((await api("/api/projects/default", "DELETE")).status, 403);
+
+    // default project lookup unchanged for N96/N104 consumers
+    const defAgain = await (await api("/api/project", "GET")).json();
+    assert.equal(defAgain.id, "default");
+  });
+});

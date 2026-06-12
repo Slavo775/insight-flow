@@ -141,6 +141,8 @@ export interface ProjectDto {
   id: string;
   title: string;
   description?: string;
+  /** N108 — "builtin" for the shipped default flow. */
+  source?: "builtin" | "custom";
   agents: string[];
   flow: { from: string; to: string; on?: string }[];
   install: string[];
@@ -148,10 +150,26 @@ export interface ProjectDto {
   installModules: { id: string; title: string; kind: string }[];
 }
 
-export async function fetchProject(): Promise<ProjectDto> {
-  const res = await fetch("/api/project");
+export async function fetchProject(id?: string): Promise<ProjectDto> {
+  const res = await fetch("/api/project" + (id ? `?id=${encodeURIComponent(id)}` : ""));
   if (!res.ok) throw new Error("Failed to load project (" + res.status + ")");
   return res.json();
+}
+
+export interface ProjectSummaryDto {
+  id: string;
+  title: string;
+  description?: string;
+  source: "builtin" | "custom";
+  agentCount: number;
+  flowCount: number;
+}
+
+export async function fetchProjects(): Promise<ProjectSummaryDto[]> {
+  const res = await fetch("/api/projects");
+  if (!res.ok) throw new Error("Failed to load projects (" + res.status + ")");
+  const data: { projects: ProjectSummaryDto[] } = await res.json();
+  return data.projects;
 }
 
 /** Markdown content behind an include module's @ref, or null if not present. */

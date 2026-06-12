@@ -33,6 +33,16 @@ import {
 import { DEFAULT_PROJECT } from "../../agents/project.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
 import { handleCustomDefsRequest } from "./custom-defs.js";
+import type { Project } from "../../agents/project.js";
+
+/** N108 — shipped default + user-space flows; degrades to default-only. */
+function mergedProjectsView(): Record<string, Project> {
+  try {
+    return { [DEFAULT_PROJECT.id]: DEFAULT_PROJECT, ...loadUserRegistries().projects };
+  } catch {
+    return { [DEFAULT_PROJECT.id]: DEFAULT_PROJECT };
+  }
+}
 
 /**
  * N102 — built-ins + the project's user-space registries, loaded per call so
@@ -659,19 +669,45 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     }
 
     // N96 — the project layer: agents, flow edges, global install.
+    // N108 — `?id=` selects any flow from the merged view (default when absent,
+    // keeping N96/N104 consumers untouched); /api/projects lists them all.
     if (url.pathname === "/api/project") {
-      const agentTitle = (id: string): string => COMPOSED_AGENTS[id]?.title ?? id;
+      const { modules: moduleRegistry, agents: composedAgents } = mergedView();
+      const projects = mergedProjectsView();
+      const requestedId = url.searchParams.get("id") ?? DEFAULT_PROJECT.id;
+      const project = projects[requestedId];
+      if (!project) {
+        res.writeHead(404, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: `unknown project '${requestedId}'` }));
+        return;
+      }
+      const agentTitle = (id: string): string => composedAgents[id]?.title ?? id;
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(
         JSON.stringify({
-          ...DEFAULT_PROJECT,
-          agentTitles: Object.fromEntries(DEFAULT_PROJECT.agents.map((a) => [a, agentTitle(a)])),
-          installModules: DEFAULT_PROJECT.install.map((id) => {
-            const mod = MODULE_REGISTRY[id];
+          ...project,
+          source: project.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
+          agentTitles: Object.fromEntries(project.agents.map((a) => [a, agentTitle(a)])),
+          installModules: project.install.map((id) => {
+            const mod = moduleRegistry[id];
             return { id, title: mod?.title ?? id, kind: mod?.kind ?? "unknown" };
           }),
         }),
       );
+      return;
+    }
+
+    if (url.pathname === "/api/projects" && (req.method ?? "GET") === "GET") {
+      const projects = Object.values(mergedProjectsView()).map((p) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        source: p.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
+        agentCount: p.agents.length,
+        flowCount: p.flow.length,
+      }));
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ projects }));
       return;
     }
 
