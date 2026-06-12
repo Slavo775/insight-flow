@@ -927,6 +927,140 @@
       "branch": "rework/N97-onboard-task-git",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/74",
       "mergedAt": "2026-06-12T05:53:50.456Z"
+    },
+    {
+      "id": "N98",
+      "title": "Security as a first-class module — decompose enforcement, baseline trio on every agent",
+      "type": "rework",
+      "priority": "medium",
+      "status": "fixed",
+      "folder": "workTasks/N98-security-as-a-first-class-module-decompose-enforce",
+      "createdAt": "2026-06-12T06:43:46.677Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-12T06:43:46.677Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T06:49:23.156Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T06:53:55.081Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T06:57:24.963Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-12T07:09:30.686Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-12T07:10:23.969Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-12T07:11:47.735Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-12T07:15:16.529Z",
+          "by": "task-review-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-12T06:49:23.156Z",
+        "completedAt": "2026-06-12T06:53:55.080Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/security.json",
+          "packages/taskflow/src/agents/composed",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "AGENT_ENFORCEMENT.md",
+          "TASK_ANALYZER_ROLE.md",
+          "TASKMASTER_ROLE.md",
+          "TASKMASTER_CHANGE_ROLE.md",
+          "TASK_IMPLEMENTER_ROLE.md",
+          "TASK_REVIEWER_ROLE.md",
+          "TASK_REVIEW_FIXER_ROLE.md",
+          "TASK_HUMAN_REVIEW_ROLE.md",
+          "TASK_INCIDENT_ROLE.md",
+          "TASK_REQUEST_CHANGES_ROLE.md",
+          "TASK_GIT_ROLE.md",
+          "packages/taskflow/templates/roles",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "composer",
+        "security",
+        "modules"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-12T06:57:24.963Z",
+          "commitHash": "c225992",
+          "commitMessage": "rework(N98): security as a first-class module — baseline trio on every agent"
+        }
+      ],
+      "branch": "rework/N98-security-module",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/76",
+      "mergedAt": null
+    },
+    {
+      "id": "N99",
+      "title": "insightFlow layout — path indirection + back-compat shim",
+      "type": "rework",
+      "priority": "high",
+      "status": "ready",
+      "folder": "workTasks/N99-insightflow-layout-path-indirection-back-compat-sh",
+      "createdAt": "2026-06-12T11:28:52.665Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-12T11:28:52.665Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "storage",
+        "migration",
+        "core"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
