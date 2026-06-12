@@ -46,8 +46,8 @@ export {
   TaskflowProjectNotFoundError,
 } from "./core/paths.js";
 export type { FlowRoot } from "./core/paths.js";
-export { currentFlowNodes } from "./core/flow-status.js";
-export type { FlowEdge } from "./core/flow-status.js";
+export { currentFlowNodes, suggestNextSteps } from "./core/flow-status.js";
+export type { FlowEdge, NextStep } from "./core/flow-status.js";
 export {
   TaskSchema,
   ReviewSchema,
