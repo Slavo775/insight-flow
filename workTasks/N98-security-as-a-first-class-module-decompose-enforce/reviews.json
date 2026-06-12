@@ -1,0 +1,14 @@
+{
+  "taskId": "N98",
+  "reviews": [
+    {
+      "startedAt": "2026-06-12T07:09:30.686Z",
+      "endedAt": "2026-06-12T07:10:23.969Z",
+      "verdict": "fix-needed",
+      "comment": "Fix-needed — upgraded legacy consumers silently lose ALL security refs (enforcement regenerates without the embedded line, old role files never gain the include); fix = security-line patcher in applyEnforcement + upgrade-path test",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
