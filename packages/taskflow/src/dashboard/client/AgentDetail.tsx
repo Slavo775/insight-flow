@@ -2,6 +2,7 @@
 // composition map. Change request R1: clicking a module node opens an info
 // modal in place (no navigation); the modal links to the full module page.
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 import type { AgentDto } from "./api.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
@@ -85,6 +86,13 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
         {agent.description ? <Description>{agent.description}</Description> : null}
         <Sub>
           {agent.id} · {agent.modules.length} modules in sequence · {sharedCount} shared
+          {/* N107 — built-ins are immutable; only custom agents are editable. */}
+          {agent.source === "custom" ? (
+            <>
+              {" · "}
+              <Link to={`/agent/edit/${agent.id}`}>Edit</Link>
+            </>
+          ) : null}
         </Sub>
       </Header>
       <Legend>

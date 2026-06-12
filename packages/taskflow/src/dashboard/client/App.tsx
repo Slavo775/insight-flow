@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClaudeStatus } from "./activity.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { Route, Routes } from "react-router-dom";
+import { AgentForm } from "./AgentForm.js";
 import { AgentsPage } from "./AgentsPage.js";
 import { DetailPanel } from "./DetailPanel.js";
 import { ModuleForm } from "./ModuleForm.js";
@@ -209,6 +210,9 @@ export function App() {
       <Route path="/module/edit/*" element={<ModuleForm />} />
       <Route path="/module/*" element={<ModulesPage />} />
       <Route path="/agent" element={<AgentsPage />} />
+      {/* N107 — authoring routes win over the :id route below. */}
+      <Route path="/agent/new" element={<AgentForm />} />
+      <Route path="/agent/edit/:id" element={<AgentForm />} />
       <Route path="/agent/:id" element={<AgentsPage />} />
       <Route path="/project" element={<ProjectPage />} />
     </Routes>

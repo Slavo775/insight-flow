@@ -201,3 +201,20 @@ test("each editable module kind round-trips through the API", async () => {
     }
   });
 });
+
+// N107 — agent reorder round-trip: the saved module order is the UI order.
+test("agent module order round-trips through PUT", async () => {
+  await withServer(async () => {
+    assert.equal((await api("/api/modules", "POST", MODULE)).status, 201);
+    assert.equal((await api("/api/agents", "POST", AGENT)).status, 201);
+    const reordered = { ...AGENT, modules: ["custom:greeting", "security"] };
+    assert.equal((await api("/api/agents/custom:greeter", "PUT", reordered)).status, 200);
+    const listed = await (await api("/api/agents", "GET")).json();
+    const agent = listed.agents.find((a) => a.id === "custom:greeter");
+    assert.deepEqual(
+      agent.modules.map((m) => m.id),
+      ["custom:greeting", "security"],
+    );
+    assert.equal(agent.source, "custom");
+  });
+});

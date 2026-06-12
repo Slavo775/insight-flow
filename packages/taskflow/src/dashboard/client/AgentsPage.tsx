@@ -32,11 +32,16 @@ export function AgentsPage() {
 
   const agent = registry.agents.find((a) => a.id === id) ?? null;
 
-  const sidebar = registry.agents.map((a) => (
-    <MenuLink key={a.id} to={`/agent/${a.id}`} title={a.description}>
-      <AgentGlyph>⚙</AgentGlyph> {a.title}
-    </MenuLink>
-  ));
+  const sidebar = [
+    <MenuLink key="__new" to="/agent/new">
+      ＋ New agent
+    </MenuLink>,
+    ...registry.agents.map((a) => (
+      <MenuLink key={a.id} to={`/agent/${a.id}`} title={a.description}>
+        <AgentGlyph>⚙</AgentGlyph> {a.title}
+      </MenuLink>
+    )),
+  ];
 
   return (
     <>
