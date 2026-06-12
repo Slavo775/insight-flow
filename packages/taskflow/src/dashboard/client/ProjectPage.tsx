@@ -11,10 +11,12 @@ import {
   deleteDefinition,
   fetchProject,
   fetchProjects,
+  saveDefinition,
   type ProjectDto,
   type ProjectSummaryDto,
 } from "./api.js";
 import { Button } from "./components/index.js";
+import { FlowEditor, type FlowPositions } from "./components/FlowEditor.js";
 import { FlowMap } from "./components/FlowMap.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { kindColor } from "./components/CompositionMap.js";
@@ -85,6 +87,11 @@ export function ProjectPage() {
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [topError, setTopError] = useState<string | null>(null);
+  // N109 — layout edit mode (custom flows only): draft positions live here
+  // until an explicit Save; null = not editing.
+  const [draftPositions, setDraftPositions] = useState<FlowPositions | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [busy, setBusy] = useState(false);
   const projectName = useDashboardStore((s) => s.snapshot?.projectName || "");
 
   useEffect(() => {
@@ -101,6 +108,8 @@ export function ProjectPage() {
   useEffect(() => {
     let alive = true;
     setProject(null);
+    setDraftPositions(null);
+    setDirty(false);
     fetchProject(id).then(
       (p) => alive && setProject(p),
       (e: unknown) => alive && setError(e instanceof Error ? e.message : String(e)),
@@ -114,6 +123,47 @@ export function ProjectPage() {
   if (!projects || !project) return <Hint>Loading project…</Hint>;
 
   const isBuiltin = project.source !== "custom";
+  const editing = draftPositions !== null;
+
+  const startEdit = (): void => {
+    setDraftPositions({ ...(project.layout ?? {}) });
+    setDirty(false);
+  };
+
+  const exitEdit = (): void => {
+    if (dirty && !window.confirm("Discard unsaved layout changes?")) return;
+    setDraftPositions(null);
+    setDirty(false);
+  };
+
+  const saveLayout = async (): Promise<void> => {
+    if (!draftPositions) return;
+    setTopError(null);
+    setBusy(true);
+    try {
+      // PUT the full flow record — only `layout` changes; everything else is
+      // carried verbatim so the server's whole-record validation holds.
+      const record = {
+        id: project.id,
+        title: project.title,
+        ...(project.description ? { description: project.description } : {}),
+        agents: project.agents,
+        flow: project.flow,
+        install: project.install,
+        layout: draftPositions,
+      };
+      await saveDefinition("projects", record, true);
+      // Re-render from server truth.
+      const fresh = await fetchProject(project.id);
+      setProject(fresh);
+      setDraftPositions(null);
+      setDirty(false);
+    } catch (err) {
+      setTopError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const removeFlow = async (): Promise<void> => {
     if (!window.confirm(`Delete flow ${project.id}?`)) return;
@@ -174,18 +224,49 @@ export function ProjectPage() {
         <Header>
           <Title>{project.title}</Title>
           <SourceBadge $builtin={isBuiltin}>{isBuiltin ? "shipped" : "custom"}</SourceBadge>
-          {!isBuiltin ? (
-            <Button type="button" $variant="danger" onClick={() => void removeFlow()}>
-              Delete flow
-            </Button>
+          {!isBuiltin && !editing ? (
+            <>
+              <Button type="button" $variant="nav" onClick={startEdit}>
+                Edit layout
+              </Button>
+              <Button type="button" $variant="danger" onClick={() => void removeFlow()}>
+                Delete flow
+              </Button>
+            </>
+          ) : null}
+          {editing ? (
+            <>
+              <Button
+                type="button"
+                $variant="primary"
+                disabled={busy || !dirty}
+                onClick={() => void saveLayout()}
+              >
+                Save layout
+              </Button>
+              <Button type="button" $variant="nav" disabled={busy} onClick={exitEdit}>
+                {dirty ? "Discard" : "Done"}
+              </Button>
+            </>
           ) : null}
         </Header>
         {project.description ? <Description>{project.description}</Description> : null}
-        <FlowMap project={project} />
-        {!isBuiltin ? (
+        {editing ? (
+          <FlowEditor
+            project={project}
+            onPositionsChange={(positions) => {
+              setDraftPositions(positions);
+              setDirty(true);
+            }}
+          />
+        ) : (
+          <FlowMap project={project} />
+        )}
+        {!isBuiltin && !editing ? (
           <Hint>
-            Node/edge editing lands with the flow editor (N109–N111). Until then,{" "}
-            <Link to="/project/new">duplicate from default</Link> is the quickest start.
+            Drag nodes via Edit layout; edge editing lands with N110–N111.{" "}
+            <Link to="/project/new">Duplicate from default</Link> is the quickest start for a new
+            flow.
           </Hint>
         ) : null}
       </SideLayout>
