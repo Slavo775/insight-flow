@@ -81,7 +81,7 @@
       "title": "insightFlow layout — ecosystem sweep (init, hooks, master, docs)",
       "type": "rework",
       "priority": "high",
-      "status": "in-progress",
+      "status": "implemented",
       "folder": "workTasks/N101-insightflow-layout-ecosystem-sweep-init-hooks-mast",
       "createdAt": "2026-06-12T11:29:03.928Z",
       "statusHistory": [
@@ -94,12 +94,30 @@
           "status": "in-progress",
           "at": "2026-06-12T12:15:54.687Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T12:37:36.265Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-12T12:15:54.687Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-12T12:37:36.265Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/agents/init/providers/skills.ts",
+          "packages/taskflow/src/agents/init/providers/context.ts",
+          "packages/taskflow/src/agents/modules/roles/*.json",
+          "packages/taskflow/src/cli/commands/create.ts",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/src/core/storage.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "README.md",
+          "CLAUDE.md",
+          "AGENTS.md",
+          "docs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
