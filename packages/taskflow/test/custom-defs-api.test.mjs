@@ -285,3 +285,56 @@ test("project layout persists through PUT and bad coords fail validation", async
     assert.ok((await bad.json()).issues.some((i) => i.path.includes("layout")));
   });
 });
+
+// N111 — load → edit → save → reload fidelity + the stale-revision guard.
+test("flow edit round-trips deep-equal and stale revisions are rejected", async () => {
+  await withServer(async () => {
+    const def = await (await api("/api/project", "GET")).json();
+    const flow = {
+      id: "custom:rt",
+      title: "Round trip",
+      agents: def.agents,
+      flow: def.flow,
+      install: [],
+    };
+    assert.equal((await api("/api/projects", "POST", flow)).status, 201);
+
+    // load (capture revision) → edit (move a node + add an edge) → save
+    const loaded = await (await api("/api/project?id=custom%3Art", "GET")).json();
+    assert.ok(loaded.revision, "custom flows carry a revision token");
+    const edited = {
+      ...flow,
+      flow: [...flow.flow, { from: "task-git", to: "task-incident", on: "merged" }],
+      layout: { "task-implement": { x: 11, y: 22 } },
+    };
+    const put = await fetch(`http://127.0.0.1:${PORT}/api/projects/custom:rt`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "x-revision": loaded.revision },
+      body: JSON.stringify(edited),
+    });
+    assert.equal(put.status, 200);
+
+    // reload: deep-equal what was saved
+    const reloaded = await (await api("/api/project?id=custom%3Art", "GET")).json();
+    assert.deepEqual(reloaded.flow, edited.flow);
+    assert.deepEqual(reloaded.layout, edited.layout);
+    assert.notEqual(reloaded.revision, loaded.revision, "revision rotates on save");
+
+    // a second writer using the OLD revision gets 409
+    const stale = await fetch(`http://127.0.0.1:${PORT}/api/projects/custom:rt`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "x-revision": loaded.revision },
+      body: JSON.stringify(flow),
+    });
+    assert.equal(stale.status, 409);
+    assert.match((await stale.json()).error, /stale revision/);
+
+    // a bad trigger still 400s with a flow path for the inline panel
+    const bad = await api("/api/projects/custom:rt", "PUT", {
+      ...edited,
+      flow: [{ from: "task-implement", to: "task-git", on: "approvedd" }],
+    });
+    assert.equal(bad.status, 400);
+    assert.ok((await bad.json()).issues.some((i) => i.path.startsWith("flow.")));
+  });
+});

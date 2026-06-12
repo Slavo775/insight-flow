@@ -4,7 +4,15 @@
 // against the prospective merged registries *before* touching disk (400 with
 // field issues); deletes refuse while the target is referenced (409 listing
 // the referencing ids). Files are written atomically (tmp + rename).
-import { mkdirSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { resolve } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { ZodError } from "zod";
@@ -46,6 +54,21 @@ function fileFor(root: string, kind: Kind, id: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9-_]+/g, "-");
   return resolve(root, kind, `${slug}.json`);
+}
+
+/**
+ * N111 — optimistic-concurrency token for a stored definition: the hash of
+ * the file bytes. GET responses carry it; PUTs may send it back via the
+ * `x-revision` header — a mismatch means someone else saved in between (409).
+ */
+export function definitionRevision(
+  kind: Kind,
+  id: string,
+  root: string = userSpaceRoot(),
+): string | null {
+  const path = fileFor(root, kind, id);
+  if (!existsSync(path)) return null;
+  return createHash("sha1").update(readFileSync(path)).digest("hex").slice(0, 16);
 }
 
 function builtinIds(kind: Kind): Set<string> {
@@ -258,6 +281,16 @@ export function handleCustomDefsRequest(
         error: `unknown ${kind.slice(0, -1)} '${record.id}' — use POST to create`,
       });
       return;
+    }
+    // N111 — optimistic-concurrency floor: a PUT carrying the revision it
+    // loaded gets rejected when the stored file has changed since.
+    const sentRevision = req.headers["x-revision"];
+    if (method === "PUT" && typeof sentRevision === "string" && sentRevision.length > 0) {
+      const current = definitionRevision(kind, record.id, root);
+      if (current && current !== sentRevision) {
+        send(res, 409, { ok: false, error: "stale revision — reload the flow and retry" });
+        return;
+      }
     }
 
     if (kind === "modules") {

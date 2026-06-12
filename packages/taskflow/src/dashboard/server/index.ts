@@ -32,7 +32,7 @@ import {
 } from "../../agents/compose.js";
 import { DEFAULT_PROJECT } from "../../agents/project.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
-import { handleCustomDefsRequest } from "./custom-defs.js";
+import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
 
 /** N108 — shipped default + user-space flows; degrades to default-only. */
@@ -687,6 +687,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         JSON.stringify({
           ...project,
           source: project.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
+          // N111 — optimistic-concurrency token; PUTs echo it via x-revision.
+          revision:
+            project.id === DEFAULT_PROJECT.id
+              ? undefined
+              : (definitionRevision("projects", project.id) ?? undefined),
           agentTitles: Object.fromEntries(project.agents.map((a) => [a, agentTitle(a)])),
           installModules: project.install.map((id) => {
             const mod = moduleRegistry[id];
