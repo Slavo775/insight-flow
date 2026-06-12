@@ -85,7 +85,7 @@
       "title": "Flow editor — save/load round-trip via CRUD API",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N111-flow-editor-save-load-round-trip-via-crud-api",
       "createdAt": "2026-06-12T11:29:04.918Z",
       "statusHistory": [
@@ -103,6 +103,11 @@
           "status": "implemented",
           "at": "2026-06-12T17:13:15.467Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T17:13:39.534Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -128,9 +133,15 @@
         "flow",
         "editor"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T17:13:39.534Z",
+          "commitHash": "238cf36",
+          "commitMessage": "feat(dashboard): N111 save round-trip + revision guard"
+        }
+      ],
+      "branch": "feat/N111-save-roundtrip",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/90",
       "mergedAt": null
     },
     {
