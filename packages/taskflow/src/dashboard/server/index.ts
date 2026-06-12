@@ -64,7 +64,9 @@ function hydrateShardJson(raw: string, workDir: string): string {
   for (const task of parsed.tasks) {
     const folder = typeof task.folder === "string" ? task.folder : null;
     if (!folder) continue;
-    const tail = folder.replace(/^.*?\//, "");
+    // Folder prefixes vary by layout era ("workTasks/...", "insightFlow/workTasks/...");
+    // the basename against the live workDir is canonical (N101).
+    const tail = folder.split(/[\\/]/).filter(Boolean).pop() ?? folder;
     const folderPath = normalize(resolve(workDir, tail));
     if (!folderPath.startsWith(workDirGuard) && folderPath !== normalize(workDir)) {
       task.reviews = Array.isArray(task.reviews) ? task.reviews : [];
@@ -508,7 +510,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         res.end(JSON.stringify({ error: "name must be one of TASK|CHECKLIST|REVIEW|ANALYSIS" }));
         return;
       }
-      const docPath = resolve(process.cwd(), folder, fileName);
+      // Resolve via the live workDir + folder basename so pre-migration folder
+      // values ("workTasks/Nxx-...") keep working after migrate-layout (N101).
+      const folderTail = folder.split(/[\\/]/).filter(Boolean).pop() ?? "";
+      const docPath = resolve(workDir, folderTail, fileName);
       if (docPath !== workDir && !docPath.startsWith(workDir + sep)) {
         res.writeHead(400, { "Content-Type": MIME[".json"] });
         res.end(JSON.stringify({ error: "folder outside work directory" }));

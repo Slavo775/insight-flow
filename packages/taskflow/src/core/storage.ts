@@ -144,13 +144,14 @@ export function resolveId(master: MasterFile, id?: string): string {
 }
 
 /**
- * Resolve `<workDir>/<task.folder relative tail>`. Task.folder is stored as
- * "workTasks/Nxx-slug" (relative to repo root), but we read with respect to
- * the configured workDir to keep tests + alternate roots working.
+ * Resolve `<workDir>/<task folder name>`. Task.folder is stored relative to
+ * the project root and its prefix varies by layout era ("workTasks/Nxx-slug",
+ * "insightFlow/workTasks/Nxx-slug"); task folders are always direct children
+ * of the tasks dir, so the basename against the live workDir is canonical.
  */
 function resolveTaskFolder(cwd: string | undefined, config: TaskflowConfig, task: Task): string {
   const workDir = getWorkDir(config, cwd);
-  const tail = task.folder.replace(/^.*?\//, ""); // drop leading "workTasks/" (or workDir prefix)
+  const tail = task.folder.split(/[\\/]/).filter(Boolean).pop() ?? task.folder;
   return resolve(workDir, tail);
 }
 

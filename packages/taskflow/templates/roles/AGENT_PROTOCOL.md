@@ -7,7 +7,7 @@ Each role file inherits this protocol via `@AGENT_PROTOCOL.md` and only document
 STANDARD WORKFLOW (apply unless the role explicitly overrides a step)
 
 1. **Resolve task** — if no ID was provided by the human, run the role's task-picker CLI (`insight-flow next` / `next-review` / `next-fix` / `next-change` / `current`). Capture the returned `id` and `folder`.
-2. **Mark started** — run the role's lifecycle-start CLI (e.g. `implement-start`, `review-start`, `fix-start`, `change-start`, `incident-status investigating`). All mutations go through the CLI — never edit tracker JSON or workTasks/ files directly with Edit/Write.
+2. **Mark started** — run the role's lifecycle-start CLI (e.g. `implement-start`, `review-start`, `fix-start`, `change-start`, `incident-status investigating`). All mutations go through the CLI — never edit tracker JSON or task-folder files directly with Edit/Write.
 3. **Read context** — `insight-flow show --id Nxx --summary --spec` returns lean state + TASK.md + CHECKLIST.md content inline (single Bash call beats two `Read` calls). For REVIEW.md / source files, use `Read` with offset/limit.
 4. **Plan** — follow the "Implementation plan" / role workflow in dependency order. No creative scope expansion.
 5. **Execute** — apply the role's actual work (write code, post review, record verdict, etc.). Match existing code patterns.
@@ -20,7 +20,7 @@ STANDARD WORKFLOW (apply unless the role explicitly overrides a step)
 
 UNIVERSAL NEVER
 
-- Never use Edit / Write / file-creation tools on `tracker.json`, `TASK.md`, `CHECKLIST.md`, or anything inside `workTasks/` for **state mutations** — go through the CLI. (Editing the narrative *content* of TASK.md / CHECKLIST.md / REVIEW.md after the CLI has scaffolded them is fine and expected — that's not state.)
+- Never use Edit / Write / file-creation tools on `tracker.json`, `TASK.md`, `CHECKLIST.md`, or anything inside the tracker directory for **state mutations** — go through the CLI. (Editing the narrative *content* of TASK.md / CHECKLIST.md / REVIEW.md after the CLI has scaffolded them is fine and expected — that's not state.)
 - Never add or remove dependencies without explicit human approval.
 - Never modify files unrelated to the task scope.
 - Never force-push to `main` / `master`.

@@ -53,7 +53,7 @@ This project uses **insight-flow** for AI-assisted task lifecycle management.
 
 ## Task System
 
-Tasks are tracked in \`${config.workDir}/\` as sharded JSON files. Use the insight-flow CLI or slash commands to manage them.
+Tasks are tracked in \`insightFlow/workTasks/\` as sharded JSON files (legacy projects: \`${config.workDir}/\`). Use the insight-flow CLI or slash commands to manage them.
 
 ## Commands
 
@@ -83,7 +83,7 @@ ready -> in-progress -> implemented -> reviewing -> approved -> pushed -> merged
 ## Conventions
 
 - Task IDs: N00, N01, N02, ...
-- Task folders: \`${config.workDir}/Nxx-short-title/\` containing TASK.md + CHECKLIST.md
+- Task folders: \`insightFlow/workTasks/Nxx-short-title/\` containing TASK.md + CHECKLIST.md
 - Branches: \`<type>/Nxx-short-title\` (e.g., \`feat/N00-add-auth\`)
 - Commits: conventional commits (feat, fix, refactor, docs, chore, etc.)
 - Tracker commands: \`insight-flow <command>\` (run \`insight-flow help\` for the full list)

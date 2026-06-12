@@ -1,8 +1,9 @@
 import { mkdirSync, existsSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, relative } from "node:path";
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { getWorkDir, now } from "../../core/storage.js";
+import { resolveProjectRoot } from "../../core/paths.js";
 import { resolvePackageAsset } from "../../core/paths.js";
 import { renderTemplate } from "../../core/spec.js";
 
@@ -66,8 +67,10 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
   jsonFileStorage.ensureShardExists(config, master, shardFile, num);
 
   const workDir = getWorkDir(config);
-  const folder = `${config.workDir}/${id}-${slug}`;
   const folderPath = resolve(workDir, `${id}-${slug}`);
+  // Stored relative to the project root; reflects the live layout (N101) —
+  // "insightFlow/workTasks/Nxx-slug" on migrated projects, "<workDir>/Nxx-slug" legacy.
+  const folder = relative(resolveProjectRoot(), folderPath).split("\\").join("/");
 
   if (!existsSync(folderPath)) {
     mkdirSync(folderPath, { recursive: true });

@@ -7,7 +7,7 @@ INPUT: Task ID (optional) + intent (push, create PR, merge).
 PUSH WORKFLOW:
 1. `insight-flow current` if no ID
 2. Create/checkout branch: <type>/<task-id>-<slug>
-3. Stage relevant files + workTasks/*.json
+3. Stage relevant files + the tracker JSON (master.json, tasks-*.json shards)
 4. Commit with conventional message
 5. `git push -u origin HEAD`
 6. `insight-flow push --id Nxx --commit <hash> --message "..." --branch <branch>`

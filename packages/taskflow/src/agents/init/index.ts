@@ -9,7 +9,7 @@ import {
 import { createInterface } from "node:readline";
 import { resolve } from "node:path";
 import type { TaskflowConfig } from "../../core/types.js";
-import { resolvePackageAsset } from "../../core/paths.js";
+import { resolvePackageAsset, resolveFlowRoot } from "../../core/paths.js";
 import { applyAgentExtensions } from "../agents.js";
 import {
   installActivityHook,
@@ -118,11 +118,20 @@ export async function initProject(
   const claudeSelected = providers.some((p) => p.id === "claude");
   console.log(`insight-flow init — editors: ${providers.map((p) => p.id).join(", ")}`);
 
-  // 2. Create workTasks dir + master.json
-  const workDir = resolve(cwd, config.workDir);
+  // 2. Create the tasks dir + master.json. New projects are born on the
+  //    consolidated insightFlow/ layout (N101); a project that already has a
+  //    legacy <workDir>/ keeps it — `insight-flow migrate-layout` moves it.
+  const flowRoot = resolveFlowRoot(cwd, config.workDir);
+  const legacyExists = flowRoot.layout === "legacy" && existsSync(flowRoot.tasksDir);
+  const workDir = legacyExists ? flowRoot.tasksDir : resolve(cwd, "insightFlow", "workTasks");
+  if (legacyExists) {
+    console.log(
+      `Legacy ${config.workDir}/ layout detected — keeping it. Run 'insight-flow migrate-layout' to move to insightFlow/.`,
+    );
+  }
   if (!existsSync(workDir)) {
     mkdirSync(workDir, { recursive: true });
-    console.log(`Created ${config.workDir}/`);
+    console.log("Created insightFlow/workTasks/");
   }
 
   const masterPath = resolve(workDir, "master.json");

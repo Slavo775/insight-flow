@@ -15,7 +15,7 @@ function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
   lines.push("STRICT ENFORCEMENT — TASK FILE MUTATIONS");
   lines.push("");
   lines.push(
-    "- NEVER use Edit, Write, or file-creation tools on: tracker.json, TASK.md, CHECKLIST.md, or any file inside workTasks/",
+    "- NEVER use Edit, Write, or file-creation tools on: tracker.json, TASK.md, CHECKLIST.md, or any file inside the tracker directory (insightFlow/workTasks/, legacy workTasks/)",
   );
   lines.push(
     "- ALL task state changes MUST go through `insight-flow` CLI commands (create, update-status, set-review, etc.)",
