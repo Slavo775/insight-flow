@@ -9,7 +9,7 @@
       "title": "insight-flow migrate-layout command",
       "type": "rework",
       "priority": "high",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "workTasks/N100-insight-flow-migrate-layout-command",
       "createdAt": "2026-06-12T11:29:03.827Z",
       "statusHistory": [
@@ -27,6 +27,11 @@
           "status": "implemented",
           "at": "2026-06-12T12:13:11.963Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T12:13:19.796Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -50,9 +55,15 @@
         "migration",
         "cli"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T12:13:19.795Z",
+          "commitHash": "503d0ed",
+          "commitMessage": "rework(cli): N100 migrate-layout command"
+        }
+      ],
+      "branch": "rework/N100-migrate-layout-command",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/79",
       "mergedAt": null
     },
     {
