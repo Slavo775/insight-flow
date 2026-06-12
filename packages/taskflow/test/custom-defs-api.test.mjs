@@ -163,3 +163,41 @@ test("validation, immutability, and conflict failure modes", async () => {
     assert.equal(r.status, 400);
   });
 });
+
+// N106 — one module of every form-editable kind round-trips with harness target.
+test("each editable module kind round-trips through the API", async () => {
+  await withServer(async () => {
+    const kinds = [
+      {
+        id: "custom:k-section",
+        title: "S",
+        kind: "section",
+        heading: "H",
+        body: "b",
+        target: "claude",
+      },
+      { id: "custom:k-include", title: "I", kind: "include", ref: "AGENT_X.md", target: "cursor" },
+      {
+        id: "custom:k-mcp",
+        title: "M",
+        kind: "mcp-server",
+        name: "srv",
+        config: { command: "x" },
+        target: "both",
+      },
+      { id: "custom:k-hook", title: "H", kind: "hook", event: "PostToolUse", command: "echo hi" },
+      { id: "custom:k-skill", title: "K", kind: "skill", name: "my-skill", content: "# Skill" },
+    ];
+    for (const record of kinds) {
+      const r = await api("/api/modules", "POST", record);
+      assert.equal(r.status, 201, `${record.kind} create`);
+    }
+    const listed = await (await api("/api/modules", "GET")).json();
+    for (const record of kinds) {
+      const found = listed.modules.find((m) => m.id === record.id);
+      assert.ok(found, `${record.id} listed`);
+      assert.equal(found.source, "custom");
+      if (record.target) assert.equal(found.target, record.target, `${record.id} target`);
+    }
+  });
+});

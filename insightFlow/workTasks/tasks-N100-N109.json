@@ -454,7 +454,7 @@
       "title": "Module create/edit form (kind-specific, Claude+Cursor targets)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N106-module-create-edit-form-kind-specific-claude-curso",
       "createdAt": "2026-06-12T11:29:04.433Z",
       "statusHistory": [
@@ -462,12 +462,37 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.433Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T14:31:52.800Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T14:53:37.688Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T14:54:05.734Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T14:31:52.799Z",
+        "completedAt": "2026-06-12T14:53:37.688Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/ModulesPage.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/App.tsx",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/registry.ts",
+          "packages/taskflow/src/dashboard/client/components/Button.tsx",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -481,9 +506,15 @@
         "composer",
         "forms"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T14:54:05.733Z",
+          "commitHash": "0e53d92",
+          "commitMessage": "feat(dashboard): N106 module form"
+        }
+      ],
+      "branch": "feat/N106-module-form",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/85",
       "mergedAt": null
     },
     {

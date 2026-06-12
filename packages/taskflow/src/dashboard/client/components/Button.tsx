@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 
-export type ButtonVariant = "nav" | "tab" | "icon" | "close" | "docTab";
+export type ButtonVariant = "nav" | "tab" | "icon" | "close" | "docTab" | "primary" | "danger";
 
 const buttonVariants = {
   nav: css`
@@ -60,6 +60,38 @@ const buttonVariants = {
     border: none;
     color: ${(p) => p.theme.color.textMuted};
     font-size: ${(p) => p.theme.font.size["2xl"]};
+  `,
+  // N106 — form actions (module/agent/project authoring).
+  primary: css`
+    background: ${(p) => p.theme.color.accent};
+    border: 1px solid ${(p) => p.theme.color.accent};
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: ${(p) => p.theme.radius.md};
+    font-size: ${(p) => p.theme.font.size.md};
+    &:hover {
+      opacity: 0.9;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  `,
+  danger: css`
+    background: none;
+    border: 1px solid ${(p) => p.theme.color.red};
+    color: ${(p) => p.theme.color.red};
+    padding: 6px 16px;
+    border-radius: ${(p) => p.theme.radius.md};
+    font-size: ${(p) => p.theme.font.size.md};
+    &:hover {
+      background: ${(p) => p.theme.color.red};
+      color: #fff;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
   `,
   docTab: css<{ $active?: boolean }>`
     background: ${(p) => (p.$active ? p.theme.color.accent : p.theme.color.surface)};

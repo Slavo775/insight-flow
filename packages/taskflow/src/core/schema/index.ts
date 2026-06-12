@@ -260,6 +260,10 @@ const agentModuleBase = {
   // composer/emitter — never rendered into role MD or artifacts.
   description: z.string().optional(),
   source: z.enum(["builtin", "custom"]).default("builtin"),
+  // N106 — harness target. Descriptive metadata this round (authoring UI +
+  // browsing); emitters apply contributions to both harnesses regardless and
+  // start honoring it in a later iteration. Absent = "both".
+  target: z.enum(["claude", "cursor", "both"]).optional(),
 };
 
 export const AgentModuleSchema = z.discriminatedUnion("kind", [

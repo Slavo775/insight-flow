@@ -4,6 +4,7 @@ import { ActivityFeed } from "./ActivityFeed.js";
 import { Route, Routes } from "react-router-dom";
 import { AgentsPage } from "./AgentsPage.js";
 import { DetailPanel } from "./DetailPanel.js";
+import { ModuleForm } from "./ModuleForm.js";
 import { ModulesPage } from "./ModulesPage.js";
 import { ProjectPage } from "./ProjectPage.js";
 import { TaskDetailPage } from "./TaskDetailPage.js";
@@ -203,6 +204,9 @@ export function App() {
       {/* N93 — composer registry browser. Module ids contain "/"
           (task-implement/never), so the module route is a splat. */}
       <Route path="/module" element={<ModulesPage />} />
+      {/* N106 — authoring routes win over the id splat below. */}
+      <Route path="/module/new" element={<ModuleForm />} />
+      <Route path="/module/edit/*" element={<ModuleForm />} />
       <Route path="/module/*" element={<ModulesPage />} />
       <Route path="/agent" element={<AgentsPage />} />
       <Route path="/agent/:id" element={<AgentsPage />} />

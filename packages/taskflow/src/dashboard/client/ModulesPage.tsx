@@ -57,9 +57,14 @@ const Hint = styled.p`
 
 function groupModules(registry: Registry): { title: string; ids: string[] }[] {
   const shared: string[] = [];
+  const custom: string[] = [];
   const byPrefix = new Map<string, string[]>();
   const agentIds = new Set(registry.agents.map((a) => a.id));
   for (const m of registry.modules) {
+    if (m.source === "custom") {
+      custom.push(m.id);
+      continue;
+    }
     const slash = m.id.indexOf("/");
     if (slash === -1) {
       shared.push(m.id);
@@ -73,6 +78,7 @@ function groupModules(registry: Registry): { title: string; ids: string[] }[] {
   const roles = [...byPrefix.entries()].filter(([p]) => agentIds.has(p));
   const integrations = [...byPrefix.entries()].filter(([p]) => !agentIds.has(p));
   return [
+    { title: "Custom", ids: custom },
     { title: "Shared", ids: shared },
     ...integrations.map(([p, ids]) => ({ title: `Integration: ${p}`, ids })),
     ...roles.map(([p, ids]) => ({ title: p, ids })),
@@ -95,21 +101,26 @@ export function ModulesPage() {
   const byId = new Map(registry.modules.map((m) => [m.id, m]));
   const selected = moduleId ? (byId.get(moduleId) ?? null) : null;
 
-  const sidebar = groupModules(registry).map((group) => (
-    <Group key={group.title}>
-      <GroupTitle>{group.title}</GroupTitle>
-      {group.ids.map((id) => {
-        const m = byId.get(id);
-        if (!m) return null;
-        return (
-          <MenuLink key={id} to={`/module/${id}`} title={m.description}>
-            <KindDot $color={kindColor(tokens, m.kind)} />
-            {m.id}
-          </MenuLink>
-        );
-      })}
-    </Group>
-  ));
+  const sidebar = [
+    <Group key="__new">
+      <MenuLink to="/module/new">＋ New module</MenuLink>
+    </Group>,
+    ...groupModules(registry).map((group) => (
+      <Group key={group.title}>
+        <GroupTitle>{group.title}</GroupTitle>
+        {group.ids.map((id) => {
+          const m = byId.get(id);
+          if (!m) return null;
+          return (
+            <MenuLink key={id} to={`/module/${id}`} title={m.description}>
+              <KindDot $color={kindColor(tokens, m.kind)} />
+              {m.id}
+            </MenuLink>
+          );
+        })}
+      </Group>
+    )),
+  ];
 
   return (
     <>
@@ -124,4 +135,3 @@ export function ModulesPage() {
     </>
   );
 }
-
