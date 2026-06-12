@@ -234,7 +234,7 @@
       "title": "Task-on-flow map — current state highlighted",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "pushed",
       "folder": "workTasks/N104-task-on-flow-map-current-state-highlighted",
       "createdAt": "2026-06-12T11:29:04.238Z",
       "statusHistory": [
@@ -242,12 +242,33 @@
           "status": "ready",
           "at": "2026-06-12T11:29:04.239Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-12T12:39:31.726Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-12T12:43:41.321Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-12T12:43:49.758Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-12T12:39:31.726Z",
+        "completedAt": "2026-06-12T12:43:41.321Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/flow-status.ts",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx",
+          "packages/taskflow/src/dashboard/client/TaskDetailPage.tsx",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/flow-status.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -260,9 +281,15 @@
         "dashboard",
         "flow"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-12T12:43:49.757Z",
+          "commitHash": "c219828",
+          "commitMessage": "feat(dashboard): N104 task-on-flow map"
+        }
+      ],
+      "branch": "feat/N104-task-on-flow-map",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/81",
       "mergedAt": null
     },
     {
