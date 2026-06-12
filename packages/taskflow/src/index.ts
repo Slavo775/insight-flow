@@ -18,7 +18,7 @@ export type {
   CustomAgent,
 } from "./core/types.js";
 
-export { resolveConfig, getWorkDir, getMasterPath } from "./core/config.js";
+export { resolveConfig, getWorkDir, getEventsDir, getMasterPath } from "./core/config.js";
 export {
   loadMaster,
   saveMaster,
@@ -42,8 +42,10 @@ export { buildBulkInitArgs } from "./cli/commands/batch-ui.js";
 export {
   resolveProjectRoot,
   resolvePackageAsset,
+  resolveFlowRoot,
   TaskflowProjectNotFoundError,
 } from "./core/paths.js";
+export type { FlowRoot } from "./core/paths.js";
 export {
   TaskSchema,
   ReviewSchema,

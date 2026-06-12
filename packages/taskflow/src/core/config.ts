@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, basename } from "node:path";
 import type { TaskflowConfig, ActivityEngineConfig, NotificationsConfig } from "./types.js";
-import { resolveProjectRoot } from "./paths.js";
+import { resolveProjectRoot, resolveFlowRoot, DEFAULT_WORK_DIR } from "./paths.js";
 
 const CONFIG_FILENAME = "taskflow.config.json";
 
@@ -20,7 +20,7 @@ const NOTIFICATION_DEFAULTS: NotificationsConfig = {
 };
 
 const DEFAULTS: TaskflowConfig = {
-  workDir: "workTasks",
+  workDir: DEFAULT_WORK_DIR,
   shardSize: 10,
   projectName: "",
   rolesDir: ".claude/roles",
@@ -103,7 +103,12 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
 
 export function getWorkDir(config: TaskflowConfig, cwd: string = process.cwd()): string {
   const anchor = safeResolveProjectRoot(cwd) ?? cwd;
-  return resolve(anchor, config.workDir);
+  return resolveFlowRoot(anchor, config.workDir).tasksDir;
+}
+
+export function getEventsDir(config: TaskflowConfig, cwd: string = process.cwd()): string {
+  const anchor = safeResolveProjectRoot(cwd) ?? cwd;
+  return resolveFlowRoot(anchor, config.workDir).eventsDir;
 }
 
 export function getMasterPath(config: TaskflowConfig, cwd: string = process.cwd()): string {
