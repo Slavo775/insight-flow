@@ -125,16 +125,24 @@ export function FlowMap({
       };
     });
 
-    const edges: Edge[] = project.flow.map((e) => ({
-      id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
-      source: e.from,
-      target: e.to,
-      animated: true,
-      label: e.on ?? "",
-      labelStyle: { fill: theme.color.textMuted, fontFamily: theme.font.family, fontSize: 10 },
-      labelBgStyle: { fill: theme.color.surface },
-      style: { stroke: theme.color.border },
-    }));
+    const edges: Edge[] = project.flow.map((e) => {
+      // N112 — a custom-state trigger renders its title and color.
+      const state = project.states?.find((s) => s.id === e.on);
+      return {
+        id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
+        source: e.from,
+        target: e.to,
+        animated: true,
+        label: state?.title ?? e.on ?? "",
+        labelStyle: {
+          fill: state?.color ?? theme.color.textMuted,
+          fontFamily: theme.font.family,
+          fontSize: 10,
+        },
+        labelBgStyle: { fill: theme.color.surface },
+        style: { stroke: state?.color ?? theme.color.border },
+      };
+    });
 
     return { nodes, edges };
   }, [project, theme, highlightNodes, secondaryHighlightNodes]);

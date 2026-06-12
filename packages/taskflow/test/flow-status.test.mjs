@@ -35,11 +35,7 @@ const CASES = {
 
 test("currentFlowNodes maps every canonical status per the default flow", () => {
   for (const [status, expected] of Object.entries(CASES)) {
-    assert.deepEqual(
-      currentFlowNodes(defaultProject.flow, status),
-      expected,
-      `status "${status}"`,
-    );
+    assert.deepEqual(currentFlowNodes(defaultProject.flow, status), expected, `status "${status}"`);
   }
 });
 
@@ -80,8 +76,8 @@ test("suggestNextSteps carries the trigger and dedupes targets", () => {
     { from: "x", to: "y" },
   ];
   assert.deepEqual(suggestNextSteps(flow, "s"), [
-    { agentId: "b", on: "s" },
-    { agentId: "d", on: "s" },
+    { agentId: "b", on: "s", label: "s" },
+    { agentId: "d", on: "s", label: "s" },
   ]);
   assert.deepEqual(suggestNextSteps(flow, "zzz"), []);
 });
@@ -95,4 +91,26 @@ test("currentFlowNodes dedupes producers and preserves flow order", () => {
   ];
   assert.deepEqual(currentFlowNodes(flow, "s"), ["a", "d"]);
   assert.deepEqual(currentFlowNodes(flow, "missing"), []);
+});
+
+// N112 — alias resolution: a custom state maps onto a canonical status; the
+// map and the suggestions honor it while canonical-only flows are unaffected.
+test("custom states alias onto canonical statuses end-to-end", () => {
+  const states = [{ id: "qa-verify", title: "QA Verify", color: "#a78bfa", mapsTo: "approved" }];
+  const flow = [
+    { from: "task-review", to: "task-human-review", on: "qa-verify" },
+    { from: "task-review", to: "task-review-fix", on: "fix-needed" },
+  ];
+  // an approved task is "at" the producer of the aliased edge…
+  assert.deepEqual(currentFlowNodes(flow, "approved", states), ["task-review"]);
+  // …and the suggestion carries the custom title as its label.
+  assert.deepEqual(suggestNextSteps(flow, "approved", states), [
+    { agentId: "task-human-review", on: "qa-verify", label: "QA Verify" },
+  ]);
+  // without the states list the alias is just an unknown trigger — no match.
+  assert.deepEqual(currentFlowNodes(flow, "approved"), []);
+  // canonical triggers resolve to themselves regardless.
+  assert.deepEqual(suggestNextSteps(flow, "fix-needed", states), [
+    { agentId: "task-review-fix", on: "fix-needed", label: "fix-needed" },
+  ]);
 });

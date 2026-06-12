@@ -6,6 +6,11 @@
  * Working statuses (in-progress, reviewing, …) carry no edges by design —
  * callers degrade gracefully. Derived entirely from the flow definition; no
  * hardcoded status table.
+ *
+ * N112 — flows may define custom states: display aliases that map onto
+ * exactly one canonical status. `resolveTrigger` collapses an edge's trigger
+ * to its canonical status, so the map and the suggestions honor aliases while
+ * tasks keep storing canonical statuses only.
  */
 export interface FlowEdge {
   from: string;
@@ -13,11 +18,33 @@ export interface FlowEdge {
   on?: string;
 }
 
+export interface FlowStateDef {
+  id: string;
+  title: string;
+  color?: string;
+  mapsTo: string;
+}
+
+/** The canonical status behind a trigger: a custom state's mapsTo, else itself. */
+export function resolveTrigger(
+  on: string | undefined,
+  states?: FlowStateDef[],
+): string | undefined {
+  if (!on) return undefined;
+  return states?.find((s) => s.id === on)?.mapsTo ?? on;
+}
+
 /** Agents the task is currently "at": unique producers of edges triggered by `status`. */
-export function currentFlowNodes(flow: FlowEdge[], status: string): string[] {
+export function currentFlowNodes(
+  flow: FlowEdge[],
+  status: string,
+  states?: FlowStateDef[],
+): string[] {
   const out: string[] = [];
   for (const edge of flow) {
-    if (edge.on === status && !out.includes(edge.from)) out.push(edge.from);
+    if (resolveTrigger(edge.on, states) === status && !out.includes(edge.from)) {
+      out.push(edge.from);
+    }
   }
   return out;
 }
@@ -25,6 +52,8 @@ export function currentFlowNodes(flow: FlowEdge[], status: string): string[] {
 export interface NextStep {
   agentId: string;
   on: string;
+  /** Display label: the custom state's title when the trigger is an alias. */
+  label: string;
 }
 
 /**
@@ -33,12 +62,17 @@ export interface NextStep {
  * task-human-review and task-git). Empty for working/terminal statuses —
  * suggestions only; the next/next-review pickers stay canonical.
  */
-export function suggestNextSteps(flow: FlowEdge[], status: string): NextStep[] {
+export function suggestNextSteps(
+  flow: FlowEdge[],
+  status: string,
+  states?: FlowStateDef[],
+): NextStep[] {
   const out: NextStep[] = [];
   for (const edge of flow) {
-    if (edge.on === status && !out.some((s) => s.agentId === edge.to)) {
-      out.push({ agentId: edge.to, on: edge.on });
-    }
+    if (!edge.on || resolveTrigger(edge.on, states) !== status) continue;
+    if (out.some((s) => s.agentId === edge.to)) continue;
+    const state = states?.find((s) => s.id === edge.on);
+    out.push({ agentId: edge.to, on: edge.on, label: state?.title ?? edge.on });
   }
   return out;
 }

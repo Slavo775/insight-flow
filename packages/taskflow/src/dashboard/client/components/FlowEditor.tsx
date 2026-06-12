@@ -109,9 +109,12 @@ function toFlowEdge(e: Edge): FlowEdge {
 
 export function FlowEditor({
   project,
+  states,
   onDraftChange,
 }: {
   project: ProjectDto;
+  /** N112 — the draft's custom states, offered (badged) in the trigger picker. */
+  states?: { id: string; title: string }[];
   /** Fired after every position or edge change with the full draft. */
   onDraftChange: (draft: FlowDraft) => void;
 }) {
@@ -206,11 +209,22 @@ export function FlowEditor({
           {pending.source} → {pending.target} on
           <select value={pendingTrigger} onChange={(e) => setPendingTrigger(e.target.value)}>
             <option value={DIRECT_HANDOFF}>(direct handoff)</option>
-            {TASK_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
+            {states?.length ? (
+              <optgroup label="Custom states">
+                {states.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title} (custom)
+                  </option>
+                ))}
+              </optgroup>
+            ) : null}
+            <optgroup label="Canonical statuses">
+              {TASK_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </optgroup>
           </select>
           <Button type="button" $variant="primary" onClick={confirmPending}>
             Add edge

@@ -338,3 +338,29 @@ test("flow edit round-trips deep-equal and stale revisions are rejected", async 
     assert.ok((await bad.json()).issues.some((i) => i.path.startsWith("flow.")));
   });
 });
+
+// N112 — states round-trip via the API; undefined custom trigger 400s.
+test("custom states round-trip and gate edge triggers", async () => {
+  await withServer(async () => {
+    const flow = {
+      id: "custom:staged",
+      title: "Staged",
+      agents: ["task-review", "task-human-review"],
+      states: [{ id: "qa-verify", title: "QA Verify", color: "#a78bfa", mapsTo: "approved" }],
+      flow: [{ from: "task-review", to: "task-human-review", on: "qa-verify" }],
+      install: [],
+    };
+    assert.equal((await api("/api/projects", "POST", flow)).status, 201);
+    const fetched = await (await api("/api/project?id=custom%3Astaged", "GET")).json();
+    assert.deepEqual(fetched.states, flow.states);
+    assert.equal(fetched.flow[0].on, "qa-verify");
+
+    // removing the state while an edge still uses it → 400 with the flow path
+    const bad = await api("/api/projects/custom:staged", "PUT", { ...flow, states: [] });
+    assert.equal(bad.status, 400);
+    const body = await bad.json();
+    assert.ok(
+      body.issues.some((i) => i.path.startsWith("flow.") && /unknown trigger/.test(i.message)),
+    );
+  });
+});
