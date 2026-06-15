@@ -75,6 +75,10 @@ const IdPreview = styled.code`
 export type EditableKind = "section" | "include" | "mcp-server" | "hook" | "skill";
 const KINDS: EditableKind[] = ["section", "include", "mcp-server", "hook", "skill"];
 
+// N120 — mirrors the server's locked tier (user-registry.ts). Kept inline so
+// the client bundle doesn't pull node:fs from user-registry.
+const LOCKED_MODULE_IDS = new Set(["security", "enforcement", "protocol"]);
+
 interface FormState {
   idTail: string;
   title: string;
@@ -217,10 +221,12 @@ export function ModuleForm() {
   if (registryError) return <p>Failed to load registry: {registryError}</p>;
   if (!registry) return <p>Loading…</p>;
   if (editId && !editing) return <p>Unknown module “{editId}”.</p>;
-  if (editing && editing.source !== "custom") {
+  // N120 — locked modules stay read-only; defaults are editable (saving ejects
+  // an override into insightFlow/), custom is full CRUD.
+  if (editing && LOCKED_MODULE_IDS.has(editing.id)) {
     return (
       <p>
-        Built-in modules are immutable. <Link to={`/module/${editing.id}`}>Back</Link>
+        “{editing.id}” is locked (read-only). <Link to={`/module/${editing.id}`}>Back</Link>
       </p>
     );
   }
@@ -228,7 +234,10 @@ export function ModuleForm() {
   const s = state ?? (editing ? fromModule(editing) : EMPTY);
   const set = (patch: Partial<FormState>): void => setState({ ...s, ...patch });
   const isEdit = Boolean(editing);
-  const fullId = `custom:${s.idTail.trim() || "<id>"}`;
+  // Editing a built-in keeps its real id (the save ejects an override); custom
+  // new/edit builds a custom: id from the tail.
+  const editingDefault = Boolean(editing) && !editing!.id.startsWith("custom:");
+  const fullId = editingDefault ? editing!.id : `custom:${s.idTail.trim() || "<id>"}`;
 
   const submit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -238,6 +247,8 @@ export function ModuleForm() {
       setErrors(localErrors ?? {});
       return;
     }
+    // Editing a default → write under its real (built-in) id, not a custom: id.
+    if (editingDefault) record.id = editing!.id;
     setErrors({});
     setBusy(true);
     try {
@@ -259,13 +270,17 @@ export function ModuleForm() {
 
   const remove = async (): Promise<void> => {
     if (!editing) return;
-    if (!window.confirm(`Delete ${editing.id}? This cannot be undone.`)) return;
+    // N120 — a built-in is reverted to its shipped version; a custom is deleted.
+    const msg = editingDefault
+      ? `Revert ${editing.id} to the shipped version?`
+      : `Delete ${editing.id}? This cannot be undone.`;
+    if (!window.confirm(msg)) return;
     setTopError(null);
     setBusy(true);
     try {
       await deleteDefinition("modules", editing.id);
       invalidateRegistry();
-      navigate("/module");
+      navigate(editingDefault ? `/module/${editing.id}` : "/module");
     } catch (err) {
       if (err instanceof ApiError && err.referencedBy?.length) {
         setTopError(
@@ -289,7 +304,15 @@ export function ModuleForm() {
         title={isEdit ? `Edit ${editing!.id}` : "New module"}
         sidebar={<Link to="/module">← All modules</Link>}
       >
-        <Section title={isEdit ? "Edit custom module" : "Create custom module"}>
+        <Section
+          title={
+            !isEdit
+              ? "Create custom module"
+              : editingDefault
+                ? `Edit default — saving ejects an override into insightFlow/`
+                : "Edit custom module"
+          }
+        >
           {topError ? <TopError role="alert">{topError}</TopError> : null}
           <FormBox onSubmit={(e) => void submit(e)}>
             <Field>
@@ -427,7 +450,7 @@ export function ModuleForm() {
                   disabled={busy}
                   onClick={() => void remove()}
                 >
-                  Delete
+                  {editingDefault ? "Revert to shipped" : "Delete"}
                 </Button>
               ) : null}
               <Link to={isEdit ? `/module/${editing!.id}` : "/module"}>Cancel</Link>

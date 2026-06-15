@@ -521,3 +521,63 @@ test("POST /api/task-flow: ready→200, locked→409, missing→404", async () =
     assert.equal(r.status, 409);
   });
 });
+
+// N120 — three editability tiers: default (PUT writes override / DELETE reverts),
+// locked (403), custom (unchanged).
+test("editability tiers: default eject/revert, locked read-only, custom CRUD", async () => {
+  await withServer(async (dir) => {
+    // PUT a non-locked built-in module → writes an override (200), merged reflects it
+    const override = { id: "minimal-diff", title: "MD (ejected)", kind: "section", body: "EJECT" };
+    let r = await api("/api/modules/minimal-diff", "PUT", override);
+    assert.equal(r.status, 200);
+    assert.ok(
+      existsSync(join(dir, "insightFlow/modules/minimal-diff.json")),
+      "override file written",
+    );
+    let listed = await (await api("/api/modules", "GET")).json();
+    const md = listed.modules.find((m) => m.id === "minimal-diff");
+    assert.equal(md.body, "EJECT");
+    assert.equal(md.source, "builtin", "ejected default stays builtin");
+
+    // POST to a built-in id → 400 (must PUT)
+    assert.equal((await api("/api/modules", "POST", override)).status, 400);
+
+    // DELETE the built-in (override exists) → reverts (200, override file gone)
+    r = await api("/api/modules/minimal-diff", "DELETE");
+    assert.equal(r.status, 200);
+    assert.equal((await r.json()).reverted, "minimal-diff");
+    assert.ok(!existsSync(join(dir, "insightFlow/modules/minimal-diff.json")), "override removed");
+    // reverted → merged shows the shipped body again
+    listed = await (await api("/api/modules", "GET")).json();
+    assert.notEqual(listed.modules.find((m) => m.id === "minimal-diff").body, "EJECT");
+
+    // DELETE a built-in with NO override → 403 (can't delete a shipped def)
+    assert.equal((await api("/api/modules/minimal-diff", "DELETE")).status, 403);
+
+    // locked module: PUT and DELETE both 403
+    assert.equal(
+      (
+        await api("/api/modules/security", "PUT", {
+          id: "security",
+          title: "x",
+          kind: "include",
+          ref: "X.md",
+        })
+      ).status,
+      403,
+    );
+    assert.equal((await api("/api/modules/security", "DELETE")).status, 403);
+
+    // default project flow is ejectable via PUT
+    const base = await (await api("/api/project", "GET")).json();
+    r = await api("/api/projects/default", "PUT", {
+      id: "default",
+      title: "Default (ejected)",
+      agents: base.agents,
+      flow: base.flow,
+      install: base.install,
+    });
+    assert.equal(r.status, 200);
+    assert.equal((await (await api("/api/project", "GET")).json()).title, "Default (ejected)");
+  });
+});

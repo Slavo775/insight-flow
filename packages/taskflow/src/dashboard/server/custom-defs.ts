@@ -27,6 +27,7 @@ import {
 import { DEFAULT_PROJECT, type Project } from "../../agents/project.js";
 import {
   CUSTOM_ID_PREFIX,
+  isLockedModuleId,
   loadUserRegistries,
   userSpaceRoot,
   type UserRegistries,
@@ -49,10 +50,10 @@ function send(res: ServerResponse, status: number, payload: unknown): void {
 }
 
 function fileFor(root: string, kind: Kind, id: string): string {
-  const slug = id
-    .slice(CUSTOM_ID_PREFIX.length)
-    .toLowerCase()
-    .replace(/[^a-z0-9-_]+/g, "-");
+  // N120 — built-in override ids have no "custom:" prefix to strip; slug the
+  // tail so both custom defs and ejected built-ins map to a stable filename.
+  const tail = id.startsWith(CUSTOM_ID_PREFIX) ? id.slice(CUSTOM_ID_PREFIX.length) : id;
+  const slug = tail.toLowerCase().replace(/[^a-z0-9-_]+/g, "-");
   return resolve(root, kind, `${slug}.json`);
 }
 
@@ -228,18 +229,32 @@ export function handleCustomDefsRequest(
       send(res, 400, { ok: false, error: "id required" });
       return true;
     }
-    if (!pathId.startsWith(CUSTOM_ID_PREFIX)) {
-      send(res, 403, { ok: false, error: "built-ins are immutable" });
+    // N119/N120 — locked ids are read-only (never deletable/revertable).
+    if (kind === "modules" && isLockedModuleId(pathId)) {
+      send(res, 403, { ok: false, error: `'${pathId}' is locked (read-only)` });
       return true;
     }
+    const isCustom = pathId.startsWith(CUSTOM_ID_PREFIX);
     if (!existing[pathId]) {
-      send(res, 404, { ok: false, error: `unknown ${kind.slice(0, -1)} '${pathId}'` });
+      // No user-space file. Custom → genuinely unknown (404). Built-in → there's
+      // no override to revert and you can't delete a shipped definition (403).
+      send(
+        res,
+        isCustom ? 404 : 403,
+        isCustom
+          ? { ok: false, error: `unknown ${kind.slice(0, -1)} '${pathId}'` }
+          : { ok: false, error: `'${pathId}' is a shipped definition — nothing to revert` },
+      );
       return true;
     }
-    const refs = referencingIds(kind, pathId, user);
-    if (refs.length > 0) {
-      send(res, 409, { ok: false, error: "still referenced", referencedBy: refs });
-      return true;
+    // Reverting an override doesn't remove the id (it falls back to the shipped
+    // def), so only a CUSTOM delete can break referencing definitions.
+    if (isCustom) {
+      const refs = referencingIds(kind, pathId, user);
+      if (refs.length > 0) {
+        send(res, 409, { ok: false, error: "still referenced", referencedBy: refs });
+        return true;
+      }
     }
     try {
       unlinkSync(fileFor(root, kind, pathId));
@@ -248,7 +263,8 @@ export function handleCustomDefsRequest(
       return true;
     }
     onChanged?.();
-    send(res, 200, { ok: true, deleted: pathId });
+    // Custom → deleted; built-in → reverted to the shipped definition.
+    send(res, 200, isCustom ? { ok: true, deleted: pathId } : { ok: true, reverted: pathId });
     return true;
   }
 
@@ -272,28 +288,39 @@ export function handleCustomDefsRequest(
       });
       return;
     }
-    if (!record.id.startsWith(CUSTOM_ID_PREFIX)) {
-      send(res, 403, {
+    // N120 — three editability tiers by id shape:
+    //   custom:*           → full CRUD (create POST, update PUT)
+    //   built-in id        → eject/override: PUT writes the override (no POST)
+    //   locked             → read-only (403)
+    const isCustom = record.id.startsWith(CUSTOM_ID_PREFIX);
+    const isBuiltin = builtinIds(kind).has(record.id);
+    if (kind === "modules" && isLockedModuleId(record.id)) {
+      send(res, 403, { ok: false, error: `'${record.id}' is locked (read-only)` });
+      return;
+    }
+    if (!isCustom && !isBuiltin) {
+      send(res, 400, {
         ok: false,
-        error: "built-ins are immutable — custom ids must start with 'custom:'",
+        error: `id '${record.id}' must start with 'custom:' or match a shipped built-in to override`,
       });
       return;
     }
-    if (builtinIds(kind).has(record.id)) {
-      send(res, 403, { ok: false, error: `id '${record.id}' collides with a built-in` });
+    if (isBuiltin && method === "POST") {
+      send(res, 400, { ok: false, error: `'${record.id}' is a default — use PUT to edit (eject)` });
       return;
     }
-    if (method === "POST" && existing[record.id]) {
+    if (isCustom && method === "POST" && existing[record.id]) {
       send(res, 409, { ok: false, error: `'${record.id}' already exists — use PUT to update` });
       return;
     }
-    if (method === "PUT" && !existing[record.id]) {
+    if (isCustom && method === "PUT" && !existing[record.id]) {
       send(res, 404, {
         ok: false,
         error: `unknown ${kind.slice(0, -1)} '${record.id}' — use POST to create`,
       });
       return;
     }
+    // built-in PUT (eject/override) is always allowed — create-or-update the override.
     // N111 — optimistic-concurrency floor: a PUT carrying the revision it
     // loaded gets rejected when the stored file has changed since.
     const sentRevision = req.headers["x-revision"];
@@ -306,7 +333,8 @@ export function handleCustomDefsRequest(
     }
 
     if (kind === "modules") {
-      (record as { source: string }).source = "custom";
+      // An eject/override of a built-in keeps "builtin"; a custom def is "custom".
+      (record as { source: string }).source = isCustom ? "custom" : "builtin";
     }
     // Validate against prospective registries that include the new record
     // (replacing its previous version on PUT).

@@ -9,7 +9,7 @@
       "title": "Three-tier editability in CRUD + forms (eject-on-update, locked read-only)",
       "type": "rework",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N120-three-tier-editability-in-crud-forms-eject-on-upda",
       "createdAt": "2026-06-15T19:43:22.623Z",
       "statusHistory": [
@@ -17,12 +17,23 @@
           "status": "ready",
           "at": "2026-06-15T19:43:22.623Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T20:18:42.689Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-15T20:18:42.689Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
