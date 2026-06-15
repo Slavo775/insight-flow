@@ -309,7 +309,7 @@
       "title": "Flow editor — add/remove agents in edit mode (palette + node popover)",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N114-flow-editor-add-remove-agents-in-edit-mode-palette",
       "createdAt": "2026-06-15T11:39:59.119Z",
       "statusHistory": [
@@ -327,6 +327,11 @@
           "status": "implemented",
           "at": "2026-06-15T12:05:14.431Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-15T12:05:21.313Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -350,9 +355,15 @@
         "flow",
         "editor"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-15T12:05:21.312Z",
+          "commitHash": "94f03e5",
+          "commitMessage": "feat(dashboard): N114 editor agent add/remove"
+        }
+      ],
+      "branch": "feat/N114-editor-agent-mgmt",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/94",
       "mergedAt": null
     },
     {
