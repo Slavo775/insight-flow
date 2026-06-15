@@ -5,6 +5,9 @@
 // opens a trigger picker constrained to the canonical status enum (plus the
 // legal trigger-less direct handoff); self-loops and duplicate (from,to,on)
 // triples are blocked; edges are selectable and Backspace/Delete-removable.
+// N114 — agent management: an "Add agent" palette adds nodes from the registry;
+// clicking a node opens a popover to remove it (and its incident edges). The
+// draft now carries the agent set (the node ids), persisted on Save.
 import { useCallback, useMemo, useState } from "react";
 import {
   Background,
@@ -83,11 +86,60 @@ const EditorError = styled.div`
 export type FlowPositions = Record<string, { x: number; y: number }>;
 
 export interface FlowDraft {
+  /** N114 — the flow's agent set (the node ids), persisted on Save. */
+  agents: string[];
   positions: FlowPositions;
   flow: FlowEdge[];
 }
 
+/** N114 — a composed agent that can be added to the flow. */
+export interface AgentChoice {
+  id: string;
+  title: string;
+  source?: "builtin" | "custom";
+}
+
 const DIRECT_HANDOFF = "__direct__";
+
+const AddBar = styled.div`
+  position: absolute;
+  top: ${(p) => p.theme.space.lg};
+  left: ${(p) => p.theme.space.lg};
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: ${(p) => p.theme.space.md};
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.sm} ${(p) => p.theme.space.md};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.textMuted};
+
+  select {
+    background: ${(p) => p.theme.color.surface};
+    color: ${(p) => p.theme.color.text};
+    border: 1px solid ${(p) => p.theme.color.border};
+    border-radius: ${(p) => p.theme.radius.md};
+    padding: 4px 8px;
+    font-family: ${(p) => p.theme.font.family};
+  }
+`;
+
+const NodePopover = styled.div`
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: ${(p) => p.theme.space.sm};
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.accent};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.md};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.text};
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.4);
+`;
 
 function toReactFlowEdge(e: FlowEdge, theme: ReturnType<typeof useTheme>): Edge {
   return {
@@ -110,18 +162,29 @@ function toFlowEdge(e: Edge): FlowEdge {
 export function FlowEditor({
   project,
   states,
+  allAgents = [],
   onDraftChange,
 }: {
   project: ProjectDto;
   /** N112 — the draft's custom states, offered (badged) in the trigger picker. */
   states?: { id: string; title: string }[];
-  /** Fired after every position or edge change with the full draft. */
+  /** N114 — every composed agent (built-in + custom) for the Add palette + node labels. */
+  allAgents?: AgentChoice[];
+  /** Fired after every agent, position, or edge change with the full draft. */
   onDraftChange: (draft: FlowDraft) => void;
 }) {
   const theme = useTheme();
   const [pending, setPending] = useState<Connection | null>(null);
   const [pendingTrigger, setPendingTrigger] = useState<string>(DIRECT_HANDOFF);
   const [editorError, setEditorError] = useState<string | null>(null);
+  // N114 — node-click popover (Remove from flow), positioned at the click.
+  const [nodeMenu, setNodeMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+
+  const titleOf = useCallback(
+    (id: string): string =>
+      allAgents.find((a) => a.id === id)?.title ?? project.agentTitles[id] ?? id,
+    [allAgents, project.agentTitles],
+  );
 
   const initialNodes: Node[] = useMemo(() => {
     const positions = computePositions(project);
@@ -154,7 +217,7 @@ export function FlowEditor({
     [project.id],
   );
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const report = useCallback(
@@ -163,10 +226,54 @@ export function FlowEditor({
       for (const node of currentNodes) {
         positions[node.id] = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
       }
-      onDraftChange({ positions, flow: currentEdges.map(toFlowEdge) });
+      onDraftChange({
+        agents: currentNodes.map((n) => n.id),
+        positions,
+        flow: currentEdges.map(toFlowEdge),
+      });
     },
     [onDraftChange],
   );
+
+  // N114 — add an agent node (default position offset by node count so adds
+  // don't stack); reports the new agent set + node.
+  const addAgent = (agentId: string): void => {
+    if (!agentId || nodes.some((n) => n.id === agentId)) return;
+    const offset = 60 + nodes.length * 26;
+    const newNode: Node = {
+      id: agentId,
+      position: { x: offset, y: offset },
+      data: { label: `⚙ ${titleOf(agentId)}` },
+      style: {
+        background: theme.color.bg,
+        color: theme.color.text,
+        border: `1px solid ${theme.color.accent}`,
+        borderRadius: theme.radius.xl,
+        fontFamily: theme.font.family,
+        fontSize: theme.font.size.md,
+        padding: "10px 14px",
+        width: 220,
+      },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+    };
+    const next = [...nodes, newNode];
+    setNodes(next);
+    report(next, edges);
+  };
+
+  // N114 — remove an agent node AND every edge incident to it (a saved flow
+  // can't reference a missing agent — ProjectSchema rejects such edges).
+  const removeAgent = (agentId: string): void => {
+    const nextNodes = nodes.filter((n) => n.id !== agentId);
+    const nextEdges = edges.filter((e) => e.source !== agentId && e.target !== agentId);
+    setNodes(nextNodes);
+    setEdges(nextEdges);
+    setNodeMenu(null);
+    report(nextNodes, nextEdges);
+  };
+
+  const availableAgents = allAgents.filter((a) => !nodes.some((n) => n.id === a.id));
 
   const confirmPending = (): void => {
     if (!pending) return;
@@ -204,6 +311,39 @@ export function FlowEditor({
 
   return (
     <EditBox>
+      {!pending ? (
+        <AddBar>
+          Add agent
+          <select
+            value=""
+            onChange={(e) => {
+              addAgent(e.target.value);
+              e.target.value = "";
+            }}
+          >
+            <option value="" disabled>
+              {availableAgents.length ? "Pick an agent…" : "All agents added"}
+            </option>
+            {availableAgents.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.title}
+                {a.source === "custom" ? " (custom)" : ""}
+              </option>
+            ))}
+          </select>
+        </AddBar>
+      ) : null}
+      {nodeMenu ? (
+        <NodePopover style={{ left: nodeMenu.x, top: nodeMenu.y }}>
+          <strong>{titleOf(nodeMenu.id)}</strong>
+          <Button type="button" $variant="danger" onClick={() => removeAgent(nodeMenu.id)}>
+            Remove from flow
+          </Button>
+          <Button type="button" $variant="nav" onClick={() => setNodeMenu(null)}>
+            Cancel
+          </Button>
+        </NodePopover>
+      ) : null}
       {pending ? (
         <PickerOverlay>
           {pending.source} → {pending.target} on
@@ -241,6 +381,8 @@ export function FlowEditor({
         onNodesChange={onNodesChange}
         onEdgesChange={handleEdgesChange}
         onNodeDragStop={() => report(nodes, edges)}
+        onNodeClick={(e, node) => setNodeMenu({ id: node.id, x: e.clientX, y: e.clientY })}
+        onPaneClick={() => setNodeMenu(null)}
         onConnect={(connection) => {
           setEditorError(null);
           if (connection.source === connection.target) {

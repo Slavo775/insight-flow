@@ -404,3 +404,43 @@ test("custom flow persists a hand-picked agent subset with empty flow/install", 
     assert.deepEqual(got.install, []);
   });
 });
+
+// N114 — agent add/remove round-trips; removing an agent WITHOUT its incident
+// edges is rejected (which is why the editor cascades edge removal on node delete).
+test("editing the agent set round-trips; orphaned edges are rejected", async () => {
+  await withServer(async () => {
+    const base = {
+      id: "custom:team",
+      title: "Team",
+      agents: ["task-implement", "task-review", "task-git"],
+      flow: [
+        { from: "task-implement", to: "task-review", on: "implemented" },
+        { from: "task-review", to: "task-git", on: "approved" },
+      ],
+      install: [],
+    };
+    assert.equal((await api("/api/projects", "POST", base)).status, 201);
+
+    // Add an agent (no new edges) → round-trips.
+    const added = { ...base, agents: [...base.agents, "task-human-review"] };
+    assert.equal((await api("/api/projects/custom:team", "PUT", added)).status, 200);
+    let got = await (await api("/api/project?id=custom%3Ateam", "GET")).json();
+    assert.ok(got.agents.includes("task-human-review"));
+
+    // Remove task-review but leave its edges → 400 (orphaned edge endpoints).
+    const orphaned = { ...added, agents: ["task-implement", "task-git", "task-human-review"] };
+    const bad = await api("/api/projects/custom:team", "PUT", orphaned);
+    assert.equal(bad.status, 400);
+
+    // Remove task-review AND its incident edges (what the editor does) → 200.
+    const cascaded = {
+      ...added,
+      agents: ["task-implement", "task-git", "task-human-review"],
+      flow: [],
+    };
+    assert.equal((await api("/api/projects/custom:team", "PUT", cascaded)).status, 200);
+    got = await (await api("/api/project?id=custom%3Ateam", "GET")).json();
+    assert.ok(!got.agents.includes("task-review"));
+    assert.deepEqual(got.flow, []);
+  });
+});
