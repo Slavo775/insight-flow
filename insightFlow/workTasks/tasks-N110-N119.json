@@ -677,7 +677,7 @@
       "title": "Eject/override loader — insightFlow/ shadows shipped defaults",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N119-eject-override-loader-insightflow-shadows-shipped-",
       "createdAt": "2026-06-15T19:43:22.523Z",
       "statusHistory": [
@@ -685,12 +685,25 @@
           "status": "ready",
           "at": "2026-06-15T19:43:22.523Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-15T19:59:25.572Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T20:02:59.573Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-15T19:59:25.572Z",
+        "completedAt": "2026-06-15T20:02:59.572Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/test/user-registry.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

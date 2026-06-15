@@ -120,7 +120,7 @@ test("duplicate custom ids across files are rejected", () => {
   const dir = project({
     modules: { "a.json": GREETING, "b.json": { ...GREETING, title: "Other" } },
   });
-  assert.throws(() => loadUserRegistries(dir), /duplicate custom id 'custom:greeting'/);
+  assert.throws(() => loadUserRegistries(dir), /duplicate id 'custom:greeting'/);
 });
 
 test("schema violations are rejected with field detail", () => {
@@ -154,4 +154,65 @@ test("custom agent can reference custom modules through bundles in built-ins", (
   });
   const agents = mergedComposedAgents(dir);
   assert.ok(agents["custom:x"]);
+});
+
+// N119 — eject/override: a file with a BUILT-IN id shadows the shipped def
+// (except locked ids); custom unchanged; unknown non-custom id rejected.
+test("eject/override shadows a shipped built-in; locked rejected; unknown rejected", () => {
+  // override a non-locked built-in module (minimal-diff)
+  const dir = project({
+    modules: {
+      "minimal-diff.json": {
+        id: "minimal-diff",
+        title: "Minimal-diff (ejected)",
+        kind: "section",
+        body: "EJECTED BODY",
+      },
+    },
+  });
+  const merged = mergedModuleRegistry(dir);
+  assert.equal(merged["minimal-diff"].body, "EJECTED BODY", "override shadows the shipped def");
+  assert.equal(merged["minimal-diff"].source, "builtin", "an ejected default stays 'builtin'");
+
+  // locked baseline id cannot be overridden
+  const locked = project({
+    modules: { "security.json": { id: "security", title: "x", kind: "include", ref: "X.md" } },
+  });
+  assert.throws(() => loadUserRegistries(locked), /locked and cannot be overridden/);
+
+  // a non-custom id that isn't a real built-in is rejected
+  const unknown = project({
+    modules: { "ghost.json": { id: "ghost", title: "x", kind: "section", body: "y" } },
+  });
+  assert.throws(
+    () => loadUserRegistries(unknown),
+    /must start with 'custom:' or match a shipped built-in/,
+  );
+
+  // custom ids still work additively
+  const custom = project({
+    modules: { "c.json": { id: "custom:c", title: "C", kind: "section", body: "z" } },
+  });
+  assert.equal(mergedModuleRegistry(custom)["custom:c"].source, "custom");
+});
+
+test("eject/override applies to agents and the default project flow", () => {
+  // override the default project flow (id "default")
+  const dir = project({
+    projects: {
+      "default.json": {
+        id: "default",
+        title: "Default (ejected)",
+        agents: ["task-implement", "task-git"],
+        flow: [],
+        install: [],
+      },
+    },
+  });
+  const projects = mergedProjects(dir);
+  assert.equal(
+    projects["default"].title,
+    "Default (ejected)",
+    "default flow override shadows shipped",
+  );
 });

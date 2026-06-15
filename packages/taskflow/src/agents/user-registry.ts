@@ -21,6 +21,17 @@ import { DEFAULT_PROJECT, type Project } from "./project.js";
 export const CUSTOM_ID_PREFIX = "custom:";
 export const USER_SPACE_DIRS = ["modules", "agents", "projects"] as const;
 
+/**
+ * N119 — the LOCKED tier: shipped definitions that may NOT be ejected/overridden
+ * (read-only even in user space). The cross-cutting baseline (N98) plus, later,
+ * status-transition modules (N128). Everything else built-in is ejectable.
+ */
+export const LOCKED_MODULE_IDS = new Set(["security", "enforcement", "protocol"]);
+
+export function isLockedModuleId(id: string): boolean {
+  return LOCKED_MODULE_IDS.has(id);
+}
+
 export interface UserRegistries {
   modules: Record<string, AgentModule>;
   agents: Record<string, ComposedAgent>;
@@ -38,10 +49,12 @@ function readKind<T extends { id: string }>(
   dir: string,
   schema: z.ZodType<T>,
   builtinIds: Set<string>,
-): { items: Record<string, T>; files: Record<string, string> } {
+  lockedIds: Set<string> = new Set(),
+): { items: Record<string, T>; files: Record<string, string>; overrides: Set<string> } {
   const out: Record<string, T> = {};
   const files: Record<string, string> = {};
-  if (!existsSync(dir)) return { items: out, files };
+  const overrides = new Set<string>();
+  if (!existsSync(dir)) return { items: out, files, overrides };
   for (const file of readdirSync(dir)
     .filter((f) => f.endsWith(".json"))
     .sort()) {
@@ -62,19 +75,30 @@ function readKind<T extends { id: string }>(
           : (err as Error).message;
       throw new UserRegistryError(path, detail);
     }
+    // N119 — three id shapes:
+    //   custom:*  → additive custom definition (as before)
+    //   built-in id (not custom:, not locked) → EJECT/OVERRIDE: shadows the
+    //     shipped definition via the merge order below
+    //   locked id, or an unknown non-custom id → rejected
     if (!parsed.id.startsWith(CUSTOM_ID_PREFIX)) {
-      throw new UserRegistryError(path, `id '${parsed.id}' must start with '${CUSTOM_ID_PREFIX}'`);
-    }
-    if (builtinIds.has(parsed.id)) {
-      throw new UserRegistryError(path, `id '${parsed.id}' collides with a built-in`);
+      if (lockedIds.has(parsed.id)) {
+        throw new UserRegistryError(path, `id '${parsed.id}' is locked and cannot be overridden`);
+      }
+      if (!builtinIds.has(parsed.id)) {
+        throw new UserRegistryError(
+          path,
+          `id '${parsed.id}' must start with '${CUSTOM_ID_PREFIX}' or match a shipped built-in to override`,
+        );
+      }
+      overrides.add(parsed.id);
     }
     if (out[parsed.id]) {
-      throw new UserRegistryError(path, `duplicate custom id '${parsed.id}'`);
+      throw new UserRegistryError(path, `duplicate id '${parsed.id}'`);
     }
     out[parsed.id] = parsed;
     files[parsed.id] = path;
   }
-  return { items: out, files };
+  return { items: out, files, overrides };
 }
 
 /** User-space root: always `<projectRoot>/insightFlow`, on either layout. */
@@ -85,14 +109,16 @@ export function userSpaceRoot(projectDir: string = resolveProjectRoot()): string
 export function loadUserRegistries(projectDir: string = resolveProjectRoot()): UserRegistries {
   const root = userSpaceRoot(projectDir);
 
-  const { items: modules } = readKind(
+  const { items: modules, overrides: moduleOverrides } = readKind(
     resolve(root, "modules"),
     AgentModuleSchema,
     new Set(Object.keys(MODULE_REGISTRY)),
+    LOCKED_MODULE_IDS,
   );
   for (const mod of Object.values(modules)) {
-    // Schema defaults source to "builtin"; user space is canonical "custom".
-    (mod as { source: string }).source = "custom";
+    // Custom (custom:*) definitions are "custom"; an eject/override (N119) of a
+    // built-in id keeps "builtin" — it IS the (edited) shipped definition.
+    (mod as { source: string }).source = moduleOverrides.has(mod.id) ? "builtin" : "custom";
   }
   const mergedModules = { ...MODULE_REGISTRY, ...modules };
 
