@@ -6,6 +6,28 @@ import { getWorkDir, now } from "../../core/storage.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 import { resolvePackageAsset } from "../../core/paths.js";
 import { renderTemplate } from "../../core/spec.js";
+import { mergedProjects } from "../../agents/user-registry.js";
+
+/**
+ * N116 — resolve the flow a new task binds to: explicit `--flow` wins, else the
+ * `flows.byType[<type>]` mapping, else `flows.defaultFlow`. An unknown/missing
+ * flow falls back to "default" non-fatally with a printed note.
+ */
+function resolveFlowId(config: TaskflowConfig, type: string, explicit?: string): string {
+  const flows = config.flows ?? { defaultFlow: "default", byType: {} };
+  const requested = explicit ?? flows.byType[type] ?? flows.defaultFlow ?? "default";
+  let known: Set<string>;
+  try {
+    known = new Set(Object.keys(mergedProjects()));
+  } catch {
+    known = new Set(["default"]); // malformed user space — only the shipped flow is safe
+  }
+  if (!known.has(requested)) {
+    console.error(`Flow "${requested}" not found — binding to "default" instead.`);
+    return "default";
+  }
+  return requested;
+}
 
 function scaffoldTaskDocs(
   folderPath: string,
@@ -76,12 +98,16 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
     mkdirSync(folderPath, { recursive: true });
   }
 
+  const taskType = (opts.type as string) || "fix";
+  const flowId = resolveFlowId(config, taskType, opts.flow as string | undefined);
+
   const task = {
     id,
     title,
-    type: (opts.type as string) || "fix",
+    type: taskType,
     priority: (opts.priority as string) || "medium",
     status: "ready",
+    flowId,
     folder,
     createdAt: now(),
     statusHistory: [{ status: "ready", at: now(), by: (opts.by as string) || "taskmaster" }],
@@ -131,6 +157,7 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
     JSON.stringify({
       action: "created",
       id,
+      flowId,
       folder: task.folder,
       taskMd: scaffold.taskMdCreated ? `${task.folder}/TASK.md` : null,
       checklistMd: scaffold.checklistMdCreated ? `${task.folder}/CHECKLIST.md` : null,

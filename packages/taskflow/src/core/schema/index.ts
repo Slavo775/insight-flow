@@ -97,6 +97,9 @@ export const TaskSchema = z.object({
   branch: z.string().nullable().default(null),
   mrUrl: z.string().nullable().default(null),
   mergedAt: z.string().nullable().default(null),
+  // N116 — the project flow that governs this task ("default" or "custom:<slug>").
+  // Legacy tasks without it read back as "default" — zero behavior change.
+  flowId: z.string().default("default"),
 });
 
 export const ShardFileSchema = z.object({

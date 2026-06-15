@@ -453,7 +453,7 @@
       "title": "Flow binding — Task.flowId + type→flow map (taskmaster binds at create)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N116-flow-binding-task-flowid-type-flow-map-taskmaster-",
       "createdAt": "2026-06-15T16:41:02.156Z",
       "statusHistory": [
@@ -461,12 +461,33 @@
           "status": "ready",
           "at": "2026-06-15T16:41:02.156Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-15T16:46:32.515Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T17:01:59.325Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-15T17:02:08.273Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-15T16:46:32.514Z",
+        "completedAt": "2026-06-15T17:01:59.325Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/types.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/config.ts",
+          "packages/taskflow/src/cli/commands/create.ts",
+          "packages/taskflow/test/flow-binding.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -480,9 +501,15 @@
         "core",
         "cli"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-15T17:02:08.273Z",
+          "commitHash": "d50eb29",
+          "commitMessage": "feat(core): N116 flow binding"
+        }
+      ],
+      "branch": "feat/N116-flow-binding",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/96",
       "mergedAt": null
     },
     {

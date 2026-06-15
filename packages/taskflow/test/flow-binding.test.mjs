@@ -1,0 +1,114 @@
+/**
+ * N116 — flow binding: Task.flowId default, flows config merge, and the
+ * create-time resolution (--flow → byType → defaultFlow → "default" fallback).
+ */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { TaskSchema, resolveConfig } from "../dist/index.js";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const CLI = resolve(here, "../dist/cli.js");
+
+const BASE_TASK = {
+  id: "N00",
+  title: "T",
+  type: "feat",
+  priority: "low",
+  status: "ready",
+  folder: "insightFlow/workTasks/N00-t",
+  createdAt: "2026-06-15T00:00:00.000Z",
+  statusHistory: [],
+  implementation: { startedAt: null, completedAt: null, filesChanged: [], tokensUsed: null },
+  changesAfterImplementation: [],
+  committedAt: null,
+  totalDurationMinutes: null,
+  tags: [],
+};
+
+test("Task.flowId defaults to 'default' and preserves an explicit value", () => {
+  assert.equal(TaskSchema.parse({ ...BASE_TASK }).flowId, "default");
+  assert.equal(TaskSchema.parse({ ...BASE_TASK, flowId: "custom:hotfix" }).flowId, "custom:hotfix");
+});
+
+test("flows config merges: user byType extends, defaultFlow preserved", () => {
+  const dir = mkdtempSync(join(tmpdir(), "n116-cfg-"));
+  writeFileSync(
+    join(dir, "taskflow.config.json"),
+    JSON.stringify({ workDir: "workTasks", flows: { byType: { fix: "custom:hotfix" } } }),
+  );
+  mkdirSync(join(dir, "workTasks"), { recursive: true });
+  writeFileSync(
+    join(dir, "workTasks/master.json"),
+    JSON.stringify({ meta: { nextId: 0, currentTaskId: null, nextIncidentId: 1, shards: [] } }),
+  );
+  const cfg = resolveConfig(dir);
+  assert.equal(cfg.flows.defaultFlow, "default"); // preserved despite user only setting byType
+  assert.equal(cfg.flows.byType.fix, "custom:hotfix");
+});
+
+function project({ byType = {}, customFlow } = {}) {
+  const dir = mkdtempSync(join(tmpdir(), "n116-create-"));
+  writeFileSync(
+    join(dir, "taskflow.config.json"),
+    JSON.stringify({ workDir: "workTasks", flows: { defaultFlow: "default", byType } }),
+  );
+  mkdirSync(join(dir, "insightFlow/workTasks"), { recursive: true });
+  writeFileSync(
+    join(dir, "insightFlow/workTasks/master.json"),
+    JSON.stringify({ meta: { nextId: 0, currentTaskId: null, nextIncidentId: 1, shards: [] } }),
+  );
+  if (customFlow) {
+    mkdirSync(join(dir, "insightFlow/projects"), { recursive: true });
+    writeFileSync(
+      join(dir, "insightFlow/projects/hotfix.json"),
+      JSON.stringify({
+        id: "custom:hotfix",
+        title: "Hotfix",
+        agents: ["task-implement", "task-git"],
+        flow: [],
+        install: [],
+      }),
+    );
+  }
+  return dir;
+}
+
+function create(dir, args) {
+  return JSON.parse(
+    execFileSync(process.execPath, [CLI, "create", "--title", "T", ...args], {
+      cwd: dir,
+      encoding: "utf-8",
+    }),
+  );
+}
+
+test("create binds flowId: type-map → mapped flow when it exists", () => {
+  const dir = project({ byType: { fix: "custom:hotfix" }, customFlow: true });
+  assert.equal(create(dir, ["--type", "fix"]).flowId, "custom:hotfix");
+});
+
+test("create binds flowId: explicit --flow wins", () => {
+  const dir = project({ byType: { fix: "default" }, customFlow: true });
+  assert.equal(create(dir, ["--type", "fix", "--flow", "custom:hotfix"]).flowId, "custom:hotfix");
+});
+
+test("create falls back to 'default' when the mapped flow does not exist", () => {
+  const dir = project({ byType: { fix: "custom:ghost" } }); // no such flow on disk
+  const out = create(dir, ["--type", "fix"]);
+  assert.equal(out.flowId, "default");
+  // and the stored task carries it
+  const shard = JSON.parse(
+    readFileSync(join(dir, "insightFlow/workTasks/tasks-N00-N09.json"), "utf-8"),
+  );
+  assert.equal(shard.tasks[0].flowId, "default");
+});
+
+test("create with no mapping uses defaultFlow", () => {
+  const dir = project({});
+  assert.equal(create(dir, ["--type", "feat"]).flowId, "default");
+});
