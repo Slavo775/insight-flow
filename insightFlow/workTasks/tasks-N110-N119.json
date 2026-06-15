@@ -605,7 +605,7 @@
       "title": "Guide — surface the task's flow + next step (reuse suggestNextSteps)",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N118-guide-surface-the-task-s-flow-next-step-reuse-sugg",
       "createdAt": "2026-06-15T16:41:02.337Z",
       "statusHistory": [
@@ -623,6 +623,11 @@
           "status": "implemented",
           "at": "2026-06-15T17:22:15.456Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-15T17:22:23.365Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -646,9 +651,15 @@
         "dashboard",
         "cli"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-15T17:22:23.365Z",
+          "commitHash": "eff351d",
+          "commitMessage": "feat(flow): N118 Guide surfacing"
+        }
+      ],
+      "branch": "feat/N118-guide-surface",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/98",
       "mergedAt": null
     }
   ]
