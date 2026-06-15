@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -70,7 +70,8 @@ function project({ byType = {}, customFlow } = {}) {
         id: "custom:hotfix",
         title: "Hotfix",
         agents: ["task-implement", "task-git"],
-        flow: [],
+        // a ready→ edge so N118's suggestNextSteps is non-empty for a ready task
+        flow: [{ from: "task-implement", to: "task-git", on: "ready" }],
         install: [],
       }),
     );
@@ -146,4 +147,30 @@ test("set-flow reassigns a ready task; locks after work starts; rejects unknown 
   // flow unchanged after the locked attempt
   shard = JSON.parse(readFileSync(join(dir, "insightFlow/workTasks/tasks-N00-N09.json"), "utf-8"));
   assert.equal(shard.tasks[0].flowId, "custom:hotfix");
+});
+
+// N118 — `current`/`next` surface the task's flow + the flow's next step;
+// a deleted/missing flow degrades to "default". Picker order is untouched.
+test("current/next surface the task's flow and next step (deleted flow → default)", () => {
+  const dir = project({ byType: { fix: "custom:hotfix" }, customFlow: true });
+  const created = JSON.parse(cli(dir, ["create", "--title", "T", "--type", "fix"]));
+  assert.equal(created.flowId, "custom:hotfix");
+
+  // `current` carries the task's flow + the hotfix flow's ready→ next step
+  const current = JSON.parse(cli(dir, ["current"]));
+  assert.equal(current.flowId, "custom:hotfix");
+  assert.deepEqual(
+    current.nextSteps.map((s) => s.command),
+    ["/task-git"],
+  );
+
+  // `next` (picker) also carries flow + nextSteps; pick is still the ready task
+  const next = JSON.parse(cli(dir, ["next"]));
+  assert.equal(next.next, created.id);
+  assert.equal(next.flowId, "custom:hotfix");
+
+  // delete the custom flow → current degrades to default gracefully
+  rmSync(join(dir, "insightFlow/projects/hotfix.json"));
+  const after = JSON.parse(cli(dir, ["current"]));
+  assert.equal(after.flowId, "default");
 });

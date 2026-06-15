@@ -183,13 +183,19 @@ function NextStepChips({
 // N104: the task's position in the project lifecycle flow. Producers of the
 // current status light up (📍); statuses without flow edges (working states
 // like in-progress) render the map with an explanatory note instead.
-function TaskFlowPosition({ status }: { status: string }) {
+function TaskFlowPosition({ status, flowId }: { status: string; flowId: string }) {
   const [project, setProject] = useState<ProjectDto | null>(null);
   useEffect(() => {
-    fetchProject()
-      .then(setProject)
-      .catch(() => setProject(null));
-  }, []);
+    let alive = true;
+    // N118 — render the task's OWN flow; a missing/deleted flow degrades to default.
+    fetchProject(flowId)
+      .catch(() => fetchProject())
+      .then((p) => alive && setProject(p))
+      .catch(() => alive && setProject(null));
+    return () => {
+      alive = false;
+    };
+  }, [flowId]);
 
   if (!project) return null;
   // N112 — custom states alias onto canonical statuses; the task's status is
@@ -246,7 +252,7 @@ export function TaskDetailPage() {
               flowId={task.flowId ?? "default"}
               status={task.status}
             />
-            <TaskFlowPosition status={task.status} />
+            <TaskFlowPosition status={task.status} flowId={task.flowId ?? "default"} />
           </>
         ) : (
           <div className="empty">Loading {id}…</div>
