@@ -605,7 +605,7 @@
       "title": "Guide — surface the task's flow + next step (reuse suggestNextSteps)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N118-guide-surface-the-task-s-flow-next-step-reuse-sugg",
       "createdAt": "2026-06-15T16:41:02.337Z",
       "statusHistory": [
@@ -613,12 +613,31 @@
           "status": "ready",
           "at": "2026-06-15T16:41:02.337Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-15T17:17:35.952Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T17:22:15.456Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-15T17:22:23.365Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-15T17:17:35.951Z",
+        "completedAt": "2026-06-15T17:22:15.455Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/query.ts",
+          "packages/taskflow/src/dashboard/client/TaskDetailPage.tsx",
+          "packages/taskflow/test/flow-binding.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -632,9 +651,15 @@
         "dashboard",
         "cli"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-15T17:22:23.365Z",
+          "commitHash": "eff351d",
+          "commitMessage": "feat(flow): N118 Guide surfacing"
+        }
+      ],
+      "branch": "feat/N118-guide-surface",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/98",
       "mergedAt": null
     }
   ]

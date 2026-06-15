@@ -2,6 +2,39 @@ import type { MasterFile, TaskflowConfig, ParsedArgs, Task } from "../../core/ty
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { loadTaskReviewsHybrid, loadTaskIncidentsHybrid } from "../../core/storage.js";
 import { loadSpec } from "../../core/spec.js";
+import { suggestNextSteps } from "../../core/flow-status.js";
+import { mergedProjects } from "../../agents/user-registry.js";
+
+/**
+ * N118 — Guide: given a task's flow + status, return the flow actually in
+ * effect (a missing/deleted flow degrades to "default") and the next agent(s)
+ * the flow points to. Advisory only — the picker order is unchanged.
+ */
+function flowGuide(
+  flowId: string,
+  status: string,
+): { flowId: string; nextSteps: { agentId: string; command: string; on: string }[] } {
+  let projects: Record<
+    string,
+    {
+      id: string;
+      flow: { from: string; to: string; on?: string }[];
+      states?: { id: string; title: string; color?: string; mapsTo: string }[];
+    }
+  >;
+  try {
+    projects = mergedProjects();
+  } catch {
+    projects = {};
+  }
+  const used = projects[flowId] ?? projects["default"];
+  if (!used) return { flowId, nextSteps: [] };
+  const steps = suggestNextSteps(used.flow, status, used.states);
+  return {
+    flowId: used.id,
+    nextSteps: steps.map((s) => ({ agentId: s.agentId, command: `/${s.agentId}`, on: s.on })),
+  };
+}
 
 function appendSpec(
   config: TaskflowConfig,
@@ -23,12 +56,15 @@ export function cmdCurrent(config: TaskflowConfig, master: MasterFile): void {
   }
   try {
     const { task } = jsonFileStorage.loadTaskById(config, master, id);
+    const guide = flowGuide(task.flowId, task.status);
     console.log(
       JSON.stringify({
         currentTaskId: id,
         title: task.title,
         status: task.status,
         folder: task.folder,
+        flowId: guide.flowId,
+        nextSteps: guide.nextSteps,
       }),
     );
   } catch {
@@ -227,6 +263,7 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: Parsed
   master.meta.currentTaskId = pick.id;
   jsonFileStorage.saveMaster(config, master);
 
+  const guide = flowGuide(pick.flowId, pick.status);
   const payload: Record<string, unknown> = {
     next: pick.id,
     title: pick.title,
@@ -234,6 +271,8 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: Parsed
     priority: pick.priority,
     status: pick.status,
     folder: pick.folder,
+    flowId: guide.flowId,
+    nextSteps: guide.nextSteps,
     reason:
       pick.status === "fix-needed"
         ? "Review requested changes — fix first"
