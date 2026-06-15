@@ -381,7 +381,7 @@
       "title": "Flow editor — edge modal to change trigger and delete relationship",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N115-flow-editor-edge-modal-to-change-trigger-and-delet",
       "createdAt": "2026-06-15T11:39:59.198Z",
       "statusHistory": [
@@ -389,12 +389,26 @@
           "status": "ready",
           "at": "2026-06-15T11:39:59.198Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-15T12:06:33.073Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T12:17:59.010Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-15T12:06:33.073Z",
+        "completedAt": "2026-06-15T12:17:59.010Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/test/flow-edit.test.mjs",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

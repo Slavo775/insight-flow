@@ -444,3 +444,21 @@ test("editing the agent set round-trips; orphaned edges are rejected", async () 
     assert.deepEqual(got.flow, []);
   });
 });
+
+// N115 — an edge's trigger change persists through Save.
+test("an edge trigger change round-trips", async () => {
+  await withServer(async () => {
+    const base = {
+      id: "custom:edges",
+      title: "Edges",
+      agents: ["task-review", "task-git"],
+      flow: [{ from: "task-review", to: "task-git", on: "approved" }],
+      install: [],
+    };
+    assert.equal((await api("/api/projects", "POST", base)).status, 201);
+    const changed = { ...base, flow: [{ from: "task-review", to: "task-git", on: "fixed" }] };
+    assert.equal((await api("/api/projects/custom:edges", "PUT", changed)).status, 200);
+    const got = await (await api("/api/project?id=custom%3Aedges", "GET")).json();
+    assert.equal(got.flow[0].on, "fixed");
+  });
+});

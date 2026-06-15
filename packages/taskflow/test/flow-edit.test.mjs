@@ -130,3 +130,17 @@ test("DefinitionIdSchema constrains custom ids but leaves built-ins alone", () =
     true,
   );
 });
+
+// N115 — changing an edge's trigger validates as remove-old + add-new: the
+// edge being edited is excluded, so re-picking its own trigger is fine but a
+// trigger that duplicates a sibling's (from,to,on) is rejected.
+test("edge trigger change validates against the other edges", () => {
+  const flow = [
+    { from: "a", to: "b", on: "implemented" },
+    { from: "a", to: "b", on: "fixed" },
+  ];
+  const others = flow.filter((_, i) => i !== 0); // editing edge[0]
+  assert.match(validateEdgeAddition(others, { from: "a", to: "b", on: "fixed" }), /duplicate/);
+  assert.equal(validateEdgeAddition(others, { from: "a", to: "b", on: "approved" }), null);
+  assert.equal(validateEdgeAddition(others, { from: "a", to: "b", on: "implemented" }), null);
+});

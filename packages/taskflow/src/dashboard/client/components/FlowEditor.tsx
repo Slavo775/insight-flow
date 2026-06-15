@@ -141,6 +141,75 @@ const NodePopover = styled.div`
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.4);
 `;
 
+// N115 — the edge editor modal (change trigger / delete relationship).
+const ModalBackdrop = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.45);
+`;
+
+const EdgeModal = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${(p) => p.theme.space.md};
+  min-width: 300px;
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.accent};
+  border-radius: ${(p) => p.theme.radius.xl};
+  padding: ${(p) => p.theme.space["2xl"]};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.text};
+
+  select {
+    background: ${(p) => p.theme.color.surface};
+    color: ${(p) => p.theme.color.text};
+    border: 1px solid ${(p) => p.theme.color.border};
+    border-radius: ${(p) => p.theme.radius.md};
+    padding: 6px 8px;
+    font-family: ${(p) => p.theme.font.family};
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: ${(p) => p.theme.space.md};
+  align-items: center;
+`;
+
+const ModalError = styled.span`
+  color: ${(p) => p.theme.color.red};
+  font-size: ${(p) => p.theme.font.size.xs};
+`;
+
+/** Shared trigger `<option>` list: direct handoff, this flow's custom states, canonical statuses. */
+function TriggerOptions({ states }: { states?: { id: string; title: string }[] }) {
+  return (
+    <>
+      <option value={DIRECT_HANDOFF}>(direct handoff)</option>
+      {states?.length ? (
+        <optgroup label="Custom states">
+          {states.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.title} (custom)
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
+      <optgroup label="Canonical statuses">
+        {TASK_STATUSES.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
+      </optgroup>
+    </>
+  );
+}
+
 function toReactFlowEdge(e: FlowEdge, theme: ReturnType<typeof useTheme>): Edge {
   return {
     id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
@@ -179,6 +248,13 @@ export function FlowEditor({
   const [editorError, setEditorError] = useState<string | null>(null);
   // N114 — node-click popover (Remove from flow), positioned at the click.
   const [nodeMenu, setNodeMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  // N115 — edge-click modal (change trigger / delete); `trigger` is the draft
+  // selection, `error` an inline validation message.
+  const [edgeMenu, setEdgeMenu] = useState<{
+    id: string;
+    trigger: string;
+    error?: string;
+  } | null>(null);
 
   const titleOf = useCallback(
     (id: string): string =>
@@ -275,6 +351,40 @@ export function FlowEditor({
 
   const availableAgents = allAgents.filter((a) => !nodes.some((n) => n.id === a.id));
 
+  // N115 — edge editor modal: change an existing edge's trigger, or delete it.
+  const editEdge = edgeMenu ? edges.find((e) => e.id === edgeMenu.id) : undefined;
+
+  const saveEdgeTrigger = (): void => {
+    if (!edgeMenu || !editEdge) return;
+    const on = edgeMenu.trigger === DIRECT_HANDOFF ? undefined : edgeMenu.trigger;
+    const candidate: FlowEdge = {
+      from: editEdge.source,
+      to: editEdge.target,
+      ...(on ? { on } : {}),
+    };
+    // A trigger change is remove-old + add-new: validate against the OTHER
+    // edges so the same duplicate-(from,to,on) rule applies.
+    const others = edges.filter((e) => e.id !== edgeMenu.id).map(toFlowEdge);
+    const rejection = validateEdgeAddition(others, candidate);
+    if (rejection) {
+      setEdgeMenu({ ...edgeMenu, error: rejection });
+      return;
+    }
+    const replaced = toReactFlowEdge(candidate, theme);
+    const next = edges.map((e) => (e.id === edgeMenu.id ? replaced : e));
+    setEdges(next);
+    setEdgeMenu(null);
+    report(nodes, next);
+  };
+
+  const deleteEdge = (): void => {
+    if (!edgeMenu) return;
+    const next = edges.filter((e) => e.id !== edgeMenu.id);
+    setEdges(next);
+    setEdgeMenu(null);
+    report(nodes, next);
+  };
+
   const confirmPending = (): void => {
     if (!pending) return;
     const on = pendingTrigger === DIRECT_HANDOFF ? undefined : pendingTrigger;
@@ -348,23 +458,7 @@ export function FlowEditor({
         <PickerOverlay>
           {pending.source} → {pending.target} on
           <select value={pendingTrigger} onChange={(e) => setPendingTrigger(e.target.value)}>
-            <option value={DIRECT_HANDOFF}>(direct handoff)</option>
-            {states?.length ? (
-              <optgroup label="Custom states">
-                {states.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.title} (custom)
-                  </option>
-                ))}
-              </optgroup>
-            ) : null}
-            <optgroup label="Canonical statuses">
-              {TASK_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </optgroup>
+            <TriggerOptions states={states} />
           </select>
           <Button type="button" $variant="primary" onClick={confirmPending}>
             Add edge
@@ -374,6 +468,38 @@ export function FlowEditor({
           </Button>
         </PickerOverlay>
       ) : null}
+      {edgeMenu && editEdge ? (
+        <ModalBackdrop onClick={() => setEdgeMenu(null)}>
+          <EdgeModal onClick={(e) => e.stopPropagation()}>
+            <strong>
+              {titleOf(editEdge.source)} → {titleOf(editEdge.target)}
+            </strong>
+            <label>
+              Trigger
+              <select
+                value={edgeMenu.trigger}
+                onChange={(e) =>
+                  setEdgeMenu({ ...edgeMenu, trigger: e.target.value, error: undefined })
+                }
+              >
+                <TriggerOptions states={states} />
+              </select>
+            </label>
+            {edgeMenu.error ? <ModalError>{edgeMenu.error}</ModalError> : null}
+            <ModalActions>
+              <Button type="button" $variant="primary" onClick={saveEdgeTrigger}>
+                Save
+              </Button>
+              <Button type="button" $variant="danger" onClick={deleteEdge}>
+                Delete edge
+              </Button>
+              <Button type="button" $variant="nav" onClick={() => setEdgeMenu(null)}>
+                Cancel
+              </Button>
+            </ModalActions>
+          </EdgeModal>
+        </ModalBackdrop>
+      ) : null}
       {editorError ? <EditorError role="alert">{editorError}</EditorError> : null}
       <ReactFlow
         nodes={nodes}
@@ -382,7 +508,16 @@ export function FlowEditor({
         onEdgesChange={handleEdgesChange}
         onNodeDragStop={() => report(nodes, edges)}
         onNodeClick={(e, node) => setNodeMenu({ id: node.id, x: e.clientX, y: e.clientY })}
-        onPaneClick={() => setNodeMenu(null)}
+        onEdgeClick={(_, edge) =>
+          setEdgeMenu({
+            id: edge.id,
+            trigger: ((edge.data as { on?: string } | undefined)?.on as string) ?? DIRECT_HANDOFF,
+          })
+        }
+        onPaneClick={() => {
+          setNodeMenu(null);
+          setEdgeMenu(null);
+        }}
         onConnect={(connection) => {
           setEditorError(null);
           if (connection.source === connection.target) {
