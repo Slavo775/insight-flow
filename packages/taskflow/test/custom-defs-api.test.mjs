@@ -462,3 +462,62 @@ test("an edge trigger change round-trips", async () => {
     assert.equal(got.flow[0].on, "fixed");
   });
 });
+
+// N117 — /api/task-flow reassigns a ready task (200), locks after work starts
+// (409), and 404s an unknown task. (Core guards are unit-tested via the CLI.)
+test("POST /api/task-flow: ready→200, locked→409, missing→404", async () => {
+  await withServer(async (dir) => {
+    const taskOf = (status) => ({
+      id: "N00",
+      title: "T",
+      type: "feat",
+      priority: "low",
+      status,
+      folder: "workTasks/N00-t",
+      createdAt: "2026-06-15T00:00:00.000Z",
+      statusHistory: [],
+      implementation: { startedAt: null, completedAt: null, filesChanged: [], tokensUsed: null },
+      changesAfterImplementation: [],
+      committedAt: null,
+      totalDurationMinutes: null,
+      tags: [],
+      pushes: [],
+    });
+    const writeTask = (status) => {
+      writeFileSync(
+        resolve(dir, "workTasks/master.json"),
+        JSON.stringify({
+          meta: {
+            nextId: 1,
+            currentTaskId: "N00",
+            nextIncidentId: 1,
+            shards: ["tasks-N00-N09.json"],
+          },
+        }),
+      );
+      writeFileSync(
+        resolve(dir, "workTasks/tasks-N00-N09.json"),
+        JSON.stringify({ range: { from: 0, to: 9 }, tasks: [taskOf(status)] }),
+      );
+    };
+
+    // missing task → 404
+    let r = await api("/api/task-flow", "POST", { id: "N00", flow: "default" });
+    assert.equal(r.status, 404);
+
+    // ready → 200
+    writeTask("ready");
+    r = await api("/api/task-flow", "POST", { id: "N00", flow: "default" });
+    assert.equal(r.status, 200);
+    assert.equal((await r.json()).flowId, "default");
+
+    // unknown flow → 400
+    r = await api("/api/task-flow", "POST", { id: "N00", flow: "custom:ghost" });
+    assert.equal(r.status, 400);
+
+    // locked after work starts → 409
+    writeTask("in-progress");
+    r = await api("/api/task-flow", "POST", { id: "N00", flow: "default" });
+    assert.equal(r.status, 409);
+  });
+});

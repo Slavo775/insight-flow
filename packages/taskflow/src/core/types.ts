@@ -111,6 +111,8 @@ export interface Task {
   branch: string | null;
   mrUrl: string | null;
   mergedAt: string | null;
+  /** N116 — the project flow that governs this task ("default" or "custom:<slug>"). */
+  flowId: string;
 }
 
 export interface ReviewsFile {

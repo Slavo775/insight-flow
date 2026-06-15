@@ -24,6 +24,8 @@ import {
 } from "../../agents/activity-hook.js";
 import { EventStore } from "./event-stream.js";
 import { HookEventInputSchema } from "../../core/schema/index.js";
+import { jsonFileStorage } from "../../core/storage-port.js";
+import { setTaskFlow } from "../../cli/commands/set-flow.js";
 import {
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
@@ -802,6 +804,44 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       }
       res.writeHead(404, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ error: "Include file not found in this project" }));
+      return;
+    }
+
+    // N117 — reassign a task's flow from the dashboard (ready-only). Same
+    // guards as the CLI `set-flow` via the shared setTaskFlow core.
+    if (url.pathname === "/api/task-flow" && req.method === "POST") {
+      let body = "";
+      req.on("data", (chunk: Buffer) => {
+        body += chunk.toString("utf-8");
+        if (body.length > 16 * 1024) req.destroy();
+      });
+      req.on("end", () => {
+        let parsed: { id?: string; flow?: string };
+        try {
+          parsed = JSON.parse(body);
+        } catch {
+          res.writeHead(400, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: "invalid JSON" }));
+          return;
+        }
+        if (!parsed.id || !parsed.flow) {
+          res.writeHead(400, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: "id and flow are required" }));
+          return;
+        }
+        const master = jsonFileStorage.loadMaster(config);
+        const result = setTaskFlow(config, master, parsed.id, parsed.flow);
+        const status = result.ok
+          ? 200
+          : result.error === "not-found"
+            ? 404
+            : result.error === "locked"
+              ? 409
+              : 400;
+        if (result.ok) transport.emit("file-change", { at: new Date().toISOString() });
+        res.writeHead(status, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify(result.ok ? { ok: true, flowId: result.flowId } : result));
+      });
       return;
     }
 

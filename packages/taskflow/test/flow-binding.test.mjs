@@ -112,3 +112,38 @@ test("create with no mapping uses defaultFlow", () => {
   const dir = project({});
   assert.equal(create(dir, ["--type", "feat"]).flowId, "default");
 });
+
+// N117 — set-flow: ready→ok, locked after work starts, unknown flow rejected.
+function cli(dir, args) {
+  return execFileSync(process.execPath, [CLI, ...args], { cwd: dir, encoding: "utf-8" });
+}
+
+test("set-flow reassigns a ready task; locks after work starts; rejects unknown flow", () => {
+  const dir = project({ customFlow: true });
+  const created = JSON.parse(cli(dir, ["create", "--title", "T", "--type", "feat"]));
+  assert.equal(created.flowId, "default");
+
+  // ready → reassign succeeds
+  const set = JSON.parse(cli(dir, ["set-flow", "--id", created.id, "--flow", "custom:hotfix"]));
+  assert.equal(set.flowId, "custom:hotfix");
+  let shard = JSON.parse(
+    readFileSync(join(dir, "insightFlow/workTasks/tasks-N00-N09.json"), "utf-8"),
+  );
+  assert.equal(shard.tasks[0].flowId, "custom:hotfix");
+
+  // unknown flow → error
+  assert.throws(
+    () => cli(dir, ["set-flow", "--id", created.id, "--flow", "custom:ghost"]),
+    (err) => /unknown flow/.test(String(err.stderr)),
+  );
+
+  // advance past ready → locked
+  cli(dir, ["implement-start", "--id", created.id]);
+  assert.throws(
+    () => cli(dir, ["set-flow", "--id", created.id, "--flow", "default"]),
+    (err) => /locks once work starts/.test(String(err.stderr)),
+  );
+  // flow unchanged after the locked attempt
+  shard = JSON.parse(readFileSync(join(dir, "insightFlow/workTasks/tasks-N00-N09.json"), "utf-8"));
+  assert.equal(shard.tasks[0].flowId, "custom:hotfix");
+});
