@@ -29,6 +29,10 @@ const DEFAULTS: TaskflowConfig = {
   },
   activityEngine: ACTIVITY_DEFAULTS,
   notifications: NOTIFICATION_DEFAULTS,
+  // N116 — flow binding. Empty byType ships safe (every task → "default");
+  // projects opt in by mapping types to their custom flows, e.g.
+  // `"flows": { "defaultFlow": "default", "byType": { "fix": "custom:hotfix" } }`.
+  flows: { defaultFlow: "default", byType: {} },
   agents: {
     git: {
       permissions: {
@@ -89,6 +93,10 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
     notifications: {
       ...NOTIFICATION_DEFAULTS,
       ...(userConfig.notifications ?? {}),
+    },
+    flows: {
+      defaultFlow: userConfig.flows?.defaultFlow ?? DEFAULTS.flows!.defaultFlow,
+      byType: { ...DEFAULTS.flows!.byType, ...(userConfig.flows?.byType ?? {}) },
     },
     agents: {
       ...(DEFAULTS.agents ?? {}),

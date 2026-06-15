@@ -394,12 +394,27 @@ export interface TaskflowConfig {
   master?: MasterConfig;
   events?: EventsConfig;
   /**
+   * N116 — flow binding. `taskmaster`/`create` binds a new task to a project
+   * flow (`Task.flowId`) deterministically: `byType[<task type>]` → `defaultFlow`.
+   * Flow ids are project ids ("default" or "custom:<slug>"). An unknown mapped
+   * flow falls back to "default" at create time (non-fatal).
+   */
+  flows?: FlowsConfig;
+  /**
    * Marker for the hook-script generation shipped with the installed package.
    * Bumped whenever the bundled hook layout in `activity-hook.ts` changes
    * (N68). The CLI compares this against the package's bundled version and
    * warns when a consumer needs to run `insight-flow migrate-hooks`.
    */
   hooksVersion?: number;
+}
+
+/** N116 — flow binding configuration. */
+export interface FlowsConfig {
+  /** Flow a task is bound to when no type mapping matches. */
+  defaultFlow: string;
+  /** Map of task type → flow id (e.g. `{ "fix": "custom:hotfix" }`). */
+  byType: Record<string, string>;
 }
 
 export interface ParsedArgs {

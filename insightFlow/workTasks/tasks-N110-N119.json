@@ -453,7 +453,7 @@
       "title": "Flow binding — Task.flowId + type→flow map (taskmaster binds at create)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N116-flow-binding-task-flowid-type-flow-map-taskmaster-",
       "createdAt": "2026-06-15T16:41:02.156Z",
       "statusHistory": [
@@ -461,12 +461,28 @@
           "status": "ready",
           "at": "2026-06-15T16:41:02.156Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-15T16:46:32.515Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T17:01:59.325Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-15T16:46:32.514Z",
+        "completedAt": "2026-06-15T17:01:59.325Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/types.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/config.ts",
+          "packages/taskflow/src/cli/commands/create.ts",
+          "packages/taskflow/test/flow-binding.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
