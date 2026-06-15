@@ -238,7 +238,7 @@
       "title": "Flow editor — new flow picks its own agent set (no default inheritance)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N113-flow-editor-new-flow-picks-its-own-agent-set-no-de",
       "createdAt": "2026-06-15T11:39:59.037Z",
       "statusHistory": [
@@ -246,12 +246,25 @@
           "status": "ready",
           "at": "2026-06-15T11:39:59.037Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-15T11:44:58.557Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T11:50:50.141Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-15T11:44:58.557Z",
+        "completedAt": "2026-06-15T11:50:50.140Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/ProjectForm.tsx",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

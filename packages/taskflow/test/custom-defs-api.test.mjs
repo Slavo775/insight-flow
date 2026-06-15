@@ -391,3 +391,16 @@ test("non-slug custom ids are rejected (no filename collision / silent overwrite
     assert.ok(existsSync(join(dir, "insightFlow/modules/greeting.json")));
   });
 });
+
+// N113 — a new flow created with a hand-picked agent subset stores exactly
+// those agents with empty edges + install (no inheritance from the default).
+test("custom flow persists a hand-picked agent subset with empty flow/install", async () => {
+  await withServer(async () => {
+    const picked = { id: "custom:lean", title: "Lean", agents: ["task-implement", "task-git"] };
+    assert.equal((await api("/api/projects", "POST", picked)).status, 201);
+    const got = await (await api("/api/project?id=custom%3Alean", "GET")).json();
+    assert.deepEqual(got.agents, ["task-implement", "task-git"]);
+    assert.deepEqual(got.flow, []);
+    assert.deepEqual(got.install, []);
+  });
+});
