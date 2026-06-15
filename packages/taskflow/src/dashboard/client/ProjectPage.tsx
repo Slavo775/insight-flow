@@ -21,6 +21,7 @@ import { FlowMap } from "./components/FlowMap.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { kindColor } from "./components/CompositionMap.js";
 import { KindDot, MenuLink } from "./ModulesPage.js";
+import { useRegistry } from "./registry.js";
 import { TASK_STATUSES } from "../../core/statuses.js";
 import { tokens } from "./theme.js";
 
@@ -115,6 +116,7 @@ const StateRow = styled.div`
 export function ProjectPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { registry } = useRegistry(); // N114 — agents for the editor's Add palette
   const [projects, setProjects] = useState<ProjectSummaryDto[] | null>(null);
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -162,7 +164,11 @@ export function ProjectPage() {
   const editing = draft !== null;
 
   const startEdit = (): void => {
-    setDraft({ positions: { ...(project.layout ?? {}) }, flow: project.flow });
+    setDraft({
+      agents: project.agents,
+      positions: { ...(project.layout ?? {}) },
+      flow: project.flow,
+    });
     setDraftStates(project.states ?? []);
     setDirty(false);
   };
@@ -194,13 +200,14 @@ export function ProjectPage() {
     setTopError(null);
     setBusy(true);
     try {
-      // PUT the full flow record — layout + edges from the draft; everything
-      // else carried verbatim so the server's whole-record validation holds.
+      // PUT the full flow record — agents + layout + edges from the draft
+      // (N114 the agent set is editable too); everything else carried verbatim
+      // so the server's whole-record validation holds.
       const record = {
         id: project.id,
         title: project.title,
         ...(project.description ? { description: project.description } : {}),
-        agents: project.agents,
+        agents: draft.agents,
         flow: draft.flow,
         install: project.install,
         layout: draft.positions,
@@ -391,6 +398,7 @@ export function ProjectPage() {
             <FlowEditor
               project={project}
               states={draftStates.filter((s) => s.id && s.title)}
+              allAgents={registry?.agents ?? []}
               onDraftChange={(next) => {
                 setDraft(next);
                 setDirty(true);
