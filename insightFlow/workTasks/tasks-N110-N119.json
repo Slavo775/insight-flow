@@ -527,7 +527,7 @@
       "title": "set-flow command + dashboard reassignment (ready-only)",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N117-set-flow-command-dashboard-reassignment-ready-only",
       "createdAt": "2026-06-15T16:41:02.247Z",
       "statusHistory": [
@@ -545,6 +545,11 @@
           "status": "implemented",
           "at": "2026-06-15T17:15:34.494Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-15T17:15:42.654Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -574,9 +579,15 @@
         "cli",
         "dashboard"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-15T17:15:42.654Z",
+          "commitHash": "544b5c1",
+          "commitMessage": "feat(flow): N117 set-flow + dashboard reassign"
+        }
+      ],
+      "branch": "feat/N117-set-flow",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/97",
       "mergedAt": null
     },
     {
