@@ -5,7 +5,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
-import { ApiError, deleteDefinition, saveDefinition } from "./api.js";
+import { ApiError, deleteDefinition, saveDefinition, slugifyIdTail } from "./api.js";
 import { Button, Section } from "./components/index.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
 import { SideLayout } from "./components/SideLayout.js";
@@ -284,7 +284,7 @@ export function AgentForm() {
                 value={sIdTail}
                 disabled={isEdit}
                 placeholder="my-agent"
-                onChange={(e) => setIdTail(e.target.value)}
+                onChange={(e) => setIdTail(slugifyIdTail(e.target.value))}
               />
               <span>
                 Stored as <code>{fullId}</code>

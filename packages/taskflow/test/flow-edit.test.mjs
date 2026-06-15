@@ -4,7 +4,12 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { validateEdgeAddition, TASK_STATUSES, ProjectSchema } from "../dist/index.js";
+import {
+  validateEdgeAddition,
+  TASK_STATUSES,
+  ProjectSchema,
+  AgentModuleSchema,
+} from "../dist/index.js";
 
 const EDGES = [
   { from: "a", to: "b", on: "ready" },
@@ -102,5 +107,26 @@ test("ProjectSchema states: duplicates, canonical shadowing, unknown mapsTo, tri
       flow: [],
     }).success,
     false,
+  );
+});
+
+// Review-fix — schema rejects custom ids that aren't filename-safe slugs.
+test("DefinitionIdSchema constrains custom ids but leaves built-ins alone", () => {
+  const ok = { id: "custom:my-flow", title: "T", agents: ["a", "b"], flow: [], install: [] };
+  assert.equal(ProjectSchema.safeParse(ok).success, true);
+  for (const bad of ["custom:My-Flow", "custom:a b", "custom:a/b", "custom:-lead", "custom:"]) {
+    assert.equal(ProjectSchema.safeParse({ ...ok, id: bad }).success, false, bad);
+  }
+  // built-in-style ids (no custom: prefix) are unconstrained — the shipped
+  // default project id and slashed module ids must still validate.
+  assert.equal(ProjectSchema.safeParse({ ...ok, id: "default" }).success, true);
+  assert.equal(
+    AgentModuleSchema.safeParse({
+      id: "task-implement/input-contract",
+      title: "T",
+      kind: "section",
+      body: "x",
+    }).success,
+    true,
   );
 });

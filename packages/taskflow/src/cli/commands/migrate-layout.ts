@@ -38,27 +38,30 @@ export function cmdMigrateLayout(config: TaskflowConfig, opts: Record<string, un
   const sourceTasksDir = layoutBefore.tasksDir;
   const movedLegacyEventsDir = resolve(targetTasksDir, ".events");
 
+  // Blockers are collected, not thrown inline, so --dry-run reports them as
+  // warnings without exiting non-zero (a dry-run takes no side effects and is
+  // purely informational). A real run fails on any blocker below.
+  //
   // Partial state: insightFlow/ exists (without workTasks/, or layout detection
   // would have said "insightFlow") — a previous run was interrupted or the dir
-  // was created by hand. Refuse rather than guess. Exception (N102): the
-  // user-space registry dirs (modules/agents/projects) legitimately exist
-  // before migration — they don't make the layout ambiguous.
+  // was created by hand. Exception (N102): the user-space registry dirs
+  // (modules/agents/projects) legitimately exist before migration.
+  const blockers: string[] = [];
   if (existsSync(insightRoot)) {
     const REGISTRY_DIRS = new Set(["modules", "agents", "projects"]);
     const stray = readdirSync(insightRoot).filter(
       (entry) => !REGISTRY_DIRS.has(entry) && entry !== ".DS_Store",
     );
     if (stray.length > 0) {
-      fail(
+      blockers.push(
         `partial insightFlow/ layout detected at ${insightRoot} (no workTasks/ inside; found: ${stray.join(", ")}). ` +
           `Inspect its contents: either remove the directory and re-run, or finish the move ` +
           `by hand (mv ${rel(projectRoot, sourceTasksDir)} ${rel(projectRoot, targetTasksDir)}).`,
       );
     }
   }
-
   if (!existsSync(sourceTasksDir)) {
-    fail(
+    blockers.push(
       `nothing to migrate: ${rel(projectRoot, sourceTasksDir)} does not exist. ` +
         `Run 'insight-flow init' to create a project.`,
     );
@@ -78,9 +81,14 @@ export function cmdMigrateLayout(config: TaskflowConfig, opts: Record<string, un
         action: "migrate-layout",
         result: "dry-run",
         moves: moves.map((m) => ({ from: rel(projectRoot, m.from), to: rel(projectRoot, m.to) })),
+        ...(blockers.length ? { warnings: blockers } : {}),
       }) + "\n",
     );
     return;
+  }
+
+  if (blockers.length > 0) {
+    fail(blockers.join(" "));
   }
 
   mkdirSync(insightRoot, { recursive: true });

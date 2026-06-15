@@ -721,10 +721,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // below; successful writes notify connected dashboards.
     if (
       handleCustomDefsRequest(req, res, url, () =>
-        transport.emit("event", {
-          kind: "custom-defs-changed",
-          at: new Date().toISOString(),
-        }),
+        // Dedicated SSE event so the client can drop its registry cache; a
+        // write in one tab is then reflected on the next registry navigation
+        // in any connected tab (full live re-render is a later iteration).
+        transport.emit("custom-defs-changed", { at: new Date().toISOString() }),
       )
     ) {
       return;

@@ -238,8 +238,27 @@ export const HookEventInputSchema = z.object({
 // / `hook` / `skill` modules feed the artifact emitter (agents/emit.ts).
 // ---------------------------------------------------------------------------
 
+// N103 review-fix — definition ids must be filename-safe so the user-space
+// CRUD layer's `<id-tail>.json` mapping is bijective: two distinct ids can
+// never slug-collide onto one file (which silently overwrote a record). Custom
+// ids ("custom:<tail>") are constrained to a lowercase slug; built-in ids
+// (no "custom:" prefix — they use "/" and flat names) are left untouched.
+const CUSTOM_PREFIX = "custom:";
+const CUSTOM_TAIL_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
+export const DefinitionIdSchema = z
+  .string()
+  .min(1)
+  .refine(
+    (id) =>
+      !id.startsWith(CUSTOM_PREFIX) || CUSTOM_TAIL_PATTERN.test(id.slice(CUSTOM_PREFIX.length)),
+    {
+      message:
+        "custom id must be 'custom:' followed by lowercase letters, digits, and hyphens (e.g. custom:my-module)",
+    },
+  );
+
 const agentModuleBase = {
-  id: z.string().min(1),
+  id: DefinitionIdSchema,
   title: z.string().min(1),
   // Short human-readable summary for browsing UIs (N93). Ignored by the
   // composer/emitter — never rendered into role MD or artifacts.
@@ -327,7 +346,7 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
 ]);
 
 export const ComposedAgentSchema = z.object({
-  id: z.string().min(1),
+  id: DefinitionIdSchema,
   title: z.string().min(1),
   // Short human-readable summary for browsing UIs (N93); not part of the MD.
   description: z.string().optional(),
@@ -367,7 +386,7 @@ export const ProjectStateSchema = z.object({
 
 export const ProjectSchema = z
   .object({
-    id: z.string().min(1),
+    id: DefinitionIdSchema,
     title: z.string().min(1),
     description: z.string().optional(),
     // Composed-agent ids this project uses (validated against COMPOSED_AGENTS

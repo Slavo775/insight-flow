@@ -5,7 +5,13 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { ApiError, deleteDefinition, saveDefinition, type ModuleDto } from "./api.js";
+import {
+  ApiError,
+  deleteDefinition,
+  saveDefinition,
+  slugifyIdTail,
+  type ModuleDto,
+} from "./api.js";
 import { Button, Section } from "./components/index.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { invalidateRegistry, useRegistry } from "./registry.js";
@@ -292,7 +298,7 @@ export function ModuleForm() {
                 value={s.idTail}
                 disabled={isEdit}
                 placeholder="my-module"
-                onChange={(e) => set({ idTail: e.target.value })}
+                onChange={(e) => set({ idTail: slugifyIdTail(e.target.value) })}
               />
               <span>
                 Stored as <IdPreview>{fullId}</IdPreview>

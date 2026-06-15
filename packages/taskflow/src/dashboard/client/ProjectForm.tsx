@@ -4,7 +4,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { fetchProject, saveDefinition } from "./api.js";
+import { fetchProject, saveDefinition, slugifyIdTail } from "./api.js";
 import { Button, Section } from "./components/index.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { useDashboardStore } from "./store.js";
@@ -111,7 +111,7 @@ export function ProjectForm() {
               <input
                 value={idTail}
                 placeholder="hotfix"
-                onChange={(e) => setIdTail(e.target.value)}
+                onChange={(e) => setIdTail(slugifyIdTail(e.target.value))}
               />
               <span>
                 Stored as <code>custom:{idTail.trim() || "<id>"}</code>
