@@ -381,7 +381,7 @@
       "title": "Flow editor — edge modal to change trigger and delete relationship",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N115-flow-editor-edge-modal-to-change-trigger-and-delet",
       "createdAt": "2026-06-15T11:39:59.198Z",
       "statusHistory": [
@@ -399,6 +399,11 @@
           "status": "implemented",
           "at": "2026-06-15T12:17:59.010Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-15T12:18:06.438Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -422,9 +427,15 @@
         "flow",
         "editor"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-15T12:18:06.438Z",
+          "commitHash": "2ec62e5",
+          "commitMessage": "feat(dashboard): N115 edge modal"
+        }
+      ],
+      "branch": "feat/N115-edge-modal",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/95",
       "mergedAt": null
     }
   ]
