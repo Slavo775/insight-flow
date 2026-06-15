@@ -453,7 +453,7 @@
       "title": "Flow binding — Task.flowId + type→flow map (taskmaster binds at create)",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N116-flow-binding-task-flowid-type-flow-map-taskmaster-",
       "createdAt": "2026-06-15T16:41:02.156Z",
       "statusHistory": [
@@ -471,6 +471,11 @@
           "status": "implemented",
           "at": "2026-06-15T17:01:59.325Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-15T17:02:08.273Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -496,9 +501,15 @@
         "core",
         "cli"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-15T17:02:08.273Z",
+          "commitHash": "d50eb29",
+          "commitMessage": "feat(core): N116 flow binding"
+        }
+      ],
+      "branch": "feat/N116-flow-binding",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/96",
       "mergedAt": null
     },
     {
