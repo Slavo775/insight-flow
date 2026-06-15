@@ -171,10 +171,22 @@ function readBody(
   });
 }
 
-function atomicWrite(path: string, record: unknown): void {
+/**
+ * Persist a record. `exclusive` (used for POST create) fails with EEXIST when
+ * the file already exists, closing the concurrent-create race where two POSTs
+ * of the same new id both pass the in-memory duplicate check. PUT (overwrite)
+ * uses a unique temp file + rename so a crash never leaves a half-written
+ * record in place.
+ */
+function atomicWrite(path: string, record: unknown, exclusive = false): void {
   mkdirSync(resolve(path, ".."), { recursive: true });
-  const tmp = `${path}.tmp-${process.pid}`;
-  writeFileSync(tmp, JSON.stringify(record, null, 2) + "\n");
+  const body = JSON.stringify(record, null, 2) + "\n";
+  if (exclusive) {
+    writeFileSync(path, body, { flag: "wx" }); // O_CREAT|O_EXCL — throws EEXIST
+    return;
+  }
+  const tmp = `${path}.tmp-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  writeFileSync(tmp, body);
   renameSync(tmp, path);
 }
 
@@ -333,8 +345,13 @@ export function handleCustomDefsRequest(
     }
 
     try {
-      atomicWrite(fileFor(root, kind, record.id), record);
+      atomicWrite(fileFor(root, kind, record.id), record, method === "POST");
     } catch (err) {
+      // A concurrent create won the exclusive-write race.
+      if ((err as NodeJS.ErrnoException).code === "EEXIST") {
+        send(res, 409, { ok: false, error: `'${record.id}' already exists — use PUT to update` });
+        return;
+      }
       send(res, 500, { ok: false, error: (err as Error).message });
       return;
     }

@@ -152,3 +152,22 @@ test("pre-existing user-space registry dirs (N102) do not block migration", () =
   assert.ok(existsSync(join(dir, "insightFlow/workTasks/master.json")));
   assert.ok(existsSync(join(dir, "insightFlow/modules/greeting.json")), "registry dir untouched");
 });
+
+// Review-fix — --dry-run reports a partial-state blocker as a warning and
+// exits 0 (side-effect-free), while a real run still fails on it.
+test("dry-run reports partial-state as a warning without exiting non-zero", () => {
+  const dir = legacyProject();
+  mkdirSync(join(dir, "insightFlow/somethingStray"), { recursive: true });
+
+  // dry-run must NOT throw (exit 0) and should carry warnings.
+  const out = JSON.parse(run(dir, ["migrate-layout", "--dry-run"]));
+  assert.equal(out.result, "dry-run");
+  assert.ok(Array.isArray(out.warnings) && /partial insightFlow/.test(out.warnings[0]));
+  assert.ok(existsSync(join(dir, "workTasks/master.json")), "dry-run touched nothing");
+
+  // a real run still refuses.
+  assert.throws(
+    () => run(dir, ["migrate-layout"]),
+    (err) => /partial insightFlow/.test(String(err.stderr)),
+  );
+});

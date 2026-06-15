@@ -75,6 +75,16 @@ export class ApiError extends Error {
 
 export type DefinitionKind = "modules" | "agents" | "projects";
 
+/**
+ * Normalize a custom-id tail to the filename-safe slug the schema requires
+ * (lowercase letters, digits, hyphens). Applied as the user types so the
+ * common case ("My Module" → "my-module") never trips the server's stricter
+ * id validation; the schema remains the real guarantee for API/JSON authors.
+ */
+export function slugifyIdTail(raw: string): string {
+  return raw.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+}
+
 async function throwApiError(res: Response): Promise<never> {
   let payload: { error?: string; issues?: ApiIssue[]; referencedBy?: string[] } = {};
   try {

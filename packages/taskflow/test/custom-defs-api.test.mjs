@@ -364,3 +364,30 @@ test("custom states round-trip and gate edge triggers", async () => {
     );
   });
 });
+
+// Review-fix — the slug-collision silent-overwrite is closed: distinct custom
+// ids that would slug onto the same file are now rejected, never written.
+test("non-slug custom ids are rejected (no filename collision / silent overwrite)", async () => {
+  await withServer(async (dir) => {
+    // First create with a clean id succeeds.
+    assert.equal(
+      (await api("/api/modules", "POST", { ...MODULE, id: "custom:greeting" })).status,
+      201,
+    );
+    // The mixed-case sibling that used to slug onto greeting.json is now a 400.
+    const clash = await api("/api/modules", "POST", {
+      ...MODULE,
+      id: "custom:Greeting",
+      title: "X",
+    });
+    assert.equal(clash.status, 400);
+    assert.ok((await clash.json()).issues.some((i) => i.path === "id"));
+    // Spaces and slashes are likewise rejected before touching disk.
+    assert.equal((await api("/api/modules", "POST", { ...MODULE, id: "custom:a b" })).status, 400);
+    assert.equal((await api("/api/modules", "POST", { ...MODULE, id: "custom:a/b" })).status, 400);
+    // The original record is untouched (its file still holds "Greeting section").
+    const listed = await (await api("/api/modules", "GET")).json();
+    assert.equal(listed.modules.find((m) => m.id === "custom:greeting").title, "Greeting section");
+    assert.ok(existsSync(join(dir, "insightFlow/modules/greeting.json")));
+  });
+});

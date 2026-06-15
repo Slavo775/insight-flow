@@ -9,6 +9,7 @@ import {
   updatePageTitle,
 } from "./notifications.js";
 import { useDashboardStore } from "./store.js";
+import { invalidateRegistry } from "./registry.js";
 
 interface SnapshotFrame {
   activity?: ActivityEvent[];
@@ -63,6 +64,11 @@ export function useDashboardStream(): void {
     });
 
     es.addEventListener("file-change", () => void store().sync());
+
+    // N103 review-fix — a custom-definition CRUD write (possibly from another
+    // tab) invalidates the shared registry cache so the next /module, /agent,
+    // or /project navigation refetches fresh data instead of serving stale.
+    es.addEventListener("custom-defs-changed", () => invalidateRegistry());
 
     es.addEventListener("status", (e) => {
       const frame = JSON.parse((e as MessageEvent).data) as { to?: string };
