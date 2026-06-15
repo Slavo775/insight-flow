@@ -193,6 +193,25 @@ export async function fetchProjects(): Promise<ProjectSummaryDto[]> {
   return data.projects;
 }
 
+/** N117 — reassign a task's flow (ready-only; the server enforces the lock). */
+export async function setTaskFlow(id: string, flow: string): Promise<void> {
+  const res = await fetch("/api/task-flow", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, flow }),
+  });
+  if (!res.ok) {
+    let msg = `request failed (${res.status})`;
+    try {
+      const body = await res.json();
+      msg = body.message ?? body.error ?? msg;
+    } catch {
+      /* non-JSON */
+    }
+    throw new Error(msg);
+  }
+}
+
 /** Markdown content behind an include module's @ref, or null if not present. */
 export async function fetchIncludeDoc(ref: string): Promise<string | null> {
   const res = await fetch("/api/include-doc?ref=" + encodeURIComponent(ref));
