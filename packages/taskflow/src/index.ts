@@ -103,6 +103,7 @@ export {
   COMPOSED_AGENTS,
 } from "./agents/compose.js";
 export type { AgentModule, ComposedAgent, AgentArtifacts } from "./agents/compose.js";
+export { transitionTargetFor } from "./agents/transitions.js";
 export { applyArtifacts, renameManifestBucket } from "./agents/emit.js";
 export type { EmitReport, EmitAction } from "./agents/emit.js";
 export { DEFAULT_PROJECT, projectBucketId, collectProjectInstall } from "./agents/project.js";

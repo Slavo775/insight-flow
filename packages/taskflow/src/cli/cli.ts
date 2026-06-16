@@ -14,6 +14,7 @@ import { cmdReviewStart, cmdReviewEnd } from "./commands/review.js";
 import { cmdFixStart, cmdFixEnd } from "./commands/fix.js";
 import { cmdPush, cmdMrUpdate, cmdMerge, cmdDone } from "./commands/push.js";
 import { cmdSetFlow } from "./commands/set-flow.js";
+import { cmdAdvance } from "./commands/advance.js";
 import {
   cmdCurrent,
   cmdList,
@@ -117,6 +118,7 @@ function printHelp(): void {
     push --id Nxx --commit abc123 --message "..." [--branch name]
     mr-update --id Nxx --url "https://..."
     set-flow --id Nxx --flow <flowId>    Reassign a task's flow (ready-only; N117)
+    advance --id Nxx --agent <agentId>   Advance via the agent's flow transition (N133)
     merge --id Nxx
     done --id Nxx
 
@@ -351,6 +353,9 @@ async function run(): Promise<void> {
         break;
       case "set-flow":
         cmdSetFlow(config, master, opts);
+        break;
+      case "advance":
+        cmdAdvance(config, master, opts);
         break;
       case "merge":
         cmdMerge(config, master, opts);

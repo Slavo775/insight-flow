@@ -202,14 +202,38 @@ export function collectArtifacts(
  * after a body-carrying section joins with "\n" (continuation) and after a
  * heading-only section with "\n\n" (opens it); everything else "\n\n".
  */
+// N133 — a status-transition module (N128) renders as an instruction section:
+// the agent advances the task through its OWN flow via the flow-validated
+// setter (`insight-flow advance`, which reads this module and writes through
+// N131), instead of a hardcoded canonical literal. Shipped agents carry no
+// status-transition modules, so default role Markdown is byte-identical.
+function transitionSection(
+  m: Extract<AgentModule, { kind: "status-transition" }>,
+): Extract<AgentModule, { kind: "section" }> {
+  const from = m.from ? ` (only from \`${m.from}\`)` : "";
+  return {
+    id: m.id,
+    title: m.title,
+    source: m.source,
+    kind: "section",
+    heading: "## Advance the flow",
+    body:
+      `When your work is complete, advance the task through its flow:\n\n` +
+      `\`insight-flow advance --id <task-id> --agent ${m.agent}\`\n\n` +
+      `This sets status \`${m.sets}\`${from}, validated against the task's flow.`,
+  };
+}
+
 export function composeAgent(
   def: ComposedAgent,
   registry: Record<string, AgentModule> = MODULE_REGISTRY,
 ): string {
-  const mods = resolveModules(def, registry).filter(
-    (m): m is Extract<AgentModule, { kind: "section" | "include" }> =>
-      m.kind === "section" || m.kind === "include",
-  );
+  const mods = resolveModules(def, registry)
+    .map((m) => (m.kind === "status-transition" ? transitionSection(m) : m))
+    .filter(
+      (m): m is Extract<AgentModule, { kind: "section" | "include" }> =>
+        m.kind === "section" || m.kind === "include",
+    );
 
   let out = "";
   mods.forEach((mod, i) => {
