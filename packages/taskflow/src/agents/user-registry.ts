@@ -32,6 +32,16 @@ export function isLockedModuleId(id: string): boolean {
   return LOCKED_MODULE_IDS.has(id);
 }
 
+/**
+ * N128 — locked-by-kind as well as by id: every `status-transition` module is
+ * LOCKED (the canonical lifecycle's transitions are not user-overridable).
+ * Custom (`custom:`) status-transition modules are still allowed — the lock
+ * only bars overriding a shipped/built-in definition (see `readKind`).
+ */
+export function isLockedModule(def: { id: string; kind?: string }): boolean {
+  return LOCKED_MODULE_IDS.has(def.id) || def.kind === "status-transition";
+}
+
 export interface UserRegistries {
   modules: Record<string, AgentModule>;
   agents: Record<string, ComposedAgent>;
@@ -49,7 +59,7 @@ function readKind<T extends { id: string }>(
   dir: string,
   schema: z.ZodType<T>,
   builtinIds: Set<string>,
-  lockedIds: Set<string> = new Set(),
+  isLocked: (item: T) => boolean = () => false,
 ): { items: Record<string, T>; files: Record<string, string>; overrides: Set<string> } {
   const out: Record<string, T> = {};
   const files: Record<string, string> = {};
@@ -81,7 +91,7 @@ function readKind<T extends { id: string }>(
     //     shipped definition via the merge order below
     //   locked id, or an unknown non-custom id → rejected
     if (!parsed.id.startsWith(CUSTOM_ID_PREFIX)) {
-      if (lockedIds.has(parsed.id)) {
+      if (isLocked(parsed)) {
         throw new UserRegistryError(path, `id '${parsed.id}' is locked and cannot be overridden`);
       }
       if (!builtinIds.has(parsed.id)) {
@@ -113,7 +123,7 @@ export function loadUserRegistries(projectDir: string = resolveProjectRoot()): U
     resolve(root, "modules"),
     AgentModuleSchema,
     new Set(Object.keys(MODULE_REGISTRY)),
-    LOCKED_MODULE_IDS,
+    isLockedModule,
   );
   for (const mod of Object.values(modules)) {
     // Custom (custom:*) definitions are "custom"; an eject/override (N119) of a

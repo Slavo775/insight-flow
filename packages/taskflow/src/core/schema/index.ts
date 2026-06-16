@@ -346,6 +346,20 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
     kind: z.literal("bundle"),
     modules: z.array(z.string().min(1)).min(1),
   }),
+  // Status-transition module (N128): behavior-as-data. Declares that `agent`,
+  // on completing its turn, advances the task to status `sets` (optionally only
+  // when transitioning `from` a given status). The transition engine (N131) and
+  // role prompts (N133) read these instead of hardcoded literals, so a custom
+  // flow's agents emit that flow's own statuses. The canonical lifecycle's
+  // transition modules are LOCKED (not user-overridable). Contributes nothing
+  // to the artifact emitter or the composed role Markdown.
+  z.object({
+    ...agentModuleBase,
+    kind: z.literal("status-transition"),
+    agent: z.string().min(1),
+    sets: z.string().min(1),
+    from: z.string().min(1).optional(),
+  }),
 ]);
 
 export const ComposedAgentSchema = z.object({
@@ -387,6 +401,20 @@ export const ProjectStateSchema = z.object({
   mapsTo: TaskStatusSchema,
 });
 
+// N128 — a flow's own status: the building block of full custom statuses.
+// `id` is the value a task stores in Task.status; `title` is the display label
+// (badges/kanban); `color` styles badges/columns (N130); `terminal` marks an
+// end state (e.g. merged/done) with no outgoing transition. The shipped default
+// flow declares the canonical enum (TASK_STATUSES) verbatim, so its behavior is
+// byte-identical — this is data only; the engine still uses canonical literals
+// until N131. An empty `statuses` set falls back to the canonical universe.
+export const FlowStatusSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  color: z.string().optional(),
+  terminal: z.boolean().optional(),
+});
+
 export const ProjectSchema = z
   .object({
     id: DefinitionIdSchema,
@@ -403,6 +431,10 @@ export const ProjectSchema = z
     layout: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(),
     // N112 — per-flow custom states (aliases onto canonical statuses).
     states: z.array(ProjectStateSchema).default([]),
+    // N128 — the flow's own ordered status set. The shipped default flow declares
+    // the canonical enum (TASK_STATUSES); empty ⇒ falls back to canonical (so
+    // N108–N122 custom flows authored before this field keep validating exactly).
+    statuses: z.array(FlowStatusSchema).default([]),
     // N122 — the flow's main/entry agent(s): invoking one binds a task to this
     // flow (N123). Must be a subset of `agents`. Empty ⇒ not selectable by agent.
     entryAgents: z.array(z.string().min(1)).default([]),
@@ -419,15 +451,38 @@ export const ProjectSchema = z
       }
     });
 
-    // N112 — state ids must be unique and must not shadow canonical statuses.
+    // N128 — the flow's status universe: its declared set, or the canonical
+    // enum when it declares none (back-compat for pre-N128 flows). Edges,
+    // states, and (later) transition modules reference only ids in this set.
     const canonical = new Set<string>(TASK_STATUSES);
+    const statusIds = project.statuses.length
+      ? new Set(project.statuses.map((s) => s.id))
+      : canonical;
+
+    // N128 — status ids must be unique within the flow.
+    const statusSeen = new Set<string>();
+    project.statuses.forEach((status, index) => {
+      if (statusSeen.has(status.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["statuses", index, "id"],
+          message: `duplicate status id '${status.id}'`,
+        });
+      }
+      statusSeen.add(status.id);
+    });
+
+    // N112/N128 — state ids must be unique and must not shadow a status of this
+    // flow; their `mapsTo` alias must resolve to a status the flow declares
+    // (only enforced once the flow opts into a custom set — an empty set keeps
+    // the canonical universe, so canonical mapsTo values always resolve).
     const stateIds = new Set<string>();
     project.states.forEach((state, index) => {
-      if (canonical.has(state.id)) {
+      if (statusIds.has(state.id)) {
         ctx.addIssue({
           code: "custom",
           path: ["states", index, "id"],
-          message: `state id '${state.id}' shadows a canonical status`,
+          message: `state id '${state.id}' shadows a status of this flow`,
         });
       }
       if (stateIds.has(state.id)) {
@@ -437,18 +492,25 @@ export const ProjectSchema = z
           message: `duplicate state id '${state.id}'`,
         });
       }
+      if (project.statuses.length && !statusIds.has(state.mapsTo)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["states", index, "mapsTo"],
+          message: `state maps to '${state.mapsTo}', not a status of this flow`,
+        });
+      }
       stateIds.add(state.id);
     });
 
-    // N110/N112 — edge triggers must be canonical or a state defined by THIS
-    // flow; duplicates of the (from, to, on) triple are editor mistakes.
+    // N110/N112/N128 — edge triggers must be a status of THIS flow or a state
+    // it defines; duplicates of the (from, to, on) triple are editor mistakes.
     const seen = new Set<string>();
     project.flow.forEach((edge, index) => {
-      if (edge.on && !canonical.has(edge.on) && !stateIds.has(edge.on)) {
+      if (edge.on && !statusIds.has(edge.on) && !stateIds.has(edge.on)) {
         ctx.addIssue({
           code: "custom",
           path: ["flow", index, "on"],
-          message: `unknown trigger '${edge.on}' (not a canonical status or a state of this flow)`,
+          message: `unknown trigger '${edge.on}' (not a status or a state of this flow)`,
         });
       }
       const key = `${edge.from}→${edge.to}:${edge.on ?? ""}`;

@@ -30,5 +30,22 @@
     { "from": "task-implement", "to": "task-git", "on": "changes-implemented" }
   ],
   "install": ["activity"],
+  "statuses": [
+    { "id": "ready", "title": "ready", "color": "#94a3b8" },
+    { "id": "in-progress", "title": "in-progress", "color": "#f59e0b" },
+    { "id": "implemented", "title": "implemented", "color": "#06b6d4" },
+    { "id": "reviewing", "title": "reviewing", "color": "#a855f7" },
+    { "id": "approved", "title": "approved", "color": "#22c55e" },
+    { "id": "fix-needed", "title": "fix-needed", "color": "#ef4444" },
+    { "id": "fixing", "title": "fixing", "color": "#dc2626" },
+    { "id": "fixed", "title": "fixed", "color": "#22c55e" },
+    { "id": "pushed", "title": "pushed", "color": "#16a34a" },
+    { "id": "merged", "title": "merged", "color": "#10b981", "terminal": true },
+    { "id": "done", "title": "done", "terminal": true },
+    { "id": "request-changes", "title": "request-changes" },
+    { "id": "changes-requested", "title": "changes-requested", "color": "#f97316" },
+    { "id": "changes-implementing", "title": "changes-implementing", "color": "#fb923c" },
+    { "id": "changes-implemented", "title": "changes-implemented", "color": "#14b8a6" }
+  ],
   "entryAgents": ["task-analyze", "taskmaster"]
 }
