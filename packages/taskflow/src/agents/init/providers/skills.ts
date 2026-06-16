@@ -1,5 +1,7 @@
 import type { CustomAgent } from "../../../core/types.js";
 import type { SkillDef } from "./types.js";
+import { composeAgentById } from "../../compose.js";
+import { mergedComposedAgents, mergedModuleRegistry } from "../../user-registry.js";
 
 /**
  * Canonical built-in skill bodies — the single source of truth for every
@@ -249,7 +251,33 @@ export function buildSkillList(customAgents: CustomAgent[] = []): SkillDef[] {
     // (matches insight-flow's pre-N75 always-overwrite behaviour for them).
     overwrite: true,
   }));
-  return [...builtins, ...custom];
+  // N124 — composer custom agents (insightFlow/agents/, N107) become slash
+  // commands too: /<id> with the composed prompt. Appended last so they
+  // converge with / win over a same-named legacy config.agents.custom.
+  return [...builtins, ...custom, ...composerAgentSkills()];
+}
+
+/**
+ * N124 — scaffold one `/<id>` command per composer custom agent
+ * (`insightFlow/agents/`), body = its composed prompt over the merged registry.
+ * A broken user space degrades to no extra commands.
+ */
+export function composerAgentSkills(): SkillDef[] {
+  let agents, registry;
+  try {
+    agents = mergedComposedAgents();
+    registry = mergedModuleRegistry();
+  } catch {
+    return [];
+  }
+  return Object.values(agents)
+    .filter((a) => a.id.startsWith("custom:"))
+    .map((a) => ({
+      name: a.id.replace(/^custom:/, ""),
+      body: `${composeAgentById(a.id, agents, registry)}\n\n$ARGUMENTS\n`,
+      description: a.description ?? a.title,
+      overwrite: true,
+    }));
 }
 
 /**

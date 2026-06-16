@@ -212,7 +212,7 @@
       "title": "Custom composer agents scaffolded as slash commands",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N124-custom-composer-agents-scaffolded-as-slash-command",
       "createdAt": "2026-06-15T19:43:23.004Z",
       "statusHistory": [
@@ -220,12 +220,25 @@
           "status": "ready",
           "at": "2026-06-15T19:43:23.004Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:16:58.126Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T06:45:57.017Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-16T06:16:58.125Z",
+        "completedAt": "2026-06-16T06:45:57.017Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/init/providers/skills.ts",
+          "packages/taskflow/test/init-layout.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -248,7 +261,7 @@
       "title": "Derive the full install plan from a flow",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "in-progress",
       "folder": "insightFlow/workTasks/N125-derive-the-full-install-plan-from-a-flow",
       "createdAt": "2026-06-15T19:43:23.110Z",
       "statusHistory": [
@@ -256,10 +269,15 @@
           "status": "ready",
           "at": "2026-06-15T19:43:23.111Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:46:00.465Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
+        "startedAt": "2026-06-16T06:46:00.464Z",
         "completedAt": null,
         "filesChanged": [],
         "tokensUsed": null

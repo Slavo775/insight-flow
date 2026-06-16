@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,7 +21,10 @@ test("fresh init scaffolds insightFlow/workTasks and the CLI round-trips", () =>
   const dir = mkdtempSync(join(tmpdir(), "n101-init-layout-"));
   run(dir, ["init", "--editor", "claude", "-y"]);
 
-  assert.ok(existsSync(join(dir, "insightFlow/workTasks/master.json")), "master.json in new layout");
+  assert.ok(
+    existsSync(join(dir, "insightFlow/workTasks/master.json")),
+    "master.json in new layout",
+  );
   assert.ok(existsSync(join(dir, "insightFlow/workTasks/tasks-N00-N09.json")), "initial shard");
   assert.ok(!existsSync(join(dir, "workTasks")), "no legacy root for fresh projects");
 
@@ -53,6 +56,36 @@ test("re-init of a legacy project keeps the legacy layout and suggests migrate-l
 
   const out = run(dir, ["init", "--editor", "claude", "-y"]);
   assert.match(out, /migrate-layout/, "init points legacy projects at migrate-layout");
-  assert.ok(!existsSync(join(dir, "insightFlow")), "no insightFlow dir created for legacy projects");
+  assert.ok(
+    !existsSync(join(dir, "insightFlow")),
+    "no insightFlow dir created for legacy projects",
+  );
   assert.ok(existsSync(join(dir, "workTasks/master.json")), "legacy tree untouched");
+});
+
+// N124 — a composer custom agent (insightFlow/agents/) scaffolds a /<id> slash command.
+test("init scaffolds slash commands for composer custom agents", () => {
+  const dir = mkdtempSync(join(tmpdir(), "n124-init-"));
+  writeFileSync(join(dir, "taskflow.config.json"), JSON.stringify({ workDir: "workTasks" }));
+  mkdirSync(join(dir, "insightFlow/workTasks"), { recursive: true });
+  writeFileSync(
+    join(dir, "insightFlow/workTasks/master.json"),
+    JSON.stringify({ meta: { nextId: 0, currentTaskId: null, nextIncidentId: 1, shards: [] } }),
+  );
+  // a composer custom agent referencing a built-in module (composes cleanly)
+  mkdirSync(join(dir, "insightFlow/agents"), { recursive: true });
+  writeFileSync(
+    join(dir, "insightFlow/agents/greeter.json"),
+    JSON.stringify({ id: "custom:greeter", title: "Greeter", modules: ["security"] }),
+  );
+
+  run(dir, ["init", "--editor", "claude", "-y"]);
+
+  const cmd = join(dir, ".claude/commands/greeter.md");
+  assert.ok(existsSync(cmd), "/greeter command scaffolded for the composer custom agent");
+  const body = readFileSync(cmd, "utf-8");
+  assert.match(body, /@AGENT_SECURITY\.md/, "composed body includes the agent's module");
+  assert.match(body, /\$ARGUMENTS/, "command accepts arguments");
+  // built-in role commands still scaffolded
+  assert.ok(existsSync(join(dir, ".claude/commands/task-implement.md")));
 });
