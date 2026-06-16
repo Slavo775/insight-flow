@@ -18,6 +18,7 @@ import {
 import { Button } from "./components/index.js";
 import { FlowEditor, type FlowDraft } from "./components/FlowEditor.js";
 import { FlowMap } from "./components/FlowMap.js";
+import { InstallModal } from "./components/InstallModal.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { kindColor } from "./components/CompositionMap.js";
 import { KindDot, MenuLink } from "./ModulesPage.js";
@@ -130,6 +131,8 @@ export function ProjectPage() {
   >([]);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
+  // N127 — the "Install this flow" modal (plan + live progress); null = closed.
+  const [installing, setInstalling] = useState(false);
   const projectName = useDashboardStore((s) => s.snapshot?.projectName || "");
 
   useEffect(() => {
@@ -327,6 +330,12 @@ export function ProjectPage() {
               Edit flow
             </Button>
           ) : null}
+          {/* N127 — install this flow's artifacts (mcp/hooks/skills) here. */}
+          {!editing ? (
+            <Button type="button" $variant="primary" onClick={() => setInstalling(true)}>
+              Install this flow
+            </Button>
+          ) : null}
           {/* Custom flows delete; an ejected default reverts to shipped. */}
           {!isBuiltin && !editing ? (
             <Button type="button" $variant="danger" onClick={() => void removeFlow()}>
@@ -445,6 +454,13 @@ export function ProjectPage() {
           </Hint>
         ) : null}
       </SideLayout>
+      {installing ? (
+        <InstallModal
+          flowId={project.id}
+          flowTitle={project.title}
+          onClose={() => setInstalling(false)}
+        />
+      ) : null}
     </>
   );
 }

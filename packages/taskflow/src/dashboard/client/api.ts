@@ -199,6 +199,36 @@ export async function fetchProjects(): Promise<ProjectSummaryDto[]> {
   return data.projects;
 }
 
+// N125/N127 — flow install plan + execution.
+export interface InstallStepDto {
+  kind: "mcp" | "hook" | "skill";
+  key: string;
+  label: string;
+  target: string;
+}
+
+export async function fetchFlowInstallPlan(flowId: string): Promise<InstallStepDto[]> {
+  const res = await fetch("/api/flow-install-plan?id=" + encodeURIComponent(flowId));
+  if (!res.ok) throw new Error(`Failed to load install plan (${res.status})`);
+  return (await res.json()).plan as InstallStepDto[];
+}
+
+export interface InstallReport {
+  target: string;
+  action: "created" | "updated" | "unchanged" | "removed";
+}
+
+export async function runFlowInstall(flowId: string): Promise<InstallReport[]> {
+  const res = await fetch("/api/flow-install", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: flowId }),
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error ?? `install failed (${res.status})`);
+  return body.reports as InstallReport[];
+}
+
 /** N117 — reassign a task's flow (ready-only; the server enforces the lock). */
 export async function setTaskFlow(id: string, flow: string): Promise<void> {
   const res = await fetch("/api/task-flow", {
