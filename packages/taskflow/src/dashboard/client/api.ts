@@ -1,4 +1,4 @@
-import type { Task } from "./lib.js";
+import type { Task, FlowStatus } from "./lib.js";
 
 export interface ShardResponse {
   tasks?: Task[];
@@ -190,6 +190,8 @@ export interface ProjectSummaryDto {
   flowCount: number;
   /** N122 — the flow's main/entry agent(s); empty ⇒ not selectable by agent. */
   entryAgents?: string[];
+  /** N128/N129 — the flow's own status set; drives the kanban columns. */
+  statuses?: FlowStatus[];
 }
 
 export async function fetchProjects(): Promise<ProjectSummaryDto[]> {

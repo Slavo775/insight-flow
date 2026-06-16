@@ -1,5 +1,5 @@
-import type { Task } from "./lib.js";
-import { COLUMNS, formatTime, hexToRgb, taskStatusColor } from "./lib.js";
+import type { Task, Column } from "./lib.js";
+import { COLUMNS, orphanStatuses, formatTime, hexToRgb, taskStatusColor } from "./lib.js";
 import { Badge, Button, Card, CardId, CardMeta, CardTitle } from "./components/index.js";
 
 export function Nav({ projectName }: { projectName: string }) {
@@ -56,6 +56,9 @@ export function Stats({ tasks }: { tasks: Task[] }) {
 }
 
 function TaskCard({ task, onOpen }: { task: Task; onOpen: (id: string) => void }) {
+  // N129 — show the flow on cards bound to a non-default flow; default-flow
+  // cards stay byte-identical to today (no chip).
+  const flow = task.flowId && task.flowId !== "default" ? task.flowId : null;
   return (
     <Card onClick={() => onOpen(task.id)}>
       <CardId>
@@ -65,16 +68,36 @@ function TaskCard({ task, onOpen }: { task: Task; onOpen: (id: string) => void }
       <CardMeta>
         <span>{task.type}</span>
         <span>{task.priority}</span>
+        {flow ? <span title={`flow: ${flow}`}>⛓ {flow.replace(/^custom:/, "")}</span> : null}
         <span>{formatTime(task.createdAt)}</span>
       </CardMeta>
     </Card>
   );
 }
 
-export function Kanban({ tasks, onOpen }: { tasks: Task[]; onOpen: (id: string) => void }) {
+export function Kanban({
+  tasks,
+  onOpen,
+  columns = COLUMNS,
+}: {
+  tasks: Task[];
+  onOpen: (id: string) => void;
+  // N129 — columns derived from the flows' status sets; defaults to the
+  // canonical 6 (default-only board + fallback while flow statuses load).
+  columns?: Column[];
+}) {
+  // Tasks whose status matches no column degrade into a trailing "Other"
+  // column instead of vanishing (graceful for a renamed/removed flow status).
+  const orphans = orphanStatuses(
+    tasks.map((t) => t.status),
+    columns,
+  );
+  const rendered: Column[] = orphans.length
+    ? [...columns, { key: "__other__", label: "Other", matches: orphans }]
+    : columns;
   return (
     <div className="kanban">
-      {COLUMNS.map((col) => {
+      {rendered.map((col) => {
         const colTasks = tasks.filter((t) => col.matches.includes(t.status));
         return (
           <div className="column" key={col.key}>

@@ -21,6 +21,7 @@ import {
 } from "./notifications.js";
 import { useDashboardStore } from "./store.js";
 import { useDashboardStream } from "./useDashboardStream.js";
+import { useFlowColumns } from "./flow-columns.js";
 import { Kanban, Nav, ShardNav, Stats, Timeline } from "./ui.js";
 
 function activityStatusView(s: ClaudeStatus | null): { text: string; cls: string } {
@@ -101,6 +102,8 @@ function DashboardView() {
   const selectedTaskId = useDashboardStore((s) => s.selectedTaskId);
   const loadShard = useDashboardStore((s) => s.loadShard);
   const selectTask = useDashboardStore((s) => s.selectTask);
+  // N129 — kanban columns derived from the flows' status sets (canonical fallback).
+  const columns = useFlowColumns();
 
   const selected = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
@@ -144,7 +147,7 @@ function DashboardView() {
             <ShardNav shards={shards} current={currentShard} onSelect={(n) => void loadShard(n)} />
           ) : null}
           <Stats tasks={tasks} />
-          <Kanban tasks={tasks} onOpen={selectTask} />
+          <Kanban tasks={tasks} columns={columns} onOpen={selectTask} />
 
           {activityEnabled ? (
             <div className="act-tabs">

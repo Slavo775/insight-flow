@@ -2,18 +2,22 @@
 
 ## Done criteria
 
-- [ ] Kanban columns derived from flows' statuses (union, ordered)
-- [ ] Default-only board identical to today
-- [ ] Tasks group by status; cards show flow; orphan handled
-- [ ] No code change to add a flow's columns
+- [x] Kanban columns derived from flows' statuses (`core/kanban.buildColumns`,
+      union over `/api/projects` statuses; `useFlowColumns` hook + cache)
+- [x] Default-only board identical to today (canonical statuses keep the 6-column
+      grouping; `CANONICAL_COLUMNS` is the fallback while statuses load)
+- [x] Tasks group by status; cards show flow for non-default flows; orphan
+      statuses collected into a trailing "Other" column
+- [x] No code change to add a flow's columns (data-driven from `Project.statuses`)
 
 ## Quality gates
 
-- [ ] `npx tsc --noEmit` passes
-- [ ] `npm run lint` passes
-- [ ] Related tests pass
-- [ ] No regressions in affected area
+- [x] `npx tsc --noEmit` passes (server + client)
+- [x] `npm run lint` passes (no new findings)
+- [x] Related tests pass (199; +4 in `test/kanban-columns.test.mjs`)
+- [x] No regressions in affected area (default-only parity asserted; build green)
 
 ## Verification
 
-- [ ] default parity + custom-flow columns + orphan handling verified
+- [x] default parity + custom-flow columns + dedup + orphan handling verified by
+      `test/kanban-columns.test.mjs`

@@ -778,6 +778,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         flowCount: p.flow.length,
         // N122 — empty ⇒ not selectable by agent (only by type / explicit).
         entryAgents: p.entryAgents,
+        // N128/N129 — the flow's status set drives the kanban columns.
+        statuses: p.statuses,
       }));
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ projects }));

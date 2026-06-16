@@ -52,6 +52,8 @@ export { currentFlowNodes, suggestNextSteps, resolveTrigger } from "./core/flow-
 export type { FlowEdge, NextStep, FlowStateDef } from "./core/flow-status.js";
 // (TaskStatus the type already exports from core/types; only the const here.)
 export { TASK_STATUSES } from "./core/statuses.js";
+export { buildColumns, orphanStatuses, CANONICAL_COLUMNS } from "./core/kanban.js";
+export type { Column, FlowStatus } from "./core/kanban.js";
 export { validateEdgeAddition, edgeKey } from "./core/flow-edit.js";
 export {
   loadUserRegistries,
