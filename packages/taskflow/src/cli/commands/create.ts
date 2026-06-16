@@ -9,19 +9,47 @@ import { renderTemplate } from "../../core/spec.js";
 import { mergedProjects } from "../../agents/user-registry.js";
 
 /**
- * N116 — resolve the flow a new task binds to: explicit `--flow` wins, else the
- * `flows.byType[<type>]` mapping, else `flows.defaultFlow`. An unknown/missing
- * flow falls back to "default" non-fatally with a printed note.
+ * N116/N123 — resolve the flow a new task binds to. Precedence: explicit
+ * `--flow` > `--agent` (the flow whose `entryAgents` includes it, N122/N123) >
+ * `flows.byType[<type>]` > `flows.defaultFlow`. An unknown/missing flow falls
+ * back to "default" non-fatally. An `--agent` that owns no flow, or more than
+ * one, is a hard error (the latter requires `--flow` to disambiguate).
  */
-function resolveFlowId(config: TaskflowConfig, type: string, explicit?: string): string {
+function resolveFlowId(
+  config: TaskflowConfig,
+  type: string,
+  explicit?: string,
+  agent?: string,
+): string {
   const flows = config.flows ?? { defaultFlow: "default", byType: {} };
-  const requested = explicit ?? flows.byType[type] ?? flows.defaultFlow ?? "default";
-  let known: Set<string>;
+  let projects: Record<string, { entryAgents?: string[] }>;
   try {
-    known = new Set(Object.keys(mergedProjects()));
+    projects = mergedProjects();
   } catch {
-    known = new Set(["default"]); // malformed user space — only the shipped flow is safe
+    projects = { default: {} }; // malformed user space — only the shipped flow is safe
   }
+  const known = new Set(Object.keys(projects));
+
+  // N123 — a main/entry agent identifies its flow.
+  let byAgent: string | undefined;
+  if (!explicit && agent) {
+    const owning = Object.entries(projects)
+      .filter(([, p]) => (p.entryAgents ?? []).includes(agent))
+      .map(([id]) => id);
+    if (owning.length === 0) {
+      console.error(`Agent "${agent}" is not a main agent of any flow — pass --flow to bind one.`);
+      process.exit(1);
+    }
+    if (owning.length > 1) {
+      console.error(
+        `Agent "${agent}" is a main agent of multiple flows (${owning.join(", ")}) — pass --flow.`,
+      );
+      process.exit(1);
+    }
+    byAgent = owning[0];
+  }
+
+  const requested = explicit ?? byAgent ?? flows.byType[type] ?? flows.defaultFlow ?? "default";
   if (!known.has(requested)) {
     console.error(`Flow "${requested}" not found — binding to "default" instead.`);
     return "default";
@@ -99,7 +127,12 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
   }
 
   const taskType = (opts.type as string) || "fix";
-  const flowId = resolveFlowId(config, taskType, opts.flow as string | undefined);
+  const flowId = resolveFlowId(
+    config,
+    taskType,
+    opts.flow as string | undefined,
+    opts.agent as string | undefined,
+  );
 
   const task = {
     id,

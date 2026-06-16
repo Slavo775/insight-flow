@@ -162,7 +162,7 @@
       "title": "Main-agent binds the flow on task creation (both-equal with type-map)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N123-main-agent-binds-the-flow-on-task-creation-both-eq",
       "createdAt": "2026-06-15T19:43:22.907Z",
       "statusHistory": [
@@ -170,12 +170,26 @@
           "status": "ready",
           "at": "2026-06-15T19:43:22.908Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:13:12.381Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T06:16:52.306Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-16T06:13:12.381Z",
+        "completedAt": "2026-06-16T06:16:52.306Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/create.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/test/flow-binding.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

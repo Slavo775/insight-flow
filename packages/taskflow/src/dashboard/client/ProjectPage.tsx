@@ -212,6 +212,9 @@ export function ProjectPage() {
         install: project.install,
         layout: draft.positions,
         states: draftStates,
+        // N122 — carry entry agents verbatim (only ones still in the agent set)
+        // so editing a flow doesn't drop its main agents.
+        entryAgents: (project.entryAgents ?? []).filter((a) => draft.agents.includes(a)),
       };
       await saveDefinition("projects", record, true, { revision: project.revision });
       // Re-render from server truth.
