@@ -255,6 +255,20 @@ export function ProjectPage() {
     }
   };
 
+  // N121 — revert the ejected default flow to its shipped version (DELETE the
+  // override; the id stays, falling back to the package default).
+  const revertFlow = async (): Promise<void> => {
+    if (!window.confirm("Revert the default flow to the shipped version?")) return;
+    setTopError(null);
+    try {
+      await deleteDefinition("projects", project.id);
+      const fresh = await fetchProject(project.id);
+      setProject(fresh);
+    } catch (err) {
+      setTopError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
   const sidebar = (
     <>
       <Group>
@@ -298,16 +312,25 @@ export function ProjectPage() {
         {topError ? <TopError role="alert">{topError}</TopError> : null}
         <Header>
           <Title>{project.title}</Title>
-          <SourceBadge $builtin={isBuiltin}>{isBuiltin ? "shipped" : "custom"}</SourceBadge>
+          <SourceBadge $builtin={isBuiltin}>
+            {isBuiltin ? (project.ejected ? "shipped · ejected" : "shipped") : "custom"}
+          </SourceBadge>
+          {/* N121 — every flow is editable now (the default ejects on save). */}
+          {!editing ? (
+            <Button type="button" $variant="nav" onClick={startEdit}>
+              Edit flow
+            </Button>
+          ) : null}
+          {/* Custom flows delete; an ejected default reverts to shipped. */}
           {!isBuiltin && !editing ? (
-            <>
-              <Button type="button" $variant="nav" onClick={startEdit}>
-                Edit flow
-              </Button>
-              <Button type="button" $variant="danger" onClick={() => void removeFlow()}>
-                Delete flow
-              </Button>
-            </>
+            <Button type="button" $variant="danger" onClick={() => void removeFlow()}>
+              Delete flow
+            </Button>
+          ) : null}
+          {isBuiltin && project.ejected && !editing ? (
+            <Button type="button" $variant="danger" onClick={() => void revertFlow()}>
+              Revert to shipped
+            </Button>
           ) : null}
           {editing ? (
             <>

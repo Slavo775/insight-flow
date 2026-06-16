@@ -158,6 +158,8 @@ export interface ProjectDto {
   description?: string;
   /** N108 — "builtin" for the shipped default flow. */
   source?: "builtin" | "custom";
+  /** N121 — true when a user-space override shadows the shipped definition. */
+  ejected?: boolean;
   agents: string[];
   flow: { from: string; to: string; on?: string }[];
   install: string[];

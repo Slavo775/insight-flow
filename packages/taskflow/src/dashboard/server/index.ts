@@ -689,6 +689,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         JSON.stringify({
           ...project,
           source: project.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
+          // N121 — true when a user-space override file shadows the shipped def
+          // (drives the "Revert to shipped" affordance for the default flow).
+          ejected: definitionRevision("projects", project.id) !== null,
           // N111 — optimistic-concurrency token; PUTs echo it via x-revision.
           revision:
             project.id === DEFAULT_PROJECT.id

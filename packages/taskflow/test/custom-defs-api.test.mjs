@@ -581,3 +581,24 @@ test("editability tiers: default eject/revert, locked read-only, custom CRUD", a
     assert.equal((await (await api("/api/project", "GET")).json()).title, "Default (ejected)");
   });
 });
+
+// N121 — the default flow ejects (PUT) and reverts (DELETE); /api/project
+// reports `ejected`.
+test("default flow eject/revert round-trip + ejected flag", async () => {
+  await withServer(async () => {
+    let p = await (await api("/api/project", "GET")).json();
+    assert.equal(p.ejected, false, "pristine default is not ejected");
+
+    const base = { id: "default", title: "Default (ejected)", agents: p.agents, flow: p.flow, install: p.install };
+    assert.equal((await api("/api/projects/default", "PUT", base)).status, 200);
+    p = await (await api("/api/project", "GET")).json();
+    assert.equal(p.ejected, true);
+    assert.equal(p.title, "Default (ejected)");
+
+    // revert (DELETE the override) → back to shipped, ejected false
+    assert.equal((await api("/api/projects/default", "DELETE")).status, 200);
+    p = await (await api("/api/project", "GET")).json();
+    assert.equal(p.ejected, false);
+    assert.notEqual(p.title, "Default (ejected)");
+  });
+});
