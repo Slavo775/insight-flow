@@ -11,8 +11,14 @@ import { mergedProjects } from "../../agents/user-registry.js";
 function resolveFlow(task: Task): StatusFlow | undefined {
   try {
     return mergedProjects()[task.flowId ?? "default"];
-  } catch {
-    return undefined; // canonical universe — never block on a custom-flow file
+  } catch (err) {
+    // Never block the lifecycle on a malformed custom-flow file — fall back to
+    // the canonical universe. Surface the degradation so it isn't silent.
+    console.error(
+      `warning: could not load flows (${(err as Error).message}); ` +
+        `validating ${task.id} against the canonical status set.`,
+    );
+    return undefined;
   }
 }
 

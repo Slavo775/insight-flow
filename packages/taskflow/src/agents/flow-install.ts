@@ -54,7 +54,7 @@ export function flowInstallPlan(flow: Project): InstallStep[] {
     push({ kind: "mcp", key: m.name, label: `MCP server: ${m.name}`, target: ".mcp.json" });
   }
   for (const h of art.hooks) {
-    const key = `${h.event}:${h.matcher ?? ""}:${h.command}`;
+    const key = `${h.event}:${h.matcher ?? ""}:${h.command}:${h.timeout ?? ""}`;
     push({
       kind: "hook",
       key,

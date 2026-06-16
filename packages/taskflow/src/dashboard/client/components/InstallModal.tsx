@@ -204,20 +204,6 @@ export function InstallModal({
     };
   }, [flowId]);
 
-  // Live progress: listen to install-progress only while an install is running.
-  useEffect(() => {
-    if (phase !== "running") return;
-    const es = new EventSource("/sse");
-    es.addEventListener("install-progress", (e) => {
-      const frame = JSON.parse((e as MessageEvent).data) as ProgressFrame;
-      if (frame.phase === "step" && frame.target && frame.action) {
-        const { target, action } = frame;
-        setActions((prev) => ({ ...prev, [target]: action }));
-      }
-    });
-    return () => es.close();
-  }, [phase]);
-
   // Escape / backdrop close — blocked mid-install so a run isn't abandoned.
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -231,7 +217,23 @@ export function InstallModal({
     setRunError(null);
     setActions({});
     setPhase("running");
+    // Open the progress stream and wait for it to CONNECT before the POST: the
+    // server emits the install-progress frames synchronously inside the request
+    // handler, so a listener attached after the POST would miss them. We await
+    // `onopen` (with a short fallback so a blocked SSE never hangs the install).
+    const es = new EventSource("/sse");
+    es.addEventListener("install-progress", (e) => {
+      const frame = JSON.parse((e as MessageEvent).data) as ProgressFrame;
+      if (frame.phase === "step" && frame.target && frame.action) {
+        const { target, action } = frame;
+        setActions((prev) => ({ ...prev, [target]: action }));
+      }
+    });
     try {
+      await new Promise<void>((resolve) => {
+        es.onopen = () => resolve();
+        setTimeout(resolve, 1500); // fall through if onopen never fires
+      });
       const reports = await runFlowInstall(flowId);
       // The response is authoritative — fold every report in by target.
       const final: Record<string, InstallReport["action"]> = {};
@@ -241,6 +243,8 @@ export function InstallModal({
     } catch (err) {
       setRunError(err instanceof Error ? err.message : String(err));
       setPhase("failed");
+    } finally {
+      es.close();
     }
   };
 
@@ -288,7 +292,7 @@ export function InstallModal({
               {plan.map((step) => {
                 const status = stepStatus(step);
                 return (
-                  <StepRow key={`${step.kind}:${step.key}`}>
+                  <StepRow key={`${step.kind}:${step.key}`} title={`written to ${step.target}`}>
                     <StepIcon $token={status.token}>{status.glyph}</StepIcon>
                     <StepLabel>{step.label}</StepLabel>
                     <StepTarget>{step.target}</StepTarget>

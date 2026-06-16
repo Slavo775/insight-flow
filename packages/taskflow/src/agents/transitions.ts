@@ -10,9 +10,10 @@ type StatusTransition = Extract<AgentModule, { kind: "status-transition" }>;
 /**
  * The status `agentId`'s status-transition module sets when advancing from
  * `fromStatus`. Prefers a module that names this agent and (optionally) guards
- * on `from`; falls back to any from-matching transition the agent carries.
- * Returns undefined when the agent has no matching transition module (or the
- * registries fail to load).
+ * on `from`; falls back to any from-matching transition the agent carries. When
+ * several modules match (e.g. overlapping `from` guards), the first in the
+ * agent's declared module order wins. Returns undefined when the agent has no
+ * matching transition module (or the registries fail to load).
  */
 export function transitionTargetFor(agentId: string, fromStatus: string): string | undefined {
   let agents: Record<string, { id: string; title: string; modules: string[] }>;
