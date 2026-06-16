@@ -632,3 +632,26 @@ test("flow install plan lists artifacts from agents + install (deduped)", async 
     assert.equal((await api("/api/flow-install-plan?id=custom%3Aghost", "GET")).status, 404);
   });
 });
+
+// N126 — POST /api/flow-install writes the artifacts (idempotent) and reports.
+test("flow install writes artifacts and is idempotent", async () => {
+  await withServer(async (dir) => {
+    let r = await api("/api/flow-install", "POST", { id: "default" });
+    assert.equal(r.status, 200);
+    const first = await r.json();
+    assert.ok(first.ok && Array.isArray(first.reports));
+    // default flow installs the activity lifecycle hooks → settings written
+    assert.ok(existsSync(join(dir, ".claude/settings.json")), "hooks written to settings.json");
+    const wrote = (reps) =>
+      reps.some((rep) => rep.action === "created" || rep.action === "updated");
+    assert.ok(wrote(first.reports), "something was created/updated");
+
+    // second run is idempotent (nothing created/updated)
+    r = await api("/api/flow-install", "POST", { id: "default" });
+    const second = await r.json();
+    assert.ok(!wrote(second.reports), "re-run writes nothing");
+
+    // unknown flow → 404
+    assert.equal((await api("/api/flow-install", "POST", { id: "custom:ghost" })).status, 404);
+  });
+});

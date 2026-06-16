@@ -32,8 +32,10 @@ import {
   type AgentModule,
   type ComposedAgent,
 } from "../../agents/compose.js";
-import { DEFAULT_PROJECT } from "../../agents/project.js";
-import { flowInstallPlan } from "../../agents/flow-install.js";
+import { DEFAULT_PROJECT, projectBucketId } from "../../agents/project.js";
+import { flowInstallPlan, flowArtifacts } from "../../agents/flow-install.js";
+import { applyArtifacts } from "../../agents/emit.js";
+import { resolveProjectRoot } from "../../core/paths.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
@@ -720,6 +722,49 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ flowId, plan: flowInstallPlan(flow) }));
+      return;
+    }
+
+    // N126 — run the install plan for a flow (write .mcp.json / hooks / skills
+    // via the idempotent emitter) and stream per-step progress over SSE.
+    if (url.pathname === "/api/flow-install" && req.method === "POST") {
+      let body = "";
+      req.on("data", (chunk: Buffer) => {
+        body += chunk.toString("utf-8");
+        if (body.length > 16 * 1024) req.destroy();
+      });
+      req.on("end", () => {
+        try {
+          const parsed = body ? (JSON.parse(body) as { id?: string }) : {};
+          const flowId = parsed.id ?? DEFAULT_PROJECT.id;
+          const flow = mergedProjectsView()[flowId];
+          if (!flow) {
+            res.writeHead(404, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: `unknown flow '${flowId}'` }));
+            return;
+          }
+          const plan = flowInstallPlan(flow);
+          transport.emit("install-progress", { phase: "started", flowId, plan });
+          const projectRoot = resolveProjectRoot();
+          const reports = applyArtifacts(flowArtifacts(flow), projectRoot, projectBucketId(flow), {
+            INSIGHT_FLOW_BIN: "insight-flow",
+          });
+          for (const r of reports) {
+            transport.emit("install-progress", {
+              phase: "step",
+              target: r.target,
+              action: r.action,
+            });
+          }
+          transport.emit("install-progress", { phase: "done", flowId, reports });
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: true, flowId, reports }));
+        } catch (err) {
+          transport.emit("install-progress", { phase: "failed", error: (err as Error).message });
+          res.writeHead(500, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+        }
+      });
       return;
     }
 
