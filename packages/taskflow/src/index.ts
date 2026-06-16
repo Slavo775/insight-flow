@@ -48,6 +48,8 @@ export {
 export type { FlowRoot } from "./core/paths.js";
 export { flowInstallPlan, flowArtifacts } from "./agents/flow-install.js";
 export type { InstallStep } from "./agents/flow-install.js";
+export { setStatus, flowStatusUniverse, InvalidStatusTransitionError } from "./core/set-status.js";
+export type { StatusFlow, SetStatusOptions } from "./core/set-status.js";
 export { currentFlowNodes, suggestNextSteps, resolveTrigger } from "./core/flow-status.js";
 export type { FlowEdge, NextStep, FlowStateDef } from "./core/flow-status.js";
 // (TaskStatus the type already exports from core/types; only the const here.)

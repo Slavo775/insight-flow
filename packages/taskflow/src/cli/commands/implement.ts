@@ -1,6 +1,7 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { getWorkDir, now, resolveId } from "../../core/storage.js";
+import { writeStatus } from "./status-write.js";
 
 export function cmdImplementStart(
   config: TaskflowConfig,
@@ -10,13 +11,8 @@ export function cmdImplementStart(
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
-  task.status = "in-progress";
+  writeStatus(task, "in-progress", (opts.by as string) || "task-implement");
   task.implementation.startedAt = now();
-  task.statusHistory.push({
-    status: "in-progress",
-    at: now(),
-    by: (opts.by as string) || "task-implement",
-  });
 
   if (opts.tokens) {
     task.implementation.tokensUsed = parseInt(opts.tokens as string, 10);
@@ -36,13 +32,8 @@ export function cmdImplementEnd(
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
-  task.status = "implemented";
+  writeStatus(task, "implemented", (opts.by as string) || "task-implement");
   task.implementation.completedAt = now();
-  task.statusHistory.push({
-    status: "implemented",
-    at: now(),
-    by: (opts.by as string) || "task-implement",
-  });
 
   if (opts.files) {
     task.implementation.filesChanged = (opts.files as string).split(",").map((f) => f.trim());

@@ -3,6 +3,7 @@ import { resolveConfig, getMasterPath } from "../core/config.js";
 import { jsonFileStorage } from "../core/storage-port.js";
 import { resolvePackageAsset, TaskflowProjectNotFoundError } from "../core/paths.js";
 import { TaskflowValidationError } from "../core/schema/index.js";
+import { InvalidStatusTransitionError } from "../core/set-status.js";
 import { initProject } from "../agents/init/index.js";
 import { startServer } from "../dashboard/server/index.js";
 import { runMaster } from "../master/index.js";
@@ -411,7 +412,11 @@ async function run(): Promise<void> {
 }
 
 run().catch((err) => {
-  if (err instanceof TaskflowValidationError || err instanceof TaskflowProjectNotFoundError) {
+  if (
+    err instanceof TaskflowValidationError ||
+    err instanceof TaskflowProjectNotFoundError ||
+    err instanceof InvalidStatusTransitionError
+  ) {
     console.error(`error: ${err.message}`);
     process.exit(1);
   }
