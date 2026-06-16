@@ -10,7 +10,7 @@ import {
 } from "./notifications.js";
 import { useDashboardStore } from "./store.js";
 import { invalidateRegistry } from "./registry.js";
-import { invalidateFlowColumns } from "./flow-columns.js";
+import { invalidateFlows } from "./flow-columns.js";
 
 interface SnapshotFrame {
   activity?: ActivityEvent[];
@@ -71,7 +71,7 @@ export function useDashboardStream(): void {
     // or /project navigation refetches fresh data instead of serving stale.
     es.addEventListener("custom-defs-changed", () => {
       invalidateRegistry();
-      invalidateFlowColumns(); // N129 — a flow's statuses may have changed
+      invalidateFlows(); // N129/N130 — a flow's statuses may have changed
     });
 
     es.addEventListener("status", (e) => {

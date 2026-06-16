@@ -7,9 +7,18 @@ import { ThemeProvider } from "styled-components";
 import { readingTheme } from "./theme.js";
 import type { DocName } from "./api.js";
 import { fetchTaskDoc } from "./api.js";
-import type { Implementation, Incident, Push, Review, StatusHistoryEntry, Task } from "./lib.js";
+import type {
+  FlowStatus,
+  Implementation,
+  Incident,
+  Push,
+  Review,
+  StatusHistoryEntry,
+  Task,
+} from "./lib.js";
 import { formatTime } from "./lib.js";
 import { Badge, Button, Chip, Section, Severity, Text } from "./components/index.js";
+import { useFlowStatusMap } from "./flow-columns.js";
 
 function FileChips({ files }: { files?: string[] }) {
   if (!files || !files.length) return null;
@@ -23,6 +32,9 @@ function FileChips({ files }: { files?: string[] }) {
 }
 
 function Info({ task }: { task: Task }) {
+  // N130 — resolve the status badge from the task's flow status set.
+  const statusMap = useFlowStatusMap();
+  const flowStatuses = statusMap[task.flowId ?? "default"];
   return (
     <dl className="kv">
       <dt>Type</dt>
@@ -35,7 +47,7 @@ function Info({ task }: { task: Task }) {
       </dd>
       <dt>Status</dt>
       <dd>
-        <Badge status={task.status} />
+        <Badge status={task.status} statuses={flowStatuses} />
       </dd>
       <dt>Created</dt>
       <dd>
@@ -222,7 +234,13 @@ function PushItem({ push }: { push: Push }) {
   );
 }
 
-function StatusHistory({ hist }: { hist?: StatusHistoryEntry[] }) {
+function StatusHistory({
+  hist,
+  statuses,
+}: {
+  hist?: StatusHistoryEntry[];
+  statuses?: FlowStatus[];
+}) {
   if (!hist || !hist.length) return <div className="empty">No history</div>;
   return (
     <div className="timeline-mini">
@@ -232,7 +250,7 @@ function StatusHistory({ hist }: { hist?: StatusHistoryEntry[] }) {
         .map((h, i) => (
           <div className="timeline-mini-item" key={h.at + i}>
             <span className="t-when">{formatTime(h.at)}</span>
-            <Badge status={h.status} />
+            <Badge status={h.status} statuses={statuses} />
             <span className="t-who">by {h.by || "?"}</span>
           </div>
         ))}
@@ -306,6 +324,9 @@ function DocViewer({ folder }: { folder: string }) {
  * markdown docs are comfortable; the dense dashboard outside is unaffected.
  */
 export function TaskDetail({ task }: { task: Task }) {
+  // N130 — the task's flow status set, threaded to the status-history badges.
+  const statusMap = useFlowStatusMap();
+  const flowStatuses = statusMap[task.flowId ?? "default"];
   return (
     <ThemeProvider theme={readingTheme}>
       <div className="reading">
@@ -346,7 +367,7 @@ export function TaskDetail({ task }: { task: Task }) {
           </Section>
         ) : null}
         <Section title="Status history" count={(task.statusHistory || []).length}>
-          <StatusHistory hist={task.statusHistory} />
+          <StatusHistory hist={task.statusHistory} statuses={flowStatuses} />
         </Section>
         {task.folder ? (
           <Section title="Documents">

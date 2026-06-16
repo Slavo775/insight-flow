@@ -1,30 +1,30 @@
-// N129 — derive the kanban's columns from every flow's status set. Mirrors the
-// registry cache (registry.ts): one shared in-flight/settled promise so the
-// board doesn't refetch on each shard nav, invalidated on a custom-defs write.
-// Until the flows load (and forever in a default-only workspace), the canonical
-// 6-column board is the fallback, so there's no layout flash.
-import { useEffect, useState } from "react";
-import { fetchProjects } from "./api.js";
-import { buildColumns, COLUMNS, type Column } from "./lib.js";
+// N129/N130 — derive the kanban's columns AND per-flow status styling from
+// every flow's status set. Mirrors the registry cache (registry.ts): one shared
+// in-flight/settled promise of the flow summaries, invalidated on a custom-defs
+// write. Until the flows load (and forever in a default-only workspace), the
+// canonical 6-column board / canonical styling is the fallback — no flash.
+import { useEffect, useMemo, useState } from "react";
+import { fetchProjects, type ProjectSummaryDto } from "./api.js";
+import { buildColumns, COLUMNS, type Column, type FlowStatus } from "./lib.js";
 
-let cached: Promise<Column[]> | null = null;
+let cached: Promise<ProjectSummaryDto[]> | null = null;
 
-function load(): Promise<Column[]> {
-  cached ??= fetchProjects().then((projects) => buildColumns(projects));
+function load(): Promise<ProjectSummaryDto[]> {
+  cached ??= fetchProjects();
   return cached;
 }
 
-/** Drop the cache after a flow CRUD write so the next mount rebuilds columns. */
-export function invalidateFlowColumns(): void {
+/** Drop the cache after a flow CRUD write so the next mount refetches. */
+export function invalidateFlows(): void {
   cached = null;
 }
 
-export function useFlowColumns(): Column[] {
-  const [columns, setColumns] = useState<Column[]>(COLUMNS);
+function useFlows(): ProjectSummaryDto[] | null {
+  const [flows, setFlows] = useState<ProjectSummaryDto[] | null>(null);
   useEffect(() => {
     let alive = true;
     load().then(
-      (cols) => alive && setColumns(cols),
+      (f) => alive && setFlows(f),
       () => {
         cached = null; // allow retry on next mount; keep canonical fallback
       },
@@ -33,5 +33,21 @@ export function useFlowColumns(): Column[] {
       alive = false;
     };
   }, []);
-  return columns;
+  return flows;
+}
+
+/** N129 — kanban columns from the union of flow statuses (canonical fallback). */
+export function useFlowColumns(): Column[] {
+  const flows = useFlows();
+  return useMemo(() => (flows ? buildColumns(flows) : COLUMNS), [flows]);
+}
+
+/** N130 — flowId → its status set, for per-flow badge/label/color resolution. */
+export function useFlowStatusMap(): Record<string, FlowStatus[]> {
+  const flows = useFlows();
+  return useMemo(() => {
+    const map: Record<string, FlowStatus[]> = {};
+    for (const f of flows ?? []) if (f.statuses?.length) map[f.id] = f.statuses;
+    return map;
+  }, [flows]);
 }

@@ -80,7 +80,14 @@ export interface Task {
 // `COLUMNS` is the canonical default (a default-only board, and the fallback
 // while flow statuses load).
 export type { Column, FlowStatus } from "../../core/kanban.js";
-export { buildColumns, orphanStatuses, CANONICAL_COLUMNS as COLUMNS } from "../../core/kanban.js";
+export {
+  buildColumns,
+  orphanStatuses,
+  isCanonicalStatus,
+  statusLabel,
+  statusColor,
+  CANONICAL_COLUMNS as COLUMNS,
+} from "../../core/kanban.js";
 
 export function badgeClass(status: string): string {
   if (["ready"].includes(status)) return "badge-ready";

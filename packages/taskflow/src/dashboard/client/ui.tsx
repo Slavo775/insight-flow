@@ -1,6 +1,15 @@
-import type { Task, Column } from "./lib.js";
-import { COLUMNS, orphanStatuses, formatTime, hexToRgb, taskStatusColor } from "./lib.js";
+import type { Task, Column, FlowStatus } from "./lib.js";
+import {
+  COLUMNS,
+  orphanStatuses,
+  statusColor,
+  statusLabel,
+  formatTime,
+  hexToRgb,
+  taskStatusColor,
+} from "./lib.js";
 import { Badge, Button, Card, CardId, CardMeta, CardTitle } from "./components/index.js";
+import { useFlowStatusMap } from "./flow-columns.js";
 
 export function Nav({ projectName }: { projectName: string }) {
   return (
@@ -55,14 +64,23 @@ export function Stats({ tasks }: { tasks: Task[] }) {
   );
 }
 
-function TaskCard({ task, onOpen }: { task: Task; onOpen: (id: string) => void }) {
+function TaskCard({
+  task,
+  statuses,
+  onOpen,
+}: {
+  task: Task;
+  // N130 — the task's flow status set, for per-flow badge styling.
+  statuses?: FlowStatus[];
+  onOpen: (id: string) => void;
+}) {
   // N129 — show the flow on cards bound to a non-default flow; default-flow
   // cards stay byte-identical to today (no chip).
   const flow = task.flowId && task.flowId !== "default" ? task.flowId : null;
   return (
     <Card onClick={() => onOpen(task.id)}>
       <CardId>
-        {task.id} <Badge status={task.status} />
+        {task.id} <Badge status={task.status} statuses={statuses} />
       </CardId>
       <CardTitle>{task.title}</CardTitle>
       <CardMeta>
@@ -86,6 +104,7 @@ export function Kanban({
   // canonical 6 (default-only board + fallback while flow statuses load).
   columns?: Column[];
 }) {
+  const statusMap = useFlowStatusMap(); // N130 — per-flow badge styling
   // Tasks whose status matches no column degrade into a trailing "Other"
   // column instead of vanishing (graceful for a renamed/removed flow status).
   const orphans = orphanStatuses(
@@ -108,7 +127,14 @@ export function Kanban({
             {colTasks.length === 0 ? (
               <div className="empty">No tasks</div>
             ) : (
-              colTasks.map((t) => <TaskCard key={t.id} task={t} onOpen={onOpen} />)
+              colTasks.map((t) => (
+                <TaskCard
+                  key={t.id}
+                  task={t}
+                  statuses={statusMap[t.flowId ?? "default"]}
+                  onOpen={onOpen}
+                />
+              ))
             )}
           </div>
         );
@@ -122,13 +148,21 @@ interface TimelineEvent {
   status: string;
   at: string;
   by?: string;
+  flowId: string;
 }
 
 export function Timeline({ tasks }: { tasks: Task[] }) {
+  const statusMap = useFlowStatusMap(); // N130 — per-flow status color/label
   const events: TimelineEvent[] = [];
   for (const t of tasks) {
     for (const h of t.statusHistory || []) {
-      events.push({ taskId: t.id, status: h.status, at: h.at, by: h.by });
+      events.push({
+        taskId: t.id,
+        status: h.status,
+        at: h.at,
+        by: h.by,
+        flowId: t.flowId ?? "default",
+      });
     }
   }
   events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
@@ -145,7 +179,8 @@ export function Timeline({ tasks }: { tasks: Task[] }) {
   return (
     <div className="act-item-list">
       {events.slice(0, 30).map((e, i) => {
-        const color = taskStatusColor(e.status);
+        const flowStatuses = statusMap[e.flowId];
+        const color = statusColor(e.status, flowStatuses) ?? taskStatusColor(e.status);
         return (
           <div
             className="act-item"
@@ -167,7 +202,7 @@ export function Timeline({ tasks }: { tasks: Task[] }) {
                 flexShrink: 0,
               }}
             >
-              {e.status}
+              {statusLabel(e.status, flowStatuses)}
             </span>
             <span style={{ color: "var(--text)", fontSize: 11, flex: 1, minWidth: 0 }}>
               {" "}

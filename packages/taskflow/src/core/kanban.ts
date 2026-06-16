@@ -58,6 +58,26 @@ export function buildColumns(flows: { statuses?: FlowStatus[] }[]): Column[] {
   return columns;
 }
 
+/** Whether a status is one of the canonical lifecycle values (board grouping). */
+export function isCanonicalStatus(status: string): boolean {
+  return CANONICAL_STATUS_IDS.has(status);
+}
+
+// N130 — resolve a status's display from the relevant flow's status set
+// (N128), falling back to the raw id / no color. The shipped default flow
+// declares title === id and the canonical colors, so a default-only workspace
+// resolves byte-identically to today's badges/timeline.
+
+/** The status's display label: the flow status def's title, else the raw id. */
+export function statusLabel(status: string, statuses?: FlowStatus[]): string {
+  return statuses?.find((s) => s.id === status)?.title ?? status;
+}
+
+/** The status's color from the flow status def, or undefined (caller falls back). */
+export function statusColor(status: string, statuses?: FlowStatus[]): string | undefined {
+  return statuses?.find((s) => s.id === status)?.color;
+}
+
 /**
  * Task statuses matched by no column — orphans the board collects into a
  * trailing "Other" column. Order-preserving and deduped; empty for a
