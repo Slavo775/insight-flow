@@ -403,8 +403,22 @@ export const ProjectSchema = z
     layout: z.record(z.string(), z.object({ x: z.number(), y: z.number() })).optional(),
     // N112 — per-flow custom states (aliases onto canonical statuses).
     states: z.array(ProjectStateSchema).default([]),
+    // N122 — the flow's main/entry agent(s): invoking one binds a task to this
+    // flow (N123). Must be a subset of `agents`. Empty ⇒ not selectable by agent.
+    entryAgents: z.array(z.string().min(1)).default([]),
   })
   .superRefine((project, ctx) => {
+    // N122 — entry agents must be declared agents of the flow.
+    project.entryAgents.forEach((id, index) => {
+      if (!project.agents.includes(id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["entryAgents", index],
+          message: `entry agent '${id}' is not one of the flow's agents`,
+        });
+      }
+    });
+
     // N112 — state ids must be unique and must not shadow canonical statuses.
     const canonical = new Set<string>(TASK_STATUSES);
     const stateIds = new Set<string>();

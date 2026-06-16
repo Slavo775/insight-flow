@@ -163,6 +163,8 @@ export interface ProjectDto {
   agents: string[];
   flow: { from: string; to: string; on?: string }[];
   install: string[];
+  /** N122 — the flow's main/entry agent(s); empty ⇒ not selectable by agent. */
+  entryAgents?: string[];
   /** N109 — hand-arranged node positions; absent = auto-layout. */
   layout?: Record<string, { x: number; y: number }>;
   /** N111 — optimistic-concurrency token for custom flows. */
@@ -186,6 +188,8 @@ export interface ProjectSummaryDto {
   source: "builtin" | "custom";
   agentCount: number;
   flowCount: number;
+  /** N122 — the flow's main/entry agent(s); empty ⇒ not selectable by agent. */
+  entryAgents?: string[];
 }
 
 export async function fetchProjects(): Promise<ProjectSummaryDto[]> {

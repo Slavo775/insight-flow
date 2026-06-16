@@ -29,5 +29,6 @@
     { "from": "task-request-changes", "to": "task-implement", "on": "changes-requested" },
     { "from": "task-implement", "to": "task-git", "on": "changes-implemented" }
   ],
-  "install": ["activity"]
+  "install": ["activity"],
+  "entryAgents": ["task-analyze", "taskmaster"]
 }

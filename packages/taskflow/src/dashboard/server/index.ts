@@ -715,6 +715,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         source: p.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
         agentCount: p.agents.length,
         flowCount: p.flow.length,
+        // N122 — empty ⇒ not selectable by agent (only by type / explicit).
+        entryAgents: p.entryAgents,
       }));
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ projects }));

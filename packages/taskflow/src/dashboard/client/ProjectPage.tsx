@@ -286,10 +286,13 @@ export function ProjectPage() {
         <MenuLink to="/project/new">＋ New flow</MenuLink>
       </Group>
       <Group>
-        <GroupTitle>Agents</GroupTitle>
+        <GroupTitle>
+          Agents{(project.entryAgents?.length ?? 0) === 0 ? " (no main — pick by type only)" : ""}
+        </GroupTitle>
         {project.agents.map((a) => (
           <MenuLink key={a} to={`/agent/${a}`}>
-            ⚙ {project.agentTitles[a] ?? a}
+            {project.entryAgents?.includes(a) ? "★" : "⚙"} {project.agentTitles[a] ?? a}
+            {project.entryAgents?.includes(a) ? " · main" : ""}
           </MenuLink>
         ))}
       </Group>

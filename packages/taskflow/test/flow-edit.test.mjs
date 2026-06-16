@@ -144,3 +144,16 @@ test("edge trigger change validates against the other edges", () => {
   assert.equal(validateEdgeAddition(others, { from: "a", to: "b", on: "approved" }), null);
   assert.equal(validateEdgeAddition(others, { from: "a", to: "b", on: "implemented" }), null);
 });
+
+// N122 — entryAgents must be a subset of the flow's agents.
+test("ProjectSchema.entryAgents must be declared agents", () => {
+  const base = { id: "custom:f", title: "F", agents: ["a", "b"], flow: [], install: [] };
+  assert.equal(ProjectSchema.safeParse({ ...base, entryAgents: ["a"] }).success, true);
+  assert.equal(ProjectSchema.safeParse({ ...base, entryAgents: ["a", "b"] }).success, true);
+  assert.equal(ProjectSchema.safeParse({ ...base, entryAgents: [] }).success, true); // empty ok
+  const bad = ProjectSchema.safeParse({ ...base, entryAgents: ["ghost"] });
+  assert.equal(bad.success, false);
+  assert.match(bad.error.issues[0].message, /not one of the flow's agents/);
+  // default (no entryAgents) → []
+  assert.deepEqual(ProjectSchema.parse(base).entryAgents, []);
+});

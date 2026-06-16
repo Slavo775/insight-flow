@@ -108,7 +108,7 @@
       "title": "Project.entryAgents — flow identity via main/starter agent(s)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N122-project-entryagents-flow-identity-via-main-starter",
       "createdAt": "2026-06-15T19:43:22.810Z",
       "statusHistory": [
@@ -116,12 +116,29 @@
           "status": "ready",
           "at": "2026-06-15T19:43:22.811Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:09:21.324Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T06:13:06.230Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-16T06:09:21.324Z",
+        "completedAt": "2026-06-16T06:13:06.230Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/project/default.json",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/test/flow-edit.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
