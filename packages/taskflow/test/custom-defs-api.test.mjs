@@ -589,7 +589,13 @@ test("default flow eject/revert round-trip + ejected flag", async () => {
     let p = await (await api("/api/project", "GET")).json();
     assert.equal(p.ejected, false, "pristine default is not ejected");
 
-    const base = { id: "default", title: "Default (ejected)", agents: p.agents, flow: p.flow, install: p.install };
+    const base = {
+      id: "default",
+      title: "Default (ejected)",
+      agents: p.agents,
+      flow: p.flow,
+      install: p.install,
+    };
     assert.equal((await api("/api/projects/default", "PUT", base)).status, 200);
     p = await (await api("/api/project", "GET")).json();
     assert.equal(p.ejected, true);
@@ -600,5 +606,29 @@ test("default flow eject/revert round-trip + ejected flag", async () => {
     p = await (await api("/api/project", "GET")).json();
     assert.equal(p.ejected, false);
     assert.notEqual(p.title, "Default (ejected)");
+  });
+});
+
+// N125 — GET /api/flow-install-plan derives the flow's mcp/hook/skill artifacts.
+test("flow install plan lists artifacts from agents + install (deduped)", async () => {
+  await withServer(async () => {
+    const r = await api("/api/flow-install-plan", "GET");
+    assert.equal(r.status, 200);
+    const { plan } = await r.json();
+    assert.ok(Array.isArray(plan));
+    // default flow installs the activity hooks → at least one hook step
+    assert.ok(
+      plan.some((s) => s.kind === "hook"),
+      "default plan has hook steps",
+    );
+    // deduped: no two steps share kind+key
+    const keys = plan.map((s) => `${s.kind}:${s.key}`);
+    assert.equal(keys.length, new Set(keys).size, "plan is deduped");
+    // every step targets a known artifact location
+    for (const s of plan) {
+      assert.match(s.target, /\.mcp\.json|\.claude\//);
+    }
+    // unknown flow → 404
+    assert.equal((await api("/api/flow-install-plan?id=custom%3Aghost", "GET")).status, 404);
   });
 });

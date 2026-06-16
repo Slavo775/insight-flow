@@ -33,6 +33,7 @@ import {
   type ComposedAgent,
 } from "../../agents/compose.js";
 import { DEFAULT_PROJECT } from "../../agents/project.js";
+import { flowInstallPlan } from "../../agents/flow-install.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
@@ -704,6 +705,21 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           }),
         }),
       );
+      return;
+    }
+
+    // N125 — the install plan for a flow (mcp/hook/skill artifacts from its
+    // agents + install list). Read-only; execution is N126.
+    if (url.pathname === "/api/flow-install-plan" && (req.method ?? "GET") === "GET") {
+      const flowId = url.searchParams.get("id") ?? DEFAULT_PROJECT.id;
+      const flow = mergedProjectsView()[flowId];
+      if (!flow) {
+        res.writeHead(404, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: `unknown flow '${flowId}'` }));
+        return;
+      }
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ flowId, plan: flowInstallPlan(flow) }));
       return;
     }
 

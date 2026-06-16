@@ -261,7 +261,7 @@
       "title": "Derive the full install plan from a flow",
       "type": "feat",
       "priority": "medium",
-      "status": "in-progress",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N125-derive-the-full-install-plan-from-a-flow",
       "createdAt": "2026-06-15T19:43:23.110Z",
       "statusHistory": [
@@ -274,12 +274,22 @@
           "status": "in-progress",
           "at": "2026-06-16T06:46:00.465Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T07:24:17.866Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-16T06:46:00.464Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-16T07:24:17.865Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
