@@ -171,6 +171,8 @@ export function ProjectPage() {
       agents: project.agents,
       positions: { ...(project.layout ?? {}) },
       flow: project.flow,
+      // N134 — seed the draft's start points from the saved flow.
+      entryAgents: project.entryAgents ?? [],
     });
     setDraftStates(project.states ?? []);
     setDirty(false);
@@ -215,9 +217,9 @@ export function ProjectPage() {
         install: project.install,
         layout: draft.positions,
         states: draftStates,
-        // N122 — carry entry agents verbatim (only ones still in the agent set)
-        // so editing a flow doesn't drop its main agents.
-        entryAgents: (project.entryAgents ?? []).filter((a) => draft.agents.includes(a)),
+        // N134 — persist the draft's start-point toggles, kept to the current
+        // agent set so a removed agent can't remain an entry (was N122 verbatim).
+        entryAgents: draft.entryAgents.filter((a) => draft.agents.includes(a)),
       };
       await saveDefinition("projects", record, true, { revision: project.revision });
       // Re-render from server truth.
@@ -293,12 +295,13 @@ export function ProjectPage() {
       </Group>
       <Group>
         <GroupTitle>
-          Agents{(project.entryAgents?.length ?? 0) === 0 ? " (no main — pick by type only)" : ""}
+          Agents
+          {(project.entryAgents?.length ?? 0) === 0 ? " (no start point — pick by type only)" : ""}
         </GroupTitle>
         {project.agents.map((a) => (
           <MenuLink key={a} to={`/agent/${a}`}>
             {project.entryAgents?.includes(a) ? "★" : "⚙"} {project.agentTitles[a] ?? a}
-            {project.entryAgents?.includes(a) ? " · main" : ""}
+            {project.entryAgents?.includes(a) ? " · start point" : ""}
           </MenuLink>
         ))}
       </Group>
