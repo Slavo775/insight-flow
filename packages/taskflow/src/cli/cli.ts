@@ -3,6 +3,7 @@ import { resolveConfig, getMasterPath } from "../core/config.js";
 import { jsonFileStorage } from "../core/storage-port.js";
 import { resolvePackageAsset, TaskflowProjectNotFoundError } from "../core/paths.js";
 import { TaskflowValidationError } from "../core/schema/index.js";
+import { InvalidStatusTransitionError } from "../core/set-status.js";
 import { initProject } from "../agents/init/index.js";
 import { startServer } from "../dashboard/server/index.js";
 import { runMaster } from "../master/index.js";
@@ -13,6 +14,7 @@ import { cmdReviewStart, cmdReviewEnd } from "./commands/review.js";
 import { cmdFixStart, cmdFixEnd } from "./commands/fix.js";
 import { cmdPush, cmdMrUpdate, cmdMerge, cmdDone } from "./commands/push.js";
 import { cmdSetFlow } from "./commands/set-flow.js";
+import { cmdAdvance } from "./commands/advance.js";
 import {
   cmdCurrent,
   cmdList,
@@ -116,6 +118,7 @@ function printHelp(): void {
     push --id Nxx --commit abc123 --message "..." [--branch name]
     mr-update --id Nxx --url "https://..."
     set-flow --id Nxx --flow <flowId>    Reassign a task's flow (ready-only; N117)
+    advance --id Nxx --agent <agentId>   Advance via the agent's flow transition (N133)
     merge --id Nxx
     done --id Nxx
 
@@ -351,6 +354,9 @@ async function run(): Promise<void> {
       case "set-flow":
         cmdSetFlow(config, master, opts);
         break;
+      case "advance":
+        cmdAdvance(config, master, opts);
+        break;
       case "merge":
         cmdMerge(config, master, opts);
         break;
@@ -411,7 +417,11 @@ async function run(): Promise<void> {
 }
 
 run().catch((err) => {
-  if (err instanceof TaskflowValidationError || err instanceof TaskflowProjectNotFoundError) {
+  if (
+    err instanceof TaskflowValidationError ||
+    err instanceof TaskflowProjectNotFoundError ||
+    err instanceof InvalidStatusTransitionError
+  ) {
     console.error(`error: ${err.message}`);
     process.exit(1);
   }

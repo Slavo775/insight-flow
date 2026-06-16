@@ -1,6 +1,7 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { getWorkDir, now, resolveId } from "../../core/storage.js";
+import { writeStatus } from "./status-write.js";
 
 export function cmdPush(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
@@ -25,8 +26,7 @@ export function cmdPush(config: TaskflowConfig, master: MasterFile, opts: Parsed
     commitMessage: opts.message as string,
   });
 
-  task.status = "pushed";
-  task.statusHistory.push({ status: "pushed", at: now(), by: (opts.by as string) || "task-git" });
+  writeStatus(task, "pushed", (opts.by as string) || "task-git");
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
@@ -58,9 +58,8 @@ export function cmdMerge(config: TaskflowConfig, master: MasterFile, opts: Parse
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
-  task.status = "merged";
+  writeStatus(task, "merged", (opts.by as string) || "task-git");
   task.mergedAt = now();
-  task.statusHistory.push({ status: "merged", at: now(), by: (opts.by as string) || "task-git" });
 
   const start = new Date(task.createdAt);
   const end = new Date(task.mergedAt);
@@ -81,9 +80,8 @@ export function cmdDone(config: TaskflowConfig, master: MasterFile, opts: Parsed
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
-  task.status = "done";
+  writeStatus(task, "done", (opts.by as string) || "git-agent");
   task.committedAt = now();
-  task.statusHistory.push({ status: "done", at: now(), by: (opts.by as string) || "git-agent" });
 
   const start = new Date(task.createdAt);
   const end = new Date(task.committedAt);

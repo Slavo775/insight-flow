@@ -1,6 +1,7 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { getWorkDir, now, resolveId } from "../../core/storage.js";
+import { writeStatus } from "./status-write.js";
 
 export function cmdChangeRequest(
   config: TaskflowConfig,
@@ -28,12 +29,7 @@ export function cmdChangeRequest(
     implementedBy: null,
   });
 
-  task.status = "changes-requested";
-  task.statusHistory.push({
-    status: "changes-requested",
-    at: now(),
-    by: (opts.by as string) || "task-request-changes",
-  });
+  writeStatus(task, "changes-requested", (opts.by as string) || "task-request-changes");
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
@@ -62,12 +58,7 @@ export function cmdChangeStart(config: TaskflowConfig, master: MasterFile, opts:
   }
 
   lastChange.status = "implementing";
-  task.status = "changes-implementing";
-  task.statusHistory.push({
-    status: "changes-implementing",
-    at: now(),
-    by: (opts.by as string) || "implement-changes",
-  });
+  writeStatus(task, "changes-implementing", (opts.by as string) || "implement-changes");
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(
@@ -103,12 +94,7 @@ export function cmdChangeEnd(config: TaskflowConfig, master: MasterFile, opts: P
     lastChange.filesChanged = (opts.files as string).split(",").map((f) => f.trim());
   }
 
-  task.status = "changes-implemented";
-  task.statusHistory.push({
-    status: "changes-implemented",
-    at: now(),
-    by: (opts.by as string) || "implement-changes",
-  });
+  writeStatus(task, "changes-implemented", (opts.by as string) || "implement-changes");
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(

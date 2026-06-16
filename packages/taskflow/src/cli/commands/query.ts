@@ -3,6 +3,7 @@ import { jsonFileStorage } from "../../core/storage-port.js";
 import { loadTaskReviewsHybrid, loadTaskIncidentsHybrid } from "../../core/storage.js";
 import { loadSpec } from "../../core/spec.js";
 import { suggestNextSteps } from "../../core/flow-status.js";
+import { isCanonicalStatus } from "../../core/kanban.js";
 import { mergedProjects } from "../../agents/user-registry.js";
 
 /**
@@ -223,6 +224,10 @@ export function cmdStats(config: TaskflowConfig, master: MasterFile, opts: Parse
 }
 
 const PRIORITY_WEIGHT: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+// The canonical actionability order for `next`. The DEFAULT flow (and any flow
+// reusing only canonical statuses) is weighted by this, byte-identical to the
+// pre-N132 picker. A custom-status flow is ordered by its own declared status
+// sequence instead (see flowStageWeight).
 const STATUS_WEIGHT: Record<string, number> = {
   "fix-needed": 0,
   "changes-requested": 1,
@@ -230,14 +235,61 @@ const STATUS_WEIGHT: Record<string, number> = {
   "in-progress": 3,
   ready: 4,
 };
+const CANONICAL_NEXT_STATUSES = [
+  "fix-needed",
+  "changes-requested",
+  "ready",
+  "in-progress",
+  "changes-implementing",
+];
+
+interface PickerFlow {
+  statuses?: { id: string; terminal?: boolean }[];
+}
+
+/** All flows, keyed by id; empty on any load failure (never blocks a picker). */
+function loadFlows(): Record<string, PickerFlow> {
+  try {
+    return mergedProjects();
+  } catch {
+    return {};
+  }
+}
+
+/** A flow that declares at least one NON-canonical status drives custom ordering. */
+function isCustomStatusFlow(
+  flow?: PickerFlow,
+): flow is { statuses: { id: string; terminal?: boolean }[] } {
+  return Boolean(flow?.statuses?.length) && !flow!.statuses!.every((s) => isCanonicalStatus(s.id));
+}
+
+/** N132 — `next` actionability: canonical filter for canonical flows; for a
+ *  custom-status flow, any non-terminal status it declares (work remains). */
+function actionableForNext(task: Task, flows: Record<string, PickerFlow>): boolean {
+  const flow = flows[task.flowId] ?? flows["default"];
+  if (isCustomStatusFlow(flow)) {
+    const def = flow.statuses.find((s) => s.id === task.status);
+    return def !== undefined && !def.terminal;
+  }
+  return CANONICAL_NEXT_STATUSES.includes(task.status);
+}
+
+/** N132 — stage weight (lower = earlier/more urgent): canonical STATUS_WEIGHT
+ *  for canonical flows (byte-identical), else the status's index in the custom
+ *  flow's declared order. */
+function flowStageWeight(task: Task, flows: Record<string, PickerFlow>): number {
+  const flow = flows[task.flowId] ?? flows["default"];
+  if (isCustomStatusFlow(flow)) {
+    const idx = flow.statuses.findIndex((s) => s.id === task.status);
+    return idx >= 0 ? idx : 99;
+  }
+  return STATUS_WEIGHT[task.status] ?? 9;
+}
 
 export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const tasks = jsonFileStorage.loadAllTasks(config, master);
-  const actionable = tasks.filter((t) =>
-    ["fix-needed", "changes-requested", "ready", "in-progress", "changes-implementing"].includes(
-      t.status,
-    ),
-  );
+  const flows = loadFlows();
+  const actionable = tasks.filter((t) => actionableForNext(t, flows));
 
   if (actionable.length === 0) {
     console.log(
@@ -250,8 +302,8 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: Parsed
   }
 
   actionable.sort((a, b) => {
-    const sa = STATUS_WEIGHT[a.status] ?? 9;
-    const sb = STATUS_WEIGHT[b.status] ?? 9;
+    const sa = flowStageWeight(a, flows);
+    const sb = flowStageWeight(b, flows);
     if (sa !== sb) return sa - sb;
     const pa = PRIORITY_WEIGHT[a.priority] ?? 9;
     const pb = PRIORITY_WEIGHT[b.priority] ?? 9;
@@ -282,7 +334,10 @@ export function cmdNext(config: TaskflowConfig, master: MasterFile, opts: Parsed
             ? "Resume interrupted change implementation"
             : pick.status === "in-progress"
               ? "Resume interrupted implementation"
-              : `Highest priority ready task (${pick.priority})`,
+              : pick.status === "ready"
+                ? `Highest priority ready task (${pick.priority})`
+                : // N132 — a custom-flow status: name the flow + stage.
+                  `Next step in flow ${guide.flowId} — status '${pick.status}'`,
   };
   appendSpec(config, pick, payload, opts);
   console.log(JSON.stringify(payload));

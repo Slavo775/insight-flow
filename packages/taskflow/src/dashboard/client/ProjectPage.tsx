@@ -18,6 +18,7 @@ import {
 import { Button } from "./components/index.js";
 import { FlowEditor, type FlowDraft } from "./components/FlowEditor.js";
 import { FlowMap } from "./components/FlowMap.js";
+import { InstallModal } from "./components/InstallModal.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { kindColor } from "./components/CompositionMap.js";
 import { KindDot, MenuLink } from "./ModulesPage.js";
@@ -130,6 +131,8 @@ export function ProjectPage() {
   >([]);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
+  // N127 — the "Install this flow" modal (plan + live progress); null = closed.
+  const [installing, setInstalling] = useState(false);
   const projectName = useDashboardStore((s) => s.snapshot?.projectName || "");
 
   useEffect(() => {
@@ -212,6 +215,9 @@ export function ProjectPage() {
         install: project.install,
         layout: draft.positions,
         states: draftStates,
+        // N122 — carry entry agents verbatim (only ones still in the agent set)
+        // so editing a flow doesn't drop its main agents.
+        entryAgents: (project.entryAgents ?? []).filter((a) => draft.agents.includes(a)),
       };
       await saveDefinition("projects", record, true, { revision: project.revision });
       // Re-render from server truth.
@@ -255,6 +261,20 @@ export function ProjectPage() {
     }
   };
 
+  // N121 — revert the ejected default flow to its shipped version (DELETE the
+  // override; the id stays, falling back to the package default).
+  const revertFlow = async (): Promise<void> => {
+    if (!window.confirm("Revert the default flow to the shipped version?")) return;
+    setTopError(null);
+    try {
+      await deleteDefinition("projects", project.id);
+      const fresh = await fetchProject(project.id);
+      setProject(fresh);
+    } catch (err) {
+      setTopError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
   const sidebar = (
     <>
       <Group>
@@ -272,10 +292,13 @@ export function ProjectPage() {
         <MenuLink to="/project/new">＋ New flow</MenuLink>
       </Group>
       <Group>
-        <GroupTitle>Agents</GroupTitle>
+        <GroupTitle>
+          Agents{(project.entryAgents?.length ?? 0) === 0 ? " (no main — pick by type only)" : ""}
+        </GroupTitle>
         {project.agents.map((a) => (
           <MenuLink key={a} to={`/agent/${a}`}>
-            ⚙ {project.agentTitles[a] ?? a}
+            {project.entryAgents?.includes(a) ? "★" : "⚙"} {project.agentTitles[a] ?? a}
+            {project.entryAgents?.includes(a) ? " · main" : ""}
           </MenuLink>
         ))}
       </Group>
@@ -298,16 +321,31 @@ export function ProjectPage() {
         {topError ? <TopError role="alert">{topError}</TopError> : null}
         <Header>
           <Title>{project.title}</Title>
-          <SourceBadge $builtin={isBuiltin}>{isBuiltin ? "shipped" : "custom"}</SourceBadge>
+          <SourceBadge $builtin={isBuiltin}>
+            {isBuiltin ? (project.ejected ? "shipped · ejected" : "shipped") : "custom"}
+          </SourceBadge>
+          {/* N121 — every flow is editable now (the default ejects on save). */}
+          {!editing ? (
+            <Button type="button" $variant="nav" onClick={startEdit}>
+              Edit flow
+            </Button>
+          ) : null}
+          {/* N127 — install this flow's artifacts (mcp/hooks/skills) here. */}
+          {!editing ? (
+            <Button type="button" $variant="primary" onClick={() => setInstalling(true)}>
+              Install this flow
+            </Button>
+          ) : null}
+          {/* Custom flows delete; an ejected default reverts to shipped. */}
           {!isBuiltin && !editing ? (
-            <>
-              <Button type="button" $variant="nav" onClick={startEdit}>
-                Edit flow
-              </Button>
-              <Button type="button" $variant="danger" onClick={() => void removeFlow()}>
-                Delete flow
-              </Button>
-            </>
+            <Button type="button" $variant="danger" onClick={() => void removeFlow()}>
+              Delete flow
+            </Button>
+          ) : null}
+          {isBuiltin && project.ejected && !editing ? (
+            <Button type="button" $variant="danger" onClick={() => void revertFlow()}>
+              Revert to shipped
+            </Button>
           ) : null}
           {editing ? (
             <>
@@ -416,6 +454,13 @@ export function ProjectPage() {
           </Hint>
         ) : null}
       </SideLayout>
+      {installing ? (
+        <InstallModal
+          flowId={project.id}
+          flowTitle={project.title}
+          onClose={() => setInstalling(false)}
+        />
+      ) : null}
     </>
   );
 }

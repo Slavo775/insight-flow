@@ -2325,6 +2325,46 @@
       "payload": {
         "tool_name": "Bash"
       }
+    },
+    {
+      "type": "review-end",
+      "taskId": "N118",
+      "timestamp": "2026-06-15T18:05:22.838Z",
+      "source": "agent"
+    },
+    {
+      "type": "done",
+      "taskId": "N118",
+      "timestamp": "2026-06-15T18:05:22.936Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1781546723109_0270",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-15T18:05:23.109Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N118",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781546739407_eb71",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-15T18:05:39.406Z",
+      "sessionId": "59d0f60a-cf9b-4ce9-a599-e91cec6bd630",
+      "taskId": "N118",
+      "payload": {}
+    },
+    {
+      "type": "start",
+      "taskId": "N118",
+      "timestamp": "2026-06-15T19:43:22.366Z",
+      "source": "agent"
     }
   ]
 }

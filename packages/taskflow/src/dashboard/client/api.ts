@@ -1,4 +1,4 @@
-import type { Task } from "./lib.js";
+import type { Task, FlowStatus } from "./lib.js";
 
 export interface ShardResponse {
   tasks?: Task[];
@@ -158,9 +158,13 @@ export interface ProjectDto {
   description?: string;
   /** N108 — "builtin" for the shipped default flow. */
   source?: "builtin" | "custom";
+  /** N121 — true when a user-space override shadows the shipped definition. */
+  ejected?: boolean;
   agents: string[];
   flow: { from: string; to: string; on?: string }[];
   install: string[];
+  /** N122 — the flow's main/entry agent(s); empty ⇒ not selectable by agent. */
+  entryAgents?: string[];
   /** N109 — hand-arranged node positions; absent = auto-layout. */
   layout?: Record<string, { x: number; y: number }>;
   /** N111 — optimistic-concurrency token for custom flows. */
@@ -184,6 +188,10 @@ export interface ProjectSummaryDto {
   source: "builtin" | "custom";
   agentCount: number;
   flowCount: number;
+  /** N122 — the flow's main/entry agent(s); empty ⇒ not selectable by agent. */
+  entryAgents?: string[];
+  /** N128/N129 — the flow's own status set; drives the kanban columns. */
+  statuses?: FlowStatus[];
 }
 
 export async function fetchProjects(): Promise<ProjectSummaryDto[]> {
@@ -191,6 +199,36 @@ export async function fetchProjects(): Promise<ProjectSummaryDto[]> {
   if (!res.ok) throw new Error("Failed to load projects (" + res.status + ")");
   const data: { projects: ProjectSummaryDto[] } = await res.json();
   return data.projects;
+}
+
+// N125/N127 — flow install plan + execution.
+export interface InstallStepDto {
+  kind: "mcp" | "hook" | "skill";
+  key: string;
+  label: string;
+  target: string;
+}
+
+export async function fetchFlowInstallPlan(flowId: string): Promise<InstallStepDto[]> {
+  const res = await fetch("/api/flow-install-plan?id=" + encodeURIComponent(flowId));
+  if (!res.ok) throw new Error(`Failed to load install plan (${res.status})`);
+  return (await res.json()).plan as InstallStepDto[];
+}
+
+export interface InstallReport {
+  target: string;
+  action: "created" | "updated" | "unchanged" | "removed";
+}
+
+export async function runFlowInstall(flowId: string): Promise<InstallReport[]> {
+  const res = await fetch("/api/flow-install", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: flowId }),
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error ?? `install failed (${res.status})`);
+  return body.reports as InstallReport[];
 }
 
 /** N117 — reassign a task's flow (ready-only; the server enforces the lock). */

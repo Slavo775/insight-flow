@@ -46,10 +46,23 @@ export {
   TaskflowProjectNotFoundError,
 } from "./core/paths.js";
 export type { FlowRoot } from "./core/paths.js";
+export { flowInstallPlan, flowArtifacts } from "./agents/flow-install.js";
+export type { InstallStep } from "./agents/flow-install.js";
+export { setStatus, flowStatusUniverse, InvalidStatusTransitionError } from "./core/set-status.js";
+export type { StatusFlow, SetStatusOptions } from "./core/set-status.js";
 export { currentFlowNodes, suggestNextSteps, resolveTrigger } from "./core/flow-status.js";
 export type { FlowEdge, NextStep, FlowStateDef } from "./core/flow-status.js";
 // (TaskStatus the type already exports from core/types; only the const here.)
 export { TASK_STATUSES } from "./core/statuses.js";
+export {
+  buildColumns,
+  orphanStatuses,
+  isCanonicalStatus,
+  statusLabel,
+  statusColor,
+  CANONICAL_COLUMNS,
+} from "./core/kanban.js";
+export type { Column, FlowStatus } from "./core/kanban.js";
 export { validateEdgeAddition, edgeKey } from "./core/flow-edit.js";
 export {
   loadUserRegistries,
@@ -90,6 +103,7 @@ export {
   COMPOSED_AGENTS,
 } from "./agents/compose.js";
 export type { AgentModule, ComposedAgent, AgentArtifacts } from "./agents/compose.js";
+export { transitionTargetFor } from "./agents/transitions.js";
 export { applyArtifacts, renameManifestBucket } from "./agents/emit.js";
 export type { EmitReport, EmitAction } from "./agents/emit.js";
 export { DEFAULT_PROJECT, projectBucketId, collectProjectInstall } from "./agents/project.js";

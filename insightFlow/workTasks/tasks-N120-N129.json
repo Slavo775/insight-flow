@@ -1,0 +1,701 @@
+{
+  "range": {
+    "from": 120,
+    "to": 129
+  },
+  "tasks": [
+    {
+      "id": "N120",
+      "title": "Three-tier editability in CRUD + forms (eject-on-update, locked read-only)",
+      "type": "rework",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N120-three-tier-editability-in-crud-forms-eject-on-upda",
+      "createdAt": "2026-06-15T19:43:22.623Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:22.623Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-15T20:18:42.689Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:12:09.619Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.233Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:53.774Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:08.722Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": "2026-06-15T20:18:42.689Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "composer",
+        "api",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N121",
+      "title": "Default flow editable via eject",
+      "type": "rework",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N121-default-flow-editable-via-eject",
+      "createdAt": "2026-06-15T19:43:22.719Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:22.719Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-15T20:18:47.904Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T05:32:08.226Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:24.689Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.317Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:53.865Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:08.810Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-15T20:18:47.904Z",
+        "completedAt": "2026-06-16T05:32:08.225Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "flow"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N122",
+      "title": "Project.entryAgents — flow identity via main/starter agent(s)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N122-project-entryagents-flow-identity-via-main-starter",
+      "createdAt": "2026-06-15T19:43:22.810Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:22.811Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:09:21.324Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T06:13:06.230Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:24.776Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.405Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:53.973Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:08.907Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T06:09:21.324Z",
+        "completedAt": "2026-06-16T06:13:06.230Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/project/default.json",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/test/flow-edit.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "flow",
+        "schema",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N123",
+      "title": "Main-agent binds the flow on task creation (both-equal with type-map)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N123-main-agent-binds-the-flow-on-task-creation-both-eq",
+      "createdAt": "2026-06-15T19:43:22.907Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:22.908Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:13:12.381Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T06:16:52.306Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:24.861Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.490Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:54.067Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:08.999Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T06:13:12.381Z",
+        "completedAt": "2026-06-16T06:16:52.306Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/create.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/test/flow-binding.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "flow",
+        "cli"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N124",
+      "title": "Custom composer agents scaffolded as slash commands",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N124-custom-composer-agents-scaffolded-as-slash-command",
+      "createdAt": "2026-06-15T19:43:23.004Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:23.004Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:16:58.126Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T06:45:57.017Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:24.945Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.578Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:54.158Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:09.090Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T06:16:58.125Z",
+        "completedAt": "2026-06-16T06:45:57.017Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/init/providers/skills.ts",
+          "packages/taskflow/test/init-layout.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "cli"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N125",
+      "title": "Derive the full install plan from a flow",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N125-derive-the-full-install-plan-from-a-flow",
+      "createdAt": "2026-06-15T19:43:23.110Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:23.111Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T06:46:00.465Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T07:24:17.866Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:25.034Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.660Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:54.245Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:09.178Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T06:46:00.464Z",
+        "completedAt": "2026-06-16T07:24:17.865Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "install",
+        "composer",
+        "api"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N126",
+      "title": "Install execution endpoint with SSE progress",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N126-install-execution-endpoint-with-sse-progress",
+      "createdAt": "2026-06-15T19:43:23.271Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:23.272Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T07:24:23.609Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T07:29:22.943Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:25.117Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.744Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:54.338Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:09.264Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T07:24:23.608Z",
+        "completedAt": "2026-06-16T07:29:22.942Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "install",
+        "api"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N127",
+      "title": "Install UI — button + live progress modal",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N127-install-ui-button-live-progress-modal",
+      "createdAt": "2026-06-15T19:43:23.374Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:23.374Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T07:29:28.770Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T07:37:33.097Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:25.202Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.831Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:54.426Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:09.352Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T07:29:28.770Z",
+        "completedAt": "2026-06-16T07:37:33.096Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "install",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N128",
+      "title": "status-transition module kind + Project.statuses (flow status set)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N128-status-transition-module-kind-project-statuses-flo",
+      "createdAt": "2026-06-15T19:43:23.474Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:23.474Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T07:40:25.098Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T07:51:43.657Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:25.294Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:03.924Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:54.512Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:09.438Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T07:40:25.097Z",
+        "completedAt": "2026-06-16T07:51:43.657Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "status",
+        "schema",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    },
+    {
+      "id": "N129",
+      "title": "Kanban renders columns from flow status sets",
+      "type": "rework",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N129-kanban-renders-columns-from-flow-status-sets",
+      "createdAt": "2026-06-15T19:43:23.576Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-15T19:43:23.576Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T07:52:34.298Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T07:59:40.628Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T15:13:25.375Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T15:18:04.003Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T16:35:54.605Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T16:40:09.530Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T07:52:34.297Z",
+        "completedAt": "2026-06-16T07:59:40.628Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "status",
+        "kanban"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
+      "mergedAt": null
+    }
+  ]
+}

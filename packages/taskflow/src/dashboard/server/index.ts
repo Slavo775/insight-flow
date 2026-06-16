@@ -32,7 +32,10 @@ import {
   type AgentModule,
   type ComposedAgent,
 } from "../../agents/compose.js";
-import { DEFAULT_PROJECT } from "../../agents/project.js";
+import { DEFAULT_PROJECT, projectBucketId } from "../../agents/project.js";
+import { flowInstallPlan, flowArtifacts } from "../../agents/flow-install.js";
+import { applyArtifacts } from "../../agents/emit.js";
+import { resolveProjectRoot } from "../../core/paths.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
@@ -689,6 +692,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         JSON.stringify({
           ...project,
           source: project.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
+          // N121 — true when a user-space override file shadows the shipped def
+          // (drives the "Revert to shipped" affordance for the default flow).
+          ejected: definitionRevision("projects", project.id) !== null,
           // N111 — optimistic-concurrency token; PUTs echo it via x-revision.
           revision:
             project.id === DEFAULT_PROJECT.id
@@ -704,6 +710,64 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
+    // N125 — the install plan for a flow (mcp/hook/skill artifacts from its
+    // agents + install list). Read-only; execution is N126.
+    if (url.pathname === "/api/flow-install-plan" && (req.method ?? "GET") === "GET") {
+      const flowId = url.searchParams.get("id") ?? DEFAULT_PROJECT.id;
+      const flow = mergedProjectsView()[flowId];
+      if (!flow) {
+        res.writeHead(404, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: `unknown flow '${flowId}'` }));
+        return;
+      }
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ flowId, plan: flowInstallPlan(flow) }));
+      return;
+    }
+
+    // N126 — run the install plan for a flow (write .mcp.json / hooks / skills
+    // via the idempotent emitter) and stream per-step progress over SSE.
+    if (url.pathname === "/api/flow-install" && req.method === "POST") {
+      let body = "";
+      req.on("data", (chunk: Buffer) => {
+        body += chunk.toString("utf-8");
+        if (body.length > 16 * 1024) req.destroy();
+      });
+      req.on("end", () => {
+        try {
+          const parsed = body ? (JSON.parse(body) as { id?: string }) : {};
+          const flowId = parsed.id ?? DEFAULT_PROJECT.id;
+          const flow = mergedProjectsView()[flowId];
+          if (!flow) {
+            res.writeHead(404, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: `unknown flow '${flowId}'` }));
+            return;
+          }
+          const plan = flowInstallPlan(flow);
+          transport.emit("install-progress", { phase: "started", flowId, plan });
+          const projectRoot = resolveProjectRoot();
+          const reports = applyArtifacts(flowArtifacts(flow), projectRoot, projectBucketId(flow), {
+            INSIGHT_FLOW_BIN: "insight-flow",
+          });
+          for (const r of reports) {
+            transport.emit("install-progress", {
+              phase: "step",
+              target: r.target,
+              action: r.action,
+            });
+          }
+          transport.emit("install-progress", { phase: "done", flowId, reports });
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: true, flowId, reports }));
+        } catch (err) {
+          transport.emit("install-progress", { phase: "failed", error: (err as Error).message });
+          res.writeHead(500, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+        }
+      });
+      return;
+    }
+
     if (url.pathname === "/api/projects" && (req.method ?? "GET") === "GET") {
       const projects = Object.values(mergedProjectsView()).map((p) => ({
         id: p.id,
@@ -712,6 +776,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         source: p.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
         agentCount: p.agents.length,
         flowCount: p.flow.length,
+        // N122 — empty ⇒ not selectable by agent (only by type / explicit).
+        entryAgents: p.entryAgents,
+        // N128/N129 — the flow's status set drives the kanban columns.
+        statuses: p.statuses,
       }));
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ projects }));

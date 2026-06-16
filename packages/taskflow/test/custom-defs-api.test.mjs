@@ -521,3 +521,137 @@ test("POST /api/task-flow: ready→200, locked→409, missing→404", async () =
     assert.equal(r.status, 409);
   });
 });
+
+// N120 — three editability tiers: default (PUT writes override / DELETE reverts),
+// locked (403), custom (unchanged).
+test("editability tiers: default eject/revert, locked read-only, custom CRUD", async () => {
+  await withServer(async (dir) => {
+    // PUT a non-locked built-in module → writes an override (200), merged reflects it
+    const override = { id: "minimal-diff", title: "MD (ejected)", kind: "section", body: "EJECT" };
+    let r = await api("/api/modules/minimal-diff", "PUT", override);
+    assert.equal(r.status, 200);
+    assert.ok(
+      existsSync(join(dir, "insightFlow/modules/minimal-diff.json")),
+      "override file written",
+    );
+    let listed = await (await api("/api/modules", "GET")).json();
+    const md = listed.modules.find((m) => m.id === "minimal-diff");
+    assert.equal(md.body, "EJECT");
+    assert.equal(md.source, "builtin", "ejected default stays builtin");
+
+    // POST to a built-in id → 400 (must PUT)
+    assert.equal((await api("/api/modules", "POST", override)).status, 400);
+
+    // DELETE the built-in (override exists) → reverts (200, override file gone)
+    r = await api("/api/modules/minimal-diff", "DELETE");
+    assert.equal(r.status, 200);
+    assert.equal((await r.json()).reverted, "minimal-diff");
+    assert.ok(!existsSync(join(dir, "insightFlow/modules/minimal-diff.json")), "override removed");
+    // reverted → merged shows the shipped body again
+    listed = await (await api("/api/modules", "GET")).json();
+    assert.notEqual(listed.modules.find((m) => m.id === "minimal-diff").body, "EJECT");
+
+    // DELETE a built-in with NO override → 403 (can't delete a shipped def)
+    assert.equal((await api("/api/modules/minimal-diff", "DELETE")).status, 403);
+
+    // locked module: PUT and DELETE both 403
+    assert.equal(
+      (
+        await api("/api/modules/security", "PUT", {
+          id: "security",
+          title: "x",
+          kind: "include",
+          ref: "X.md",
+        })
+      ).status,
+      403,
+    );
+    assert.equal((await api("/api/modules/security", "DELETE")).status, 403);
+
+    // default project flow is ejectable via PUT
+    const base = await (await api("/api/project", "GET")).json();
+    r = await api("/api/projects/default", "PUT", {
+      id: "default",
+      title: "Default (ejected)",
+      agents: base.agents,
+      flow: base.flow,
+      install: base.install,
+    });
+    assert.equal(r.status, 200);
+    assert.equal((await (await api("/api/project", "GET")).json()).title, "Default (ejected)");
+  });
+});
+
+// N121 — the default flow ejects (PUT) and reverts (DELETE); /api/project
+// reports `ejected`.
+test("default flow eject/revert round-trip + ejected flag", async () => {
+  await withServer(async () => {
+    let p = await (await api("/api/project", "GET")).json();
+    assert.equal(p.ejected, false, "pristine default is not ejected");
+
+    const base = {
+      id: "default",
+      title: "Default (ejected)",
+      agents: p.agents,
+      flow: p.flow,
+      install: p.install,
+    };
+    assert.equal((await api("/api/projects/default", "PUT", base)).status, 200);
+    p = await (await api("/api/project", "GET")).json();
+    assert.equal(p.ejected, true);
+    assert.equal(p.title, "Default (ejected)");
+
+    // revert (DELETE the override) → back to shipped, ejected false
+    assert.equal((await api("/api/projects/default", "DELETE")).status, 200);
+    p = await (await api("/api/project", "GET")).json();
+    assert.equal(p.ejected, false);
+    assert.notEqual(p.title, "Default (ejected)");
+  });
+});
+
+// N125 — GET /api/flow-install-plan derives the flow's mcp/hook/skill artifacts.
+test("flow install plan lists artifacts from agents + install (deduped)", async () => {
+  await withServer(async () => {
+    const r = await api("/api/flow-install-plan", "GET");
+    assert.equal(r.status, 200);
+    const { plan } = await r.json();
+    assert.ok(Array.isArray(plan));
+    // default flow installs the activity hooks → at least one hook step
+    assert.ok(
+      plan.some((s) => s.kind === "hook"),
+      "default plan has hook steps",
+    );
+    // deduped: no two steps share kind+key
+    const keys = plan.map((s) => `${s.kind}:${s.key}`);
+    assert.equal(keys.length, new Set(keys).size, "plan is deduped");
+    // every step targets a known artifact location
+    for (const s of plan) {
+      assert.match(s.target, /\.mcp\.json|\.claude\//);
+    }
+    // unknown flow → 404
+    assert.equal((await api("/api/flow-install-plan?id=custom%3Aghost", "GET")).status, 404);
+  });
+});
+
+// N126 — POST /api/flow-install writes the artifacts (idempotent) and reports.
+test("flow install writes artifacts and is idempotent", async () => {
+  await withServer(async (dir) => {
+    let r = await api("/api/flow-install", "POST", { id: "default" });
+    assert.equal(r.status, 200);
+    const first = await r.json();
+    assert.ok(first.ok && Array.isArray(first.reports));
+    // default flow installs the activity lifecycle hooks → settings written
+    assert.ok(existsSync(join(dir, ".claude/settings.json")), "hooks written to settings.json");
+    const wrote = (reps) =>
+      reps.some((rep) => rep.action === "created" || rep.action === "updated");
+    assert.ok(wrote(first.reports), "something was created/updated");
+
+    // second run is idempotent (nothing created/updated)
+    r = await api("/api/flow-install", "POST", { id: "default" });
+    const second = await r.json();
+    assert.ok(!wrote(second.reports), "re-run writes nothing");
+
+    // unknown flow → 404
+    assert.equal((await api("/api/flow-install", "POST", { id: "custom:ghost" })).status, 404);
+  });
+});

@@ -8,6 +8,7 @@ import {
   loadTaskIncidentsHybrid,
   recomputeTaskSummary,
 } from "../../core/storage.js";
+import { writeStatus } from "./status-write.js";
 
 export function cmdFixStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
@@ -20,12 +21,7 @@ export function cmdFixStart(config: TaskflowConfig, master: MasterFile, opts: Pa
     process.exit(1);
   }
 
-  task.status = "fixing";
-  task.statusHistory.push({
-    status: "fixing",
-    at: now(),
-    by: (opts.by as string) || "task-review-fix",
-  });
+  writeStatus(task, "fixing", (opts.by as string) || "task-review-fix");
 
   lastReview.fix = {
     startedAt: now(),
@@ -62,12 +58,7 @@ export function cmdFixEnd(config: TaskflowConfig, master: MasterFile, opts: Pars
   }
   jsonFileStorage.saveTaskReviews(config, task, reviews);
 
-  task.status = "fixed";
-  task.statusHistory.push({
-    status: "fixed",
-    at: now(),
-    by: (opts.by as string) || "task-review-fix",
-  });
+  writeStatus(task, "fixed", (opts.by as string) || "task-review-fix");
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);

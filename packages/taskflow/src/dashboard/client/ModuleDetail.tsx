@@ -15,6 +15,9 @@ import { CompositionMap, kindColor, type MapNodeSpec } from "./components/Compos
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
 
+// N120 — mirrors the server's locked tier (read-only, never ejectable).
+const LOCKED_MODULE_IDS = new Set(["security", "enforcement", "protocol"]);
+
 const Header = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -270,9 +273,12 @@ export function ModuleHeader({ module }: { module: ModuleDto }) {
         <Muted>
           {module.id} · {module.source}
           {module.target ? ` · ${module.target}` : ""}
+          {LOCKED_MODULE_IDS.has(module.id) ? " · locked" : ""}
         </Muted>
-        {/* N106 — built-ins are immutable; only custom modules are editable. */}
-        {module.source === "custom" ? <Link to={`/module/edit/${module.id}`}>Edit</Link> : null}
+        {/* N120 — custom + non-locked defaults are editable (editing a default ejects). */}
+        {!LOCKED_MODULE_IDS.has(module.id) ? (
+          <Link to={`/module/edit/${module.id}`}>Edit</Link>
+        ) : null}
       </Header>
       {module.description ? <Description>{module.description}</Description> : null}
     </>

@@ -9,17 +9,13 @@ import {
   recomputeTaskSummary,
 } from "../../core/storage.js";
 import { scaffoldReviewMd } from "../../core/spec.js";
+import { writeStatus } from "./status-write.js";
 
 export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
   const { task, shard, shardFile } = jsonFileStorage.loadTaskById(config, master, id);
 
-  task.status = "reviewing";
-  task.statusHistory.push({
-    status: "reviewing",
-    at: now(),
-    by: (opts.by as string) || "task-review",
-  });
+  writeStatus(task, "reviewing", (opts.by as string) || "task-review");
 
   const reviews = loadTaskReviewsHybrid(config, task);
   reviews.push({
@@ -82,12 +78,7 @@ export function cmdReviewEnd(config: TaskflowConfig, master: MasterFile, opts: P
   if (opts.by) review.by = opts.by as string;
   jsonFileStorage.saveTaskReviews(config, task, reviews);
 
-  task.status = opts.verdict as string;
-  task.statusHistory.push({
-    status: opts.verdict as string,
-    at: now(),
-    by: (opts.by as string) || review.by || "task-review",
-  });
+  writeStatus(task, opts.verdict as string, (opts.by as string) || review.by || "task-review");
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);

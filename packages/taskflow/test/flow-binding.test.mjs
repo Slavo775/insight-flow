@@ -174,3 +174,61 @@ test("current/next surface the task's flow and next step (deleted flow → defau
   const after = JSON.parse(cli(dir, ["current"]));
   assert.equal(after.flowId, "default");
 });
+
+// N123 — a main/entry agent binds its flow at creation; precedence + ambiguity.
+function withFlow(dir, file, def) {
+  mkdirSync(join(dir, "insightFlow/projects"), { recursive: true });
+  writeFileSync(join(dir, "insightFlow/projects", file), JSON.stringify(def));
+}
+
+test("create --agent binds the agent's flow; --flow wins; ambiguity + no-flow error", () => {
+  const dir = project({}); // default flow present (entryAgents: task-analyze, taskmaster)
+
+  // taskmaster is a main agent of the default flow
+  assert.equal(
+    JSON.parse(cli(dir, ["create", "--title", "T", "--agent", "taskmaster"])).flowId,
+    "default",
+  );
+
+  // a custom flow whose only main agent is task-implement
+  withFlow(dir, "hotfix.json", {
+    id: "custom:hotfix",
+    title: "Hotfix",
+    agents: ["task-implement", "task-git"],
+    flow: [],
+    install: [],
+    entryAgents: ["task-implement"],
+  });
+  assert.equal(
+    JSON.parse(cli(dir, ["create", "--title", "T", "--agent", "task-implement"])).flowId,
+    "custom:hotfix",
+  );
+
+  // --flow overrides --agent
+  assert.equal(
+    JSON.parse(
+      cli(dir, ["create", "--title", "T", "--agent", "task-implement", "--flow", "default"]),
+    ).flowId,
+    "default",
+  );
+
+  // an agent that's a main of NO flow → error
+  assert.throws(
+    () => cli(dir, ["create", "--title", "T", "--agent", "task-review"]),
+    (err) => /not a main agent of any flow/.test(String(err.stderr)),
+  );
+
+  // ambiguity: a second flow also names task-implement as a main agent
+  withFlow(dir, "other.json", {
+    id: "custom:other",
+    title: "Other",
+    agents: ["task-implement"],
+    flow: [],
+    install: [],
+    entryAgents: ["task-implement"],
+  });
+  assert.throws(
+    () => cli(dir, ["create", "--title", "T", "--agent", "task-implement"]),
+    (err) => /main agent of multiple flows/.test(String(err.stderr)),
+  );
+});

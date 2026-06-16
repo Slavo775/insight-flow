@@ -74,28 +74,20 @@ export interface Task {
   pushes?: Push[];
 }
 
-export interface Column {
-  key: string;
-  label: string;
-  matches: string[];
-}
-
-export const COLUMNS: Column[] = [
-  { key: "ready", label: "Ready", matches: ["ready"] },
-  {
-    key: "progress",
-    label: "In Progress",
-    matches: ["in-progress", "implemented", "changes-implementing", "changes-implemented"],
-  },
-  { key: "review", label: "Review", matches: ["reviewing"] },
-  {
-    key: "fix",
-    label: "Fix",
-    matches: ["fix-needed", "fixing", "fixed", "changes-requested", "request-changes"],
-  },
-  { key: "approved", label: "Approved", matches: ["approved", "pushed"] },
-  { key: "merged", label: "Done", matches: ["merged", "done"] },
-];
+// N129 — the kanban columns now derive from the flows' status sets. The pure
+// builder + canonical 6-column grouping live in core/kanban (shared with the
+// test harness); re-exported here so existing client imports keep working.
+// `COLUMNS` is the canonical default (a default-only board, and the fallback
+// while flow statuses load).
+export type { Column, FlowStatus } from "../../core/kanban.js";
+export {
+  buildColumns,
+  orphanStatuses,
+  isCanonicalStatus,
+  statusLabel,
+  statusColor,
+  CANONICAL_COLUMNS as COLUMNS,
+} from "../../core/kanban.js";
 
 export function badgeClass(status: string): string {
   if (["ready"].includes(status)) return "badge-ready";

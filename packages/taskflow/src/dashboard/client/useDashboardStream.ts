@@ -10,6 +10,7 @@ import {
 } from "./notifications.js";
 import { useDashboardStore } from "./store.js";
 import { invalidateRegistry } from "./registry.js";
+import { invalidateFlows } from "./flow-columns.js";
 
 interface SnapshotFrame {
   activity?: ActivityEvent[];
@@ -68,7 +69,10 @@ export function useDashboardStream(): void {
     // N103 review-fix — a custom-definition CRUD write (possibly from another
     // tab) invalidates the shared registry cache so the next /module, /agent,
     // or /project navigation refetches fresh data instead of serving stale.
-    es.addEventListener("custom-defs-changed", () => invalidateRegistry());
+    es.addEventListener("custom-defs-changed", () => {
+      invalidateRegistry();
+      invalidateFlows(); // N129/N130 — a flow's statuses may have changed
+    });
 
     es.addEventListener("status", (e) => {
       const frame = JSON.parse((e as MessageEvent).data) as { to?: string };
