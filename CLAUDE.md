@@ -18,6 +18,10 @@ pnpm --dir packages/taskflow run build
 # Pack the npm tarball
 pnpm pack:taskflow
 
+# Local-publish for test-project install (yalc) — see packages/taskflow/README.md "Local testing with yalc"
+pnpm yalc:publish                        # build + publish to local yalc store
+pnpm yalc:push                           # build + push to all linked test projects
+
 # Run the CLI locally against the playground sandbox
 pnpm play                                # → http://localhost:6006
 

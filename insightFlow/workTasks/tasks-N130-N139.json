@@ -453,6 +453,60 @@
       "branch": "feat/N134-N135-flow-chart-ux",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/100",
       "mergedAt": null
+    },
+    {
+      "id": "N136",
+      "title": "Yalc local-publish scripts for test-project install",
+      "type": "feat",
+      "priority": "medium",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N136-yalc-local-publish-scripts-for-test-project-instal",
+      "createdAt": "2026-06-17T07:09:51.998Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T07:09:51.998Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T07:12:54.412Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T07:16:32.358Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T07:12:54.412Z",
+        "completedAt": "2026-06-17T07:16:32.358Z",
+        "filesChanged": [
+          "package.json",
+          ".gitignore",
+          "packages/taskflow/README.md",
+          "CLAUDE.md",
+          "pnpm-lock.yaml"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "tooling",
+        "dx",
+        "yalc",
+        "build"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }

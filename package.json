@@ -6,6 +6,8 @@
     "build": "pnpm --dir packages/taskflow run build",
     "build:package": "pnpm --dir packages/taskflow run build",
     "pack:taskflow": "pnpm --dir packages/taskflow exec npm pack",
+    "yalc:publish": "pnpm --dir packages/taskflow run build && pnpm --dir packages/taskflow exec yalc publish",
+    "yalc:push": "pnpm --dir packages/taskflow run build && pnpm --dir packages/taskflow exec yalc push",
     "play": "pnpm --dir playground run ui",
     "ui": "node packages/taskflow/dist/cli.js ui",
     "master": "node packages/taskflow/dist/cli.js master",
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.7"
+    "lint-staged": "^17.0.7",
+    "yalc": "1.0.0-pre.53"
   }
 }

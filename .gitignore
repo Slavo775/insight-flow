@@ -24,6 +24,10 @@ playground/.taskflow-activity.jsonl
 # npm pack artifacts (use `pnpm pack:taskflow` to (re)generate)
 *.tgz
 
+# yalc local-publish artifacts (use `pnpm yalc:publish` / `pnpm yalc:push`)
+.yalc/
+yalc.lock
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

@@ -864,6 +864,43 @@ The master itself can run in standalone mode (no new registrations accepted, ove
 { "port": 6100, "standalone": true }
 ```
 
+## Local testing with yalc (contributors)
+
+Before cutting a real npm release, test the package the way a consumer would install it — bin wiring, `files`-allowlisted contents, prod deps only — using [yalc](https://github.com/wclr/yalc) as a local package store. `yalc` ships as a dev dependency, so no global install is required.
+
+**1. Publish the freshly-built package to the local store** (from the repo root):
+
+```bash
+pnpm yalc:publish
+```
+
+This runs the package build, then copies exactly what `npm publish` would (the `files` allowlist: `dist`, `schema`, `templates`, `README.md`, `LICENSE`) plus the `insight-flow` bin into `~/.yalc/packages/insight-flow`.
+
+**2. Install into a test project** (run inside that project):
+
+```bash
+npx yalc add insight-flow && pnpm install
+npx insight-flow --version      # or: npx insight-flow ui
+```
+
+`yalc add` drops a real copy into `<project>/.yalc/` and injects a `file:.yalc/insight-flow` dependency — so it behaves like a genuine npm install, not a symlinked `npm link`.
+
+**3. Iterate** — after changing package code, rebuild and update every linked project in place:
+
+```bash
+pnpm yalc:push                  # = build + publish + update all linked consumers
+```
+
+If a consumer doesn't refresh automatically, run `npx yalc update` inside it.
+
+**4. Clean up** the test project before committing it:
+
+```bash
+npx yalc remove insight-flow && pnpm install
+```
+
+> The `.yalc/` directory and `yalc.lock` are gitignored at the repo root, so yalc state never leaks into commits if you use `playground/` as the test consumer.
+
 ## License
 
 MIT
