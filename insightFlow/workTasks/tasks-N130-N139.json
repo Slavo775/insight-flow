@@ -786,7 +786,7 @@
       "title": "Fix doubled task-folder path in spec.ts resolveTaskFolder",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N139-fix-doubled-task-folder-path-in-spec-ts-resolvetas",
       "createdAt": "2026-06-17T12:11:19.125Z",
       "statusHistory": [
@@ -824,6 +824,21 @@
           "status": "approved",
           "at": "2026-06-17T12:25:45.178Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-17T12:40:27.614Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T12:40:27.776Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T12:40:27.854Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -840,18 +855,24 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-17T12:40:27.855Z",
+      "totalDurationMinutes": 29,
       "tags": [
         "bug",
         "paths",
         "layout",
         "cli"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
-      "mergedAt": null,
+      "pushes": [
+        {
+          "at": "2026-06-17T12:40:27.614Z",
+          "commitHash": "5a3f378a26f483245df799871dfb3f995cb11cbe",
+          "commitMessage": "fix(core): resolveTaskFolder basename (N139) (#103)"
+        }
+      ],
+      "branch": "fix/N139-spec-resolvetaskfolder-path",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/103",
+      "mergedAt": "2026-06-17T12:40:27.777Z",
       "flowId": "default"
     }
   ]
