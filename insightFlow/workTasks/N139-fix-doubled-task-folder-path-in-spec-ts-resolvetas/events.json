@@ -583,6 +583,84 @@
       "payload": {
         "tool_name": "Bash"
       }
+    },
+    {
+      "id": "evt_1781700053102_434a",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-17T12:40:53.101Z",
+      "sessionId": "94223b55-c46e-4252-9b98-3410c5018b28",
+      "taskId": "N139",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781700062020_4210",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-17T12:41:02.020Z",
+      "sessionId": "94223b55-c46e-4252-9b98-3410c5018b28",
+      "taskId": "N139",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781700062136_2e61",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-17T12:41:02.136Z",
+      "sessionId": "94223b55-c46e-4252-9b98-3410c5018b28",
+      "taskId": "N139",
+      "payload": {}
+    },
+    {
+      "type": "done",
+      "taskId": "N139",
+      "timestamp": "2026-06-17T12:41:09.409Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1781700070162_195f",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-17T12:41:10.162Z",
+      "sessionId": "94223b55-c46e-4252-9b98-3410c5018b28",
+      "taskId": "N139",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1781700082107_529f",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-17T12:41:22.106Z",
+      "sessionId": "94223b55-c46e-4252-9b98-3410c5018b28",
+      "taskId": "N139",
+      "payload": {}
+    },
+    {
+      "id": "evt_1781700266467_ad38",
+      "type": "session-start",
+      "source": "hook",
+      "hookName": "SessionStart",
+      "timestamp": "2026-06-17T12:44:26.467Z",
+      "sessionId": "cbebab47-ca6f-4350-9cab-93074cba0cb8",
+      "taskId": "N139",
+      "payload": {}
+    },
+    {
+      "type": "start",
+      "taskId": "N139",
+      "timestamp": "2026-06-17T12:59:07.056Z",
+      "source": "agent"
     }
   ]
 }

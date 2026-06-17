@@ -1,0 +1,174 @@
+{
+  "range": {
+    "from": 140,
+    "to": 149
+  },
+  "tasks": [
+    {
+      "id": "N140",
+      "title": "Unify resolveTaskFolder into one shared core resolver",
+      "type": "rework",
+      "priority": "medium",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N140-unify-resolvetaskfolder-into-one-shared-core-resol",
+      "createdAt": "2026-06-17T12:59:12.782Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T12:59:12.782Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T13:10:14.048Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T13:14:31.690Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T13:26:20.257Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T13:28:59.447Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T13:38:01.067Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T13:38:38.982Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T13:56:27.797Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T13:56:28.117Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T13:10:14.048Z",
+        "completedAt": "2026-06-17T13:14:31.690Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/config.ts",
+          "packages/taskflow/src/core/spec.ts",
+          "packages/taskflow/src/core/storage.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/spec-path.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-17T13:56:28.118Z",
+      "totalDurationMinutes": 57,
+      "tags": [
+        "core",
+        "tech-debt",
+        "refactor"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/104",
+      "mergedAt": "2026-06-17T13:56:27.799Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N141",
+      "title": "Guarded cleanup of stray doubled workTasks dirs in migrate-layout",
+      "type": "feat",
+      "priority": "low",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N141-guarded-cleanup-of-stray-doubled-worktasks-dirs-in",
+      "createdAt": "2026-06-17T12:59:57.528Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T12:59:57.528Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T13:17:47.208Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T13:23:49.042Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T13:28:59.528Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T13:35:04.053Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T13:38:01.148Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T13:38:39.073Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T13:56:27.877Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T13:56:28.195Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T13:17:47.208Z",
+        "completedAt": "2026-06-17T13:23:49.042Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/migrate-layout.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/test/migrate-layout-strays.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-17T13:56:28.196Z",
+      "totalDurationMinutes": 57,
+      "tags": [
+        "cli",
+        "migrate-layout",
+        "safety"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/105",
+      "mergedAt": "2026-06-17T13:56:27.878Z",
+      "flowId": "default"
+    }
+  ]
+}
