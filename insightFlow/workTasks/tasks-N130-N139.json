@@ -554,7 +554,7 @@
       "title": "Composed-module (bundle) kind in module form",
       "type": "feat",
       "priority": "low",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N137-composed-module-bundle-kind-in-module-form",
       "createdAt": "2026-06-17T09:24:57.875Z",
       "statusHistory": [
@@ -592,6 +592,21 @@
           "status": "approved",
           "at": "2026-06-17T11:58:58.352Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-17T12:04:09.125Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T12:04:09.295Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T12:04:09.371Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -606,25 +621,31 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-17T12:04:09.371Z",
+      "totalDurationMinutes": 159,
       "tags": [
         "dashboard",
         "modules",
         "composer",
         "ux"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
-      "mergedAt": null
+      "pushes": [
+        {
+          "at": "2026-06-17T12:04:09.125Z",
+          "commitHash": "3de8f19d13d9c351d60d46f066939fc3a34e2119",
+          "commitMessage": "feat(dashboard): composer-ux (N137, N138) (#102)"
+        }
+      ],
+      "branch": "feat/N137-N138-composer-ux",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/102",
+      "mergedAt": "2026-06-17T12:04:09.295Z"
     },
     {
       "id": "N138",
       "title": "Agent-installable command or skill on flow install",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N138-agent-installable-command-or-skill-on-flow-install",
       "createdAt": "2026-06-17T09:24:57.959Z",
       "statusHistory": [
@@ -677,6 +698,21 @@
           "status": "approved",
           "at": "2026-06-17T11:58:58.549Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-17T12:04:09.456Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T12:04:09.630Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T12:04:09.716Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -717,18 +753,24 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-17T12:04:09.716Z",
+      "totalDurationMinutes": 159,
       "tags": [
         "agents",
         "composer",
         "flow-install",
         "commands"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
-      "mergedAt": null
+      "pushes": [
+        {
+          "at": "2026-06-17T12:04:09.455Z",
+          "commitHash": "3de8f19d13d9c351d60d46f066939fc3a34e2119",
+          "commitMessage": "feat(dashboard): composer-ux (N137, N138) (#102)"
+        }
+      ],
+      "branch": "feat/N137-N138-composer-ux",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/102",
+      "mergedAt": "2026-06-17T12:04:09.630Z"
     }
   ]
 }
