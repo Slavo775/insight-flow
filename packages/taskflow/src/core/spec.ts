@@ -11,7 +11,12 @@ import { resolvePackageAsset } from "./paths.js";
  */
 function resolveTaskFolder(config: TaskflowConfig, task: Task, cwd?: string): string {
   const workDir = getWorkDir(config, cwd);
-  const tail = task.folder.replace(/^.*?\//, "");
+  // N139 — task.folder is stored project-root-relative (e.g.
+  // "insightFlow/workTasks/N00-x"). Take its basename so joining with workDir
+  // (already the resolved tasks dir) can't double the layout segments — the old
+  // `replace(/^.*?\//, "")` stripped only the first segment and produced
+  // insightFlow/workTasks/workTasks/N00-x under the N101 layout.
+  const tail = task.folder.split(/[\\/]/).filter(Boolean).pop() ?? task.folder;
   return resolve(workDir, tail);
 }
 
