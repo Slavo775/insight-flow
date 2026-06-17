@@ -570,6 +570,8 @@ Example — run a script when any task starts and send a desktop notification wh
 
 Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and `skill` modules are emitted by `insight-flow prompt-build --compose --apply` into `.mcp.json`, `.claude/settings.json`, and `.claude/skills/` respectively. Managed entries are tracked per agent in `.claude/taskflow-managed.json` — re-applies replace cleanly, removing a module removes its artifact, and hooks you wrote yourself are never touched. Note: the first managed write normalizes the touched JSON file to 2-space formatting (content and key order are preserved). Use `--def <file.json>` to compose a project-local agent definition that adopts integration modules.
 
+**Agent as a runnable command (N138).** A composed agent may opt in (`command: { install: true, as: "command" | "skill" }`, set via the agent form's "runnable command" checkbox) to install **itself** — its composed prompt — as a slash command (`.claude/commands/<name>.md`) or skill (`.claude/skills/<name>/SKILL.md`) when its flow is installed. The name is derived as `task-<slug>` from the agent id (no double-prefix; names colliding with the 10 built-in commands are rejected on save). Like the other artifacts it is tracked per agent in `taskflow-managed.json`: re-apply is idempotent and clearing the opt-in removes the file on the next install. Pick `as: "skill"` for Cursor portability (skills map to `.cursor/skills/` via `insight-flow init`).
+
 ## Programmatic API
 
 ```ts

@@ -5,7 +5,13 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
-import { ApiError, deleteDefinition, saveDefinition, slugifyIdTail } from "./api.js";
+import {
+  ApiError,
+  deleteDefinition,
+  deriveCommandName,
+  saveDefinition,
+  slugifyIdTail,
+} from "./api.js";
 import { Button, Section } from "./components/index.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
@@ -142,6 +148,28 @@ const FormActions = styled.div`
   align-items: center;
 `;
 
+const CheckRow = styled.label`
+  display: flex;
+  align-items: center;
+  gap: ${(p) => p.theme.space.sm};
+  color: ${(p) => p.theme.color.text};
+`;
+
+// N138 — RESERVED_COMMAND_NAMES mirrors core/schema (kept inline so the client
+// bundle doesn't import the zod schema module); deriveCommandName lives in api.js.
+const RESERVED_COMMAND_NAMES = new Set([
+  "task-analyze",
+  "taskmaster",
+  "taskmaster-change",
+  "task-implement",
+  "task-review",
+  "task-review-fix",
+  "task-human-review",
+  "task-git",
+  "task-incident",
+  "task-request-changes",
+]);
+
 export function AgentForm() {
   const params = useParams();
   const editId = params.id ?? null;
@@ -166,6 +194,9 @@ export function AgentForm() {
   // N135 — a click on a preview module node opens this modal instead of
   // navigating away (which would discard the unsaved form).
   const [openModuleId, setOpenModuleId] = useState<string | null>(null);
+  // N138 — opt-in install of this agent as a runnable command/skill on flow install.
+  const [installCommand, setInstallCommand] = useState<boolean | null>(null);
+  const [commandAs, setCommandAs] = useState<"command" | "skill" | null>(null);
 
   if (registryError) return <p>Failed to load registry: {registryError}</p>;
   if (!registry) return <p>Loading…</p>;
@@ -184,6 +215,11 @@ export function AgentForm() {
   const sDescription = description ?? editing?.description ?? "";
   const sModules = moduleIds ?? editing?.modules.map((m) => m.id) ?? [];
   const fullId = `custom:${sIdTail.trim() || "<id>"}`;
+  // N138 — derived command state + collision check.
+  const sInstallCommand = installCommand ?? editing?.command?.install ?? false;
+  const sCommandAs = commandAs ?? editing?.command?.as ?? "command";
+  const commandName = deriveCommandName(fullId);
+  const commandReserved = sInstallCommand && RESERVED_COMMAND_NAMES.has(commandName);
 
   const moduleById = new Map(registry.modules.map((m) => [m.id, m]));
   // Every registry module is pickable — bundles included (they expand at
@@ -231,6 +267,8 @@ export function AgentForm() {
     if (!sIdTail.trim()) localErrors.idTail = "required";
     if (!sTitle.trim()) localErrors.title = "required";
     if (!sModules.length) localErrors.modules = "add at least one module";
+    if (commandReserved)
+      localErrors.command = `/${commandName} collides with a built-in command — rename the agent`;
     if (Object.keys(localErrors).length) {
       setErrors(localErrors);
       return;
@@ -243,6 +281,7 @@ export function AgentForm() {
         title: sTitle.trim(),
         ...(sDescription.trim() ? { description: sDescription.trim() } : {}),
         modules: sModules,
+        ...(sInstallCommand ? { command: { install: true, as: sCommandAs } } : {}),
       };
       await saveDefinition("agents", record, isEdit);
       invalidateRegistry();
@@ -370,6 +409,47 @@ export function AgentForm() {
                 onModuleClick={setOpenModuleId}
               />
             ) : null}
+
+            <Field as="div">
+              Runnable command (N138){" "}
+              {errors.command ? <FieldError>{errors.command}</FieldError> : null}
+              <CheckRow>
+                <input
+                  type="checkbox"
+                  checked={sInstallCommand}
+                  onChange={(e) => setInstallCommand(e.target.checked)}
+                />
+                Install this agent as a runnable command/skill when its flow is installed
+              </CheckRow>
+              {sInstallCommand ? (
+                <>
+                  <CheckRow>
+                    <input
+                      type="radio"
+                      checked={sCommandAs === "command"}
+                      onChange={() => setCommandAs("command")}
+                    />
+                    Slash command (<code>.claude/commands</code>)
+                  </CheckRow>
+                  <CheckRow>
+                    <input
+                      type="radio"
+                      checked={sCommandAs === "skill"}
+                      onChange={() => setCommandAs("skill")}
+                    />
+                    Skill (<code>.claude/skills</code> — also works in Cursor)
+                  </CheckRow>
+                  <span>
+                    Installs as <code>/{commandName}</code>
+                  </span>
+                  {commandReserved ? (
+                    <FieldError>
+                      /{commandName} collides with a built-in command — rename the agent
+                    </FieldError>
+                  ) : null}
+                </>
+              ) : null}
+            </Field>
 
             <FormActions>
               <Button type="submit" $variant="primary" disabled={busy}>

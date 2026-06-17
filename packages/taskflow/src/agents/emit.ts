@@ -36,6 +36,8 @@ interface ManagedEntry {
   /** Hook script files owned by this agent (under .claude/hooks/). */
   scripts?: string[];
   skills: string[];
+  /** N138 — installable commands/skills (the agent's composed prompt) owned by this agent. */
+  commands?: { name: string; as: "command" | "skill" }[];
 }
 
 interface ManagedManifest {
@@ -233,6 +235,66 @@ function applySkills(
   owned.skills = [...current];
 }
 
+// N138 — install the agent's composed prompt as a runnable slash command
+// (`.claude/commands/<name>.md`) or skill (`.claude/skills/<name>/SKILL.md`).
+// Names are claimed per agent in the manifest (a second agent claiming the same
+// name throws); a command this agent no longer contributes — or whose target
+// kind changed — is removed on the next apply.
+function applyCommands(
+  projectRoot: string,
+  agentId: string,
+  commands: AgentArtifacts["commands"],
+  manifest: ManagedManifest,
+  owned: ManagedEntry,
+  reports: EmitReport[],
+): void {
+  const label = (name: string, as: "command" | "skill"): string =>
+    as === "skill" ? `.claude/skills/${name}/SKILL.md` : `.claude/commands/${name}.md`;
+  const writePath = (name: string, as: "command" | "skill"): string =>
+    as === "skill"
+      ? join(projectRoot, ".claude/skills", name, "SKILL.md")
+      : join(projectRoot, ".claude/commands", `${name}.md`);
+  const removePath = (name: string, as: "command" | "skill"): string =>
+    as === "skill"
+      ? join(projectRoot, ".claude/skills", name)
+      : join(projectRoot, ".claude/commands", `${name}.md`);
+
+  // A command/skill name is claimed by exactly one agent.
+  for (const { name } of commands) {
+    for (const [otherId, entry] of Object.entries(manifest.agents)) {
+      if (otherId !== agentId && (entry.commands ?? []).some((c) => c.name === name)) {
+        throw new Error(
+          `command '${name}' is already managed by agent '${otherId}' — refusing to overwrite`,
+        );
+      }
+    }
+  }
+
+  const current = new Map(commands.map((c) => [c.name, c]));
+  for (const old of owned.commands ?? []) {
+    const still = current.get(old.name);
+    if (still && still.as === old.as) continue; // kept (target kind unchanged)
+    const path = removePath(old.name, old.as);
+    if (existsSync(path)) {
+      rmSync(path, old.as === "skill" ? { recursive: true } : {});
+      reports.push({ target: label(old.name, old.as), action: "removed" });
+    }
+  }
+  for (const { name, body, as } of commands) {
+    const path = writePath(name, as);
+    const text = body.endsWith("\n") ? body : body + "\n";
+    const prev = existsSync(path) ? readFileSync(path, "utf-8") : null;
+    if (prev === text) {
+      reports.push({ target: label(name, as), action: "unchanged" });
+      continue;
+    }
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, text);
+    reports.push({ target: label(name, as), action: prev === null ? "created" : "updated" });
+  }
+  owned.commands = commands.map((c) => ({ name: c.name, as: c.as }));
+}
+
 /**
  * Rename a manifest bucket (N96: the N94-era `activity` bucket becomes the
  * project bucket `project:default`). No-op when `from` is absent or `to`
@@ -278,12 +340,14 @@ export function applyArtifacts(
   const owned = manifest.agents[agentId] ?? { hooks: [], skills: [] };
   owned.hooks ??= [];
   owned.skills ??= [];
+  owned.commands ??= [];
 
   applyMcpServers(projectRoot, artifacts.mcpServers, reports);
   applyHooks(projectRoot, hooks, owned, reports);
   applySkills(projectRoot, agentId, artifacts.skills, manifest, owned, reports);
+  applyCommands(projectRoot, agentId, artifacts.commands, manifest, owned, reports);
 
-  if (owned.hooks.length || owned.skills.length || owned.scripts?.length)
+  if (owned.hooks.length || owned.skills.length || owned.scripts?.length || owned.commands?.length)
     manifest.agents[agentId] = owned;
   else delete manifest.agents[agentId];
 

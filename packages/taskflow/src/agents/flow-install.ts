@@ -7,7 +7,7 @@ import { mergedComposedAgents, mergedModuleRegistry } from "./user-registry.js";
 import type { Project } from "./project.js";
 
 export interface InstallStep {
-  kind: "mcp" | "hook" | "skill";
+  kind: "mcp" | "hook" | "skill" | "command";
   /** Stable key for dedup (kind + this). */
   key: string;
   /** Human label for the modal. */
@@ -17,7 +17,7 @@ export interface InstallStep {
 }
 
 function emptyArtifacts(): AgentArtifacts {
-  return { mcpServers: [], hooks: [], skills: [] };
+  return { mcpServers: [], hooks: [], skills: [], commands: [] };
 }
 
 /** The artifacts a flow implies: its agents' contributions + its install list. */
@@ -36,6 +36,7 @@ export function flowArtifacts(flow: Project): AgentArtifacts {
     out.mcpServers.push(...a.mcpServers);
     out.hooks.push(...a.hooks);
     out.skills.push(...a.skills);
+    out.commands.push(...a.commands);
   }
   return out;
 }
@@ -68,6 +69,16 @@ export function flowInstallPlan(flow: Project): InstallStep[] {
       key: s.name,
       label: `Skill: ${s.name}`,
       target: `.claude/skills/${s.name}/SKILL.md`,
+    });
+  }
+  // N138 — an agent's own composed prompt installed as a runnable command/skill.
+  for (const c of art.commands) {
+    push({
+      kind: "command",
+      key: c.name,
+      label: `${c.as === "skill" ? "Skill" : "Command"}: /${c.name}`,
+      target:
+        c.as === "skill" ? `.claude/skills/${c.name}/SKILL.md` : `.claude/commands/${c.name}.md`,
     });
   }
   return steps;

@@ -828,6 +828,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         title: def.title,
         description: def.description,
         source: def.id.startsWith("custom:") ? "custom" : "builtin",
+        // N138 — surface the installable-command opt-in so the edit form repopulates.
+        ...(def.command ? { command: def.command } : {}),
         modules: def.modules.map((id) => {
           const mod = moduleRegistry[id];
           return {

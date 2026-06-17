@@ -37,7 +37,7 @@ test("collectArtifacts gathers non-text kinds and ignores text kinds", () => {
   assert.equal(a.mcpServers.length, 0);
   // the section module contributes to MD, not artifacts
   const textOnly = collectArtifacts({ id: "t", title: "T", modules: ["testing/prompt"] });
-  assert.deepEqual(textOnly, { mcpServers: [], hooks: [], skills: [] });
+  assert.deepEqual(textOnly, { mcpServers: [], hooks: [], skills: [], commands: [] });
 });
 
 test("collectArtifacts dedups repeated refs and throws on unknown ids", () => {
@@ -52,7 +52,14 @@ test("collectArtifacts dedups repeated refs and throws on unknown ids", () => {
 test("mcp-server merge: dedup by name, conflict on different config, key order tolerated", () => {
   const dir = tmp();
   const registry = {
-    a: { id: "a", title: "A", kind: "mcp-server", source: "builtin", name: "jira", config: { url: "x", auth: "t" } },
+    a: {
+      id: "a",
+      title: "A",
+      kind: "mcp-server",
+      source: "builtin",
+      name: "jira",
+      config: { url: "x", auth: "t" },
+    },
   };
   const artifacts = collectArtifacts({ id: "p", title: "P", modules: ["a"] }, registry);
   let reports = applyArtifacts(artifacts, dir, "p");
@@ -62,7 +69,10 @@ test("mcp-server merge: dedup by name, conflict on different config, key order t
   reports = applyArtifacts(artifacts, dir, "p");
   assert.deepEqual(reports, [{ target: ".mcp.json", action: "unchanged" }]);
   // same config in a different key order → no false conflict
-  writeFileSync(join(dir, ".mcp.json"), JSON.stringify({ mcpServers: { jira: { auth: "t", url: "x" } } }));
+  writeFileSync(
+    join(dir, ".mcp.json"),
+    JSON.stringify({ mcpServers: { jira: { auth: "t", url: "x" } } }),
+  );
   assert.doesNotThrow(() => applyArtifacts(artifacts, dir, "p"));
   // same name + different config → throws
   writeFileSync(join(dir, ".mcp.json"), JSON.stringify({ mcpServers: { jira: { url: "OTHER" } } }));
@@ -75,7 +85,12 @@ test("hooks reconcile via managed manifest: apply, reapply, replace, remove; for
   mkdirSync(join(dir, ".claude"), { recursive: true });
   writeFileSync(
     join(dir, ".claude/settings.json"),
-    JSON.stringify({ other: true, hooks: { PostToolUse: [{ matcher: "Bash", hooks: [{ type: "command", command: "user-hook" }] }] } }),
+    JSON.stringify({
+      other: true,
+      hooks: {
+        PostToolUse: [{ matcher: "Bash", hooks: [{ type: "command", command: "user-hook" }] }],
+      },
+    }),
   );
 
   const artifacts = collectArtifacts(PILOT);
@@ -86,7 +101,10 @@ test("hooks reconcile via managed manifest: apply, reapply, replace, remove; for
 
   // idempotent reapply
   const second = applyArtifacts(artifacts, dir, PILOT.id);
-  assert.ok(second.every((r) => r.action === "unchanged"), JSON.stringify(second));
+  assert.ok(
+    second.every((r) => r.action === "unchanged"),
+    JSON.stringify(second),
+  );
   settings = readJson(join(dir, ".claude/settings.json"));
   assert.equal(settings.hooks.PostToolUse.length, 2, "no duplicate on reapply");
 
@@ -115,7 +133,10 @@ test("full pilot apply is idempotent end-to-end", () => {
   applyArtifacts(artifacts, dir, PILOT.id);
   const second = applyArtifacts(artifacts, dir, PILOT.id);
   assert.ok(second.length > 0);
-  assert.ok(second.every((r) => r.action === "unchanged"), JSON.stringify(second));
+  assert.ok(
+    second.every((r) => r.action === "unchanged"),
+    JSON.stringify(second),
+  );
   rmSync(dir, { recursive: true });
 });
 
@@ -145,7 +166,14 @@ test("skill name collisions across agents throw instead of silently overwriting"
   const dir = tmp();
   applyArtifacts(collectArtifacts(PILOT), dir, PILOT.id);
   const registry = {
-    s: { id: "s", title: "S", kind: "skill", source: "builtin", name: "taskflow-run-tests", content: "---\nname: x\n---\nother" },
+    s: {
+      id: "s",
+      title: "S",
+      kind: "skill",
+      source: "builtin",
+      name: "taskflow-run-tests",
+      content: "---\nname: x\n---\nother",
+    },
   };
   const other = collectArtifacts({ id: "other-agent", title: "O", modules: ["s"] }, registry);
   assert.throws(
@@ -183,7 +211,10 @@ test("N94/N96: script-carrying hooks — write 0755, substitute vars, remove wit
   const second = applyArtifacts(artifacts, dir, ACTIVITY_AGENT.id, {
     INSIGHT_FLOW_BIN: "npx insight-flow",
   });
-  assert.ok(second.every((r) => r.action === "unchanged"), JSON.stringify(second));
+  assert.ok(
+    second.every((r) => r.action === "unchanged"),
+    JSON.stringify(second),
+  );
 
   // removing a module removes its script + entry, keeps the rest
   // (the install is the `activity` bundle — drop one child by listing the rest)
@@ -231,14 +262,18 @@ test("N95: adopting the testing bundle yields identical artifacts to listing the
   const dir = tmp();
   applyArtifacts(viaBundle, dir, "p");
   const second = applyArtifacts(viaBundle, dir, "p");
-  assert.ok(second.every((r) => r.action === "unchanged"), JSON.stringify(second));
+  assert.ok(
+    second.every((r) => r.action === "unchanged"),
+    JSON.stringify(second),
+  );
 });
 
 test("schema rejects unsafe skill names (path traversal)", async () => {
   const { AgentModuleSchema } = await import("../dist/index.js");
   for (const bad of ["../evil", "a/b", ".hidden", "UPPER"]) {
     assert.throws(
-      () => AgentModuleSchema.parse({ id: "s", title: "S", kind: "skill", name: bad, content: "x" }),
+      () =>
+        AgentModuleSchema.parse({ id: "s", title: "S", kind: "skill", name: bad, content: "x" }),
       `skill name '${bad}' should be rejected`,
     );
   }

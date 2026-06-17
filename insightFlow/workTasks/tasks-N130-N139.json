@@ -548,6 +548,187 @@
       "branch": "feat/N136-yalc-local-publish-scripts",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/101",
       "mergedAt": "2026-06-17T07:32:02.107Z"
+    },
+    {
+      "id": "N137",
+      "title": "Composed-module (bundle) kind in module form",
+      "type": "feat",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N137-composed-module-bundle-kind-in-module-form",
+      "createdAt": "2026-06-17T09:24:57.875Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T09:24:57.876Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T10:05:55.359Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T10:10:29.330Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T10:39:14.494Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T10:40:54.932Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T11:58:58.263Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T11:58:58.352Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T10:05:55.358Z",
+        "completedAt": "2026-06-17T10:10:29.329Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "modules",
+        "composer",
+        "ux"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N138",
+      "title": "Agent-installable command or skill on flow install",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N138-agent-installable-command-or-skill-on-flow-install",
+      "createdAt": "2026-06-17T09:24:57.959Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T09:24:57.960Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T10:10:29.420Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T10:23:19.281Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T10:39:14.581Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T10:40:55.028Z",
+          "by": "task-review"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-17T10:59:58.917Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-17T11:03:49.688Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-17T11:05:18.553Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T11:58:58.446Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T11:58:58.549Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T10:10:29.420Z",
+        "completedAt": "2026-06-17T10:23:19.281Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/AgentForm.tsx",
+          "packages/taskflow/test/agent-command.test.mjs",
+          "packages/taskflow/test/emit.test.mjs",
+          "packages/taskflow/README.md",
+          "docs/architecture-diagrams.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-17T10:59:58.917Z",
+          "description": "Agent detail (/agent/<id>) should display the installed command/skill name (e.g. /task-test-agent) when the agent opts into install-command",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-17T11:05:18.552Z",
+          "filesChanged": [
+            "packages/taskflow/src/dashboard/client/api.ts",
+            "packages/taskflow/src/dashboard/client/AgentForm.tsx",
+            "packages/taskflow/src/dashboard/client/AgentDetail.tsx"
+          ],
+          "comment": "Agent detail header now shows 'installs /task-<name> (command|skill)' when the agent opts in; deriveCommandName extracted to api.ts and reused by AgentForm + AgentDetail.",
+          "implementedBy": "task-implement"
+        }
+      ],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "composer",
+        "flow-install",
+        "commands"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }

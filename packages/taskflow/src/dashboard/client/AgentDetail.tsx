@@ -4,7 +4,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
-import type { AgentDto } from "./api.js";
+import { deriveCommandName, type AgentDto } from "./api.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
@@ -86,6 +86,13 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
         {agent.description ? <Description>{agent.description}</Description> : null}
         <Sub>
           {agent.id} · {agent.modules.length} modules in sequence · {sharedCount} shared
+          {/* N138 — surface the installed command/skill so it's clear what command this agent is. */}
+          {agent.command?.install ? (
+            <>
+              {" · installs "}
+              <code>/{deriveCommandName(agent.id)}</code> ({agent.command.as})
+            </>
+          ) : null}
           {/* N107 — built-ins are immutable; only custom agents are editable. */}
           {agent.source === "custom" ? (
             <>

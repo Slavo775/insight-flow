@@ -362,14 +362,59 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
   }),
 ]);
 
-export const ComposedAgentSchema = z.object({
-  id: DefinitionIdSchema,
-  title: z.string().min(1),
-  // Short human-readable summary for browsing UIs (N93); not part of the MD.
-  description: z.string().optional(),
-  // Ordered registry ids; the author controls placement explicitly.
-  modules: z.array(z.string().min(1)).min(1),
-});
+// N138 — the built-in slash-command names a custom agent's emitted command must
+// not collide with.
+export const RESERVED_COMMAND_NAMES = [
+  "task-analyze",
+  "taskmaster",
+  "taskmaster-change",
+  "task-implement",
+  "task-review",
+  "task-review-fix",
+  "task-human-review",
+  "task-git",
+  "task-incident",
+  "task-request-changes",
+] as const;
+
+// N138 — derive the installed slash-command/skill name for an agent: the id tail
+// (minus the `custom:` prefix), namespaced under `task-` unless it already starts
+// with `task` (no double-prefix). DefinitionIdSchema guarantees a safe slug, so
+// the result is always a safe path segment (command filename / skill dir).
+export function deriveCommandName(agentId: string): string {
+  const tail = agentId.replace(/^custom:/, "");
+  return /^task/.test(tail) ? tail : `task-${tail}`;
+}
+
+export const ComposedAgentSchema = z
+  .object({
+    id: DefinitionIdSchema,
+    title: z.string().min(1),
+    // Short human-readable summary for browsing UIs (N93); not part of the MD.
+    description: z.string().optional(),
+    // Ordered registry ids; the author controls placement explicitly.
+    modules: z.array(z.string().min(1)).min(1),
+    // N138 — opt-in: when this agent's flow is installed, also install a runnable
+    // slash command (the composed prompt) or a skill. Name = deriveCommandName(id).
+    command: z
+      .object({
+        install: z.boolean(),
+        as: z.enum(["command", "skill"]).default("command"),
+      })
+      .optional(),
+  })
+  .superRefine((def, ctx) => {
+    if (def.command?.install) {
+      const name = deriveCommandName(def.id);
+      if ((RESERVED_COMMAND_NAMES as readonly string[]).includes(name)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["command"],
+          message: `command name '${name}' collides with a built-in command — rename the agent`,
+        });
+      }
+    }
+  });
 
 // ---------------------------------------------------------------------------
 // N96 — project layer (the atomic-design top tier): which agents a project
