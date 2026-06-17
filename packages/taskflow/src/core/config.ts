@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, basename } from "node:path";
-import type { TaskflowConfig, ActivityEngineConfig, NotificationsConfig } from "./types.js";
+import type { Task, TaskflowConfig, ActivityEngineConfig, NotificationsConfig } from "./types.js";
 import { resolveProjectRoot, resolveFlowRoot, DEFAULT_WORK_DIR } from "./paths.js";
 
 const CONFIG_FILENAME = "taskflow.config.json";
@@ -112,6 +112,25 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
 export function getWorkDir(config: TaskflowConfig, cwd: string = process.cwd()): string {
   const anchor = safeResolveProjectRoot(cwd) ?? cwd;
   return resolveFlowRoot(anchor, config.workDir).tasksDir;
+}
+
+/**
+ * Resolve a task's on-disk folder as `<workDir>/<basename of task.folder>`.
+ *
+ * `task.folder` is stored project-root-relative and its prefix varies by layout
+ * era ("workTasks/Nxx-slug", "insightFlow/workTasks/Nxx-slug"), but task folders
+ * are always direct children of the resolved tasks dir — so the basename joined
+ * against the live workDir is canonical for every layout. Taking the basename
+ * (rather than stripping a fixed prefix) is what prevents the doubled
+ * `insightFlow/workTasks/workTasks/Nxx` path that the N101 layout exposed (N139).
+ *
+ * N140: single shared resolver — previously duplicated in storage.ts and spec.ts
+ * with divergent argument orders, which is how they drifted in the first place.
+ */
+export function resolveTaskFolder(config: TaskflowConfig, task: Task, cwd?: string): string {
+  const workDir = getWorkDir(config, cwd);
+  const tail = task.folder.split(/[\\/]/).filter(Boolean).pop() ?? task.folder;
+  return resolve(workDir, tail);
 }
 
 export function getEventsDir(config: TaskflowConfig, cwd: string = process.cwd()): string {

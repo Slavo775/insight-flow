@@ -1,24 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Task, TaskflowConfig } from "./types.js";
-import { getWorkDir } from "./config.js";
+import { resolveTaskFolder } from "./config.js";
 import { resolvePackageAsset } from "./paths.js";
-
-/**
- * Resolve `<workDir>/<task.folder relative tail>` — duplicated from storage.ts
- * to keep spec.ts independent. `task.folder` is stored as a project-relative
- * path like "workTasks/Nxx-slug".
- */
-function resolveTaskFolder(config: TaskflowConfig, task: Task, cwd?: string): string {
-  const workDir = getWorkDir(config, cwd);
-  // N139 — task.folder is stored project-root-relative (e.g.
-  // "insightFlow/workTasks/N00-x"). Take its basename so joining with workDir
-  // (already the resolved tasks dir) can't double the layout segments — the old
-  // `replace(/^.*?\//, "")` stripped only the first segment and produced
-  // insightFlow/workTasks/workTasks/N00-x under the N101 layout.
-  const tail = task.folder.split(/[\\/]/).filter(Boolean).pop() ?? task.folder;
-  return resolve(workDir, tail);
-}
 
 /** Substitute `{{KEY}}` placeholders. Used by every template consumer. */
 export function renderTemplate(tplPath: string, vars: Record<string, string>): string {
