@@ -85,12 +85,15 @@ export function FlowMap({
   project,
   highlightNodes,
   secondaryHighlightNodes,
+  readOnly = false,
 }: {
   project: ProjectDto;
   /** N104: node ids rendered with the "task is here" accent (📍 badge). */
   highlightNodes?: string[];
   /** N105: suggested next agents — dashed accent (▶ badge). */
   secondaryHighlightNodes?: string[];
+  /** N135 — suppress node-click navigation when embedded in an edit/create surface. */
+  readOnly?: boolean;
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -101,7 +104,9 @@ export function FlowMap({
     const nodes: Node[] = project.agents.map((a) => {
       const isCurrent = highlightNodes?.includes(a) ?? false;
       const isSuggested = !isCurrent && (secondaryHighlightNodes?.includes(a) ?? false);
-      const badge = isCurrent ? "📍 " : isSuggested ? "▶ " : "";
+      // N134 — start-point agents (entryAgents) carry a leading ★.
+      const isEntry = project.entryAgents?.includes(a) ?? false;
+      const badge = `${isEntry ? "★ " : ""}${isCurrent ? "📍 " : isSuggested ? "▶ " : ""}`;
       return {
         id: a,
         position: positions[a],
@@ -156,7 +161,7 @@ export function FlowMap({
         minZoom={0.2}
         nodesConnectable={false}
         nodesDraggable
-        onNodeClick={(_, node) => navigate(`/agent/${node.id}`)}
+        onNodeClick={readOnly ? undefined : (_, node) => navigate(`/agent/${node.id}`)}
         colorMode="dark"
       >
         <Background gap={24} />

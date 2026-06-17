@@ -309,6 +309,150 @@
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
       "mergedAt": "2026-06-16T16:45:13.691Z"
+    },
+    {
+      "id": "N134",
+      "title": "Flow editor: toggle agents as flow start points",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N134-flow-editor-toggle-agents-as-flow-start-points",
+      "createdAt": "2026-06-16T17:22:56.023Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-16T17:22:56.023Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T17:35:00.721Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T18:32:05.722Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-16T18:52:24.520Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T18:58:11.417Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T19:02:22.882Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T17:35:00.721Z",
+        "completedAt": "2026-06-16T18:32:05.721Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "flow-editor",
+        "ux"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-16T18:52:24.519Z",
+          "commitHash": "7a616cab43346d86f6995d3857ca45b7c59d109d",
+          "commitMessage": "feat(dashboard): flow start-point toggle (N134)"
+        }
+      ],
+      "branch": "feat/N134-N135-flow-chart-ux",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/100",
+      "mergedAt": null
+    },
+    {
+      "id": "N135",
+      "title": "Suppress map node navigation in edit/create surfaces",
+      "type": "fix",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N135-suppress-map-node-navigation-in-edit-create-surfac",
+      "createdAt": "2026-06-16T17:23:05.258Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-16T17:23:05.259Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-16T17:35:00.811Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-16T18:32:05.820Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-16T18:52:24.616Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-16T18:58:11.512Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-16T19:02:22.978Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-16T17:35:00.811Z",
+        "completedAt": "2026-06-16T18:32:05.820Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+          "packages/taskflow/src/dashboard/client/AgentForm.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "maps",
+        "ux"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-16T18:52:24.615Z",
+          "commitHash": "7a616cab43346d86f6995d3857ca45b7c59d109d",
+          "commitMessage": "fix(dashboard): no-navigate edit/create maps (N135)"
+        }
+      ],
+      "branch": "feat/N134-N135-flow-chart-ux",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/100",
+      "mergedAt": null
     }
   ]
 }

@@ -102,10 +102,18 @@ export function CompositionMap({
    * "click to module its so annoying").
    */
   onModuleClick,
+  readOnly = false,
 }: {
   nodes: MapNodeSpec[];
   edges: [string, string][];
   onModuleClick?: (moduleId: string) => void;
+  /**
+   * N135 — when true, node clicks never navigate to a detail page (used by
+   * edit/create surfaces that embed the map as a live preview, where a
+   * navigation would discard unsaved input). An `onModuleClick` handler still
+   * fires, so an in-place modal preview keeps working.
+   */
+  readOnly?: boolean;
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -166,9 +174,9 @@ export function CompositionMap({
           if (!spec) return;
           if (spec.role === "module") {
             if (onModuleClick) onModuleClick(spec.id);
-            else navigate(`/module/${spec.id}`);
+            else if (!readOnly) navigate(`/module/${spec.id}`);
           } else if (spec.role === "agent") {
-            navigate(`/agent/${spec.id.replace(/^agent:/, "")}`);
+            if (!readOnly) navigate(`/agent/${spec.id.replace(/^agent:/, "")}`);
           } else if (spec.role === "facet" && onModuleClick) {
             // Facet nodes (e.g. the “@AGENT_ENFORCEMENT.md” node on the module
             // map) open the module modal too (human review R2).

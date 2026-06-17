@@ -8,7 +8,7 @@
 // N114 — agent management: an "Add agent" palette adds nodes from the registry;
 // clicking a node opens a popover to remove it (and its incident edges). The
 // draft now carries the agent set (the node ids), persisted on Save.
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Background,
   Controls,
@@ -90,6 +90,8 @@ export interface FlowDraft {
   agents: string[];
   positions: FlowPositions;
   flow: FlowEdge[];
+  /** N134 — the flow's start-point agent ids (persisted as `entryAgents`). */
+  entryAgents: string[];
 }
 
 /** N114 — a composed agent that can be added to the flow. */
@@ -255,6 +257,9 @@ export function FlowEditor({
     trigger: string;
     error?: string;
   } | null>(null);
+  // N134 — the draft's start-point agents (the flow's entryAgents). Seeded from
+  // the project; toggled from the node popover, persisted by ProjectPage on Save.
+  const [entryAgents, setEntryAgents] = useState<string[]>(project.entryAgents ?? []);
 
   const titleOf = useCallback(
     (id: string): string =>
@@ -297,7 +302,7 @@ export function FlowEditor({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const report = useCallback(
-    (currentNodes: Node[], currentEdges: Edge[]): void => {
+    (currentNodes: Node[], currentEdges: Edge[], currentEntry: string[] = entryAgents): void => {
       const positions: FlowPositions = {};
       for (const node of currentNodes) {
         positions[node.id] = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
@@ -306,9 +311,11 @@ export function FlowEditor({
         agents: currentNodes.map((n) => n.id),
         positions,
         flow: currentEdges.map(toFlowEdge),
+        // N134 — never report a start point that isn't (still) in the agent set.
+        entryAgents: currentEntry.filter((id) => currentNodes.some((n) => n.id === id)),
       });
     },
-    [onDraftChange],
+    [onDraftChange, entryAgents],
   );
 
   // N114 — add an agent node (default position offset by node count so adds
@@ -340,14 +347,43 @@ export function FlowEditor({
 
   // N114 — remove an agent node AND every edge incident to it (a saved flow
   // can't reference a missing agent — ProjectSchema rejects such edges).
+  // N134 — a removed agent also drops from the start-point set.
   const removeAgent = (agentId: string): void => {
     const nextNodes = nodes.filter((n) => n.id !== agentId);
     const nextEdges = edges.filter((e) => e.source !== agentId && e.target !== agentId);
+    const nextEntry = entryAgents.filter((id) => id !== agentId);
     setNodes(nextNodes);
     setEdges(nextEdges);
+    setEntryAgents(nextEntry);
     setNodeMenu(null);
-    report(nextNodes, nextEdges);
+    report(nextNodes, nextEdges, nextEntry);
   };
+
+  // N134 — toggle an agent as a flow start point (entryAgents); multiple
+  // allowed. Reports the new entry set so ProjectPage persists it on Save.
+  const toggleEntry = (agentId: string): void => {
+    const nextEntry = entryAgents.includes(agentId)
+      ? entryAgents.filter((id) => id !== agentId)
+      : [...entryAgents, agentId];
+    setEntryAgents(nextEntry);
+    setNodeMenu(null);
+    report(nodes, edges, nextEntry);
+  };
+
+  // N134 — reflect start-point toggles on the canvas: ★-prefix the label and
+  // thicken the border for entry agents (node identity/positions untouched).
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        const isEntry = entryAgents.includes(n.id);
+        return {
+          ...n,
+          data: { ...n.data, label: `${isEntry ? "★ " : ""}⚙ ${titleOf(n.id)}` },
+          style: { ...n.style, border: `${isEntry ? 2 : 1}px solid ${theme.color.accent}` },
+        };
+      }),
+    );
+  }, [entryAgents, setNodes, titleOf, theme.color.accent]);
 
   const availableAgents = allAgents.filter((a) => !nodes.some((n) => n.id === a.id));
 
@@ -446,6 +482,9 @@ export function FlowEditor({
       {nodeMenu ? (
         <NodePopover style={{ left: nodeMenu.x, top: nodeMenu.y }}>
           <strong>{titleOf(nodeMenu.id)}</strong>
+          <Button type="button" $variant="primary" onClick={() => toggleEntry(nodeMenu.id)}>
+            {entryAgents.includes(nodeMenu.id) ? "Unset start point" : "Set as start point"}
+          </Button>
           <Button type="button" $variant="danger" onClick={() => removeAgent(nodeMenu.id)}>
             Remove from flow
           </Button>

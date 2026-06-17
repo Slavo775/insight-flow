@@ -8,6 +8,7 @@ import styled, { useTheme } from "styled-components";
 import { ApiError, deleteDefinition, saveDefinition, slugifyIdTail } from "./api.js";
 import { Button, Section } from "./components/index.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
+import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import { SideLayout } from "./components/SideLayout.js";
 import { KindDot } from "./ModulesPage.js";
 import { invalidateRegistry, useRegistry } from "./registry.js";
@@ -162,6 +163,9 @@ export function AgentForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [topError, setTopError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // N135 — a click on a preview module node opens this modal instead of
+  // navigating away (which would discard the unsaved form).
+  const [openModuleId, setOpenModuleId] = useState<string | null>(null);
 
   if (registryError) return <p>Failed to load registry: {registryError}</p>;
   if (!registry) return <p>Loading…</p>;
@@ -215,6 +219,10 @@ export function AgentForm() {
     },
   ];
   const previewEdges: [string, string][] = sModules.map((id) => [id, "agent:__preview"]);
+  // N135 — resolve the clicked preview module for the in-place info modal.
+  const openModule = openModuleId
+    ? (registry.modules.find((m) => m.id === openModuleId) ?? null)
+    : null;
 
   const submit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -354,7 +362,14 @@ export function AgentForm() {
               </div>
             </Columns>
 
-            {sModules.length ? <CompositionMap nodes={previewNodes} edges={previewEdges} /> : null}
+            {sModules.length ? (
+              <CompositionMap
+                nodes={previewNodes}
+                edges={previewEdges}
+                readOnly
+                onModuleClick={setOpenModuleId}
+              />
+            ) : null}
 
             <FormActions>
               <Button type="submit" $variant="primary" disabled={busy}>
@@ -375,6 +390,9 @@ export function AgentForm() {
           </FormBox>
         </Section>
       </SideLayout>
+      {openModule ? (
+        <ModuleInfoModal module={openModule} onClose={() => setOpenModuleId(null)} />
+      ) : null}
     </>
   );
 }
