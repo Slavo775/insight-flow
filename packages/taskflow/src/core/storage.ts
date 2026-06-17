@@ -10,7 +10,7 @@ import type {
   Task,
   TaskflowConfig,
 } from "./types.js";
-import { getWorkDir, getMasterPath } from "./config.js";
+import { getWorkDir, getMasterPath, resolveTaskFolder } from "./config.js";
 import {
   IncidentsFileSchema,
   MasterFileSchema,
@@ -143,24 +143,12 @@ export function resolveId(master: MasterFile, id?: string): string {
   return resolved;
 }
 
-/**
- * Resolve `<workDir>/<task folder name>`. Task.folder is stored relative to
- * the project root and its prefix varies by layout era ("workTasks/Nxx-slug",
- * "insightFlow/workTasks/Nxx-slug"); task folders are always direct children
- * of the tasks dir, so the basename against the live workDir is canonical.
- */
-function resolveTaskFolder(cwd: string | undefined, config: TaskflowConfig, task: Task): string {
-  const workDir = getWorkDir(config, cwd);
-  const tail = task.folder.split(/[\\/]/).filter(Boolean).pop() ?? task.folder;
-  return resolve(workDir, tail);
-}
-
 export function getReviewsPath(config: TaskflowConfig, task: Task, cwd?: string): string {
-  return resolve(resolveTaskFolder(cwd, config, task), "reviews.json");
+  return resolve(resolveTaskFolder(config, task, cwd), "reviews.json");
 }
 
 export function getIncidentsPath(config: TaskflowConfig, task: Task, cwd?: string): string {
-  return resolve(resolveTaskFolder(cwd, config, task), "incidents.json");
+  return resolve(resolveTaskFolder(config, task, cwd), "incidents.json");
 }
 
 /** Load reviews for a task from its side file. Returns [] if missing. */
@@ -180,7 +168,7 @@ export function saveTaskReviews(
   reviews: Review[],
   cwd?: string,
 ): void {
-  const folder = resolveTaskFolder(cwd, config, task);
+  const folder = resolveTaskFolder(config, task, cwd);
   if (!existsSync(folder)) mkdirSync(folder, { recursive: true });
   const path = getReviewsPath(config, task, cwd);
   const data: ReviewsFile = { taskId: task.id, reviews };
@@ -206,7 +194,7 @@ export function saveTaskIncidents(
   incidents: Incident[],
   cwd?: string,
 ): void {
-  const folder = resolveTaskFolder(cwd, config, task);
+  const folder = resolveTaskFolder(config, task, cwd);
   if (!existsSync(folder)) mkdirSync(folder, { recursive: true });
   const path = getIncidentsPath(config, task, cwd);
   const data: IncidentsFile = { taskId: task.id, incidents };

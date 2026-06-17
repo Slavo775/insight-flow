@@ -18,7 +18,13 @@ export type {
   CustomAgent,
 } from "./core/types.js";
 
-export { resolveConfig, getWorkDir, getEventsDir, getMasterPath } from "./core/config.js";
+export {
+  resolveConfig,
+  getWorkDir,
+  getEventsDir,
+  getMasterPath,
+  resolveTaskFolder,
+} from "./core/config.js";
 export { loadSpec, scaffoldReviewMd } from "./core/spec.js";
 export {
   loadMaster,
