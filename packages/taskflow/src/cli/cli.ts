@@ -133,7 +133,7 @@ function printHelp(): void {
 
     migrate                               Migrate from legacy tracker.json
     migrate-reviews                       Split inline reviews/incidents into per-task side files (run once after upgrade)
-    migrate-layout [--dry-run]            Move workTasks/ + .events into the consolidated insightFlow/ root (idempotent; N100)
+    migrate-layout [--dry-run] [--fix-strays]  Move workTasks/ + .events into the consolidated insightFlow/ root (idempotent; N100). --fix-strays removes empty/scaffold-only doubled workTasks/workTasks/ dirs (N141)
     prompt-build [--apply]                Print or apply enforcement block from taskflow.config.json
     prompt-build --compose [<agent-id>] [--out <dir>]  Compose role MD from agent-module definitions (N88 spike)
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
