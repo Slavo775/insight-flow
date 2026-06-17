@@ -253,6 +253,11 @@ const tasks = loadAllTasks(config, master);
 startServer(config, 6006);
 ```
 
+## Development
+
+- **[Local testing with yalc](docs/local-testing-with-yalc.md)** — publish the package to a local store and install it into a test project (`pnpm yalc:publish` → `npx yalc add insight-flow` → `pnpm yalc:push`) before cutting a real release.
+- **[Architecture diagrams](docs/architecture-diagrams.md)** — system diagrams (agent lifecycle, server federation, notifications, activity engine).
+
 ## License
 
 MIT
