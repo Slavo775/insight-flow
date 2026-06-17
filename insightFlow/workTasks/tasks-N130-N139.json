@@ -78,7 +78,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
-      "mergedAt": "2026-06-16T16:45:13.177Z"
+      "mergedAt": "2026-06-16T16:45:13.177Z",
+      "flowId": "default"
     },
     {
       "id": "N131",
@@ -155,7 +156,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
-      "mergedAt": "2026-06-16T16:45:13.356Z"
+      "mergedAt": "2026-06-16T16:45:13.356Z",
+      "flowId": "default"
     },
     {
       "id": "N132",
@@ -232,7 +234,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
-      "mergedAt": "2026-06-16T16:45:13.523Z"
+      "mergedAt": "2026-06-16T16:45:13.523Z",
+      "flowId": "default"
     },
     {
       "id": "N133",
@@ -308,7 +311,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/99",
-      "mergedAt": "2026-06-16T16:45:13.691Z"
+      "mergedAt": "2026-06-16T16:45:13.691Z",
+      "flowId": "default"
     },
     {
       "id": "N134",
@@ -390,7 +394,8 @@
       ],
       "branch": "feat/N134-N135-flow-chart-ux",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/100",
-      "mergedAt": "2026-06-17T07:32:34.541Z"
+      "mergedAt": "2026-06-17T07:32:34.541Z",
+      "flowId": "default"
     },
     {
       "id": "N135",
@@ -472,7 +477,8 @@
       ],
       "branch": "feat/N134-N135-flow-chart-ux",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/100",
-      "mergedAt": "2026-06-17T07:32:34.806Z"
+      "mergedAt": "2026-06-17T07:32:34.806Z",
+      "flowId": "default"
     },
     {
       "id": "N136",
@@ -547,7 +553,8 @@
       ],
       "branch": "feat/N136-yalc-local-publish-scripts",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/101",
-      "mergedAt": "2026-06-17T07:32:02.107Z"
+      "mergedAt": "2026-06-17T07:32:02.107Z",
+      "flowId": "default"
     },
     {
       "id": "N137",
@@ -638,7 +645,8 @@
       ],
       "branch": "feat/N137-N138-composer-ux",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/102",
-      "mergedAt": "2026-06-17T12:04:09.295Z"
+      "mergedAt": "2026-06-17T12:04:09.295Z",
+      "flowId": "default"
     },
     {
       "id": "N138",
@@ -770,7 +778,81 @@
       ],
       "branch": "feat/N137-N138-composer-ux",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/102",
-      "mergedAt": "2026-06-17T12:04:09.630Z"
+      "mergedAt": "2026-06-17T12:04:09.630Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N139",
+      "title": "Fix doubled task-folder path in spec.ts resolveTaskFolder",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N139-fix-doubled-task-folder-path-in-spec-ts-resolvetas",
+      "createdAt": "2026-06-17T12:11:19.125Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T12:11:19.126Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T12:13:32.587Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T12:16:41.109Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T12:22:32.891Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T12:23:38.062Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T12:25:05.164Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T12:25:45.178Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T12:13:32.587Z",
+        "completedAt": "2026-06-17T12:16:41.109Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/spec.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/spec-path.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "bug",
+        "paths",
+        "layout",
+        "cli"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
