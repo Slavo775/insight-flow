@@ -315,7 +315,7 @@
       "title": "Flow editor: toggle agents as flow start points",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N134-flow-editor-toggle-agents-as-flow-start-points",
       "createdAt": "2026-06-16T17:22:56.023Z",
       "statusHistory": [
@@ -348,6 +348,16 @@
           "status": "approved",
           "at": "2026-06-16T19:02:22.882Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T07:32:34.542Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T07:32:34.628Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -364,8 +374,8 @@
       "reviewCount": 1,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-17T07:32:34.628Z",
+      "totalDurationMinutes": 850,
       "tags": [
         "dashboard",
         "flow-editor",
@@ -380,14 +390,14 @@
       ],
       "branch": "feat/N134-N135-flow-chart-ux",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/100",
-      "mergedAt": null
+      "mergedAt": "2026-06-17T07:32:34.541Z"
     },
     {
       "id": "N135",
       "title": "Suppress map node navigation in edit/create surfaces",
       "type": "fix",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N135-suppress-map-node-navigation-in-edit-create-surfac",
       "createdAt": "2026-06-16T17:23:05.258Z",
       "statusHistory": [
@@ -420,6 +430,16 @@
           "status": "approved",
           "at": "2026-06-16T19:02:22.978Z",
           "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T07:32:34.806Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T07:32:34.896Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -436,8 +456,8 @@
       "reviewCount": 1,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-17T07:32:34.895Z",
+      "totalDurationMinutes": 849,
       "tags": [
         "dashboard",
         "maps",
@@ -452,14 +472,14 @@
       ],
       "branch": "feat/N134-N135-flow-chart-ux",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/100",
-      "mergedAt": null
+      "mergedAt": "2026-06-17T07:32:34.806Z"
     },
     {
       "id": "N136",
       "title": "Yalc local-publish scripts for test-project install",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "done",
       "folder": "insightFlow/workTasks/N136-yalc-local-publish-scripts-for-test-project-instal",
       "createdAt": "2026-06-17T07:09:51.998Z",
       "statusHistory": [
@@ -477,6 +497,21 @@
           "status": "implemented",
           "at": "2026-06-17T07:16:32.358Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-17T07:32:01.936Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-17T07:32:02.108Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-17T07:32:02.197Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -495,18 +530,24 @@
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-17T07:32:02.196Z",
+      "totalDurationMinutes": 22,
       "tags": [
         "tooling",
         "dx",
         "yalc",
         "build"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
-      "mergedAt": null
+      "pushes": [
+        {
+          "at": "2026-06-17T07:32:01.935Z",
+          "commitHash": "f42db6ec8fe72401e1a3fe167b95c75e2eae8e76",
+          "commitMessage": "feat(build): yalc local-publish scripts for test-project install (N136)"
+        }
+      ],
+      "branch": "feat/N136-yalc-local-publish-scripts",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/101",
+      "mergedAt": "2026-06-17T07:32:02.107Z"
     }
   ]
 }
