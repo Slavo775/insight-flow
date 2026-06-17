@@ -72,8 +72,87 @@ const IdPreview = styled.code`
   color: ${(p) => p.theme.color.accent};
 `;
 
-export type EditableKind = "section" | "include" | "mcp-server" | "hook" | "skill";
-const KINDS: EditableKind[] = ["section", "include", "mcp-server", "hook", "skill"];
+// N137 — bundle ("Composed module") picker, mirroring AgentForm's pattern.
+const PickerList = styled.div`
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.lg};
+  max-height: 240px;
+  overflow-y: auto;
+`;
+
+const PickerRow = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${(p) => p.theme.space.md};
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid ${(p) => p.theme.color.border};
+  color: ${(p) => p.theme.color.text};
+  font-family: inherit;
+  font-size: ${(p) => p.theme.font.size.sm};
+  padding: ${(p) => p.theme.space.md};
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: ${(p) => p.theme.color.border};
+  }
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+`;
+
+const OrderedRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${(p) => p.theme.space.md};
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.sm} ${(p) => p.theme.space.md};
+  margin-bottom: ${(p) => p.theme.space.sm};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.text};
+`;
+
+const RowTitle = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const RowButton = styled.button`
+  background: none;
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.md};
+  color: ${(p) => p.theme.color.textMuted};
+  cursor: pointer;
+  padding: 2px 8px;
+
+  &:hover {
+    border-color: ${(p) => p.theme.color.accent};
+    color: ${(p) => p.theme.color.text};
+  }
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+`;
+
+export type EditableKind = "section" | "include" | "mcp-server" | "hook" | "skill" | "bundle";
+const KINDS: EditableKind[] = ["section", "include", "mcp-server", "hook", "skill", "bundle"];
+// N137 — "bundle" is surfaced to users as "Composed module"; the rest use their raw kind.
+const KIND_LABELS: Record<EditableKind, string> = {
+  section: "section",
+  include: "include",
+  "mcp-server": "mcp-server",
+  hook: "hook",
+  skill: "skill",
+  bundle: "Composed module (bundle)",
+};
 
 // N120 — mirrors the server's locked tier (user-registry.ts). Kept inline so
 // the client bundle doesn't pull node:fs from user-registry.
@@ -94,6 +173,7 @@ interface FormState {
   matcher: string;
   command: string;
   content: string;
+  modules: string[];
 }
 
 const EMPTY: FormState = {
@@ -111,6 +191,7 @@ const EMPTY: FormState = {
   matcher: "",
   command: "",
   content: "",
+  modules: [],
 };
 
 function fromModule(m: ModuleDto): FormState {
@@ -120,7 +201,7 @@ function fromModule(m: ModuleDto): FormState {
     title: m.title,
     description: m.description ?? "",
     target: m.target ?? "both",
-    kind: (m.kind === "bundle" ? "section" : m.kind) as EditableKind,
+    kind: m.kind as EditableKind,
     heading: m.heading ?? "",
     body: m.body ?? "",
     ref: m.ref ?? "",
@@ -130,6 +211,7 @@ function fromModule(m: ModuleDto): FormState {
     matcher: m.matcher ?? "",
     command: m.command ?? "",
     content: m.content ?? "",
+    modules: m.modules ?? [],
   };
 }
 
@@ -189,6 +271,10 @@ function toRecord(s: FormState): {
       record.name = s.name.trim();
       record.content = s.content;
       break;
+    case "bundle":
+      if (!s.modules.length) errors.modules = "pick at least one module";
+      record.modules = s.modules;
+      break;
   }
 
   return Object.keys(errors).length ? { errors } : { record };
@@ -217,6 +303,8 @@ export function ModuleForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [topError, setTopError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // N137 — search box for the bundle ("Composed module") picker.
+  const [pickSearch, setPickSearch] = useState("");
 
   if (registryError) return <p>Failed to load registry: {registryError}</p>;
   if (!registry) return <p>Loading…</p>;
@@ -233,6 +321,14 @@ export function ModuleForm() {
 
   const s = state ?? (editing ? fromModule(editing) : EMPTY);
   const set = (patch: Partial<FormState>): void => setState({ ...s, ...patch });
+  // N137 — reorder a bundle's selected modules (declared order is significant at compose).
+  const moveModule = (index: number, delta: number): void => {
+    const next = [...s.modules];
+    const target = index + delta;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    set({ modules: next });
+  };
   const isEdit = Boolean(editing);
   // Editing a built-in keeps its real id (the save ejects an override); custom
   // new/edit builds a custom: id from the tail.
@@ -355,7 +451,7 @@ export function ModuleForm() {
               >
                 {KINDS.map((k) => (
                   <option key={k} value={k}>
-                    {k}
+                    {KIND_LABELS[k]}
                   </option>
                 ))}
               </select>
@@ -437,6 +533,67 @@ export function ModuleForm() {
                   <textarea value={s.content} onChange={(e) => set({ content: e.target.value })} />
                 </Field>
               </>
+            ) : null}
+
+            {s.kind === "bundle" ? (
+              <Field as="div">
+                Modules to compose {err("modules")}
+                <input
+                  placeholder="Search modules…"
+                  value={pickSearch}
+                  onChange={(e) => setPickSearch(e.target.value)}
+                />
+                <PickerList>
+                  {registry.modules
+                    .filter((m) => m.id !== fullId)
+                    .filter(
+                      (m) =>
+                        !pickSearch.trim() ||
+                        `${m.id} ${m.title}`
+                          .toLowerCase()
+                          .includes(pickSearch.trim().toLowerCase()),
+                    )
+                    .map((m) => (
+                      <PickerRow
+                        key={m.id}
+                        type="button"
+                        disabled={s.modules.includes(m.id)}
+                        onClick={() => set({ modules: [...s.modules, m.id] })}
+                      >
+                        <RowTitle>
+                          {m.title} · {m.id}
+                        </RowTitle>
+                        <span>{m.source}</span>
+                      </PickerRow>
+                    ))}
+                </PickerList>
+                <div>
+                  {s.modules.map((id, i) => (
+                    <OrderedRow key={id}>
+                      <span>{i + 1}.</span>
+                      <RowTitle title={id}>
+                        {registry.modules.find((m) => m.id === id)?.title ?? id}
+                      </RowTitle>
+                      <RowButton type="button" disabled={i === 0} onClick={() => moveModule(i, -1)}>
+                        ↑
+                      </RowButton>
+                      <RowButton
+                        type="button"
+                        disabled={i === s.modules.length - 1}
+                        onClick={() => moveModule(i, 1)}
+                      >
+                        ↓
+                      </RowButton>
+                      <RowButton
+                        type="button"
+                        onClick={() => set({ modules: s.modules.filter((x) => x !== id) })}
+                      >
+                        ✕
+                      </RowButton>
+                    </OrderedRow>
+                  ))}
+                </div>
+              </Field>
             ) : null}
 
             <FormActions>

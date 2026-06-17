@@ -89,6 +89,9 @@ STATUS TRANSITIONS (show as a separate swim-lane or sub-graph):
 QUALITY GATE NOTE:
   Every agent that produces code (task-implement, task-review-fix, task-request-changes) runs project-supplied quality gates (typecheck/lint/test) configured in taskflow.config.json agents.extend arrays. insight-flow ships no default commands — if none are configured the step is skipped and noted in the report.
 
+CUSTOM AGENTS AS COMMANDS (N138):
+  Beyond the built-in slash commands above, a user-composed agent can opt in to install its own composed prompt as a runnable command (.claude/commands/<name>.md) or skill (.claude/skills/<name>/SKILL.md) when its flow is installed. The command name is derived as task-<slug> (collisions with the built-in names above are rejected). So the "Claude Code slash commands" swim-lane is open-ended: the canonical lifecycle agents plus any installed custom agents.
+
 Style: use boxes for agents/roles, diamonds for decisions (approved vs fix-needed), arrows for transitions. Group the agents in a vertical "Claude Code slash commands" swim-lane on the left and the status transitions in a horizontal swim-lane at the bottom. Use a neutral color palette.
 ```
 

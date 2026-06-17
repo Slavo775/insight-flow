@@ -24,7 +24,7 @@
 // are namespaced "<role>/<slug>" ("task-implement/input-contract");
 // integration modules "<integration>/<slug>" ("testing/hook").
 import type { z } from "zod";
-import { AgentModuleSchema, ComposedAgentSchema } from "../core/schema/index.js";
+import { AgentModuleSchema, ComposedAgentSchema, deriveCommandName } from "../core/schema/index.js";
 
 import security from "./modules/security.json";
 import enforcement from "./modules/enforcement.json";
@@ -171,14 +171,20 @@ export interface AgentArtifacts {
     script?: { name: string; content: string };
   }[];
   skills: { name: string; content: string }[];
+  // N138 — the agent's own composed prompt installed as a runnable slash command
+  // (`.claude/commands/<name>.md`) or skill (`.claude/skills/<name>/SKILL.md`).
+  commands: { name: string; body: string; as: "command" | "skill" }[];
 }
 
-/** Collect an agent's `mcp-server` / `hook` / `skill` contributions (N92). */
+/**
+ * Collect an agent's `mcp-server` / `hook` / `skill` contributions (N92) plus,
+ * when opted in (N138), its own composed prompt as an installable command/skill.
+ */
 export function collectArtifacts(
   def: ComposedAgent,
   registry: Record<string, AgentModule> = MODULE_REGISTRY,
 ): AgentArtifacts {
-  const out: AgentArtifacts = { mcpServers: [], hooks: [], skills: [] };
+  const out: AgentArtifacts = { mcpServers: [], hooks: [], skills: [], commands: [] };
   for (const mod of resolveModules(def, registry)) {
     if (mod.kind === "mcp-server") out.mcpServers.push({ name: mod.name, config: mod.config });
     else if (mod.kind === "hook")
@@ -190,6 +196,17 @@ export function collectArtifacts(
         script: mod.script,
       });
     else if (mod.kind === "skill") out.skills.push({ name: mod.name, content: mod.content });
+  }
+  // N138 — installable command/skill carrying the agent's composed prompt. Skills
+  // require frontmatter (name + description); commands take the prompt verbatim.
+  if (def.command?.install) {
+    const name = deriveCommandName(def.id);
+    const prompt = composeAgent(def, registry);
+    const body =
+      def.command.as === "skill"
+        ? `---\nname: ${name}\ndescription: ${def.description ?? def.title}\n---\n\n${prompt}`
+        : prompt;
+    out.commands.push({ name, body, as: def.command.as });
   }
   return out;
 }

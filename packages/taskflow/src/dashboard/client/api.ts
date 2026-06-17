@@ -85,6 +85,14 @@ export function slugifyIdTail(raw: string): string {
   return raw.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
 }
 
+// N138 — client mirror of core/schema's deriveCommandName: the installed
+// command/skill name for an agent (task-<slug>, no double-prefix). Kept here so
+// the client bundle doesn't import the zod schema module.
+export function deriveCommandName(agentId: string): string {
+  const tail = agentId.replace(/^custom:/, "");
+  return /^task/.test(tail) ? tail : `task-${tail}`;
+}
+
 async function throwApiError(res: Response): Promise<never> {
   let payload: { error?: string; issues?: ApiIssue[]; referencedBy?: string[] } = {};
   try {
@@ -144,6 +152,8 @@ export interface AgentDto {
   /** N102 — "custom" for user-space agents; absent/builtin for shipped ones. */
   source?: "builtin" | "custom";
   modules: AgentModuleRef[];
+  /** N138 — opt-in install of the agent's composed prompt as a command/skill. */
+  command?: { install: boolean; as: "command" | "skill" };
 }
 
 export async function fetchModules(): Promise<ModulesResponse> {
@@ -203,7 +213,7 @@ export async function fetchProjects(): Promise<ProjectSummaryDto[]> {
 
 // N125/N127 — flow install plan + execution.
 export interface InstallStepDto {
-  kind: "mcp" | "hook" | "skill";
+  kind: "mcp" | "hook" | "skill" | "command";
   key: string;
   label: string;
   target: string;
