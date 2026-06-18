@@ -369,6 +369,7 @@ test("N149 fix: flowArtifacts emits a command for a built-in handover SOURCE (re
   assert.ok(cmd, "a command is emitted for the built-in handover source");
   assert.ok(cmd.body.includes("## Handover"), "carries a Handover section");
   assert.ok(cmd.body.includes("/task-git"), "lists the flow handover target");
+  assert.ok(cmd.body.endsWith("$ARGUMENTS\n"), "N153: $ARGUMENTS parity with init");
 });
 
 test("N149 fix: no command emitted for a non-source agent without command.install", async () => {

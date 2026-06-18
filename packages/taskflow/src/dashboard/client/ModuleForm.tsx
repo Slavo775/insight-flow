@@ -649,6 +649,10 @@ export function ModuleForm() {
               </Field>
             ) : null}
 
+            {/* N155 — status pickers here stay canonical: a module is global
+                (not bound to one flow), so it can't offer a specific flow's
+                custom statuses. Flow-specific triggers are picked in the flow
+                editor (FlowEditor.TriggerOptions), which has the flow context. */}
             {s.kind === "status-transition" ? (
               <>
                 <Field>

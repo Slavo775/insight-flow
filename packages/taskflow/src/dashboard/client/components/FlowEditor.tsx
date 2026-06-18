@@ -203,8 +203,20 @@ const ModalError = styled.span`
   font-size: ${(p) => p.theme.font.size.xs};
 `;
 
-/** Shared trigger `<option>` list: direct handoff, this flow's custom states, canonical statuses. */
-function TriggerOptions({ states }: { states?: { id: string; title: string }[] }) {
+/**
+ * Shared trigger `<option>` list: direct handoff, this flow's custom states, and
+ * the flow's status universe. N155 — when the flow declares its own statuses
+ * (N128 `Project.statuses`), offer those (that IS the flow's universe); otherwise
+ * fall back to the canonical enum.
+ */
+function TriggerOptions({
+  states,
+  statuses,
+}: {
+  states?: { id: string; title: string }[];
+  statuses?: { id: string; title: string }[];
+}) {
+  const flowScoped = statuses && statuses.length > 0;
   return (
     <>
       <option value={DIRECT_HANDOFF}>(direct handoff)</option>
@@ -217,12 +229,18 @@ function TriggerOptions({ states }: { states?: { id: string; title: string }[] }
           ))}
         </optgroup>
       ) : null}
-      <optgroup label="Canonical statuses">
-        {TASK_STATUSES.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
+      <optgroup label={flowScoped ? "Flow statuses" : "Canonical statuses"}>
+        {flowScoped
+          ? statuses.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.title}
+              </option>
+            ))
+          : TASK_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
       </optgroup>
     </>
   );
@@ -536,7 +554,7 @@ export function FlowEditor({
         <PickerOverlay>
           {pending.source} → {pending.target} on
           <select value={pendingTrigger} onChange={(e) => setPendingTrigger(e.target.value)}>
-            <TriggerOptions states={states} />
+            <TriggerOptions states={states} statuses={project.statuses} />
           </select>
           <label>
             <input
@@ -577,7 +595,7 @@ export function FlowEditor({
                   setEdgeMenu({ ...edgeMenu, trigger: e.target.value, error: undefined })
                 }
               >
-                <TriggerOptions states={states} />
+                <TriggerOptions states={states} statuses={project.statuses} />
               </select>
             </label>
             <label>

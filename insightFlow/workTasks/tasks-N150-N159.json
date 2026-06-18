@@ -83,6 +83,457 @@
       "mrUrl": null,
       "mergedAt": "2026-06-18T15:29:31.746Z",
       "flowId": "default"
+    },
+    {
+      "id": "N151",
+      "title": "dashboard server request error boundary + oversize-body 413",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N151-dashboard-server-request-error-boundary-oversize-b",
+      "createdAt": "2026-06-18T15:59:54.744Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T15:59:54.745Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T16:47:55.420Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T17:18:45.808Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T18:09:16.298Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-18T18:18:14.454Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-18T19:07:13.032Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-18T19:09:44.670Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T19:32:54.592Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T19:35:14.329Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T19:51:49.630Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T19:57:33.080Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T16:47:55.421Z",
+        "completedAt": "2026-06-18T17:18:45.809Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/dashboard-error-boundary.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "server",
+        "reliability",
+        "bug"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N152",
+      "title": "surface silent fail-open in writeStatus flow resolution (N131)",
+      "type": "fix",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N152-surface-silent-fail-open-in-writestatus-flow-resol",
+      "createdAt": "2026-06-18T15:59:54.827Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T15:59:54.827Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T17:18:45.891Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T17:27:53.236Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T18:09:16.381Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T18:18:14.540Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T19:51:49.714Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T19:57:33.167Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T17:18:45.892Z",
+        "completedAt": "2026-06-18T17:27:53.237Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/status-write.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "status",
+        "reliability"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N153",
+      "title": "emit/install hardening — skill-namespace collision, frontmatter escaping, empty-prompt, ARGUMENTS parity",
+      "type": "fix",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N153-emit-install-hardening-skill-namespace-collision-f",
+      "createdAt": "2026-06-18T16:41:11.387Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T16:41:11.388Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T17:27:53.319Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T17:35:52.797Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T18:09:16.464Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T18:18:14.628Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T19:51:49.800Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T19:57:33.254Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T17:27:53.320Z",
+        "completedAt": "2026-06-18T17:35:52.799Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/test/agent-command.test.mjs",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "emit",
+        "install",
+        "compose",
+        "reliability"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N154",
+      "title": "ModuleDetail/AgentDetail render handover + status-transition kinds",
+      "type": "fix",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N154-moduledetail-agentdetail-render-handover-status-tr",
+      "createdAt": "2026-06-18T16:41:11.469Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T16:41:11.470Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T17:35:52.882Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T17:41:38.532Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T18:09:16.548Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T18:18:14.715Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T19:51:49.887Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T19:57:33.341Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T17:35:52.883Z",
+        "completedAt": "2026-06-18T17:41:38.533Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/AgentDetail.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "handover",
+        "ui"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N155",
+      "title": "custom-flow statuses selectable in status/trigger pickers",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N155-custom-flow-statuses-selectable-in-status-trigger-",
+      "createdAt": "2026-06-18T16:41:11.551Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T16:41:11.551Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T17:41:38.617Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T17:47:26.806Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T18:09:16.633Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T18:18:14.799Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T19:51:49.972Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T19:57:33.428Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T17:41:38.618Z",
+        "completedAt": "2026-06-18T17:47:26.807Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/api.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "flows",
+        "ui"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N156",
+      "title": "housekeeping batch — low-value review follow-ups (N99-N150)",
+      "type": "chore",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N156-housekeeping-batch-low-value-review-follow-ups-n99",
+      "createdAt": "2026-06-18T16:41:11.630Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T16:41:11.630Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T17:47:26.892Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T17:51:45.089Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T18:09:16.717Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T18:18:14.884Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T19:51:50.056Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T19:57:33.516Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T17:47:26.893Z",
+        "completedAt": "2026-06-18T17:51:45.090Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/locked.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/dashboard/client/locked.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cleanup",
+        "polish"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

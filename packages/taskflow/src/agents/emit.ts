@@ -189,6 +189,27 @@ function applyHooks(
   owned.scripts = currentScripts;
 }
 
+// N153 — the on-disk namespace an artifact occupies: a `skill` module and a
+// `command` installed `as:"skill"` BOTH write `.claude/skills/<name>/SKILL.md`,
+// so they share one namespace; `as:"command"` lives under `.claude/commands/`.
+function claimKey(name: string, as: "command" | "skill"): string {
+  return as === "skill" ? `skills/${name}` : `commands/${name}`;
+}
+
+// N153 — every (namespace, name) claimed by OTHER agents, with the owner id.
+// Cross-checks commands AND skills so a command-as-skill vs skill-module
+// collision in `.claude/skills/<name>` is caught (was previously missed: the
+// command guard only scanned `commands`, the skill guard only `skills`).
+function collectOtherClaims(manifest: ManagedManifest, agentId: string): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const [otherId, entry] of Object.entries(manifest.agents)) {
+    if (otherId === agentId) continue;
+    for (const c of entry.commands ?? []) out.set(claimKey(c.name, c.as), otherId);
+    for (const s of entry.skills ?? []) out.set(claimKey(s, "skill"), otherId);
+  }
+  return out;
+}
+
 function applySkills(
   projectRoot: string,
   agentId: string,
@@ -197,14 +218,15 @@ function applySkills(
   owned: ManagedEntry,
   reports: EmitReport[],
 ): void {
-  // A skill name is claimed by exactly one agent.
+  // A skill name is claimed by exactly one agent — across the shared
+  // `.claude/skills` namespace (skill modules + commands installed as skills).
+  const others = collectOtherClaims(manifest, agentId);
   for (const { name } of skills) {
-    for (const [otherId, entry] of Object.entries(manifest.agents)) {
-      if (otherId !== agentId && entry.skills.includes(name)) {
-        throw new Error(
-          `skill '${name}' is already managed by agent '${otherId}' — refusing to overwrite`,
-        );
-      }
+    const owner = others.get(claimKey(name, "skill"));
+    if (owner) {
+      throw new Error(
+        `skill '${name}' is already managed by agent '${owner}' — refusing to overwrite`,
+      );
     }
   }
 
@@ -259,14 +281,15 @@ function applyCommands(
       ? join(projectRoot, ".claude/skills", name)
       : join(projectRoot, ".claude/commands", `${name}.md`);
 
-  // A command/skill name is claimed by exactly one agent.
-  for (const { name } of commands) {
-    for (const [otherId, entry] of Object.entries(manifest.agents)) {
-      if (otherId !== agentId && (entry.commands ?? []).some((c) => c.name === name)) {
-        throw new Error(
-          `command '${name}' is already managed by agent '${otherId}' — refusing to overwrite`,
-        );
-      }
+  // A command/skill name is claimed by exactly one agent, checked in the
+  // namespace it actually writes to (N153: as:"skill" shares `.claude/skills`).
+  const others = collectOtherClaims(manifest, agentId);
+  for (const { name, as } of commands) {
+    const owner = others.get(claimKey(name, as));
+    if (owner) {
+      throw new Error(
+        `${as} '${name}' is already managed by agent '${owner}' — refusing to overwrite`,
+      );
     }
   }
 

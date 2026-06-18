@@ -1,4 +1,4 @@
-import { createServer } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import {
   readFileSync,
   unlinkSync,
@@ -504,7 +504,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   // N68: in-memory hook-event store driving derived project status.
   const eventStore = new EventStore();
 
-  const server = createServer((req, res) => {
+  // N151 — the request dispatch lives in a named function so the createServer
+  // callback can wrap it in a handler-wide error boundary (below).
+  function dispatch(req: IncomingMessage, res: ServerResponse): void {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);
 
     // N83: native SSE stream (replaced socket.io). Hand matching requests off
@@ -729,11 +731,19 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // via the idempotent emitter) and stream per-step progress over SSE.
     if (url.pathname === "/api/flow-install" && req.method === "POST") {
       let body = "";
+      let aborted = false;
       req.on("data", (chunk: Buffer) => {
+        if (aborted) return;
         body += chunk.toString("utf-8");
-        if (body.length > 16 * 1024) req.destroy();
+        if (body.length > 16 * 1024) {
+          aborted = true;
+          res.writeHead(413, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: "payload too large" }));
+          req.destroy();
+        }
       });
       req.on("end", () => {
+        if (aborted) return;
         try {
           const parsed = body ? (JSON.parse(body) as { id?: string }) : {};
           const flowId = parsed.id ?? DEFAULT_PROJECT.id;
@@ -881,11 +891,19 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // guards as the CLI `set-flow` via the shared setTaskFlow core.
     if (url.pathname === "/api/task-flow" && req.method === "POST") {
       let body = "";
+      let aborted = false;
       req.on("data", (chunk: Buffer) => {
+        if (aborted) return;
         body += chunk.toString("utf-8");
-        if (body.length > 16 * 1024) req.destroy();
+        if (body.length > 16 * 1024) {
+          aborted = true;
+          res.writeHead(413, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: "payload too large" }));
+          req.destroy();
+        }
       });
       req.on("end", () => {
+        if (aborted) return;
         let parsed: { id?: string; flow?: string };
         try {
           parsed = JSON.parse(body);
@@ -899,18 +917,28 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           res.end(JSON.stringify({ ok: false, error: "id and flow are required" }));
           return;
         }
-        const master = jsonFileStorage.loadMaster(config);
-        const result = setTaskFlow(config, master, parsed.id, parsed.flow);
-        const status = result.ok
-          ? 200
-          : result.error === "not-found"
-            ? 404
-            : result.error === "locked"
-              ? 409
-              : 400;
-        if (result.ok) transport.emit("file-change", { at: new Date().toISOString() });
-        res.writeHead(status, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify(result.ok ? { ok: true, flowId: result.flowId } : result));
+        // N151 — async body callback: guard the master read/setTaskFlow so a
+        // malformed master.json returns 500 instead of crashing the process
+        // (the handler-wide boundary can't catch a throw in this later tick).
+        try {
+          const master = jsonFileStorage.loadMaster(config);
+          const result = setTaskFlow(config, master, parsed.id, parsed.flow);
+          const status = result.ok
+            ? 200
+            : result.error === "not-found"
+              ? 404
+              : result.error === "locked"
+                ? 409
+                : 400;
+          if (result.ok) transport.emit("file-change", { at: new Date().toISOString() });
+          res.writeHead(status, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify(result.ok ? { ok: true, flowId: result.flowId } : result));
+        } catch (err) {
+          if (!res.headersSent) {
+            res.writeHead(500, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+          }
+        }
       });
       return;
     }
@@ -976,28 +1004,39 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           );
           return;
         }
-        const event = validated.data;
-        const { duplicate, from, to } = eventStore.insert(event);
+        // N151 — guard the post-parse work (eventStore.insert writes to disk;
+        // the master push does I/O). A throw here runs in a later tick the
+        // handler-wide boundary can't catch, so return 500 instead of crashing
+        // this high-traffic endpoint.
+        try {
+          const event = validated.data;
+          const { duplicate, from, to } = eventStore.insert(event);
 
-        // Skip socket emit on duplicates so retried hooks don't double-render
-        // in the dashboard. Status frame still gated on a real transition.
-        if (!duplicate) {
-          transport.emit("event", { kind: "event", event });
-          if (from !== to) {
-            const statusAt = new Date().toISOString();
-            transport.emit("status", {
-              kind: "status",
-              from,
-              to,
-              at: statusAt,
-              latestEventId: event.id,
-            });
-            if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+          // Skip socket emit on duplicates so retried hooks don't double-render
+          // in the dashboard. Status frame still gated on a real transition.
+          if (!duplicate) {
+            transport.emit("event", { kind: "event", event });
+            if (from !== to) {
+              const statusAt = new Date().toISOString();
+              transport.emit("status", {
+                kind: "status",
+                from,
+                to,
+                at: statusAt,
+                latestEventId: event.id,
+              });
+              if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+            }
+          }
+
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: true, status: to, duplicate }));
+        } catch (err) {
+          if (!res.headersSent) {
+            res.writeHead(500, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
           }
         }
-
-        res.writeHead(200, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ ok: true, status: to, duplicate }));
       });
       req.on("error", () => {
         if (aborted) return;
@@ -1122,6 +1161,21 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     } catch {
       res.writeHead(500, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ error: "Dashboard build not found. Run `pnpm build`." }));
+    }
+  }
+
+  // N151 — handler-wide error boundary: an unhandled throw anywhere in dispatch
+  // (e.g. a malformed/missing master.json read) returns 500 instead of crashing
+  // the long-running dashboard process. Async body callbacks guard themselves
+  // (they run after dispatch returns) — see /api/task-flow.
+  const server = createServer((req, res) => {
+    try {
+      dispatch(req, res);
+    } catch (err) {
+      if (!res.headersSent) {
+        res.writeHead(500, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+      }
     }
   });
 
