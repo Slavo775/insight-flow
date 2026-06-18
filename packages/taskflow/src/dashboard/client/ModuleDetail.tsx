@@ -14,9 +14,7 @@ import { fetchIncludeDoc, type ModuleDto } from "./api.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
-
-// N120 — mirrors the server's locked tier (read-only, never ejectable).
-const LOCKED_MODULE_IDS = new Set(["security", "enforcement", "protocol"]);
+import { isLockedModuleClient } from "./locked.js";
 
 const Header = styled.div`
   display: flex;
@@ -273,12 +271,12 @@ export function ModuleHeader({ module }: { module: ModuleDto }) {
         <Muted>
           {module.id} · {module.source}
           {module.target ? ` · ${module.target}` : ""}
-          {LOCKED_MODULE_IDS.has(module.id) ? " · locked" : ""}
+          {isLockedModuleClient(module) ? " · locked" : ""}
         </Muted>
-        {/* N120 — custom + non-locked defaults are editable (editing a default ejects). */}
-        {!LOCKED_MODULE_IDS.has(module.id) ? (
-          <Link to={`/module/edit/${module.id}`}>Edit</Link>
-        ) : null}
+        {/* N120/N142 — custom + non-locked defaults are editable (editing a default
+            ejects); locked-by-id and locked-by-kind (status-transition/handover)
+            stay read-only, so no Edit link. */}
+        {!isLockedModuleClient(module) ? <Link to={`/module/edit/${module.id}`}>Edit</Link> : null}
       </Header>
       {module.description ? <Description>{module.description}</Description> : null}
     </>

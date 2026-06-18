@@ -1,0 +1,23 @@
+{
+  "taskId": "N146",
+  "reviews": [
+    {
+      "startedAt": "2026-06-18T09:00:38.222Z",
+      "endedAt": "2026-06-18T09:03:42.730Z",
+      "verdict": "approved",
+      "comment": "Orphan over-flagging fixed: alias resolution via resolveTrigger + three-way classifyEdge (backed/builtin-source/orphan). Verified on real is-test data. 246 tests, typechecks clean.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-18T09:05:46.141Z",
+      "endedAt": "2026-06-18T09:07:14.896Z",
+      "verdict": "approved",
+      "comment": "Project owner approved the full round; authorized PR+merge via gh and rebuild into is-test.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

@@ -35,6 +35,10 @@ NEVER
 - Never invent feedback, requests, or verdicts — use exactly what the human said.
 - Never approve or decide on the human's behalf.
 
+## Handover
+
+When your work is complete once the task is `changes-requested`, hand over to `task-implement`: stop and get an explicit human go-ahead before invoking `/task-implement`.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 

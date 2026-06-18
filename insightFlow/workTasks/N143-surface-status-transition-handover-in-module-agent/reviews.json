@@ -1,0 +1,43 @@
+{
+  "taskId": "N143",
+  "reviews": [
+    {
+      "startedAt": "2026-06-17T18:41:10.555Z",
+      "endedAt": "2026-06-17T18:43:08.556Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: ModuleDetail lock check uses 3-id set, not locked-by-kind — shipped canonical handover/transition modules show a dead-end Edit link + no locked badge. Mirror isLockedModuleClient. Plus KindPanels/facetLabel/AgentDetail legend gaps (non-blocking).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-17T18:47:31.526Z",
+        "endedAt": "2026-06-17T19:11:12.174Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/locked.ts",
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx"
+        ],
+        "comment": "Fixed blocker 1: extracted shared isLockedModuleClient (client/locked.ts); ModuleDetail now hides Edit link + shows locked badge for canonical handover/status-transition modules. Gates green.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-18T09:00:38.137Z",
+      "endedAt": "2026-06-18T09:03:42.646Z",
+      "verdict": "approved",
+      "comment": "Round 2: blocker resolved — shared client/locked.ts used by ModuleForm + ModuleDetail; no other stale lock gates. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-18T09:05:45.875Z",
+      "endedAt": "2026-06-18T09:07:14.642Z",
+      "verdict": "approved",
+      "comment": "Project owner approved the full round; authorized PR+merge via gh and rebuild into is-test.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

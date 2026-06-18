@@ -37,6 +37,10 @@ NEVER
 - Never remove existing spec sections unless the human explicitly asks.
 - Never create a new task (this skill modifies existing tasks only).
 
+## Handover
+
+When your work is complete once the task is `ready`, hand over to `task-implement`: stop and get an explicit human go-ahead before invoking `/task-implement`.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 

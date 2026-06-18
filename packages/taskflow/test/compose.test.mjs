@@ -78,7 +78,10 @@ test("registry holds shared include + section modules and role-scoped modules", 
         assert.ok(modId.startsWith(`${agentId}/`), `${modId} is scoped to a different role`);
       }
     }
-    assert.ok(def.modules.some((m) => m === `${agentId}/identity`), `${agentId} has an identity module`);
+    assert.ok(
+      def.modules.some((m) => m === `${agentId}/identity`),
+      `${agentId} has an identity module`,
+    );
   }
 });
 
@@ -106,10 +109,18 @@ test("composed agents are a single ordered modules list (no v1 fields)", () => {
 
 test("pure sequence: blocks render in declared order", () => {
   const md = composeAgentById("task-implement");
-  const markers = COMPOSED_AGENTS["task-implement"].modules.map((id) => {
-    const mod = MODULE_REGISTRY[id];
-    return mod.kind === "include" ? `@${mod.ref}` : (mod.heading ?? mod.body.split("\n")[0]);
-  });
+  const markers = COMPOSED_AGENTS["task-implement"].modules
+    .map((id) => {
+      const mod = MODULE_REGISTRY[id];
+      if (mod.kind === "include") return `@${mod.ref}`;
+      // N128/N142 — status-transition + handover modules render as synthetic
+      // sections; several handovers collapse into one "## Handover" section.
+      if (mod.kind === "status-transition") return "## Advance the flow";
+      if (mod.kind === "handover") return "## Handover";
+      return mod.heading ?? mod.body.split("\n")[0];
+    })
+    // Collapse consecutive duplicate markers (the combined handover section).
+    .filter((m, i, arr) => m !== arr[i - 1]);
   let pos = -1;
   for (const marker of markers) {
     const next = md.indexOf(marker, pos + 1);
@@ -144,7 +155,14 @@ test("heading-only section module opens its section with a blank line before the
 
 test("continuation rule: body-only section module joins the previous section without a blank line", () => {
   const registry = {
-    head: { id: "head", title: "H", source: "builtin", kind: "section", heading: "NEVER", body: "- own bullet" },
+    head: {
+      id: "head",
+      title: "H",
+      source: "builtin",
+      kind: "section",
+      heading: "NEVER",
+      body: "- own bullet",
+    },
     cont: { id: "cont", title: "C", source: "builtin", kind: "section", body: "- shared bullet" },
   };
   const md = composeAgent({ id: "x", title: "X", modules: ["head", "cont"] }, registry);
@@ -166,14 +184,111 @@ test("shared section modules compose a custom agent against the real registry", 
   const md = composeAgent({
     id: "custom-recorder",
     title: "Custom Recorder",
-    modules: ["task-human-review/identity", "enforcement", "minimal-diff", "scope-guard", "recorder-discipline", "actions"],
+    modules: [
+      "task-human-review/identity",
+      "enforcement",
+      "minimal-diff",
+      "scope-guard",
+      "recorder-discipline",
+      "actions",
+    ],
   });
   assert.match(md, /^ROLE: Insight-Flow Human Review Recorder/);
   assert.ok(md.includes("@AGENT_ENFORCEMENT.md"));
-  assert.ok(md.includes("Never change code unrelated to the task at hand."), "minimal-diff renders");
+  assert.ok(
+    md.includes("Never change code unrelated to the task at hand."),
+    "minimal-diff renders",
+  );
   assert.ok(md.includes("Ambiguous spec → ask, do not guess."), "scope-guard renders");
-  assert.ok(md.includes("Preserve the human's exact wording — do not rephrase or soften."), "recorder-discipline renders");
-  assert.ok(md.endsWith("<!-- taskflow:phase-markers:end -->\n"), "actions block terminates the file");
+  assert.ok(
+    md.includes("Preserve the human's exact wording — do not rephrase or soften."),
+    "recorder-discipline renders",
+  );
+  assert.ok(
+    md.endsWith("<!-- taskflow:phase-markers:end -->\n"),
+    "actions block terminates the file",
+  );
+});
+
+test("N142: handover module (auto) renders a '## Handover' section that chains the slash-command", () => {
+  const registry = {
+    h: {
+      id: "h",
+      title: "H",
+      source: "builtin",
+      kind: "handover",
+      to: "task-git",
+      on: "implemented",
+      mode: "auto",
+    },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["h"] }, registry);
+  assert.ok(md.includes("## Handover"), "renders the Handover heading");
+  assert.ok(md.includes("once the task is `implemented`"), "names the trigger");
+  assert.ok(md.includes("invoke `/task-git` directly"), "auto chains the next command");
+  assert.ok(!md.includes("explicit human go-ahead"), "auto does not gate");
+});
+
+test("N142: handover module (gated, the default) renders a '## Handover' section that stops for go-ahead", () => {
+  const registry = {
+    h: {
+      id: "h",
+      title: "H",
+      source: "builtin",
+      kind: "handover",
+      to: "taskmaster",
+      mode: "gated",
+    },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["h"] }, registry);
+  assert.ok(md.includes("## Handover"), "renders the Handover heading");
+  assert.ok(
+    md.includes("explicit human go-ahead before invoking `/taskmaster`"),
+    "gated stops for go-ahead",
+  );
+  assert.ok(!md.includes("once the task is"), "trigger-less handover omits the when clause");
+});
+
+test("N142/N145: several handover modules collapse into ONE '## Handover' section listing candidates", () => {
+  const registry = {
+    a: {
+      id: "a",
+      title: "A",
+      source: "builtin",
+      kind: "handover",
+      to: "task-git",
+      on: "approved",
+      mode: "auto",
+    },
+    b: {
+      id: "b",
+      title: "B",
+      source: "builtin",
+      kind: "handover",
+      to: "task-review-fix",
+      on: "fix-needed",
+      mode: "gated",
+    },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["a", "b"] }, registry);
+  assert.equal(
+    md.match(/## Handover/g)?.length,
+    1,
+    "exactly one Handover heading for multiple handovers",
+  );
+  assert.ok(md.includes("pick the handover that matches your outcome"), "candidate intro");
+  assert.ok(md.includes("- `task-git` once `approved` (auto)"), "auto candidate bullet");
+  assert.ok(md.includes("- `task-review-fix` once `fix-needed` (gated)"), "gated candidate bullet");
+});
+
+test("N142: handover schema defaults mode to 'gated' when omitted", () => {
+  const parsed = AgentModuleSchema.parse({
+    id: "custom:h",
+    title: "H",
+    kind: "handover",
+    to: "task-git",
+  });
+  assert.equal(parsed.mode, "gated");
 });
 
 test("N94: every shipped role inlines the actions block instead of including AGENT_EVENTS.md", () => {
@@ -203,7 +318,11 @@ test("N96: the default project installs the activity bundle; hooks are templated
 });
 
 test("N96: project flow is referentially sound and triggers are real statuses", async () => {
-  const { DEFAULT_PROJECT, COMPOSED_AGENTS: agents, ProjectSchema } = await import("../dist/index.js");
+  const {
+    DEFAULT_PROJECT,
+    COMPOSED_AGENTS: agents,
+    ProjectSchema,
+  } = await import("../dist/index.js");
   for (const a of DEFAULT_PROJECT.agents) assert.ok(agents[a], `agent ${a} exists`);
   for (const e of DEFAULT_PROJECT.flow) {
     assert.ok(DEFAULT_PROJECT.agents.includes(e.from) && DEFAULT_PROJECT.agents.includes(e.to));
@@ -229,7 +348,11 @@ test("N95: bundles expand recursively at their declared position", () => {
     outer: { id: "outer", title: "O", source: "builtin", kind: "bundle", modules: ["inner", "c"] },
   };
   const md = composeAgent({ id: "x", title: "X", modules: ["a", "outer"] }, registry);
-  assert.equal(md, "ONE\n\n1\n\nTWO\n\n2\n\nTHREE\n\n3\n", "nested bundle children splice in order");
+  assert.equal(
+    md,
+    "ONE\n\n1\n\nTWO\n\n2\n\nTHREE\n\n3\n",
+    "nested bundle children splice in order",
+  );
 });
 
 test("N95: dedup spans bundle and direct refs (first occurrence wins)", () => {
@@ -238,7 +361,10 @@ test("N95: dedup spans bundle and direct refs (first occurrence wins)", () => {
     bun: { id: "bun", title: "B", source: "builtin", kind: "bundle", modules: ["a"] },
   };
   // direct ref first, bundle second — and the reverse — both render once
-  for (const order of [["a", "bun"], ["bun", "a"]]) {
+  for (const order of [
+    ["a", "bun"],
+    ["bun", "a"],
+  ]) {
     const md = composeAgent({ id: "x", title: "X", modules: order }, registry);
     assert.equal(md.split("ONE").length - 1, 1, `order ${order.join(",")} dedups`);
   }

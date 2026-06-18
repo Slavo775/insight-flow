@@ -25,7 +25,12 @@ import "@xyflow/react/dist/style.css";
 import styled, { useTheme } from "styled-components";
 import { TASK_STATUSES } from "../../../core/statuses.js";
 import { validateEdgeAddition } from "../../../core/flow-edit.js";
-import type { FlowEdge } from "../../../core/flow-status.js";
+import {
+  classifyEdge,
+  type FlowEdge,
+  type AgentHandover,
+  type FlowStateDef,
+} from "../../../core/flow-status.js";
 import type { ProjectDto } from "../api.js";
 import { computePositions } from "./FlowMap.js";
 import { Button } from "./Button.js";
@@ -81,6 +86,41 @@ const EditorError = styled.div`
   padding: ${(p) => p.theme.space.md} ${(p) => p.theme.space.lg};
   font-size: ${(p) => p.theme.font.size.sm};
   color: ${(p) => p.theme.color.red};
+`;
+
+// N144 — orphan-edge warning (edges no agent handover backs) + a small legend.
+const OrphanWarning = styled.div`
+  position: absolute;
+  bottom: ${(p) => p.theme.space.lg};
+  left: ${(p) => p.theme.space.lg};
+  z-index: 10;
+  max-width: 320px;
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.red};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.md};
+  font-size: ${(p) => p.theme.font.size.xs};
+  color: ${(p) => p.theme.color.red};
+
+  ul {
+    margin: 4px 0 0;
+    padding-left: 16px;
+  }
+`;
+
+const Legend = styled.div`
+  position: absolute;
+  bottom: ${(p) => p.theme.space.lg};
+  right: ${(p) => p.theme.space.lg};
+  z-index: 10;
+  display: flex;
+  gap: ${(p) => p.theme.space.md};
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.sm} ${(p) => p.theme.space.md};
+  font-size: ${(p) => p.theme.font.size.xs};
+  color: ${(p) => p.theme.color.textMuted};
 `;
 
 export type FlowPositions = Record<string, { x: number; y: number }>;
@@ -212,16 +252,46 @@ function TriggerOptions({ states }: { states?: { id: string; title: string }[] }
   );
 }
 
-function toReactFlowEdge(e: FlowEdge, theme: ReturnType<typeof useTheme>): Edge {
+function toReactFlowEdge(
+  e: FlowEdge,
+  theme: ReturnType<typeof useTheme>,
+  handoversByAgent: Record<string, AgentHandover[]> = {},
+  builtins: ReadonlySet<string> = new Set(),
+  states?: FlowStateDef[],
+): Edge {
+  // N144/N146 — three-way: backed (mode badge) · built-in source (neutral "not
+  // backed") · orphan (red ⚠, a custom source the user can wire). Custom-state
+  // triggers are resolved to canonical before matching. The diagram is non-binding.
+  const { backing, handover } = classifyEdge(e, handoversByAgent, builtins, states);
+  const base = e.on ?? "";
+  let tag: string;
+  let stroke: string;
+  let labelFill: string;
+  let dashed = false;
+  if (backing === "backed" && handover) {
+    tag = `· ${handover.mode}`;
+    stroke = handover.mode === "auto" ? theme.color.green : theme.color.accent;
+    labelFill = theme.color.textMuted;
+  } else if (backing === "builtin-source") {
+    tag = "· not backed (built-in)";
+    stroke = theme.color.textMuted;
+    labelFill = theme.color.textMuted;
+    dashed = true;
+  } else {
+    tag = "⚠";
+    stroke = theme.color.red;
+    labelFill = theme.color.red;
+    dashed = true;
+  }
   return {
     id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
     source: e.from,
     target: e.to,
-    label: e.on ?? "",
+    label: base ? `${base}  ${tag}` : tag,
     data: { on: e.on },
-    labelStyle: { fill: theme.color.textMuted, fontFamily: theme.font.family, fontSize: 10 },
+    labelStyle: { fill: labelFill, fontFamily: theme.font.family, fontSize: 10 },
     labelBgStyle: { fill: theme.color.surface },
-    style: { stroke: theme.color.border },
+    style: { stroke, ...(dashed ? { strokeDasharray: "5 4" } : {}) },
   };
 }
 
@@ -234,6 +304,8 @@ export function FlowEditor({
   project,
   states,
   allAgents = [],
+  handoversByAgent = {},
+  builtinAgents,
   onDraftChange,
 }: {
   project: ProjectDto;
@@ -241,10 +313,17 @@ export function FlowEditor({
   states?: { id: string; title: string }[];
   /** N114 — every composed agent (built-in + custom) for the Add palette + node labels. */
   allAgents?: AgentChoice[];
+  /** N144 — declared handovers per agent; backs edges with an auto/gated badge + flags orphans. */
+  handoversByAgent?: Record<string, AgentHandover[]>;
+  /** N146 — built-in/locked agent ids; unbacked edges from these are neutral, not orphan. */
+  builtinAgents?: ReadonlySet<string>;
   /** Fired after every agent, position, or edge change with the full draft. */
   onDraftChange: (draft: FlowDraft) => void;
 }) {
   const theme = useTheme();
+  const builtins = builtinAgents ?? new Set<string>();
+  // N146 — saved custom states drive alias resolution for edge classification.
+  const flowStates = project.states as FlowStateDef[] | undefined;
   const [pending, setPending] = useState<Connection | null>(null);
   const [pendingTrigger, setPendingTrigger] = useState<string>(DIRECT_HANDOFF);
   const [editorError, setEditorError] = useState<string | null>(null);
@@ -292,7 +371,8 @@ export function FlowEditor({
   }, [project.id]); // eslint-disable-line
 
   const initialEdges: Edge[] = useMemo(
-    () => project.flow.map((e) => toReactFlowEdge(e, theme)),
+    () =>
+      project.flow.map((e) => toReactFlowEdge(e, theme, handoversByAgent, builtins, flowStates)),
     // Seeded once per project identity, like the nodes.
     // eslint-disable-next-line
     [project.id],
@@ -406,7 +486,7 @@ export function FlowEditor({
       setEdgeMenu({ ...edgeMenu, error: rejection });
       return;
     }
-    const replaced = toReactFlowEdge(candidate, theme);
+    const replaced = toReactFlowEdge(candidate, theme, handoversByAgent, builtins, flowStates);
     const next = edges.map((e) => (e.id === edgeMenu.id ? replaced : e));
     setEdges(next);
     setEdgeMenu(null);
@@ -435,7 +515,10 @@ export function FlowEditor({
       setPending(null);
       return;
     }
-    const next = [...edges, toReactFlowEdge(candidate, theme)];
+    const next = [
+      ...edges,
+      toReactFlowEdge(candidate, theme, handoversByAgent, builtins, flowStates),
+    ];
     setEdges(next);
     setPending(null);
     setEditorError(null);
@@ -454,6 +537,13 @@ export function FlowEditor({
       );
     }
   };
+
+  // N144/N146 — diagram honesty: only GENUINE orphans (a custom source the user
+  // can wire) warrant a warning. Built-in-source edges can't be backed and are
+  // shown neutrally, not listed as fixable problems.
+  const orphanEdges = edges
+    .map(toFlowEdge)
+    .filter((e) => classifyEdge(e, handoversByAgent, builtins, flowStates).backing === "orphan");
 
   return (
     <EditBox>
@@ -540,6 +630,28 @@ export function FlowEditor({
         </ModalBackdrop>
       ) : null}
       {editorError ? <EditorError role="alert">{editorError}</EditorError> : null}
+      <Legend>
+        <span style={{ color: theme.color.green }}>● auto</span>
+        <span style={{ color: theme.color.accent }}>● gated</span>
+        <span style={{ color: theme.color.textMuted }}>not backed (built-in)</span>
+        <span style={{ color: theme.color.red }}>⚠ orphan</span>
+      </Legend>
+      {orphanEdges.length ? (
+        <OrphanWarning role="alert">
+          ⚠ {orphanEdges.length} edge{orphanEdges.length > 1 ? "s" : ""} not backed by an agent
+          handover — the agent won't take {orphanEdges.length > 1 ? "these steps" : "this step"}.
+          Add the handover on the source agent, or remove the edge:
+          <ul>
+            {orphanEdges.slice(0, 6).map((e) => (
+              <li key={`${e.from}->${e.to}:${e.on ?? ""}`}>
+                {e.from} → {e.to}
+                {e.on ? ` (${e.on})` : ""}
+              </li>
+            ))}
+            {orphanEdges.length > 6 ? <li>…and {orphanEdges.length - 6} more</li> : null}
+          </ul>
+        </OrphanWarning>
+      ) : null}
       <ReactFlow
         nodes={nodes}
         edges={edges}

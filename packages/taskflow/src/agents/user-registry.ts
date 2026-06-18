@@ -33,13 +33,16 @@ export function isLockedModuleId(id: string): boolean {
 }
 
 /**
- * N128 — locked-by-kind as well as by id: every `status-transition` module is
- * LOCKED (the canonical lifecycle's transitions are not user-overridable).
- * Custom (`custom:`) status-transition modules are still allowed — the lock
- * only bars overriding a shipped/built-in definition (see `readKind`).
+ * N128/N142 — locked-by-kind as well as by id: every `status-transition` and
+ * `handover` module is LOCKED (the canonical lifecycle's transitions/handovers
+ * are not user-overridable). Custom (`custom:`) modules of these kinds are still
+ * allowed — the lock only bars overriding a shipped/built-in definition (see
+ * `readKind`).
  */
 export function isLockedModule(def: { id: string; kind?: string }): boolean {
-  return LOCKED_MODULE_IDS.has(def.id) || def.kind === "status-transition";
+  return (
+    LOCKED_MODULE_IDS.has(def.id) || def.kind === "status-transition" || def.kind === "handover"
+  );
 }
 
 export interface UserRegistries {

@@ -42,6 +42,13 @@ SCOPE GUARD
 - If the work requires touching files outside the declared task scope, stop and ask the human.
 - Ambiguous spec → ask, do not guess.
 
+## Handover
+
+When your work is complete, hand the task to the next agent — pick the handover that matches your outcome:
+
+- `task-git` once `implemented` (auto) — invoke `/task-git` directly to continue — no need to pause.
+- `task-git` once `changes-implemented` (auto) — invoke `/task-git` directly to continue — no need to pause.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 

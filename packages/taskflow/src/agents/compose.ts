@@ -35,6 +35,7 @@ import actions from "./modules/actions.json";
 import minimalDiff from "./modules/minimal-diff.json";
 import scopeGuard from "./modules/scope-guard.json";
 import recorderDiscipline from "./modules/recorder-discipline.json";
+import handovers from "./modules/handovers.json";
 import taskAnalyzeModules from "./modules/roles/task-analyze.json";
 import taskmasterModules from "./modules/roles/taskmaster.json";
 import taskmasterChangeModules from "./modules/roles/taskmaster-change.json";
@@ -87,6 +88,7 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     minimalDiff,
     scopeGuard,
     recorderDiscipline,
+    ...handovers,
     ...taskAnalyzeModules,
     ...taskmasterModules,
     ...taskmasterChangeModules,
@@ -241,15 +243,77 @@ function transitionSection(
   };
 }
 
+// N142/N145 — handover modules (N142) render as a single "## Handover" section:
+// when this agent's work is complete it hands the task to the next agent's slash
+// command. `auto` tells the agent to invoke it directly in-session; `gated` (the
+// default) tells it to stop for an explicit human go-ahead first. DESCRIPTIVE —
+// the agent honors this from its prompt; nothing in the system auto-runs, and the
+// flow diagram stays non-binding (the agent's handovers win). An agent with
+// several handovers gets ONE section listing the candidates; it free-picks the
+// one matching its outcome. Cross-cutting safety (auto ≠ bypass permissions/
+// consent, no auto-chaining a cycle back-edge, no chaining a silent gated
+// handover) lives in the shared enforcement/protocol modules, not here.
+type HandoverModule = Extract<AgentModule, { kind: "handover" }>;
+
+/** The per-candidate behavior clause shared by the single + multi forms. */
+function handoverAction(m: HandoverModule): string {
+  const cmd = `/${deriveCommandName(m.to)}`;
+  return m.mode === "auto"
+    ? `invoke \`${cmd}\` directly to continue — no need to pause.`
+    : `stop and get an explicit human go-ahead before invoking \`${cmd}\`.`;
+}
+
+// All of an agent's handover modules, merged into one section. Identity (id/
+// title/source) comes from the first module so the section is stable.
+function handoverSection(handovers: HandoverModule[]): Extract<AgentModule, { kind: "section" }> {
+  const first = handovers[0];
+  let body: string;
+  if (handovers.length === 1) {
+    const when = first.on ? ` once the task is \`${first.on}\`` : "";
+    body = `When your work is complete${when}, hand over to \`${first.to}\`: ${handoverAction(first)}`;
+  } else {
+    const bullets = handovers
+      .map((m) => {
+        const when = m.on ? ` once \`${m.on}\`` : "";
+        return `- \`${m.to}\`${when} (${m.mode}) — ${handoverAction(m)}`;
+      })
+      .join("\n");
+    body =
+      `When your work is complete, hand the task to the next agent — pick the ` +
+      `handover that matches your outcome:\n\n${bullets}`;
+  }
+  return {
+    id: first.id,
+    title: first.title,
+    source: first.source,
+    kind: "section",
+    heading: "## Handover",
+    body,
+  };
+}
+
 export function composeAgent(
   def: ComposedAgent,
   registry: Record<string, AgentModule> = MODULE_REGISTRY,
 ): string {
-  const mods = resolveModules(def, registry)
-    .map((m) => (m.kind === "status-transition" ? transitionSection(m) : m))
+  const resolved = resolveModules(def, registry);
+  // All handover modules collapse into ONE "## Handover" section, emitted at the
+  // position of the first one (the rest map to null and drop out).
+  const handovers = resolved.filter((m): m is HandoverModule => m.kind === "handover");
+  let handoverEmitted = false;
+  const mods = resolved
+    .map((m) => {
+      if (m.kind === "status-transition") return transitionSection(m);
+      if (m.kind === "handover") {
+        if (handoverEmitted) return null;
+        handoverEmitted = true;
+        return handoverSection(handovers);
+      }
+      return m;
+    })
     .filter(
       (m): m is Extract<AgentModule, { kind: "section" | "include" }> =>
-        m.kind === "section" || m.kind === "include",
+        m != null && (m.kind === "section" || m.kind === "include"),
     );
 
   let out = "";

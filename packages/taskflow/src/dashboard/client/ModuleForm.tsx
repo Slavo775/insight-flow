@@ -14,6 +14,8 @@ import {
 } from "./api.js";
 import { Button, Section } from "./components/index.js";
 import { SideLayout } from "./components/SideLayout.js";
+import { TASK_STATUSES } from "../../core/statuses.js";
+import { isLockedModuleClient } from "./locked.js";
 import { invalidateRegistry, useRegistry } from "./registry.js";
 import { useDashboardStore } from "./store.js";
 import { Nav } from "./ui.js";
@@ -142,8 +144,25 @@ const RowButton = styled.button`
   }
 `;
 
-export type EditableKind = "section" | "include" | "mcp-server" | "hook" | "skill" | "bundle";
-const KINDS: EditableKind[] = ["section", "include", "mcp-server", "hook", "skill", "bundle"];
+export type EditableKind =
+  | "section"
+  | "include"
+  | "mcp-server"
+  | "hook"
+  | "skill"
+  | "bundle"
+  | "status-transition"
+  | "handover";
+const KINDS: EditableKind[] = [
+  "section",
+  "include",
+  "mcp-server",
+  "hook",
+  "skill",
+  "bundle",
+  "status-transition",
+  "handover",
+];
 // N137 — "bundle" is surfaced to users as "Composed module"; the rest use their raw kind.
 const KIND_LABELS: Record<EditableKind, string> = {
   section: "section",
@@ -152,11 +171,9 @@ const KIND_LABELS: Record<EditableKind, string> = {
   hook: "hook",
   skill: "skill",
   bundle: "Composed module (bundle)",
+  "status-transition": "status transition",
+  handover: "handover",
 };
-
-// N120 — mirrors the server's locked tier (user-registry.ts). Kept inline so
-// the client bundle doesn't pull node:fs from user-registry.
-const LOCKED_MODULE_IDS = new Set(["security", "enforcement", "protocol"]);
 
 interface FormState {
   idTail: string;
@@ -174,6 +191,14 @@ interface FormState {
   command: string;
   content: string;
   modules: string[];
+  // N128 status-transition + N142 handover fields.
+  agent: string;
+  sets: string;
+  from: string;
+  to: string;
+  on: string;
+  mode: "auto" | "gated";
+  label: string;
 }
 
 const EMPTY: FormState = {
@@ -192,6 +217,13 @@ const EMPTY: FormState = {
   command: "",
   content: "",
   modules: [],
+  agent: "",
+  sets: "",
+  from: "",
+  to: "",
+  on: "",
+  mode: "gated",
+  label: "",
 };
 
 function fromModule(m: ModuleDto): FormState {
@@ -212,6 +244,13 @@ function fromModule(m: ModuleDto): FormState {
     command: m.command ?? "",
     content: m.content ?? "",
     modules: m.modules ?? [],
+    agent: m.agent ?? "",
+    sets: m.sets ?? "",
+    from: m.from ?? "",
+    to: m.to ?? "",
+    on: m.on ?? "",
+    mode: m.mode ?? "gated",
+    label: m.label ?? "",
   };
 }
 
@@ -275,6 +314,20 @@ function toRecord(s: FormState): {
       if (!s.modules.length) errors.modules = "pick at least one module";
       record.modules = s.modules;
       break;
+    case "status-transition":
+      if (!s.agent.trim()) errors.agent = "required";
+      if (!s.sets.trim()) errors.sets = "required";
+      record.agent = s.agent.trim();
+      record.sets = s.sets.trim();
+      if (s.from.trim()) record.from = s.from.trim();
+      break;
+    case "handover":
+      if (!s.to.trim()) errors.to = "required";
+      record.to = s.to.trim();
+      if (s.on.trim()) record.on = s.on.trim();
+      record.mode = s.mode;
+      if (s.label.trim()) record.label = s.label.trim();
+      break;
   }
 
   return Object.keys(errors).length ? { errors } : { record };
@@ -311,7 +364,7 @@ export function ModuleForm() {
   if (editId && !editing) return <p>Unknown module “{editId}”.</p>;
   // N120 — locked modules stay read-only; defaults are editable (saving ejects
   // an override into insightFlow/), custom is full CRUD.
-  if (editing && LOCKED_MODULE_IDS.has(editing.id)) {
+  if (editing && isLockedModuleClient(editing)) {
     return (
       <p>
         “{editing.id}” is locked (read-only). <Link to={`/module/${editing.id}`}>Back</Link>
@@ -594,6 +647,85 @@ export function ModuleForm() {
                   ))}
                 </div>
               </Field>
+            ) : null}
+
+            {s.kind === "status-transition" ? (
+              <>
+                <Field>
+                  Agent (whose completion advances the task) {err("agent")}
+                  <select value={s.agent} onChange={(e) => set({ agent: e.target.value })}>
+                    <option value="">Pick an agent…</option>
+                    {registry.agents.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.title} · {a.id}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field>
+                  Sets status {err("sets")}
+                  <select value={s.sets} onChange={(e) => set({ sets: e.target.value })}>
+                    <option value="">Pick a status…</option>
+                    {TASK_STATUSES.map((st) => (
+                      <option key={st} value={st}>
+                        {st}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field>
+                  Only from status (optional) {err("from")}
+                  <select value={s.from} onChange={(e) => set({ from: e.target.value })}>
+                    <option value="">(any status)</option>
+                    {TASK_STATUSES.map((st) => (
+                      <option key={st} value={st}>
+                        {st}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </>
+            ) : null}
+
+            {s.kind === "handover" ? (
+              <>
+                <Field>
+                  Hand over to agent {err("to")}
+                  <select value={s.to} onChange={(e) => set({ to: e.target.value })}>
+                    <option value="">Pick an agent…</option>
+                    {registry.agents.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.title} · {a.id}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field>
+                  On status (optional — blank = direct handoff) {err("on")}
+                  <select value={s.on} onChange={(e) => set({ on: e.target.value })}>
+                    <option value="">(direct handoff)</option>
+                    {TASK_STATUSES.map((st) => (
+                      <option key={st} value={st}>
+                        {st}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field>
+                  Mode
+                  <select
+                    value={s.mode}
+                    onChange={(e) => set({ mode: e.target.value as FormState["mode"] })}
+                  >
+                    <option value="gated">gated — stop for an explicit human go-ahead</option>
+                    <option value="auto">auto — chain the next command in-session</option>
+                  </select>
+                </Field>
+                <Field>
+                  Label (optional) {err("label")}
+                  <input value={s.label} onChange={(e) => set({ label: e.target.value })} />
+                </Field>
+              </>
             ) : null}
 
             <FormActions>

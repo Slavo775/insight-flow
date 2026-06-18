@@ -360,6 +360,24 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
     sets: z.string().min(1),
     from: z.string().min(1).optional(),
   }),
+  // Handover module (N142): behavior-as-data. Declares that the agent this
+  // module is composed into, on completing its turn, hands work over to agent
+  // `to` (optionally only when the task is at status `on`). `mode` governs how:
+  // `auto` chains the target's slash-command in-session; `gated` (the default)
+  // stops for an explicit human go-ahead first. DESCRIPTIVE — the agent honors
+  // this from its composed prompt; nothing in the system auto-runs and the flow
+  // diagram stays non-binding (the agent's handovers win). Like
+  // `status-transition`, the canonical lifecycle's handovers are LOCKED (not
+  // user-overridable) and the module contributes nothing to the artifact
+  // emitter (it renders into role Markdown only).
+  z.object({
+    ...agentModuleBase,
+    kind: z.literal("handover"),
+    to: z.string().min(1),
+    on: z.string().min(1).optional(),
+    mode: z.enum(["auto", "gated"]).default("gated"),
+    label: z.string().min(1).optional(),
+  }),
 ]);
 
 // N138 — the built-in slash-command names a custom agent's emitted command must

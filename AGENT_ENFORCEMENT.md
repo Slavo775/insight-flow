@@ -13,6 +13,12 @@ GIT RULE
 - Verify all CHECKLIST.md items before marking implemented or done
 - Never mix tools for the same operation
 
+HANDOVER RULE
+
+- A `## Handover` section lists the next agent(s); pick the one matching your outcome.
+- `auto` lets you invoke the next agent in-session without pausing to ask which — it NEVER bypasses git/permission gates or consent. `gated` requires an explicit human go-ahead first; silence is not approval.
+- Never `auto`-chain back to an agent already run for this task this session (cycle guard). See `@AGENT_PROTOCOL.md` "HANDOVER DISCIPLINE".
+
 TOKEN EFFICIENCY (applies to every role)
 
 - No subagents. Direct tool calls only.

@@ -1,0 +1,131 @@
+[
+  {
+    "id": "task-analyze/handover-taskmaster",
+    "title": "Handover — analyze → taskmaster",
+    "description": "Canonical handover: after analysis, hand to taskmaster with explicit human go-ahead (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "taskmaster",
+    "mode": "gated"
+  },
+  {
+    "id": "taskmaster/handover-implement",
+    "title": "Handover — taskmaster → implement",
+    "description": "Canonical handover: once the spec is ready, hand to the implementer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-implement",
+    "on": "ready",
+    "mode": "gated"
+  },
+  {
+    "id": "taskmaster-change/handover-implement",
+    "title": "Handover — taskmaster-change → implement",
+    "description": "Canonical handover: once the revised spec is ready, hand to the implementer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-implement",
+    "on": "ready",
+    "mode": "gated"
+  },
+  {
+    "id": "task-implement/handover-git-implemented",
+    "title": "Handover — implement → git (implemented)",
+    "description": "Canonical handover: once implemented, hand to task-git to push (auto).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-git",
+    "on": "implemented",
+    "mode": "auto"
+  },
+  {
+    "id": "task-implement/handover-git-changes",
+    "title": "Handover — implement → git (changes-implemented)",
+    "description": "Canonical handover: once requested changes are implemented, hand to task-git to push (auto).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-git",
+    "on": "changes-implemented",
+    "mode": "auto"
+  },
+  {
+    "id": "task-git/handover-review",
+    "title": "Handover — git → review",
+    "description": "Canonical handover: once pushed, hand to the reviewer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-review",
+    "on": "pushed",
+    "mode": "gated"
+  },
+  {
+    "id": "task-review/handover-human-review",
+    "title": "Handover — review → human review",
+    "description": "Canonical handover: on approval, hand to the human reviewer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-human-review",
+    "on": "approved",
+    "mode": "gated"
+  },
+  {
+    "id": "task-review/handover-review-fix",
+    "title": "Handover — review → review-fix",
+    "description": "Canonical handover: when a fix is needed, hand to the review fixer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-review-fix",
+    "on": "fix-needed",
+    "mode": "gated"
+  },
+  {
+    "id": "task-review-fix/handover-review",
+    "title": "Handover — review-fix → review",
+    "description": "Canonical handover: once fixed, hand back to the reviewer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-review",
+    "on": "fixed",
+    "mode": "gated"
+  },
+  {
+    "id": "task-human-review/handover-review-fix",
+    "title": "Handover — human review → review-fix",
+    "description": "Canonical handover: when the human flags a fix, hand to the review fixer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-review-fix",
+    "on": "fix-needed",
+    "mode": "gated"
+  },
+  {
+    "id": "task-human-review/handover-git",
+    "title": "Handover — human review → git",
+    "description": "Canonical handover: on human approval, hand to task-git to merge/push (auto).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-git",
+    "on": "approved",
+    "mode": "auto"
+  },
+  {
+    "id": "task-human-review/handover-request-changes",
+    "title": "Handover — human review → request-changes",
+    "description": "Canonical handover: when post-merge changes are needed, hand to request-changes (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-request-changes",
+    "on": "done",
+    "mode": "gated"
+  },
+  {
+    "id": "task-request-changes/handover-implement",
+    "title": "Handover — request-changes → implement",
+    "description": "Canonical handover: once changes are requested, hand to the implementer (gated).",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "task-implement",
+    "on": "changes-requested",
+    "mode": "gated"
+  }
+]

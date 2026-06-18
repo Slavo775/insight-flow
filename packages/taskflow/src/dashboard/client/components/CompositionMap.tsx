@@ -51,6 +51,10 @@ export function kindColor(theme: Theme, kind: string): string {
       return theme.color.green;
     case "bundle":
       return theme.color.amber;
+    case "status-transition":
+      return theme.color.red;
+    case "handover":
+      return theme.color.accent;
     default:
       return theme.color.textMuted;
   }

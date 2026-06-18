@@ -16,8 +16,10 @@ import {
 import "@xyflow/react/dist/style.css";
 import styled, { useTheme } from "styled-components";
 import type { ProjectDto } from "../api.js";
+import { classifyEdge, type AgentHandover } from "../../../core/flow-status.js";
 
 const MapBox = styled.div`
+  position: relative;
   height: 620px;
   background: ${(p) => p.theme.color.surface};
   border: 1px solid ${(p) => p.theme.color.border};
@@ -27,6 +29,22 @@ const MapBox = styled.div`
   @media (max-width: 768px) {
     height: 70vh;
   }
+`;
+
+// N144 — auto/gated/orphan legend for the edge badges (parity with FlowEditor).
+const Legend = styled.div`
+  position: absolute;
+  top: ${(p) => p.theme.space.lg};
+  right: ${(p) => p.theme.space.lg};
+  z-index: 10;
+  display: flex;
+  gap: ${(p) => p.theme.space.md};
+  background: ${(p) => p.theme.color.bg};
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.sm} ${(p) => p.theme.space.md};
+  font-size: ${(p) => p.theme.font.size.xs};
+  color: ${(p) => p.theme.color.textMuted};
 `;
 
 /** Column per BFS depth from the roots; isolated agents go last. */
@@ -85,6 +103,8 @@ export function FlowMap({
   project,
   highlightNodes,
   secondaryHighlightNodes,
+  handoversByAgent = {},
+  builtinAgents,
   readOnly = false,
 }: {
   project: ProjectDto;
@@ -92,11 +112,16 @@ export function FlowMap({
   highlightNodes?: string[];
   /** N105: suggested next agents — dashed accent (▶ badge). */
   secondaryHighlightNodes?: string[];
+  /** N144 — declared handovers per agent; backs edges with an auto/gated badge. */
+  handoversByAgent?: Record<string, AgentHandover[]>;
+  /** N146 — built-in/locked agent ids; unbacked edges from these are neutral, not orphan. */
+  builtinAgents?: ReadonlySet<string>;
   /** N135 — suppress node-click navigation when embedded in an edit/create surface. */
   readOnly?: boolean;
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
+  const builtins = builtinAgents ?? new Set<string>();
 
   const { nodes, edges } = useMemo(() => {
     const positions = computePositions(project);
@@ -133,27 +158,58 @@ export function FlowMap({
     const edges: Edge[] = project.flow.map((e) => {
       // N112 — a custom-state trigger renders its title and color.
       const state = project.states?.find((s) => s.id === e.on);
+      // N144/N146 — the diagram is non-binding. Three-way classification:
+      // backed (mode badge) · built-in source (neutral "not backed") · orphan
+      // (red ⚠, a custom source the user can add a handover to). Custom-state
+      // triggers are resolved to canonical before matching (N146).
+      const { backing, handover } = classifyEdge(e, handoversByAgent, builtins, project.states);
+      const base = state?.title ?? e.on ?? "";
+      let tag: string;
+      let stroke: string;
+      let labelFill: string;
+      let dashed = false;
+      if (backing === "backed" && handover) {
+        tag = `· ${handover.mode}`;
+        stroke = handover.mode === "auto" ? theme.color.green : theme.color.accent;
+        labelFill = state?.color ?? theme.color.textMuted;
+      } else if (backing === "builtin-source") {
+        tag = "· not backed (built-in)";
+        stroke = theme.color.textMuted;
+        labelFill = theme.color.textMuted;
+        dashed = true;
+      } else {
+        tag = "⚠ orphan";
+        stroke = theme.color.red;
+        labelFill = theme.color.red;
+        dashed = true;
+      }
       return {
         id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
         source: e.from,
         target: e.to,
         animated: true,
-        label: state?.title ?? e.on ?? "",
-        labelStyle: {
-          fill: state?.color ?? theme.color.textMuted,
-          fontFamily: theme.font.family,
-          fontSize: 10,
-        },
+        label: base ? `${base}  ${tag}` : tag,
+        labelStyle: { fill: labelFill, fontFamily: theme.font.family, fontSize: 10 },
         labelBgStyle: { fill: theme.color.surface },
-        style: { stroke: state?.color ?? theme.color.border },
+        style: { stroke, ...(dashed ? { strokeDasharray: "5 4" } : {}) },
       };
     });
 
     return { nodes, edges };
-  }, [project, theme, highlightNodes, secondaryHighlightNodes]);
+  }, [project, theme, highlightNodes, secondaryHighlightNodes, handoversByAgent, builtins]);
+
+  const hasEdges = project.flow.length > 0;
 
   return (
     <MapBox>
+      {hasEdges ? (
+        <Legend>
+          <span style={{ color: theme.color.green }}>● auto</span>
+          <span style={{ color: theme.color.accent }}>● gated</span>
+          <span style={{ color: theme.color.textMuted }}>not backed (built-in)</span>
+          <span style={{ color: theme.color.red }}>⚠ orphan</span>
+        </Legend>
+      ) : null}
       <ReactFlow
         nodes={nodes}
         edges={edges}
