@@ -65,9 +65,57 @@ test("collectArtifacts emits the composed prompt as a command (and skips when no
 test("skill target wraps the composed prompt in SKILL.md frontmatter", () => {
   const a = collectArtifacts({ ...AGENT, command: { install: true, as: "skill" } });
   assert.equal(a.commands[0].as, "skill");
+  // N153 — description is JSON-stringified (YAML-safe quoted scalar).
   assert.match(
     a.commands[0].body,
-    /^---\nname: task-web-tester\ndescription: Drives chrome\n---\n/,
+    /^---\nname: task-web-tester\ndescription: "Drives chrome"\n---\n/,
+  );
+});
+
+test("N153: skill description with YAML metacharacters stays valid frontmatter", () => {
+  const a = collectArtifacts({
+    ...AGENT,
+    description: "Drives: chrome #1 [beta]",
+    command: { install: true, as: "skill" },
+  });
+  // the colon/hash/brackets are safely quoted, not raw
+  assert.match(a.commands[0].body, /\ndescription: "Drives: chrome #1 \[beta\]"\n/);
+});
+
+test("N153: empty composed prompt → no command emitted (only non-text modules)", () => {
+  const registry = {
+    m: { id: "m", title: "M", source: "builtin", kind: "mcp-server", name: "x", config: {} },
+  };
+  const a = collectArtifacts(
+    { id: "custom:empty", title: "E", modules: ["m"], command: { install: true, as: "command" } },
+    registry,
+  );
+  assert.equal(a.commands.length, 0, "no command for an empty prompt");
+  assert.equal(a.mcpServers.length, 1, "the mcp-server artifact is still collected");
+});
+
+test("N153: command-as-skill collides with a skill module of the same name", () => {
+  const dir = tmp();
+  // agent A contributes a skill module named "task-foo"
+  applyArtifacts(
+    { mcpServers: [], hooks: [], skills: [{ name: "task-foo", content: "x" }], commands: [] },
+    dir,
+    "agentA",
+  );
+  // agent B installs a command AS A SKILL deriving the same name → same .claude/skills path
+  assert.throws(
+    () =>
+      applyArtifacts(
+        {
+          mcpServers: [],
+          hooks: [],
+          skills: [],
+          commands: [{ name: "task-foo", body: "y", as: "skill" }],
+        },
+        dir,
+        "agentB",
+      ),
+    /already managed by agent 'agentA'/,
   );
 });
 

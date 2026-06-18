@@ -48,7 +48,18 @@ const LegendItem = styled.span<{ $color: string }>`
   }
 `;
 
-const KINDS = ["section", "include", "mcp-server", "hook", "skill"] as const;
+// N154 — include the bundle + behavior-as-data kinds so an agent carrying a
+// handover / status-transition / bundle node surfaces it in the legend.
+const KINDS = [
+  "section",
+  "include",
+  "mcp-server",
+  "hook",
+  "skill",
+  "bundle",
+  "status-transition",
+  "handover",
+] as const;
 
 export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Registry }) {
   const theme = useTheme();

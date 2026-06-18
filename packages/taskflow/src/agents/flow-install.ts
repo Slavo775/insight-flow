@@ -65,7 +65,9 @@ export function flowArtifacts(flow: Project): AgentArtifacts {
     if (flowHandovers.length && a.commands.length === 0) {
       a.commands.push({
         name: deriveCommandName(def.id),
-        body: composeAgent(def, registry, flowHandovers),
+        // N153 — append `$ARGUMENTS` for parity with init's claude provider, so
+        // overwriting a built-in source's command keeps slash-command arg handling.
+        body: `${composeAgent(def, registry, flowHandovers)}\n\n$ARGUMENTS\n`,
         as: "command",
       });
     }

@@ -207,11 +207,21 @@ export function collectArtifacts(
   if (def.command?.install) {
     const name = deriveCommandName(def.id);
     const prompt = composeAgent(def, registry, extraHandovers);
-    const body =
-      def.command.as === "skill"
-        ? `---\nname: ${name}\ndescription: ${def.description ?? def.title}\n---\n\n${prompt}`
-        : prompt;
-    out.commands.push({ name, body, as: def.command.as });
+    // N153 — don't emit a blank command/skill: an agent of only non-text
+    // modules composes to an empty prompt.
+    if (!prompt.trim()) {
+      console.error(
+        `warning: agent '${def.id}' composes to an empty prompt — skipping its command`,
+      );
+    } else {
+      // N153 — JSON.stringify yields a YAML-safe double-quoted scalar, so a `:`
+      // or other metacharacter in the description can't break the frontmatter.
+      const body =
+        def.command.as === "skill"
+          ? `---\nname: ${name}\ndescription: ${JSON.stringify(def.description ?? def.title)}\n---\n\n${prompt}`
+          : prompt;
+      out.commands.push({ name, body, as: def.command.as });
+    }
   }
   return out;
 }

@@ -199,6 +199,8 @@ export interface ProjectDto {
   revision?: string;
   /** N112 — per-flow custom states (display aliases onto canonical statuses). */
   states?: { id: string; title: string; color?: string; mapsTo: string }[];
+  /** N128/N155 — the flow's own status set (drives flow-aware trigger pickers). */
+  statuses?: FlowStatus[];
   agentTitles: Record<string, string>;
   installModules: { id: string; title: string; kind: string }[];
 }

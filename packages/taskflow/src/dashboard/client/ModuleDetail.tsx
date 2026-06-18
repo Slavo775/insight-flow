@@ -236,6 +236,41 @@ export function KindPanels({ module }: { module: ModuleDto }) {
           </BundleChips>
         </Panel>
       );
+    // N154 — N128/N142 behavior-as-data kinds: show their fields.
+    case "status-transition":
+      return (
+        <Panel>
+          <PanelTitle>Status transition</PanelTitle>
+          <KV>
+            <dt>Agent</dt>
+            <dd>{module.agent}</dd>
+            <dt>Sets</dt>
+            <dd>{module.sets}</dd>
+            <dt>From</dt>
+            <dd>{module.from ?? "(any status)"}</dd>
+          </KV>
+        </Panel>
+      );
+    case "handover":
+      return (
+        <Panel>
+          <PanelTitle>Handover</PanelTitle>
+          <KV>
+            <dt>To</dt>
+            <dd>{module.to}</dd>
+            <dt>On</dt>
+            <dd>{module.on ?? "(direct handoff)"}</dd>
+            <dt>Mode</dt>
+            <dd>{module.mode ?? "gated"}</dd>
+            {module.label ? (
+              <>
+                <dt>Label</dt>
+                <dd>{module.label}</dd>
+              </>
+            ) : null}
+          </KV>
+        </Panel>
+      );
     default:
       return null;
   }
@@ -297,6 +332,10 @@ function facetLabel(module: ModuleDto): string {
       return `skill: ${module.name}`;
     case "bundle":
       return `${module.modules?.length ?? 0} bundled modules`;
+    case "status-transition":
+      return `sets ${module.sets}`;
+    case "handover":
+      return `→ ${module.to} (${module.mode ?? "gated"})`;
     default:
       return module.kind;
   }

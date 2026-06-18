@@ -25,8 +25,11 @@ export const USER_SPACE_DIRS = ["modules", "agents", "projects"] as const;
  * N119 — the LOCKED tier: shipped definitions that may NOT be ejected/overridden
  * (read-only even in user space). The cross-cutting baseline (N98) plus, later,
  * status-transition modules (N128). Everything else built-in is ejectable.
+ * N156 — the id set is shared with the client via `core/locked.ts` (re-exported
+ * here so existing importers are unaffected).
  */
-export const LOCKED_MODULE_IDS = new Set(["security", "enforcement", "protocol"]);
+export { LOCKED_MODULE_IDS } from "../core/locked.js";
+import { LOCKED_MODULE_IDS } from "../core/locked.js";
 
 export function isLockedModuleId(id: string): boolean {
   return LOCKED_MODULE_IDS.has(id);

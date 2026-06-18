@@ -6,7 +6,9 @@
 // Locked by id (the cross-cutting baseline trio) OR by kind: a SHIPPED
 // (non-custom) `status-transition` / `handover` module is read-only; custom
 // (`custom:`) modules of those kinds are full CRUD.
-export const LOCKED_MODULE_IDS = new Set(["security", "enforcement", "protocol"]);
+// N156 — shared with the server (agents/user-registry) via core/locked.ts.
+export { LOCKED_MODULE_IDS } from "../../core/locked.js";
+import { LOCKED_MODULE_IDS } from "../../core/locked.js";
 
 export function isLockedModuleClient(m: { id: string; kind: string }): boolean {
   if (LOCKED_MODULE_IDS.has(m.id)) return true;

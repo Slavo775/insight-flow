@@ -1,0 +1,41 @@
+{
+  "taskId": "N151",
+  "reviews": [
+    {
+      "startedAt": "2026-06-18T18:09:16.300Z",
+      "endedAt": "2026-06-18T18:18:14.453Z",
+      "verdict": "fix-needed",
+      "comment": "Blocker: /log/events async req.on(end) callback unguarded past JSON.parse (eventStore.insert + master-forward) — in-scope, can still crash. Boundary + task-flow + oversize + regression test are solid.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-18T19:07:13.034Z",
+        "endedAt": "2026-06-18T19:09:44.669Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts"
+        ],
+        "comment": "Fixed blocker: guarded /log/events post-parse callback (eventStore.insert + master push) → 500. All 3 async body callbacks now guarded. 254 tests green.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-18T19:32:54.594Z",
+      "endedAt": "2026-06-18T19:35:14.328Z",
+      "verdict": "approved",
+      "comment": "Round 2: blocker resolved — all 3 async body callbacks guarded; 254 tests green. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-18T19:51:49.632Z",
+      "endedAt": "2026-06-18T19:57:33.079Z",
+      "verdict": "approved",
+      "comment": "Owner approved; authorized commit/push/PR/merge via gh.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
