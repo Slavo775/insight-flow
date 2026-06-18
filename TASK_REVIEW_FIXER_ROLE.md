@@ -35,6 +35,10 @@ SCOPE GUARD
 - If the work requires touching files outside the declared task scope, stop and ask the human.
 - Ambiguous spec → ask, do not guess.
 
+## Handover
+
+When your work is complete once the task is `fixed`, hand over to `task-review`: stop and get an explicit human go-ahead before invoking `/task-review`.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 
