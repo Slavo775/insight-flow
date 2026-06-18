@@ -614,6 +614,239 @@
       "mrUrl": null,
       "mergedAt": "2026-06-18T09:19:51.241Z",
       "flowId": "default"
+    },
+    {
+      "id": "N147",
+      "title": "edge-level handover on ProjectFlowEdge (project-scoped, trigger-independent)",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N147-edge-level-handover-on-projectflowedge-project-sco",
+      "createdAt": "2026-06-18T12:15:57.417Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T12:15:57.417Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T12:34:45.087Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T12:44:26.645Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T13:15:19.536Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T13:21:52.706Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T15:26:15.589Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T15:27:11.673Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T12:34:45.088Z",
+        "completedAt": "2026-06-18T12:44:26.646Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/flow-status.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/test/flow-statuses.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "flows",
+        "schema",
+        "core"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N148",
+      "title": "flow-editor relation picker — status change vs handover (auto/gated)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N148-flow-editor-relation-picker-status-change-vs-hando",
+      "createdAt": "2026-06-18T12:15:57.508Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T12:15:57.508Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T12:44:26.729Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T13:09:23.795Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T13:15:19.624Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T13:21:52.793Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T15:26:15.678Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T15:27:11.756Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T12:44:26.730Z",
+        "completedAt": "2026-06-18T13:09:23.796Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "flows",
+        "dashboard",
+        "flow-editor"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N149",
+      "title": "install-time handover composition from flow edges",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N149-install-time-handover-composition-from-flow-edges",
+      "createdAt": "2026-06-18T12:15:57.597Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T12:15:57.597Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T13:09:23.888Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T13:15:19.715Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-18T13:21:52.879Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-18T14:13:27.667Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-18T14:20:21.532Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T14:40:54.156Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T14:41:59.188Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T15:26:15.768Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T15:27:11.843Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": "2026-06-18T13:09:23.889Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "flows",
+        "install",
+        "compose"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

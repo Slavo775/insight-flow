@@ -291,6 +291,103 @@ test("N142: handover schema defaults mode to 'gated' when omitted", () => {
   assert.equal(parsed.mode, "gated");
 });
 
+test("N149: composeAgent merges extra (flow) handovers into one '## Handover' section", () => {
+  const registry = {
+    body: {
+      id: "body",
+      title: "B",
+      source: "builtin",
+      kind: "section",
+      heading: "## Role",
+      body: "x",
+    },
+    h: {
+      id: "h",
+      title: "H",
+      source: "builtin",
+      kind: "handover",
+      to: "task-git",
+      on: "implemented",
+      mode: "auto",
+    },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["body", "h"] }, registry, [
+    { to: "custom:qa", on: "approved", mode: "gated" },
+  ]);
+  assert.equal(md.match(/## Handover/g)?.length, 1, "one merged Handover section");
+  assert.ok(md.includes("`task-git`"), "agent-module handover present");
+  assert.ok(md.includes("`custom:qa`"), "flow edge handover merged in");
+});
+
+test("N149: extra handovers append a '## Handover' section when the agent declares none", () => {
+  const registry = {
+    body: {
+      id: "body",
+      title: "B",
+      source: "builtin",
+      kind: "section",
+      heading: "## Role",
+      body: "x",
+    },
+  };
+  const md = composeAgent({ id: "x", title: "X", modules: ["body"] }, registry, [
+    { to: "task-git", mode: "auto" },
+  ]);
+  assert.ok(md.includes("## Handover"), "section appended");
+  assert.ok(md.includes("invoke `/task-git` directly"), "auto wording");
+});
+
+test("N149: no extra handovers leaves composition unchanged (drift-safe)", () => {
+  const registry = {
+    body: {
+      id: "body",
+      title: "B",
+      source: "builtin",
+      kind: "section",
+      heading: "## Role",
+      body: "x",
+    },
+  };
+  const def = { id: "x", title: "X", modules: ["body"] };
+  assert.equal(composeAgent(def, registry), composeAgent(def, registry, []));
+  assert.ok(!composeAgent(def, registry).includes("## Handover"));
+});
+
+test("N149 fix: flowArtifacts emits a command for a built-in handover SOURCE (rewrites its file)", async () => {
+  const { flowArtifacts } = await import("../dist/index.js");
+  // taskmaster is built-in (no command.install); a flow handover from it must
+  // still produce a command artifact so install rewrites .claude/commands/taskmaster.md.
+  const flow = {
+    id: "custom:t",
+    title: "T",
+    agents: ["taskmaster", "task-git"],
+    flow: [{ from: "taskmaster", to: "task-git", on: "ready", handover: { mode: "auto" } }],
+    install: [],
+    states: [],
+  };
+  const cmd = flowArtifacts(flow).commands.find((c) => c.name === "taskmaster");
+  assert.ok(cmd, "a command is emitted for the built-in handover source");
+  assert.ok(cmd.body.includes("## Handover"), "carries a Handover section");
+  assert.ok(cmd.body.includes("/task-git"), "lists the flow handover target");
+});
+
+test("N149 fix: no command emitted for a non-source agent without command.install", async () => {
+  const { flowArtifacts } = await import("../dist/index.js");
+  // task-git is the TARGET (not a source) and not command-installed → no forced command.
+  const flow = {
+    id: "custom:t2",
+    title: "T2",
+    agents: ["taskmaster", "task-git"],
+    flow: [{ from: "taskmaster", to: "task-git", on: "ready", handover: { mode: "auto" } }],
+    install: [],
+    states: [],
+  };
+  assert.equal(
+    flowArtifacts(flow).commands.find((c) => c.name === "task-git"),
+    undefined,
+  );
+});
+
 test("N94: every shipped role inlines the actions block instead of including AGENT_EVENTS.md", () => {
   for (const [id, file] of Object.entries(ROLE_FILES)) {
     const committed = readFileSync(resolve(repoRoot, file), "utf-8");

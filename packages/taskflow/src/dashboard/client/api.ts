@@ -188,7 +188,8 @@ export interface ProjectDto {
   /** N121 — true when a user-space override shadows the shipped definition. */
   ejected?: boolean;
   agents: string[];
-  flow: { from: string; to: string; on?: string }[];
+  /** N147 — `handover` marks the relation as a handover (project-scoped, independent of `on`). */
+  flow: { from: string; to: string; on?: string; handover?: { mode: "auto" | "gated" } }[];
   install: string[];
   /** N122 — the flow's main/entry agent(s); empty ⇒ not selectable by agent. */
   entryAgents?: string[];

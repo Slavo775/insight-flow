@@ -452,6 +452,15 @@ export const ProjectFlowEdgeSchema = z.object({
   // at the field level — the per-project superRefine constrains it to the
   // canonical enum ∪ the flow's own custom state ids.
   on: z.string().min(1).optional(),
+  // N147 — edge-level handover (PROJECT-SCOPED): when present, this relation is
+  // a handover — the source agent hands work to `to`, and at flow-install time
+  // (N149) the source agent's emitted prompt gains a `## Handover` section.
+  // Independent of `on`: a relation may be a plain status-change (trigger only),
+  // a pure handover (no trigger), or both. `mode` governs whether the agent
+  // chains the next command in-session (`auto`) or stops for an explicit human
+  // go-ahead (`gated`, the default). Stored on the edge, not the agent, so it
+  // works for built-in/locked source agents without mutating the shared agent.
+  handover: z.object({ mode: z.enum(["auto", "gated"]).default("gated") }).optional(),
 });
 
 // N112 — a per-flow custom state: a display alias for exactly one canonical
