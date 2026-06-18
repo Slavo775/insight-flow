@@ -94,6 +94,42 @@ test("N128: empty statuses falls back to the canonical universe (back-compat)", 
   assert.equal(ProjectSchema.safeParse(legacy).success, true);
 });
 
+// ---- N147 edge-level handover (project-scoped, trigger-independent) ----------
+
+test("N147: edge handover parses; mode defaults to gated; independent of trigger", () => {
+  // pure handover (no trigger)
+  const pure = ProjectSchema.safeParse({
+    ...baseFlow,
+    flow: [{ from: "a", to: "b", handover: { mode: "auto" } }],
+  });
+  assert.equal(pure.success, true);
+  assert.equal(pure.data.flow[0].handover.mode, "auto");
+
+  // handover + trigger together (both)
+  const both = ProjectSchema.safeParse({
+    ...baseFlow,
+    flow: [{ from: "a", to: "b", on: "implemented", handover: { mode: "gated" } }],
+  });
+  assert.equal(both.success, true);
+
+  // mode defaults to gated when the handover object omits it
+  const dflt = ProjectSchema.safeParse({
+    ...baseFlow,
+    flow: [{ from: "a", to: "b", handover: {} }],
+  });
+  assert.equal(dflt.success, true);
+  assert.equal(dflt.data.flow[0].handover.mode, "gated");
+});
+
+test("N147: edges without handover validate unchanged (back-compat)", () => {
+  const legacy = ProjectSchema.safeParse({
+    ...baseFlow,
+    flow: [{ from: "a", to: "b", on: "implemented" }],
+  });
+  assert.equal(legacy.success, true);
+  assert.equal(legacy.data.flow[0].handover, undefined);
+});
+
 test("N128: duplicate status ids are rejected", () => {
   const dup = ProjectSchema.safeParse({
     ...baseFlow,

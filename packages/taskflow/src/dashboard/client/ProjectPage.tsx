@@ -3,7 +3,7 @@
 // lifecycle flow map. N108 — multiple named flows: the sidebar lists every
 // flow (shipped default badged), /project/:id deep-links, custom flows are
 // deletable; the default stays the one the task maps bind to.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import {
@@ -24,7 +24,6 @@ import { kindColor } from "./components/CompositionMap.js";
 import { KindDot, MenuLink } from "./ModulesPage.js";
 import { useRegistry } from "./registry.js";
 import { TASK_STATUSES } from "../../core/statuses.js";
-import type { AgentHandover } from "../../core/flow-status.js";
 import { tokens } from "./theme.js";
 
 const TASK_STATUS_OPTIONS: readonly string[] = TASK_STATUSES;
@@ -119,31 +118,8 @@ export function ProjectPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { registry } = useRegistry(); // N114 — agents for the editor's Add palette
-  // N144 — each agent's declared handovers, joined from the registry (the
-  // AgentModuleRef carries `kind` but not the handover fields, so look the full
-  // module up by id). Drives the flow map's auto/gated badges + orphan warnings.
-  const handoversByAgent = useMemo<Record<string, AgentHandover[]>>(() => {
-    if (!registry) return {};
-    const byId = new Map(registry.modules.map((m) => [m.id, m]));
-    const out: Record<string, AgentHandover[]> = {};
-    for (const agent of registry.agents) {
-      const list: AgentHandover[] = [];
-      for (const ref of agent.modules) {
-        if (ref.kind !== "handover") continue;
-        const mod = byId.get(ref.id);
-        if (mod?.to) list.push({ to: mod.to, on: mod.on, mode: mod.mode ?? "gated" });
-      }
-      if (list.length) out[agent.id] = list;
-    }
-    return out;
-  }, [registry]);
-  // N146 — built-in/locked agents: their handovers can't be edited, so an
-  // unbacked edge from one of these is informational ("not backed (built-in)"),
-  // not a fixable orphan. `AgentDto.source` is "custom" for user agents.
-  const builtinAgents = useMemo<Set<string>>(
-    () => new Set((registry?.agents ?? []).filter((a) => a.source !== "custom").map((a) => a.id)),
-    [registry],
-  );
+  // N150 — edges self-define their handover (project-scoped, on the edge), so the
+  // map/editor no longer need an agent-module cross-check here.
   const [projects, setProjects] = useState<ProjectSummaryDto[] | null>(null);
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -466,8 +442,6 @@ export function ProjectPage() {
               project={project}
               states={draftStates.filter((s) => s.id && s.title)}
               allAgents={registry?.agents ?? []}
-              handoversByAgent={handoversByAgent}
-              builtinAgents={builtinAgents}
               onDraftChange={(next) => {
                 setDraft(next);
                 setDirty(true);
@@ -475,11 +449,7 @@ export function ProjectPage() {
             />
           </>
         ) : (
-          <FlowMap
-            project={project}
-            handoversByAgent={handoversByAgent}
-            builtinAgents={builtinAgents}
-          />
+          <FlowMap project={project} />
         )}
         {!isBuiltin && !editing ? (
           <Hint>

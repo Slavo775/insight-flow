@@ -7,13 +7,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  currentFlowNodes,
-  suggestNextSteps,
-  edgeHandover,
-  isEdgeBackedByHandover,
-  classifyEdge,
-} from "../dist/index.js";
+import { currentFlowNodes, suggestNextSteps } from "../dist/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const defaultProject = JSON.parse(
@@ -97,104 +91,6 @@ test("currentFlowNodes dedupes producers and preserves flow order", () => {
   ];
   assert.deepEqual(currentFlowNodes(flow, "s"), ["a", "d"]);
   assert.deepEqual(currentFlowNodes(flow, "missing"), []);
-});
-
-// N144 — diagram honesty: an edge is "backed" iff its `from` agent declares a
-// handover with matching `to` and `on`; otherwise it is an orphan edge.
-test("edgeHandover / isEdgeBackedByHandover match on (from→to, on)", () => {
-  const handovers = {
-    "task-implement": [
-      { to: "task-git", on: "implemented", mode: "auto" },
-      { to: "task-git", on: "changes-implemented", mode: "auto" },
-    ],
-    "task-analyze": [{ to: "taskmaster", mode: "gated" }],
-  };
-  // backed: exact (to, on) match → returns the handover (with its mode)
-  assert.deepEqual(
-    edgeHandover({ from: "task-implement", to: "task-git", on: "implemented" }, handovers),
-    {
-      to: "task-git",
-      on: "implemented",
-      mode: "auto",
-    },
-  );
-  assert.equal(
-    isEdgeBackedByHandover(
-      { from: "task-implement", to: "task-git", on: "implemented" },
-      handovers,
-    ),
-    true,
-  );
-  // trigger-less handover backs a trigger-less edge
-  assert.equal(isEdgeBackedByHandover({ from: "task-analyze", to: "taskmaster" }, handovers), true);
-  // orphan: right agent + target but wrong trigger
-  assert.equal(
-    isEdgeBackedByHandover({ from: "task-implement", to: "task-git", on: "pushed" }, handovers),
-    false,
-  );
-  // orphan: agent declares no handovers at all
-  assert.equal(
-    isEdgeBackedByHandover({ from: "task-git", to: "task-review", on: "pushed" }, handovers),
-    false,
-  );
-  assert.equal(edgeHandover({ from: "task-git", to: "task-review", on: "pushed" }, {}), undefined);
-});
-
-// N146 — custom-state aliases: an edge can trigger on a flow's custom state id
-// (e.g. `test-ready` mapsTo `ready`); a handover's `on` is canonical. The edge
-// must resolve through `states` before matching, else it falsely orphans.
-test("edgeHandover resolves custom-state aliases before matching (N146)", () => {
-  const handovers = { taskmaster: [{ to: "task-implement", on: "ready", mode: "gated" }] };
-  const states = [{ id: "test-ready", title: "Test ready", mapsTo: "ready" }];
-  const edge = { from: "taskmaster", to: "task-implement", on: "test-ready" };
-  // with states → the alias resolves to `ready` and the edge is backed
-  assert.deepEqual(edgeHandover(edge, handovers, states), {
-    to: "task-implement",
-    on: "ready",
-    mode: "gated",
-  });
-  assert.equal(isEdgeBackedByHandover(edge, handovers, states), true);
-  // back-compat: without states the raw trigger `test-ready` !== `ready` → no match
-  assert.equal(edgeHandover(edge, handovers), undefined);
-  assert.equal(isEdgeBackedByHandover(edge, handovers), false);
-});
-
-// N146 — three-way classification: backed | builtin-source | orphan.
-test("classifyEdge distinguishes backed, built-in-source, and orphan edges (N146)", () => {
-  const handovers = {
-    "custom:author": [{ to: "custom:reviewer", on: "ready", mode: "auto" }],
-    taskmaster: [{ to: "task-implement", on: "ready", mode: "gated" }],
-  };
-  const builtins = new Set(["taskmaster", "task-implement"]);
-  // backed — matching handover on a custom source
-  assert.equal(
-    classifyEdge({ from: "custom:author", to: "custom:reviewer", on: "ready" }, handovers, builtins)
-      .backing,
-    "backed",
-  );
-  // built-in source, unbacked target → informational, not a fixable orphan
-  assert.equal(
-    classifyEdge({ from: "taskmaster", to: "custom:test-agent", on: "ready" }, handovers, builtins)
-      .backing,
-    "builtin-source",
-  );
-  // custom source, no backing handover → genuine orphan
-  assert.equal(
-    classifyEdge({ from: "custom:author", to: "custom:other", on: "ready" }, handovers, builtins)
-      .backing,
-    "orphan",
-  );
-  // alias still resolves inside classifyEdge (built-in source + custom state)
-  const states = [{ id: "test-ready", title: "Test ready", mapsTo: "ready" }];
-  assert.equal(
-    classifyEdge(
-      { from: "taskmaster", to: "task-implement", on: "test-ready" },
-      handovers,
-      builtins,
-      states,
-    ).backing,
-    "backed",
-  );
 });
 
 // N112 — alias resolution: a custom state maps onto a canonical status; the

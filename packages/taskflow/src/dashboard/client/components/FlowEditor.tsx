@@ -25,12 +25,7 @@ import "@xyflow/react/dist/style.css";
 import styled, { useTheme } from "styled-components";
 import { TASK_STATUSES } from "../../../core/statuses.js";
 import { validateEdgeAddition } from "../../../core/flow-edit.js";
-import {
-  classifyEdge,
-  type FlowEdge,
-  type AgentHandover,
-  type FlowStateDef,
-} from "../../../core/flow-status.js";
+import type { FlowEdge } from "../../../core/flow-status.js";
 import type { ProjectDto } from "../api.js";
 import { computePositions } from "./FlowMap.js";
 import { Button } from "./Button.js";
@@ -88,26 +83,7 @@ const EditorError = styled.div`
   color: ${(p) => p.theme.color.red};
 `;
 
-// N144 — orphan-edge warning (edges no agent handover backs) + a small legend.
-const OrphanWarning = styled.div`
-  position: absolute;
-  bottom: ${(p) => p.theme.space.lg};
-  left: ${(p) => p.theme.space.lg};
-  z-index: 10;
-  max-width: 320px;
-  background: ${(p) => p.theme.color.bg};
-  border: 1px solid ${(p) => p.theme.color.red};
-  border-radius: ${(p) => p.theme.radius.lg};
-  padding: ${(p) => p.theme.space.md};
-  font-size: ${(p) => p.theme.font.size.xs};
-  color: ${(p) => p.theme.color.red};
-
-  ul {
-    margin: 4px 0 0;
-    padding-left: 16px;
-  }
-`;
-
+// N150 — relation legend (status-change vs handover auto/gated).
 const Legend = styled.div`
   position: absolute;
   bottom: ${(p) => p.theme.space.lg};
@@ -252,60 +228,46 @@ function TriggerOptions({ states }: { states?: { id: string; title: string }[] }
   );
 }
 
-function toReactFlowEdge(
-  e: FlowEdge,
-  theme: ReturnType<typeof useTheme>,
-  handoversByAgent: Record<string, AgentHandover[]> = {},
-  builtins: ReadonlySet<string> = new Set(),
-  states?: FlowStateDef[],
-): Edge {
-  // N144/N146 — three-way: backed (mode badge) · built-in source (neutral "not
-  // backed") · orphan (red ⚠, a custom source the user can wire). Custom-state
-  // triggers are resolved to canonical before matching. The diagram is non-binding.
-  const { backing, handover } = classifyEdge(e, handoversByAgent, builtins, states);
+function toReactFlowEdge(e: FlowEdge, theme: ReturnType<typeof useTheme>): Edge {
+  // N150 — the edge self-defines: a handover edge (carries `handover`) shows its
+  // auto/gated badge; a plain status-change edge shows just its trigger. No
+  // cross-check against agent modules, so no "orphan" concept here.
   const base = e.on ?? "";
-  let tag: string;
-  let stroke: string;
-  let labelFill: string;
-  let dashed = false;
-  if (backing === "backed" && handover) {
-    tag = `· ${handover.mode}`;
-    stroke = handover.mode === "auto" ? theme.color.green : theme.color.accent;
-    labelFill = theme.color.textMuted;
-  } else if (backing === "builtin-source") {
-    tag = "· not backed (built-in)";
-    stroke = theme.color.textMuted;
-    labelFill = theme.color.textMuted;
-    dashed = true;
-  } else {
-    tag = "⚠";
-    stroke = theme.color.red;
-    labelFill = theme.color.red;
-    dashed = true;
-  }
+  const ho = e.handover;
+  const tag = ho ? `· ${ho.mode}` : "";
+  const stroke = ho
+    ? ho.mode === "auto"
+      ? theme.color.green
+      : theme.color.accent
+    : theme.color.border;
+  const label = base && tag ? `${base}  ${tag}` : base || tag;
   return {
     id: `${e.from}->${e.to}:${e.on ?? "handoff"}`,
     source: e.from,
     target: e.to,
-    label: base ? `${base}  ${tag}` : tag,
-    data: { on: e.on },
-    labelStyle: { fill: labelFill, fontFamily: theme.font.family, fontSize: 10 },
+    label,
+    // N148 — carry the edge's own handover so it round-trips through the draft.
+    data: { on: e.on, handover: ho },
+    labelStyle: { fill: theme.color.textMuted, fontFamily: theme.font.family, fontSize: 10 },
     labelBgStyle: { fill: theme.color.surface },
-    style: { stroke, ...(dashed ? { strokeDasharray: "5 4" } : {}) },
+    style: { stroke },
   };
 }
 
 function toFlowEdge(e: Edge): FlowEdge {
-  const on = (e.data as { on?: string } | undefined)?.on;
-  return { from: e.source, to: e.target, ...(on ? { on } : {}) };
+  const data = e.data as { on?: string; handover?: { mode: "auto" | "gated" } } | undefined;
+  return {
+    from: e.source,
+    to: e.target,
+    ...(data?.on ? { on: data.on } : {}),
+    ...(data?.handover ? { handover: data.handover } : {}),
+  };
 }
 
 export function FlowEditor({
   project,
   states,
   allAgents = [],
-  handoversByAgent = {},
-  builtinAgents,
   onDraftChange,
 }: {
   project: ProjectDto;
@@ -313,27 +275,22 @@ export function FlowEditor({
   states?: { id: string; title: string }[];
   /** N114 — every composed agent (built-in + custom) for the Add palette + node labels. */
   allAgents?: AgentChoice[];
-  /** N144 — declared handovers per agent; backs edges with an auto/gated badge + flags orphans. */
-  handoversByAgent?: Record<string, AgentHandover[]>;
-  /** N146 — built-in/locked agent ids; unbacked edges from these are neutral, not orphan. */
-  builtinAgents?: ReadonlySet<string>;
   /** Fired after every agent, position, or edge change with the full draft. */
   onDraftChange: (draft: FlowDraft) => void;
 }) {
   const theme = useTheme();
-  const builtins = builtinAgents ?? new Set<string>();
-  // N146 — saved custom states drive alias resolution for edge classification.
-  const flowStates = project.states as FlowStateDef[] | undefined;
   const [pending, setPending] = useState<Connection | null>(null);
   const [pendingTrigger, setPendingTrigger] = useState<string>(DIRECT_HANDOFF);
+  // N148 — the draft handover for the relation being created (null = status-change only).
+  const [pendingHandover, setPendingHandover] = useState<{ mode: "auto" | "gated" } | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   // N114 — node-click popover (Remove from flow), positioned at the click.
   const [nodeMenu, setNodeMenu] = useState<{ id: string; x: number; y: number } | null>(null);
-  // N115 — edge-click modal (change trigger / delete); `trigger` is the draft
-  // selection, `error` an inline validation message.
+  // N115/N148 — edge-click modal: trigger, handover (auto/gated or null), inline error.
   const [edgeMenu, setEdgeMenu] = useState<{
     id: string;
     trigger: string;
+    handover: { mode: "auto" | "gated" } | null;
     error?: string;
   } | null>(null);
   // N134 — the draft's start-point agents (the flow's entryAgents). Seeded from
@@ -371,8 +328,7 @@ export function FlowEditor({
   }, [project.id]); // eslint-disable-line
 
   const initialEdges: Edge[] = useMemo(
-    () =>
-      project.flow.map((e) => toReactFlowEdge(e, theme, handoversByAgent, builtins, flowStates)),
+    () => project.flow.map((e) => toReactFlowEdge(e, theme)),
     // Seeded once per project identity, like the nodes.
     // eslint-disable-next-line
     [project.id],
@@ -477,6 +433,7 @@ export function FlowEditor({
       from: editEdge.source,
       to: editEdge.target,
       ...(on ? { on } : {}),
+      ...(edgeMenu.handover ? { handover: edgeMenu.handover } : {}),
     };
     // A trigger change is remove-old + add-new: validate against the OTHER
     // edges so the same duplicate-(from,to,on) rule applies.
@@ -486,7 +443,7 @@ export function FlowEditor({
       setEdgeMenu({ ...edgeMenu, error: rejection });
       return;
     }
-    const replaced = toReactFlowEdge(candidate, theme, handoversByAgent, builtins, flowStates);
+    const replaced = toReactFlowEdge(candidate, theme);
     const next = edges.map((e) => (e.id === edgeMenu.id ? replaced : e));
     setEdges(next);
     setEdgeMenu(null);
@@ -508,6 +465,7 @@ export function FlowEditor({
       from: pending.source,
       to: pending.target,
       ...(on ? { on } : {}),
+      ...(pendingHandover ? { handover: pendingHandover } : {}),
     };
     const rejection = validateEdgeAddition(edges.map(toFlowEdge), candidate);
     if (rejection) {
@@ -515,12 +473,10 @@ export function FlowEditor({
       setPending(null);
       return;
     }
-    const next = [
-      ...edges,
-      toReactFlowEdge(candidate, theme, handoversByAgent, builtins, flowStates),
-    ];
+    const next = [...edges, toReactFlowEdge(candidate, theme)];
     setEdges(next);
     setPending(null);
+    setPendingHandover(null);
     setEditorError(null);
     report(nodes, next);
   };
@@ -537,13 +493,6 @@ export function FlowEditor({
       );
     }
   };
-
-  // N144/N146 — diagram honesty: only GENUINE orphans (a custom source the user
-  // can wire) warrant a warning. Built-in-source edges can't be backed and are
-  // shown neutrally, not listed as fixable problems.
-  const orphanEdges = edges
-    .map(toFlowEdge)
-    .filter((e) => classifyEdge(e, handoversByAgent, builtins, flowStates).backing === "orphan");
 
   return (
     <EditBox>
@@ -589,6 +538,23 @@ export function FlowEditor({
           <select value={pendingTrigger} onChange={(e) => setPendingTrigger(e.target.value)}>
             <TriggerOptions states={states} />
           </select>
+          <label>
+            <input
+              type="checkbox"
+              checked={pendingHandover !== null}
+              onChange={(e) => setPendingHandover(e.target.checked ? { mode: "gated" } : null)}
+            />{" "}
+            Handover to this agent
+          </label>
+          {pendingHandover ? (
+            <select
+              value={pendingHandover.mode}
+              onChange={(e) => setPendingHandover({ mode: e.target.value as "auto" | "gated" })}
+            >
+              <option value="gated">gated (ask first)</option>
+              <option value="auto">auto (chain)</option>
+            </select>
+          ) : null}
           <Button type="button" $variant="primary" onClick={confirmPending}>
             Add edge
           </Button>
@@ -614,6 +580,37 @@ export function FlowEditor({
                 <TriggerOptions states={states} />
               </select>
             </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={edgeMenu.handover !== null}
+                onChange={(e) =>
+                  setEdgeMenu({
+                    ...edgeMenu,
+                    handover: e.target.checked ? { mode: "gated" } : null,
+                    error: undefined,
+                  })
+                }
+              />{" "}
+              Handover to this agent
+            </label>
+            {edgeMenu.handover ? (
+              <label>
+                Mode
+                <select
+                  value={edgeMenu.handover.mode}
+                  onChange={(e) =>
+                    setEdgeMenu({
+                      ...edgeMenu,
+                      handover: { mode: e.target.value as "auto" | "gated" },
+                    })
+                  }
+                >
+                  <option value="gated">gated (ask first)</option>
+                  <option value="auto">auto (chain)</option>
+                </select>
+              </label>
+            ) : null}
             {edgeMenu.error ? <ModalError>{edgeMenu.error}</ModalError> : null}
             <ModalActions>
               <Button type="button" $variant="primary" onClick={saveEdgeTrigger}>
@@ -631,27 +628,10 @@ export function FlowEditor({
       ) : null}
       {editorError ? <EditorError role="alert">{editorError}</EditorError> : null}
       <Legend>
-        <span style={{ color: theme.color.green }}>● auto</span>
-        <span style={{ color: theme.color.accent }}>● gated</span>
-        <span style={{ color: theme.color.textMuted }}>not backed (built-in)</span>
-        <span style={{ color: theme.color.red }}>⚠ orphan</span>
+        <span style={{ color: theme.color.textMuted }}>— status change</span>
+        <span style={{ color: theme.color.green }}>● handover (auto)</span>
+        <span style={{ color: theme.color.accent }}>● handover (gated)</span>
       </Legend>
-      {orphanEdges.length ? (
-        <OrphanWarning role="alert">
-          ⚠ {orphanEdges.length} edge{orphanEdges.length > 1 ? "s" : ""} not backed by an agent
-          handover — the agent won't take {orphanEdges.length > 1 ? "these steps" : "this step"}.
-          Add the handover on the source agent, or remove the edge:
-          <ul>
-            {orphanEdges.slice(0, 6).map((e) => (
-              <li key={`${e.from}->${e.to}:${e.on ?? ""}`}>
-                {e.from} → {e.to}
-                {e.on ? ` (${e.on})` : ""}
-              </li>
-            ))}
-            {orphanEdges.length > 6 ? <li>…and {orphanEdges.length - 6} more</li> : null}
-          </ul>
-        </OrphanWarning>
-      ) : null}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -659,12 +639,16 @@ export function FlowEditor({
         onEdgesChange={handleEdgesChange}
         onNodeDragStop={() => report(nodes, edges)}
         onNodeClick={(e, node) => setNodeMenu({ id: node.id, x: e.clientX, y: e.clientY })}
-        onEdgeClick={(_, edge) =>
+        onEdgeClick={(_, edge) => {
+          const data = edge.data as
+            | { on?: string; handover?: { mode: "auto" | "gated" } }
+            | undefined;
           setEdgeMenu({
             id: edge.id,
-            trigger: ((edge.data as { on?: string } | undefined)?.on as string) ?? DIRECT_HANDOFF,
-          })
-        }
+            trigger: data?.on ?? DIRECT_HANDOFF,
+            handover: data?.handover ?? null,
+          });
+        }}
         onPaneClick={() => {
           setNodeMenu(null);
           setEdgeMenu(null);
@@ -676,6 +660,7 @@ export function FlowEditor({
             return;
           }
           setPendingTrigger(DIRECT_HANDOFF);
+          setPendingHandover(null);
           setPending(connection);
         }}
         isValidConnection={(c) => c.source !== c.target}

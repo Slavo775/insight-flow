@@ -25,6 +25,7 @@
 // integration modules "<integration>/<slug>" ("testing/hook").
 import type { z } from "zod";
 import { AgentModuleSchema, ComposedAgentSchema, deriveCommandName } from "../core/schema/index.js";
+import type { AgentHandover } from "../core/flow-status.js";
 
 import security from "./modules/security.json";
 import enforcement from "./modules/enforcement.json";
@@ -185,6 +186,8 @@ export interface AgentArtifacts {
 export function collectArtifacts(
   def: ComposedAgent,
   registry: Record<string, AgentModule> = MODULE_REGISTRY,
+  // N149 — flow edge handovers merged into the agent's command/skill body.
+  extraHandovers: AgentHandover[] = [],
 ): AgentArtifacts {
   const out: AgentArtifacts = { mcpServers: [], hooks: [], skills: [], commands: [] };
   for (const mod of resolveModules(def, registry)) {
@@ -203,7 +206,7 @@ export function collectArtifacts(
   // require frontmatter (name + description); commands take the prompt verbatim.
   if (def.command?.install) {
     const name = deriveCommandName(def.id);
-    const prompt = composeAgent(def, registry);
+    const prompt = composeAgent(def, registry, extraHandovers);
     const body =
       def.command.as === "skill"
         ? `---\nname: ${name}\ndescription: ${def.description ?? def.title}\n---\n\n${prompt}`
@@ -292,14 +295,46 @@ function handoverSection(handovers: HandoverModule[]): Extract<AgentModule, { ki
   };
 }
 
+// N149 — fold the flow's project-scoped edge handovers (AgentHandover) into the
+// agent's own handover modules, deduped by (to, on, mode). Synthesizes minimal
+// handover modules so they render through the same `handoverSection`.
+function mergeHandovers(
+  moduleHandovers: HandoverModule[],
+  extra: AgentHandover[],
+): HandoverModule[] {
+  const extraAsModules: HandoverModule[] = extra.map((h, i) => ({
+    id: `flow-handover-${i}`,
+    title: "Flow handover",
+    source: "custom",
+    kind: "handover",
+    to: h.to,
+    ...(h.on ? { on: h.on } : {}),
+    mode: h.mode,
+  }));
+  const seen = new Set<string>();
+  const out: HandoverModule[] = [];
+  for (const h of [...moduleHandovers, ...extraAsModules]) {
+    const key = `${h.to}|${h.on ?? ""}|${h.mode}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(h);
+  }
+  return out;
+}
+
 export function composeAgent(
   def: ComposedAgent,
   registry: Record<string, AgentModule> = MODULE_REGISTRY,
+  // N149 — extra (flow edge) handovers merged into this agent's "## Handover"
+  // section at install time. Empty for the global/canonical compose, so
+  // `composeAgentById`'s drift-guarded output is unchanged.
+  extraHandovers: AgentHandover[] = [],
 ): string {
   const resolved = resolveModules(def, registry);
-  // All handover modules collapse into ONE "## Handover" section, emitted at the
-  // position of the first one (the rest map to null and drop out).
-  const handovers = resolved.filter((m): m is HandoverModule => m.kind === "handover");
+  // All handover modules collapse into ONE "## Handover" section (merged with any
+  // flow edge handovers), emitted at the position of the first one.
+  const moduleHandovers = resolved.filter((m): m is HandoverModule => m.kind === "handover");
+  const handovers = mergeHandovers(moduleHandovers, extraHandovers);
   let handoverEmitted = false;
   const mods = resolved
     .map((m) => {
@@ -315,6 +350,11 @@ export function composeAgent(
       (m): m is Extract<AgentModule, { kind: "section" | "include" }> =>
         m != null && (m.kind === "section" || m.kind === "include"),
     );
+  // N149 — agent has no handover module of its own but the flow adds handovers:
+  // append the section at the end so the installed prompt still carries it.
+  if (!handoverEmitted && handovers.length) {
+    mods.push(handoverSection(handovers));
+  }
 
   let out = "";
   mods.forEach((mod, i) => {

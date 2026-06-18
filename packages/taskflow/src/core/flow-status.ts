@@ -16,6 +16,13 @@ export interface FlowEdge {
   from: string;
   to: string;
   on?: string;
+  /**
+   * N147 — edge-level handover (project-scoped). Present ⇒ this relation is a
+   * handover (source agent hands to `to`); independent of `on`. `mode`: `auto`
+   * chains the next command in-session, `gated` stops for explicit human
+   * go-ahead. Consumed at flow-install time (N149) to build the agent's section.
+   */
+  handover?: { mode: "auto" | "gated" };
 }
 
 export interface FlowStateDef {
@@ -49,64 +56,13 @@ export function currentFlowNodes(
   return out;
 }
 
-// N142/N144 — a handover an agent declares (the authoritative, agent-owned
-// next step). The flow diagram is non-binding: an edge is "backed" when the
-// producing agent (`from`) actually declares a handover matching it, and
-// "orphan" otherwise (the diagram drew an edge no agent honors).
+// N142/N149 — a handover a source agent makes to a target. After N147/N150 the
+// authoritative source is the flow edge's own `handover` field (project-scoped);
+// this shape is reused by install-time composition (N149) to render the section.
 export interface AgentHandover {
   to: string;
   on?: string;
   mode: "auto" | "gated";
-}
-
-/**
- * The handover on `edge.from` that backs this edge (same `to` and `on`), if any.
- * N146 — the edge's trigger may be a flow custom-state id (e.g. `test-ready`);
- * a handover's `on` is always canonical (e.g. `ready`). Resolve the edge trigger
- * through the flow's `states` (via `resolveTrigger`) before comparing, so an
- * aliased edge still matches its backing handover. Omitting `states` keeps the
- * pre-N146 raw-compare behavior (back-compat).
- */
-export function edgeHandover(
-  edge: FlowEdge,
-  handoversByAgent: Record<string, AgentHandover[]>,
-  states?: FlowStateDef[],
-): AgentHandover | undefined {
-  const list = handoversByAgent[edge.from] ?? [];
-  const trigger = resolveTrigger(edge.on, states) ?? "";
-  return list.find((h) => h.to === edge.to && (h.on ?? "") === trigger);
-}
-
-/** True when the diagram edge is backed by a declared agent handover (N144). */
-export function isEdgeBackedByHandover(
-  edge: FlowEdge,
-  handoversByAgent: Record<string, AgentHandover[]>,
-  states?: FlowStateDef[],
-): boolean {
-  return edgeHandover(edge, handoversByAgent, states) !== undefined;
-}
-
-/**
- * N146 — three-way edge classification for the flow diagram:
- *  - `backed`         — a declared handover on the source agent matches the edge.
- *  - `builtin-source` — no match, but the source is a built-in/locked agent
- *                       whose handovers can't be edited, so the edge can never be
- *                       backed by the user. Informational, not an error.
- *  - `orphan`         — no match and the source is a custom agent the user CAN
- *                       add a handover to. A genuine, fixable orphan.
- */
-export type EdgeBacking = "backed" | "builtin-source" | "orphan";
-
-export function classifyEdge(
-  edge: FlowEdge,
-  handoversByAgent: Record<string, AgentHandover[]>,
-  builtinAgents: ReadonlySet<string>,
-  states?: FlowStateDef[],
-): { backing: EdgeBacking; handover?: AgentHandover } {
-  const handover = edgeHandover(edge, handoversByAgent, states);
-  if (handover) return { backing: "backed", handover };
-  if (builtinAgents.has(edge.from)) return { backing: "builtin-source" };
-  return { backing: "orphan" };
 }
 
 export interface NextStep {
