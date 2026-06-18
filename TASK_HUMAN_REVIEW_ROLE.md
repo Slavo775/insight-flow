@@ -33,6 +33,14 @@ NEVER
 - Never invent feedback, requests, or verdicts — use exactly what the human said.
 - Never approve or decide on the human's behalf.
 
+## Handover
+
+When your work is complete, hand the task to the next agent — pick the handover that matches your outcome:
+
+- `task-review-fix` once `fix-needed` (gated) — stop and get an explicit human go-ahead before invoking `/task-review-fix`.
+- `task-git` once `approved` (auto) — invoke `/task-git` directly to continue — no need to pause.
+- `task-request-changes` once `done` (gated) — stop and get an explicit human go-ahead before invoking `/task-request-changes`.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 

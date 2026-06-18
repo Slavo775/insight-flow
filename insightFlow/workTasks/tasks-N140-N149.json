@@ -169,6 +169,401 @@
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/105",
       "mergedAt": "2026-06-17T13:56:27.878Z",
       "flowId": "default"
+    },
+    {
+      "id": "N142",
+      "title": "handover module kind — schema + compose render + locked canonical set",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N142-handover-module-kind-schema-compose-render-locked-",
+      "createdAt": "2026-06-17T17:14:40.392Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T17:14:40.392Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T17:22:03.572Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T18:18:38.699Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T18:41:10.468Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T18:43:08.469Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T09:05:45.784Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T09:07:14.554Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T17:22:03.571Z",
+        "completedAt": "2026-06-17T18:18:38.700Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/agents/modules/handovers.json",
+          "packages/taskflow/src/agents/composed/*.json",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "schema",
+        "compose",
+        "core"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N143",
+      "title": "surface status-transition + handover in module/agent editors (CRUD, locked read-only)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N143-surface-status-transition-handover-in-module-agent",
+      "createdAt": "2026-06-17T17:14:40.478Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T17:14:40.478Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T18:18:51.739Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T18:23:46.305Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T18:41:10.554Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-17T18:43:08.557Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-17T18:47:31.525Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-17T19:11:12.175Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T09:00:38.135Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T09:03:42.646Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T09:05:45.873Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T09:07:14.643Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T18:18:51.741Z",
+        "completedAt": "2026-06-17T18:23:46.306Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "dashboard",
+        "crud",
+        "ui"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N144",
+      "title": "flow-diagram honesty — auto/gated badges + orphan-edge warnings",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N144-flow-diagram-honesty-auto-gated-badges-orphan-edge",
+      "createdAt": "2026-06-17T17:14:40.583Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T17:14:40.583Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T18:23:46.387Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T18:33:51.460Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T18:41:10.639Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T18:43:08.642Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T09:05:45.957Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T09:07:14.726Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T18:23:46.388Z",
+        "completedAt": "2026-06-17T18:33:51.462Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/flow-status.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/test/flow-status.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "dashboard",
+        "flow-editor"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N145",
+      "title": "prompt wiring — auto-vs-gated handover language + in-session chaining",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N145-prompt-wiring-auto-vs-gated-handover-language-in-s",
+      "createdAt": "2026-06-17T17:14:40.681Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-17T17:14:40.681Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-17T18:33:51.545Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-17T18:33:51.629Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-17T18:41:10.727Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-17T18:43:08.730Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T09:05:46.041Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T09:07:14.810Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-17T18:33:51.547Z",
+        "completedAt": "2026-06-17T18:33:51.630Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/compose.ts",
+          "AGENT_PROTOCOL.md",
+          "AGENT_ENFORCEMENT.md",
+          "TASK_*_ROLE.md",
+          "packages/taskflow/templates/roles/*",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "prompts",
+        "agents"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N146",
+      "title": "orphan-edge over-flagging — resolve custom-state aliases + soften built-in-source edges",
+      "type": "fix",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N146-orphan-edge-over-flagging-resolve-custom-state-ali",
+      "createdAt": "2026-06-18T07:37:08.651Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T07:37:08.651Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T07:40:48.407Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-18T08:57:47.105Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T09:00:38.221Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T09:03:42.731Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-18T09:05:46.139Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-18T09:07:14.897Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T07:40:48.408Z",
+        "completedAt": "2026-06-18T08:57:47.106Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/flow-status.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/test/flow-status.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "flow-editor",
+        "dashboard",
+        "bug"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

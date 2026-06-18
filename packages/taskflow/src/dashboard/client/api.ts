@@ -37,7 +37,15 @@ export interface ModuleDto {
   source: "builtin" | "custom";
   /** N106 — harness target (descriptive this round). Absent = both. */
   target?: "claude" | "cursor" | "both";
-  kind: "section" | "include" | "mcp-server" | "hook" | "skill" | "bundle";
+  kind:
+    | "section"
+    | "include"
+    | "mcp-server"
+    | "hook"
+    | "skill"
+    | "bundle"
+    | "status-transition"
+    | "handover";
   heading?: string;
   body?: string;
   ref?: string;
@@ -51,6 +59,15 @@ export interface ModuleDto {
   content?: string;
   /** bundle kind: ids of the contained modules. */
   modules?: string[];
+  /** status-transition kind (N128): agent advances the task to `sets` (optionally only `from`). */
+  agent?: string;
+  sets?: string;
+  from?: string;
+  /** handover kind (N142): hand to agent `to` (optionally only `on` a status), `mode` auto|gated. */
+  to?: string;
+  on?: string;
+  mode?: "auto" | "gated";
+  label?: string;
 }
 
 // N103/N106 — writes to the custom-definition CRUD API -----------------------

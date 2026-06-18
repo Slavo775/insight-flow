@@ -115,8 +115,9 @@ const shardOf = (dir) =>
 
 test("N133 e2e: advance sets the flow's custom status via the agent's transition", () => {
   const dir = customProject();
-  const id = JSON.parse(cli(dir, ["create", "--title", "T", "--type", "feat", "--flow", "custom:qa"]))
-    .id;
+  const id = JSON.parse(
+    cli(dir, ["create", "--title", "T", "--type", "feat", "--flow", "custom:qa"]),
+  ).id;
   assert.equal(shardOf(dir).flowId, "custom:qa");
 
   const out = JSON.parse(cli(dir, ["advance", "--id", id, "--agent", "custom:qa-verifier"]));
@@ -129,8 +130,9 @@ test("N133 e2e: advance sets the flow's custom status via the agent's transition
 
 test("N133 e2e: advance with an agent that has no transition module errors", () => {
   const dir = customProject();
-  const id = JSON.parse(cli(dir, ["create", "--title", "T", "--type", "feat", "--flow", "custom:qa"]))
-    .id;
+  const id = JSON.parse(
+    cli(dir, ["create", "--title", "T", "--type", "feat", "--flow", "custom:qa"]),
+  ).id;
   assert.throws(
     () => cli(dir, ["advance", "--id", id, "--agent", "task-implement"]),
     (err) => /No status-transition module/.test(String(err.stderr)),

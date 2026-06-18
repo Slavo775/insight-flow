@@ -61,7 +61,9 @@ test("N131: a custom flow gates to its own status set", () => {
   bad.flowId = "custom:qa";
   assert.throws(
     () => setStatus(bad, "in-progress", { by: "qa", at: "t" }, qa),
-    (err) => err instanceof InvalidStatusTransitionError && /not a status of flow 'custom:qa'/.test(err.message),
+    (err) =>
+      err instanceof InvalidStatusTransitionError &&
+      /not a status of flow 'custom:qa'/.test(err.message),
   );
   assert.equal(bad.status, "ready");
   assert.equal(bad.statusHistory.length, 0);
@@ -88,7 +90,10 @@ function project(customFlow) {
   );
   if (customFlow) {
     mkdirSync(join(dir, "insightFlow/projects"), { recursive: true });
-    writeFileSync(join(dir, "insightFlow/projects", `${customFlow.id.replace(/^custom:/, "")}.json`), JSON.stringify(customFlow));
+    writeFileSync(
+      join(dir, "insightFlow/projects", `${customFlow.id.replace(/^custom:/, "")}.json`),
+      JSON.stringify(customFlow),
+    );
   }
   return dir;
 }
@@ -132,7 +137,9 @@ test("N131 e2e: a custom-flow task rejects an out-of-set canonical transition", 
     ],
   };
   const dir = project(qa);
-  const id = JSON.parse(cli(dir, ["create", "--title", "T", "--type", "feat", "--flow", "custom:qa"])).id;
+  const id = JSON.parse(
+    cli(dir, ["create", "--title", "T", "--type", "feat", "--flow", "custom:qa"]),
+  ).id;
   assert.equal(shardOf(dir).flowId, "custom:qa");
 
   // implement-start sets "in-progress", which custom:qa does not declare → reject

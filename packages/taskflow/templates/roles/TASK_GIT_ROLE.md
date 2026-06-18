@@ -177,6 +177,10 @@ insight-flow mr-update --id <ID> --url "<pasted-pr-url>"
 
 ---
 
+## Handover
+
+When your work is complete once the task is `pushed`, hand over to `task-review`: stop and get an explicit human go-ahead before invoking `/task-review`.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 

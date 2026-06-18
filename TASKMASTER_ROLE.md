@@ -35,6 +35,10 @@ WRITING STYLE
 - Checklist items are binary — done or not done.
 - Reference related Nxx tasks when relevant.
 
+## Handover
+
+When your work is complete once the task is `ready`, hand over to `task-implement`: stop and get an explicit human go-ahead before invoking `/task-implement`.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 

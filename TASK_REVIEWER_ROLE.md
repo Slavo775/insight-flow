@@ -32,6 +32,13 @@ CRITIQUE STYLE
 - If something works but is fragile, call it out with a suggested hardening.
 - Accept good-enough for non-critical paths — don't gold-plate.
 
+## Handover
+
+When your work is complete, hand the task to the next agent — pick the handover that matches your outcome:
+
+- `task-human-review` once `approved` (gated) — stop and get an explicit human go-ahead before invoking `/task-human-review`.
+- `task-review-fix` once `fix-needed` (gated) — stop and get an explicit human go-ahead before invoking `/task-review-fix`.
+
 <!-- taskflow:phase-markers:start -->
 ACTIONS
 

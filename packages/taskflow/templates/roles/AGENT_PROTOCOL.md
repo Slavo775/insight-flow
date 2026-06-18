@@ -18,6 +18,17 @@ STANDARD WORKFLOW (apply unless the role explicitly overrides a step)
 
 ---
 
+HANDOVER DISCIPLINE (applies to any role whose prompt carries a `## Handover` section)
+
+A handover names the next agent to run. Your `## Handover` section may list several — **pick the one that matches your actual outcome; never fan out to all of them.**
+
+- **`auto` is not a permission escalation.** `auto` only means "don't pause to ask *which* agent comes next" — you may invoke the next agent's slash-command in-session. It does **not** authorize skipping git/permission gates (`AgentGitPermissions`) or the consent rules: the next agent still asks before any outward, destructive, or remote action exactly as if a human had invoked it.
+- **`gated` needs an explicit go-ahead.** Do not chain a `gated` handover until the human explicitly approves it. Answering an unrelated question is not approval; silence is not approval. If no go-ahead comes, stop without chaining.
+- **No auto-chaining a cycle.** Never `auto`-invoke an agent that has already run for this task in the current session (e.g. the review ↔ review-fix loop). Treat such a back-edge as `gated` and ask first.
+- The flow diagram is descriptive: when it disagrees with your `## Handover` section, your section wins.
+
+---
+
 UNIVERSAL NEVER
 
 - Never use Edit / Write / file-creation tools on `tracker.json`, `TASK.md`, `CHECKLIST.md`, or anything inside the tracker directory for **state mutations** — go through the CLI. (Editing the narrative *content* of TASK.md / CHECKLIST.md / REVIEW.md after the CLI has scaffolded them is fine and expected — that's not state.)
