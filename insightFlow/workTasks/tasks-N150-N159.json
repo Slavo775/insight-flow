@@ -594,6 +594,163 @@
       "mrUrl": null,
       "mergedAt": "2026-06-18T20:37:54.145Z",
       "flowId": "default"
+    },
+    {
+      "id": "N157",
+      "title": "Langfuse observability exporter (opt-in OTEL)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N157-langfuse-observability-exporter-opt-in-otel",
+      "createdAt": "2026-06-18T21:20:05.258Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T21:20:05.259Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "observability",
+        "langfuse",
+        "activity",
+        "integration"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N158",
+      "title": "SPIKE: insight-flow as an MCP server (task-state for any agent)",
+      "type": "chore",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N158-spike-insight-flow-as-an-mcp-server-task-state-for",
+      "createdAt": "2026-06-18T21:20:05.348Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T21:20:05.348Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-18T23:55:00.073Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-19T03:27:56.077Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-19T06:25:20.908Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-19T06:26:41.163Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-18T23:55:00.074Z",
+        "completedAt": "2026-06-19T03:27:56.078Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "mcp",
+        "spike",
+        "integration",
+        "architecture"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N159",
+      "title": "SPIKE: OpenHands headless runner for insight-flow tasks",
+      "type": "chore",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N159-spike-openhands-headless-runner-for-insight-flow-t",
+      "createdAt": "2026-06-18T21:20:05.435Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-18T21:20:05.435Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-19T03:27:51.248Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-19T03:27:56.162Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-19T06:25:21.006Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-19T06:26:41.256Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-19T03:27:51.249Z",
+        "completedAt": "2026-06-19T03:27:56.163Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "openhands",
+        "runner",
+        "spike",
+        "integration"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
