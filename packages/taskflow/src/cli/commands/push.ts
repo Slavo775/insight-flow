@@ -1,6 +1,7 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
-import { getWorkDir, now, resolveId } from "../../core/storage.js";
+import { getWorkDir, now, resolveId, loadTaskReviewsHybrid } from "../../core/storage.js";
+import { recordTaskLifecycle } from "../../core/observability/langfuse.js";
 import { writeStatus } from "./status-write.js";
 
 export function cmdPush(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
@@ -66,6 +67,7 @@ export function cmdMerge(config: TaskflowConfig, master: MasterFile, opts: Parse
   task.totalDurationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
+  recordTaskLifecycle(config, task, loadTaskReviewsHybrid(config, task));
   console.log(
     JSON.stringify({
       action: "merged",
@@ -88,6 +90,7 @@ export function cmdDone(config: TaskflowConfig, master: MasterFile, opts: Parsed
   task.totalDurationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
+  recordTaskLifecycle(config, task, loadTaskReviewsHybrid(config, task));
   console.log(
     JSON.stringify({
       action: "done",

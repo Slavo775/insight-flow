@@ -600,7 +600,7 @@
       "title": "Langfuse observability exporter (opt-in OTEL)",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N157-langfuse-observability-exporter-opt-in-otel",
       "createdAt": "2026-06-18T21:20:05.258Z",
       "statusHistory": [
@@ -608,17 +608,52 @@
           "status": "ready",
           "at": "2026-06-18T21:20:05.259Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-19T10:10:04.821Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-19T10:23:52.245Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-19T10:31:08.411Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-19T10:35:12.489Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-19T10:10:04.823Z",
+        "completedAt": "2026-06-19T10:23:52.247Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/types.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/observability/langfuse.ts",
+          "packages/taskflow/src/cli/commands/implement.ts",
+          "packages/taskflow/src/cli/commands/review.ts",
+          "packages/taskflow/src/cli/commands/fix.ts",
+          "packages/taskflow/src/cli/commands/change.ts",
+          "packages/taskflow/src/cli/commands/push.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md",
+          "packages/taskflow/test/observability-langfuse.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,

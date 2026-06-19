@@ -1,6 +1,7 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
-import { getWorkDir, now, resolveId } from "../../core/storage.js";
+import { getWorkDir, now, resolveId, loadTaskReviewsHybrid } from "../../core/storage.js";
+import { recordTaskLifecycle } from "../../core/observability/langfuse.js";
 import { writeStatus } from "./status-write.js";
 
 export function cmdChangeRequest(
@@ -97,6 +98,7 @@ export function cmdChangeEnd(config: TaskflowConfig, master: MasterFile, opts: P
   writeStatus(task, "changes-implemented", (opts.by as string) || "implement-changes");
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
+  recordTaskLifecycle(config, task, loadTaskReviewsHybrid(config, task));
   console.log(
     JSON.stringify({
       action: "change-ended",

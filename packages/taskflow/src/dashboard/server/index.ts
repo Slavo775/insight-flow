@@ -24,6 +24,7 @@ import {
 } from "../../agents/activity-hook.js";
 import { EventStore } from "./event-stream.js";
 import { HookEventInputSchema } from "../../core/schema/index.js";
+import { recordHookEvent } from "../../core/observability/langfuse.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { setTaskFlow } from "../../cli/commands/set-flow.js";
 import {
@@ -1015,6 +1016,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           // Skip socket emit on duplicates so retried hooks don't double-render
           // in the dashboard. Status frame still gated on a real transition.
           if (!duplicate) {
+            // N157 — opt-in Langfuse sink (no-op when disabled; fire-and-forget,
+            // fail-open). Only events carrying a taskId are exported.
+            recordHookEvent(config, event);
             transport.emit("event", { kind: "event", event });
             if (from !== to) {
               const statusAt = new Date().toISOString();

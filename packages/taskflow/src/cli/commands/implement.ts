@@ -1,6 +1,7 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { getWorkDir, now, resolveId } from "../../core/storage.js";
+import { recordTaskLifecycle } from "../../core/observability/langfuse.js";
 import { writeStatus } from "./status-write.js";
 
 export function cmdImplementStart(
@@ -45,6 +46,7 @@ export function cmdImplementEnd(
   }
 
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
+  recordTaskLifecycle(config, task);
   console.log(
     JSON.stringify({
       action: "implement-ended",

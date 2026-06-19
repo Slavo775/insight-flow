@@ -377,6 +377,25 @@ export interface MasterConfig {
   startMasterLocally?: boolean;
 }
 
+/**
+ * N157 — opt-in Langfuse observability sink. Absent or `enabled: false` ⇒ the
+ * exporter is a no-op and the (optional) Langfuse SDK is never loaded, so
+ * non-users pay nothing. Credentials resolve config-first then env
+ * (`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST`) so keys are
+ * never required in committed config. Mirrors the opt-in shape of
+ * `activityEngine` / `notifications` / `master`.
+ */
+export interface LangfuseConfig {
+  enabled: boolean;
+  host?: string;
+  publicKey?: string;
+  secretKey?: string;
+}
+
+export interface ObservabilityConfig {
+  langfuse?: LangfuseConfig;
+}
+
 export interface TaskflowConfig {
   workDir: string;
   shardSize: number;
@@ -394,6 +413,8 @@ export interface TaskflowConfig {
   agents?: AgentsConfig;
   notifications?: NotificationsConfig;
   master?: MasterConfig;
+  /** N157 — opt-in observability sinks (Langfuse). Absent ⇒ disabled. */
+  observability?: ObservabilityConfig;
   events?: EventsConfig;
   /**
    * N116 — flow binding. `taskmaster`/`create` binds a new task to a project

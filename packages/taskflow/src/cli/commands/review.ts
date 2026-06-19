@@ -9,6 +9,7 @@ import {
   recomputeTaskSummary,
 } from "../../core/storage.js";
 import { scaffoldReviewMd } from "../../core/spec.js";
+import { recordTaskLifecycle } from "../../core/observability/langfuse.js";
 import { writeStatus } from "./status-write.js";
 
 export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
@@ -82,5 +83,6 @@ export function cmdReviewEnd(config: TaskflowConfig, master: MasterFile, opts: P
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
+  recordTaskLifecycle(config, task, reviews);
   console.log(JSON.stringify({ action: "review-ended", id, verdict: opts.verdict }));
 }

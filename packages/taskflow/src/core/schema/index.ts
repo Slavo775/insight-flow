@@ -127,6 +127,21 @@ export const MasterConfigSchema = z.object({
   startMasterLocally: z.boolean().optional(),
 });
 
+// N157 — the opt-in Langfuse observability block. The wider TaskflowConfig is
+// not Zod-validated (it's JSON.parse + defaults in config.ts); this schema is
+// used by the exporter to defensively parse just this block before use, so a
+// malformed `observability` never reaches the SDK adapter. Default disabled.
+export const LangfuseConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  host: z.string().optional(),
+  publicKey: z.string().optional(),
+  secretKey: z.string().optional(),
+});
+
+export const ObservabilityConfigSchema = z.object({
+  langfuse: LangfuseConfigSchema.optional(),
+});
+
 export const MasterFileSchema = z.object({
   meta: z.object({
     nextId: z.number().int().min(0),
