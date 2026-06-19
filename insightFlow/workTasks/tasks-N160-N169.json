@@ -72,6 +72,60 @@
       "mrUrl": null,
       "mergedAt": "2026-06-19T06:35:25.495Z",
       "flowId": "default"
+    },
+    {
+      "id": "N161",
+      "title": "Langfuse skill pointer module (opt-in, registry-only)",
+      "type": "feat",
+      "priority": "low",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N161-langfuse-skill-pointer-module-opt-in-registry-only",
+      "createdAt": "2026-06-19T14:42:32.063Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-19T14:42:32.064Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-19T14:43:47.377Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-19T14:47:10.909Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-19T14:43:47.378Z",
+        "completedAt": "2026-06-19T14:47:10.911Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/langfuse.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/test/langfuse-module.test.mjs",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "langfuse",
+        "observability",
+        "module",
+        "integration"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

@@ -71,6 +71,22 @@ export {
 } from "./core/kanban.js";
 export type { Column, FlowStatus } from "./core/kanban.js";
 export { validateEdgeAddition, edgeKey } from "./core/flow-edit.js";
+// N157 — opt-in Langfuse observability exporter.
+export {
+  buildLangfusePayload,
+  isLangfuseEnabled,
+  resolveLangfuseCreds,
+  recordTaskLifecycle,
+  recordHookEvent,
+  flushObservability,
+} from "./core/observability/langfuse.js";
+export type {
+  LangfusePayload,
+  LangfuseTracePayload,
+  LangfuseSpanPayload,
+  LangfuseScorePayload,
+  LangfuseCreds,
+} from "./core/observability/langfuse.js";
 export {
   loadUserRegistries,
   mergedModuleRegistry,

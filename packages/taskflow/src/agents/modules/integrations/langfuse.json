@@ -1,0 +1,11 @@
+[
+  {
+    "id": "langfuse/setup-skill",
+    "title": "Langfuse setup — plugin pointer skill",
+    "description": "Opt-in pointer skill: how to install the official Langfuse plugin (code instrumentation) and enable insight-flow's N157 lifecycle exporter. Does not fork upstream content.",
+    "source": "builtin",
+    "kind": "skill",
+    "name": "langfuse-setup",
+    "content": "---\nname: langfuse-setup\ndescription: Set up Langfuse observability for this project. Use when adding Langfuse tracing — installs the official Langfuse Claude Code plugin for instrumenting your application's LLM calls, and points to insight-flow's built-in lifecycle exporter for tracing the task lifecycle.\n---\n\n# Langfuse setup (pointer)\n\nThis is a POINTER skill: it does not contain the Langfuse instrumentation guidance itself — that lives in the official, self-updating Langfuse plugin. insight-flow deliberately does not fork it (the upstream skill's first rule is \"never implement from memory; always fetch current docs\").\n\nThere are two complementary halves. Pick the one you need.\n\n## 1. Instrument your application's LLM calls → the official Langfuse plugin\n\nFor tracing LLM/SDK calls, querying traces, prompt migration, and evals, install the maintained Langfuse Claude Code plugin (MIT — github.com/langfuse/skills):\n\n1. `/plugin marketplace add langfuse/skills`\n2. `/plugin install langfuse`\n3. Invoke the installed `langfuse` skill — it fetches the latest Langfuse docs and follows best practices.\n\nThe upstream plugin also ships a `.cursor-plugin` for Cursor.\n\n## 2. Trace the insight-flow task lifecycle → the built-in N157 exporter\n\ninsight-flow can export its OWN task lifecycle to Langfuse — each Task as a trace, each phase (implement / review / fix / change) as a span, review verdicts as scores. This is separate from instrumenting your app's LLM calls. Enable it in `taskflow.config.json`:\n\n```jsonc\n\"observability\": { \"langfuse\": { \"enabled\": true } }\n```\n\nwith `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST` in the environment and `npm i langfuse` (optional peer dependency). See the README \"Observability\" section.\n\nNote: insight-flow itself makes no LLM calls, so the plugin instruments YOUR application code while the N157 exporter covers the task lifecycle.\n"
+  }
+]

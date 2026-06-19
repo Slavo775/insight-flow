@@ -8,6 +8,7 @@ import {
   loadTaskIncidentsHybrid,
   recomputeTaskSummary,
 } from "../../core/storage.js";
+import { recordTaskLifecycle } from "../../core/observability/langfuse.js";
 import { writeStatus } from "./status-write.js";
 
 export function cmdFixStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
@@ -62,6 +63,7 @@ export function cmdFixEnd(config: TaskflowConfig, master: MasterFile, opts: Pars
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
+  recordTaskLifecycle(config, task, reviews);
   console.log(
     JSON.stringify({
       action: "fix-ended",

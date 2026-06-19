@@ -76,6 +76,14 @@
     "dashboard",
     "cli"
   ],
+  "peerDependencies": {
+    "langfuse": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "langfuse": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "@xyflow/react": "^12.11.0",
     "react": "^18.3.1",

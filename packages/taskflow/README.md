@@ -284,6 +284,16 @@ The block below shows every supported key with its default. Strip the `//` comme
     "startMasterLocally": false    // auto-start master server on dashboard launch
   },
 
+  // ── Observability (opt-in) ───────────────────────────────────────────────────
+  "observability": {
+    "langfuse": {
+      "enabled": false,            // master switch — absent/false = no-op, SDK never loaded
+      "host": "http://localhost:3000", // self-hosted or cloud Langfuse base URL
+      "publicKey": "pk-lf-...",    // prefer env LANGFUSE_PUBLIC_KEY (never commit keys)
+      "secretKey": "sk-lf-..."     // prefer env LANGFUSE_SECRET_KEY (never commit keys)
+    }
+  },
+
   // ── Events ──────────────────────────────────────────────────────────────────
   "events": {
     "dedupWindowSeconds": 60,      // suppress duplicate events within this window
@@ -325,6 +335,33 @@ Controls the live activity panel in the dashboard. The panel shows what Claude C
 | `notifications.browser` | `true` | Web Notification API popups on task-status transitions (implemented, approved, fix-needed, merged). |
 | `notifications.cli` | `true` | Enable `insight-flow notify` calls. Set to `false` to silence all OS/CLI notifications. |
 | `notifications.sounds.enabled` | `true` | Play sounds in the dashboard tab when a notification fires. |
+
+### Observability (opt-in Langfuse exporter)
+
+Off by default. When enabled, insight-flow exports its existing lifecycle signal to [Langfuse](https://langfuse.com) (open-source LLM observability; self-host via Docker/k8s or use cloud): each **Task → a trace**, each agent phase (implement / review / fix / change) **→ a span**, `tokensUsed` **→ trace/span metadata**, and each review **verdict → a score**. It adds no new signal — it re-exports what's already on disk.
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `observability.langfuse.enabled` | `false` | Master switch. When absent or `false` the exporter is a no-op and the Langfuse SDK is **never imported** — non-users pay nothing. |
+| `observability.langfuse.host` | env `LANGFUSE_HOST` | Base URL of your Langfuse instance (self-hosted or cloud). |
+| `observability.langfuse.publicKey` | env `LANGFUSE_PUBLIC_KEY` | Public API key. **Prefer the env var** — never commit keys. |
+| `observability.langfuse.secretKey` | env `LANGFUSE_SECRET_KEY` | Secret API key. **Prefer the env var** — never commit keys. |
+
+The Langfuse SDK is an **optional peer dependency** — it is not installed for normal users. To use the exporter, install it in your project:
+
+```bash
+npm install langfuse        # or: pnpm add langfuse
+```
+
+Notes:
+
+- **Lazy + fail-open.** The SDK is dynamically imported only when enabled and credentialed. If it isn't installed, or a key is missing, or an export call fails, insight-flow logs a single warning and continues — the task lifecycle is never blocked.
+- **Credentials resolve config-first, then env** (`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST`). Keep keys in the environment, not in committed config.
+- Wired from the lifecycle commands (`implement-end`, `review-end`, `fix-end`, `change-end`, `merge`, `done`) and from the dashboard's `/log/events` ingestion. Traces upsert by task id, so re-exporting at each boundary refines a single trace rather than duplicating it.
+
+The N157 exporter above traces the **task lifecycle**. To instrument **your application's own LLM calls** with Langfuse, use the official, self-updating Langfuse Claude Code plugin (`/plugin marketplace add langfuse/skills` → `/plugin install langfuse`). insight-flow ships a small opt-in pointer skill module — `langfuse/setup-skill` (installs as the `langfuse-setup` skill) — that documents both halves. It lives in the module registry but is **not** in any default flow, so it never installs automatically; add it to a flow when you want it.
+
+### Notifications
 
 insight-flow uses a **three-tier notification model**. All notifications fire from hook scripts outside Claude's context — the AI agent itself never triggers a notification.
 

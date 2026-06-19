@@ -4,6 +4,7 @@ import { jsonFileStorage } from "../core/storage-port.js";
 import { resolvePackageAsset, TaskflowProjectNotFoundError } from "../core/paths.js";
 import { TaskflowValidationError } from "../core/schema/index.js";
 import { InvalidStatusTransitionError } from "../core/set-status.js";
+import { flushObservability } from "../core/observability/langfuse.js";
 import { initProject } from "../agents/init/index.js";
 import { startServer } from "../dashboard/server/index.js";
 import { runMaster } from "../master/index.js";
@@ -414,6 +415,10 @@ async function run(): Promise<void> {
         process.exit(1);
     }
   }
+
+  // N157 — deliver any scheduled Langfuse exports before the short-lived CLI
+  // process exits. No-op when observability is disabled (nothing scheduled).
+  await flushObservability();
 }
 
 run().catch((err) => {

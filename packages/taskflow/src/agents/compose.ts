@@ -49,6 +49,7 @@ import taskRequestChangesModules from "./modules/roles/task-request-changes.json
 import taskGitModules from "./modules/roles/task-git.json";
 import testingModules from "./modules/integrations/testing.json";
 import activityModules from "./modules/integrations/activity.json";
+import langfuseModules from "./modules/integrations/langfuse.json";
 import taskAnalyze from "./composed/task-analyze.json";
 import taskmaster from "./composed/taskmaster.json";
 import taskmasterChange from "./composed/taskmaster-change.json";
@@ -102,6 +103,10 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     ...taskGitModules,
     ...testingModules,
     ...activityModules,
+    // N161 — opt-in Langfuse pointer skill. Registry-only: NOT added to any
+    // shipped flow (project/default.json), so it never installs by default;
+    // anyone can add it to their own flow.
+    ...langfuseModules,
   ],
   AgentModuleSchema,
 );
