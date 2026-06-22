@@ -626,7 +626,7 @@
       "title": "Flow removal + default-flow override (feature)",
       "type": "feat",
       "priority": "high",
-      "status": "in-progress",
+      "status": "done",
       "folder": "insightFlow/workTasks/N167-flow-removal-and-default-flow-resolution-bug-via-e",
       "createdAt": "2026-06-22T10:46:09.197Z",
       "statusHistory": [
@@ -639,28 +639,58 @@
           "status": "in-progress",
           "at": "2026-06-22T14:47:09.220Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T17:32:27.657Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T17:33:00.654Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T17:33:26.276Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-22T14:47:09.219Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-22T17:32:27.657Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/config.ts",
+          "packages/taskflow/src/cli/commands/set-default-flow.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/test/default-flow.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-22T17:33:26.276Z",
+      "totalDurationMinutes": 407,
       "tags": [
         "flows",
         "bug",
         "default-flow"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-22T17:33:00.653Z",
+          "commitHash": "3de756b",
+          "commitMessage": "feat(flows): default-flow override (N167)"
+        }
+      ],
+      "branch": "feat/N167-default-flow-override",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/121",
       "mergedAt": null
     },
     {
