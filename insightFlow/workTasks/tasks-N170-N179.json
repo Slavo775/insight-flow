@@ -276,6 +276,75 @@
       "branch": "feat/N172-overwrite-undo",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/124",
       "mergedAt": null
+    },
+    {
+      "id": "N173",
+      "title": "Custom-flow agents propagate identity (--agent/--by) in lifecycle commands",
+      "type": "fix",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N173-custom-flow-agents-propagate-identity-agent-by-in-",
+      "createdAt": "2026-06-22T20:21:23.356Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T20:21:23.356Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T20:29:20.437Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T20:29:20.533Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T20:30:23.492Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T20:30:50.925Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-22T20:29:20.436Z",
+        "completedAt": "2026-06-22T20:29:20.533Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/agent-command.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-22T20:30:50.925Z",
+      "totalDurationMinutes": 9,
+      "tags": [
+        "flows",
+        "agents",
+        "composer",
+        "binding"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-22T20:30:23.491Z",
+          "commitHash": "e1d0a3f",
+          "commitMessage": "fix(flows): agent identity propagation (N173)"
+        }
+      ],
+      "branch": "fix/N173-agent-identity-propagation",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/126",
+      "mergedAt": null
     }
   ]
 }
