@@ -143,7 +143,7 @@
       "title": "Install overwrite undo/rollback",
       "type": "feat",
       "priority": "low",
-      "status": "ready",
+      "status": "done",
       "folder": "insightFlow/workTasks/N172-install-overwrite-undo-rollback",
       "createdAt": "2026-06-22T16:40:34.750Z",
       "statusHistory": [
@@ -151,28 +151,60 @@
           "status": "ready",
           "at": "2026-06-22T16:40:34.750Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T18:33:14.739Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T18:40:19.043Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T18:40:51.385Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T18:41:47.491Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-22T18:33:14.739Z",
+        "completedAt": "2026-06-22T18:40:19.043Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/components/InstallModal.tsx",
+          "packages/taskflow/test/inputs.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-22T18:41:47.491Z",
+      "totalDurationMinutes": 121,
       "tags": [
         "install",
         "emit",
         "ux"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-22T18:40:51.384Z",
+          "commitHash": "9107126",
+          "commitMessage": "feat(install): overwrite undo (N172)"
+        }
+      ],
+      "branch": "feat/N172-overwrite-undo",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/123",
       "mergedAt": null
     }
   ]
