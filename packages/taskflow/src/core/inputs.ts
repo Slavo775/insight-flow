@@ -27,6 +27,19 @@ export interface InputMeta {
 
 const PLACEHOLDER = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
 
+/**
+ * N171 — placeholders that are runtime/build vars, NOT collected user inputs:
+ * `${CLAUDE_PROJECT_DIR}` (expanded by Claude Code in hooks) and `${ARGUMENTS}`
+ * (slash-command args). They're left literal at substitution time (no value is
+ * provided) and excluded from the required-inputs scan so they never surface as
+ * a field to fill.
+ */
+export const RESERVED_PLACEHOLDERS = new Set([
+  "CLAUDE_PROJECT_DIR",
+  "ARGUMENTS",
+  "INSIGHT_FLOW_BIN",
+]);
+
 /** Deep-collect the unique `${VAR}` names referenced anywhere in `value`. */
 export function scanPlaceholders(value: unknown, out: Set<string> = new Set()): Set<string> {
   if (typeof value === "string") {
