@@ -245,6 +245,9 @@ export interface InputSpecDto {
   title: string;
   description?: string;
   secret: boolean;
+  /** N165 — a value is already saved locally; the modal shows "saved" and the
+   * user may leave the field blank to reuse it. The value itself is never sent. */
+  saved?: boolean;
 }
 
 export async function fetchFlowInstallPlan(
