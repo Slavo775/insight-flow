@@ -27,6 +27,7 @@ import { TASK_STATUSES } from "../../../core/statuses.js";
 import { validateEdgeAddition } from "../../../core/flow-edit.js";
 import type { FlowEdge } from "../../../core/flow-status.js";
 import type { ProjectDto } from "../api.js";
+import type { FlowStatus } from "../lib.js";
 import { computePositions } from "./FlowMap.js";
 import { Button } from "./Button.js";
 
@@ -108,6 +109,8 @@ export interface FlowDraft {
   flow: FlowEdge[];
   /** N134 — the flow's start-point agent ids (persisted as `entryAgents`). */
   entryAgents: string[];
+  /** N169 — the flow's terminal "done" outcomes (statuses flagged `terminal`). */
+  terminals: FlowStatus[];
 }
 
 /** N114 — a composed agent that can be added to the flow. */
@@ -314,19 +317,49 @@ export function FlowEditor({
   // N134 — the draft's start-point agents (the flow's entryAgents). Seeded from
   // the project; toggled from the node popover, persisted by ProjectPage on Save.
   const [entryAgents, setEntryAgents] = useState<string[]>(project.entryAgents ?? []);
+  // N169 — the flow's terminal outcomes (statuses flagged `terminal`). Seeded
+  // from the saved flow; authored via "Add terminal"; persisted by ProjectPage.
+  const [terminals, setTerminals] = useState<FlowStatus[]>(
+    () => (project.statuses ?? []).filter((s) => s.terminal),
+  );
 
   const titleOf = useCallback(
     (id: string): string =>
-      allAgents.find((a) => a.id === id)?.title ?? project.agentTitles[id] ?? id,
-    [allAgents, project.agentTitles],
+      terminals.find((t) => t.id === id)?.title ??
+      allAgents.find((a) => a.id === id)?.title ??
+      project.agentTitles[id] ??
+      id,
+    [allAgents, project.agentTitles, terminals],
+  );
+
+  // N169 — a terminal node renders as a circle; it only takes inputs (LEFT).
+  const terminalNode = useCallback(
+    (t: FlowStatus, pos: { x: number; y: number }): Node => ({
+      id: t.id,
+      position: pos,
+      data: { label: `◉ ${t.title}`, kind: "terminal" },
+      style: {
+        background: theme.color.bg,
+        color: t.color ?? theme.color.green,
+        border: `2px solid ${t.color ?? theme.color.green}`,
+        borderRadius: theme.radius.pill,
+        fontFamily: theme.font.family,
+        fontSize: theme.font.size.sm,
+        padding: "12px 18px",
+        width: 150,
+        textAlign: "center" as const,
+      },
+      targetPosition: Position.Left,
+    }),
+    [theme],
   );
 
   const initialNodes: Node[] = useMemo(() => {
     const positions = computePositions(project);
-    return project.agents.map((a) => ({
+    const agentNodes: Node[] = project.agents.map((a) => ({
       id: a,
       position: positions[a],
-      data: { label: `⚙ ${project.agentTitles[a] ?? a}` },
+      data: { label: `⚙ ${project.agentTitles[a] ?? a}`, kind: "agent" },
       style: {
         background: theme.color.bg,
         color: theme.color.text,
@@ -341,6 +374,13 @@ export function FlowEditor({
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
     }));
+    // N169 — seed terminal nodes from the saved flow's terminal statuses.
+    const maxX = Math.max(0, ...project.agents.map((a) => positions[a]?.x ?? 0));
+    const seededTerminals = (project.statuses ?? []).filter((s) => s.terminal);
+    const terminalNodes = seededTerminals.map((t, i) =>
+      terminalNode(t, project.layout?.[t.id] ?? { x: maxX + 280, y: i * 110 }),
+    );
+    return [...agentNodes, ...terminalNodes];
     // The editor seeds once per project identity — live edits own the state,
     // so theme/title changes intentionally don't re-seed dragged positions.
   }, [project.id]); // eslint-disable-line
@@ -356,20 +396,30 @@ export function FlowEditor({
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const report = useCallback(
-    (currentNodes: Node[], currentEdges: Edge[], currentEntry: string[] = entryAgents): void => {
+    (
+      currentNodes: Node[],
+      currentEdges: Edge[],
+      currentEntry: string[] = entryAgents,
+      currentTerminals: FlowStatus[] = terminals,
+    ): void => {
       const positions: FlowPositions = {};
       for (const node of currentNodes) {
         positions[node.id] = { x: Math.round(node.position.x), y: Math.round(node.position.y) };
       }
+      // N169 — terminal nodes are not agents; keep them out of the agent set.
+      const agentIds = currentNodes
+        .filter((n) => (n.data as { kind?: string })?.kind !== "terminal")
+        .map((n) => n.id);
       onDraftChange({
-        agents: currentNodes.map((n) => n.id),
+        agents: agentIds,
         positions,
         flow: currentEdges.map(toFlowEdge),
         // N134 — never report a start point that isn't (still) in the agent set.
-        entryAgents: currentEntry.filter((id) => currentNodes.some((n) => n.id === id)),
+        entryAgents: currentEntry.filter((id) => agentIds.includes(id)),
+        terminals: currentTerminals,
       });
     },
-    [onDraftChange, entryAgents],
+    [onDraftChange, entryAgents, terminals],
   );
 
   // N114 — add an agent node (default position offset by node count so adds
@@ -424,11 +474,50 @@ export function FlowEditor({
     report(nodes, edges, nextEntry);
   };
 
+  // N169 — add a terminal "done" node: name it, create a `terminal` status, drop
+  // a circle node. The status + position are persisted by ProjectPage on Save.
+  const addTerminal = (): void => {
+    const title = window.prompt("Name this terminal outcome (e.g. Done, Rejected):")?.trim();
+    if (!title) return;
+    const base =
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "done";
+    const taken = new Set([...terminals.map((t) => t.id), ...nodes.map((nd) => nd.id)]);
+    let id = base;
+    for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
+    const status: FlowStatus = { id, title, terminal: true };
+    const offset = 80 + nodes.length * 26;
+    const nextTerminals = [...terminals, status];
+    const nextNodes = [...nodes, terminalNode(status, { x: offset + 360, y: offset })];
+    setTerminals(nextTerminals);
+    setNodes(nextNodes);
+    report(nextNodes, edges, entryAgents, nextTerminals);
+  };
+
+  // N169 — remove a terminal node, its status, and every edge into it.
+  const removeTerminal = (id: string): void => {
+    const nextTerminals = terminals.filter((t) => t.id !== id);
+    const nextNodes = nodes.filter((n) => n.id !== id);
+    const nextEdges = edges.filter((e) => e.source !== id && e.target !== id);
+    setTerminals(nextTerminals);
+    setNodes(nextNodes);
+    setEdges(nextEdges);
+    setNodeMenu(null);
+    report(nextNodes, nextEdges, entryAgents, nextTerminals);
+  };
+
+  const isTerminal = (id: string): boolean => terminals.some((t) => t.id === id);
+
   // N134 — reflect start-point toggles on the canvas: ★-prefix the label and
   // thicken the border for entry agents (node identity/positions untouched).
   useEffect(() => {
     setNodes((nds) =>
       nds.map((n) => {
+        // N169 — terminal nodes keep their own ◉ label/style; only agents get
+        // the ★ start-point treatment.
+        if ((n.data as { kind?: string })?.kind === "terminal") return n;
         const isEntry = entryAgents.includes(n.id);
         return {
           ...n,
@@ -534,17 +623,30 @@ export function FlowEditor({
               </option>
             ))}
           </select>
+          {/* N169 — author a terminal "done" outcome. */}
+          <Button type="button" $variant="secondary" onClick={addTerminal}>
+            ◉ Add terminal
+          </Button>
         </AddBar>
       ) : null}
       {nodeMenu ? (
         <NodePopover style={{ left: nodeMenu.x, top: nodeMenu.y }}>
           <strong>{titleOf(nodeMenu.id)}</strong>
-          <Button type="button" $variant="primary" onClick={() => toggleEntry(nodeMenu.id)}>
-            {entryAgents.includes(nodeMenu.id) ? "Unset start point" : "Set as start point"}
-          </Button>
-          <Button type="button" $variant="danger" onClick={() => removeAgent(nodeMenu.id)}>
-            Remove from flow
-          </Button>
+          {isTerminal(nodeMenu.id) ? (
+            // N169 — terminal node menu: remove only (no start-point toggle).
+            <Button type="button" $variant="danger" onClick={() => removeTerminal(nodeMenu.id)}>
+              Remove terminal
+            </Button>
+          ) : (
+            <>
+              <Button type="button" $variant="primary" onClick={() => toggleEntry(nodeMenu.id)}>
+                {entryAgents.includes(nodeMenu.id) ? "Unset start point" : "Set as start point"}
+              </Button>
+              <Button type="button" $variant="danger" onClick={() => removeAgent(nodeMenu.id)}>
+                Remove from flow
+              </Button>
+            </>
+          )}
           <Button type="button" $variant="nav" onClick={() => setNodeMenu(null)}>
             Cancel
           </Button>
@@ -677,11 +779,16 @@ export function FlowEditor({
             setEditorError("self-loops are not allowed");
             return;
           }
+          // N169 — a terminal is an end state: it can be a target, never a source.
+          if (connection.source && isTerminal(connection.source)) {
+            setEditorError("a terminal node has no outgoing edges");
+            return;
+          }
           setPendingTrigger(DIRECT_HANDOFF);
           setPendingHandover(null);
           setPending(connection);
         }}
-        isValidConnection={(c) => c.source !== c.target}
+        isValidConnection={(c) => c.source !== c.target && !(c.source != null && isTerminal(c.source))}
         fitView
         minZoom={0.2}
         nodesConnectable

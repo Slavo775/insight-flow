@@ -175,6 +175,9 @@ export function ProjectPage() {
       flow: project.flow,
       // N134 — seed the draft's start points from the saved flow.
       entryAgents: project.entryAgents ?? [],
+      // N169 — seed the draft's terminals so saving without touching them
+      // (or after non-terminal edits) preserves the flow's end states.
+      terminals: (project.statuses ?? []).filter((s) => s.terminal),
     });
     setDraftStates(project.states ?? []);
     setDirty(false);
@@ -222,6 +225,12 @@ export function ProjectPage() {
         // N134 — persist the draft's start-point toggles, kept to the current
         // agent set so a removed agent can't remain an entry (was N122 verbatim).
         entryAgents: draft.entryAgents.filter((a) => draft.agents.includes(a)),
+        // N169 — persist the flow's terminal outcomes (statuses with `terminal`),
+        // preserving any non-terminal statuses the flow already declared.
+        statuses: [
+          ...(project.statuses ?? []).filter((s) => !s.terminal),
+          ...(draft.terminals ?? []),
+        ],
       };
       await saveDefinition("projects", record, true, { revision: project.revision });
       // Re-render from server truth.
