@@ -452,7 +452,7 @@
       "title": "Terminal done nodes in flows with status-transition edges and multiple outcomes",
       "type": "feat",
       "priority": "high",
-      "status": "in-progress",
+      "status": "done",
       "folder": "insightFlow/workTasks/N166-terminal-done-nodes-in-flows-with-status-transitio",
       "createdAt": "2026-06-22T10:46:09.107Z",
       "statusHistory": [
@@ -465,36 +465,67 @@
           "status": "in-progress",
           "at": "2026-06-22T14:33:19.746Z",
           "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T15:08:11.737Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T15:13:33.377Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-22T15:14:07.653Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T15:14:08.182Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
         "startedAt": "2026-06-22T14:33:19.745Z",
-        "completedAt": null,
-        "filesChanged": [],
+        "completedAt": "2026-06-22T15:08:11.737Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/terminal-nodes.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-22T15:14:08.182Z",
+      "totalDurationMinutes": 268,
       "tags": [
         "react-flow",
         "flow-model",
         "schema"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
-      "mergedAt": null
+      "pushes": [
+        {
+          "at": "2026-06-22T15:13:33.375Z",
+          "commitHash": "c078068",
+          "commitMessage": "feat(dashboard): terminal done nodes read + data model (N166)"
+        }
+      ],
+      "branch": "feat/N166-terminal-done-nodes",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/116",
+      "mergedAt": "2026-06-22T15:14:07.653Z"
     },
     {
       "id": "N167",
       "title": "Flow removal and default-flow resolution bug via entry/start points",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "in-progress",
       "folder": "insightFlow/workTasks/N167-flow-removal-and-default-flow-resolution-bug-via-e",
       "createdAt": "2026-06-22T10:46:09.197Z",
       "statusHistory": [
@@ -502,10 +533,15 @@
           "status": "ready",
           "at": "2026-06-22T10:46:09.197Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T14:47:09.220Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
+        "startedAt": "2026-06-22T14:47:09.219Z",
         "completedAt": null,
         "filesChanged": [],
         "tokensUsed": null
