@@ -20,6 +20,7 @@ function resolveFlowId(
   type: string,
   explicit?: string,
   agent?: string,
+  softAgent?: string,
 ): string {
   const flows = config.flows ?? { defaultFlow: "default", byType: {} };
   let projects: Record<string, { entryAgents?: string[] }>;
@@ -49,7 +50,20 @@ function resolveFlowId(
     byAgent = owning[0];
   }
 
-  const requested = explicit ?? byAgent ?? flows.byType[type] ?? flows.defaultFlow ?? "default";
+  // N173 — a `--by <id>` that is also a flow's entry agent binds the flow too
+  // (lenient: a `--by` that isn't an entry agent is just attribution and is
+  // ignored here). This lets a custom flow's main agent bind by passing the same
+  // identity it stamps on every lifecycle command, without a separate `--agent`.
+  let bySoft: string | undefined;
+  if (!explicit && !byAgent && softAgent) {
+    const owning = Object.entries(projects)
+      .filter(([, p]) => (p.entryAgents ?? []).includes(softAgent))
+      .map(([id]) => id);
+    if (owning.length === 1) bySoft = owning[0];
+  }
+
+  const requested =
+    explicit ?? byAgent ?? bySoft ?? flows.byType[type] ?? flows.defaultFlow ?? "default";
   if (!known.has(requested)) {
     console.error(`Flow "${requested}" not found — binding to "default" instead.`);
     return "default";
@@ -132,6 +146,7 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
     taskType,
     opts.flow as string | undefined,
     opts.agent as string | undefined,
+    opts.by as string | undefined,
   );
 
   const task = {

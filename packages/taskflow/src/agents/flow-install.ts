@@ -5,7 +5,7 @@
 import {
   collectArtifacts,
   composeAgent,
-  flowIdentityNote,
+  withFlowIdentity,
   type AgentArtifacts,
 } from "./compose.js";
 import { mergedComposedAgents, mergedModuleRegistry } from "./user-registry.js";
@@ -79,8 +79,8 @@ export function flowArtifacts(flow: Project): AgentArtifacts {
         name: deriveCommandName(def.id),
         // N153 — append `$ARGUMENTS` for parity with init's claude provider, so
         // overwriting a built-in source's command keeps slash-command arg handling.
-        // N173 — identity note so a force-emitted flow source binds its flow too.
-        body: `${composeAgent(def, registry, flowHandovers)}${flowIdentityNote(def.id)}\n\n$ARGUMENTS\n`,
+        // N173 — stamp identity so a force-emitted flow source binds its flow too.
+        body: `${withFlowIdentity(composeAgent(def, registry, flowHandovers), def.id)}\n\n$ARGUMENTS\n`,
         as: "command",
       });
     }

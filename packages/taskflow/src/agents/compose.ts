@@ -202,11 +202,23 @@ export function flowIdentityNote(agentId: string): string {
     "",
     "## Flow identity",
     "",
-    `You are the composed agent \`${agentId}\`. Identify yourself on insight-flow lifecycle commands so the task binds to YOUR flow and the status history attributes to you:`,
-    `- \`insight-flow create\` — when you create the task as the flow's main agent, add \`--agent ${agentId}\` (this binds the new task to your flow).`,
-    `- Status transitions (\`implement-start\`/\`implement-end\`, \`push\`, \`merge\`, \`done\`, \`review-*\`, \`change-*\`, \`fix-*\`) — add \`--by ${agentId}\`.`,
+    `You are the composed agent \`${agentId}\`. Add \`--by ${agentId}\` to EVERY \`insight-flow\` command you run (\`create\`, \`implement-start\`/\`implement-end\`, \`push\`, \`merge\`, \`done\`, \`review-*\`, \`change-*\`, \`fix-*\`). On \`create\` this also binds the new task to your flow (you are its main/entry agent); on every command it attributes the status history to you instead of a generic role default.`,
     "",
   ].join("\n");
+}
+
+/**
+ * N173 — wrap a command-installed agent's prompt so it carries its flow identity.
+ * The composed body has an explicit `insight-flow create --title …` example that
+ * the agent copies verbatim, so the appended note alone was unreliable for create.
+ * Stamp `--by <id>` directly into that invocation (binds the flow + attributes the
+ * ready status), then append the note for the remaining lifecycle commands. Only
+ * the command-with-args form ("insight-flow create " with a trailing space) is
+ * stamped; prose mentions (`` `insight-flow create` ``) are left alone.
+ */
+export function withFlowIdentity(body: string, agentId: string): string {
+  const stamped = body.split("insight-flow create ").join(`insight-flow create --by ${agentId} `);
+  return stamped + flowIdentityNote(agentId);
 }
 
 /**
@@ -250,7 +262,7 @@ export function collectArtifacts(
       );
     } else {
       // N173 — the installed command identifies the agent so it binds its flow.
-      const prompt = base + flowIdentityNote(def.id);
+      const prompt = withFlowIdentity(base, def.id);
       // N153 — JSON.stringify yields a YAML-safe double-quoted scalar, so a `:`
       // or other metacharacter in the description can't break the frontmatter.
       const body =

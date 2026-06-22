@@ -77,3 +77,24 @@ test("clearFlowReferences resets a default/byType that points at a removed flow"
   assert.equal(flows.byType.fix, undefined, "byType mapping dropped");
   assert.equal(flows.byType.feat, "default", "unrelated mapping kept");
 });
+
+test("N173: create --by an entry agent binds that flow; a non-entry --by stays default", () => {
+  const dir = project();
+  writeFileSync(
+    join(dir, "insightFlow/projects/hotfix.json"),
+    JSON.stringify({
+      id: "custom:hotfix",
+      title: "Hotfix",
+      agents: ["task-implement", "task-git"],
+      entryAgents: ["task-implement"],
+      flow: [],
+      install: [],
+    }),
+  );
+  // --by the flow's entry agent binds it (and attributes the ready status)
+  const a = JSON.parse(cli(dir, ["create", "--title", "T", "--type", "feat", "--by", "task-implement"]));
+  assert.equal(a.flowId, "custom:hotfix");
+  // --by a non-entry agent is attribution only → stays default
+  const b = JSON.parse(cli(dir, ["create", "--title", "T2", "--by", "task-git"]));
+  assert.equal(b.flowId, "default");
+});

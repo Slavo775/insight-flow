@@ -13,16 +13,16 @@ import {
   collectArtifacts,
   applyArtifacts,
   composeAgent,
-  flowIdentityNote,
+  withFlowIdentity,
   deriveCommandName,
   RESERVED_COMMAND_NAMES,
   ComposedAgentSchema,
   flowInstallPlan,
 } from "../dist/index.js";
 
-// N173 — a command-installed agent's body is its composed prompt + the flow
-// identity note (so it stamps --agent/--by on lifecycle calls).
-const cmdBody = (agent) => composeAgent(agent) + flowIdentityNote(agent.id);
+// N173 — a command-installed agent's body is its composed prompt wrapped with the
+// flow identity (stamps --by into `create` + appends the identity note).
+const cmdBody = (agent) => withFlowIdentity(composeAgent(agent), agent.id);
 
 const tmp = () => mkdtempSync(join(tmpdir(), "n138-cmd-"));
 
@@ -64,7 +64,7 @@ test("collectArtifacts emits the composed prompt as a command (and skips when no
   assert.equal(a.commands[0].name, "task-web-tester");
   assert.equal(a.commands[0].as, "command");
   assert.equal(a.commands[0].body, cmdBody(AGENT));
-  assert.match(a.commands[0].body, /--agent custom:web-tester/);
+  assert.match(a.commands[0].body, /--by custom:web-tester/);
   assert.equal(collectArtifacts({ ...AGENT, command: undefined }).commands.length, 0);
 });
 
@@ -212,4 +212,12 @@ test("flowInstallPlan still builds the default flow's steps (new command loop is
   const plan = flowInstallPlan(DEFAULT_PROJECT);
   assert.ok(Array.isArray(plan) && plan.length > 0);
   assert.ok(plan.every((s) => ["mcp", "hook", "skill", "command"].includes(s.kind)));
+});
+
+test("N173: withFlowIdentity stamps --by into the create invocation, not prose mentions", () => {
+  const body = "Run: `insight-flow create --title X`.\nIf `insight-flow create` returns null, edit it.";
+  const out = withFlowIdentity(body, "custom:tm");
+  assert.match(out, /insight-flow create --by custom:tm --title X/);
+  assert.match(out, /If `insight-flow create` returns null/); // prose mention untouched
+  assert.match(out, /## Flow identity/);
 });
