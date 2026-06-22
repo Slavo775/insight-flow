@@ -35,7 +35,7 @@ import {
 } from "../../agents/compose.js";
 import { DEFAULT_PROJECT, projectBucketId } from "../../agents/project.js";
 import { flowInstallPlan, flowArtifacts, flowRequiredInputs } from "../../agents/flow-install.js";
-import { applyArtifacts, InstallConflictError } from "../../agents/emit.js";
+import { applyArtifacts, InstallConflictError, restoreMcpServer } from "../../agents/emit.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
@@ -674,6 +674,30 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // filter it here before serialising rather than relying on CORS alone.
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(config, null, 2));
+      return;
+    }
+
+    // N172 — undo an install overwrite: restore a `.mcp.json` server entry to its
+    // prior config. POST { name, config }.
+    if (url.pathname === "/api/mcp-restore" && req.method === "POST") {
+      let body = "";
+      req.on("data", (c: Buffer) => (body += c.toString("utf-8")));
+      req.on("end", () => {
+        try {
+          const { name, config } = JSON.parse(body || "{}") as { name?: string; config?: unknown };
+          if (!name || config === undefined) {
+            res.writeHead(400, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: "name and config are required" }));
+            return;
+          }
+          const action = restoreMcpServer(resolveProjectRoot(), name, config);
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: true, name, action }));
+        } catch (err) {
+          res.writeHead(500, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+        }
+      });
       return;
     }
 

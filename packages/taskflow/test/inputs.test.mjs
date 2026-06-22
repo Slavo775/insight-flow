@@ -20,6 +20,7 @@ import {
   collectArtifacts,
   applyArtifacts,
   InstallConflictError,
+  restoreMcpServer,
 } from "../dist/index.js";
 
 const tmp = () => mkdtempSync(join(tmpdir(), "n165-"));
@@ -167,4 +168,28 @@ test("N171: ${VAR} substituted in a hook command; runtime vars left literal", ()
   const settings = readJson(join(dir, ".claude/settings.json"));
   const cmd = settings.hooks.PostToolUse[0].hooks[0].command;
   assert.match(cmd, /run secret-val in \$\{CLAUDE_PROJECT_DIR\}/);
+});
+
+// ---- N172: overwrite undo (restoreMcpServer) ----
+
+test("N172: restoreMcpServer rolls a .mcp.json entry back to a prior config", () => {
+  const dir = tmp();
+  applyArtifacts(collectArtifacts(c7Agent, c7Registry), dir, "a", { CONTEXT7_API_KEY: "old" });
+  applyArtifacts(
+    collectArtifacts(c7Agent, c7Registry),
+    dir,
+    "a",
+    { CONTEXT7_API_KEY: "new" },
+    { force: true },
+  );
+  assert.equal(
+    readJson(join(dir, ".mcp.json")).mcpServers.context7.headers.Authorization,
+    "Bearer new",
+  );
+  // undo: restore the captured prior entry
+  restoreMcpServer(dir, "context7", { type: "http", headers: { Authorization: "Bearer old" } });
+  assert.equal(
+    readJson(join(dir, ".mcp.json")).mcpServers.context7.headers.Authorization,
+    "Bearer old",
+  );
 });

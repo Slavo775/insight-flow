@@ -103,6 +103,19 @@ function writeJsonIfChanged(path: string, value: unknown): EmitAction {
   return prev === null ? "created" : "updated";
 }
 
+/**
+ * N172 — restore a single `.mcp.json` server entry to a prior config (the undo of
+ * an N165 overwrite). Writes the entry directly (force); no conflict check, since
+ * the caller is intentionally rolling back to a captured prior value.
+ */
+export function restoreMcpServer(projectRoot: string, name: string, config: unknown): EmitAction {
+  const path = join(projectRoot, ".mcp.json");
+  const doc = readJson<{ mcpServers?: Record<string, unknown> }>(path, {});
+  doc.mcpServers ??= {};
+  doc.mcpServers[name] = config;
+  return writeJsonIfChanged(path, doc);
+}
+
 function applyMcpServers(
   projectRoot: string,
   servers: AgentArtifacts["mcpServers"],

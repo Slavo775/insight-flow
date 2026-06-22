@@ -322,6 +322,19 @@ export async function setTaskFlow(id: string, flow: string): Promise<void> {
   }
 }
 
+/** N172 — undo an install overwrite: restore a `.mcp.json` server entry to a prior config. */
+export async function restoreMcpServer(name: string, config: unknown): Promise<void> {
+  const res = await fetch("/api/mcp-restore", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, config }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `request failed (${res.status})`);
+  }
+}
+
 /** N167 — make a flow the binding default (new tasks bind to it, no entryAgents needed). */
 export async function setDefaultFlow(flowId: string): Promise<void> {
   const res = await fetch("/api/default-flow", {
