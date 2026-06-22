@@ -451,7 +451,11 @@ export function ModuleForm() {
       <Nav projectName={projectName} />
       <SideLayout
         title={isEdit ? `Edit ${editing!.id}` : "New module"}
-        sidebar={<Link to="/module">← All modules</Link>}
+        sidebar={
+          <Button as={Link} to="/module" $variant="secondary">
+            ← All modules
+          </Button>
+        }
       >
         <Section
           title={
@@ -739,14 +743,20 @@ export function ModuleForm() {
               {isEdit ? (
                 <Button
                   type="button"
-                  $variant="danger"
+                  $variant="secondary"
                   disabled={busy}
                   onClick={() => void remove()}
                 >
                   {editingDefault ? "Revert to shipped" : "Delete"}
                 </Button>
               ) : null}
-              <Link to={isEdit ? `/module/${editing!.id}` : "/module"}>Cancel</Link>
+              <Button
+                as={Link}
+                to={isEdit ? `/module/${editing!.id}` : "/module"}
+                $variant="secondary"
+              >
+                Cancel
+              </Button>
             </FormActions>
           </FormBox>
         </Section>

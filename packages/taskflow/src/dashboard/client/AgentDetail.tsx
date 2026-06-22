@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 import { deriveCommandName, type AgentDto } from "./api.js";
+import { Button } from "./components/index.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
@@ -104,14 +105,13 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
               <code>/{deriveCommandName(agent.id)}</code> ({agent.command.as})
             </>
           ) : null}
-          {/* N107 — built-ins are immutable; only custom agents are editable. */}
-          {agent.source === "custom" ? (
-            <>
-              {" · "}
-              <Link to={`/agent/edit/${agent.id}`}>Edit</Link>
-            </>
-          ) : null}
         </Sub>
+        {/* N107 — built-ins are immutable; only custom agents are editable. */}
+        {agent.source === "custom" ? (
+          <Button as={Link} to={`/agent/edit/${agent.id}`} $variant="primary">
+            Edit
+          </Button>
+        ) : null}
       </Header>
       <Legend>
         {usedKinds.map((k) => (
