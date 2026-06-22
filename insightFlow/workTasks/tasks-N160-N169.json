@@ -70,8 +70,7 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-06-19T06:35:25.495Z",
-      "flowId": "default"
+      "mergedAt": "2026-06-19T06:35:25.495Z"
     },
     {
       "id": "N161",
@@ -134,8 +133,444 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-06-19T19:35:34.087Z",
-      "flowId": "default"
+      "mergedAt": "2026-06-19T19:35:34.087Z"
+    },
+    {
+      "id": "N162",
+      "title": "Shared Button component everywhere + secondary (white-bordered) variant",
+      "type": "feat",
+      "priority": "medium",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N162-shared-button-component-everywhere-secondary-white",
+      "createdAt": "2026-06-22T10:45:56.792Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T10:45:56.792Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T10:57:31.130Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T11:01:58.490Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T11:05:19.920Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-22T13:31:31.368Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-22T13:32:13.066Z",
+          "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-22T14:30:43.196Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T14:30:43.277Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-22T10:57:31.130Z",
+        "completedAt": "2026-06-22T11:01:58.490Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/Button.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/AgentDetail.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-22T14:30:43.277Z",
+      "totalDurationMinutes": 225,
+      "tags": [
+        "ui",
+        "dashboard",
+        "buttons"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-22T11:05:19.920Z",
+          "commitHash": "fd90a2a",
+          "commitMessage": "feat(dashboard): shared Button secondary variant (N162)"
+        }
+      ],
+      "branch": "feat/N162-shared-button-secondary-variant",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/111",
+      "mergedAt": "2026-06-22T14:30:43.196Z"
+    },
+    {
+      "id": "N163",
+      "title": "Directional left-to-right flow layout with subject node left, consumers right, visible relationships",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N163-directional-left-to-right-flow-layout-with-subject",
+      "createdAt": "2026-06-22T10:46:08.846Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T10:46:08.846Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "ui",
+        "react-flow",
+        "layout"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N164",
+      "title": "Reuse one agent/command across multiple flows via idempotent install",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N164-reuse-one-agent-command-across-multiple-flows-via-",
+      "createdAt": "2026-06-22T10:46:08.934Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T10:46:08.934Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T11:05:44.342Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T12:13:38.452Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T12:14:41.176Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-22T13:29:09.244Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-22T13:30:45.093Z",
+          "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-22T14:30:43.367Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T14:30:43.453Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-22T11:05:44.341Z",
+        "completedAt": "2026-06-22T12:13:38.451Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/test/emit.test.mjs",
+          "packages/taskflow/test/agent-command.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-22T14:30:43.453Z",
+      "totalDurationMinutes": 225,
+      "tags": [
+        "emit",
+        "flows",
+        "install"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-22T12:14:41.175Z",
+          "commitHash": "e61e30d",
+          "commitMessage": "feat(agents): idempotent install across flows (N164)"
+        }
+      ],
+      "branch": "feat/N164-idempotent-install-across-flows",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/112",
+      "mergedAt": "2026-06-22T14:30:43.367Z"
+    },
+    {
+      "id": "N165",
+      "title": "Overwrite affordance with before/after diff for differing install conflicts",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N165-overwrite-affordance-with-before-after-diff-for-di",
+      "createdAt": "2026-06-22T10:46:09.019Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T10:46:09.020Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T14:00:30.618Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T14:14:39.476Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T14:15:54.573Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-22T14:30:43.721Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T14:30:43.811Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-22T14:00:30.618Z",
+        "completedAt": "2026-06-22T14:14:39.476Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/inputs.ts",
+          "packages/taskflow/src/core/secrets.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/components/InstallModal.tsx",
+          "packages/taskflow/test/inputs.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-22T14:30:43.810Z",
+      "totalDurationMinutes": 225,
+      "tags": [
+        "emit",
+        "install",
+        "ux"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-22T14:15:54.573Z",
+          "commitHash": "038fae9",
+          "commitMessage": "feat(install): templated inputs + substitution + resolved overwrite (N165)"
+        }
+      ],
+      "branch": "feat/N165-templated-inputs-substitution-overwrite",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/114",
+      "mergedAt": "2026-06-22T14:30:43.721Z"
+    },
+    {
+      "id": "N166",
+      "title": "Terminal done nodes in flows with status-transition edges and multiple outcomes",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N166-terminal-done-nodes-in-flows-with-status-transitio",
+      "createdAt": "2026-06-22T10:46:09.107Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T10:46:09.108Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "react-flow",
+        "flow-model",
+        "schema"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N167",
+      "title": "Flow removal and default-flow resolution bug via entry/start points",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N167-flow-removal-and-default-flow-resolution-bug-via-e",
+      "createdAt": "2026-06-22T10:46:09.197Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T10:46:09.197Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "flows",
+        "bug",
+        "default-flow"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N168",
+      "title": "Split task-git out of enforcement module into its own handover-able module",
+      "type": "rework",
+      "priority": "medium",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N168-split-task-git-out-of-enforcement-module-into-its-",
+      "createdAt": "2026-06-22T10:46:09.287Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T10:46:09.287Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T12:25:07.035Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T13:06:04.217Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T13:06:57.149Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-22T13:32:36.295Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-22T13:33:46.681Z",
+          "by": "task-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-22T14:30:43.541Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T14:30:43.630Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-22T12:25:07.035Z",
+        "completedAt": "2026-06-22T13:06:04.217Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/src/agents/modules/roles/task-git.json",
+          "packages/taskflow/src/agents/composed/task-git.json",
+          "AGENT_ENFORCEMENT.md",
+          "AGENT_GIT.md",
+          "TASK_GIT_ROLE.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-22T14:30:43.630Z",
+      "totalDurationMinutes": 225,
+      "tags": [
+        "modules",
+        "task-git",
+        "enforcement"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-22T13:06:57.149Z",
+          "commitHash": "ae21b81",
+          "commitMessage": "rework(agents): split task-git from enforcement (N168)"
+        }
+      ],
+      "branch": "rework/N168-split-task-git-from-enforcement",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/113",
+      "mergedAt": "2026-06-22T14:30:43.540Z"
     }
   ]
 }
