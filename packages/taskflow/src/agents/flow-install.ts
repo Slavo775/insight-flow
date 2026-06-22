@@ -2,7 +2,12 @@
 // skill artifact contributed by the flow's agents PLUS its `install` list,
 // deduped and flattened into an ordered, displayable plan. Read-only — the
 // execution (writing .mcp.json / hooks / skills) is N126.
-import { collectArtifacts, composeAgent, type AgentArtifacts } from "./compose.js";
+import {
+  collectArtifacts,
+  composeAgent,
+  flowIdentityNote,
+  type AgentArtifacts,
+} from "./compose.js";
 import { mergedComposedAgents, mergedModuleRegistry } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
@@ -74,7 +79,8 @@ export function flowArtifacts(flow: Project): AgentArtifacts {
         name: deriveCommandName(def.id),
         // N153 — append `$ARGUMENTS` for parity with init's claude provider, so
         // overwriting a built-in source's command keeps slash-command arg handling.
-        body: `${composeAgent(def, registry, flowHandovers)}\n\n$ARGUMENTS\n`,
+        // N173 — identity note so a force-emitted flow source binds its flow too.
+        body: `${composeAgent(def, registry, flowHandovers)}${flowIdentityNote(def.id)}\n\n$ARGUMENTS\n`,
         as: "command",
       });
     }

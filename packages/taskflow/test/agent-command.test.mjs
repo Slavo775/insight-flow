@@ -13,11 +13,16 @@ import {
   collectArtifacts,
   applyArtifacts,
   composeAgent,
+  flowIdentityNote,
   deriveCommandName,
   RESERVED_COMMAND_NAMES,
   ComposedAgentSchema,
   flowInstallPlan,
 } from "../dist/index.js";
+
+// N173 — a command-installed agent's body is its composed prompt + the flow
+// identity note (so it stamps --agent/--by on lifecycle calls).
+const cmdBody = (agent) => composeAgent(agent) + flowIdentityNote(agent.id);
 
 const tmp = () => mkdtempSync(join(tmpdir(), "n138-cmd-"));
 
@@ -58,7 +63,8 @@ test("collectArtifacts emits the composed prompt as a command (and skips when no
   assert.equal(a.commands.length, 1);
   assert.equal(a.commands[0].name, "task-web-tester");
   assert.equal(a.commands[0].as, "command");
-  assert.equal(a.commands[0].body, composeAgent(AGENT));
+  assert.equal(a.commands[0].body, cmdBody(AGENT));
+  assert.match(a.commands[0].body, /--agent custom:web-tester/);
   assert.equal(collectArtifacts({ ...AGENT, command: undefined }).commands.length, 0);
 });
 
@@ -124,7 +130,7 @@ test("applyArtifacts installs the command, is idempotent, and removes it on opt-
   applyArtifacts(collectArtifacts(AGENT), dir, AGENT.id);
   const cmdPath = join(dir, ".claude/commands/task-web-tester.md");
   assert.ok(existsSync(cmdPath), "command file written");
-  assert.equal(readFileSync(cmdPath, "utf-8"), composeAgent(AGENT));
+  assert.equal(readFileSync(cmdPath, "utf-8"), cmdBody(AGENT));
 
   const second = applyArtifacts(collectArtifacts(AGENT), dir, AGENT.id);
   assert.ok(
@@ -170,24 +176,16 @@ test("a command name claimed by another agent with a DIFFERENT body throws inste
   );
 });
 
-test("N164: identical command re-claim across agents/flows is idempotent (no throw)", () => {
+test("N164: the SAME agent installed by a second flow is idempotent (no throw)", () => {
   const dir = tmp();
-  applyArtifacts(collectArtifacts(AGENT), dir, AGENT.id);
-  // a different agent id that derives the SAME command name AND the SAME composed
-  // body — i.e. the same agent reused across flows. Must NOT throw (N164).
-  const twin = {
-    id: "custom:task-web-tester",
-    title: "Twin",
-    modules: ["testing/prompt"],
-    command: { install: true, as: "command" },
-  };
-  assert.equal(deriveCommandName(twin.id), "task-web-tester");
-  assert.equal(composeAgent(twin), composeAgent(AGENT), "identical composed prompt");
+  // The same command-installed agent appears in two flows (different install
+  // buckets). N173 — the identity note is keyed on the agent id, so the SAME
+  // agent yields an identical body in both flows → idempotent re-claim.
+  applyArtifacts(collectArtifacts(AGENT), dir, "flow-a");
   let reports;
   assert.doesNotThrow(() => {
-    reports = applyArtifacts(collectArtifacts(twin), dir, twin.id);
+    reports = applyArtifacts(collectArtifacts(AGENT), dir, "flow-b");
   });
-  // the on-disk command file is already correct → reported unchanged
   assert.ok(
     reports.some((r) => r.target.endsWith("task-web-tester.md") && r.action === "unchanged"),
     JSON.stringify(reports),
@@ -197,22 +195,15 @@ test("N164: identical command re-claim across agents/flows is idempotent (no thr
 test("N164 review-fix: a shared command survives when one owner opts out", () => {
   const dir = tmp();
   const cmdPath = join(dir, ".claude/commands/task-web-tester.md");
-  // Agent A installs the command…
-  applyArtifacts(collectArtifacts(AGENT), dir, AGENT.id);
-  // …agent B (same derived name + identical body) shares the claim…
-  const twin = {
-    id: "custom:task-web-tester",
-    title: "Twin",
-    modules: ["testing/prompt"],
-    command: { install: true, as: "command" },
-  };
-  applyArtifacts(collectArtifacts(twin), dir, twin.id);
+  // The same agent installed by two flows (different buckets).
+  applyArtifacts(collectArtifacts(AGENT), dir, "flow-a");
+  applyArtifacts(collectArtifacts(AGENT), dir, "flow-b");
   assert.ok(existsSync(cmdPath), "present after shared re-claim");
-  // …A is re-applied WITHOUT the command → must NOT delete it (B still claims it).
-  applyArtifacts(collectArtifacts({ ...AGENT, command: undefined }), dir, AGENT.id);
+  // flow-a re-applied WITHOUT the command → must NOT delete it (flow-b still claims it).
+  applyArtifacts(collectArtifacts({ ...AGENT, command: undefined }), dir, "flow-a");
   assert.ok(existsSync(cmdPath), "shared command survives one owner opting out");
-  // And once B also drops it, the file is finally removed (no claimant left).
-  applyArtifacts({ mcpServers: [], hooks: [], skills: [], commands: [] }, dir, twin.id);
+  // Once flow-b also drops it, no claimant remains → removed.
+  applyArtifacts({ mcpServers: [], hooks: [], skills: [], commands: [] }, dir, "flow-b");
   assert.ok(!existsSync(cmdPath), "removed once no agent claims it");
 });
 

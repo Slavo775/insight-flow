@@ -187,6 +187,29 @@ export interface AgentArtifacts {
 }
 
 /**
+ * N173 — appended to a command-installed agent's composed prompt so the agent
+ * identifies itself to insight-flow's lifecycle commands. Without this, a custom
+ * flow's agent runs generic `insight-flow create`/status calls, so the task binds
+ * to the default flow and the status history shows role defaults ("taskmaster",
+ * "git-agent") instead of the flow's own agents. `--agent` on create binds the
+ * task to the agent's flow (it's the flow's entry agent); `--by` attributes each
+ * status transition. The note is added only to the COMMAND body (not the canonical
+ * role files), so the drift guard is unaffected.
+ */
+export function flowIdentityNote(agentId: string): string {
+  return [
+    "",
+    "",
+    "## Flow identity",
+    "",
+    `You are the composed agent \`${agentId}\`. Identify yourself on insight-flow lifecycle commands so the task binds to YOUR flow and the status history attributes to you:`,
+    `- \`insight-flow create\` — when you create the task as the flow's main agent, add \`--agent ${agentId}\` (this binds the new task to your flow).`,
+    `- Status transitions (\`implement-start\`/\`implement-end\`, \`push\`, \`merge\`, \`done\`, \`review-*\`, \`change-*\`, \`fix-*\`) — add \`--by ${agentId}\`.`,
+    "",
+  ].join("\n");
+}
+
+/**
  * Collect an agent's `mcp-server` / `hook` / `skill` contributions (N92) plus,
  * when opted in (N138), its own composed prompt as an installable command/skill.
  */
@@ -218,14 +241,16 @@ export function collectArtifacts(
   // require frontmatter (name + description); commands take the prompt verbatim.
   if (def.command?.install) {
     const name = deriveCommandName(def.id);
-    const prompt = composeAgent(def, registry, extraHandovers);
+    const base = composeAgent(def, registry, extraHandovers);
     // N153 — don't emit a blank command/skill: an agent of only non-text
     // modules composes to an empty prompt.
-    if (!prompt.trim()) {
+    if (!base.trim()) {
       console.error(
         `warning: agent '${def.id}' composes to an empty prompt — skipping its command`,
       );
     } else {
+      // N173 — the installed command identifies the agent so it binds its flow.
+      const prompt = base + flowIdentityNote(def.id);
       // N153 — JSON.stringify yields a YAML-safe double-quoted scalar, so a `:`
       // or other metacharacter in the description can't break the frontmatter.
       const body =
