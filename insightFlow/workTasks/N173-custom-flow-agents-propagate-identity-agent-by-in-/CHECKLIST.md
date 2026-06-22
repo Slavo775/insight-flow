@@ -1,0 +1,17 @@
+# N173 — Custom-flow agents propagate identity (--agent/--by) in lifecycle commands — Checklist
+
+## Done criteria
+
+- [ ] <specific checkable item>
+- [ ] <specific checkable item>
+
+## Quality gates
+
+- [ ] `npx tsc --noEmit` passes
+- [ ] `npm run lint` passes
+- [ ] Related tests pass
+- [ ] No regressions in affected area
+
+## Verification
+
+- [ ] <manual or automated verification step with expected result>
