@@ -586,6 +586,26 @@
           "status": "done",
           "at": "2026-06-22T15:14:08.182Z",
           "by": "git-agent"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-22T19:45:19.807Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-22T19:45:19.892Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-22T19:51:12.328Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T19:52:54.104Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -599,12 +619,27 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-22T19:45:19.806Z",
+          "description": "Terminal edge validation was only relaxed in the dashboard save path (custom-defs); the user-space loader (user-registry.ts) and project loader (project.ts) still reject agent→terminal edges as 'undeclared agent', so a hand-authored flow with a terminal node fails to LOAD. Relax both loaders to allow edge.to to be a declared terminal status. (Bug found in is-test: js-news.json → done)",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-22T19:51:12.328Z",
+          "filesChanged": [
+            "packages/taskflow/src/agents/user-registry.ts",
+            "packages/taskflow/src/agents/project.ts",
+            "packages/taskflow/test/user-registry.test.mjs"
+          ],
+          "comment": "Relax the user-space loader (user-registry) + project loader to accept agent→terminal edges (edge.to may be a declared terminal status), matching the dashboard save path. Fixes hand-authored flows failing to LOAD (js-news.json → done).",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": "2026-06-22T15:14:08.182Z",
-      "totalDurationMinutes": 268,
+      "committedAt": "2026-06-22T19:52:54.104Z",
+      "totalDurationMinutes": 547,
       "tags": [
         "react-flow",
         "flow-model",
@@ -618,7 +653,7 @@
         }
       ],
       "branch": "feat/N166-terminal-done-nodes",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/116",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/125",
       "mergedAt": "2026-06-22T15:14:07.653Z"
     },
     {
