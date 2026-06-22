@@ -178,6 +178,22 @@ const FieldHint = styled.span`
   font-size: ${(p) => p.theme.font.size.xs};
 `;
 
+// N165 — "saved" affordance: a value is already stored locally (the value itself
+// never leaves the server; this is just the indicator).
+const FieldLabelRow = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${(p) => p.theme.space.md};
+`;
+
+const SavedBadge = styled.span`
+  color: ${(p) => p.theme.color.green};
+  border: 1px solid ${(p) => p.theme.color.green};
+  border-radius: ${(p) => p.theme.radius.pill};
+  font-size: ${(p) => p.theme.font.size.xs};
+  padding: 0 ${(p) => p.theme.space.md};
+`;
+
 const DiffBox = styled.div`
   border: 1px solid ${(p) => p.theme.color.amber};
   border-radius: ${(p) => p.theme.radius.lg};
@@ -354,16 +370,29 @@ export function InstallModal({
             </Lead>
             {requiredInputs.map((inp) => (
               <Field key={inp.name}>
-                {inp.title}
+                <FieldLabelRow>
+                  {inp.title}
+                  {inp.saved ? <SavedBadge>✓ saved</SavedBadge> : null}
+                </FieldLabelRow>
                 <input
                   type={inp.secret ? "password" : "text"}
                   autoComplete="off"
-                  placeholder={inp.secret ? "••••••" : inp.name}
+                  placeholder={
+                    inp.saved
+                      ? "•••••• saved — leave blank to reuse"
+                      : inp.secret
+                        ? "••••••"
+                        : inp.name
+                  }
                   value={values[inp.name] ?? ""}
                   disabled={running}
                   onChange={(e) => setValues((prev) => ({ ...prev, [inp.name]: e.target.value }))}
                 />
-                {inp.description ? <FieldHint>{inp.description}</FieldHint> : null}
+                {inp.saved ? (
+                  <FieldHint>Saved locally — leave blank to reuse, or type to change.</FieldHint>
+                ) : inp.description ? (
+                  <FieldHint>{inp.description}</FieldHint>
+                ) : null}
               </Field>
             ))}
           </>

@@ -726,13 +726,15 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       // N165 — requiredInputs lets the modal render fields for `${VAR}` placeholders.
-      res.end(
-        JSON.stringify({
-          flowId,
-          plan: flowInstallPlan(flow),
-          requiredInputs: flowRequiredInputs(flow),
-        }),
-      );
+      // N165 change: flag inputs whose value is already saved (the boolean only —
+      // the secret value never leaves the server) so the modal can show "saved"
+      // and let the user leave it blank to reuse.
+      const stored = readSecrets(resolveProjectRoot());
+      const requiredInputs = flowRequiredInputs(flow).map((inp) => ({
+        ...inp,
+        saved: Boolean(stored[inp.name] && stored[inp.name].length > 0),
+      }));
+      res.end(JSON.stringify({ flowId, plan: flowInstallPlan(flow), requiredInputs }));
       return;
     }
 
