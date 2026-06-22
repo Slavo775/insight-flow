@@ -792,10 +792,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             writeSecrets(projectRoot, toPersist);
             ensureGitignored(projectRoot);
           }
-          secretValues = required
-            .filter((i) => i.secret)
-            .map((i) => values[i.name])
-            .filter((v): v is string => Boolean(v));
+          // N165 review-fix — scrub against this submission's secrets AND every
+          // value already in the local store, so a *previously-stored* key that
+          // sits on the `.mcp.json` "installed" side of a conflict diff is masked
+          // too (not just the value just submitted).
+          secretValues = [
+            ...required.filter((i) => i.secret).map((i) => values[i.name]),
+            ...Object.values(stored),
+          ].filter((v): v is string => typeof v === "string" && v.length > 0);
 
           const plan = flowInstallPlan(flow);
           transport.emit("install-progress", { phase: "started", flowId, plan });
