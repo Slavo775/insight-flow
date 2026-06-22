@@ -35,13 +35,19 @@ function loadProject(raw: unknown): Project {
       throw new Error(`Project '${project.id}' references unknown agent '${id}'`);
     }
   }
+  // N166 — an edge's source is always an agent; its target may be an agent OR a
+  // declared terminal status (a "done" node, a status flagged `terminal`).
+  const terminalIds = new Set((project.statuses ?? []).filter((s) => s.terminal).map((s) => s.id));
   for (const edge of project.flow) {
-    for (const end of [edge.from, edge.to]) {
-      if (!project.agents.includes(end)) {
-        throw new Error(
-          `Project '${project.id}' flow edge ${edge.from} → ${edge.to} references undeclared agent '${end}'`,
-        );
-      }
+    if (!project.agents.includes(edge.from)) {
+      throw new Error(
+        `Project '${project.id}' flow edge ${edge.from} → ${edge.to} references undeclared agent '${edge.from}'`,
+      );
+    }
+    if (!project.agents.includes(edge.to) && !terminalIds.has(edge.to)) {
+      throw new Error(
+        `Project '${project.id}' flow edge ${edge.from} → ${edge.to} references undeclared agent or terminal '${edge.to}'`,
+      );
     }
   }
   collectProjectInstall(project); // resolves install ids; throws on unknown/cycle
