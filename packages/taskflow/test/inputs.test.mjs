@@ -12,6 +12,7 @@ import {
   scanPlaceholders,
   substituteVars,
   resolveInputs,
+  RESERVED_PLACEHOLDERS,
   readSecrets,
   writeSecrets,
   ensureGitignored,
@@ -137,4 +138,33 @@ test("force overwrites the differing config", () => {
   assert.ok(reports.some((r) => r.target === ".mcp.json" && r.action === "updated"));
   const cfg = readJson(join(dir, ".mcp.json")).mcpServers.context7;
   assert.equal(cfg.headers.Authorization, "Bearer xyz");
+});
+
+// ---- N171: ${VAR} in non-mcp kinds (hooks/skills/commands) ----
+
+test("N171: reserved placeholders are not treated as inputs", () => {
+  const scanned = scanPlaceholders({
+    cmd: "node ${CLAUDE_PROJECT_DIR}/x --key ${MY_KEY} ${ARGUMENTS}",
+  });
+  for (const r of RESERVED_PLACEHOLDERS) scanned.delete(r);
+  assert.deepEqual([...scanned], ["MY_KEY"]);
+});
+
+test("N171: ${VAR} substituted in a hook command; runtime vars left literal", () => {
+  const dir = tmp();
+  const registry = {
+    h: {
+      id: "h",
+      title: "H",
+      source: "builtin",
+      kind: "hook",
+      event: "PostToolUse",
+      command: "run ${MY_KEY} in ${CLAUDE_PROJECT_DIR}",
+    },
+  };
+  const art = collectArtifacts({ id: "a", title: "A", modules: ["h"] }, registry);
+  applyArtifacts(art, dir, "a", { MY_KEY: "secret-val" });
+  const settings = readJson(join(dir, ".claude/settings.json"));
+  const cmd = settings.hooks.PostToolUse[0].hooks[0].command;
+  assert.match(cmd, /run secret-val in \$\{CLAUDE_PROJECT_DIR\}/);
 });

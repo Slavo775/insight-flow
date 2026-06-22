@@ -394,16 +394,23 @@ export function applyArtifacts(
 ): EmitReport[] {
   const sub = (text: string): string =>
     vars ? Object.entries(vars).reduce((acc, [k, v]) => acc.split(`__${k}__`).join(v), text) : text;
+  // N165/N171 — `${VAR}` input substitution. Only provided values are replaced;
+  // an unprovided placeholder (e.g. `${CLAUDE_PROJECT_DIR}`, expanded by Claude
+  // Code at runtime) is left literal.
+  const subVars = <T>(value: T): T => (vars ? substituteVars(value, vars) : value);
   const hooks = artifacts.hooks.map((h) => ({
     ...h,
-    command: sub(h.command),
-    script: h.script ? { name: h.script.name, content: sub(h.script.content) } : undefined,
+    command: subVars(sub(h.command)),
+    script: h.script ? { name: h.script.name, content: subVars(sub(h.script.content)) } : undefined,
   }));
   // N165 — resolve `${VAR}` placeholders in mcp configs from the same vars map
   // (input values flow in here), so applyMcpServers compares resolved configs.
   const mcpServers = vars
     ? artifacts.mcpServers.map((m) => ({ ...m, config: substituteVars(m.config, vars) }))
     : artifacts.mcpServers;
+  // N171 — extend `${VAR}` substitution to skill content + command bodies.
+  const skills = artifacts.skills.map((s) => ({ ...s, content: subVars(s.content) }));
+  const commands = artifacts.commands.map((c) => ({ ...c, body: subVars(c.body) }));
 
   const reports: EmitReport[] = [];
   const manifestPath = join(projectRoot, MANIFEST_PATH);
@@ -418,8 +425,8 @@ export function applyArtifacts(
 
   applyMcpServers(projectRoot, mcpServers, reports, options?.force ?? false);
   applyHooks(projectRoot, hooks, owned, reports);
-  applySkills(projectRoot, agentId, artifacts.skills, manifest, owned, reports);
-  applyCommands(projectRoot, agentId, artifacts.commands, manifest, owned, reports);
+  applySkills(projectRoot, agentId, skills, manifest, owned, reports);
+  applyCommands(projectRoot, agentId, commands, manifest, owned, reports);
 
   if (owned.hooks.length || owned.skills.length || owned.scripts?.length || owned.commands?.length)
     manifest.agents[agentId] = owned;

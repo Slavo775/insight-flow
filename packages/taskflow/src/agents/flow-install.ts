@@ -6,7 +6,13 @@ import { collectArtifacts, composeAgent, type AgentArtifacts } from "./compose.j
 import { mergedComposedAgents, mergedModuleRegistry } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
-import { scanPlaceholders, resolveInputs, type InputSpec } from "../core/inputs.js";
+import {
+  scanPlaceholders,
+  resolveInputs,
+  RESERVED_PLACEHOLDERS,
+  type InputMeta,
+  type InputSpec,
+} from "../core/inputs.js";
 import type { Project } from "./project.js";
 
 export interface InstallStep {
@@ -131,10 +137,20 @@ export function flowInstallPlan(flow: Project): InstallStep[] {
 export function flowRequiredInputs(flow: Project): InputSpec[] {
   const art = flowArtifacts(flow);
   const scanned = new Set<string>();
-  const meta = [];
+  const meta: InputMeta[] = [];
   for (const m of art.mcpServers) {
     scanPlaceholders(m.config, scanned);
     if (m.inputs) meta.push(...m.inputs);
   }
+  // N171 — also collect `${VAR}` placeholders from hooks, skills, and command
+  // bodies, so a templated hook/prompt surfaces the same input fields.
+  for (const h of art.hooks) {
+    scanPlaceholders(h.command, scanned);
+    if (h.script) scanPlaceholders(h.script.content, scanned);
+  }
+  for (const s of art.skills) scanPlaceholders(s.content, scanned);
+  for (const c of art.commands) scanPlaceholders(c.body, scanned);
+  // N171 — runtime/build vars (CLAUDE_PROJECT_DIR, ARGUMENTS, …) are never inputs.
+  for (const r of RESERVED_PLACEHOLDERS) scanned.delete(r);
   return resolveInputs(scanned, meta);
 }

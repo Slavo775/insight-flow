@@ -58,7 +58,12 @@ export type { FlowRoot } from "./core/paths.js";
 export { flowInstallPlan, flowArtifacts, flowRequiredInputs } from "./agents/flow-install.js";
 export type { InstallStep } from "./agents/flow-install.js";
 // N165 — templated install inputs + local secrets store.
-export { scanPlaceholders, substituteVars, resolveInputs } from "./core/inputs.js";
+export {
+  scanPlaceholders,
+  substituteVars,
+  resolveInputs,
+  RESERVED_PLACEHOLDERS,
+} from "./core/inputs.js";
 export type { InputSpec, InputMeta } from "./core/inputs.js";
 export {
   readSecrets,
