@@ -336,7 +336,7 @@ export function InstallModal({
   const undoOverwrite = async (): Promise<void> => {
     if (!lastOverwrite || lastOverwrite.kind !== "mcp") return;
     try {
-      await restoreMcpServer(lastOverwrite.name, lastOverwrite.installed);
+      await restoreMcpServer(lastOverwrite.name);
       setLastOverwrite(null);
       setRunError(null);
     } catch (err) {

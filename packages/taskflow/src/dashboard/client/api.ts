@@ -322,12 +322,16 @@ export async function setTaskFlow(id: string, flow: string): Promise<void> {
   }
 }
 
-/** N172 — undo an install overwrite: restore a `.mcp.json` server entry to a prior config. */
-export async function restoreMcpServer(name: string, config: unknown): Promise<void> {
+/**
+ * N172 — undo an install overwrite: restore a `.mcp.json` server entry. The
+ * server holds the real prior value (snapshotted before the overwrite); the
+ * client only names which server to roll back.
+ */
+export async function restoreMcpServer(name: string): Promise<void> {
   const res = await fetch("/api/mcp-restore", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, config }),
+    body: JSON.stringify({ name }),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
