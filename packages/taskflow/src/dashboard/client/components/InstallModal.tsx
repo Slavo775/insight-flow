@@ -9,8 +9,11 @@ import styled from "styled-components";
 import {
   fetchFlowInstallPlan,
   runFlowInstall,
+  InstallConflictError,
   type InstallReport,
   type InstallStepDto,
+  type InputSpecDto,
+  type InstallConflictDto,
 } from "../api.js";
 import { Button } from "./index.js";
 import type { Theme } from "../theme.js";
@@ -150,6 +153,50 @@ const Actions = styled.div`
   justify-content: flex-end;
 `;
 
+// N165 — input fields for `${VAR}` placeholders + the conflict diff.
+const Field = styled.label`
+  display: flex;
+  flex-direction: column;
+  gap: ${(p) => p.theme.space.sm};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.textMuted};
+  margin-bottom: ${(p) => p.theme.space.md};
+
+  input {
+    background: ${(p) => p.theme.color.bg};
+    color: ${(p) => p.theme.color.text};
+    border: 1px solid ${(p) => p.theme.color.border};
+    border-radius: ${(p) => p.theme.radius.lg};
+    padding: ${(p) => p.theme.space.md};
+    font-family: ${(p) => p.theme.font.family};
+    font-size: ${(p) => p.theme.font.size.md};
+  }
+`;
+
+const FieldHint = styled.span`
+  color: ${(p) => p.theme.color.textMuted};
+  font-size: ${(p) => p.theme.font.size.xs};
+`;
+
+const DiffBox = styled.div`
+  border: 1px solid ${(p) => p.theme.color.amber};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.md};
+  margin-bottom: ${(p) => p.theme.space.lg};
+  font-size: ${(p) => p.theme.font.size.sm};
+  color: ${(p) => p.theme.color.text};
+
+  pre {
+    background: ${(p) => p.theme.color.surface};
+    border-radius: ${(p) => p.theme.radius.md};
+    padding: ${(p) => p.theme.space.md};
+    margin: ${(p) => p.theme.space.sm} 0 0;
+    overflow-x: auto;
+    font-size: ${(p) => p.theme.font.size.xs};
+    color: ${(p) => p.theme.color.text};
+  }
+`;
+
 type Phase = "idle" | "running" | "done" | "failed";
 
 const ACTION_STYLE: Record<
@@ -189,6 +236,10 @@ export function InstallModal({
   // same action — the honest granularity insight-flow actually writes at.
   const [actions, setActions] = useState<Record<string, InstallReport["action"]>>({});
   const [runError, setRunError] = useState<string | null>(null);
+  // N165 — collected `${VAR}` input values + a structured conflict (if any).
+  const [requiredInputs, setRequiredInputs] = useState<InputSpecDto[]>([]);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [conflict, setConflict] = useState<InstallConflictDto | null>(null);
   const phaseRef = useRef<Phase>("idle");
   phaseRef.current = phase;
 
@@ -196,7 +247,11 @@ export function InstallModal({
   useEffect(() => {
     let alive = true;
     fetchFlowInstallPlan(flowId).then(
-      (steps) => alive && setPlan(steps),
+      (res) => {
+        if (!alive) return;
+        setPlan(res.plan);
+        setRequiredInputs(res.requiredInputs);
+      },
       (e: unknown) => alive && setPlanError(e instanceof Error ? e.message : String(e)),
     );
     return () => {
@@ -213,8 +268,9 @@ export function InstallModal({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const install = async (): Promise<void> => {
+  const install = async (force = false): Promise<void> => {
     setRunError(null);
+    setConflict(null);
     setActions({});
     setPhase("running");
     // Open the progress stream and wait for it to CONNECT before the POST: the
@@ -234,14 +290,20 @@ export function InstallModal({
         es.onopen = () => resolve();
         setTimeout(resolve, 1500); // fall through if onopen never fires
       });
-      const reports = await runFlowInstall(flowId);
+      const reports = await runFlowInstall(flowId, { values, force });
       // The response is authoritative — fold every report in by target.
       const final: Record<string, InstallReport["action"]> = {};
       for (const r of reports) final[r.target] = r.action;
       setActions(final);
       setPhase("done");
     } catch (err) {
-      setRunError(err instanceof Error ? err.message : String(err));
+      // N165 — a differing config comes back as a structured conflict: surface
+      // the before/after diff and let the user choose to overwrite.
+      if (err instanceof InstallConflictError) {
+        setConflict(err.conflict);
+      } else {
+        setRunError(err instanceof Error ? err.message : String(err));
+      }
       setPhase("failed");
     } finally {
       es.close();
@@ -282,6 +344,31 @@ export function InstallModal({
           </Lead>
         ) : null}
 
+        {requiredInputs.length > 0 ? (
+          <>
+            <Lead>
+              This flow needs {requiredInputs.length} value{requiredInputs.length === 1 ? "" : "s"}.
+              They are substituted into <code>.mcp.json</code> at install and saved locally
+              (gitignored), so you won&apos;t be asked again. Leave a field blank to reuse a saved
+              value.
+            </Lead>
+            {requiredInputs.map((inp) => (
+              <Field key={inp.name}>
+                {inp.title}
+                <input
+                  type={inp.secret ? "password" : "text"}
+                  autoComplete="off"
+                  placeholder={inp.secret ? "••••••" : inp.name}
+                  value={values[inp.name] ?? ""}
+                  disabled={running}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [inp.name]: e.target.value }))}
+                />
+                {inp.description ? <FieldHint>{inp.description}</FieldHint> : null}
+              </Field>
+            ))}
+          </>
+        ) : null}
+
         {plan && plan.length > 0 ? (
           <>
             <Lead>
@@ -309,24 +396,52 @@ export function InstallModal({
         {phase === "done" ? (
           <Summary $tone="ok">Install complete — {flowTitle} is wired into this project.</Summary>
         ) : null}
-        {phase === "failed" ? <Summary $tone="error">Install failed: {runError}</Summary> : null}
+        {phase === "failed" && conflict ? (
+          <DiffBox>
+            <strong>{conflict.name}</strong> already exists with a different config. Review the
+            change, then overwrite to replace it (secret values are masked).
+            <div>
+              <FieldHint>installed</FieldHint>
+              <pre>{JSON.stringify(conflict.installed, null, 2)}</pre>
+            </div>
+            <div>
+              <FieldHint>incoming</FieldHint>
+              <pre>{JSON.stringify(conflict.incoming, null, 2)}</pre>
+            </div>
+          </DiffBox>
+        ) : null}
+        {phase === "failed" && !conflict ? (
+          <Summary $tone="error">Install failed: {runError}</Summary>
+        ) : null}
 
         <Actions>
           <Button type="button" $variant="nav" disabled={running} onClick={onClose}>
             {phase === "done" ? "Close" : "Cancel"}
           </Button>
+          {conflict ? (
+            <Button
+              type="button"
+              $variant="danger"
+              disabled={running}
+              onClick={() => void install(true)}
+            >
+              {running ? "Overwriting…" : "Overwrite"}
+            </Button>
+          ) : null}
           {plan && plan.length > 0 ? (
             <Button
               type="button"
               $variant="primary"
               disabled={running}
-              onClick={() => void install()}
+              onClick={() => void install(false)}
             >
               {running
                 ? "Installing…"
-                : phase === "done" || phase === "failed"
+                : phase === "done"
                   ? "Run again"
-                  : "Install"}
+                  : phase === "failed"
+                    ? "Retry"
+                    : "Install"}
             </Button>
           ) : null}
         </Actions>

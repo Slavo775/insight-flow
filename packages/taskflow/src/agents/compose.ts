@@ -26,6 +26,7 @@
 import type { z } from "zod";
 import { AgentModuleSchema, ComposedAgentSchema, deriveCommandName } from "../core/schema/index.js";
 import type { AgentHandover } from "../core/flow-status.js";
+import type { InputMeta } from "../core/inputs.js";
 
 import security from "./modules/security.json";
 import enforcement from "./modules/enforcement.json";
@@ -170,7 +171,8 @@ export function resolveModules(
 
 /** The non-text contributions of a composed agent, in declared order. */
 export interface AgentArtifacts {
-  mcpServers: { name: string; config: Record<string, unknown> }[];
+  // N165 — `inputs` carries optional metadata for `${VAR}` placeholders in `config`.
+  mcpServers: { name: string; config: Record<string, unknown>; inputs?: InputMeta[] }[];
   hooks: {
     event: string;
     matcher?: string;
@@ -196,7 +198,12 @@ export function collectArtifacts(
 ): AgentArtifacts {
   const out: AgentArtifacts = { mcpServers: [], hooks: [], skills: [], commands: [] };
   for (const mod of resolveModules(def, registry)) {
-    if (mod.kind === "mcp-server") out.mcpServers.push({ name: mod.name, config: mod.config });
+    if (mod.kind === "mcp-server")
+      out.mcpServers.push({
+        name: mod.name,
+        config: mod.config,
+        ...(mod.inputs ? { inputs: mod.inputs } : {}),
+      });
     else if (mod.kind === "hook")
       out.hooks.push({
         event: mod.event,

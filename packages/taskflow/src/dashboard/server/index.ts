@@ -34,9 +34,10 @@ import {
   type ComposedAgent,
 } from "../../agents/compose.js";
 import { DEFAULT_PROJECT, projectBucketId } from "../../agents/project.js";
-import { flowInstallPlan, flowArtifacts } from "../../agents/flow-install.js";
-import { applyArtifacts } from "../../agents/emit.js";
+import { flowInstallPlan, flowArtifacts, flowRequiredInputs } from "../../agents/flow-install.js";
+import { applyArtifacts, InstallConflictError } from "../../agents/emit.js";
 import { resolveProjectRoot } from "../../core/paths.js";
+import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
@@ -724,7 +725,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         return;
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ flowId, plan: flowInstallPlan(flow) }));
+      // N165 — requiredInputs lets the modal render fields for `${VAR}` placeholders.
+      res.end(
+        JSON.stringify({
+          flowId,
+          plan: flowInstallPlan(flow),
+          requiredInputs: flowRequiredInputs(flow),
+        }),
+      );
       return;
     }
 
@@ -745,8 +753,17 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       });
       req.on("end", () => {
         if (aborted) return;
+        // N165 — collect/persist input values + secrets out of scope; declared
+        // here so the catch can scrub secret values from any error surface.
+        let secretValues: string[] = [];
         try {
-          const parsed = body ? (JSON.parse(body) as { id?: string }) : {};
+          const parsed = body
+            ? (JSON.parse(body) as {
+                id?: string;
+                values?: Record<string, string>;
+                force?: boolean;
+              })
+            : {};
           const flowId = parsed.id ?? DEFAULT_PROJECT.id;
           const flow = mergedProjectsView()[flowId];
           if (!flow) {
@@ -754,12 +771,39 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             res.end(JSON.stringify({ ok: false, error: `unknown flow '${flowId}'` }));
             return;
           }
+          const projectRoot = resolveProjectRoot();
+
+          // N165 — resolve `${VAR}` inputs: submitted values win over the stored
+          // secrets; newly-submitted values are persisted (gitignored) so a
+          // re-install doesn't re-prompt. .mcp.json now holds substituted secrets.
+          const required = flowRequiredInputs(flow);
+          const submitted = parsed.values ?? {};
+          const stored = readSecrets(projectRoot);
+          const values: Record<string, string> = {};
+          const toPersist: Record<string, string> = {};
+          for (const inp of required) {
+            const v = submitted[inp.name] ?? stored[inp.name];
+            if (v !== undefined) values[inp.name] = v;
+            if (submitted[inp.name] !== undefined) toPersist[inp.name] = submitted[inp.name];
+          }
+          if (Object.keys(toPersist).length) {
+            writeSecrets(projectRoot, toPersist);
+            ensureGitignored(projectRoot);
+          }
+          secretValues = required
+            .filter((i) => i.secret)
+            .map((i) => values[i.name])
+            .filter((v): v is string => Boolean(v));
+
           const plan = flowInstallPlan(flow);
           transport.emit("install-progress", { phase: "started", flowId, plan });
-          const projectRoot = resolveProjectRoot();
-          const reports = applyArtifacts(flowArtifacts(flow), projectRoot, projectBucketId(flow), {
-            INSIGHT_FLOW_BIN: "insight-flow",
-          });
+          const reports = applyArtifacts(
+            flowArtifacts(flow),
+            projectRoot,
+            projectBucketId(flow),
+            { INSIGHT_FLOW_BIN: "insight-flow", ...values },
+            { force: parsed.force === true },
+          );
           for (const r of reports) {
             transport.emit("install-progress", {
               phase: "step",
@@ -771,9 +815,21 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           res.writeHead(200, { "Content-Type": MIME[".json"] });
           res.end(JSON.stringify({ ok: true, flowId, reports }));
         } catch (err) {
-          transport.emit("install-progress", { phase: "failed", error: (err as Error).message });
+          // N165 — a differing config is a structured conflict (409): the modal
+          // shows a before/after diff and can retry with `force`. Secret values
+          // are scrubbed from every surface.
+          if (err instanceof InstallConflictError) {
+            transport.emit("install-progress", { phase: "failed", error: err.message });
+            res.writeHead(409, { "Content-Type": MIME[".json"] });
+            res.end(
+              JSON.stringify({ ok: false, conflict: scrubSecrets(err.conflict, secretValues) }),
+            );
+            return;
+          }
+          const message = scrubSecrets((err as Error).message, secretValues);
+          transport.emit("install-progress", { phase: "failed", error: message });
           res.writeHead(500, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+          res.end(JSON.stringify({ ok: false, error: message }));
         }
       });
       return;

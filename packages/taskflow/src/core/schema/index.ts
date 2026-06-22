@@ -317,6 +317,19 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
     kind: z.literal("mcp-server"),
     name: z.string().min(1),
     config: z.record(z.string(), z.unknown()),
+    // N165 — optional metadata for `${VAR}` placeholders in `config`. Inputs are
+    // derived implicitly from the placeholders; this only refines title/help and
+    // toggles the secret (masked) treatment.
+    inputs: z
+      .array(
+        z.object({
+          name: z.string().min(1),
+          title: z.string().optional(),
+          description: z.string().optional(),
+          secret: z.boolean().optional(),
+        }),
+      )
+      .optional(),
   }),
   // Hook module: a Claude Code settings hook registration, reconciled into
   // `.claude/settings.json` via the taskflow-managed manifest. A hook may ship
