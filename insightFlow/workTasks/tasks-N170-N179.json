@@ -310,6 +310,31 @@
           "status": "done",
           "at": "2026-06-22T20:30:50.925Z",
           "by": "git-agent"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-22T21:01:14.789Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-22T21:01:14.874Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-22T21:05:28.036Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T21:06:03.704Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T21:06:27.502Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -323,12 +348,29 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-22T21:01:14.789Z",
+          "description": "Identity note unreliable for 'create': the composed body has an explicit 'insight-flow create --title ...' example (no flags) that the agent copies verbatim, ignoring the appended --agent note. So create still binds to default + 'ready by taskmaster'. Fix: inject --by <id> directly into the create invocation in the command body, and make create bind the flow from --by when it's an entry agent. (Found in is-test N04 vue-news)",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-22T21:05:28.036Z",
+          "filesChanged": [
+            "packages/taskflow/src/agents/compose.ts",
+            "packages/taskflow/src/agents/flow-install.ts",
+            "packages/taskflow/src/cli/commands/create.ts",
+            "packages/taskflow/test/agent-command.test.mjs",
+            "packages/taskflow/test/default-flow.test.mjs"
+          ],
+          "comment": "Stamp --by <id> directly into the create invocation in the command body (the agent copies the explicit example verbatim, so the appended note was ignored for create); create now binds the flow from --by when it's an entry agent (lenient). Fixes 'ready by taskmaster' + flow-default for custom flows.",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": "2026-06-22T20:30:50.925Z",
-      "totalDurationMinutes": 9,
+      "committedAt": "2026-06-22T21:06:27.502Z",
+      "totalDurationMinutes": 45,
       "tags": [
         "flows",
         "agents",
@@ -340,10 +382,15 @@
           "at": "2026-06-22T20:30:23.491Z",
           "commitHash": "e1d0a3f",
           "commitMessage": "fix(flows): agent identity propagation (N173)"
+        },
+        {
+          "at": "2026-06-22T21:06:03.703Z",
+          "commitHash": "c53e0fb",
+          "commitMessage": "fix(flows): create identity injection (N173 follow-up)"
         }
       ],
-      "branch": "fix/N173-agent-identity-propagation",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/126",
+      "branch": "fix/N173b-create-identity-injection",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/127",
       "mergedAt": null
     }
   ]
