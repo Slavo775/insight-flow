@@ -145,5 +145,7 @@ export type { AgentModule, ComposedAgent, AgentArtifacts } from "./agents/compos
 export { transitionTargetFor } from "./agents/transitions.js";
 export { applyArtifacts, renameManifestBucket, InstallConflictError } from "./agents/emit.js";
 export type { EmitReport, EmitAction, InstallConflict } from "./agents/emit.js";
+// N166 — referential validator (terminal-status edge targets) exposed for tests.
+export { validateReferences } from "./dashboard/server/custom-defs.js";
 export { DEFAULT_PROJECT, projectBucketId, collectProjectInstall } from "./agents/project.js";
 export type { Project } from "./agents/project.js";
