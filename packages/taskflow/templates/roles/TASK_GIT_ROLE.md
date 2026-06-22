@@ -38,6 +38,8 @@ ask the user whether to proceed.
 
 ---
 
+@AGENT_GIT.md
+
 WORKFLOW: PUSH (default when invoked without explicit intent, or "push", "commit and push")
 
 1. **Get task** — run `insight-flow current` if no ID given. Read task from tracker.

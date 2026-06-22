@@ -35,6 +35,14 @@
     "body": "Read `agents.git.permissions` at the start of every run (see `@AGENT_CONFIG.md`).\nEach operation below is only executed if its permission flag is `true` or absent.\nIf a flag is `false`, skip the operation and print the blocked message — do not\nask the user whether to proceed.\n\n---"
   },
   {
+    "id": "task-git/git-permissions",
+    "title": "Task Git Agent — git-permission snapshot",
+    "description": "N168 — the generated, config-derived git-permission snapshot (AGENT_GIT.md), referenced only by the Task Git Agent (git is no longer baked into the shared enforcement include).",
+    "source": "builtin",
+    "kind": "include",
+    "ref": "AGENT_GIT.md"
+  },
+  {
     "id": "task-git/workflow-push",
     "title": "Task Git Agent — WORKFLOW: PUSH",
     "description": "The Task Git Agent's WORKFLOW: PUSH section.",

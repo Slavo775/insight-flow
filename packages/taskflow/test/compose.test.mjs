@@ -49,6 +49,23 @@ test("drift guard: composer output is byte-identical to every committed role fil
   }
 });
 
+test("N168: git is separated from the shared enforcement include into task-git only", () => {
+  // The task-git agent references the generated git-permission include…
+  assert.ok(
+    composeAgentById("task-git").includes("@AGENT_GIT.md"),
+    "task-git should reference @AGENT_GIT.md",
+  );
+  // …while a non-git agent does not inherit any git include.
+  assert.ok(
+    !composeAgentById("task-implement").includes("@AGENT_GIT.md"),
+    "task-implement must not reference @AGENT_GIT.md",
+  );
+  // The shared enforcement file no longer carries the GIT RULE block.
+  const enforcement = readFileSync(resolve(repoRoot, "AGENT_ENFORCEMENT.md"), "utf-8");
+  assert.ok(!enforcement.includes("GIT RULE"), "enforcement must not carry a GIT RULE section");
+  assert.ok(!enforcement.includes("Branch naming"), "git conventions must not live in enforcement");
+});
+
 test("all 9 shipped roles are registered as composed agents", () => {
   assert.deepEqual(listComposedAgents().sort(), Object.keys(ROLE_FILES).sort());
 });

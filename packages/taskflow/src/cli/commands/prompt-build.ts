@@ -7,7 +7,7 @@ import { applyArtifacts } from "../../agents/emit.js";
 import { ComposedAgentSchema } from "../../core/schema/index.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 
-function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
+function buildEnforcementBlock(): string {
   const lines: string[] = [];
 
   // N98: @AGENT_SECURITY.md is no longer embedded here — security is a
@@ -24,19 +24,37 @@ function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
     '- Running the script is MANDATORY — there are no exceptions, even for "minor" field updates',
   );
   lines.push("- Violation: direct file edit bypasses validation, ID sequencing, and audit trail");
-  lines.push("");
-  lines.push("GIT RULE");
-  lines.push("");
-  lines.push("- Use `git` for branch creation, commits, and push (universal — works on any host).");
-  lines.push(
-    "- PR creation: use the command defined in `taskflow.config.json.agents.extend.task-git` for your project. insight-flow does not ship a default. See `@PR_API.md` for examples by host (GitHub `gh`, GitLab `glab`, no-CLI compare URL).",
-  );
-  lines.push("- Branch naming: <type>/<task-id>-<slug>");
   lines.push("- Verify all CHECKLIST.md items before marking implemented or done");
+  lines.push("- Never mix tools for the same operation");
+  lines.push("");
+  lines.push("TOKEN EFFICIENCY (applies to every role)");
+  lines.push("");
+  lines.push("- No subagents. Direct tool calls only.");
+  lines.push("- Batch independent reads in one parallel round.");
+  lines.push("- Read only what the task scope explicitly requires.");
 
+  return lines.join("\n");
+}
+
+// N168 — git is no longer baked into the shared enforcement block (every role
+// inherited it). The static git conventions live in the task-git agent's own
+// modules; only the *dynamic*, config-derived permission snapshot needs
+// generation, so it lives in its own `AGENT_GIT.md` include that ONLY the
+// task-git agent references (via the `task-git/git-permissions` module).
+function buildGitBlock(rawGitPerms?: AgentGitPermissions): string {
+  const lines: string[] = [];
+  lines.push("GIT PERMISSIONS");
+  lines.push("");
+  lines.push(
+    "- Generated from `agents.git.permissions`. The Task Git Agent reads the live config at runtime (see its PERMISSION GATES); the list below is a snapshot for quick reference.",
+  );
+
+  const denials: string[] = [];
   if (rawGitPerms) {
     if (rawGitPerms.remoteOps === "deny") {
-      lines.push("- All remote operations (push, createPR, deleteBranchRemote) are NOT permitted.");
+      denials.push(
+        "- All remote operations (push, createPR, deleteBranchRemote) are NOT permitted.",
+      );
       // Also surface any local ops that were explicitly denied alongside remoteOps: "deny"
       const localOps = [
         "createBranch",
@@ -46,27 +64,18 @@ function buildEnforcementBlock(rawGitPerms?: AgentGitPermissions): string {
         "deleteBranchLocal",
       ] as const;
       for (const op of localOps) {
-        if (rawGitPerms[op] === false) {
-          lines.push(`- ${op} is NOT permitted.`);
-        }
+        if (rawGitPerms[op] === false) denials.push(`- ${op} is NOT permitted.`);
       }
     } else {
       for (const [op, val] of Object.entries(rawGitPerms)) {
         if (op === "remoteOps") continue;
-        if (val === false) {
-          lines.push(`- ${op} is NOT permitted.`);
-        }
+        if (val === false) denials.push(`- ${op} is NOT permitted.`);
       }
     }
   }
 
-  lines.push("- Never mix tools for the same operation");
-  lines.push("");
-  lines.push("TOKEN EFFICIENCY (applies to every role)");
-  lines.push("");
-  lines.push("- No subagents. Direct tool calls only.");
-  lines.push("- Batch independent reads in one parallel round.");
-  lines.push("- Read only what the task scope explicitly requires.");
+  if (denials.length) lines.push(...denials);
+  else lines.push("- No git operations are currently denied.");
 
   return lines.join("\n");
 }
@@ -169,7 +178,7 @@ export function applyEnforcement(
   config: TaskflowConfig,
   cwd: string,
 ): { created: boolean; patched: string[]; skipped: string[] } {
-  const block = buildEnforcementBlock(readRawGitPerms(cwd));
+  const block = buildEnforcementBlock();
   const resolvedRolesDir = config.rolesDir ? resolve(cwd, config.rolesDir) : null;
   const hasRootRoles = ROLE_FILES.some((f) => existsSync(join(cwd, f)));
   const enforcementDir =
@@ -182,6 +191,15 @@ export function applyEnforcement(
   const enforcementPath = join(enforcementDir, "AGENT_ENFORCEMENT.md");
   const created = !existsSync(enforcementPath);
   writeFileSync(enforcementPath, block + "\n", "utf-8");
+
+  // N168 — the task-git agent's `@AGENT_GIT.md` include: the dynamic, config-
+  // derived git-permission snapshot, written alongside the enforcement file so
+  // the reference resolves for consumer projects.
+  writeFileSync(
+    join(enforcementDir, "AGENT_GIT.md"),
+    buildGitBlock(readRawGitPerms(cwd)) + "\n",
+    "utf-8",
+  );
 
   const patched: string[] = [];
   const skipped: string[] = [];
@@ -293,7 +311,7 @@ export function cmdPromptBuild(config: TaskflowConfig, opts: ParsedArgs): void {
   }
 
   if (!opts.apply) {
-    const block = buildEnforcementBlock(readRawGitPerms(cwd));
+    const block = buildEnforcementBlock();
     console.log("# Enforcement block (preview)\n");
     console.log(block);
     console.log(
