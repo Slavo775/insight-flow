@@ -103,6 +103,26 @@
           "status": "done",
           "at": "2026-06-22T18:32:40.680Z",
           "by": "git-agent"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-22T19:29:54.181Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-22T19:29:54.363Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-22T19:37:21.439Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T19:38:34.067Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -116,12 +136,27 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-22T19:29:54.181Z",
+          "description": "Spurious inputs: flowRequiredInputs scans composed command/skill BODIES (prose), surfacing shell-var examples as required inputs (task-git → TITLE_ENCODED/BODY_ENCODED/BRANCH). Limit scanning +  substitution to config-like surfaces (mcp config + hook command); prose bodies are not auto-templated. (Review finding)",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-22T19:37:21.439Z",
+          "filesChanged": [
+            "packages/taskflow/src/agents/emit.ts",
+            "packages/taskflow/src/agents/flow-install.ts",
+            "packages/taskflow/test/inputs.test.mjs"
+          ],
+          "comment": "Limit  scanning + substitution to config-like surfaces (mcp config + hook command); prose bodies / hook scripts no longer scanned, so shell-var examples (task-git TITLE_ENCODED/…) don't surface as inputs.",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": "2026-06-22T18:32:40.680Z",
-      "totalDurationMinutes": 112,
+      "committedAt": "2026-06-22T19:38:34.066Z",
+      "totalDurationMinutes": 178,
       "tags": [
         "install",
         "inputs",
@@ -135,7 +170,7 @@
         }
       ],
       "branch": "feat/N171-templated-inputs-non-mcp",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/122",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/124",
       "mergedAt": null
     },
     {
@@ -171,6 +206,26 @@
           "status": "done",
           "at": "2026-06-22T18:41:47.491Z",
           "by": "git-agent"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-22T19:29:54.267Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-22T19:29:54.450Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-22T19:37:21.529Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T19:38:34.155Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -185,12 +240,27 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-22T19:29:54.267Z",
+          "description": "Undo writes masked junk: conflict.installed is scrubbed before reaching the client, so restoreMcpServer writes '***' into .mcp.json for secret servers. Capture the prior entry server-side before a force overwrite and restore from there. (Review finding)",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-22T19:37:21.528Z",
+          "filesChanged": [
+            "packages/taskflow/src/dashboard/server/index.ts",
+            "packages/taskflow/src/dashboard/client/api.ts",
+            "packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+          ],
+          "comment": "Snapshot the prior .mcp.json entry server-side before a force overwrite; /api/mcp-restore restores the real value (not the client's scrubbed copy).",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": "2026-06-22T18:41:47.491Z",
-      "totalDurationMinutes": 121,
+      "committedAt": "2026-06-22T19:38:34.155Z",
+      "totalDurationMinutes": 178,
       "tags": [
         "install",
         "emit",
@@ -204,7 +274,7 @@
         }
       ],
       "branch": "feat/N172-overwrite-undo",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/123",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/124",
       "mergedAt": null
     }
   ]
