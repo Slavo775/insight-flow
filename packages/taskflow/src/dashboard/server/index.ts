@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
 import { SseTransport, type Transport } from "./transport.js";
 import type { TaskflowConfig, HookEventInput } from "../../core/types.js";
-import { getWorkDir } from "../../core/config.js";
+import { getWorkDir, setDefaultFlow } from "../../core/config.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
 import { getNavHtml, getNavCss, getConfigPageHtml } from "./dashboard.js";
 import {
@@ -674,6 +674,30 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // filter it here before serialising rather than relying on CORS alone.
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify(config, null, 2));
+      return;
+    }
+
+    // N167 — set the binding default flow (so new tasks use a custom flow without
+    // needing entryAgents). POST { flowId }. Validates the flow exists.
+    if (url.pathname === "/api/default-flow" && req.method === "POST") {
+      let body = "";
+      req.on("data", (c: Buffer) => (body += c.toString("utf-8")));
+      req.on("end", () => {
+        try {
+          const flowId = (JSON.parse(body || "{}") as { flowId?: string }).flowId;
+          if (!flowId || !mergedProjectsView()[flowId]) {
+            res.writeHead(400, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: `unknown flow '${flowId ?? ""}'` }));
+            return;
+          }
+          setDefaultFlow(flowId);
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: true, defaultFlow: flowId }));
+        } catch (err) {
+          res.writeHead(500, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+        }
+      });
       return;
     }
 

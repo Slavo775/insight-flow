@@ -322,6 +322,19 @@ export async function setTaskFlow(id: string, flow: string): Promise<void> {
   }
 }
 
+/** N167 — make a flow the binding default (new tasks bind to it, no entryAgents needed). */
+export async function setDefaultFlow(flowId: string): Promise<void> {
+  const res = await fetch("/api/default-flow", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flowId }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `request failed (${res.status})`);
+  }
+}
+
 /** Markdown content behind an include module's @ref, or null if not present. */
 export async function fetchIncludeDoc(ref: string): Promise<string | null> {
   const res = await fetch("/api/include-doc?ref=" + encodeURIComponent(ref));

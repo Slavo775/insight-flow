@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import { resolve, basename } from "node:path";
 import type { Task, TaskflowConfig, ActivityEngineConfig, NotificationsConfig } from "./types.js";
 import { resolveProjectRoot, resolveFlowRoot, DEFAULT_WORK_DIR } from "./paths.js";
@@ -107,6 +107,50 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
       },
     },
   };
+}
+
+/**
+ * N167 — set the binding default flow in `taskflow.config.json`
+ * (`flows.defaultFlow`). A new task with no explicit flow / entry-agent match /
+ * type mapping binds to this — so a custom flow becomes the default WITHOUT
+ * needing `entryAgents`. Writes the raw user config (preserving `byType`).
+ */
+export function setDefaultFlow(flowId: string, cwd: string = process.cwd()): void {
+  const anchor = safeResolveProjectRoot(cwd) ?? cwd;
+  const configPath = resolve(anchor, CONFIG_FILENAME);
+  const raw: Partial<TaskflowConfig> = existsSync(configPath)
+    ? (JSON.parse(readFileSync(configPath, "utf-8")) as Partial<TaskflowConfig>)
+    : {};
+  raw.flows = { defaultFlow: flowId, byType: raw.flows?.byType ?? {} };
+  writeFileSync(configPath, JSON.stringify(raw, null, 2) + "\n", "utf-8");
+}
+
+/**
+ * N167 — if the default flow (or any `byType` mapping) points at `flowId`, reset
+ * it to "default". Called after a flow is removed so no dangling default/binding
+ * survives. Returns true if anything changed.
+ */
+export function clearFlowReferences(flowId: string, cwd: string = process.cwd()): boolean {
+  const anchor = safeResolveProjectRoot(cwd) ?? cwd;
+  const configPath = resolve(anchor, CONFIG_FILENAME);
+  if (!existsSync(configPath)) return false;
+  const raw = JSON.parse(readFileSync(configPath, "utf-8")) as Partial<TaskflowConfig>;
+  if (!raw.flows) return false;
+  let changed = false;
+  if (raw.flows.defaultFlow === flowId) {
+    raw.flows.defaultFlow = "default";
+    changed = true;
+  }
+  if (raw.flows.byType) {
+    for (const [type, mapped] of Object.entries(raw.flows.byType)) {
+      if (mapped === flowId) {
+        delete raw.flows.byType[type];
+        changed = true;
+      }
+    }
+  }
+  if (changed) writeFileSync(configPath, JSON.stringify(raw, null, 2) + "\n", "utf-8");
+  return changed;
 }
 
 export function getWorkDir(config: TaskflowConfig, cwd: string = process.cwd()): string {
