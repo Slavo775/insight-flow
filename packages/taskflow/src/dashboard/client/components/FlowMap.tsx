@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Background,
   Controls,
+  MarkerType,
   MiniMap,
   Position,
   ReactFlow,
@@ -173,7 +174,9 @@ export function FlowMap({
           fontSize: 10,
         },
         labelBgStyle: { fill: theme.color.surface },
-        style: { stroke },
+        style: { stroke, strokeWidth: 1.5 },
+        // N163 — directional arrowhead so the flow reads left-to-right.
+        markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 18, height: 18 },
       };
     });
 

@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Background,
   Controls,
+  MarkerType,
   MiniMap,
   Position,
   ReactFlow,
@@ -124,30 +125,44 @@ export function CompositionMap({
   const isMobile = useIsMobile();
 
   const { nodes, edges } = useMemo(() => {
-    const left = specs.filter((s) => !s.emphasis);
-    const right = specs.filter((s) => s.emphasis);
+    // N163 — directional columns derived from edge direction relative to the
+    // emphasized subject: inputs (→ subject) on the LEFT, the subject in the
+    // MIDDLE, outputs (subject →) and any unconnected nodes on the RIGHT. So the
+    // module page shows the subject module left of its consuming agents, with
+    // inputs on the left and outputs on the right.
+    const subjectIds = new Set(specs.filter((s) => s.emphasis).map((s) => s.id));
+    const feedsSubject = (id: string): boolean =>
+      pairs.some(([from, to]) => from === id && subjectIds.has(to));
+    const inputs = specs.filter((s) => !s.emphasis && feedsSubject(s.id));
+    const subjects = specs.filter((s) => s.emphasis);
+    const outputs = specs.filter((s) => !s.emphasis && !feedsSubject(s.id));
+
     const ROW = 78;
-    const leftX = 0;
-    const rightX = isMobile ? 300 : 420;
-    const centerY = Math.max(0, ((left.length - 1) * ROW) / 2);
+    const COL = isMobile ? 240 : 360;
+    // With no inputs, keep the subject in the left column (agent map: modules →
+    // agent → nothing on the right would otherwise float the agent mid-canvas).
+    const midX = inputs.length ? COL : 0;
+    const tallest = Math.max(inputs.length, subjects.length, outputs.length, 1);
+    const place = (arr: MapNodeSpec[], x: number): Node[] => {
+      const offset = Math.max(0, ((tallest - arr.length) * ROW) / 2);
+      return arr.map((s, i) => ({
+        id: s.id,
+        position: { x, y: offset + i * ROW },
+        data: { label: s.label },
+        style: nodeStyle(
+          theme,
+          s.emphasis ? theme.color.accent : kindColor(theme, s.kind),
+          s.emphasis,
+        ),
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+      }));
+    };
 
     const nodes: Node[] = [
-      ...left.map((s, i) => ({
-        id: s.id,
-        position: { x: leftX, y: i * ROW },
-        data: { label: s.label },
-        style: nodeStyle(theme, kindColor(theme, s.kind)),
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-      })),
-      ...right.map((s, i) => ({
-        id: s.id,
-        position: { x: rightX, y: centerY + i * ROW },
-        data: { label: s.label },
-        style: nodeStyle(theme, theme.color.accent, true),
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-      })),
+      ...place(inputs, 0),
+      ...place(subjects, midX),
+      ...place(outputs, midX + COL),
     ];
 
     const edges: Edge[] = pairs.map(([from, to]) => ({
@@ -155,7 +170,10 @@ export function CompositionMap({
       source: from,
       target: to,
       animated: true,
-      style: { stroke: theme.color.border },
+      // N163 — visible relationships: a left-to-right arrowhead + a stronger
+      // stroke than the near-invisible border colour used before.
+      markerEnd: { type: MarkerType.ArrowClosed, color: theme.color.accent, width: 18, height: 18 },
+      style: { stroke: theme.color.accent, strokeWidth: 1.5 },
     }));
 
     return { nodes, edges };
