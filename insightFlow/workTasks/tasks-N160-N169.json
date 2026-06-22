@@ -223,7 +223,7 @@
       "title": "Directional left-to-right flow layout with subject node left, consumers right, visible relationships",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "done",
       "folder": "insightFlow/workTasks/N163-directional-left-to-right-flow-layout-with-subject",
       "createdAt": "2026-06-22T10:46:08.846Z",
       "statusHistory": [
@@ -231,29 +231,63 @@
           "status": "ready",
           "at": "2026-06-22T10:46:08.846Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T14:37:33.998Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T14:43:27.233Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T14:44:21.004Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-22T14:46:03.708Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T14:46:03.796Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-22T14:37:33.997Z",
+        "completedAt": "2026-06-22T14:43:27.233Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+          "packages/taskflow/src/dashboard/client/components/FlowMap.tsx"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-22T14:46:03.795Z",
+      "totalDurationMinutes": 240,
       "tags": [
         "ui",
         "react-flow",
         "layout"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
-      "mergedAt": null
+      "pushes": [
+        {
+          "at": "2026-06-22T14:44:21.003Z",
+          "commitHash": "6bfe1dc",
+          "commitMessage": "feat(dashboard): directional composition layout (N163)"
+        }
+      ],
+      "branch": "feat/N163-directional-composition-layout",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/115",
+      "mergedAt": "2026-06-22T14:46:03.707Z"
     },
     {
       "id": "N164",
@@ -418,7 +452,7 @@
       "title": "Terminal done nodes in flows with status-transition edges and multiple outcomes",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "in-progress",
       "folder": "insightFlow/workTasks/N166-terminal-done-nodes-in-flows-with-status-transitio",
       "createdAt": "2026-06-22T10:46:09.107Z",
       "statusHistory": [
@@ -426,10 +460,15 @@
           "status": "ready",
           "at": "2026-06-22T10:46:09.108Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T14:33:19.746Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
+        "startedAt": "2026-06-22T14:33:19.745Z",
         "completedAt": null,
         "filesChanged": [],
         "tokensUsed": null
