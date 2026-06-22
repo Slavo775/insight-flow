@@ -119,7 +119,7 @@ export function FlowMap({
   const { nodes, edges } = useMemo(() => {
     const positions = computePositions(project);
 
-    const nodes: Node[] = project.agents.map((a) => {
+    const agentNodes: Node[] = project.agents.map((a) => {
       const isCurrent = highlightNodes?.includes(a) ?? false;
       const isSuggested = !isCurrent && (secondaryHighlightNodes?.includes(a) ?? false);
       // N134 — start-point agents (entryAgents) carry a leading ★.
@@ -180,7 +180,34 @@ export function FlowMap({
       };
     });
 
-    return { nodes, edges };
+    // N166 — terminal "done" nodes: declared terminal statuses that an agent
+    // edge ends at, rendered as circles in a trailing column. They represent the
+    // flow's end states (done / handed-off / rejected) — multiple are allowed,
+    // and the edge into each carries the status transition that reaches it.
+    const wiredTerminals = (project.statuses ?? []).filter(
+      (s) => s.terminal && project.flow.some((e) => e.to === s.id),
+    );
+    const maxAgentX = Math.max(0, ...project.agents.map((a) => positions[a]?.x ?? 0));
+    const terminalNodes: Node[] = wiredTerminals.map((t, i) => ({
+      id: t.id,
+      position: { x: maxAgentX + COL_W, y: i * ROW_H },
+      data: { label: `◉ ${t.title}` },
+      style: {
+        background: theme.color.bg,
+        color: t.color ?? theme.color.green,
+        border: `2px solid ${t.color ?? theme.color.green}`,
+        borderRadius: theme.radius.pill,
+        fontFamily: theme.font.family,
+        fontSize: theme.font.size.sm,
+        fontWeight: theme.font.weight.semibold,
+        padding: "12px 18px",
+        width: 140,
+        textAlign: "center" as const,
+      },
+      targetPosition: Position.Left,
+    }));
+
+    return { nodes: [...agentNodes, ...terminalNodes], edges };
   }, [project, theme, highlightNodes, secondaryHighlightNodes]);
 
   const hasEdges = project.flow.length > 0;
