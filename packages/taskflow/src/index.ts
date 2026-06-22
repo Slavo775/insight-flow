@@ -144,6 +144,7 @@ export {
   composeAgentById,
   collectArtifacts,
   flowIdentityNote,
+  withFlowIdentity,
   listComposedAgents,
   indexById,
   MODULE_REGISTRY,
