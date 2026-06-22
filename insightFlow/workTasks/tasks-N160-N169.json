@@ -409,6 +409,26 @@
           "status": "done",
           "at": "2026-06-22T14:30:43.811Z",
           "by": "git-agent"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-22T15:27:34.365Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-22T15:31:32.287Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-22T15:34:41.778Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T15:35:40.385Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -425,12 +445,27 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-22T15:27:34.365Z",
+          "description": "Install modal: when a secret/input value is already saved, indicate it's set and pre-fill it (refill) so the user doesn't re-enter. Human review feedback: 'it will be good if the secrets will be refill if once is set'.",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-22T15:34:41.778Z",
+          "filesChanged": [
+            "packages/taskflow/src/dashboard/server/index.ts",
+            "packages/taskflow/src/dashboard/client/api.ts",
+            "packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+          ],
+          "comment": "Modal shows a 'saved' badge + 'leave blank to reuse' for already-stored inputs; the secret value itself never leaves the server (plan returns a boolean only).",
+          "implementedBy": "task-implement"
+        }
+      ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": "2026-06-22T14:30:43.810Z",
-      "totalDurationMinutes": 225,
+      "committedAt": "2026-06-22T15:35:40.385Z",
+      "totalDurationMinutes": 290,
       "tags": [
         "emit",
         "install",
@@ -444,7 +479,7 @@
         }
       ],
       "branch": "feat/N165-templated-inputs-substitution-overwrite",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/114",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/117",
       "mergedAt": "2026-06-22T14:30:43.721Z"
     },
     {
