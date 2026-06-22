@@ -24,6 +24,8 @@ export {
   getEventsDir,
   getMasterPath,
   resolveTaskFolder,
+  setDefaultFlow,
+  clearFlowReferences,
 } from "./core/config.js";
 export { loadSpec, scaffoldReviewMd } from "./core/spec.js";
 export {

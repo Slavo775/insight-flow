@@ -25,6 +25,7 @@ import {
   type ComposedAgent,
 } from "../../agents/compose.js";
 import { DEFAULT_PROJECT, type Project } from "../../agents/project.js";
+import { clearFlowReferences } from "../../core/config.js";
 import {
   CUSTOM_ID_PREFIX,
   isLockedModuleId,
@@ -265,6 +266,15 @@ export function handleCustomDefsRequest(
     } catch (err) {
       send(res, 500, { ok: false, error: (err as Error).message });
       return true;
+    }
+    // N167 — a removed flow can't remain the binding default / a type mapping;
+    // clear any config reference so new tasks don't bind to a deleted flow.
+    if (kind === "projects" && isCustom) {
+      try {
+        clearFlowReferences(pathId);
+      } catch {
+        /* config write is best-effort */
+      }
     }
     onChanged?.();
     // Custom → deleted; built-in → reverted to the shipped definition.

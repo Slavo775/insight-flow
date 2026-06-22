@@ -16,6 +16,7 @@ import { cmdFixStart, cmdFixEnd } from "./commands/fix.js";
 import { cmdPush, cmdMrUpdate, cmdMerge, cmdDone } from "./commands/push.js";
 import { cmdSetFlow } from "./commands/set-flow.js";
 import { cmdRename } from "./commands/rename.js";
+import { cmdSetDefaultFlow } from "./commands/set-default-flow.js";
 import { cmdAdvance } from "./commands/advance.js";
 import {
   cmdCurrent,
@@ -121,6 +122,7 @@ function printHelp(): void {
     mr-update --id Nxx --url "https://..."
     set-flow --id Nxx --flow <flowId>    Reassign a task's flow (ready-only; N117)
     rename --id Nxx [--title "..."] [--type t] [--priority p]   Update a task's title/type/priority (N170)
+    set-default-flow --flow <flowId>     Make a flow the binding default for new tasks (N167)
     advance --id Nxx --agent <agentId>   Advance via the agent's flow transition (N133)
     merge --id Nxx
     done --id Nxx
@@ -359,6 +361,9 @@ async function run(): Promise<void> {
         break;
       case "rename":
         cmdRename(config, master, opts);
+        break;
+      case "set-default-flow":
+        cmdSetDefaultFlow(opts);
         break;
       case "advance":
         cmdAdvance(config, master, opts);

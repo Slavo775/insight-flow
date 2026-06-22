@@ -12,6 +12,7 @@ import {
   fetchProject,
   fetchProjects,
   saveDefinition,
+  setDefaultFlow,
   type ProjectDto,
   type ProjectSummaryDto,
 } from "./api.js";
@@ -274,6 +275,18 @@ export function ProjectPage() {
     }
   };
 
+  // N167 — make this custom flow the binding default (new tasks bind to it
+  // without needing entryAgents).
+  const makeDefault = async (): Promise<void> => {
+    setTopError(null);
+    try {
+      await setDefaultFlow(project.id);
+      window.alert(`"${project.title}" is now the default flow for new tasks.`);
+    } catch (err) {
+      setTopError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
   // N121 — revert the ejected default flow to its shipped version (DELETE the
   // override; the id stays, falling back to the package default).
   const revertFlow = async (): Promise<void> => {
@@ -348,6 +361,12 @@ export function ProjectPage() {
           {!editing ? (
             <Button type="button" $variant="primary" onClick={() => setInstalling(true)}>
               Install this flow
+            </Button>
+          ) : null}
+          {/* N167 — make this custom flow the binding default for new tasks. */}
+          {!isBuiltin && !editing ? (
+            <Button type="button" $variant="secondary" onClick={() => void makeDefault()}>
+              Set as default
             </Button>
           ) : null}
           {/* Custom flows delete; an ejected default reverts to shipped. */}
