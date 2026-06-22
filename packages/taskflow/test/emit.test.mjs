@@ -182,6 +182,14 @@ test("skill name collisions across agents throw instead of silently overwriting"
   );
 });
 
+test("N164: a second agent re-claiming an IDENTICAL skill is idempotent (no throw)", () => {
+  const dir = tmp();
+  applyArtifacts(collectArtifacts(PILOT), dir, PILOT.id);
+  // a second agent contributing the *same* skill module → identical content
+  const other = collectArtifacts({ id: "other-agent", title: "O", modules: ["testing/skill"] });
+  assert.doesNotThrow(() => applyArtifacts(other, dir, "other-agent"));
+});
+
 test("N94/N96: script-carrying hooks — write 0755, substitute vars, remove with the module", async () => {
   const { DEFAULT_PROJECT, collectProjectInstall, projectBucketId, MODULE_REGISTRY } =
     await import("../dist/index.js");

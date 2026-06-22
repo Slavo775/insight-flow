@@ -221,11 +221,17 @@ function applySkills(
   // A skill name is claimed by exactly one agent — across the shared
   // `.claude/skills` namespace (skill modules + commands installed as skills).
   const others = collectOtherClaims(manifest, agentId);
-  for (const { name } of skills) {
+  for (const { name, content } of skills) {
     const owner = others.get(claimKey(name, "skill"));
-    if (owner) {
+    if (!owner) continue;
+    // N164 — a second flow re-claiming an *identical* skill is idempotent;
+    // only a genuinely different definition is a conflict (N165 overwrite path).
+    const path = join(projectRoot, ".claude/skills", name, "SKILL.md");
+    const body = content.endsWith("\n") ? content : content + "\n";
+    const onDisk = existsSync(path) ? readFileSync(path, "utf-8") : null;
+    if (onDisk !== body) {
       throw new Error(
-        `skill '${name}' is already managed by agent '${owner}' — refusing to overwrite`,
+        `skill '${name}' is already managed by agent '${owner}' with a different definition — refusing to overwrite`,
       );
     }
   }
@@ -284,11 +290,17 @@ function applyCommands(
   // A command/skill name is claimed by exactly one agent, checked in the
   // namespace it actually writes to (N153: as:"skill" shares `.claude/skills`).
   const others = collectOtherClaims(manifest, agentId);
-  for (const { name, as } of commands) {
+  for (const { name, as, body } of commands) {
     const owner = others.get(claimKey(name, as));
-    if (owner) {
+    if (!owner) continue;
+    // N164 — a second flow re-claiming an *identical* command/skill is
+    // idempotent; only a genuinely different definition conflicts (N165).
+    const path = writePath(name, as);
+    const text = body.endsWith("\n") ? body : body + "\n";
+    const onDisk = existsSync(path) ? readFileSync(path, "utf-8") : null;
+    if (onDisk !== text) {
       throw new Error(
-        `${as} '${name}' is already managed by agent '${owner}' — refusing to overwrite`,
+        `${as} '${name}' is already managed by agent '${owner}' with a different definition — refusing to overwrite`,
       );
     }
   }
