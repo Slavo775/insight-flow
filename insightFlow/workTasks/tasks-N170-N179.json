@@ -75,7 +75,7 @@
       "title": "Templated ${VAR} inputs in non-mcp module kinds (hooks, prompts)",
       "type": "feat",
       "priority": "low",
-      "status": "ready",
+      "status": "done",
       "folder": "insightFlow/workTasks/N171-templated-var-inputs-in-non-mcp-module-kinds-hooks",
       "createdAt": "2026-06-22T16:40:34.662Z",
       "statusHistory": [
@@ -83,28 +83,59 @@
           "status": "ready",
           "at": "2026-06-22T16:40:34.662Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T17:34:20.458Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T18:31:30.413Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T18:32:06.181Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T18:32:40.680Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-22T17:34:20.458Z",
+        "completedAt": "2026-06-22T18:31:30.413Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/core/inputs.ts",
+          "packages/taskflow/test/inputs.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-22T18:32:40.680Z",
+      "totalDurationMinutes": 112,
       "tags": [
         "install",
         "inputs",
         "substitution"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-06-22T18:32:06.180Z",
+          "commitHash": "e9be7c9",
+          "commitMessage": "feat(install): ${VAR} in non-mcp kinds (N171)"
+        }
+      ],
+      "branch": "feat/N171-templated-inputs-non-mcp",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/122",
       "mergedAt": null
     },
     {
