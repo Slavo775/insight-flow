@@ -11,6 +11,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import styled, { useTheme } from "styled-components";
 import { fetchIncludeDoc, type ModuleDto } from "./api.js";
+import { Button } from "./components/index.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
@@ -311,7 +312,11 @@ export function ModuleHeader({ module }: { module: ModuleDto }) {
         {/* N120/N142 — custom + non-locked defaults are editable (editing a default
             ejects); locked-by-id and locked-by-kind (status-transition/handover)
             stay read-only, so no Edit link. */}
-        {!isLockedModuleClient(module) ? <Link to={`/module/edit/${module.id}`}>Edit</Link> : null}
+        {!isLockedModuleClient(module) ? (
+          <Button as={Link} to={`/module/edit/${module.id}`} $variant="primary">
+            Edit
+          </Button>
+        ) : null}
       </Header>
       {module.description ? <Description>{module.description}</Description> : null}
     </>

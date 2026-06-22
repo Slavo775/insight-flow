@@ -1,6 +1,14 @@
 import styled, { css } from "styled-components";
 
-export type ButtonVariant = "nav" | "tab" | "icon" | "close" | "docTab" | "primary" | "danger";
+export type ButtonVariant =
+  | "nav"
+  | "tab"
+  | "icon"
+  | "close"
+  | "docTab"
+  | "primary"
+  | "secondary"
+  | "danger";
 
 const buttonVariants = {
   nav: css`
@@ -77,6 +85,25 @@ const buttonVariants = {
       cursor: default;
     }
   `,
+  // N162 — neutral white-bordered action (Cancel, Revert to shipped, Back).
+  secondary: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid ${(p) => p.theme.color.border};
+    color: ${(p) => p.theme.color.text};
+    padding: 6px 16px;
+    border-radius: ${(p) => p.theme.radius.md};
+    font-size: ${(p) => p.theme.font.size.md};
+    &:hover {
+      border-color: ${(p) => p.theme.color.accent};
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  `,
   danger: css`
     background: none;
     border: 1px solid ${(p) => p.theme.color.red};
@@ -110,5 +137,6 @@ const buttonVariants = {
 export const Button = styled.button<{ $variant: ButtonVariant; $active?: boolean }>`
   font-family: inherit;
   cursor: pointer;
+  text-decoration: none;
   ${(p) => buttonVariants[p.$variant]}
 `;
