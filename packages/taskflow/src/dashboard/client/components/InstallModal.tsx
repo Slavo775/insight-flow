@@ -9,6 +9,7 @@ import styled from "styled-components";
 import {
   fetchFlowInstallPlan,
   runFlowInstall,
+  restoreMcpServer,
   InstallConflictError,
   type InstallReport,
   type InstallStepDto,
@@ -256,6 +257,8 @@ export function InstallModal({
   const [requiredInputs, setRequiredInputs] = useState<InputSpecDto[]>([]);
   const [values, setValues] = useState<Record<string, string>>({});
   const [conflict, setConflict] = useState<InstallConflictDto | null>(null);
+  // N172 — the conflict that was just overwritten (kept so we can offer Undo).
+  const [lastOverwrite, setLastOverwrite] = useState<InstallConflictDto | null>(null);
   const phaseRef = useRef<Phase>("idle");
   phaseRef.current = phase;
 
@@ -286,6 +289,9 @@ export function InstallModal({
 
   const install = async (force = false): Promise<void> => {
     setRunError(null);
+    // N172 — overwriting? capture the conflict so we can offer an undo on success.
+    if (force && conflict) setLastOverwrite(conflict);
+    else if (!force) setLastOverwrite(null);
     setConflict(null);
     setActions({});
     setPhase("running");
@@ -323,6 +329,18 @@ export function InstallModal({
       setPhase("failed");
     } finally {
       es.close();
+    }
+  };
+
+  // N172 — undo the last overwrite: restore the prior `.mcp.json` server entry.
+  const undoOverwrite = async (): Promise<void> => {
+    if (!lastOverwrite || lastOverwrite.kind !== "mcp") return;
+    try {
+      await restoreMcpServer(lastOverwrite.name, lastOverwrite.installed);
+      setLastOverwrite(null);
+      setRunError(null);
+    } catch (err) {
+      setRunError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -424,6 +442,17 @@ export function InstallModal({
 
         {phase === "done" ? (
           <Summary $tone="ok">Install complete — {flowTitle} is wired into this project.</Summary>
+        ) : null}
+        {/* N172 — offer to undo the overwrite we just performed. */}
+        {phase === "done" && lastOverwrite && lastOverwrite.kind === "mcp" ? (
+          <DiffBox>
+            Overwrote <strong>{lastOverwrite.name}</strong>. Changed your mind?
+            <div style={{ marginTop: 8 }}>
+              <Button type="button" $variant="secondary" onClick={() => void undoOverwrite()}>
+                ↩ Undo overwrite (restore previous)
+              </Button>
+            </div>
+          </DiffBox>
         ) : null}
         {phase === "failed" && conflict ? (
           <DiffBox>
