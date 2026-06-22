@@ -1,0 +1,2144 @@
+{
+  "taskId": "N164",
+  "events": [
+    {
+      "id": "evt_1782134949398_517a",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:29:09.397Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782134958906_ddc4",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:29:18.905Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782134959101_a163",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:29:19.101Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782134985555_97c0",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:29:45.554Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782134993363_84bf",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:29:53.363Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782134993541_1b10",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:29:53.541Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135026008_eadf",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:30:26.007Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782135026179_d01e",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:30:26.179Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/insightFlow/workTasks/N164-reuse-one-agent-command-across-multiple-flows-via-/REVIEW.md"
+      }
+    },
+    {
+      "id": "evt_1782135041695_6bb5",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:30:41.695Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135041805_53f1",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T13:30:41.805Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782135051854_8661",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:30:51.854Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135091181_5e77",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:31:31.180Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135091526_e1df",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:31:31.525Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135116799_ba1c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:31:56.798Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782135116959_1ee4",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:31:56.958Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/insightFlow/workTasks/N162-shared-button-component-everywhere-secondary-white/REVIEW.md"
+      }
+    },
+    {
+      "id": "evt_1782135124957_6e86",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:32:04.957Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135125066_7320",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T13:32:05.066Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782135139712_823d",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:32:19.712Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135153043_8170",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:32:33.043Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135153165_1b3c",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T13:32:33.165Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782135199268_7721",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:33:19.268Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782135199433_aa74",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:33:19.432Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/insightFlow/workTasks/N168-split-task-git-out-of-enforcement-module-into-its-/REVIEW.md"
+      }
+    },
+    {
+      "id": "evt_1782135210410_676f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:33:30.410Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135210531_f1e7",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T13:33:30.530Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782135233923_217e",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:33:53.922Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782135252563_6a0a",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-22T13:34:12.563Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782136744769_9059",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-06-22T13:59:04.769Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782136760759_a3b2",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T13:59:20.759Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782136763734_d9e0",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T13:59:23.728Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782136830507_570e",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:00:30.507Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782136830839_7ec4",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:00:30.839Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782136878345_9eb0",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:01:18.345Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782136878550_f222",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:01:18.549Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782136901529_c3c8",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:01:41.528Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782136902694_b1ef",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:01:42.694Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782136962520_38ff",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:02:42.520Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782136962689_f009",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:02:42.689Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/core/inputs.ts"
+      }
+    },
+    {
+      "id": "evt_1782136985166_21c2",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:03:05.165Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782136985330_d2a7",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:03:05.330Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/core/secrets.ts"
+      }
+    },
+    {
+      "id": "evt_1782136999369_491a",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:03:19.369Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137000632_1579",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:03:20.631Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137007168_2cd3",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:03:27.167Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137007328_e6df",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:03:27.328Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/core/schema/index.ts"
+      }
+    },
+    {
+      "id": "evt_1782137017491_d9f2",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:03:37.490Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137018642_8c2c",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:03:38.641Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137027091_aa32",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:03:47.091Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137027247_4bc9",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:03:47.247Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/compose.ts"
+      }
+    },
+    {
+      "id": "evt_1782137034913_35fc",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:03:54.912Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137035069_1c46",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:03:55.069Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/compose.ts"
+      }
+    },
+    {
+      "id": "evt_1782137041584_901f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:04:01.584Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137041762_5cef",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:04:01.762Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137047168_f577",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:04:07.168Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137047310_53cf",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:04:07.309Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/compose.ts"
+      }
+    },
+    {
+      "id": "evt_1782137086725_bbef",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:04:46.724Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137087997_483e",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:04:47.996Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137098155_c0ad",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:04:58.155Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137098334_51ba",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:04:58.334Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/emit.ts"
+      }
+    },
+    {
+      "id": "evt_1782137113742_2f40",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:05:13.742Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137113896_7d27",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:05:13.896Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/emit.ts"
+      }
+    },
+    {
+      "id": "evt_1782137124358_8b8e",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:05:24.357Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137124515_520d",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:05:24.515Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/emit.ts"
+      }
+    },
+    {
+      "id": "evt_1782137133286_be7a",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:05:33.286Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137133445_2b45",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:05:33.444Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/emit.ts"
+      }
+    },
+    {
+      "id": "evt_1782137155535_1dff",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:05:55.534Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137156681_9b97",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:05:56.680Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137165787_ac0a",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:06:05.787Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137165949_378f",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:06:05.948Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/flow-install.ts"
+      }
+    },
+    {
+      "id": "evt_1782137176147_789b",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:06:16.147Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137176296_5770",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:06:16.295Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/agents/flow-install.ts"
+      }
+    },
+    {
+      "id": "evt_1782137186282_427c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:06:26.282Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137187732_f157",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:06:27.732Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137201946_fdeb",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:06:41.946Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137203118_8983",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:06:43.118Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137211071_1a4b",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:06:51.071Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137211228_7000",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:06:51.228Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/index.ts"
+      }
+    },
+    {
+      "id": "evt_1782137217468_5b81",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:06:57.467Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137217622_952b",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:06:57.621Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/index.ts"
+      }
+    },
+    {
+      "id": "evt_1782137252487_55af",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:07:32.486Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137253714_1567",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:07:33.713Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137260516_d0a5",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:07:40.516Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137260678_3d6f",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:07:40.678Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/server/index.ts"
+      }
+    },
+    {
+      "id": "evt_1782137268028_4238",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:07:48.027Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137268183_3416",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:07:48.182Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/server/index.ts"
+      }
+    },
+    {
+      "id": "evt_1782137288428_e4a1",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:08:08.428Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137288585_baba",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:08:08.585Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/server/index.ts"
+      }
+    },
+    {
+      "id": "evt_1782137297438_3f51",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:08:17.437Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137298813_3063",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:08:18.812Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137306320_6b60",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:08:26.320Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137306529_22cc",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:08:26.528Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137320508_33d7",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:08:40.507Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137321624_a627",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:08:41.623Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137336765_b8ba",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:08:56.765Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137336931_935b",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:08:56.931Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/api.ts"
+      }
+    },
+    {
+      "id": "evt_1782137361246_e603",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:09:21.245Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137362418_db10",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:09:22.417Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137370247_ec8c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:09:30.247Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137370406_60dd",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:09:30.405Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137389855_ddb9",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:09:49.855Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137390021_4f4c",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:09:50.021Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137410825_7df7",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:10:10.824Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137412141_9d20",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:10:12.141Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137418733_9ec1",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:10:18.733Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137419973_41e2",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:10:19.973Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137430229_ebde",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:10:30.228Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137430444_cb71",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:10:30.444Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137436868_b7b7",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:10:36.867Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137437031_9ffd",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:10:37.031Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137446057_fc24",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:10:46.057Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137446227_58e8",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:10:46.226Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137462538_1162",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:11:02.538Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137463680_3357",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:11:03.680Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Read"
+      }
+    },
+    {
+      "id": "evt_1782137489714_1848",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:11:29.714Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137489861_cca6",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:11:29.861Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137505542_9394",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:11:45.541Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137505709_66b5",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:11:45.709Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137520077_8850",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:12:00.077Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137520235_590c",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:12:00.234Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/src/dashboard/client/components/InstallModal.tsx"
+      }
+    },
+    {
+      "id": "evt_1782137528486_3f1c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:12:08.486Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137531429_aaad",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:12:11.429Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137571143_4954",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:12:51.143Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782137571295_2e39",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:12:51.294Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/test/inputs.test.mjs"
+      }
+    },
+    {
+      "id": "evt_1782137580066_3e00",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:13:00.066Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137580225_f4c8",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:13:00.225Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/test/inputs.test.mjs"
+      }
+    },
+    {
+      "id": "evt_1782137587244_eb96",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:13:07.244Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137587389_49d5",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:13:07.389Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/test/inputs.test.mjs"
+      }
+    },
+    {
+      "id": "evt_1782137594104_2848",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:13:14.103Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137594444_39d0",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:13:14.444Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137600142_82dc",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:13:20.141Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137600465_0cab",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:13:20.464Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137614694_b853",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:13:34.693Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit"
+      }
+    },
+    {
+      "id": "evt_1782137614874_3c4d",
+      "type": "file-edited",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:13:34.873Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Edit",
+        "path": "/Users/ssedlak/Documents/personal_projects/insight-flow/packages/taskflow/test/inputs.test.mjs"
+      }
+    },
+    {
+      "id": "evt_1782137621053_f02f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:13:41.052Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137640500_4677",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:14:00.500Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137653130_f9f0",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:14:13.129Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137653386_7c62",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:14:13.386Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137679336_33c6",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:14:39.336Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137679649_3cd9",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:14:39.649Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137694878_800c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:14:54.878Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137695074_941e",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:14:55.074Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137710241_f33e",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:15:10.241Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782137710394_cbb0",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:15:10.393Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/tmp/commit-N165.txt"
+      }
+    },
+    {
+      "id": "evt_1782137724877_f6a4",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:15:24.877Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write"
+      }
+    },
+    {
+      "id": "evt_1782137725033_2561",
+      "type": "file-written",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:15:25.033Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Write",
+        "path": "/tmp/pr-N165.md"
+      }
+    },
+    {
+      "id": "evt_1782137738915_23ca",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:15:38.915Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137739056_5e80",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:15:39.056Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782137754806_f274",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:15:54.806Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137771395_a3d8",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:16:11.394Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137771527_af7e",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:16:11.527Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782137891651_011b",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:18:11.650Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782137916284_9c64",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-06-22T14:18:36.284Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782138017353_4902",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-06-22T14:20:17.353Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782138111894_6ed9",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:21:51.894Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138112034_90cc",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:21:52.033Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782138307090_94f0",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:25:07.090Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138349294_b855",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:25:49.294Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138349405_d780",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:25:49.405Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782138511558_e75b",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:28:31.558Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138523568_33ab",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:28:43.568Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138525800_d0ee",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:28:45.793Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138538200_f18a",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:28:58.200Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138543464_daa8",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:29:03.464Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138549915_5d7c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:29:09.914Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138558803_869d",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:29:18.803Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138585438_d018",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:29:45.437Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138585554_93a5",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:29:45.553Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782138591577_30cc",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:29:51.576Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138604648_a889",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:30:04.648Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138626408_63b9",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:30:26.407Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138639398_9042",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:30:39.398Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138639514_1d69",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:30:39.514Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782138644321_a60b",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:30:44.321Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138663352_437f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:31:03.352Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138663540_3929",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:31:03.540Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138677413_045f",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:31:17.413Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138677546_9572",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:31:17.546Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    },
+    {
+      "id": "evt_1782138688046_ba92",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-22T14:31:28.046Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138719041_ec8c",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-22T14:31:59.041Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782138719176_9958",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-22T14:31:59.176Z",
+      "sessionId": "1cfa43b3-1fa3-4ed1-935b-b41bf668b885",
+      "taskId": "N164",
+      "payload": {}
+    }
+  ]
+}

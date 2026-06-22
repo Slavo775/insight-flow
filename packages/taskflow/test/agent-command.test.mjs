@@ -194,6 +194,28 @@ test("N164: identical command re-claim across agents/flows is idempotent (no thr
   );
 });
 
+test("N164 review-fix: a shared command survives when one owner opts out", () => {
+  const dir = tmp();
+  const cmdPath = join(dir, ".claude/commands/task-web-tester.md");
+  // Agent A installs the command…
+  applyArtifacts(collectArtifacts(AGENT), dir, AGENT.id);
+  // …agent B (same derived name + identical body) shares the claim…
+  const twin = {
+    id: "custom:task-web-tester",
+    title: "Twin",
+    modules: ["testing/prompt"],
+    command: { install: true, as: "command" },
+  };
+  applyArtifacts(collectArtifacts(twin), dir, twin.id);
+  assert.ok(existsSync(cmdPath), "present after shared re-claim");
+  // …A is re-applied WITHOUT the command → must NOT delete it (B still claims it).
+  applyArtifacts(collectArtifacts({ ...AGENT, command: undefined }), dir, AGENT.id);
+  assert.ok(existsSync(cmdPath), "shared command survives one owner opting out");
+  // And once B also drops it, the file is finally removed (no claimant left).
+  applyArtifacts({ mcpServers: [], hooks: [], skills: [], commands: [] }, dir, twin.id);
+  assert.ok(!existsSync(cmdPath), "removed once no agent claims it");
+});
+
 test("flowInstallPlan still builds the default flow's steps (new command loop is harmless)", async () => {
   const { DEFAULT_PROJECT } = await import("../dist/index.js");
   const plan = flowInstallPlan(DEFAULT_PROJECT);

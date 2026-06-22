@@ -266,6 +266,9 @@ function applySkills(
   const current = new Set(skills.map((s) => s.name));
   for (const name of owned.skills) {
     if (current.has(name)) continue;
+    // N164 review-fix — don't delete a skill another agent/flow still claims
+    // (shared-ownership: the same identical skill installed by multiple flows).
+    if (others.has(claimKey(name, "skill"))) continue;
     const dir = join(projectRoot, ".claude/skills", name);
     if (existsSync(dir)) {
       rmSync(dir, { recursive: true });
@@ -336,6 +339,9 @@ function applyCommands(
   for (const old of owned.commands ?? []) {
     const still = current.get(old.name);
     if (still && still.as === old.as) continue; // kept (target kind unchanged)
+    // N164 review-fix — don't delete a command/skill another agent/flow still
+    // claims (shared-ownership across flows that install the same agent).
+    if (others.has(claimKey(old.name, old.as))) continue;
     const path = removePath(old.name, old.as);
     if (existsSync(path)) {
       rmSync(path, old.as === "skill" ? { recursive: true } : {});
