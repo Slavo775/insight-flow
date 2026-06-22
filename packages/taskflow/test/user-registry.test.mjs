@@ -144,7 +144,7 @@ test("custom project referencing unknown agent or undeclared flow endpoint fails
       },
     },
   });
-  assert.throws(() => loadUserRegistries(dir2), /undeclared agent 'task-review'/);
+  assert.throws(() => loadUserRegistries(dir2), /undeclared agent or terminal 'task-review'/);
 });
 
 test("custom agent can reference custom modules through bundles in built-ins", () => {
@@ -215,4 +215,39 @@ test("eject/override applies to agents and the default project flow", () => {
     "Default (ejected)",
     "default flow override shadows shipped",
   );
+});
+
+// N166 review-fix — the user-space LOADER must accept agent→terminal edges
+// (was only relaxed in the dashboard save path, so hand-authored flows with a
+// terminal node failed to load: "references undeclared agent 'done'").
+
+test("N166: a flow edge to a declared terminal status loads", () => {
+  const TERMINAL_FLOW = {
+    id: "custom:term",
+    title: "Term flow",
+    agents: ["task-implement", "task-git"],
+    // N128: declaring `statuses` makes them the flow's trigger universe, so the
+    // non-terminal edge uses a trigger-less direct handoff (like js-news).
+    statuses: [{ id: "done", title: "Done", terminal: true }],
+    flow: [
+      { from: "task-implement", to: "task-git" },
+      { from: "task-git", to: "done", on: "done" },
+    ],
+    install: [],
+  };
+  const dir = project({ projects: { "term.json": TERMINAL_FLOW } });
+  const user = loadUserRegistries(dir);
+  assert.equal(user.projects["custom:term"].flow.length, 2);
+});
+
+test("N166: a flow edge to an unknown target (not agent, not terminal) is still rejected", () => {
+  const BAD = {
+    id: "custom:bad",
+    title: "Bad",
+    agents: ["task-implement"],
+    flow: [{ from: "task-implement", to: "nowhere" }],
+    install: [],
+  };
+  const dir = project({ projects: { "bad.json": BAD } });
+  assert.throws(() => loadUserRegistries(dir), /undeclared agent or terminal 'nowhere'/);
 });
