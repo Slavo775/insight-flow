@@ -42,6 +42,10 @@ import { loadUserRegistries } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
 
+// N172 — prior `.mcp.json` server entries captured (server-side, unscrubbed)
+// before a force overwrite, keyed by server name; drained by /api/mcp-restore.
+const overwriteSnapshots = new Map<string, unknown>();
+
 /** N108 — shipped default + user-space flows; degrades to default-only. */
 function mergedProjectsView(): Record<string, Project> {
   try {
@@ -684,13 +688,21 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       req.on("data", (c: Buffer) => (body += c.toString("utf-8")));
       req.on("end", () => {
         try {
-          const { name, config } = JSON.parse(body || "{}") as { name?: string; config?: unknown };
-          if (!name || config === undefined) {
+          const { name } = JSON.parse(body || "{}") as { name?: string };
+          if (!name) {
             res.writeHead(400, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: "name and config are required" }));
+            res.end(JSON.stringify({ ok: false, error: "name is required" }));
             return;
           }
-          const action = restoreMcpServer(resolveProjectRoot(), name, config);
+          // N172 — restore from the server-side snapshot (the real prior value),
+          // not the client's secret-scrubbed copy. No snapshot ⇒ nothing to undo.
+          if (!overwriteSnapshots.has(name)) {
+            res.writeHead(409, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: `no overwrite to undo for '${name}'` }));
+            return;
+          }
+          const action = restoreMcpServer(resolveProjectRoot(), name, overwriteSnapshots.get(name));
+          overwriteSnapshots.delete(name);
           res.writeHead(200, { "Content-Type": MIME[".json"] });
           res.end(JSON.stringify({ ok: true, name, action }));
         } catch (err) {
@@ -849,10 +861,35 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             ...Object.values(stored),
           ].filter((v): v is string => typeof v === "string" && v.length > 0);
 
+          const artifacts = flowArtifacts(flow);
+          // N172 (review-fix) — before a force overwrite, snapshot the prior
+          // `.mcp.json` entries server-side (the REAL values), so Undo restores
+          // them. The client's copy of `installed` is secret-scrubbed and can't
+          // be trusted for a restore.
+          if (parsed.force === true) {
+            const mcpPath = resolve(projectRoot, ".mcp.json");
+            if (existsSync(mcpPath)) {
+              try {
+                const current = (
+                  JSON.parse(readFileSync(mcpPath, "utf-8")) as {
+                    mcpServers?: Record<string, unknown>;
+                  }
+                ).mcpServers;
+                for (const m of artifacts.mcpServers) {
+                  if (current && current[m.name] !== undefined) {
+                    overwriteSnapshots.set(m.name, current[m.name]);
+                  }
+                }
+              } catch {
+                /* unreadable .mcp.json — nothing to snapshot */
+              }
+            }
+          }
+
           const plan = flowInstallPlan(flow);
           transport.emit("install-progress", { phase: "started", flowId, plan });
           const reports = applyArtifacts(
-            flowArtifacts(flow),
+            artifacts,
             projectRoot,
             projectBucketId(flow),
             { INSIGHT_FLOW_BIN: "insight-flow", ...values },

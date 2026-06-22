@@ -21,6 +21,7 @@ import {
   applyArtifacts,
   InstallConflictError,
   restoreMcpServer,
+  flowRequiredInputs,
 } from "../dist/index.js";
 
 const tmp = () => mkdtempSync(join(tmpdir(), "n165-"));
@@ -191,5 +192,27 @@ test("N172: restoreMcpServer rolls a .mcp.json entry back to a prior config", ()
   assert.equal(
     readJson(join(dir, ".mcp.json")).mcpServers.context7.headers.Authorization,
     "Bearer old",
+  );
+});
+
+// ---- N171 review-fix: prose bodies don't surface spurious inputs ----
+
+test("N171 review-fix: command/prompt bodies are not scanned for inputs", () => {
+  // task-git's composed body carries shell-var examples (${TITLE_ENCODED}, …).
+  // A handover from it force-emits that body as a command; it must NOT become
+  // a required input (only mcp config + hook commands are scanned).
+  const flow = {
+    id: "custom:t",
+    title: "T",
+    agents: ["task-implement", "task-git"],
+    flow: [{ from: "task-git", to: "task-implement", handover: { mode: "gated" } }],
+    install: [],
+    states: [],
+    statuses: [],
+    entryAgents: [],
+  };
+  assert.deepEqual(
+    flowRequiredInputs(flow).map((i) => i.name),
+    [],
   );
 });

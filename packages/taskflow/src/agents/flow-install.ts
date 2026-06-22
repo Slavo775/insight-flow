@@ -142,15 +142,13 @@ export function flowRequiredInputs(flow: Project): InputSpec[] {
     scanPlaceholders(m.config, scanned);
     if (m.inputs) meta.push(...m.inputs);
   }
-  // N171 — also collect `${VAR}` placeholders from hooks, skills, and command
-  // bodies, so a templated hook/prompt surfaces the same input fields.
-  for (const h of art.hooks) {
-    scanPlaceholders(h.command, scanned);
-    if (h.script) scanPlaceholders(h.script.content, scanned);
-  }
-  for (const s of art.skills) scanPlaceholders(s.content, scanned);
-  for (const c of art.commands) scanPlaceholders(c.body, scanned);
-  // N171 — runtime/build vars (CLAUDE_PROJECT_DIR, ARGUMENTS, …) are never inputs.
+  // N171 (review-fix) — also collect `${VAR}` from hook COMMANDS (config-like).
+  // Deliberately NOT scanning skill content, command/prompt bodies, or hook SCRIPT
+  // content: those are prose / JS that legitimately contain `${...}` (e.g.
+  // task-git's PR-prefill examples → ${TITLE_ENCODED}), which would surface as
+  // bogus required inputs.
+  for (const h of art.hooks) scanPlaceholders(h.command, scanned);
+  // Runtime/build vars (CLAUDE_PROJECT_DIR, ARGUMENTS, …) are never inputs.
   for (const r of RESERVED_PLACEHOLDERS) scanned.delete(r);
   return resolveInputs(scanned, meta);
 }
