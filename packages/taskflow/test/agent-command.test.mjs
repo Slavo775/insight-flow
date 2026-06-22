@@ -149,20 +149,48 @@ test("skill target writes under .claude/skills/<name>/SKILL.md", () => {
   assert.match(readFileSync(p, "utf-8"), /^---\nname: task-web-tester/);
 });
 
-test("a command name claimed by another agent throws instead of overwriting", () => {
+test("a command name claimed by another agent with a DIFFERENT body throws instead of overwriting", () => {
   const dir = tmp();
   applyArtifacts(collectArtifacts(AGENT), dir, AGENT.id);
-  // a different agent id that derives the SAME command name
+  // a different agent id that derives the SAME command name but a different prompt
   const dup = {
     id: "custom:task-web-tester",
     title: "Dup",
+    modules: ["m"],
+    command: { install: true, as: "command" },
+  };
+  const registry = {
+    m: { id: "m", title: "M", kind: "section", source: "builtin", body: "a different prompt" },
+  };
+  assert.equal(deriveCommandName(dup.id), "task-web-tester");
+  assert.notEqual(composeAgent(dup, registry), composeAgent(AGENT));
+  assert.throws(
+    () => applyArtifacts(collectArtifacts(dup, registry), dir, dup.id),
+    /already managed by agent 'custom:web-tester' with a different definition/,
+  );
+});
+
+test("N164: identical command re-claim across agents/flows is idempotent (no throw)", () => {
+  const dir = tmp();
+  applyArtifacts(collectArtifacts(AGENT), dir, AGENT.id);
+  // a different agent id that derives the SAME command name AND the SAME composed
+  // body — i.e. the same agent reused across flows. Must NOT throw (N164).
+  const twin = {
+    id: "custom:task-web-tester",
+    title: "Twin",
     modules: ["testing/prompt"],
     command: { install: true, as: "command" },
   };
-  assert.equal(deriveCommandName(dup.id), "task-web-tester");
-  assert.throws(
-    () => applyArtifacts(collectArtifacts(dup), dir, dup.id),
-    /already managed by agent 'custom:web-tester'/,
+  assert.equal(deriveCommandName(twin.id), "task-web-tester");
+  assert.equal(composeAgent(twin), composeAgent(AGENT), "identical composed prompt");
+  let reports;
+  assert.doesNotThrow(() => {
+    reports = applyArtifacts(collectArtifacts(twin), dir, twin.id);
+  });
+  // the on-disk command file is already correct → reported unchanged
+  assert.ok(
+    reports.some((r) => r.target.endsWith("task-web-tester.md") && r.action === "unchanged"),
+    JSON.stringify(reports),
   );
 });
 

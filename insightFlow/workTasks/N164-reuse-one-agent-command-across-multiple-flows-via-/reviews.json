@@ -1,0 +1,14 @@
+{
+  "taskId": "N164",
+  "reviews": [
+    {
+      "startedAt": "2026-06-22T13:29:09.245Z",
+      "endedAt": "2026-06-22T13:30:45.092Z",
+      "verdict": "approved",
+      "comment": "Idempotent identical re-claim correct + tested; non-blocking: shared-ownership removal still single-owner (rmSync deletes an artifact another flow claims) — suggest guarding via collectOtherClaims, fold into N165/follow-up.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}
