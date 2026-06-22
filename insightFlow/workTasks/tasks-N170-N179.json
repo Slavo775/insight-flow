@@ -1,0 +1,148 @@
+{
+  "range": {
+    "from": 170,
+    "to": 179
+  },
+  "tasks": [
+    {
+      "id": "N170",
+      "title": "insight-flow rename command to update a task title",
+      "type": "feat",
+      "priority": "low",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N170-insight-flow-rename-command-to-update-a-task-title",
+      "createdAt": "2026-06-22T16:40:34.573Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T16:40:34.573Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-22T16:50:06.628Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-22T16:54:16.428Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-22T17:08:39.854Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T17:09:18.722Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-22T16:50:06.628Z",
+        "completedAt": "2026-06-22T16:54:16.428Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/rename.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/test/rename.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": "2026-06-22T17:09:18.722Z",
+      "totalDurationMinutes": 29,
+      "tags": [
+        "cli",
+        "tasks"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-22T17:08:39.854Z",
+          "commitHash": "7377df3",
+          "commitMessage": "feat(cli): rename command (N170)"
+        }
+      ],
+      "branch": "feat/N170-rename-command",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/119",
+      "mergedAt": null
+    },
+    {
+      "id": "N171",
+      "title": "Templated ${VAR} inputs in non-mcp module kinds (hooks, prompts)",
+      "type": "feat",
+      "priority": "low",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N171-templated-var-inputs-in-non-mcp-module-kinds-hooks",
+      "createdAt": "2026-06-22T16:40:34.662Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T16:40:34.662Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "install",
+        "inputs",
+        "substitution"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    },
+    {
+      "id": "N172",
+      "title": "Install overwrite undo/rollback",
+      "type": "feat",
+      "priority": "low",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N172-install-overwrite-undo-rollback",
+      "createdAt": "2026-06-22T16:40:34.750Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T16:40:34.750Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "install",
+        "emit",
+        "ux"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    }
+  ]
+}

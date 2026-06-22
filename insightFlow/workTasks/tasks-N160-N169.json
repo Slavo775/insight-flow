@@ -70,7 +70,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-06-19T06:35:25.495Z"
+      "mergedAt": "2026-06-19T06:35:25.495Z",
+      "flowId": "default"
     },
     {
       "id": "N161",
@@ -133,7 +134,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": "2026-06-19T19:35:34.087Z"
+      "mergedAt": "2026-06-19T19:35:34.087Z",
+      "flowId": "default"
     },
     {
       "id": "N162",
@@ -216,7 +218,8 @@
       ],
       "branch": "feat/N162-shared-button-secondary-variant",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/111",
-      "mergedAt": "2026-06-22T14:30:43.196Z"
+      "mergedAt": "2026-06-22T14:30:43.196Z",
+      "flowId": "default"
     },
     {
       "id": "N163",
@@ -287,7 +290,8 @@
       ],
       "branch": "feat/N163-directional-composition-layout",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/115",
-      "mergedAt": "2026-06-22T14:46:03.707Z"
+      "mergedAt": "2026-06-22T14:46:03.707Z",
+      "flowId": "default"
     },
     {
       "id": "N164",
@@ -403,7 +407,8 @@
       ],
       "branch": "feat/N164-idempotent-install-across-flows",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/118",
-      "mergedAt": "2026-06-22T14:30:43.367Z"
+      "mergedAt": "2026-06-22T14:30:43.367Z",
+      "flowId": "default"
     },
     {
       "id": "N165",
@@ -546,7 +551,8 @@
       ],
       "branch": "feat/N165-templated-inputs-substitution-overwrite",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/118",
-      "mergedAt": "2026-06-22T14:30:43.721Z"
+      "mergedAt": "2026-06-22T14:30:43.721Z",
+      "flowId": "default"
     },
     {
       "id": "N166",
@@ -619,12 +625,13 @@
       ],
       "branch": "feat/N166-terminal-done-nodes",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/116",
-      "mergedAt": "2026-06-22T15:14:07.653Z"
+      "mergedAt": "2026-06-22T15:14:07.653Z",
+      "flowId": "default"
     },
     {
       "id": "N167",
-      "title": "Flow removal and default-flow resolution bug via entry/start points",
-      "type": "fix",
+      "title": "Flow removal + default-flow override (feature)",
+      "type": "feat",
       "priority": "high",
       "status": "in-progress",
       "folder": "insightFlow/workTasks/N167-flow-removal-and-default-flow-resolution-bug-via-e",
@@ -661,7 +668,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
     },
     {
       "id": "N168",
@@ -746,7 +754,46 @@
       ],
       "branch": "rework/N168-split-task-git-from-enforcement",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/113",
-      "mergedAt": "2026-06-22T14:30:43.540Z"
+      "mergedAt": "2026-06-22T14:30:43.540Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N169",
+      "title": "Interactive terminal-node authoring in the flow editor",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N169-interactive-terminal-node-authoring-in-the-flow-ed",
+      "createdAt": "2026-06-22T16:40:34.480Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-22T16:40:34.481Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "react-flow",
+        "flow-editor",
+        "terminal"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
