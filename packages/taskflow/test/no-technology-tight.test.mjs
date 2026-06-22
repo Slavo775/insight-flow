@@ -19,6 +19,7 @@ const REPO_ROOT = resolve(fileURLToPath(new URL("../../../", import.meta.url)));
 const FILES = [
   "AGENT_PROTOCOL.md",
   "AGENT_ENFORCEMENT.md",
+  "AGENT_GIT.md",
   "PR_API.md",
   "TASKMASTER_ROLE.md",
   "TASKMASTER_CHANGE_ROLE.md",
