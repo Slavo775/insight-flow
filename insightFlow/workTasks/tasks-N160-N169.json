@@ -337,6 +337,26 @@
           "status": "done",
           "at": "2026-06-22T14:30:43.453Z",
           "by": "git-agent"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-22T15:45:54.753Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-22T15:45:54.931Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-22T15:54:15.961Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T16:17:46.402Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -349,12 +369,26 @@
         ],
         "tokensUsed": null
       },
-      "changesAfterImplementation": [],
+      "changesAfterImplementation": [
+        {
+          "requestedAt": "2026-06-22T15:45:54.753Z",
+          "description": "Guard shared-ownership removal: before rmSync of a command/skill an agent no longer contributes, skip deletion if another agent/flow still claims the same name. (Review finding #4)",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-22T15:54:15.960Z",
+          "filesChanged": [
+            "packages/taskflow/src/agents/emit.ts",
+            "packages/taskflow/test/agent-command.test.mjs"
+          ],
+          "comment": "Guard rmSync in applySkills/applyCommands: skip deletion when another agent still claims the name (shared ownership). Test: shared command survives one owner opting out, removed once none claim it.",
+          "implementedBy": "task-review-fix"
+        }
+      ],
       "reviewCount": 1,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": "2026-06-22T14:30:43.453Z",
-      "totalDurationMinutes": 225,
+      "committedAt": "2026-06-22T16:17:46.402Z",
+      "totalDurationMinutes": 332,
       "tags": [
         "emit",
         "flows",
@@ -368,7 +402,7 @@
         }
       ],
       "branch": "feat/N164-idempotent-install-across-flows",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/112",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/118",
       "mergedAt": "2026-06-22T14:30:43.367Z"
     },
     {
@@ -429,6 +463,26 @@
           "status": "done",
           "at": "2026-06-22T15:35:40.385Z",
           "by": "git-agent"
+        },
+        {
+          "status": "changes-requested",
+          "at": "2026-06-22T15:45:54.658Z",
+          "by": "task-request-changes"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-06-22T15:45:54.849Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "changes-implemented",
+          "at": "2026-06-22T15:54:16.059Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-22T16:17:46.491Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -459,13 +513,25 @@
           ],
           "comment": "Modal shows a 'saved' badge + 'leave blank to reuse' for already-stored inputs; the secret value itself never leaves the server (plan returns a boolean only).",
           "implementedBy": "task-implement"
+        },
+        {
+          "requestedAt": "2026-06-22T15:45:54.658Z",
+          "description": "Harden conflict-diff scrubbing: mask ALL stored secret values (not just the current submission) so a previously-stored key on the .mcp.json 'installed' side can't appear unmasked in the diff. (Review finding #1)",
+          "requestedBy": "task-request-changes",
+          "status": "implemented",
+          "implementedAt": "2026-06-22T15:54:16.058Z",
+          "filesChanged": [
+            "packages/taskflow/src/dashboard/server/index.ts"
+          ],
+          "comment": "Conflict-diff scrub now masks all stored secret values (not just the current submission), so a previously-stored key on the installed side can't leak into the diff.",
+          "implementedBy": "task-review-fix"
         }
       ],
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": "2026-06-22T15:35:40.385Z",
-      "totalDurationMinutes": 290,
+      "committedAt": "2026-06-22T16:17:46.491Z",
+      "totalDurationMinutes": 332,
       "tags": [
         "emit",
         "install",
@@ -479,7 +545,7 @@
         }
       ],
       "branch": "feat/N165-templated-inputs-substitution-overwrite",
-      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/117",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/118",
       "mergedAt": "2026-06-22T14:30:43.721Z"
     },
     {
