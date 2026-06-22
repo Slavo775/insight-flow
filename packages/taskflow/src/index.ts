@@ -53,8 +53,18 @@ export {
   TaskflowProjectNotFoundError,
 } from "./core/paths.js";
 export type { FlowRoot } from "./core/paths.js";
-export { flowInstallPlan, flowArtifacts } from "./agents/flow-install.js";
+export { flowInstallPlan, flowArtifacts, flowRequiredInputs } from "./agents/flow-install.js";
 export type { InstallStep } from "./agents/flow-install.js";
+// N165 — templated install inputs + local secrets store.
+export { scanPlaceholders, substituteVars, resolveInputs } from "./core/inputs.js";
+export type { InputSpec, InputMeta } from "./core/inputs.js";
+export {
+  readSecrets,
+  writeSecrets,
+  ensureGitignored,
+  scrubSecrets,
+  SECRETS_PATH,
+} from "./core/secrets.js";
 export { setStatus, flowStatusUniverse, InvalidStatusTransitionError } from "./core/set-status.js";
 export type { StatusFlow, SetStatusOptions } from "./core/set-status.js";
 export { currentFlowNodes, suggestNextSteps, resolveTrigger } from "./core/flow-status.js";
@@ -133,7 +143,7 @@ export {
 } from "./agents/compose.js";
 export type { AgentModule, ComposedAgent, AgentArtifacts } from "./agents/compose.js";
 export { transitionTargetFor } from "./agents/transitions.js";
-export { applyArtifacts, renameManifestBucket } from "./agents/emit.js";
-export type { EmitReport, EmitAction } from "./agents/emit.js";
+export { applyArtifacts, renameManifestBucket, InstallConflictError } from "./agents/emit.js";
+export type { EmitReport, EmitAction, InstallConflict } from "./agents/emit.js";
 export { DEFAULT_PROJECT, projectBucketId, collectProjectInstall } from "./agents/project.js";
 export type { Project } from "./agents/project.js";

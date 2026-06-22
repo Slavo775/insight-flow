@@ -6,6 +6,7 @@ import { collectArtifacts, composeAgent, type AgentArtifacts } from "./compose.j
 import { mergedComposedAgents, mergedModuleRegistry } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
+import { scanPlaceholders, resolveInputs, type InputSpec } from "../core/inputs.js";
 import type { Project } from "./project.js";
 
 export interface InstallStep {
@@ -120,4 +121,20 @@ export function flowInstallPlan(flow: Project): InstallStep[] {
     });
   }
   return steps;
+}
+
+/**
+ * N165 — the `${VAR}` inputs a flow's install must collect, scanned from its
+ * mcp-server configs and refined by any `inputs[]` metadata. Empty when no
+ * placeholders are present.
+ */
+export function flowRequiredInputs(flow: Project): InputSpec[] {
+  const art = flowArtifacts(flow);
+  const scanned = new Set<string>();
+  const meta = [];
+  for (const m of art.mcpServers) {
+    scanPlaceholders(m.config, scanned);
+    if (m.inputs) meta.push(...m.inputs);
+  }
+  return resolveInputs(scanned, meta);
 }

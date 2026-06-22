@@ -239,10 +239,24 @@ export interface InstallStepDto {
   target: string;
 }
 
-export async function fetchFlowInstallPlan(flowId: string): Promise<InstallStepDto[]> {
+// N165 — a `${VAR}` input the install must collect.
+export interface InputSpecDto {
+  name: string;
+  title: string;
+  description?: string;
+  secret: boolean;
+}
+
+export async function fetchFlowInstallPlan(
+  flowId: string,
+): Promise<{ plan: InstallStepDto[]; requiredInputs: InputSpecDto[] }> {
   const res = await fetch("/api/flow-install-plan?id=" + encodeURIComponent(flowId));
   if (!res.ok) throw new Error(`Failed to load install plan (${res.status})`);
-  return (await res.json()).plan as InstallStepDto[];
+  const body = await res.json();
+  return {
+    plan: body.plan as InstallStepDto[],
+    requiredInputs: (body.requiredInputs ?? []) as InputSpecDto[],
+  };
 }
 
 export interface InstallReport {
@@ -250,13 +264,38 @@ export interface InstallReport {
   action: "created" | "updated" | "unchanged" | "removed";
 }
 
-export async function runFlowInstall(flowId: string): Promise<InstallReport[]> {
+// N165 — a differing config conflict (HTTP 409): the modal renders the diff and
+// can retry with force. Secret values are scrubbed server-side.
+export interface InstallConflictDto {
+  kind: "mcp" | "skill" | "command";
+  name: string;
+  installed: unknown;
+  incoming: unknown;
+}
+
+/** Thrown by runFlowInstall when the server returns a 409 structured conflict. */
+export class InstallConflictError extends Error {
+  conflict: InstallConflictDto;
+  constructor(conflict: InstallConflictDto) {
+    super(`'${conflict.name}' already exists with a different definition`);
+    this.name = "InstallConflictError";
+    this.conflict = conflict;
+  }
+}
+
+export async function runFlowInstall(
+  flowId: string,
+  opts: { values?: Record<string, string>; force?: boolean } = {},
+): Promise<InstallReport[]> {
   const res = await fetch("/api/flow-install", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: flowId }),
+    body: JSON.stringify({ id: flowId, values: opts.values, force: opts.force }),
   });
   const body = await res.json();
+  if (res.status === 409 && body.conflict) {
+    throw new InstallConflictError(body.conflict as InstallConflictDto);
+  }
   if (!res.ok) throw new Error(body.error ?? `install failed (${res.status})`);
   return body.reports as InstallReport[];
 }

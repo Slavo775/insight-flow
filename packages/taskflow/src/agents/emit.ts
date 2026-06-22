@@ -24,11 +24,36 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { AgentArtifacts } from "./compose.js";
+import { substituteVars } from "../core/inputs.js";
 
 export type EmitAction = "created" | "updated" | "unchanged" | "removed";
 export interface EmitReport {
   target: string;
   action: EmitAction;
+}
+
+// N165 — a same-name conflict whose definition genuinely differs. Carries the
+// installed vs incoming sides so the install UI can render a before/after diff
+// and offer an explicit overwrite (force). `applyArtifacts` throws this for an
+// mcp-server config that differs from what's already in `.mcp.json`.
+export interface InstallConflict {
+  kind: "mcp" | "skill" | "command";
+  name: string;
+  installed: unknown;
+  incoming: unknown;
+}
+
+export class InstallConflictError extends Error {
+  readonly conflict: InstallConflict;
+  constructor(conflict: InstallConflict) {
+    super(
+      conflict.kind === "mcp"
+        ? `.mcp.json already defines server '${conflict.name}' with a different config — refusing to overwrite`
+        : `${conflict.kind} '${conflict.name}' already exists with a different definition — refusing to overwrite`,
+    );
+    this.name = "InstallConflictError";
+    this.conflict = conflict;
+  }
 }
 
 interface ManagedEntry {
@@ -82,6 +107,7 @@ function applyMcpServers(
   projectRoot: string,
   servers: AgentArtifacts["mcpServers"],
   reports: EmitReport[],
+  force = false,
 ): void {
   if (!servers.length) return;
   const path = join(projectRoot, ".mcp.json");
@@ -89,10 +115,11 @@ function applyMcpServers(
   doc.mcpServers ??= {};
   for (const { name, config } of servers) {
     const existing = doc.mcpServers[name];
-    if (existing !== undefined && stableStringify(existing) !== stableStringify(config)) {
-      throw new Error(
-        `.mcp.json already defines server '${name}' with a different config — refusing to overwrite`,
-      );
+    // N165 — configs are already `${VAR}`-resolved by the caller, so this
+    // compares resolved-incoming vs installed: an identical value is idempotent;
+    // a genuine difference is a structured conflict unless `force` overwrites it.
+    if (existing !== undefined && !force && stableStringify(existing) !== stableStringify(config)) {
+      throw new InstallConflictError({ kind: "mcp", name, installed: existing, incoming: config });
     }
     doc.mcpServers[name] = config;
   }
@@ -345,6 +372,7 @@ export function applyArtifacts(
   projectRoot: string,
   agentId: string,
   vars?: Record<string, string>,
+  options?: { force?: boolean },
 ): EmitReport[] {
   const sub = (text: string): string =>
     vars ? Object.entries(vars).reduce((acc, [k, v]) => acc.split(`__${k}__`).join(v), text) : text;
@@ -353,6 +381,11 @@ export function applyArtifacts(
     command: sub(h.command),
     script: h.script ? { name: h.script.name, content: sub(h.script.content) } : undefined,
   }));
+  // N165 — resolve `${VAR}` placeholders in mcp configs from the same vars map
+  // (input values flow in here), so applyMcpServers compares resolved configs.
+  const mcpServers = vars
+    ? artifacts.mcpServers.map((m) => ({ ...m, config: substituteVars(m.config, vars) }))
+    : artifacts.mcpServers;
 
   const reports: EmitReport[] = [];
   const manifestPath = join(projectRoot, MANIFEST_PATH);
@@ -365,7 +398,7 @@ export function applyArtifacts(
   owned.skills ??= [];
   owned.commands ??= [];
 
-  applyMcpServers(projectRoot, artifacts.mcpServers, reports);
+  applyMcpServers(projectRoot, mcpServers, reports, options?.force ?? false);
   applyHooks(projectRoot, hooks, owned, reports);
   applySkills(projectRoot, agentId, artifacts.skills, manifest, owned, reports);
   applyCommands(projectRoot, agentId, artifacts.commands, manifest, owned, reports);
