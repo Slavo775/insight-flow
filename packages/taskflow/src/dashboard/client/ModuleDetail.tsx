@@ -13,9 +13,17 @@ import styled, { useTheme } from "styled-components";
 import { fetchIncludeDoc, type ModuleDto } from "./api.js";
 import { Button } from "./components/index.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
+import { InstallModal } from "./components/InstallModal.js";
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
 import { isLockedModuleClient } from "./locked.js";
+
+// N174 — only artifact-bearing module kinds install standalone (a bundle expands
+// into them); section/include/status-transition/handover have nothing to install.
+const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle"]);
+export function isInstallableModule(module: ModuleDto): boolean {
+  return INSTALLABLE_MODULE_KINDS.has(module.kind);
+}
 
 const Header = styled.div`
   display: flex;
@@ -348,6 +356,8 @@ function facetLabel(module: ModuleDto): string {
 
 export function ModuleDetail({ module, registry }: { module: ModuleDto; registry: Registry }) {
   const [modalId, setModalId] = useState<string | null>(null);
+  // N174 — install/uninstall this module standalone (installable kinds only).
+  const [installModal, setInstallModal] = useState<"install" | "uninstall" | null>(null);
   const refs = registry.referencedBy[module.id] ?? [];
   const agentTitle = (id: string): string => registry.agents.find((a) => a.id === id)?.title ?? id;
 
@@ -390,6 +400,19 @@ export function ModuleDetail({ module, registry }: { module: ModuleDto; registry
     <>
       <ModuleHeader module={module} />
 
+      {/* N174 — installable kinds (mcp-server / hook / skill / bundle) install
+          standalone; other kinds have no install action. */}
+      {isInstallableModule(module) ? (
+        <InstallActions>
+          <Button type="button" $variant="primary" onClick={() => setInstallModal("install")}>
+            Install
+          </Button>
+          <Button type="button" $variant="nav" onClick={() => setInstallModal("uninstall")}>
+            Uninstall
+          </Button>
+        </InstallActions>
+      ) : null}
+
       <KindPanels module={module} />
 
       <Panel>
@@ -420,6 +443,20 @@ export function ModuleDetail({ module, registry }: { module: ModuleDto; registry
           onClose={() => setModalId(null)}
         />
       ) : null}
+      {installModal ? (
+        <InstallModal
+          target={{ kind: "module", id: module.id, title: module.title }}
+          mode={installModal}
+          onClose={() => setInstallModal(null)}
+        />
+      ) : null}
     </>
   );
 }
+
+const InstallActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${(p) => p.theme.space.lg};
+  margin-bottom: ${(p) => p.theme.space["2xl"]};
+`;

@@ -8,7 +8,7 @@ import {
   withFlowIdentity,
   type AgentArtifacts,
 } from "./compose.js";
-import { mergedComposedAgents, mergedModuleRegistry } from "./user-registry.js";
+import { mergedComposedAgents, mergedModuleRegistry, mergedProjects } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
 import {
@@ -94,7 +94,11 @@ export function flowArtifacts(flow: Project): AgentArtifacts {
 
 /** The deduped, ordered install plan for a flow (mcp → hooks → skills). */
 export function flowInstallPlan(flow: Project): InstallStep[] {
-  const art = flowArtifacts(flow);
+  return planFromArtifacts(flowArtifacts(flow));
+}
+
+/** The deduped, ordered install plan for any artifact set (mcp → hooks → skills → commands). */
+export function planFromArtifacts(art: AgentArtifacts): InstallStep[] {
   const steps: InstallStep[] = [];
   const seen = new Set<string>();
   const push = (step: InstallStep): void => {
@@ -141,7 +145,10 @@ export function flowInstallPlan(flow: Project): InstallStep[] {
  * placeholders are present.
  */
 export function flowRequiredInputs(flow: Project): InputSpec[] {
-  const art = flowArtifacts(flow);
+  return inputsFromArtifacts(flowArtifacts(flow));
+}
+
+export function inputsFromArtifacts(art: AgentArtifacts): InputSpec[] {
   const scanned = new Set<string>();
   const meta: InputMeta[] = [];
   for (const m of art.mcpServers) {
@@ -157,4 +164,113 @@ export function flowRequiredInputs(flow: Project): InputSpec[] {
   // Runtime/build vars (CLAUDE_PROJECT_DIR, ARGUMENTS, …) are never inputs.
   for (const r of RESERVED_PLACEHOLDERS) scanned.delete(r);
   return resolveInputs(scanned, meta);
+}
+
+// N174 — install targets. A flow was the only installable unit (N125); now an
+// agent (its composed prompt + the artifacts its modules need) and a single
+// artifact-bearing module are installable too. All three flow through the same
+// emitter (emit.ts `applyArtifacts`) under a per-target manifest bucket
+// (`targetBucketId`), so install/uninstall is reference-safe across targets.
+export type TargetKind = "flow" | "agent" | "module";
+export interface InstallTarget {
+  kind: TargetKind;
+  id: string;
+}
+
+/** Manifest bucket id for an install target (`flow:` / `agent:` / `module:`). */
+export function targetBucketId(t: InstallTarget): string {
+  return `${t.kind}:${t.id}`;
+}
+
+// Only these module kinds emit real artifacts (a `bundle` expands into them).
+// `section` / `include` are pure role-prompt text and `status-transition` /
+// `handover` are behavior-as-data — none install standalone (N174).
+const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle"]);
+
+export function isInstallableModuleKind(kind: string): boolean {
+  return INSTALLABLE_MODULE_KINDS.has(kind);
+}
+
+/** A target that has no installable artifacts (e.g. a `section` module). */
+export class NotInstallableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotInstallableError";
+  }
+}
+
+/** A target id that resolves to no flow/agent/module (→ 404 at the API). */
+export class UnknownTargetError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnknownTargetError";
+  }
+}
+
+/** Human title for a target (modal header), or null when the target is unknown. */
+export function targetTitle(t: InstallTarget): string | null {
+  if (t.kind === "flow") return mergedProjects()[t.id]?.title ?? null;
+  if (t.kind === "agent") return mergedComposedAgents()[t.id]?.title ?? null;
+  return mergedModuleRegistry()[t.id]?.title ?? null;
+}
+
+/**
+ * The artifacts an install target implies. A flow reuses `flowArtifacts`; an
+ * agent contributes its module artifacts plus its own composed prompt as a
+ * command/skill (force-emitted even when the agent didn't opt into
+ * `command.install`, so "install this agent" always lands a runnable prompt); a
+ * module contributes its single artifact (bundles expand). Unknown ids and
+ * non-installable module kinds throw.
+ */
+export function targetArtifacts(t: InstallTarget): AgentArtifacts {
+  if (t.kind === "flow") {
+    const flow = mergedProjects()[t.id];
+    if (!flow) throw new UnknownTargetError(`unknown flow '${t.id}'`);
+    return flowArtifacts(flow);
+  }
+  const registry = mergedModuleRegistry();
+  if (t.kind === "agent") {
+    const def = mergedComposedAgents()[t.id];
+    if (!def) throw new UnknownTargetError(`unknown agent '${t.id}'`);
+    const out = collectArtifacts(def, registry);
+    // N174 — collectArtifacts only emits the prompt when the agent opted into
+    // command.install. Installing an agent directly always wants its prompt, so
+    // force-emit it (mirroring the flow's force-emit body: identity-stamped +
+    // `$ARGUMENTS` for slash-command parity) when none was produced.
+    if (out.commands.length === 0) {
+      const base = composeAgent(def, registry);
+      if (base.trim()) {
+        const name = deriveCommandName(def.id);
+        const as = def.command?.as ?? "command";
+        const prompt = withFlowIdentity(base, def.id);
+        const body =
+          as === "skill"
+            ? `---\nname: ${name}\ndescription: ${JSON.stringify(def.description ?? def.title)}\n---\n\n${prompt}\n`
+            : `${prompt}\n\n$ARGUMENTS\n`;
+        out.commands.push({ name, body, as });
+      }
+    }
+    return out;
+  }
+  // module
+  const mod = registry[t.id];
+  if (!mod) throw new UnknownTargetError(`unknown module '${t.id}'`);
+  if (!isInstallableModuleKind(mod.kind)) {
+    throw new NotInstallableError(
+      `module '${t.id}' (kind '${mod.kind}') has no installable artifacts`,
+    );
+  }
+  // collectArtifacts resolves the module (bundle-aware) and keeps only its
+  // mcp-server / hook / skill contributions.
+  return collectArtifacts({ id: targetBucketId(t), title: mod.title, modules: [t.id] }, registry);
+}
+
+/** The deduped, ordered install plan for any target. */
+export function installPlan(t: InstallTarget): InstallStep[] {
+  return planFromArtifacts(targetArtifacts(t));
+}
+
+/** The `${VAR}` inputs a target's install must collect. */
+export function requiredInputs(t: InstallTarget): InputSpec[] {
+  return inputsFromArtifacts(targetArtifacts(t));
 }

@@ -68,7 +68,8 @@
       ],
       "branch": "feat/N170-rename-command",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/119",
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
     },
     {
       "id": "N171",
@@ -171,7 +172,8 @@
       ],
       "branch": "feat/N171-templated-inputs-non-mcp",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/124",
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
     },
     {
       "id": "N172",
@@ -275,7 +277,8 @@
       ],
       "branch": "feat/N172-overwrite-undo",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/124",
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
     },
     {
       "id": "N173",
@@ -391,7 +394,90 @@
       ],
       "branch": "fix/N173b-create-identity-injection",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/127",
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N174",
+      "title": "Installable & uninstallable agents and modules (dashboard)",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N174-installable-uninstallable-agents-and-modules-dashb",
+      "createdAt": "2026-06-23T11:51:07.790Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-23T11:51:07.791Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-23T12:01:26.839Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-23T13:00:21.223Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-23T13:25:10.527Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-23T13:30:48.824Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-23T14:06:37.018Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-23T14:06:56.184Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-23T12:01:26.842Z",
+        "completedAt": "2026-06-23T13:00:21.224Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/components/InstallModal.tsx",
+          "packages/taskflow/src/dashboard/client/ProjectPage.tsx",
+          "packages/taskflow/src/dashboard/client/AgentDetail.tsx",
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/test/install-targets.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "install",
+        "dashboard",
+        "agents",
+        "modules",
+        "v2"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

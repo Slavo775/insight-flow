@@ -33,9 +33,24 @@ import {
   type AgentModule,
   type ComposedAgent,
 } from "../../agents/compose.js";
-import { DEFAULT_PROJECT, projectBucketId } from "../../agents/project.js";
-import { flowInstallPlan, flowArtifacts, flowRequiredInputs } from "../../agents/flow-install.js";
-import { applyArtifacts, InstallConflictError, restoreMcpServer } from "../../agents/emit.js";
+import { DEFAULT_PROJECT } from "../../agents/project.js";
+import {
+  targetArtifacts,
+  planFromArtifacts,
+  inputsFromArtifacts,
+  targetBucketId,
+  NotInstallableError,
+  UnknownTargetError,
+  type InstallTarget,
+  type TargetKind,
+} from "../../agents/flow-install.js";
+import {
+  applyArtifacts,
+  uninstallPlan,
+  uninstallTarget,
+  InstallConflictError,
+  restoreMcpServer,
+} from "../../agents/emit.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
@@ -774,33 +789,43 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    // N125 — the install plan for a flow (mcp/hook/skill artifacts from its
-    // agents + install list). Read-only; execution is N126.
-    if (url.pathname === "/api/flow-install-plan" && (req.method ?? "GET") === "GET") {
-      const flowId = url.searchParams.get("id") ?? DEFAULT_PROJECT.id;
-      const flow = mergedProjectsView()[flowId];
-      if (!flow) {
-        res.writeHead(404, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: `unknown flow '${flowId}'` }));
+    // N174 — install plan for any target (flow | agent | module): the mcp / hook /
+    // skill / command artifacts it would write + the `${VAR}` inputs to collect.
+    // A module of a non-installable kind (section/include/…) → 400; unknown id → 404.
+    if (url.pathname === "/api/install-plan" && (req.method ?? "GET") === "GET") {
+      const kind = (url.searchParams.get("kind") ?? "") as TargetKind;
+      const id = url.searchParams.get("id") ?? "";
+      if (!["flow", "agent", "module"].includes(kind) || !id) {
+        res.writeHead(400, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "kind (flow|agent|module) and id are required" }));
         return;
       }
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      // N165 — requiredInputs lets the modal render fields for `${VAR}` placeholders.
-      // N165 change: flag inputs whose value is already saved (the boolean only —
-      // the secret value never leaves the server) so the modal can show "saved"
-      // and let the user leave it blank to reuse.
-      const stored = readSecrets(resolveProjectRoot());
-      const requiredInputs = flowRequiredInputs(flow).map((inp) => ({
-        ...inp,
-        saved: Boolean(stored[inp.name] && stored[inp.name].length > 0),
-      }));
-      res.end(JSON.stringify({ flowId, plan: flowInstallPlan(flow), requiredInputs }));
+      const target: InstallTarget = { kind, id };
+      try {
+        // Compose the target once; derive both the plan and the required inputs.
+        const art = targetArtifacts(target);
+        const stored = readSecrets(resolveProjectRoot());
+        const reqInputs = inputsFromArtifacts(art).map((inp) => ({
+          ...inp,
+          saved: Boolean(stored[inp.name] && stored[inp.name].length > 0),
+        }));
+        res.writeHead(200, { "Content-Type": MIME[".json"] });
+        res.end(
+          JSON.stringify({ kind, id, plan: planFromArtifacts(art), requiredInputs: reqInputs }),
+        );
+      } catch (err) {
+        const status =
+          err instanceof NotInstallableError ? 400 : err instanceof UnknownTargetError ? 404 : 500;
+        res.writeHead(status, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: (err as Error).message }));
+      }
       return;
     }
 
-    // N126 — run the install plan for a flow (write .mcp.json / hooks / skills
-    // via the idempotent emitter) and stream per-step progress over SSE.
-    if (url.pathname === "/api/flow-install" && req.method === "POST") {
+    // N174 — run the install plan for any target, over the target's manifest
+    // bucket: `${VAR}` input resolution, conflict (409), N172 force snapshot, and
+    // per-step SSE progress.
+    if (url.pathname === "/api/install" && req.method === "POST") {
       let body = "";
       let aborted = false;
       req.on("data", (chunk: Buffer) => {
@@ -815,30 +840,32 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       });
       req.on("end", () => {
         if (aborted) return;
-        // N165 — collect/persist input values + secrets out of scope; declared
-        // here so the catch can scrub secret values from any error surface.
         let secretValues: string[] = [];
         try {
           const parsed = body
             ? (JSON.parse(body) as {
+                kind?: TargetKind;
                 id?: string;
                 values?: Record<string, string>;
                 force?: boolean;
               })
             : {};
-          const flowId = parsed.id ?? DEFAULT_PROJECT.id;
-          const flow = mergedProjectsView()[flowId];
-          if (!flow) {
-            res.writeHead(404, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: `unknown flow '${flowId}'` }));
+          const kind = parsed.kind as TargetKind;
+          const id = parsed.id ?? "";
+          if (!["flow", "agent", "module"].includes(kind) || !id) {
+            res.writeHead(400, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: "kind and id are required" }));
             return;
           }
+          const target: InstallTarget = { kind, id };
           const projectRoot = resolveProjectRoot();
 
-          // N165 — resolve `${VAR}` inputs: submitted values win over the stored
-          // secrets; newly-submitted values are persisted (gitignored) so a
-          // re-install doesn't re-prompt. .mcp.json now holds substituted secrets.
-          const required = flowRequiredInputs(flow);
+          // Compose the target once; reuse for inputs, snapshot, plan, and apply.
+          const artifacts = targetArtifacts(target);
+
+          // N165 — resolve `${VAR}` inputs (submitted win over stored; new ones
+          // persist gitignored so a re-install doesn't re-prompt).
+          const required = inputsFromArtifacts(artifacts);
           const submitted = parsed.values ?? {};
           const stored = readSecrets(projectRoot);
           const values: Record<string, string> = {};
@@ -852,20 +879,13 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             writeSecrets(projectRoot, toPersist);
             ensureGitignored(projectRoot);
           }
-          // N165 review-fix — scrub against this submission's secrets AND every
-          // value already in the local store, so a *previously-stored* key that
-          // sits on the `.mcp.json` "installed" side of a conflict diff is masked
-          // too (not just the value just submitted).
           secretValues = [
             ...required.filter((i) => i.secret).map((i) => values[i.name]),
             ...Object.values(stored),
           ].filter((v): v is string => typeof v === "string" && v.length > 0);
 
-          const artifacts = flowArtifacts(flow);
-          // N172 (review-fix) — before a force overwrite, snapshot the prior
-          // `.mcp.json` entries server-side (the REAL values), so Undo restores
-          // them. The client's copy of `installed` is secret-scrubbed and can't
-          // be trusted for a restore.
+          // N172 — snapshot prior .mcp.json entries (real values) before a force
+          // overwrite so the immediate "Undo overwrite" button can restore them.
           if (parsed.force === true) {
             const mcpPath = resolve(projectRoot, ".mcp.json");
             if (existsSync(mcpPath)) {
@@ -886,12 +906,12 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             }
           }
 
-          const plan = flowInstallPlan(flow);
-          transport.emit("install-progress", { phase: "started", flowId, plan });
+          const plan = planFromArtifacts(artifacts);
+          transport.emit("install-progress", { phase: "started", kind, id, plan });
           const reports = applyArtifacts(
             artifacts,
             projectRoot,
-            projectBucketId(flow),
+            targetBucketId(target),
             { INSIGHT_FLOW_BIN: "insight-flow", ...values },
             { force: parsed.force === true },
           );
@@ -902,13 +922,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
               action: r.action,
             });
           }
-          transport.emit("install-progress", { phase: "done", flowId, reports });
+          transport.emit("install-progress", { phase: "done", kind, id, reports });
           res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: true, flowId, reports }));
+          res.end(JSON.stringify({ ok: true, kind, id, reports }));
         } catch (err) {
-          // N165 — a differing config is a structured conflict (409): the modal
-          // shows a before/after diff and can retry with `force`. Secret values
-          // are scrubbed from every surface.
           if (err instanceof InstallConflictError) {
             transport.emit("install-progress", { phase: "failed", error: err.message });
             res.writeHead(409, { "Content-Type": MIME[".json"] });
@@ -917,8 +934,72 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             );
             return;
           }
+          const status =
+            err instanceof NotInstallableError
+              ? 400
+              : err instanceof UnknownTargetError
+                ? 404
+                : 500;
           const message = scrubSecrets((err as Error).message, secretValues);
           transport.emit("install-progress", { phase: "failed", error: message });
+          res.writeHead(status, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: false, error: message }));
+        }
+      });
+      return;
+    }
+
+    // N174 — uninstall plan for any target: which owned artifacts get removed vs
+    // retained (still owned by another target). Read-only.
+    if (url.pathname === "/api/uninstall-plan" && (req.method ?? "GET") === "GET") {
+      const kind = (url.searchParams.get("kind") ?? "") as TargetKind;
+      const id = url.searchParams.get("id") ?? "";
+      if (!["flow", "agent", "module"].includes(kind) || !id) {
+        res.writeHead(400, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "kind (flow|agent|module) and id are required" }));
+        return;
+      }
+      const plan = uninstallPlan(resolveProjectRoot(), targetBucketId({ kind, id }));
+      res.writeHead(200, { "Content-Type": MIME[".json"] });
+      res.end(JSON.stringify({ kind, id, plan }));
+      return;
+    }
+
+    // N174 — run the uninstall for any target (reference-safe removal) over SSE.
+    if (url.pathname === "/api/uninstall" && req.method === "POST") {
+      let body = "";
+      req.on("data", (c: Buffer) => (body += c.toString("utf-8")));
+      req.on("end", () => {
+        try {
+          const parsed = body ? (JSON.parse(body) as { kind?: TargetKind; id?: string }) : {};
+          const kind = parsed.kind as TargetKind;
+          const id = parsed.id ?? "";
+          if (!["flow", "agent", "module"].includes(kind) || !id) {
+            res.writeHead(400, { "Content-Type": MIME[".json"] });
+            res.end(JSON.stringify({ ok: false, error: "kind and id are required" }));
+            return;
+          }
+          const target: InstallTarget = { kind, id };
+          transport.emit("uninstall-progress", {
+            phase: "started",
+            kind,
+            id,
+            plan: uninstallPlan(resolveProjectRoot(), targetBucketId(target)),
+          });
+          const reports = uninstallTarget(resolveProjectRoot(), targetBucketId(target));
+          for (const r of reports) {
+            transport.emit("uninstall-progress", {
+              phase: "step",
+              target: r.target,
+              action: r.action,
+            });
+          }
+          transport.emit("uninstall-progress", { phase: "done", kind, id, reports });
+          res.writeHead(200, { "Content-Type": MIME[".json"] });
+          res.end(JSON.stringify({ ok: true, kind, id, reports }));
+        } catch (err) {
+          const message = (err as Error).message;
+          transport.emit("uninstall-progress", { phase: "failed", error: message });
           res.writeHead(500, { "Content-Type": MIME[".json"] });
           res.end(JSON.stringify({ ok: false, error: message }));
         }

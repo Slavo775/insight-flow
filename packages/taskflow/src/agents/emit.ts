@@ -8,10 +8,11 @@
 //     sorted-key stringification, so key order never causes a false conflict.
 //   - hook → `.claude/settings.json` `hooks[event]` matcher groups. JSON has
 //     no comment markers, so managed entries are tracked in a sidecar
-//     manifest (`.claude/taskflow-managed.json`), **bucketed per agent id**:
-//     applying agent A only reconciles A's own entries — installing,
-//     re-applying, or regenerating other agents never touches them. Removing
-//     a module from an agent removes its hook on the next apply.
+//     manifest (`.claude/taskflow-managed.json`), **bucketed per install target**
+//     (N174: `flow:<id>` / `agent:<id>` / `module:<id>`): applying target A only
+//     reconciles A's own entries — installing, re-applying, or regenerating other
+//     targets never touches them. Removing a module from A removes its hook on the
+//     next apply, and uninstalling A removes only what no other target still owns.
 //   - skill → `.claude/skills/<name>/SKILL.md` (name is schema-restricted to
 //     a safe path segment). Skill names are claimed per agent in the same
 //     manifest; a second agent contributing an already-claimed name throws.
@@ -63,6 +64,15 @@ interface ManagedEntry {
   skills: string[];
   /** N138 — installable commands/skills (the agent's composed prompt) owned by this agent. */
   commands?: { name: string; as: "command" | "skill" }[];
+  /** N174 — mcp-server names this target owns in `.mcp.json` (for reference-safe uninstall). */
+  mcpServers?: string[];
+  /**
+   * N174 — prior `.mcp.json` values this target overwrote on a force-install,
+   * keyed by server name. On uninstall, an owned mcp entry that no longer has
+   * any other owner is restored to its snapshot (the N172 undo) instead of
+   * deleted, so removing a target rewinds the config it clobbered.
+   */
+  mcpSnapshots?: Record<string, unknown>;
 }
 
 interface ManagedManifest {
@@ -70,6 +80,22 @@ interface ManagedManifest {
 }
 
 const MANIFEST_PATH = ".claude/taskflow-managed.json";
+
+/**
+ * N174 — migrate pre-N174 flow buckets (`project:<id>`) to the target-based
+ * scheme (`flow:<id>`). In-place on the parsed manifest; skips a rename whose
+ * destination already exists (no clobber). Runs before every apply/uninstall so
+ * existing on-disk manifests adopt the new keys transparently.
+ */
+function migrateBuckets(manifest: ManagedManifest): void {
+  for (const key of Object.keys(manifest.agents)) {
+    if (!key.startsWith("project:")) continue;
+    const to = `flow:${key.slice("project:".length)}`;
+    if (manifest.agents[to]) continue;
+    manifest.agents[to] = manifest.agents[key];
+    delete manifest.agents[key];
+  }
+}
 
 interface HookGroup {
   matcher?: string;
@@ -119,9 +145,13 @@ export function restoreMcpServer(projectRoot: string, name: string, config: unkn
 function applyMcpServers(
   projectRoot: string,
   servers: AgentArtifacts["mcpServers"],
+  owned: ManagedEntry,
   reports: EmitReport[],
   force = false,
 ): void {
+  // N174 — claim ownership of exactly the servers this target contributes now,
+  // so an uninstall knows which `.mcp.json` entries are ours (reference-safe).
+  owned.mcpServers = servers.map((s) => s.name);
   if (!servers.length) return;
   const path = join(projectRoot, ".mcp.json");
   const doc = readJson<{ mcpServers?: Record<string, unknown> }>(path, {});
@@ -131,8 +161,17 @@ function applyMcpServers(
     // N165 — configs are already `${VAR}`-resolved by the caller, so this
     // compares resolved-incoming vs installed: an identical value is idempotent;
     // a genuine difference is a structured conflict unless `force` overwrites it.
-    if (existing !== undefined && !force && stableStringify(existing) !== stableStringify(config)) {
-      throw new InstallConflictError({ kind: "mcp", name, installed: existing, incoming: config });
+    if (existing !== undefined && stableStringify(existing) !== stableStringify(config)) {
+      if (!force) {
+        throw new InstallConflictError({
+          kind: "mcp",
+          name,
+          installed: existing,
+          incoming: config,
+        });
+      }
+      // N174 — record the clobbered value so uninstall can restore it (N172 undo).
+      (owned.mcpSnapshots ??= {})[name] = existing;
     }
     doc.mcpServers[name] = config;
   }
@@ -432,20 +471,223 @@ export function applyArtifacts(
   // (e.g. the pre-release agent-agnostic shape) are dropped on next write.
   const parsed = readJson<Partial<ManagedManifest>>(manifestPath, {});
   const manifest: ManagedManifest = { agents: parsed.agents ?? {} };
+  migrateBuckets(manifest); // N174 — project:<id> → flow:<id>
   const owned = manifest.agents[agentId] ?? { hooks: [], skills: [] };
   owned.hooks ??= [];
   owned.skills ??= [];
   owned.commands ??= [];
 
-  applyMcpServers(projectRoot, mcpServers, reports, options?.force ?? false);
+  applyMcpServers(projectRoot, mcpServers, owned, reports, options?.force ?? false);
   applyHooks(projectRoot, hooks, owned, reports);
   applySkills(projectRoot, agentId, artifacts.skills, manifest, owned, reports);
   applyCommands(projectRoot, agentId, artifacts.commands, manifest, owned, reports);
 
-  if (owned.hooks.length || owned.skills.length || owned.scripts?.length || owned.commands?.length)
+  if (
+    owned.hooks.length ||
+    owned.skills.length ||
+    owned.scripts?.length ||
+    owned.commands?.length ||
+    owned.mcpServers?.length
+  )
     manifest.agents[agentId] = owned;
   else delete manifest.agents[agentId];
 
+  if (Object.keys(manifest.agents).length) {
+    writeJsonIfChanged(manifestPath, manifest);
+  } else if (existsSync(manifestPath)) {
+    rmSync(manifestPath);
+  }
+  return reports;
+}
+
+// N174 — uninstall: remove a target's artifacts, reference-safe ----------------
+
+function hookKey(h: { event: string; matcher?: string; command: string }): string {
+  return `${h.event}|${h.matcher ?? ""}|${h.command}`;
+}
+
+/**
+ * Everything claimed by buckets OTHER than `exceptBucket`. An artifact present
+ * here is still owned by someone, so uninstalling `exceptBucket` must NOT remove
+ * it from disk (reference-safe shared ownership across install targets).
+ */
+function collectClaimsExcept(
+  manifest: ManagedManifest,
+  exceptBucket: string,
+): { mcp: Set<string>; hooks: Set<string>; scripts: Set<string>; namespaced: Set<string> } {
+  const mcp = new Set<string>();
+  const hooks = new Set<string>();
+  const scripts = new Set<string>();
+  const namespaced = new Set<string>();
+  for (const [id, entry] of Object.entries(manifest.agents)) {
+    if (id === exceptBucket) continue;
+    for (const name of entry.mcpServers ?? []) mcp.add(name);
+    for (const h of entry.hooks ?? []) hooks.add(hookKey(h));
+    for (const s of entry.scripts ?? []) scripts.add(s);
+    for (const s of entry.skills ?? []) namespaced.add(claimKey(s, "skill"));
+    for (const c of entry.commands ?? []) namespaced.add(claimKey(c.name, c.as));
+  }
+  return { mcp, hooks, scripts, namespaced };
+}
+
+/** One artifact in an uninstall plan: removed (no other owner) or retained. */
+export interface UninstallStep {
+  kind: "mcp" | "hook" | "skill" | "command";
+  key: string;
+  label: string;
+  target: string;
+  action: "removed" | "retained";
+}
+
+/**
+ * What uninstalling `bucketId` would do, without writing. Each owned artifact is
+ * `removed` (no other target owns it) or `retained` (still owned elsewhere).
+ * Empty when the bucket owns nothing / does not exist.
+ */
+export function uninstallPlan(projectRoot: string, bucketId: string): UninstallStep[] {
+  const manifestPath = join(projectRoot, MANIFEST_PATH);
+  const parsed = readJson<Partial<ManagedManifest>>(manifestPath, {});
+  const manifest: ManagedManifest = { agents: parsed.agents ?? {} };
+  migrateBuckets(manifest);
+  const owned = manifest.agents[bucketId];
+  if (!owned) return [];
+  const others = collectClaimsExcept(manifest, bucketId);
+  const steps: UninstallStep[] = [];
+  for (const name of owned.mcpServers ?? []) {
+    const retained = others.mcp.has(name);
+    steps.push({
+      kind: "mcp",
+      key: name,
+      label: `MCP server: ${name}`,
+      target: ".mcp.json",
+      action: retained ? "retained" : "removed",
+    });
+  }
+  for (const h of owned.hooks ?? []) {
+    const retained = others.hooks.has(hookKey(h));
+    steps.push({
+      kind: "hook",
+      key: hookKey(h),
+      label: `Hook: ${h.event}${h.matcher ? ` (${h.matcher})` : ""}`,
+      target: ".claude/settings.json",
+      action: retained ? "retained" : "removed",
+    });
+  }
+  for (const name of owned.skills ?? []) {
+    const retained = others.namespaced.has(claimKey(name, "skill"));
+    steps.push({
+      kind: "skill",
+      key: name,
+      label: `Skill: ${name}`,
+      target: `.claude/skills/${name}/SKILL.md`,
+      action: retained ? "retained" : "removed",
+    });
+  }
+  for (const c of owned.commands ?? []) {
+    const retained = others.namespaced.has(claimKey(c.name, c.as));
+    steps.push({
+      kind: "command",
+      key: c.name,
+      label: `${c.as === "skill" ? "Skill" : "Command"}: /${c.name}`,
+      target:
+        c.as === "skill" ? `.claude/skills/${c.name}/SKILL.md` : `.claude/commands/${c.name}.md`,
+      action: retained ? "retained" : "removed",
+    });
+  }
+  return steps;
+}
+
+/**
+ * Uninstall `bucketId`: drop its manifest claim and physically remove every
+ * artifact no other target still owns. An owned mcp entry that overwrote a prior
+ * config is restored to that snapshot (N172 undo) instead of deleted. Idempotent
+ * — uninstalling an unknown bucket is a no-op.
+ */
+export function uninstallTarget(projectRoot: string, bucketId: string): EmitReport[] {
+  const reports: EmitReport[] = [];
+  const manifestPath = join(projectRoot, MANIFEST_PATH);
+  const parsed = readJson<Partial<ManagedManifest>>(manifestPath, {});
+  const manifest: ManagedManifest = { agents: parsed.agents ?? {} };
+  migrateBuckets(manifest);
+  const owned = manifest.agents[bucketId];
+  if (!owned) return reports;
+  const others = collectClaimsExcept(manifest, bucketId);
+
+  // .mcp.json — delete or restore the snapshot for each unshared owned server.
+  const ownedMcp = (owned.mcpServers ?? []).filter((n) => !others.mcp.has(n));
+  if (ownedMcp.length) {
+    const path = join(projectRoot, ".mcp.json");
+    const doc = readJson<{ mcpServers?: Record<string, unknown> }>(path, {});
+    if (doc.mcpServers) {
+      for (const name of ownedMcp) {
+        const snapshot = owned.mcpSnapshots?.[name];
+        if (snapshot !== undefined) doc.mcpServers[name] = snapshot;
+        else delete doc.mcpServers[name];
+      }
+      reports.push({ target: ".mcp.json", action: writeJsonIfChanged(path, doc) });
+    }
+  }
+
+  // .claude/settings.json — drop unshared owned hook groups + their scripts.
+  const ownedHooks = (owned.hooks ?? []).filter((h) => !others.hooks.has(hookKey(h)));
+  const ownedScripts = (owned.scripts ?? []).filter((s) => !others.scripts.has(s));
+  if (ownedHooks.length) {
+    const path = join(projectRoot, ".claude/settings.json");
+    const settings = readJson<{ hooks?: Record<string, HookGroup[]>; [k: string]: unknown }>(
+      path,
+      {},
+    );
+    if (settings.hooks) {
+      for (const old of ownedHooks) {
+        const groups = settings.hooks[old.event];
+        if (!groups) continue;
+        settings.hooks[old.event] = groups.filter(
+          (g) =>
+            !(
+              (g.matcher ?? "") === (old.matcher ?? "") &&
+              g.hooks?.some((h) => h.type === "command" && h.command === old.command)
+            ),
+        );
+        if (!settings.hooks[old.event].length) delete settings.hooks[old.event];
+      }
+      if (!Object.keys(settings.hooks).length) delete settings.hooks;
+      reports.push({ target: ".claude/settings.json", action: writeJsonIfChanged(path, settings) });
+    }
+  }
+  for (const name of ownedScripts) {
+    const scriptPath = join(projectRoot, ".claude/hooks", name);
+    if (existsSync(scriptPath)) {
+      rmSync(scriptPath);
+      reports.push({ target: `.claude/hooks/${name}`, action: "removed" });
+    }
+  }
+
+  // Skills + commands — delete unshared owned files/dirs.
+  for (const name of owned.skills ?? []) {
+    if (others.namespaced.has(claimKey(name, "skill"))) continue;
+    const dir = join(projectRoot, ".claude/skills", name);
+    if (existsSync(dir)) {
+      rmSync(dir, { recursive: true });
+      reports.push({ target: `.claude/skills/${name}/SKILL.md`, action: "removed" });
+    }
+  }
+  for (const c of owned.commands ?? []) {
+    if (others.namespaced.has(claimKey(c.name, c.as))) continue;
+    const path =
+      c.as === "skill"
+        ? join(projectRoot, ".claude/skills", c.name)
+        : join(projectRoot, ".claude/commands", `${c.name}.md`);
+    if (existsSync(path)) {
+      rmSync(path, c.as === "skill" ? { recursive: true } : {});
+      reports.push({
+        target:
+          c.as === "skill" ? `.claude/skills/${c.name}/SKILL.md` : `.claude/commands/${c.name}.md`,
+        action: "removed",
+      });
+    }
+  }
+
+  delete manifest.agents[bucketId];
   if (Object.keys(manifest.agents).length) {
     writeJsonIfChanged(manifestPath, manifest);
   } else if (existsSync(manifestPath)) {

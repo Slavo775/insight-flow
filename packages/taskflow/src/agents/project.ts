@@ -19,9 +19,15 @@ import defaultProject from "./project/default.json";
 
 export type Project = z.infer<typeof ProjectSchema>;
 
-/** Manifest bucket id for a project's global installs. */
+/**
+ * Manifest bucket id for a project's global installs. N174 — a flow is one of
+ * the three install targets (`flow:` / `agent:` / `module:`), so its bucket is
+ * keyed `flow:<id>` (was `project:<id>` pre-N174; the emitter migrates the old
+ * key on next apply). Kept as a named helper so existing call sites (init's
+ * lifecycle-hook install, the dashboard) read clearly.
+ */
 export function projectBucketId(project: Project): string {
-  return `project:${project.id}`;
+  return `flow:${project.id}`;
 }
 
 // Validate the shipped definition at load: schema first, then referential

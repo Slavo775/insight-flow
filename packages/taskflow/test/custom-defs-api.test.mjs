@@ -609,10 +609,10 @@ test("default flow eject/revert round-trip + ejected flag", async () => {
   });
 });
 
-// N125 — GET /api/flow-install-plan derives the flow's mcp/hook/skill artifacts.
+// N125/N174 — GET /api/install-plan derives a flow's mcp/hook/skill artifacts.
 test("flow install plan lists artifacts from agents + install (deduped)", async () => {
   await withServer(async () => {
-    const r = await api("/api/flow-install-plan", "GET");
+    const r = await api("/api/install-plan?kind=flow&id=default", "GET");
     assert.equal(r.status, 200);
     const { plan } = await r.json();
     assert.ok(Array.isArray(plan));
@@ -629,14 +629,17 @@ test("flow install plan lists artifacts from agents + install (deduped)", async 
       assert.match(s.target, /\.mcp\.json|\.claude\//);
     }
     // unknown flow → 404
-    assert.equal((await api("/api/flow-install-plan?id=custom%3Aghost", "GET")).status, 404);
+    assert.equal(
+      (await api("/api/install-plan?kind=flow&id=custom%3Aghost", "GET")).status,
+      404,
+    );
   });
 });
 
-// N126 — POST /api/flow-install writes the artifacts (idempotent) and reports.
+// N126/N174 — POST /api/install writes the artifacts (idempotent) and reports.
 test("flow install writes artifacts and is idempotent", async () => {
   await withServer(async (dir) => {
-    let r = await api("/api/flow-install", "POST", { id: "default" });
+    let r = await api("/api/install", "POST", { kind: "flow", id: "default" });
     assert.equal(r.status, 200);
     const first = await r.json();
     assert.ok(first.ok && Array.isArray(first.reports));
@@ -647,11 +650,14 @@ test("flow install writes artifacts and is idempotent", async () => {
     assert.ok(wrote(first.reports), "something was created/updated");
 
     // second run is idempotent (nothing created/updated)
-    r = await api("/api/flow-install", "POST", { id: "default" });
+    r = await api("/api/install", "POST", { kind: "flow", id: "default" });
     const second = await r.json();
     assert.ok(!wrote(second.reports), "re-run writes nothing");
 
     // unknown flow → 404
-    assert.equal((await api("/api/flow-install", "POST", { id: "custom:ghost" })).status, 404);
+    assert.equal(
+      (await api("/api/install", "POST", { kind: "flow", id: "custom:ghost" })).status,
+      404,
+    );
   });
 });
