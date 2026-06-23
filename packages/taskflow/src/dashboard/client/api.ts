@@ -250,18 +250,6 @@ export interface InputSpecDto {
   saved?: boolean;
 }
 
-export async function fetchFlowInstallPlan(
-  flowId: string,
-): Promise<{ plan: InstallStepDto[]; requiredInputs: InputSpecDto[] }> {
-  const res = await fetch("/api/flow-install-plan?id=" + encodeURIComponent(flowId));
-  if (!res.ok) throw new Error(`Failed to load install plan (${res.status})`);
-  const body = await res.json();
-  return {
-    plan: body.plan as InstallStepDto[],
-    requiredInputs: (body.requiredInputs ?? []) as InputSpecDto[],
-  };
-}
-
 export interface InstallReport {
   target: string;
   action: "created" | "updated" | "unchanged" | "removed";
@@ -276,7 +264,7 @@ export interface InstallConflictDto {
   incoming: unknown;
 }
 
-/** Thrown by runFlowInstall when the server returns a 409 structured conflict. */
+/** Thrown by runInstall when the server returns a 409 structured conflict. */
 export class InstallConflictError extends Error {
   conflict: InstallConflictDto;
   constructor(conflict: InstallConflictDto) {
@@ -286,20 +274,75 @@ export class InstallConflictError extends Error {
   }
 }
 
-export async function runFlowInstall(
-  flowId: string,
+// N174 — install/uninstall any target (flow | agent | module). Reuses the
+// InstallStep / conflict / report shapes; the only new wire shape is the
+// uninstall plan (per-artifact removed-vs-retained).
+export type InstallTargetKind = "flow" | "agent" | "module";
+
+export async function fetchInstallPlan(
+  kind: InstallTargetKind,
+  id: string,
+): Promise<{ plan: InstallStepDto[]; requiredInputs: InputSpecDto[] }> {
+  const res = await fetch(`/api/install-plan?kind=${kind}&id=${encodeURIComponent(id)}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `Failed to load install plan (${res.status})`);
+  }
+  const body = await res.json();
+  return {
+    plan: body.plan as InstallStepDto[],
+    requiredInputs: (body.requiredInputs ?? []) as InputSpecDto[],
+  };
+}
+
+export async function runInstall(
+  kind: InstallTargetKind,
+  id: string,
   opts: { values?: Record<string, string>; force?: boolean } = {},
 ): Promise<InstallReport[]> {
-  const res = await fetch("/api/flow-install", {
+  const res = await fetch("/api/install", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: flowId, values: opts.values, force: opts.force }),
+    body: JSON.stringify({ kind, id, values: opts.values, force: opts.force }),
   });
   const body = await res.json();
   if (res.status === 409 && body.conflict) {
     throw new InstallConflictError(body.conflict as InstallConflictDto);
   }
   if (!res.ok) throw new Error(body.error ?? `install failed (${res.status})`);
+  return body.reports as InstallReport[];
+}
+
+export interface UninstallStepDto {
+  kind: "mcp" | "hook" | "skill" | "command";
+  key: string;
+  label: string;
+  target: string;
+  /** removed (no other target owns it) or retained (still owned elsewhere). */
+  action: "removed" | "retained";
+}
+
+export async function fetchUninstallPlan(
+  kind: InstallTargetKind,
+  id: string,
+): Promise<{ plan: UninstallStepDto[] }> {
+  const res = await fetch(`/api/uninstall-plan?kind=${kind}&id=${encodeURIComponent(id)}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `Failed to load uninstall plan (${res.status})`);
+  }
+  const body = await res.json();
+  return { plan: body.plan as UninstallStepDto[] };
+}
+
+export async function runUninstall(kind: InstallTargetKind, id: string): Promise<InstallReport[]> {
+  const res = await fetch("/api/uninstall", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind, id }),
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error ?? `uninstall failed (${res.status})`);
   return body.reports as InstallReport[];
 }
 

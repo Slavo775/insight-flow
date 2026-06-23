@@ -1,0 +1,23 @@
+{
+  "taskId": "N174",
+  "reviews": [
+    {
+      "startedAt": "2026-06-23T13:25:10.529Z",
+      "endedAt": "2026-06-23T13:30:48.823Z",
+      "verdict": "approved",
+      "comment": "Generalized flow-install into a flow|agent|module target with reference-safe install/uninstall; tsc+build+new tests pass, HTTP loop verified live. 4 non-blocking notes (dead flow-install routes, per-request recompute, $ARGUMENTS parity, stale comment) + 1 edge case (multi-owner mcp snapshot loss).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-23T14:06:37.021Z",
+      "endedAt": "2026-06-23T14:06:56.183Z",
+      "verdict": "approved",
+      "comment": "Human approved, no blockers; proceed to branch/commit/push/PR/merge via gh",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

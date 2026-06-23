@@ -134,8 +134,8 @@ export function ProjectPage() {
   >([]);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
-  // N127 — the "Install this flow" modal (plan + live progress); null = closed.
-  const [installing, setInstalling] = useState(false);
+  // N127/N174 — the install/uninstall modal (plan + live progress); null = closed.
+  const [modal, setModal] = useState<"install" | "uninstall" | null>(null);
   const projectName = useDashboardStore((s) => s.snapshot?.projectName || "");
 
   useEffect(() => {
@@ -359,8 +359,14 @@ export function ProjectPage() {
           ) : null}
           {/* N127 — install this flow's artifacts (mcp/hooks/skills) here. */}
           {!editing ? (
-            <Button type="button" $variant="primary" onClick={() => setInstalling(true)}>
+            <Button type="button" $variant="primary" onClick={() => setModal("install")}>
               Install this flow
+            </Button>
+          ) : null}
+          {/* N174 — uninstall this flow's artifacts (reference-safe). */}
+          {!editing ? (
+            <Button type="button" $variant="nav" onClick={() => setModal("uninstall")}>
+              Uninstall
             </Button>
           ) : null}
           {/* N167 — make this custom flow the binding default for new tasks. */}
@@ -487,11 +493,11 @@ export function ProjectPage() {
           </Hint>
         ) : null}
       </SideLayout>
-      {installing ? (
+      {modal ? (
         <InstallModal
-          flowId={project.id}
-          flowTitle={project.title}
-          onClose={() => setInstalling(false)}
+          target={{ kind: "flow", id: project.id, title: project.title }}
+          mode={modal}
+          onClose={() => setModal(null)}
         />
       ) : null}
     </>

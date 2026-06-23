@@ -55,8 +55,6 @@ export {
   TaskflowProjectNotFoundError,
 } from "./core/paths.js";
 export type { FlowRoot } from "./core/paths.js";
-export { flowInstallPlan, flowArtifacts, flowRequiredInputs } from "./agents/flow-install.js";
-export type { InstallStep } from "./agents/flow-install.js";
 // N165 — templated install inputs + local secrets store.
 export {
   scanPlaceholders,
@@ -155,10 +153,25 @@ export { transitionTargetFor } from "./agents/transitions.js";
 export {
   applyArtifacts,
   renameManifestBucket,
+  uninstallTarget,
+  uninstallPlan,
   InstallConflictError,
   restoreMcpServer,
 } from "./agents/emit.js";
-export type { EmitReport, EmitAction, InstallConflict } from "./agents/emit.js";
+export type { EmitReport, EmitAction, InstallConflict, UninstallStep } from "./agents/emit.js";
+// N174 — install-target abstraction (flow | agent | module) exposed for tests/consumers.
+export {
+  targetArtifacts,
+  installPlan,
+  requiredInputs,
+  targetBucketId,
+  isInstallableModuleKind,
+  NotInstallableError,
+  flowArtifacts,
+  flowInstallPlan,
+  flowRequiredInputs,
+} from "./agents/flow-install.js";
+export type { InstallTarget, TargetKind, InstallStep } from "./agents/flow-install.js";
 // N166 — referential validator (terminal-status edge targets) exposed for tests.
 export { validateReferences } from "./dashboard/server/custom-defs.js";
 export { DEFAULT_PROJECT, projectBucketId, collectProjectInstall } from "./agents/project.js";

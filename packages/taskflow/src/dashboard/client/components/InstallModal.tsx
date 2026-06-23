@@ -7,14 +7,18 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import {
-  fetchFlowInstallPlan,
-  runFlowInstall,
+  fetchInstallPlan,
+  runInstall,
+  fetchUninstallPlan,
+  runUninstall,
   restoreMcpServer,
   InstallConflictError,
   type InstallReport,
   type InstallStepDto,
+  type UninstallStepDto,
   type InputSpecDto,
   type InstallConflictDto,
+  type InstallTargetKind,
 } from "../api.js";
 import { Button } from "./index.js";
 import type { Theme } from "../theme.js";
@@ -235,16 +239,33 @@ interface ProgressFrame {
   error?: string;
 }
 
+// N174 — the modal installs or uninstalls any target (flow | agent | module).
+export interface InstallTargetRef {
+  kind: InstallTargetKind;
+  id: string;
+  title: string;
+}
+
+const KIND_LABEL: Record<InstallTargetKind, string> = {
+  flow: "flow",
+  agent: "agent",
+  module: "module",
+};
+
 export function InstallModal({
-  flowId,
-  flowTitle,
+  target,
+  mode = "install",
   onClose,
 }: {
-  flowId: string;
-  flowTitle: string;
+  target: InstallTargetRef;
+  mode?: "install" | "uninstall";
   onClose: () => void;
 }) {
+  const uninstalling = mode === "uninstall";
+  const kindLabel = KIND_LABEL[target.kind];
+  // Install plan (no action until run) vs uninstall plan (removed/retained known up front).
   const [plan, setPlan] = useState<InstallStepDto[] | null>(null);
+  const [uplan, setUplan] = useState<UninstallStepDto[] | null>(null);
   const [planError, setPlanError] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   // target → emitter action; populated live from SSE and finalized from the
@@ -265,20 +286,27 @@ export function InstallModal({
   // Load the plan once.
   useEffect(() => {
     let alive = true;
-    fetchFlowInstallPlan(flowId).then(
-      (res) => {
-        if (!alive) return;
-        setPlan(res.plan);
-        setRequiredInputs(res.requiredInputs);
-      },
-      (e: unknown) => alive && setPlanError(e instanceof Error ? e.message : String(e)),
-    );
+    if (uninstalling) {
+      fetchUninstallPlan(target.kind, target.id).then(
+        (res) => alive && setUplan(res.plan),
+        (e: unknown) => alive && setPlanError(e instanceof Error ? e.message : String(e)),
+      );
+    } else {
+      fetchInstallPlan(target.kind, target.id).then(
+        (res) => {
+          if (!alive) return;
+          setPlan(res.plan);
+          setRequiredInputs(res.requiredInputs);
+        },
+        (e: unknown) => alive && setPlanError(e instanceof Error ? e.message : String(e)),
+      );
+    }
     return () => {
       alive = false;
     };
-  }, [flowId]);
+  }, [target.kind, target.id, uninstalling]);
 
-  // Escape / backdrop close — blocked mid-install so a run isn't abandoned.
+  // Escape / backdrop close — blocked mid-run so a run isn't abandoned.
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === "Escape" && phaseRef.current !== "running") onClose();
@@ -287,24 +315,27 @@ export function InstallModal({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const install = async (force = false): Promise<void> => {
+  const run = async (force = false): Promise<void> => {
     setRunError(null);
-    // N172 — overwriting? capture the conflict so we can offer an undo on success.
-    if (force && conflict) setLastOverwrite(conflict);
-    else if (!force) setLastOverwrite(null);
-    setConflict(null);
+    if (!uninstalling) {
+      // N172 — overwriting? capture the conflict so we can offer an undo on success.
+      if (force && conflict) setLastOverwrite(conflict);
+      else if (!force) setLastOverwrite(null);
+      setConflict(null);
+    }
     setActions({});
     setPhase("running");
     // Open the progress stream and wait for it to CONNECT before the POST: the
-    // server emits the install-progress frames synchronously inside the request
-    // handler, so a listener attached after the POST would miss them. We await
-    // `onopen` (with a short fallback so a blocked SSE never hangs the install).
+    // server emits the progress frames synchronously inside the request handler,
+    // so a listener attached after the POST would miss them. We await `onopen`
+    // (with a short fallback so a blocked SSE never hangs the run).
     const es = new EventSource("/sse");
-    es.addEventListener("install-progress", (e) => {
+    const eventName = uninstalling ? "uninstall-progress" : "install-progress";
+    es.addEventListener(eventName, (e) => {
       const frame = JSON.parse((e as MessageEvent).data) as ProgressFrame;
       if (frame.phase === "step" && frame.target && frame.action) {
-        const { target, action } = frame;
-        setActions((prev) => ({ ...prev, [target]: action }));
+        const { target: t, action } = frame;
+        setActions((prev) => ({ ...prev, [t]: action }));
       }
     });
     try {
@@ -312,7 +343,9 @@ export function InstallModal({
         es.onopen = () => resolve();
         setTimeout(resolve, 1500); // fall through if onopen never fires
       });
-      const reports = await runFlowInstall(flowId, { values, force });
+      const reports = uninstalling
+        ? await runUninstall(target.kind, target.id)
+        : await runInstall(target.kind, target.id, { values, force });
       // The response is authoritative — fold every report in by target.
       const final: Record<string, InstallReport["action"]> = {};
       for (const r of reports) final[r.target] = r.action;
@@ -346,7 +379,7 @@ export function InstallModal({
 
   const running = phase === "running";
 
-  const stepStatus = (
+  const installStepStatus = (
     step: InstallStepDto,
   ): { glyph: string; token: ActionToken; label: string } => {
     const action = actions[step.target];
@@ -356,35 +389,62 @@ export function InstallModal({
       : { glyph: "○", token: "muted", label: "" };
   };
 
+  // N174 — an uninstall step is either retained (kept; still owned by another
+  // target) or removed. Live SSE upgrades a pending "removed" to its final state.
+  const uninstallStepStatus = (
+    step: UninstallStepDto,
+  ): { glyph: string; token: ActionToken; label: string } => {
+    if (step.action === "retained") {
+      return { glyph: "•", token: "muted", label: "kept (still used)" };
+    }
+    const action = actions[step.target];
+    if (action === "removed") return ACTION_STYLE.removed;
+    return running
+      ? { glyph: "◌", token: "amber", label: "" }
+      : { glyph: "○", token: "amber", label: "removed" };
+  };
+
+  const verb = uninstalling ? "Uninstall" : "Install";
+  const planLoaded = uninstalling ? uplan : plan;
+  const planEmpty = planLoaded != null && planLoaded.length === 0;
+
   return (
     <Backdrop onClick={() => !running && onClose()}>
       <Dialog role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <TopRow>
-          <Title>Install “{flowTitle}”</Title>
+          <Title>
+            {verb} “{target.title}”
+          </Title>
           <CloseBtn type="button" aria-label="Close" disabled={running} onClick={onClose}>
             ✕
           </CloseBtn>
         </TopRow>
 
         {planError ? (
-          <Summary $tone="error">Could not load the install plan: {planError}</Summary>
+          <Summary $tone="error">
+            Could not load the {verb.toLowerCase()} plan: {planError}
+          </Summary>
         ) : null}
 
-        {!plan && !planError ? <Lead>Loading the install plan…</Lead> : null}
+        {!planLoaded && !planError ? (
+          <Lead>Loading the {verb.toLowerCase()} plan…</Lead>
+        ) : null}
 
-        {plan && plan.length === 0 ? (
+        {planEmpty ? (
           <Lead>
-            This flow contributes no installable artifacts (no MCP servers, hooks, or skills).
+            {uninstalling
+              ? `Nothing to uninstall — this ${kindLabel} owns no installed artifacts.`
+              : `This ${kindLabel} contributes no installable artifacts (no MCP servers, hooks, or skills).`}
           </Lead>
         ) : null}
 
-        {requiredInputs.length > 0 ? (
+        {!uninstalling && requiredInputs.length > 0 ? (
           <>
             <Lead>
-              This flow needs {requiredInputs.length} value{requiredInputs.length === 1 ? "" : "s"}.
-              They are substituted into <code>.mcp.json</code> at install and saved locally
-              (gitignored), so you won&apos;t be asked again. Leave a field blank to reuse a saved
-              value.
+              This {kindLabel} needs {requiredInputs.length} value
+              {requiredInputs.length === 1 ? "" : "s"}. They are substituted into{" "}
+              <code>.mcp.json</code> at install and saved locally (gitignored), so you won&apos;t be
+              asked again. Leave a field blank to reuse a saved value.
             </Lead>
             {requiredInputs.map((inp) => (
               <Field key={inp.name}>
@@ -416,7 +476,7 @@ export function InstallModal({
           </>
         ) : null}
 
-        {plan && plan.length > 0 ? (
+        {!uninstalling && plan && plan.length > 0 ? (
           <>
             <Lead>
               insight-flow will write {plan.length} artifact{plan.length === 1 ? "" : "s"} into this
@@ -424,7 +484,7 @@ export function InstallModal({
             </Lead>
             <StepList>
               {plan.map((step) => {
-                const status = stepStatus(step);
+                const status = installStepStatus(step);
                 return (
                   <StepRow key={`${step.kind}:${step.key}`} title={`written to ${step.target}`}>
                     <StepIcon $token={status.token}>{status.glyph}</StepIcon>
@@ -440,11 +500,39 @@ export function InstallModal({
           </>
         ) : null}
 
+        {uninstalling && uplan && uplan.length > 0 ? (
+          <>
+            <Lead>
+              Removing this {kindLabel}&apos;s artifacts. Anything still used by another installed
+              flow, agent, or module is <strong>kept</strong>.
+            </Lead>
+            <StepList>
+              {uplan.map((step) => {
+                const status = uninstallStepStatus(step);
+                return (
+                  <StepRow key={`${step.kind}:${step.key}`} title={`from ${step.target}`}>
+                    <StepIcon $token={status.token}>{status.glyph}</StepIcon>
+                    <StepLabel>{step.label}</StepLabel>
+                    <StepTarget>{step.target}</StepTarget>
+                    {status.label ? (
+                      <StepAction $token={status.token}>{status.label}</StepAction>
+                    ) : null}
+                  </StepRow>
+                );
+              })}
+            </StepList>
+          </>
+        ) : null}
+
         {phase === "done" ? (
-          <Summary $tone="ok">Install complete — {flowTitle} is wired into this project.</Summary>
+          <Summary $tone="ok">
+            {uninstalling
+              ? `Uninstall complete — removed ${target.title}'s artifacts.`
+              : `Install complete — ${target.title} is wired into this project.`}
+          </Summary>
         ) : null}
         {/* N172 — offer to undo the overwrite we just performed. */}
-        {phase === "done" && lastOverwrite && lastOverwrite.kind === "mcp" ? (
+        {!uninstalling && phase === "done" && lastOverwrite && lastOverwrite.kind === "mcp" ? (
           <DiffBox>
             Overwrote <strong>{lastOverwrite.name}</strong>. Changed your mind?
             <div style={{ marginTop: 8 }}>
@@ -454,7 +542,7 @@ export function InstallModal({
             </div>
           </DiffBox>
         ) : null}
-        {phase === "failed" && conflict ? (
+        {!uninstalling && phase === "failed" && conflict ? (
           <DiffBox>
             <strong>{conflict.name}</strong> already exists with a different config. Review the
             change, then overwrite to replace it (secret values are masked).
@@ -469,37 +557,41 @@ export function InstallModal({
           </DiffBox>
         ) : null}
         {phase === "failed" && !conflict ? (
-          <Summary $tone="error">Install failed: {runError}</Summary>
+          <Summary $tone="error">
+            {verb} failed: {runError}
+          </Summary>
         ) : null}
 
         <Actions>
           <Button type="button" $variant="nav" disabled={running} onClick={onClose}>
             {phase === "done" ? "Close" : "Cancel"}
           </Button>
-          {conflict ? (
+          {!uninstalling && conflict ? (
             <Button
               type="button"
               $variant="danger"
               disabled={running}
-              onClick={() => void install(true)}
+              onClick={() => void run(true)}
             >
               {running ? "Overwriting…" : "Overwrite"}
             </Button>
           ) : null}
-          {plan && plan.length > 0 ? (
+          {planLoaded && planLoaded.length > 0 ? (
             <Button
               type="button"
-              $variant="primary"
+              $variant={uninstalling ? "danger" : "primary"}
               disabled={running}
-              onClick={() => void install(false)}
+              onClick={() => void run(false)}
             >
               {running
-                ? "Installing…"
+                ? uninstalling
+                  ? "Uninstalling…"
+                  : "Installing…"
                 : phase === "done"
                   ? "Run again"
                   : phase === "failed"
                     ? "Retry"
-                    : "Install"}
+                    : verb}
             </Button>
           ) : null}
         </Actions>

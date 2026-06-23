@@ -7,6 +7,7 @@ import styled, { useTheme } from "styled-components";
 import { deriveCommandName, type AgentDto } from "./api.js";
 import { Button } from "./components/index.js";
 import { CompositionMap, kindColor, type MapNodeSpec } from "./components/CompositionMap.js";
+import { InstallModal } from "./components/InstallModal.js";
 import { ModuleInfoModal } from "./components/ModuleInfoModal.js";
 import type { Registry } from "./registry.js";
 
@@ -65,6 +66,8 @@ const KINDS = [
 export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Registry }) {
   const theme = useTheme();
   const [openModuleId, setOpenModuleId] = useState<string | null>(null);
+  // N174 — install/uninstall this agent (its prompt + module artifacts); null = closed.
+  const [modal, setModal] = useState<"install" | "uninstall" | null>(null);
 
   const nodes: MapNodeSpec[] = [
     ...agent.modules.map((m, i) => ({
@@ -106,9 +109,16 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
             </>
           ) : null}
         </Sub>
+        {/* N174 — install this agent (composed prompt + its modules' artifacts). */}
+        <Button type="button" $variant="primary" onClick={() => setModal("install")}>
+          Install
+        </Button>
+        <Button type="button" $variant="nav" onClick={() => setModal("uninstall")}>
+          Uninstall
+        </Button>
         {/* N107 — built-ins are immutable; only custom agents are editable. */}
         {agent.source === "custom" ? (
-          <Button as={Link} to={`/agent/edit/${agent.id}`} $variant="primary">
+          <Button as={Link} to={`/agent/edit/${agent.id}`} $variant="secondary">
             Edit
           </Button>
         ) : null}
@@ -123,6 +133,13 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
       <CompositionMap nodes={nodes} edges={edges} onModuleClick={setOpenModuleId} />
       {openModule ? (
         <ModuleInfoModal module={openModule} onClose={() => setOpenModuleId(null)} />
+      ) : null}
+      {modal ? (
+        <InstallModal
+          target={{ kind: "agent", id: agent.id, title: agent.title }}
+          mode={modal}
+          onClose={() => setModal(null)}
+        />
       ) : null}
     </>
   );
