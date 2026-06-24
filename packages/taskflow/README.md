@@ -12,7 +12,7 @@ A major release. Highlights (see [CHANGELOG.md](https://github.com/Slavo775/insi
 - **Install / uninstall engine.** Derive an install plan from a flow and run it with live progress; install and uninstall agents & modules from the dashboard; templated `${VAR}` inputs; overwrite undo/rollback.
 - **Agent composition v2 — everything is a module.** A registry-backed model with heterogeneous module kinds (`mcp` / `hook` / `skill`), bundle modules, security as a first-class module, and an agent handover system. User-space registries + a CRUD API + dashboard forms let you author custom modules, agents, and projects.
 - **React + Vite dashboard.** Rewritten from the server-rendered page into a React app with task-detail pages, a module/agent browser, and a styled-components theme.
-- **New `insightFlow/` layout.** Task state now lives under `<project>/insightFlow/`. **Upgrading an existing project? Run `insight-flow migrate-layout` once** (the legacy `workTasks/` layout still resolves via a back-compat shim).
+- **New `insightFlow/` layout.** Task state now lives under `<project>/insightFlow/`. **Upgrading an existing project?** See [Upgrading from 1.x to 2.0](#upgrading-from-1x-to-20) (the legacy `workTasks/` layout still resolves via a back-compat shim).
 - **Opt-in observability** (Langfuse / OpenTelemetry) and new `insight-flow rename` / `insight-flow migrate-layout` commands.
 
 > **Breaking changes** (composition v2 schema, the `insightFlow/` layout, and the socket.io → native SSE transport) each have a migration note in the [CHANGELOG](https://github.com/Slavo775/insight-flow/blob/main/packages/taskflow/CHANGELOG.md).
@@ -144,7 +144,7 @@ your-project/
     └── hooks/                   # activity engine hook (optional)
 ```
 
-> Projects created before 2.0.0 keep their top-level `workTasks/` (resolved via a back-compat shim). Run `insight-flow migrate-layout` to move to the `insightFlow/` layout above.
+> Projects created before 2.0.0 keep their top-level `workTasks/` (resolved via a back-compat shim). Run `insight-flow migrate-layout` to move to the `insightFlow/` layout above — see [Upgrading from 1.x to 2.0](#upgrading-from-1x-to-20) for the full upgrade path.
 
 When you run `insight-flow` (or `insight-flow ui`):
 
@@ -201,8 +201,11 @@ insight-flow incident-status --id N03 --incident INC-001 --status investigating|
 insight-flow incident-resolve --id N03 --incident INC-001 --rootCause "..." --fix "..."
 insight-flow incident-list [--id N03]
 
-# Migration / utility
-insight-flow migrate                            # Migrate from legacy tracker.json
+# Migration / utility (see "Upgrading from 1.x to 2.0" below for the full upgrade path)
+insight-flow migrate                            # Migrate from a legacy tracker.json
+insight-flow migrate-layout [--dry-run] [--fix-strays]  # Move workTasks/ + .events into the consolidated insightFlow/ root (idempotent)
+insight-flow migrate-reviews                    # Split inline reviews/incidents into per-task side files (run once after upgrade)
+insight-flow migrate-hooks [--bin <path>]       # Refresh hook scripts after upgrading the package (idempotent)
 insight-flow prompt-build                       # Preview AGENT_ENFORCEMENT.md block (dry run)
 insight-flow prompt-build --apply               # Write AGENT_ENFORCEMENT.md + patch role files
 insight-flow help
@@ -781,6 +784,29 @@ Run `insight-flow bulk-ui` to start them again.
 ---
 
 ## Upgrading insight-flow
+
+### Upgrading from 1.x to 2.0
+
+2.0.0 introduces the consolidated `insightFlow/` layout and per-task review/incident side files. Existing 1.x projects keep working via a back-compat shim, but to move fully onto the 2.0 storage shape run the migrations once, in order. Each command is **idempotent** — safe to re-run:
+
+```bash
+npm install -g insight-flow@latest        # 1. install 2.0
+insight-flow migrate-layout --dry-run     # 2. preview the move (no changes written)
+insight-flow migrate-layout               # 3. move workTasks/ + .events → insightFlow/
+insight-flow migrate-reviews              # 4. split inline reviews/incidents into per-task side files
+insight-flow migrate-hooks                # 5. refresh hook scripts for the new version
+insight-flow bulk-init                    # 6. re-scaffold role files (or `insight-flow init` in a single project)
+```
+
+Notes:
+
+- **`init` does not migrate your data.** It detects a legacy `workTasks/` layout and keeps it, printing a reminder to run `migrate-layout`. The migrations above are the explicit upgrade path.
+- If you defer migrating, the legacy `workTasks/` layout still resolves via the back-compat shim — nothing breaks, you just stay on the old layout.
+- Run `migrate-layout --fix-strays` if a previous partial migration left an empty/scaffold-only doubled `workTasks/workTasks/` directory behind.
+
+For the per-breaking-change details (composition v2 schema, the `insightFlow/` layout, and the socket.io → native SSE transport), see the [CHANGELOG](https://github.com/Slavo775/insight-flow/blob/main/packages/taskflow/CHANGELOG.md).
+
+### Refreshing role files across all projects
 
 After installing a new version of insight-flow, run two commands to bring all your registered projects up to date:
 

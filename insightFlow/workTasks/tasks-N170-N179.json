@@ -681,6 +681,76 @@
       "mrUrl": null,
       "mergedAt": "2026-06-24T09:15:43.490Z",
       "flowId": "default"
+    },
+    {
+      "id": "N177",
+      "title": "Document v1 to v2 migration in README",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N177-document-v1-to-v2-migration-in-readme",
+      "createdAt": "2026-06-24T09:31:04.565Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-24T09:31:04.565Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-24T09:32:10.776Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-24T09:33:14.632Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-24T09:37:06.460Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-24T09:38:07.412Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-24T10:12:16.462Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-24T10:12:39.178Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-24T09:32:10.777Z",
+        "completedAt": "2026-06-24T09:33:14.634Z",
+        "filesChanged": [
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "migration",
+        "release"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
