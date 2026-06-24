@@ -4384,6 +4384,80 @@
       "payload": {
         "tool_name": "Bash"
       }
+    },
+    {
+      "id": "evt_1782328642130_31b5",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-24T19:17:22.129Z",
+      "sessionId": "252c4266-d571-404a-8204-0450b2f3271e",
+      "taskId": "N178",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782328653714_380d",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-24T19:17:33.714Z",
+      "sessionId": "252c4266-d571-404a-8204-0450b2f3271e",
+      "taskId": "N178",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782328653854_b132",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-24T19:17:33.854Z",
+      "sessionId": "252c4266-d571-404a-8204-0450b2f3271e",
+      "taskId": "N178",
+      "payload": {}
+    },
+    {
+      "type": "done",
+      "taskId": "N178",
+      "timestamp": "2026-06-24T19:17:36.004Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1782328656269_926a",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-06-24T19:17:36.268Z",
+      "sessionId": "252c4266-d571-404a-8204-0450b2f3271e",
+      "taskId": "N178",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782328665209_220a",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-06-24T19:17:45.208Z",
+      "sessionId": "252c4266-d571-404a-8204-0450b2f3271e",
+      "taskId": "N178",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1782328665346_b620",
+      "type": "approval-required",
+      "source": "hook",
+      "hookName": "PermissionRequest",
+      "timestamp": "2026-06-24T19:17:45.345Z",
+      "sessionId": "252c4266-d571-404a-8204-0450b2f3271e",
+      "taskId": "N178",
+      "payload": {}
     }
   ]
 }
