@@ -1,0 +1,23 @@
+{
+  "taskId": "N175",
+  "reviews": [
+    {
+      "startedAt": "2026-06-24T06:16:58.469Z",
+      "endedAt": "2026-06-24T06:21:14.270Z",
+      "verdict": "approved",
+      "comment": "Pipeline correct & secure: OIDC publish (no token, provenance, repository field verified), SHA-pinned least-privilege workflows, release-only trigger, frozen-lockfile passes post-bump, single curated [2.0.0]. 3 non-blocking nits. Manifest=2.0.0-before-publish fragility documented in RELEASING.md.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-24T06:37:29.958Z",
+      "endedAt": "2026-06-24T06:44:20.249Z",
+      "verdict": "approved",
+      "comment": "Owner approved as-is; confirmed publish triggers on GitHub Release published (not push-to-main, not bare tag push) — current implementation kept.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

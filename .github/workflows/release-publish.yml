@@ -1,0 +1,45 @@
+name: release-publish
+
+# Publishes to npm when a GitHub release is published (i.e. after the
+# release-please PR is merged and its release fires). Uses npm Trusted
+# Publishing (OIDC) — there is no NPM_TOKEN secret; provenance is attached.
+#
+# Triggers ONLY on `release: published` — never on pull_request — so secrets /
+# OIDC are never exposed to untrusted fork code.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Optional manual-approval gate; configure required reviewers on this
+    # environment in repo Settings → Environments → npm-publish.
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write # required for OIDC trusted publishing + provenance
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+      # Trusted Publishing (OIDC) requires npm >= 11.5.1; Node 20 ships npm 10.
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@latest
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Pack sanity check (LICENSE present in tarball)
+        working-directory: packages/taskflow
+        run: npm pack --dry-run 2>&1 | grep -q "LICENSE" || { echo "LICENSE missing from package tarball"; exit 1; }
+      - name: Publish to npm (OIDC + provenance)
+        working-directory: packages/taskflow
+        run: npm publish --provenance --access public

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "last-release-sha": "30e38448eb308377df9136523e62a94c877dc067",
+  "packages": {
+    "packages/taskflow": {
+      "release-type": "node",
+      "package-name": "insight-flow",
+      "changelog-path": "CHANGELOG.md",
+      "include-component-in-tag": false
+    }
+  }
+}
