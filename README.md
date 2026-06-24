@@ -1,8 +1,10 @@
 # insight-flow
 
-A workbench for AI-assisted task lifecycle management — CLI plus a built-in live dashboard.
+A workbench for AI-assisted task lifecycle management — CLI plus a built-in live React dashboard.
 
 `insight-flow` gives any project structured, auditable, visualizable task execution. One command to init, one command to launch the dashboard. Designed for Claude Code workflows but works standalone.
+
+> **New in 2.0.0:** a visual **flow** system that governs every project's lifecycle (flow map + editor), an **install/uninstall engine** for agents & modules, the everything-is-a-module **agent composition v2** model with user-space customization, and a React/Vite dashboard. See [What You Get](#what-you-get) below and the full [CHANGELOG](packages/taskflow/CHANGELOG.md) (incl. breaking-change migrations).
 
 ## Quick Start
 
@@ -51,6 +53,13 @@ your-project/
     └── hooks/                  # Activity + lifecycle hook scripts
 ```
 
+And you get:
+
+- **Flows** — define and edit your project's lifecycle visually (flow map + editor: nodes, ports, custom states, terminal "done" nodes). Tasks bind to a flow, and kanban columns, status badges, pickers, and agent prompts all read that flow's status set.
+- **Install / uninstall engine** — derive an install plan from a flow and run it with live progress; install or uninstall agents & modules straight from the dashboard, with templated `${VAR}` inputs and overwrite undo.
+- **Agent composition v2** — an everything-is-a-module registry (with `mcp` / `hook` / `skill` / bundle kinds) plus user-space registries and CRUD forms to author your own modules, agents, and projects.
+- **Multi-project overview** — a master server aggregates all your registered insight-flow projects into one live card grid.
+
 ## Dashboard
 
 ```bash
@@ -62,8 +71,8 @@ insight-flow ui --port 8080  # Custom port
 The built-in dev server:
 
 - Serves task JSON as a REST API (`/api/work-tasks`, `/api/work-tasks/:file`)
-- Renders a Kanban board, stats, timeline, and task detail panels
-- Watches the tracker directory (`insightFlow/workTasks/`, legacy `workTasks/`) for changes and live-reloads via Socket.IO (auto-reconnect, long-polling fallback)
+- Renders a Kanban board, stats, timeline, task-detail pages, the flow map + flow editor, and the module/agent browser
+- Watches the tracker directory (`insightFlow/workTasks/`, legacy `workTasks/`) for changes and live-reloads over a native Server-Sent Events (SSE) channel (`/sse`)
 - Auto-opens the browser
 
 ## CLI Reference
@@ -130,7 +139,10 @@ insight-flow next-fix         # Pick next task needing fixes
 
 ```bash
 insight-flow init             # Initialize insight-flow in current project
+insight-flow rename --id N00 --title "..." [--type ...] [--priority ...]  # Update a task's title/type/priority
+insight-flow set-flow --id N00 --flow <flowId>   # Bind a task to a flow
 insight-flow migrate          # Migrate from legacy tracker.json format
+insight-flow migrate-layout   # Move an existing project to the insightFlow/ layout
 insight-flow help             # Show help
 insight-flow version          # Show version
 ```
