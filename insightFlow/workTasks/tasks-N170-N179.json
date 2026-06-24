@@ -494,7 +494,7 @@
       "title": "Automated release pipeline (release-please + OIDC npm publish) + public-repo hardening, then cut v2.0.0",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N175-automated-release-pipeline-release-please-oidc-npm",
       "createdAt": "2026-06-23T19:08:05.430Z",
       "statusHistory": [
@@ -532,6 +532,16 @@
           "status": "approved",
           "at": "2026-06-24T06:44:20.250Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-06-24T07:03:10.806Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-06-24T07:03:18.958Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -553,8 +563,8 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-06-24T07:03:18.960Z",
+      "totalDurationMinutes": 715,
       "tags": [
         "release",
         "ci",
@@ -564,7 +574,7 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-06-24T07:03:10.808Z",
       "flowId": "default"
     }
   ]
