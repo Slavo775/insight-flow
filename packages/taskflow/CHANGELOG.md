@@ -4,19 +4,45 @@ All notable changes to `insight-flow` are documented here.
 
 ## [2.0.0] — 2026-06-23
 
+A major release. insight-flow gained a React/Vite dashboard, a full visual **flow**
+system (flows now govern every project's lifecycle), an **install/uninstall engine**
+for agents and modules, the everything-is-a-module **agent composition v2** model, and
+a new `insightFlow/` project layout. The notes below are curated highlights — see the
+commit history (`v1.0.0..v2.0.0`) for the complete list.
+
 ### ⚠ BREAKING CHANGES
 
-- **Agent composition model v2 (N89) — "everything is a module."** A composed agent is now a single ordered `modules` list of registry ids. The `sections`, `includes`, and `trailingIncludes` fields have been removed from the composed-agent schema, and the composer is now a pure-sequence renderer (each module renders as a standalone block in declared order; heading-targeted bullet merging is gone).
+- **Agent composition model v2 — "everything is a module."** A composed agent is now a single ordered `modules` list of registry ids. The `sections`, `includes`, and `trailingIncludes` fields were removed from the composed-agent schema, and the composer is a pure-sequence renderer (each module renders as a standalone block in declared order; heading-targeted bullet merging is gone). `task-git` was also split out of the enforcement module into its own module.
 
   **Migration:** if you maintain custom composed agents (`agents/composed/*.json`) or module files (`agents/modules/*.json`), convert each agent to a single ordered `modules: string[]` of registry ids, and give every module a `kind` — `"section"` (with `heading` / `body`) or `"include"` (with `ref`, e.g. `@AGENT_ENFORCEMENT.md`). Module ids must be unique — duplicate ids now throw when the registry is built. Stock role files (`TASK_*_ROLE.md`, `AGENT_*.md`) are unchanged and remain canonical.
 
+- **New `insightFlow/` project layout.** Task state now lives under `<project>/insightFlow/` (e.g. `insightFlow/workTasks/`) instead of a top-level `workTasks/`. A back-compat shim still resolves the legacy `workTasks/` layout, so existing projects keep working.
+
+  **Migration:** run `insight-flow migrate-layout` once per existing project to move task state under `insightFlow/` (and re-run `insight-flow init` to refresh scaffolding). New projects use the new layout by default.
+
+- **Dashboard realtime transport replaced.** `socket.io` was removed and the live channel is now a native **Server-Sent Events (SSE)** transport, served at `/sse`. The `socket.io` dependency is gone from the package.
+
+  **Migration:** any integration that connected to the dashboard via a Socket.IO client must switch to the native SSE endpoint (`/sse`, consumed with `EventSource`). The CLI and bundled dashboard handle this automatically — no action needed for normal use.
+
+### Added
+
+- **React + Vite dashboard.** The dashboard was rewritten from a server-rendered vanilla-JS page into a React/Vite app: dedicated task-detail pages (react-router), a wider detail panel + reading mode, a styled-components theme with shared components and a Zustand store, and a module & agent browser with composition maps.
+- **Visual flow system.** A flow map shows a task on its lifecycle with the current state highlighted and next-step suggestions, backed by a full **flow editor** — draggable nodes with persisted layout, connectable input/output ports, save/load round-trip via the CRUD API, multiple named flows per project, per-flow custom states, terminal "done" nodes, and an edge modal to edit triggers/relationships.
+- **Flows govern everything.** Tasks bind to a flow (`Task.flowId` + a type→flow map); kanban columns, status badges, status pickers, and agent role prompts all read the bound flow's status set. Added a `set-flow` command + dashboard reassignment and a generic, flow-validated status setter.
+- **Agent composition v2 + registry.** The everything-is-a-module model on a real registry: heterogeneous module kinds (`mcp` / `hook` / `skill`), bundle modules (modules composed of modules), security as a first-class module, an actions/events taxonomy, and an agent **handover** system (agent- and edge-authored handovers wired into install-time composition, diagrams, and prompts). All 9 shipped roles are now composer-generated (JSON canonical).
+- **User-space customization.** User-space registries for custom modules / agents / projects, a CRUD API for custom definitions, and dashboard forms (kind-specific module create/edit for Claude + Cursor targets; an agent composer to add/remove/reorder modules).
+- **Install / uninstall engine.** Derive a full install plan from a flow and execute it with live SSE progress; install and uninstall agents & modules from the dashboard; templated `${VAR}` inputs in hooks/skills/command bodies with install-time substitution; and overwrite undo/rollback (restores the prior `.mcp.json` entry).
+- **Opt-in observability.** A Langfuse exporter (OpenTelemetry) plus a pointer skill module — registry-only and off by default.
+- **New CLI commands.** `insight-flow migrate-layout` (upgrade a project to the `insightFlow/` layout) and `insight-flow rename` (update a task's title/type/priority). Plus yalc local-publish scripts for testing installs in a consumer project.
+
 ### Changed
 
-- **N81** — Consolidated into a single `insight-flow` package: `packages/taskflow/src` reorganized into `core / cli / dashboard / master / agents` module folders, and the former `insight-flow-master` package folded in as the `insight-flow master` subcommand (one published binary, no separate package). Added two bounded extension seams — `Transport` (`dashboard/server/transport.ts`, wrapping the dashboard's Socket.IO broadcast) and `Storage` (`core/storage-port.ts` + `jsonFileStorage`) — as swap points for the planned native transport / alternative storage backends. No public API removed; `socket.io` retained behind the transport seam.
+- **Single `insight-flow` package.** `packages/taskflow/src` is organized into `core / cli / dashboard / master / agents`, and the former `insight-flow-master` package is folded in as the `insight-flow master` subcommand (one published binary). Introduced bounded **Transport** and **Storage** extension seams; the Storage port is now used across the CLI commands.
 
 ### Fixed
 
-- **N81** — Master overview auto-start silently failed on `npm i -g insight-flow`: `findMasterBin()` resolved a workspace-only sibling path (`../../insight-flow-master/dist/index.js`) that doesn't exist in an installed package, so auto-start was skipped. It now resolves the in-package CLI and launches the folded-in `insight-flow master` subcommand — works both in-repo and when globally installed.
+- **Layout path resolution.** Eliminated a doubled `insightFlow` task-folder path in `resolveTaskFolder`, unified it into one shared core resolver, and added guarded cleanup of stray doubled `workTasks/` directories during `migrate-layout`.
+- **Reliability roundup.** Server request error boundary + oversize-body handling, event-emit hardening, install hardening (namespace-collision guard, shared-ownership removal guard, full secret scrub in the conflict diff), and flow-loader fixes (agent→terminal edges accepted; default-flow resolution on delete).
 
 ## [1.0.0] — 2026-06-02
 

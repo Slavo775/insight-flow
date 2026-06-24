@@ -1,0 +1,44 @@
+{
+  "taskId": "N176",
+  "reviews": [
+    {
+      "startedAt": "2026-06-24T08:52:58.667Z",
+      "endedAt": "2026-06-24T08:57:19.094Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: realtime transport mislabeled 'WebSocket/ws' across all 4 files — N83 shipped SSE-only at /sse (no WebSocket). Fix wording in CHANGELOG/READMEs/docs. Everything else accurate (CLI flags, breaking set, layout shim verified).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-24T08:59:12.693Z",
+        "endedAt": "2026-06-24T09:00:57.102Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/CHANGELOG.md",
+          "packages/taskflow/README.md",
+          "README.md",
+          "docs/architecture-diagrams.md"
+        ],
+        "comment": "Fixed blocker 1: realtime transport wording corrected to native SSE at /sse (was 'WebSocket/SSE at /ws') across all 9 flagged lines. Docs-only.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-24T09:06:19.465Z",
+      "endedAt": "2026-06-24T09:06:48.206Z",
+      "verdict": "approved",
+      "comment": "Round 2: blocker 1 fix verified — realtime transport now correctly 'native SSE at /sse' across all 4 files (matches EventSource('/sse') in source). No regressions, docs-only. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-24T09:07:53.013Z",
+      "endedAt": "2026-06-24T09:12:41.251Z",
+      "verdict": "approved",
+      "comment": "approved merge it",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

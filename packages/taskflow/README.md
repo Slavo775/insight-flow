@@ -1,20 +1,21 @@
 # insight-flow
 
-> A workbench for AI-assisted task lifecycle management — CLI plus a server-rendered dashboard (vanilla JS).
+> A workbench for AI-assisted task lifecycle management — CLI plus a live React dashboard.
 
-insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live server-rendered dashboard that visualizes the pipeline, lifecycle timeline, fix-loop hotspots, and per-task review history.
+insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live React/Vite dashboard that visualizes the pipeline, the lifecycle timeline, fix-loop hotspots, per-task review history, and your project's **flows**.
 
-## What's new in 1.0.0
+## What's new in 2.0.0
 
-First stable (GA) release — the CLI surface is now considered stable.
+A major release. Highlights (see [CHANGELOG.md](https://github.com/Slavo775/insight-flow/blob/main/packages/taskflow/CHANGELOG.md) for the full, curated entry):
 
-- **Cursor editor support** — `insight-flow init --editor cursor` (or `--editor all`) scaffolds the same agent skills for Cursor as `.cursor/skills/<name>/SKILL.md` + an `AGENTS.md` context block, and installs `.cursor/hooks.json` so Cursor's lifecycle events stream into the dashboard.
-- **Provider identity on events** — every lifecycle event is tagged `claude` or `cursor` and shown as a provider badge on the dashboard and master overview.
-- **Permission-required notifications for Cursor** — Cursor approval gates now fire the same `Permission required` / `Done` notifications as Claude.
-- **`batch*` → `bulk*` rename** — multi-project commands are now `bulk-register`, `bulk-ui`, `bulk-init`, etc. The old `batch*` names still work as deprecated aliases (with a warning) for one more release.
-- **Re-run `insight-flow init` after upgrading** to scaffold Cursor support (`--editor cursor` or `--editor all`).
+- **Visual flow system.** A flow map shows each task on its lifecycle with the current state highlighted and next-step suggestions, backed by a full **flow editor** — draggable nodes, connectable ports, multiple named flows per project, per-flow custom states, and terminal "done" nodes. Flows now govern everything: kanban columns, status badges, pickers, and agent prompts all read the bound flow's status set (`Task.flowId` + a type→flow map).
+- **Install / uninstall engine.** Derive an install plan from a flow and run it with live progress; install and uninstall agents & modules from the dashboard; templated `${VAR}` inputs; overwrite undo/rollback.
+- **Agent composition v2 — everything is a module.** A registry-backed model with heterogeneous module kinds (`mcp` / `hook` / `skill`), bundle modules, security as a first-class module, and an agent handover system. User-space registries + a CRUD API + dashboard forms let you author custom modules, agents, and projects.
+- **React + Vite dashboard.** Rewritten from the server-rendered page into a React app with task-detail pages, a module/agent browser, and a styled-components theme.
+- **New `insightFlow/` layout.** Task state now lives under `<project>/insightFlow/`. **Upgrading an existing project? Run `insight-flow migrate-layout` once** (the legacy `workTasks/` layout still resolves via a back-compat shim).
+- **Opt-in observability** (Langfuse / OpenTelemetry) and new `insight-flow rename` / `insight-flow migrate-layout` commands.
 
-See [CHANGELOG.md](../../CHANGELOG.md) for the full entry.
+> **Breaking changes** (composition v2 schema, the `insightFlow/` layout, and the socket.io → native SSE transport) each have a migration note in the [CHANGELOG](https://github.com/Slavo775/insight-flow/blob/main/packages/taskflow/CHANGELOG.md).
 
 ## Getting started
 
@@ -62,8 +63,8 @@ Re-running `init` on an existing project is safe — it skips files that already
 | Path | Description |
 |------|-------------|
 | `taskflow.config.json` | Project config (port, activity engine, agent permissions, …) |
-| `workTasks/master.json` | Task metadata + shard index |
-| `workTasks/tasks-N00-N09.json` | First task shard |
+| `insightFlow/workTasks/master.json` | Task metadata + shard index |
+| `insightFlow/workTasks/tasks-N00-N09.json` | First task shard |
 | `.claude/commands/task-analyze.md` | `/task-analyze` slash command (pre-taskmaster strategist) |
 | `.claude/commands/taskmaster.md` | `/taskmaster` slash command |
 | `.claude/commands/task-implement.md` | `/task-implement` slash command |
@@ -129,29 +130,32 @@ From here, use slash commands in Claude Code to drive the full lifecycle: `/task
 
 ```
 your-project/
-├── taskflow.config.json     # where workTasks live, server port, activity engine
-├── workTasks/
-│   ├── master.json          # meta + shard index
-│   ├── tasks-N00-N09.json   # tasks 0–9
-│   ├── tasks-N10-N19.json   # tasks 10–19
-│   └── N00-add-auth/        # spec + review files for each task
-│       ├── TASK.md
-│       └── CHECKLIST.md
+├── taskflow.config.json         # where task state lives, server port, activity engine
+├── insightFlow/
+│   └── workTasks/
+│       ├── master.json          # meta + shard index
+│       ├── tasks-N00-N09.json   # tasks 0–9
+│       ├── tasks-N10-N19.json   # tasks 10–19
+│       └── N00-add-auth/        # spec + review files for each task
+│           ├── TASK.md
+│           └── CHECKLIST.md
 └── .claude/
-    ├── commands/            # slash commands generated by `insight-flow init`
-    └── hooks/               # activity engine hook (optional)
+    ├── commands/                # slash commands generated by `insight-flow init`
+    └── hooks/                   # activity engine hook (optional)
 ```
+
+> Projects created before 2.0.0 keep their top-level `workTasks/` (resolved via a back-compat shim). Run `insight-flow migrate-layout` to move to the `insightFlow/` layout above.
 
 When you run `insight-flow` (or `insight-flow ui`):
 
 1. A local HTTP server starts on the configured port.
-2. The server serves the server-rendered dashboard at `/`.
-3. The dashboard reads `workTasks/*.json` from your configured `workDir` via `/api/work-tasks*`.
-4. A WebSocket on `/ws` pushes file-change events so the UI updates live as you (or AI agents) edit tasks.
+2. The server serves the React/Vite dashboard at `/`.
+3. The dashboard reads task state (`insightFlow/workTasks/*.json`, legacy `workTasks/*.json`) via `/api/work-tasks*`.
+4. A native Server-Sent Events (SSE) stream on `/sse` pushes file-change events so the UI updates live as you (or AI agents) edit tasks.
 
 ## CLI
 
-The `insight-flow` binary is the **single canonical entry point** for all task tracking. Run it from any project root that has a `workTasks/` directory (or run `insight-flow init` first).
+The `insight-flow` binary is the **single canonical entry point** for all task tracking. Run it from any project root that has an `insightFlow/` directory (legacy: a top-level `workTasks/`), or run `insight-flow init` first.
 
 ```
 insight-flow                                    # Launch dashboard
@@ -852,7 +856,7 @@ Project servers (push model):
 The master:
 - Holds an in-memory registry of all registered projects.
 - Serves `GET /overview` — a live card grid, one card per project.
-- Broadcasts `project-update` events via Socket.IO to the browser.
+- Broadcasts `project-update` events to the browser over the native SSE channel.
 
 ### Local setup
 
