@@ -44,3 +44,9 @@ yalc.lock
 *.sw?
 workTasks/.events/
 insightFlow/events/
+
+# Docusaurus docs site (website/)
+website/build/
+website/.docusaurus/
+# Generated reference pages — synced from canonical root files by sync-docs.mjs
+website/docs/reference/

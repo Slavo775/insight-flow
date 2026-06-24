@@ -1,0 +1,76 @@
+{
+  "taskId": "N178",
+  "reviews": [
+    {
+      "startedAt": "2026-06-24T17:32:38.044Z",
+      "endedAt": "2026-06-24T17:33:15.376Z",
+      "verdict": "fix-needed",
+      "comment": "Rework docs IA: cool HP, Overview, Getting Started, CLI w/ command-group subsections, Default Flows & Agents sections; don't derive from README",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-24T17:33:59.949Z",
+        "endedAt": "2026-06-24T18:14:17.408Z",
+        "status": "fixed",
+        "filesChanged": [
+          "website/docusaurus.config.ts",
+          "website/sidebars.ts",
+          "website/src/pages/index.tsx",
+          "website/src/pages/index.module.css",
+          "website/docs/overview.md",
+          "website/docs/getting-started.md",
+          "website/docs/cli/*",
+          "website/docs/flow/*",
+          "website/docs/agents/*",
+          "packages/taskflow/scripts/sync-docs.mjs"
+        ],
+        "comment": "Fixed blockers 1-6: cool homepage, Overview, Getting Started, CLI w/ 9 subsections, Default Flow (5 pages) + Agents (11 pages); content source-grounded, not from README",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-24T18:28:18.746Z",
+      "endedAt": "2026-06-24T18:43:42.311Z",
+      "verdict": "approved",
+      "comment": "IA rework approved: all 6 human blockers resolved, content matches source, clean build; 4 non-blocking polish nits noted",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-24T19:01:33.508Z",
+      "endedAt": "2026-06-24T19:02:10.570Z",
+      "verdict": "fix-needed",
+      "comment": "Framing: document agent-driven model — task creation/lifecycle is mainly for agents; Getting Started should show CLI or /taskmaster; flag agent-oriented CLI commands (create/current/next/list/stats) as not for daily user use",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-24T19:04:12.105Z",
+        "endedAt": "2026-06-24T19:09:18.563Z",
+        "status": "fixed",
+        "filesChanged": [
+          "website/docs/getting-started.md",
+          "website/docs/overview.md",
+          "website/docs/cli/index.md",
+          "website/docs/cli/tasks-and-query.md",
+          "website/docs/cli/implementation.md",
+          "website/docs/cli/review-and-fixes.md",
+          "website/docs/cli/change-requests.md",
+          "website/docs/cli/git-and-flow.md",
+          "website/docs/cli/incidents.md"
+        ],
+        "comment": "Fixed Round-3 blockers 1-3: agent-driven framing in Getting Started + Overview, agent/CLI dual path for task creation, 🤖 Agent-driven callouts across CLI groups; also cleared garbled cli/index sentence",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-24T19:14:11.107Z",
+      "endedAt": "2026-06-24T19:14:34.025Z",
+      "verdict": "approved",
+      "comment": "Approved; authorized to branch/commit/push/PR/merge and deliver GitHub Pages setup steps",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
