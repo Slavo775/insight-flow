@@ -2,7 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
-## [Unreleased]
+## [2.0.0] — 2026-06-23
+
+### ⚠ BREAKING CHANGES
+
+- **Agent composition model v2 (N89) — "everything is a module."** A composed agent is now a single ordered `modules` list of registry ids. The `sections`, `includes`, and `trailingIncludes` fields have been removed from the composed-agent schema, and the composer is now a pure-sequence renderer (each module renders as a standalone block in declared order; heading-targeted bullet merging is gone).
+
+  **Migration:** if you maintain custom composed agents (`agents/composed/*.json`) or module files (`agents/modules/*.json`), convert each agent to a single ordered `modules: string[]` of registry ids, and give every module a `kind` — `"section"` (with `heading` / `body`) or `"include"` (with `ref`, e.g. `@AGENT_ENFORCEMENT.md`). Module ids must be unique — duplicate ids now throw when the registry is built. Stock role files (`TASK_*_ROLE.md`, `AGENT_*.md`) are unchanged and remain canonical.
 
 ### Changed
 
