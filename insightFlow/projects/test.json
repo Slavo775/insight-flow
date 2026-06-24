@@ -1,0 +1,133 @@
+{
+  "id": "custom:test",
+  "title": "test title",
+  "description": "test desc",
+  "agents": [
+    "task-analyze",
+    "taskmaster",
+    "taskmaster-change",
+    "task-implement",
+    "task-review",
+    "task-review-fix",
+    "task-human-review",
+    "task-request-changes",
+    "task-incident",
+    "task-git"
+  ],
+  "flow": [
+    {
+      "from": "task-analyze",
+      "to": "taskmaster"
+    },
+    {
+      "from": "taskmaster",
+      "to": "task-implement",
+      "on": "ready"
+    },
+    {
+      "from": "taskmaster-change",
+      "to": "task-implement",
+      "on": "ready"
+    },
+    {
+      "from": "task-implement",
+      "to": "task-git",
+      "on": "implemented"
+    },
+    {
+      "from": "task-git",
+      "to": "task-review",
+      "on": "pushed"
+    },
+    {
+      "from": "task-review",
+      "to": "task-human-review",
+      "on": "approved"
+    },
+    {
+      "from": "task-review",
+      "to": "task-review-fix",
+      "on": "fix-needed"
+    },
+    {
+      "from": "task-review-fix",
+      "to": "task-review",
+      "on": "fixed"
+    },
+    {
+      "from": "task-human-review",
+      "to": "task-review-fix",
+      "on": "fix-needed"
+    },
+    {
+      "from": "task-human-review",
+      "to": "task-git",
+      "on": "approved"
+    },
+    {
+      "from": "task-human-review",
+      "to": "task-request-changes",
+      "on": "done"
+    },
+    {
+      "from": "task-request-changes",
+      "to": "task-implement",
+      "on": "changes-requested"
+    },
+    {
+      "from": "task-implement",
+      "to": "task-git",
+      "on": "changes-implemented"
+    }
+  ],
+  "install": [
+    "activity"
+  ],
+  "layout": {
+    "task-analyze": {
+      "x": -10,
+      "y": -329
+    },
+    "taskmaster": {
+      "x": 291,
+      "y": -215
+    },
+    "taskmaster-change": {
+      "x": 0,
+      "y": 110
+    },
+    "task-implement": {
+      "x": 280,
+      "y": 110
+    },
+    "task-review": {
+      "x": 840,
+      "y": 0
+    },
+    "task-review-fix": {
+      "x": 1120,
+      "y": 0
+    },
+    "task-human-review": {
+      "x": 1120,
+      "y": 110
+    },
+    "task-request-changes": {
+      "x": 1400,
+      "y": 0
+    },
+    "task-incident": {
+      "x": 1680,
+      "y": 0
+    },
+    "task-git": {
+      "x": 778,
+      "y": -260
+    }
+  },
+  "states": [],
+  "statuses": [],
+  "entryAgents": [
+    "task-analyze"
+  ]
+}
