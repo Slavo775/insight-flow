@@ -1,0 +1,116 @@
+{
+  "range": {
+    "from": 180,
+    "to": 189
+  },
+  "tasks": [
+    {
+      "id": "N180",
+      "title": "Rework npm package README as funnel/landing page + fix stale CLAUDE.md dashboard description",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N180-rework-npm-package-readme-as-funnel-landing-page-f",
+      "createdAt": "2026-06-25T08:13:26.014Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T08:13:26.014Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T08:44:25.501Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T08:47:18.919Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T08:57:00.038Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T08:58:22.548Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T09:07:33.832Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T09:07:53.181Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T08:44:25.502Z",
+        "completedAt": "2026-06-25T08:47:18.920Z",
+        "filesChanged": [
+          "packages/taskflow/README.md",
+          "CLAUDE.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "readme"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N181",
+      "title": "Consumer docs-site IA restructure + enable Docusaurus versioning",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N181-consumer-docs-site-ia-restructure-enable-docusauru",
+      "createdAt": "2026-06-25T08:40:34.114Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T08:40:34.115Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "ia",
+        "versioning"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    }
+  ]
+}
