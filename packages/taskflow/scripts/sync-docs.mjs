@@ -118,7 +118,7 @@ const categoryJson =
   JSON.stringify(
     {
       label: "Reference (synced)",
-      position: 6,
+      position: 9,
       collapsible: true,
       collapsed: true,
       link: { type: "doc", id: "reference/index" },

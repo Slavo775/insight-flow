@@ -47,6 +47,14 @@ const config: Config = {
           routeBasePath: "/docs",
           sidebarPath: "./sidebars.ts",
           editUrl: `https://github.com/${organizationName}/${projectName}/tree/main/website/`,
+          // Versioning (N181): the in-development `docs/` folder is the default
+          // version served at /docs (labeled "Next"); the frozen
+          // `versioned_docs/version-2.0` snapshot is served at /docs/2.0 and
+          // reachable from the navbar version dropdown.
+          lastVersion: "current",
+          versions: {
+            current: { label: "Next" },
+          },
         },
         blog: false,
         theme: {
@@ -65,6 +73,10 @@ const config: Config = {
         { to: "/docs/cli", label: "CLI", position: "left" },
         { to: "/docs/agents", label: "Agents", position: "left" },
         { to: "/docs/flow", label: "Flow", position: "left" },
+        {
+          type: "docsVersionDropdown",
+          position: "right",
+        },
         {
           href: `https://github.com/${organizationName}/${projectName}`,
           label: "GitHub",

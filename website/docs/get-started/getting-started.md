@@ -2,6 +2,7 @@
 title: Getting Started
 sidebar_label: Getting Started
 sidebar_position: 2
+slug: /getting-started
 ---
 
 # Getting Started
@@ -9,7 +10,7 @@ sidebar_position: 2
 This page takes you from zero to a running dashboard with your first task.
 
 :::tip insight-flow is agent-driven
-In normal use you **don't run the task commands by hand**. The [agents](./agents/index.md)
+In normal use you **don't run the task commands by hand**. The [agents](../agents/index.md)
 — Claude Code slash commands like `/task-analyze`, `/taskmaster`, `/task-implement` —
 create tasks and drive the whole lifecycle *with* you. The CLI commands shown below are
 what the agents call under the hood; you're welcome to run them directly, but you rarely
@@ -26,7 +27,7 @@ npx insight-flow init
 `init` scaffolds the agent role files, slash commands, and a `taskflow.config.json`
 with **zero technology assumptions** — no package manager, language toolchain, or
 git host is baked in. You add your own stack-specific commands via the
-[`agents.extend`](./agents/index.md#extending-agents) mechanism.
+[`agents.extend`](../agents/index.md#extending-agents) mechanism.
 
 Optionally install the CLI globally so `insight-flow` is on your PATH everywhere:
 
@@ -66,7 +67,7 @@ insight-flow create \
 
 Either way, each task gets a unique `Nxx` ID and a folder under
 `insightFlow/workTasks/` containing a `TASK.md` spec and a `CHECKLIST.md`, and starts
-in the `ready` state of the [default flow](./flow/index.md).
+in the `ready` state of the [default flow](../flow/index.md).
 
 ## 3. See what to work on
 
@@ -94,8 +95,8 @@ updates as the CLI (or the agents) change task state.
 
 ## 5. Run the lifecycle with agents
 
-In Claude Code, the work is driven by [agents](./agents/index.md) — slash commands
-that move a task through the [flow](./flow/index.md):
+In Claude Code, the work is driven by [agents](../agents/index.md) — slash commands
+that move a task through the [flow](../flow/index.md):
 
 ```
 /task-analyze   → challenge the brief, propose options
@@ -106,10 +107,10 @@ that move a task through the [flow](./flow/index.md):
 ```
 
 Prefer to drive it yourself? Every transition also has a plain CLI command — see
-the [CLI reference](./cli/index.md).
+the [CLI reference](../cli/index.md).
 
 ## Next steps
 
-- Understand the [Default Flow](./flow/index.md) your tasks move through.
-- Meet the [Agents](./agents/index.md) and the module model behind them.
-- Browse the full [CLI](./cli/index.md), grouped by purpose.
+- Understand the [Default Flow](../flow/index.md) your tasks move through.
+- Meet the [Agents](../agents/index.md) and the module model behind them.
+- Browse the full [CLI](../cli/index.md), grouped by purpose.
