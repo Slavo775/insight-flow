@@ -2,6 +2,7 @@
 title: Overview
 sidebar_label: Overview
 sidebar_position: 1
+slug: /overview
 ---
 
 # What is insight-flow?
@@ -39,7 +40,7 @@ idea →  │  states + agents  │  →   │ analyze → implement → review 
 ```
 
 :::info Who runs what
-insight-flow is **agent-driven**. In day-to-day use the [agents](./agents/index.md)
+insight-flow is **agent-driven**. In day-to-day use the [agents](../agents/index.md)
 create tasks and run the lifecycle *with* you — you don't manually type
 `create`/`next`/`implement-start`/etc. The CLI exists so the agents (and you, when you
 want) can drive task state; the dashboard is for watching it happen. So "you" in this
@@ -59,9 +60,9 @@ documentation often means "you, via an agent."
 
 | Piece | What it does |
 |-------|--------------|
-| **CLI** (`insight-flow`) | One binary: owns task state, runs the lifecycle, serves the dashboard. See [CLI](./cli/index.md). |
-| **Default flow** | A ready-to-use lifecycle (`ready → … → merged`) with agents bound to each transition. See [Default Flow](./flow/index.md). |
-| **Agents** | 10 composable, role-driven slash commands. See [Agents](./agents/index.md). |
+| **CLI** (`insight-flow`) | One binary: owns task state, runs the lifecycle, serves the dashboard. See [CLI](../cli/index.md). |
+| **Default flow** | A ready-to-use lifecycle (`ready → … → merged`) with agents bound to each transition. See [Default Flow](../flow/index.md). |
+| **Agents** | 10 composable, role-driven slash commands. See [Agents](../agents/index.md). |
 | **Dashboard** | Live Kanban / timeline / detail view, plus a multi-project master overview. |
 | **Module model** | "Everything is a module" — agents are composed from modules and customizable in user-space without forking. |
 
@@ -69,6 +70,6 @@ documentation often means "you, via an agent."
 
 - **[Getting Started](./getting-started.md)** — install, create your first task,
   launch the dashboard.
-- **[Default Flow](./flow/index.md)** — the lifecycle and its transitions.
-- **[Agents](./agents/index.md)** — the actors and how they're composed.
-- **[CLI](./cli/index.md)** — every command, grouped by what it does.
+- **[Default Flow](../flow/index.md)** — the lifecycle and its transitions.
+- **[Agents](../agents/index.md)** — the actors and how they're composed.
+- **[CLI](../cli/index.md)** — every command, grouped by what it does.

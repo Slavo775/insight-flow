@@ -89,7 +89,7 @@
       "title": "Consumer docs-site IA restructure + enable Docusaurus versioning",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N181-consumer-docs-site-ia-restructure-enable-docusauru",
       "createdAt": "2026-06-25T08:40:34.114Z",
       "statusHistory": [
@@ -97,17 +97,49 @@
           "status": "ready",
           "at": "2026-06-25T08:40:34.115Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T09:50:43.208Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T10:11:42.351Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T10:57:07.728Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T10:59:35.598Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-06-25T09:50:43.209Z",
+        "completedAt": "2026-06-25T10:11:42.352Z",
+        "filesChanged": [
+          "website/docs/get-started/*",
+          "website/docs/guides/*",
+          "website/docs/concepts/*",
+          "website/docs/cli/_category_.json",
+          "website/docs/agents/_category_.json",
+          "website/docs/flow/_category_.json",
+          "website/docs/configuration.md",
+          "website/docusaurus.config.ts",
+          "website/versions.json",
+          "website/versioned_docs/version-2.0",
+          "website/versioned_sidebars"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -115,6 +147,391 @@
         "docs",
         "ia",
         "versioning"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N182",
+      "title": "Concepts: the composition model (everything-is-a-module, agents, flows, handover)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N182-concepts-the-composition-model-everything-is-a-mod",
+      "createdAt": "2026-06-25T10:20:50.174Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T10:20:50.175Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T10:28:33.411Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T10:49:15.058Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T10:57:07.821Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T10:59:35.691Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T10:28:33.414Z",
+        "completedAt": "2026-06-25T10:49:15.059Z",
+        "filesChanged": [
+          "website/docs/concepts/index.md",
+          "website/docs/concepts/modules.md",
+          "website/docs/concepts/agents.md",
+          "website/docs/concepts/flows.md",
+          "website/docs/concepts/handover.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "concepts"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N183",
+      "title": "Reference: default inventory (modules, agents, default flow, master server)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N183-reference-default-inventory-modules-agents-default",
+      "createdAt": "2026-06-25T10:20:50.275Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T10:20:50.275Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T10:28:33.599Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T10:49:15.142Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T10:57:07.927Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T10:59:35.783Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T10:28:33.600Z",
+        "completedAt": "2026-06-25T10:49:15.143Z",
+        "filesChanged": [
+          "website/docs/built-ins/*",
+          "packages/taskflow/scripts/sync-docs.mjs",
+          "website/docs/reference/_category_.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "reference"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N184",
+      "title": "Guides: author and install modules, agents, and custom flows",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N184-guides-author-and-install-modules-agents-and-custo",
+      "createdAt": "2026-06-25T10:20:50.370Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T10:20:50.370Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T10:28:33.781Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T10:49:15.224Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T10:57:08.024Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T10:59:35.876Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T10:28:33.782Z",
+        "completedAt": "2026-06-25T10:49:15.225Z",
+        "filesChanged": [
+          "website/docs/guides/*"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "guides"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N185",
+      "title": "Reference: dashboard guide (views, task detail, activity feed) + screenshots",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N185-reference-dashboard-guide-views-task-detail-activi",
+      "createdAt": "2026-06-25T10:20:50.470Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T10:20:50.471Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T10:49:39.321Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T10:57:07.633Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T10:57:08.124Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T10:59:35.968Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T10:49:39.322Z",
+        "completedAt": "2026-06-25T10:57:07.635Z",
+        "filesChanged": [
+          "website/docs/dashboard/index.md",
+          "website/docs/dashboard/views.md",
+          "website/docs/dashboard/_category_.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N186",
+      "title": "Extend flow/statuses.md with custom statuses and state aliases",
+      "type": "feat",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N186-extend-flow-statuses-md-with-custom-statuses-and-s",
+      "createdAt": "2026-06-25T11:08:45.200Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T11:08:45.201Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T12:46:55.456Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T12:54:41.534Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T13:38:36.396Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T13:40:09.119Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T13:41:11.748Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T13:41:44.362Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T12:46:55.458Z",
+        "completedAt": "2026-06-25T12:54:41.536Z",
+        "filesChanged": [
+          "website/docs/flow/statuses.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "flow"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N187",
+      "title": "Guides: troubleshooting/FAQ, Cursor usage, and Langfuse observability setup",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N187-guides-troubleshooting-faq-cursor-usage-and-langfu",
+      "createdAt": "2026-06-25T12:29:17.445Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T12:29:17.446Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T12:46:55.655Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T12:54:41.629Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T13:38:36.488Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T13:40:09.208Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T13:41:11.843Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-25T13:41:44.549Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T12:46:55.657Z",
+        "completedAt": "2026-06-25T12:54:41.630Z",
+        "filesChanged": [
+          "website/docs/guides/troubleshooting.md",
+          "website/docs/guides/cursor.md",
+          "website/docs/guides/observability.md",
+          "website/docs/guides/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "guides"
       ],
       "pushes": [],
       "branch": null,
