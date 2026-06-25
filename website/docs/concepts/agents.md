@@ -108,3 +108,5 @@ surfaces possible.
 - [Built-in agents](../built-ins/default-agents.md) — each shipped agent's module
   list.
 - [Agents](../agents/index.md) — what each agent does at runtime.
+- [Composer MCP](../composer-mcp/index.md) — list, author, install, and delete
+  agents as MCP tools.

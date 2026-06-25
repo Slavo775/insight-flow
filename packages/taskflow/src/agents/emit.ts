@@ -540,6 +540,19 @@ export interface UninstallStep {
 }
 
 /**
+ * N188 — the set of install-target manifest buckets present in `projectRoot`
+ * (`flow:<id>` / `agent:<id>` / `module:<id>`). A target whose bucket is here
+ * has installed artifacts — drives the `installed` flag on composer reads.
+ */
+export function installedBuckets(projectRoot: string): Set<string> {
+  const manifestPath = join(projectRoot, MANIFEST_PATH);
+  const parsed = readJson<Partial<ManagedManifest>>(manifestPath, {});
+  const manifest: ManagedManifest = { agents: parsed.agents ?? {} };
+  migrateBuckets(manifest);
+  return new Set(Object.keys(manifest.agents));
+}
+
+/**
  * What uninstalling `bucketId` would do, without writing. Each owned artifact is
  * `removed` (no other target owns it) or `retained` (still owned elsewhere).
  * Empty when the bucket owns nothing / does not exist.

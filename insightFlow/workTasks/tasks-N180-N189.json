@@ -608,6 +608,104 @@
       "mrUrl": null,
       "mergedAt": "2026-06-25T13:46:21.859Z",
       "flowId": "default"
+    },
+    {
+      "id": "N188",
+      "title": "composer MCP server — module/agent/flow lifecycle over MCP (stdio)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "fixed",
+      "folder": "insightFlow/workTasks/N188-composer-mcp-server-module-agent-flow-lifecycle-ov",
+      "createdAt": "2026-06-25T15:15:43.338Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T15:15:43.338Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T15:25:17.098Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T15:44:42.447Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T15:49:13.771Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-25T15:52:26.308Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-25T16:39:06.352Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-25T16:39:42.254Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-25T17:00:09.398Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-25T17:30:45.347Z",
+          "by": "task-review-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T15:25:17.100Z",
+        "completedAt": "2026-06-25T15:44:42.449Z",
+        "filesChanged": [
+          "packages/taskflow/package.json",
+          "packages/taskflow/src/mcp/composer.ts",
+          "packages/taskflow/src/mcp/index.ts",
+          "packages/taskflow/src/cli/commands/mcp.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/integrations/composer.json",
+          "website/docs/composer-mcp/index.md",
+          "website/docs/composer-mcp/tools.md",
+          "website/docs/composer-mcp/_category_.json",
+          "website/docs/concepts/modules.md",
+          "website/docs/concepts/agents.md",
+          "website/docs/concepts/flows.md",
+          "README.md",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "mcp",
+        "composer",
+        "agents",
+        "docs"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

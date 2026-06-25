@@ -108,3 +108,5 @@ described above.
 - [Default Flow](../flow/index.md) — statuses and transitions in the dashboard.
 - [Configuration](../configuration.md#flows--task--flow-binding) — the `flows`
   config keys.
+- [Composer MCP](../composer-mcp/index.md) — list, author, install, and delete
+  flows as MCP tools.

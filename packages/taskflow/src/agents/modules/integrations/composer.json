@@ -1,0 +1,14 @@
+[
+  {
+    "id": "mcp-composer",
+    "title": "Composer MCP server",
+    "description": "Registers insight-flow's own composer MCP server (`insight-flow mcp`) in .mcp.json, so an MCP client can list, create, edit, install, uninstall, and delete modules, agents, and flows as tools. Registry-only: not part of any shipped flow, so it never installs by default — add it to a flow or install it directly.",
+    "source": "builtin",
+    "kind": "mcp-server",
+    "name": "composer",
+    "config": {
+      "command": "insight-flow",
+      "args": ["mcp"]
+    }
+  }
+]

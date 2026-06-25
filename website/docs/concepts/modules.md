@@ -122,3 +122,5 @@ There are two flavors:
 - [The handover system](./handover.md) — the `handover` kind in depth.
 - [Configuration](../configuration.md#agents) — `agents.extend` and
   `agents.custom`.
+- [Composer MCP](../composer-mcp/index.md) — list, author, install, and delete
+  modules as MCP tools.
