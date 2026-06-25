@@ -1,21 +1,16 @@
 # insight-flow
 
+[![npm version](https://img.shields.io/npm/v/insight-flow.svg)](https://www.npmjs.com/package/insight-flow)
+[![npm downloads](https://img.shields.io/npm/dm/insight-flow.svg)](https://www.npmjs.com/package/insight-flow)
+[![license](https://img.shields.io/npm/l/insight-flow.svg)](https://github.com/Slavo775/insight-flow/blob/main/LICENSE)
+
 > A workbench for AI-assisted task lifecycle management — CLI plus a live React dashboard.
 
-insight-flow tracks AI-agent task work (specs, implementation, reviews, fixes, pushes, incidents) in sharded JSON files on disk, and serves a live React/Vite dashboard that visualizes the pipeline, the lifecycle timeline, fix-loop hotspots, per-task review history, and your project's **flows**.
+insight-flow gives your AI coding agents a structured task lifecycle. It plugs into Claude Code (and Cursor) as slash commands that drive each task from **spec → implement → review → fix → ship**, tracks the state in sharded JSON files on disk, and serves a live **React + Vite** dashboard that visualizes the pipeline, the lifecycle timeline, fix-loop hotspots, per-task review history, and your project's **flows**.
 
-## What's new in 2.0.0
+**📖 [Full documentation →](https://slavo775.github.io/insight-flow/)**
 
-A major release. Highlights (see [CHANGELOG.md](https://github.com/Slavo775/insight-flow/blob/main/packages/taskflow/CHANGELOG.md) for the full, curated entry):
-
-- **Visual flow system.** A flow map shows each task on its lifecycle with the current state highlighted and next-step suggestions, backed by a full **flow editor** — draggable nodes, connectable ports, multiple named flows per project, per-flow custom states, and terminal "done" nodes. Flows now govern everything: kanban columns, status badges, pickers, and agent prompts all read the bound flow's status set (`Task.flowId` + a type→flow map).
-- **Install / uninstall engine.** Derive an install plan from a flow and run it with live progress; install and uninstall agents & modules from the dashboard; templated `${VAR}` inputs; overwrite undo/rollback.
-- **Agent composition v2 — everything is a module.** A registry-backed model with heterogeneous module kinds (`mcp` / `hook` / `skill`), bundle modules, security as a first-class module, and an agent handover system. User-space registries + a CRUD API + dashboard forms let you author custom modules, agents, and projects.
-- **React + Vite dashboard.** Rewritten from the server-rendered page into a React app with task-detail pages, a module/agent browser, and a styled-components theme.
-- **New `insightFlow/` layout.** Task state now lives under `<project>/insightFlow/`. **Upgrading an existing project?** See [Upgrading from 1.x to 2.0](#upgrading-from-1x-to-20) (the legacy `workTasks/` layout still resolves via a back-compat shim).
-- **Opt-in observability** (Langfuse / OpenTelemetry) and new `insight-flow rename` / `insight-flow migrate-layout` commands.
-
-> **Breaking changes** (composition v2 schema, the `insightFlow/` layout, and the socket.io → native SSE transport) each have a migration note in the [CHANGELOG](https://github.com/Slavo775/insight-flow/blob/main/packages/taskflow/CHANGELOG.md).
+**Now on v2.0** — a visual flow system + flow editor, an install/uninstall engine, agent composition v2 ("everything is a module"), and the React + Vite dashboard. See the [CHANGELOG](https://github.com/Slavo775/insight-flow/blob/main/packages/taskflow/CHANGELOG.md) for the full highlights and migration notes. Upgrading an existing project? See [Upgrading from 1.x to 2.0](#upgrading-from-1x-to-20).
 
 ## Getting started
 
