@@ -101,6 +101,41 @@ You don't author these JSON files by hand for project work — `agents.extend` a
 surfaces. The module/agent JSON is the internal mechanism that makes those
 surfaces possible.
 
+## Orchestrators — agents that fan out to subagents (N191)
+
+> Full guide: [Subagents & orchestration](../subagents/index.md) — including how
+> an agent decides to delegate at runtime.
+
+An agent can declare a `subagents` array of [`subagent`-module](./modules.md)
+ids. When the agent is installed, those subagents are emitted (to
+`.claude/agents/`) **and** its composed prompt gains a `## Subagents` section
+listing them with fan-out / synthesize guidance — making it an **orchestrator**:
+
+```jsonc
+{
+  "id": "custom:research-lead",
+  "title": "Research lead",
+  "modules": ["custom:research-lead-role"],
+  "subagents": ["custom:web-researcher", "custom:codebase-explorer"]
+}
+```
+
+At runtime the orchestrator spawns the relevant subagent(s) via the Task tool —
+in parallel when their work is independent — and the **rejoin is automatic**: a
+subagent's only exit is returning to its caller, and the Task tool waits for all
+of them. So "fan out and rejoin" and "the worker hands back to the orchestrator"
+are the same event, and you get them for free — no special handover. The
+orchestrator then synthesizes the results and continues its own step (handing the
+task onward with a normal handover). Both Claude and Cursor support this. Each
+declared id must resolve to a `subagent` module, or validation fails.
+
+The shipped **Task Reviewer** (`task-review`) is a built-in example (N192): it
+declares the `review-correctness` and `review-security` subagents and fans out to
+them when reviewing a diff, then synthesizes one verdict. The delegation is
+permissive — if those subagents aren't installed (or the harness has none), the
+reviewer still produces a verdict on its own, so the lifecycle degrades
+gracefully.
+
 ## See also
 
 - [Everything is a module](./modules.md) — the kinds an agent's list is made of.

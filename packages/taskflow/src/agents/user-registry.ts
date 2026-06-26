@@ -169,6 +169,16 @@ export function loadUserRegistries(projectDir: string = resolveProjectRoot()): U
     } catch (err) {
       throw new UserRegistryError(agentFiles[def.id], (err as Error).message);
     }
+    // N191 — declared subagents must resolve to `subagent`-kind modules.
+    for (const id of def.subagents ?? []) {
+      const m = mergedModules[id];
+      if (!m || m.kind !== "subagent") {
+        throw new UserRegistryError(
+          agentFiles[def.id],
+          `subagents references '${id}' which is not a subagent module`,
+        );
+      }
+    }
   }
   const mergedAgents = { ...COMPOSED_AGENTS, ...agents };
 

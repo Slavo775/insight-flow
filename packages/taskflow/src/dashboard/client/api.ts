@@ -45,7 +45,8 @@ export interface ModuleDto {
     | "skill"
     | "bundle"
     | "status-transition"
-    | "handover";
+    | "handover"
+    | "subagent";
   heading?: string;
   body?: string;
   ref?: string;
@@ -68,6 +69,13 @@ export interface ModuleDto {
   on?: string;
   mode?: "auto" | "gated";
   label?: string;
+  /** N189 — optional branch reason rendered into the `## Handover` section. */
+  when?: string;
+  /** N190 — subagent kind: emitted to `.claude/agents/<name>.md` (Claude + Cursor). */
+  tools?: string[];
+  model?: string;
+  readonly?: boolean;
+  background?: boolean;
 }
 
 // N103/N106 — writes to the custom-definition CRUD API -----------------------
@@ -171,6 +179,8 @@ export interface AgentDto {
   modules: AgentModuleRef[];
   /** N138 — opt-in install of the agent's composed prompt as a command/skill. */
   command?: { install: boolean; as: "command" | "skill" };
+  /** N191 — subagent modules this orchestrator fans out to (delegation targets). */
+  subagents?: AgentModuleRef[];
 }
 
 export async function fetchModules(): Promise<ModulesResponse> {

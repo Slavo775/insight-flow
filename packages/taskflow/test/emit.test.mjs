@@ -11,7 +11,13 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { collectArtifacts, applyArtifacts, MODULE_REGISTRY } from "../dist/index.js";
+import {
+  collectArtifacts,
+  composeAgent,
+  applyArtifacts,
+  uninstallTarget,
+  MODULE_REGISTRY,
+} from "../dist/index.js";
 
 const tmp = () => mkdtempSync(join(tmpdir(), "n92-emit-"));
 const readJson = (p) => JSON.parse(readFileSync(p, "utf-8"));
@@ -37,7 +43,159 @@ test("collectArtifacts gathers non-text kinds and ignores text kinds", () => {
   assert.equal(a.mcpServers.length, 0);
   // the section module contributes to MD, not artifacts
   const textOnly = collectArtifacts({ id: "t", title: "T", modules: ["testing/prompt"] });
-  assert.deepEqual(textOnly, { mcpServers: [], hooks: [], skills: [], commands: [] });
+  assert.deepEqual(textOnly, {
+    mcpServers: [],
+    hooks: [],
+    skills: [],
+    commands: [],
+    subagents: [],
+  });
+});
+
+// N190 — native subagent emission (cross-harness, reference-safe).
+test("subagent module emits .claude/agents/<name>.md with union frontmatter, idempotent + reference-safe", () => {
+  const dir = tmp();
+  const registry = {
+    "custom:test-writer": {
+      id: "custom:test-writer",
+      title: "Test writer",
+      description: "writes tests",
+      source: "custom",
+      kind: "subagent",
+      name: "test-writer",
+      content: "You write tests.",
+      tools: ["Read", "Edit", "Bash"],
+      readonly: false,
+    },
+  };
+  const agent = { id: "module:custom:test-writer", title: "T", modules: ["custom:test-writer"] };
+
+  const a = collectArtifacts(agent, registry);
+  assert.equal(a.subagents.length, 1);
+  assert.equal(a.subagents[0].name, "test-writer");
+
+  // install
+  const r1 = applyArtifacts(a, dir, "module:custom:test-writer");
+  const path = join(dir, ".claude/agents/test-writer.md");
+  assert.ok(existsSync(path), "subagent file written");
+  const body = readFileSync(path, "utf-8");
+  assert.match(body, /^---\nname: test-writer\n/);
+  assert.match(body, /description: "writes tests"/);
+  assert.match(body, /tools: Read, Edit, Bash/); // Claude dialect
+  assert.match(body, /readonly: false/); // Cursor dialect
+  assert.doesNotMatch(body, /\nmodel:/); // model omitted when unset (= inherit)
+  assert.match(body, /You write tests\./);
+  assert.ok(r1.some((x) => x.target === ".claude/agents/test-writer.md" && x.action === "created"));
+
+  // idempotent
+  const r2 = applyArtifacts(a, dir, "module:custom:test-writer");
+  assert.ok(r2.every((x) => x.action === "unchanged"));
+
+  // a different target with the same name + different def is refused
+  const conflicting = {
+    ...a,
+    subagents: [{ ...a.subagents[0], content: "different" }],
+  };
+  assert.throws(
+    () => applyArtifacts(conflicting, dir, "module:other"),
+    /already managed by agent 'module:custom:test-writer'/,
+  );
+
+  // uninstall removes the file
+  uninstallTarget(dir, "module:custom:test-writer");
+  assert.ok(!existsSync(path), "subagent file removed on uninstall");
+  rmSync(dir, { recursive: true, force: true });
+});
+
+// N191 — orchestrator: an agent declaring subagents gets a delegation section in
+// its prompt and emits the declared subagents as artifacts.
+test("orchestrator agent renders a ## Subagents section and emits declared subagents", () => {
+  const registry = {
+    "custom:reviewer": {
+      id: "custom:reviewer",
+      title: "Reviewer",
+      description: "reviews code",
+      source: "custom",
+      kind: "subagent",
+      name: "reviewer",
+      content: "You review code.",
+    },
+    "sec/role": {
+      id: "sec/role",
+      title: "Role",
+      source: "builtin",
+      kind: "section",
+      heading: "## Role",
+      body: "Orchestrate the work.",
+    },
+  };
+  const orch = {
+    id: "custom:orchestrator",
+    title: "Orchestrator",
+    modules: ["sec/role"],
+    subagents: ["custom:reviewer"],
+  };
+
+  const prompt = composeAgent(orch, registry);
+  assert.match(prompt, /## Subagents/);
+  assert.match(prompt, /`reviewer` — reviews code/);
+  assert.match(prompt, /Task tool/);
+
+  const a = collectArtifacts(orch, registry);
+  assert.equal(a.subagents.length, 1);
+  assert.equal(a.subagents[0].name, "reviewer");
+  assert.equal(a.subagents[0].content, "You review code.");
+});
+
+// N189 — structured handover intent renders the branch reason into the prompt.
+test("handover `when` reason renders into the ## Handover section", () => {
+  const registry = {
+    "h/doc": {
+      id: "h/doc",
+      title: "to-docs",
+      source: "builtin",
+      kind: "handover",
+      to: "task-document",
+      mode: "gated",
+      when: "the change is user-facing",
+    },
+    "h/git": {
+      id: "h/git",
+      title: "to-git",
+      source: "builtin",
+      kind: "handover",
+      to: "task-git",
+      mode: "auto",
+      when: "nothing to document",
+    },
+  };
+  const agent = { id: "custom:impl", title: "Impl", modules: ["h/doc", "h/git"] };
+  const prompt = composeAgent(agent, registry);
+  assert.match(prompt, /## Handover/);
+  assert.match(prompt, /when the change is user-facing/);
+  assert.match(prompt, /when nothing to document/);
+});
+
+// N190 (review-fix B1) — `model` is JSON-quoted in the emitted frontmatter so a
+// value can't inject extra YAML fields or break out of the frontmatter.
+test("subagent `model` is JSON-quoted in the emitted frontmatter", () => {
+  const dir = tmp();
+  const registry = {
+    "custom:m": {
+      id: "custom:m",
+      title: "M",
+      source: "custom",
+      kind: "subagent",
+      name: "m",
+      content: "hi",
+      model: "sonnet",
+    },
+  };
+  const a = collectArtifacts({ id: "module:custom:m", title: "M", modules: ["custom:m"] }, registry);
+  applyArtifacts(a, dir, "module:custom:m");
+  const body = readFileSync(join(dir, ".claude/agents/m.md"), "utf-8");
+  assert.match(body, /\nmodel: "sonnet"\n/);
+  rmSync(dir, { recursive: true, force: true });
 });
 
 test("collectArtifacts dedups repeated refs and throws on unknown ids", () => {

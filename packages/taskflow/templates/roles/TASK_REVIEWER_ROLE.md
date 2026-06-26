@@ -57,3 +57,10 @@ At each boundary, call `insight-flow log-event <type> [--task <id>]` (fire-and-f
 
 Skip all events if `activityEngine.enabled` is `false` in `taskflow.config.json`.
 <!-- taskflow:phase-markers:end -->
+
+## Subagents
+
+You can delegate to specialized subagents via the Task tool. Spawn the relevant one(s) — in parallel when their work is independent — let them finish, then synthesize their results before completing your own step:
+
+- `review-correctness` — Reviews a diff for correctness bugs, missed edge cases, and spec divergence. Use when reviewing implemented code for logic errors.
+- `review-security` — Reviews a diff for security issues: injection, authorization gaps, unsafe input handling, secret exposure. Use when reviewing implemented code for security risks.

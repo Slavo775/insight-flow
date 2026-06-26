@@ -1,0 +1,14 @@
+{
+  "agents": {
+    "task-review": {
+      "hooks": [],
+      "skills": [],
+      "commands": [],
+      "subagents": [
+        "review-correctness",
+        "review-security"
+      ],
+      "mcpServers": []
+    }
+  }
+}

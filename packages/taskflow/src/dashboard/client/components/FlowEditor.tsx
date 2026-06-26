@@ -276,7 +276,9 @@ function toReactFlowEdge(e: FlowEdge, theme: ReturnType<typeof useTheme>): Edge 
 }
 
 function toFlowEdge(e: Edge): FlowEdge {
-  const data = e.data as { on?: string; handover?: { mode: "auto" | "gated" } } | undefined;
+  const data = e.data as
+    | { on?: string; handover?: { mode: "auto" | "gated"; when?: string } }
+    | undefined;
   return {
     from: e.source,
     to: e.target,
@@ -303,7 +305,10 @@ export function FlowEditor({
   const [pending, setPending] = useState<Connection | null>(null);
   const [pendingTrigger, setPendingTrigger] = useState<string>(DIRECT_HANDOFF);
   // N148 — the draft handover for the relation being created (null = status-change only).
-  const [pendingHandover, setPendingHandover] = useState<{ mode: "auto" | "gated" } | null>(null);
+  const [pendingHandover, setPendingHandover] = useState<{
+    mode: "auto" | "gated";
+    when?: string;
+  } | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   // N114 — node-click popover (Remove from flow), positioned at the click.
   const [nodeMenu, setNodeMenu] = useState<{ id: string; x: number; y: number } | null>(null);
@@ -311,7 +316,7 @@ export function FlowEditor({
   const [edgeMenu, setEdgeMenu] = useState<{
     id: string;
     trigger: string;
-    handover: { mode: "auto" | "gated" } | null;
+    handover: { mode: "auto" | "gated"; when?: string } | null;
     error?: string;
   } | null>(null);
   // N134 — the draft's start-point agents (the flow's entryAgents). Seeded from
@@ -722,13 +727,33 @@ export function FlowEditor({
                   onChange={(e) =>
                     setEdgeMenu({
                       ...edgeMenu,
-                      handover: { mode: e.target.value as "auto" | "gated" },
+                      handover: { ...edgeMenu.handover, mode: e.target.value as "auto" | "gated" },
                     })
                   }
                 >
                   <option value="gated">gated (ask first)</option>
                   <option value="auto">auto (chain)</option>
                 </select>
+              </label>
+            ) : null}
+            {edgeMenu.handover ? (
+              <label>
+                When (branch reason)
+                <input
+                  type="text"
+                  placeholder="e.g. the change is user-facing"
+                  value={edgeMenu.handover.when ?? ""}
+                  onChange={(e) => {
+                    const when = e.target.value.trim();
+                    setEdgeMenu({
+                      ...edgeMenu,
+                      handover: {
+                        mode: edgeMenu.handover?.mode ?? "gated",
+                        ...(when ? { when } : {}),
+                      },
+                    });
+                  }}
+                />
               </label>
             ) : null}
             {edgeMenu.error ? <ModalError>{edgeMenu.error}</ModalError> : null}

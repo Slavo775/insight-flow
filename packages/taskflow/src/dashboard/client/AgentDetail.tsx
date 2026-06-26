@@ -61,6 +61,7 @@ const KINDS = [
   "bundle",
   "status-transition",
   "handover",
+  "subagent",
 ] as const;
 
 export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Registry }) {
@@ -69,6 +70,8 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
   // N174 — install/uninstall this agent (its prompt + module artifacts); null = closed.
   const [modal, setModal] = useState<"install" | "uninstall" | null>(null);
 
+  // N191 — declared subagents the orchestrator fans out to (delegation targets).
+  const subagents = agent.subagents ?? [];
   const nodes: MapNodeSpec[] = [
     ...agent.modules.map((m, i) => ({
       id: m.id,
@@ -83,10 +86,22 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
       role: "agent",
       emphasis: true,
     },
+    // N191 — subagent nodes (right column: the agent fans out TO them).
+    ...subagents.map((s) => ({
+      id: s.id,
+      label: `⤳ ${s.title}`,
+      kind: s.kind,
+      role: "module" as const,
+    })),
   ];
-  const edges: [string, string][] = agent.modules.map((m) => [m.id, `agent:${agent.id}`]);
+  const edges: [string, string][] = [
+    ...agent.modules.map((m): [string, string] => [m.id, `agent:${agent.id}`]),
+    ...subagents.map((s): [string, string] => [`agent:${agent.id}`, s.id]),
+  ];
 
-  const usedKinds = KINDS.filter((k) => agent.modules.some((m) => m.kind === k));
+  const usedKinds = KINDS.filter(
+    (k) => agent.modules.some((m) => m.kind === k) || subagents.some((s) => s.kind === k),
+  );
   const sharedCount = agent.modules.filter((m) => !m.id.includes("/")).length;
 
   const openModule = useMemo(
@@ -101,6 +116,7 @@ export function AgentDetail({ agent, registry }: { agent: AgentDto; registry: Re
         {agent.description ? <Description>{agent.description}</Description> : null}
         <Sub>
           {agent.id} · {agent.modules.length} modules in sequence · {sharedCount} shared
+          {subagents.length ? ` · ${subagents.length} subagents` : ""}
           {/* N138 — surface the installed command/skill so it's clear what command this agent is. */}
           {agent.command?.install ? (
             <>

@@ -1,0 +1,57 @@
+{
+  "taskId": "N190",
+  "reviews": [
+    {
+      "startedAt": "2026-06-26T07:06:10.245Z",
+      "endedAt": "2026-06-26T07:07:59.944Z",
+      "verdict": "fix-needed",
+      "comment": "2 blockers: B1 YAML frontmatter injection in subagentFile (model/tools[] unquoted + schema allows newlines → forge tools/readonly/is_background or break out via \\n---\\n; reachable over autonomous MCP). B2 delete-guard misses agent.subagents refs → deleting a subagent module bricks user-space load. Both shared-core fixes.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-06-26T07:09:27.990Z",
+        "endedAt": "2026-06-26T07:14:58.796Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs",
+          "packages/taskflow/test/emit.test.mjs"
+        ],
+        "comment": "Fixed B1 (YAML frontmatter injection: schema charset on model/tools + JSON-quoted model in emitter) and B2 (delete-guard now counts agent.subagents refs → 409). 311 tests green; both shared-core fixes.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-26T10:41:50.283Z",
+      "endedAt": "2026-06-26T10:42:29.025Z",
+      "verdict": "fix-needed",
+      "comment": "Dashboard doesn't render the subagent kind: ModuleDetail has no subagent case (empty body, no install button) + /api/modules referencedBy ignores def.subagents (shows '0 agents' though task-review references it). Display-only; engine/MCP correct.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-26T10:44:42.851Z",
+        "endedAt": "2026-06-26T10:48:48.628Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/ModuleDetail.tsx",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "comment": "Fixed HR1 (ModuleDetail subagent panel: content+tools/model/readonly, install button, facet) + HR2 (/api/modules referencedBy now counts def.subagents → task-review shows for review/correctness). 312 tests green.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-26T14:33:45.039Z",
+      "endedAt": "2026-06-26T14:38:59.565Z",
+      "verdict": "approved",
+      "comment": "Re-review: B1 (schema charset + emitter quoting), B2 (delete-guard subagents), R2 (dashboard module panel + referencedBy) all verified in code; 313 tests + docs build green.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

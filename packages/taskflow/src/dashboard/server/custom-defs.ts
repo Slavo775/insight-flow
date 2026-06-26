@@ -107,6 +107,13 @@ export function validateReferences(
     } catch (err) {
       return (err as Error).message;
     }
+    // N191 — declared subagents must resolve to `subagent`-kind modules.
+    for (const id of (record as ComposedAgent).subagents ?? []) {
+      if (!modules[id]) return `subagents references unknown module '${id}'`;
+      if (modules[id].kind !== "subagent") {
+        return `subagents '${id}' is not a subagent module (kind '${modules[id].kind}')`;
+      }
+    }
     return null;
   }
 
@@ -136,7 +143,10 @@ function referencingIds(kind: Kind, id: string, user: UserRegistries): string[] 
   const refs: string[] = [];
   if (kind === "modules") {
     for (const agent of Object.values(user.agents)) {
-      if (agent.modules.includes(id)) refs.push(agent.id);
+      // N190 (review-fix B2) — an orchestrator references a subagent module via
+      // its `subagents` array (not `modules`); count it so deleting the module
+      // while still referenced is refused (409) instead of bricking the load.
+      if (agent.modules.includes(id) || agent.subagents?.includes(id)) refs.push(agent.id);
     }
     for (const mod of Object.values(user.modules)) {
       if (mod.kind === "bundle" && mod.modules.includes(id)) refs.push(mod.id);

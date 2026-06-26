@@ -73,6 +73,8 @@ interface ManagedEntry {
    * deleted, so removing a target rewinds the config it clobbered.
    */
   mcpSnapshots?: Record<string, unknown>;
+  /** N190 — subagent names this target owns in `.claude/agents/` (reference-safe uninstall). */
+  subagents?: string[];
 }
 
 interface ManagedManifest {
@@ -285,6 +287,8 @@ function collectOtherClaims(manifest: ManagedManifest, agentId: string): Map<str
     if (otherId === agentId) continue;
     for (const c of entry.commands ?? []) out.set(claimKey(c.name, c.as), otherId);
     for (const s of entry.skills ?? []) out.set(claimKey(s, "skill"), otherId);
+    // N190 — subagents occupy their own `.claude/agents/<name>` namespace.
+    for (const n of entry.subagents ?? []) out.set(`agents/${n}`, otherId);
   }
   return out;
 }
@@ -415,6 +419,83 @@ function applyCommands(
   owned.commands = commands.map((c) => ({ name: c.name, as: c.as }));
 }
 
+// N190 — render a subagent's `.claude/agents/<name>.md` with UNION frontmatter:
+// `name`/`description` (both harnesses), `tools` (Claude allowlist, comma list),
+// `readonly`/`is_background` (Cursor), and `model` only when set (vendor model
+// namespaces differ; absent = inherit on both). Cursor reads `.claude/agents/`,
+// so one file serves Claude and Cursor; each ignores fields it doesn't use.
+function subagentFile(s: AgentArtifacts["subagents"][number]): string {
+  const fm: string[] = [
+    `name: ${s.name}`,
+    `description: ${JSON.stringify(s.description ?? s.name)}`,
+  ];
+  // N190 (review-fix B1) — `model` is JSON-quoted (valid YAML, injection-proof);
+  // `tools` entries are schema-restricted to a safe token charset, so the comma
+  // list (Claude's expected `tools:` format) can't break the frontmatter.
+  if (s.model) fm.push(`model: ${JSON.stringify(s.model)}`);
+  if (s.tools && s.tools.length) fm.push(`tools: ${s.tools.join(", ")}`);
+  if (s.readonly !== undefined) fm.push(`readonly: ${s.readonly}`);
+  if (s.background !== undefined) fm.push(`is_background: ${s.background}`);
+  const body = s.content.endsWith("\n") ? s.content : s.content + "\n";
+  return `---\n${fm.join("\n")}\n---\n\n${body}`;
+}
+
+// N190 — write a target's subagents to `.claude/agents/<name>.md`. Names are
+// claimed per target in the manifest (a second target with a different definition
+// for the same name throws); a subagent this target no longer contributes is
+// removed on the next apply. Mirrors `applySkills`.
+function applySubagents(
+  projectRoot: string,
+  agentId: string,
+  subagents: AgentArtifacts["subagents"],
+  manifest: ManagedManifest,
+  owned: ManagedEntry,
+  reports: EmitReport[],
+): void {
+  const others = collectOtherClaims(manifest, agentId);
+  for (const s of subagents) {
+    const owner = others.get(`agents/${s.name}`);
+    if (!owner) continue;
+    const path = join(projectRoot, ".claude/agents", `${s.name}.md`);
+    const body = subagentFile(s);
+    const onDisk = existsSync(path) ? readFileSync(path, "utf-8") : null;
+    if (onDisk !== body) {
+      throw new Error(
+        `subagent '${s.name}' is already managed by agent '${owner}' with a different definition — refusing to overwrite`,
+      );
+    }
+  }
+
+  const current = new Set(subagents.map((s) => s.name));
+  for (const name of owned.subagents ?? []) {
+    if (current.has(name)) continue;
+    if (others.has(`agents/${name}`)) continue;
+    const path = join(projectRoot, ".claude/agents", `${name}.md`);
+    if (existsSync(path)) {
+      rmSync(path);
+      reports.push({ target: `.claude/agents/${name}.md`, action: "removed" });
+    }
+  }
+  for (const s of subagents) {
+    const path = join(projectRoot, ".claude/agents", `${s.name}.md`);
+    const body = subagentFile(s);
+    const prev = existsSync(path) ? readFileSync(path, "utf-8") : null;
+    if (prev === body) {
+      reports.push({ target: `.claude/agents/${s.name}.md`, action: "unchanged" });
+      continue;
+    }
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, body);
+    reports.push({
+      target: `.claude/agents/${s.name}.md`,
+      action: prev === null ? "created" : "updated",
+    });
+  }
+  // Keep the manifest lean / backward-compatible: only record the key when used.
+  if (current.size) owned.subagents = [...current];
+  else delete owned.subagents;
+}
+
 /**
  * Rename a manifest bucket (N96: the N94-era `activity` bucket becomes the
  * project bucket `project:default`). No-op when `from` is absent or `to`
@@ -476,18 +557,22 @@ export function applyArtifacts(
   owned.hooks ??= [];
   owned.skills ??= [];
   owned.commands ??= [];
+  owned.subagents ??= [];
 
   applyMcpServers(projectRoot, mcpServers, owned, reports, options?.force ?? false);
   applyHooks(projectRoot, hooks, owned, reports);
   applySkills(projectRoot, agentId, artifacts.skills, manifest, owned, reports);
   applyCommands(projectRoot, agentId, artifacts.commands, manifest, owned, reports);
+  // Tolerate hand-built artifact objects (e.g. tests) that omit `subagents`.
+  applySubagents(projectRoot, agentId, artifacts.subagents ?? [], manifest, owned, reports);
 
   if (
     owned.hooks.length ||
     owned.skills.length ||
     owned.scripts?.length ||
     owned.commands?.length ||
-    owned.mcpServers?.length
+    owned.mcpServers?.length ||
+    owned.subagents?.length
   )
     manifest.agents[agentId] = owned;
   else delete manifest.agents[agentId];
@@ -526,13 +611,14 @@ function collectClaimsExcept(
     for (const s of entry.scripts ?? []) scripts.add(s);
     for (const s of entry.skills ?? []) namespaced.add(claimKey(s, "skill"));
     for (const c of entry.commands ?? []) namespaced.add(claimKey(c.name, c.as));
+    for (const n of entry.subagents ?? []) namespaced.add(`agents/${n}`);
   }
   return { mcp, hooks, scripts, namespaced };
 }
 
 /** One artifact in an uninstall plan: removed (no other owner) or retained. */
 export interface UninstallStep {
-  kind: "mcp" | "hook" | "skill" | "command";
+  kind: "mcp" | "hook" | "skill" | "command" | "subagent";
   key: string;
   label: string;
   target: string;
@@ -604,6 +690,16 @@ export function uninstallPlan(projectRoot: string, bucketId: string): UninstallS
       label: `${c.as === "skill" ? "Skill" : "Command"}: /${c.name}`,
       target:
         c.as === "skill" ? `.claude/skills/${c.name}/SKILL.md` : `.claude/commands/${c.name}.md`,
+      action: retained ? "retained" : "removed",
+    });
+  }
+  for (const name of owned.subagents ?? []) {
+    const retained = others.namespaced.has(`agents/${name}`);
+    steps.push({
+      kind: "subagent",
+      key: name,
+      label: `Subagent: ${name}`,
+      target: `.claude/agents/${name}.md`,
       action: retained ? "retained" : "removed",
     });
   }
@@ -697,6 +793,16 @@ export function uninstallTarget(projectRoot: string, bucketId: string): EmitRepo
           c.as === "skill" ? `.claude/skills/${c.name}/SKILL.md` : `.claude/commands/${c.name}.md`,
         action: "removed",
       });
+    }
+  }
+
+  // N190 — subagents: delete unshared owned `.claude/agents/<name>.md` files.
+  for (const name of owned.subagents ?? []) {
+    if (others.namespaced.has(`agents/${name}`)) continue;
+    const path = join(projectRoot, ".claude/agents", `${name}.md`);
+    if (existsSync(path)) {
+      rmSync(path);
+      reports.push({ target: `.claude/agents/${name}.md`, action: "removed" });
     }
   }
 

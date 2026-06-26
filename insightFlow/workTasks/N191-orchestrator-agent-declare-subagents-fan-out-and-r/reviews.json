@@ -1,0 +1,68 @@
+{
+  "taskId": "N191",
+  "reviews": [
+    {
+      "startedAt": "2026-06-26T07:06:10.461Z",
+      "endedAt": "2026-06-26T07:08:00.154Z",
+      "verdict": "approved",
+      "comment": "Orchestrator subagents field + delegation section + ref validation. Clean; depends on N190 B2 delete-guard fix.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-26T11:10:19.498Z",
+      "endedAt": "2026-06-26T11:11:08.707Z",
+      "verdict": "fix-needed",
+      "comment": "Agent detail page doesn't show an orchestrator's subagents: /api/agents omits def.subagents, AgentDto lacks it, AgentDetail maps only modules. Surface subagents on the agent view (API + DTO + map/panel). Display-only; runtime wiring correct.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-26T11:23:20.374Z",
+        "endedAt": "2026-06-26T11:34:42.133Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/AgentDetail.tsx",
+          "packages/taskflow/src/dashboard/client/components/CompositionMap.tsx",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "comment": "Surface orchestrator subagents on the agent view: /api/agents includes subagents, AgentDto + AgentDetail render them as delegation nodes/legend/count, kindColor subagent case. task-review now shows review/correctness+security. 313 tests green.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-26T14:05:50.020Z",
+      "endedAt": "2026-06-26T14:06:29.193Z",
+      "verdict": "fix-needed",
+      "comment": "Docs: no cohesive 'subagents system' page, and the runtime delegation mechanics (Task tool, auto-delegation by description, automatic rejoin, graceful degradation, cross-harness, fresh-session) are undocumented. Add a dedicated Subagents & orchestration docs section unifying N189-N192 + the handover-vs-subagent model.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-26T14:11:35.939Z",
+        "endedAt": "2026-06-26T14:14:47.393Z",
+        "status": "fixed",
+        "filesChanged": [
+          "website/docs/subagents/_category_.json",
+          "website/docs/subagents/index.md",
+          "website/docs/concepts/modules.md",
+          "website/docs/concepts/agents.md",
+          "website/docs/concepts/handover.md",
+          "website/docs/built-ins/default-modules.md"
+        ],
+        "comment": "Added dedicated 'Subagents & orchestration' docs section (runtime delegation mechanics, subagents-vs-handovers model, delivery-pipeline example), cross-linked the concept pages, refreshed built-ins inventory (mcp-composer + review subagents). Docs build clean.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-26T14:33:45.139Z",
+      "endedAt": "2026-06-26T14:38:59.664Z",
+      "verdict": "approved",
+      "comment": "Re-review: R2 (agent-view subagents via /api/agents + AgentDetail) and R3 (Subagents & orchestration docs hub) verified; 313 tests + docs build green.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

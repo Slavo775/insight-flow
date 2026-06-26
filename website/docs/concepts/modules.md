@@ -33,6 +33,7 @@ The discriminated union has **eight** `kind`s:
 | `bundle`            | A module composed of other modules — the "molecule" tier.               |
 | `status-transition` | Behavior-as-data: on completing a turn, an agent advances the status.   |
 | `handover`          | Behavior-as-data: on completing a turn, an agent hands work to another. |
+| `subagent`          | A native subagent written to `.claude/agents/<name>.md` (read by Claude and Cursor). |
 
 These fall into three categories, plus the molecule.
 
@@ -51,7 +52,7 @@ These render into the composed role Markdown as a pure sequence of blocks.
 
 Everything the agent _says_ comes from these two kinds.
 
-## Category 2 — installable artifacts (`mcp-server`, `hook`, `skill`)
+## Category 2 — installable artifacts (`mcp-server`, `hook`, `skill`, `subagent`)
 
 These contribute **nothing** to the role Markdown. Instead the composer's
 `collectArtifacts` (`packages/taskflow/src/agents/compose.ts`) gathers them, and
@@ -66,6 +67,14 @@ the install engine writes them to disk:
   made executable.
 - **`skill`** — written to `.claude/skills/<name>/SKILL.md`. The `name` is a
   restricted path segment so it can never traverse.
+- **`subagent`** (N190) — a native subagent written to `.claude/agents/<name>.md`,
+  which **both Claude and Cursor read** (Cursor also reads `.claude/agents/` for
+  compatibility). The file carries union frontmatter so one file serves both
+  harnesses: `name` + `description` (both), `tools` (Claude's allowlist),
+  `readonly` / `is_background` (Cursor), and `model` only when set (vendor model
+  ids differ; absent means inherit). `description` drives auto-delegation. This is
+  the building block a fan-out **orchestrator** agent delegates to — see
+  [Subagents & orchestration](../subagents/index.md).
 
 ## Category 3 — behavior-as-data (`handover`, `status-transition`)
 

@@ -52,6 +52,7 @@ import testingModules from "./modules/integrations/testing.json";
 import activityModules from "./modules/integrations/activity.json";
 import langfuseModules from "./modules/integrations/langfuse.json";
 import composerModules from "./modules/integrations/composer.json";
+import reviewSubagents from "./modules/integrations/review-subagents.json";
 import taskAnalyze from "./composed/task-analyze.json";
 import taskmaster from "./composed/taskmaster.json";
 import taskmasterChange from "./composed/taskmaster-change.json";
@@ -113,6 +114,8 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     // Registry-only (not in any shipped flow); install it to register
     // `insight-flow mcp` in a project's .mcp.json.
     ...composerModules,
+    // N192 — built-in review subagents the Task Reviewer fans out to (showcase).
+    ...reviewSubagents,
   ],
   AgentModuleSchema,
 );
@@ -189,6 +192,18 @@ export interface AgentArtifacts {
   // N138 — the agent's own composed prompt installed as a runnable slash command
   // (`.claude/commands/<name>.md`) or skill (`.claude/skills/<name>/SKILL.md`).
   commands: { name: string; body: string; as: "command" | "skill" }[];
+  // N190 — native subagents emitted to `.claude/agents/<name>.md` (Cursor reads it
+  // for compat). Restriction/model are vendor-neutral; the emitter writes union
+  // frontmatter (tools → Claude; readonly/background → Cursor; model when set).
+  subagents: {
+    name: string;
+    description?: string;
+    content: string;
+    tools?: string[];
+    model?: string;
+    readonly?: boolean;
+    background?: boolean;
+  }[];
 }
 
 /**
@@ -236,7 +251,13 @@ export function collectArtifacts(
   // N149 — flow edge handovers merged into the agent's command/skill body.
   extraHandovers: AgentHandover[] = [],
 ): AgentArtifacts {
-  const out: AgentArtifacts = { mcpServers: [], hooks: [], skills: [], commands: [] };
+  const out: AgentArtifacts = {
+    mcpServers: [],
+    hooks: [],
+    skills: [],
+    commands: [],
+    subagents: [],
+  };
   for (const mod of resolveModules(def, registry)) {
     if (mod.kind === "mcp-server")
       out.mcpServers.push({
@@ -253,6 +274,16 @@ export function collectArtifacts(
         script: mod.script,
       });
     else if (mod.kind === "skill") out.skills.push({ name: mod.name, content: mod.content });
+    else if (mod.kind === "subagent")
+      out.subagents.push({
+        name: mod.name,
+        ...(mod.description ? { description: mod.description } : {}),
+        content: mod.content,
+        ...(mod.tools ? { tools: mod.tools } : {}),
+        ...(mod.model ? { model: mod.model } : {}),
+        ...(mod.readonly !== undefined ? { readonly: mod.readonly } : {}),
+        ...(mod.background !== undefined ? { background: mod.background } : {}),
+      });
   }
   // N138 — installable command/skill carrying the agent's composed prompt. Skills
   // require frontmatter (name + description); commands take the prompt verbatim.
@@ -276,6 +307,23 @@ export function collectArtifacts(
           : prompt;
       out.commands.push({ name, body, as: def.command.as });
     }
+  }
+  // N191 — an orchestrator's declared subagents are emitted too, so installing
+  // the agent installs the workers it delegates to (deduped by name).
+  const seenSub = new Set(out.subagents.map((s) => s.name));
+  for (const id of def.subagents ?? []) {
+    const mod = registry[id];
+    if (!mod || mod.kind !== "subagent" || seenSub.has(mod.name)) continue;
+    seenSub.add(mod.name);
+    out.subagents.push({
+      name: mod.name,
+      ...(mod.description ? { description: mod.description } : {}),
+      content: mod.content,
+      ...(mod.tools ? { tools: mod.tools } : {}),
+      ...(mod.model ? { model: mod.model } : {}),
+      ...(mod.readonly !== undefined ? { readonly: mod.readonly } : {}),
+      ...(mod.background !== undefined ? { background: mod.background } : {}),
+    });
   }
   return out;
 }
@@ -336,13 +384,16 @@ function handoverSection(handovers: HandoverModule[]): Extract<AgentModule, { ki
   const first = handovers[0];
   let body: string;
   if (handovers.length === 1) {
-    const when = first.on ? ` once the task is \`${first.on}\`` : "";
-    body = `When your work is complete${when}, hand over to \`${first.to}\`: ${handoverAction(first)}`;
+    const on = first.on ? ` once the task is \`${first.on}\`` : "";
+    // N189 — the branch reason, when authored, makes the pick explicit.
+    const reason = first.when ? ` — when ${first.when}` : "";
+    body = `When your work is complete${on}, hand over to \`${first.to}\`${reason}: ${handoverAction(first)}`;
   } else {
     const bullets = handovers
       .map((m) => {
-        const when = m.on ? ` once \`${m.on}\`` : "";
-        return `- \`${m.to}\`${when} (${m.mode}) — ${handoverAction(m)}`;
+        const on = m.on ? ` once \`${m.on}\`` : "";
+        const reason = m.when ? ` — when ${m.when}` : "";
+        return `- \`${m.to}\`${on}${reason} (${m.mode}) — ${handoverAction(m)}`;
       })
       .join("\n");
     body =
@@ -374,6 +425,7 @@ function mergeHandovers(
     to: h.to,
     ...(h.on ? { on: h.on } : {}),
     mode: h.mode,
+    ...(h.when ? { when: h.when } : {}),
   }));
   const seen = new Set<string>();
   const out: HandoverModule[] = [];
@@ -384,6 +436,36 @@ function mergeHandovers(
     out.push(h);
   }
   return out;
+}
+
+// N191 — the orchestrator delegation section: list each declared subagent (name
+// + description) and instruct fan-out → synthesize → continue. The rejoin and
+// "worker hands back" are automatic (a subagent's only exit is returning to its
+// caller; the Task tool waits for all spawned subagents). Null when the agent
+// declares no resolvable subagents.
+function subagentSection(
+  def: ComposedAgent,
+  registry: Record<string, AgentModule>,
+): Extract<AgentModule, { kind: "section" }> | null {
+  const items = (def.subagents ?? [])
+    .map((id) => registry[id])
+    .filter((m): m is Extract<AgentModule, { kind: "subagent" }> => m?.kind === "subagent");
+  if (!items.length) return null;
+  const bullets = items
+    .map((m) => `- \`${m.name}\`${m.description ? ` — ${m.description}` : ""}`)
+    .join("\n");
+  const body =
+    `You can delegate to specialized subagents via the Task tool. Spawn the ` +
+    `relevant one(s) — in parallel when their work is independent — let them ` +
+    `finish, then synthesize their results before completing your own step:\n\n${bullets}`;
+  return {
+    id: `${def.id}:subagents`,
+    title: "Subagents",
+    source: "builtin",
+    kind: "section",
+    heading: "## Subagents",
+    body,
+  };
 }
 
 export function composeAgent(
@@ -419,6 +501,11 @@ export function composeAgent(
   if (!handoverEmitted && handovers.length) {
     mods.push(handoverSection(handovers));
   }
+
+  // N191 — orchestrator: append a "## Subagents" delegation section listing the
+  // declared subagents + fan-out/synthesize guidance (rejoin is automatic).
+  const sub = subagentSection(def, registry);
+  if (sub) mods.push(sub);
 
   let out = "";
   mods.forEach((mod, i) => {

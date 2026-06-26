@@ -1048,6 +1048,12 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const referencedBy: Record<string, string[]> = {};
       for (const def of Object.values(composedAgents)) {
         for (const id of def.modules) (referencedBy[id] ??= []).push(def.id);
+        // N190 (review-fix) — an orchestrator references a subagent module via
+        // its `subagents` array, so count those too (else the dashboard shows
+        // "referenced by 0 agents" for a subagent that task-review delegates to).
+        for (const id of def.subagents ?? []) {
+          if (!(referencedBy[id] ??= []).includes(def.id)) referencedBy[id].push(def.id);
+        }
       }
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(
@@ -1078,6 +1084,21 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             description: mod?.description,
           };
         }),
+        // N191 (review-fix) — surface an orchestrator's declared subagents so the
+        // agent detail view can show what it fans out to.
+        ...(def.subagents && def.subagents.length
+          ? {
+              subagents: def.subagents.map((id) => {
+                const mod = moduleRegistry[id];
+                return {
+                  id,
+                  title: mod?.title ?? id,
+                  kind: mod?.kind ?? "unknown",
+                  description: mod?.description,
+                };
+              }),
+            }
+          : {}),
       }));
       res.writeHead(200, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ agents, ...(userSpaceError ? { userSpaceError } : {}) }));

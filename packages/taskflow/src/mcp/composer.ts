@@ -191,9 +191,9 @@ function updateDefinition(kind: Kind, def: unknown, revision?: string): ToolResu
 
 const DEF_SHAPE_HELP = {
   module:
-    "A module object: { id, title, kind, ... } where kind is one of section|include|mcp-server|hook|skill|bundle|status-transition|handover. id must start with 'custom:' (to create) or match a shipped built-in id (to eject/override).",
+    "A module object: { id, title, kind, ... } where kind is one of section|include|mcp-server|hook|skill|bundle|status-transition|handover|subagent. A 'subagent' carries { name, content, description?, tools?, model?, readonly?, background? } and installs to .claude/agents/<name>.md (read by Claude and Cursor). id must start with 'custom:' (to create) or match a shipped built-in id (to eject/override).",
   agent:
-    "An agent object: { id, title, description?, modules: string[], command? }. id must start with 'custom:' or match a shipped agent id.",
+    "An agent object: { id, title, description?, modules: string[], command?, subagents? }. `subagents` is a list of subagent-module ids the agent fans out to (orchestrator pattern). id must start with 'custom:' or match a shipped agent id.",
   flow: "A flow object: { id, title, agents: string[], flow: edges[], install?, statuses?, entryAgents? }. id must start with 'custom:'.",
 } as const;
 

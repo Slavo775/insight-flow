@@ -614,7 +614,7 @@
       "title": "composer MCP server — module/agent/flow lifecycle over MCP (stdio)",
       "type": "feat",
       "priority": "medium",
-      "status": "fixed",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N188-composer-mcp-server-module-agent-flow-lifecycle-ov",
       "createdAt": "2026-06-25T15:15:43.338Z",
       "statusHistory": [
@@ -662,6 +662,11 @@
           "status": "fixed",
           "at": "2026-06-25T17:30:45.347Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-06-25T17:39:10.807Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -700,6 +705,78 @@
         "composer",
         "agents",
         "docs"
+      ],
+      "pushes": [
+        {
+          "at": "2026-06-25T17:39:10.806Z",
+          "commitHash": "1b14790860767724d2c95cd7dda9259fe29bd3c5",
+          "commitMessage": "feat(mcp): composer MCP server over stdio (N188)"
+        }
+      ],
+      "branch": "feat/composer-mcp",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N189",
+      "title": "Structured handover intent — when/reason per handover candidate",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N189-structured-handover-intent-when-reason-per-handove",
+      "createdAt": "2026-06-25T21:19:14.747Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T21:19:14.747Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T22:30:16.793Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T23:32:07.502Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T07:06:10.353Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T07:08:00.051Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T22:30:16.795Z",
+        "completedAt": "2026-06-25T23:32:07.503Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/flow-status.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/dashboard/client/components/FlowEditor.tsx",
+          "packages/taskflow/test/emit.test.mjs",
+          "website/docs/concepts/handover.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "handover",
+        "agents",
+        "flow"
       ],
       "pushes": [],
       "branch": null,

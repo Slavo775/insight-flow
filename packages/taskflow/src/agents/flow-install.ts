@@ -23,7 +23,7 @@ import {
 import type { Project } from "./project.js";
 
 export interface InstallStep {
-  kind: "mcp" | "hook" | "skill" | "command";
+  kind: "mcp" | "hook" | "skill" | "command" | "subagent";
   /** Stable key for dedup (kind + this). */
   key: string;
   /** Human label for the modal. */
@@ -33,7 +33,7 @@ export interface InstallStep {
 }
 
 function emptyArtifacts(): AgentArtifacts {
-  return { mcpServers: [], hooks: [], skills: [], commands: [] };
+  return { mcpServers: [], hooks: [], skills: [], commands: [], subagents: [] };
 }
 
 /**
@@ -47,7 +47,12 @@ export function flowHandoversByAgent(flow: Project): Map<string, AgentHandover[]
     if (!e.handover) continue;
     const on = resolveTrigger(e.on, flow.states);
     const list = out.get(e.from) ?? [];
-    list.push({ to: e.to, ...(on ? { on } : {}), mode: e.handover.mode });
+    list.push({
+      to: e.to,
+      ...(on ? { on } : {}),
+      mode: e.handover.mode,
+      ...(e.handover.when ? { when: e.handover.when } : {}),
+    });
     out.set(e.from, list);
   }
   return out;
@@ -90,6 +95,7 @@ export function flowArtifacts(flow: Project): AgentArtifacts {
     out.hooks.push(...a.hooks);
     out.skills.push(...a.skills);
     out.commands.push(...a.commands);
+    out.subagents.push(...a.subagents);
   }
   return out;
 }
@@ -136,6 +142,15 @@ export function planFromArtifacts(art: AgentArtifacts): InstallStep[] {
       label: `${c.as === "skill" ? "Skill" : "Command"}: /${c.name}`,
       target:
         c.as === "skill" ? `.claude/skills/${c.name}/SKILL.md` : `.claude/commands/${c.name}.md`,
+    });
+  }
+  // N190 — native subagents → `.claude/agents/<name>.md` (read by Claude + Cursor).
+  for (const s of art.subagents) {
+    push({
+      kind: "subagent",
+      key: s.name,
+      label: `Subagent: ${s.name}`,
+      target: `.claude/agents/${s.name}.md`,
     });
   }
   return steps;
@@ -187,7 +202,7 @@ export function targetBucketId(t: InstallTarget): string {
 // Only these module kinds emit real artifacts (a `bundle` expands into them).
 // `section` / `include` are pure role-prompt text and `status-transition` /
 // `handover` are behavior-as-data — none install standalone (N174).
-const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle"]);
+const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle", "subagent"]);
 
 export function isInstallableModuleKind(kind: string): boolean {
   return INSTALLABLE_MODULE_KINDS.has(kind);

@@ -97,6 +97,32 @@ it does not fork upstream Langfuse content.
 
 ---
 
+## Composer integration
+
+Lives in `modules/integrations/composer.json`. Registers insight-flow's own
+composer MCP server as an installable `mcp-server` module (N188). Registry-only —
+not in any shipped flow, so it never installs by default.
+
+| id             | kind       | What it does                                                                                                                                              |
+| -------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp-composer` | mcp-server | Writes `{ "composer": { "command": "insight-flow", "args": ["mcp"] } }` into `.mcp.json` — registers the [Composer MCP](../composer-mcp/index.md) server. |
+
+---
+
+## Review subagents
+
+Lives in `modules/integrations/review-subagents.json`. Two `subagent` modules the
+built-in Task Reviewer fans out to (N192) — see
+[Subagents & orchestration](../subagents/index.md). Read-only, emitted to
+`.claude/agents/`.
+
+| id                   | kind     | What it does                                                                     |
+| -------------------- | -------- | -------------------------------------------------------------------------------- |
+| `review/correctness` | subagent | `review-correctness` — correctness / edge-case / spec-divergence reviewer.       |
+| `review/security`    | subagent | `review-security` — injection / authz / unsafe-input / secret-exposure reviewer. |
+
+---
+
 ## Role-specific modules
 
 Per-agent prompt sections, one registry file per role under `modules/roles/`.
@@ -154,5 +180,7 @@ optional `on` status trigger, and a `mode` (`gated` = waits for human go-ahead;
 | Activity integration            | 6 hooks + 1 bundle                             |
 | Testing integration             | 3 modules + 1 bundle                           |
 | Langfuse integration            | 1 skill                                        |
+| Composer integration            | 1 mcp-server                                   |
+| Review subagents                | 2 subagents                                    |
 | Role-specific modules           | 59 sections + 1 include (across 10 role files) |
 | Handover modules                | 13                                             |
