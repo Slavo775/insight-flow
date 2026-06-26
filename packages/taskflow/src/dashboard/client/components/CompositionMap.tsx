@@ -56,6 +56,8 @@ export function kindColor(theme: Theme, kind: string): string {
       return theme.color.red;
     case "handover":
       return theme.color.accent;
+    case "subagent":
+      return theme.color.green;
     default:
       return theme.color.textMuted;
   }

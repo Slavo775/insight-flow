@@ -1,0 +1,37 @@
+{
+  "taskId": "N188",
+  "reviews": [
+    {
+      "startedAt": "2026-06-25T15:49:13.774Z",
+      "endedAt": "2026-06-25T15:52:26.308Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker (B1): update_module can override a built-in status-transition/handover module (locked by KIND, not id), writing a file the loader then rejects — bricks the composer, unrecoverable over MCP. Fix: kind-aware lock in writeDefinition. Everything else passes; build/lint/typecheck/306 tests green.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-25T16:39:06.354Z",
+      "endedAt": "2026-06-25T16:39:42.253Z",
+      "verdict": "fix-needed",
+      "comment": "Docs don't state the composer MCP's primary purpose — that it's for helping users handle insight-flow (IS) things. Lead the docs/README with the why before setup + tools.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-25T17:00:09.399Z",
+        "endedAt": "2026-06-25T17:30:45.346Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/mcp/composer.ts",
+          "website/docs/composer-mcp/index.md",
+          "README.md",
+          "packages/taskflow/README.md"
+        ],
+        "comment": "Fixed both blockers: B1 (kind-aware locked guard in writeDefinition via shared isModuleEditLocked; built-in transition/handover override now refused, custom allowed) + N1 display flag; human docs blocker (composer-mcp index + both READMEs now lead with the primary purpose). tsc/lint/build/website-build + 306 tests green.",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

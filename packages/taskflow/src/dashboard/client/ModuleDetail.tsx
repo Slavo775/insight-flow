@@ -20,7 +20,7 @@ import { isLockedModuleClient } from "./locked.js";
 
 // N174 — only artifact-bearing module kinds install standalone (a bundle expands
 // into them); section/include/status-transition/handover have nothing to install.
-const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle"]);
+const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle", "subagent"]);
 export function isInstallableModule(module: ModuleDto): boolean {
   return INSTALLABLE_MODULE_KINDS.has(module.kind);
 }
@@ -277,7 +277,35 @@ export function KindPanels({ module }: { module: ModuleDto }) {
                 <dd>{module.label}</dd>
               </>
             ) : null}
+            {module.when ? (
+              <>
+                <dt>When</dt>
+                <dd>{module.when}</dd>
+              </>
+            ) : null}
           </KV>
+        </Panel>
+      );
+    // N190 — native subagent: its frontmatter knobs + the prompt body.
+    case "subagent":
+      return (
+        <Panel>
+          <PanelTitle>Subagent — .claude/agents/{module.name}.md</PanelTitle>
+          <KV>
+            <dt>Tools</dt>
+            <dd>{module.tools?.length ? module.tools.join(", ") : "(inherits all)"}</dd>
+            <dt>Model</dt>
+            <dd>{module.model ?? "(inherit)"}</dd>
+            <dt>Read-only</dt>
+            <dd>{module.readonly ? "yes" : "no"}</dd>
+            {module.background !== undefined ? (
+              <>
+                <dt>Background</dt>
+                <dd>{module.background ? "yes" : "no"}</dd>
+              </>
+            ) : null}
+          </KV>
+          <MarkdownBlock text={module.content ?? ""} />
         </Panel>
       );
     default:
@@ -349,6 +377,8 @@ function facetLabel(module: ModuleDto): string {
       return `sets ${module.sets}`;
     case "handover":
       return `→ ${module.to} (${module.mode ?? "gated"})`;
+    case "subagent":
+      return `subagent: ${module.name}`;
     default:
       return module.kind;
   }

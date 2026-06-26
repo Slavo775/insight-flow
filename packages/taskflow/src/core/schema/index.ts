@@ -405,6 +405,39 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
     on: z.string().min(1).optional(),
     mode: z.enum(["auto", "gated"]).default("gated"),
     label: z.string().min(1).optional(),
+    // N189 — optional human-readable reason/condition for taking this handover
+    // (rendered into the `## Handover` section for 1-of-N branch picks).
+    when: z.string().min(1).optional(),
+  }),
+  // N190 — Subagent module: a native subagent definition emitted to
+  // `.claude/agents/<name>.md` (Cursor reads `.claude/agents/` for compat, so one
+  // file serves both harnesses). `description` (from the base) drives auto-
+  // delegation. Restriction/model are vendor-neutral and translated into union
+  // frontmatter: `tools` → Claude allowlist; `readonly` / `background` → Cursor;
+  // `model` is written only when set (vendor model namespaces differ; absent =
+  // inherit). `name` is a safe path segment, like skills.
+  z.object({
+    ...agentModuleBase,
+    kind: z.literal("subagent"),
+    name: z
+      .string()
+      .min(1)
+      .regex(/^[a-z0-9][a-z0-9-]*$/, "subagent name must be a safe path segment"),
+    content: z.string().min(1),
+    // N190 (review-fix B1) — `tools`/`model` are interpolated into YAML
+    // frontmatter, so restrict them to a safe charset (no whitespace, newlines,
+    // quotes, commas, or `---`) — a malicious value otherwise forges frontmatter
+    // fields (tools/readonly/is_background) or breaks out into the body. Covers
+    // every real tool name (Read, Bash, mcp__server__tool) and model id.
+    tools: z
+      .array(z.string().regex(/^[A-Za-z0-9._-]+$/, "tool name must be a safe token"))
+      .optional(),
+    model: z
+      .string()
+      .regex(/^[A-Za-z0-9._-]+$/, "model must be a safe token")
+      .optional(),
+    readonly: z.boolean().optional(),
+    background: z.boolean().optional(),
   }),
 ]);
 
@@ -448,6 +481,10 @@ export const ComposedAgentSchema = z
         as: z.enum(["command", "skill"]).default("command"),
       })
       .optional(),
+    // N191 — orchestrator: ids of `subagent`-kind modules this agent delegates to.
+    // Installing the agent emits these subagents and its composed prompt gains a
+    // "## Subagents" delegation section. Validated to resolve to subagent modules.
+    subagents: z.array(z.string().min(1)).optional(),
   })
   .superRefine((def, ctx) => {
     if (def.command?.install) {
@@ -488,7 +525,16 @@ export const ProjectFlowEdgeSchema = z.object({
   // chains the next command in-session (`auto`) or stops for an explicit human
   // go-ahead (`gated`, the default). Stored on the edge, not the agent, so it
   // works for built-in/locked source agents without mutating the shared agent.
-  handover: z.object({ mode: z.enum(["auto", "gated"]).default("gated") }).optional(),
+  // N189 — `when` is an optional human-readable reason/condition for taking this
+  // branch (e.g. "the change is user-facing"). Rendered into the source agent's
+  // `## Handover` section so a 1-of-N pick has an explicit, auditable criterion.
+  // Descriptive — the agent still decides; `when` guides + documents the choice.
+  handover: z
+    .object({
+      mode: z.enum(["auto", "gated"]).default("gated"),
+      when: z.string().min(1).optional(),
+    })
+    .optional(),
 });
 
 // N112 — a per-flow custom state: a display alias for exactly one canonical

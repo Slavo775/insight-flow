@@ -1,0 +1,298 @@
+{
+  "range": {
+    "from": 190,
+    "to": 199
+  },
+  "tasks": [
+    {
+      "id": "N190",
+      "title": "Native subagent emission (cross-harness: Claude + Cursor)",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N190-native-subagent-emission-cross-harness-claude-curs",
+      "createdAt": "2026-06-25T21:19:14.838Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T21:19:14.839Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T21:33:35.568Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T22:05:11.872Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T07:06:10.243Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-26T07:07:59.945Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-26T07:09:27.988Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-26T07:14:58.797Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T10:41:50.281Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-26T10:42:29.025Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-26T10:44:42.850Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-26T10:48:48.628Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T14:33:45.037Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T14:38:59.566Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T21:33:35.570Z",
+        "completedAt": "2026-06-25T22:05:11.874Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/agents/emit.ts",
+          "packages/taskflow/src/mcp/composer.ts",
+          "packages/taskflow/test/emit.test.mjs",
+          "website/docs/concepts/modules.md",
+          "website/docs/composer-mcp/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "subagents",
+        "agents",
+        "composer",
+        "cursor"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N191",
+      "title": "Orchestrator agent — declare subagents, fan out and rejoin",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N191-orchestrator-agent-declare-subagents-fan-out-and-r",
+      "createdAt": "2026-06-25T21:19:14.928Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T21:19:14.928Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T22:21:45.648Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-25T22:26:16.207Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T07:06:10.460Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T07:08:00.155Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T11:10:19.496Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-26T11:11:08.707Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-26T11:23:20.373Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-26T11:34:42.134Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T14:05:50.018Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-26T14:06:29.194Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-26T14:11:35.937Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-26T14:14:47.394Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T14:33:45.137Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T14:38:59.665Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T22:21:45.650Z",
+        "completedAt": "2026-06-25T22:26:16.209Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/mcp/composer.ts",
+          "packages/taskflow/test/emit.test.mjs",
+          "website/docs/concepts/agents.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 4,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "subagents",
+        "orchestrator",
+        "agents"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N192",
+      "title": "Showcase: rewire a built-in agent to fan out via subagents",
+      "type": "feat",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N192-showcase-rewire-a-built-in-agent-to-fan-out-via-su",
+      "createdAt": "2026-06-25T21:19:15.024Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-25T21:19:15.024Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-25T23:35:03.733Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-26T06:42:10.912Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T07:06:10.565Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T07:08:00.265Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-25T23:35:03.734Z",
+        "completedAt": "2026-06-26T06:42:10.913Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/review-subagents.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/composed/task-review.json",
+          "TASK_REVIEWER_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_REVIEWER_ROLE.md",
+          "packages/taskflow/test/agent-command.test.mjs",
+          "website/docs/concepts/agents.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "subagents",
+        "agents",
+        "showcase"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    }
+  ]
+}

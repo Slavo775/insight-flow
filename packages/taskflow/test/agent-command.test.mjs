@@ -211,7 +211,7 @@ test("flowInstallPlan still builds the default flow's steps (new command loop is
   const { DEFAULT_PROJECT } = await import("../dist/index.js");
   const plan = flowInstallPlan(DEFAULT_PROJECT);
   assert.ok(Array.isArray(plan) && plan.length > 0);
-  assert.ok(plan.every((s) => ["mcp", "hook", "skill", "command"].includes(s.kind)));
+  assert.ok(plan.every((s) => ["mcp", "hook", "skill", "command", "subagent"].includes(s.kind)));
 });
 
 test("N173: withFlowIdentity stamps --by into the create invocation, not prose mentions", () => {

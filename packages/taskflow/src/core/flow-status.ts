@@ -22,7 +22,7 @@ export interface FlowEdge {
    * chains the next command in-session, `gated` stops for explicit human
    * go-ahead. Consumed at flow-install time (N149) to build the agent's section.
    */
-  handover?: { mode: "auto" | "gated" };
+  handover?: { mode: "auto" | "gated"; when?: string };
 }
 
 export interface FlowStateDef {
@@ -63,6 +63,8 @@ export interface AgentHandover {
   to: string;
   on?: string;
   mode: "auto" | "gated";
+  /** N189 — optional reason/condition for taking this handover (1-of-N branch). */
+  when?: string;
 }
 
 export interface NextStep {

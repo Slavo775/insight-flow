@@ -59,6 +59,7 @@ import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
 import { cmdLogActivity } from "./commands/log-activity.js";
 import { cmdLogEvent } from "./commands/log-event.js";
+import { cmdMcp } from "./commands/mcp.js";
 import {
   parseCursorStdin,
   cursorEventToDerived,
@@ -97,6 +98,7 @@ function printHelp(): void {
     init [--force] [--examples] [--editor claude|cursor|all]  Initialize insight-flow in current project (--force overwrites existing files; --examples adds commented agents.extend stubs; --editor picks scaffolding targets, default auto-detect)
     ui [--port 6006]                      Launch dashboard server
     master [--port 6100]                  Launch the multi-project overview server (folded in; formerly insight-flow-master)
+    mcp                                   Run the composer MCP server over stdio (list/create/edit/install/uninstall/delete modules·agents·flows). Register in .mcp.json as { "command": "insight-flow", "args": ["mcp"] }
 
     create --title "..." [--type feat] [--priority high] [--tags a,b] [--with-analysis]
     status --id Nxx --status <status> [--by agent]
@@ -201,6 +203,10 @@ async function run(): Promise<void> {
   } else if (command === "master") {
     const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
     await runMaster(port);
+  } else if (command === "mcp") {
+    // N188 — composer MCP server over stdio. Must not emit anything else on
+    // stdout (it would corrupt the protocol stream).
+    await cmdMcp();
   } else if (command === "help" || command === "--help" || command === "-h") {
     printHelp();
   } else if (command === "version" || command === "--version" || command === "-v") {

@@ -32,6 +32,24 @@ see [locked modules](./modules.md#locked-modules). When an agent has several
 handover modules, the composer collapses them into **one** "## Handover" section
 listing the candidates; the agent free-picks the one matching its outcome.
 
+## Branch intent — `when` (N189)
+
+A handover (module **or** flow edge) may carry an optional **`when`** — a
+human-readable reason/condition for taking that branch. It renders into the
+`## Handover` section so a 1-of-N pick has an explicit, auditable criterion
+instead of relying on prose alone:
+
+```jsonc
+"handover": { "mode": "gated", "when": "the change is user-facing" }
+```
+
+→ _"hand over to `task-document` — when the change is user-facing: …"_
+
+`when` is **descriptive**: the agent still decides; it only guides and documents
+the choice (and shows up in the flow editor). It's the structured form of the
+branch decision — for _parallel_ delegation (and how a 1-of-N branch differs from
+a fan-out), see [Subagents & orchestration](../subagents/index.md).
+
 ## Flow-edge handovers
 
 A flow edge can also carry a handover (N147), declared on the edge instead of in

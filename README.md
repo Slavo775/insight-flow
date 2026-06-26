@@ -245,6 +245,26 @@ insight-flow was designed for AI-assisted development with Claude Code. The role
 
 Each role reads from and writes to the same task JSON, creating a full audit trail visible in the dashboard.
 
+## Composer MCP
+
+**The composer MCP server lets an AI assistant help you set up and customize insight-flow itself.** Instead of clicking through the dashboard to wire up your modules, agents, and flows, you ask Claude Code in plain language ("add a security-review agent to my flow", "install that flow") and it does it by calling the composer directly. It exposes insight-flow's modules, agents, and flows (built-in and custom) as [Model Context Protocol](https://modelcontextprotocol.io) tools — list, author, edit, install, uninstall, delete — the same operations as the dashboard, agent-callable. It runs over **stdio** (no port):
+
+```bash
+insight-flow mcp
+```
+
+Register it in your project's `.mcp.json` (or install the built-in `mcp-composer` module, which writes exactly this):
+
+```jsonc
+{
+  "mcpServers": {
+    "composer": { "command": "insight-flow", "args": ["mcp"] }
+  }
+}
+```
+
+See the [Composer MCP docs](https://slavo775.github.io/insight-flow/docs/composer-mcp/) for the full tool reference.
+
 ## API (Programmatic Usage)
 
 ```typescript

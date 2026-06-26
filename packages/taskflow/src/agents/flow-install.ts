@@ -8,8 +8,10 @@ import {
   withFlowIdentity,
   type AgentArtifacts,
 } from "./compose.js";
+import { applyArtifacts, uninstallTarget, type EmitReport } from "./emit.js";
 import { mergedComposedAgents, mergedModuleRegistry, mergedProjects } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
+import { readSecrets } from "../core/secrets.js";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
 import {
   scanPlaceholders,
@@ -21,7 +23,7 @@ import {
 import type { Project } from "./project.js";
 
 export interface InstallStep {
-  kind: "mcp" | "hook" | "skill" | "command";
+  kind: "mcp" | "hook" | "skill" | "command" | "subagent";
   /** Stable key for dedup (kind + this). */
   key: string;
   /** Human label for the modal. */
@@ -31,7 +33,7 @@ export interface InstallStep {
 }
 
 function emptyArtifacts(): AgentArtifacts {
-  return { mcpServers: [], hooks: [], skills: [], commands: [] };
+  return { mcpServers: [], hooks: [], skills: [], commands: [], subagents: [] };
 }
 
 /**
@@ -45,7 +47,12 @@ export function flowHandoversByAgent(flow: Project): Map<string, AgentHandover[]
     if (!e.handover) continue;
     const on = resolveTrigger(e.on, flow.states);
     const list = out.get(e.from) ?? [];
-    list.push({ to: e.to, ...(on ? { on } : {}), mode: e.handover.mode });
+    list.push({
+      to: e.to,
+      ...(on ? { on } : {}),
+      mode: e.handover.mode,
+      ...(e.handover.when ? { when: e.handover.when } : {}),
+    });
     out.set(e.from, list);
   }
   return out;
@@ -88,6 +95,7 @@ export function flowArtifacts(flow: Project): AgentArtifacts {
     out.hooks.push(...a.hooks);
     out.skills.push(...a.skills);
     out.commands.push(...a.commands);
+    out.subagents.push(...a.subagents);
   }
   return out;
 }
@@ -134,6 +142,15 @@ export function planFromArtifacts(art: AgentArtifacts): InstallStep[] {
       label: `${c.as === "skill" ? "Skill" : "Command"}: /${c.name}`,
       target:
         c.as === "skill" ? `.claude/skills/${c.name}/SKILL.md` : `.claude/commands/${c.name}.md`,
+    });
+  }
+  // N190 — native subagents → `.claude/agents/<name>.md` (read by Claude + Cursor).
+  for (const s of art.subagents) {
+    push({
+      kind: "subagent",
+      key: s.name,
+      label: `Subagent: ${s.name}`,
+      target: `.claude/agents/${s.name}.md`,
     });
   }
   return steps;
@@ -185,7 +202,7 @@ export function targetBucketId(t: InstallTarget): string {
 // Only these module kinds emit real artifacts (a `bundle` expands into them).
 // `section` / `include` are pure role-prompt text and `status-transition` /
 // `handover` are behavior-as-data — none install standalone (N174).
-const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle"]);
+const INSTALLABLE_MODULE_KINDS = new Set(["mcp-server", "hook", "skill", "bundle", "subagent"]);
 
 export function isInstallableModuleKind(kind: string): boolean {
   return INSTALLABLE_MODULE_KINDS.has(kind);
@@ -273,4 +290,54 @@ export function installPlan(t: InstallTarget): InstallStep[] {
 /** The `${VAR}` inputs a target's install must collect. */
 export function requiredInputs(t: InstallTarget): InputSpec[] {
   return inputsFromArtifacts(targetArtifacts(t));
+}
+
+// N188 — install/uninstall EXECUTION for any target. The dashboard's HTTP
+// endpoint wraps these concerns with submitted-secret persistence, SSE
+// progress, and conflict scrubbing; the composer MCP server has none of those,
+// so this is the shared, transport-free core: compose the target's artifacts,
+// resolve `${VAR}` inputs from provided values + the project's stored secrets,
+// and apply them under the target's manifest bucket. Throws the same
+// InstallConflictError / UnknownTargetError / NotInstallableError the endpoint
+// surfaces (the caller maps them to its transport's error shape).
+
+/** Resolve a target's `${VAR}` inputs from provided values, falling back to stored secrets. */
+function resolveInstallValues(
+  art: AgentArtifacts,
+  projectRoot: string,
+  provided: Record<string, string>,
+): Record<string, string> {
+  const stored = readSecrets(projectRoot);
+  const values: Record<string, string> = {};
+  for (const inp of inputsFromArtifacts(art)) {
+    const v = provided[inp.name] ?? stored[inp.name];
+    if (v !== undefined) values[inp.name] = v;
+  }
+  return values;
+}
+
+/**
+ * Execute the install plan for a target over its manifest bucket. `force`
+ * overwrites a conflicting `.mcp.json` entry (the prior value is snapshotted in
+ * the manifest for the N172 uninstall-undo). Returns the per-target emit reports.
+ */
+export function executeInstall(
+  t: InstallTarget,
+  projectRoot: string,
+  opts: { values?: Record<string, string>; force?: boolean } = {},
+): EmitReport[] {
+  const art = targetArtifacts(t); // throws Unknown/NotInstallable
+  const values = resolveInstallValues(art, projectRoot, opts.values ?? {});
+  return applyArtifacts(
+    art,
+    projectRoot,
+    targetBucketId(t),
+    { INSIGHT_FLOW_BIN: "insight-flow", ...values },
+    { force: opts.force ?? false },
+  );
+}
+
+/** Uninstall a target: remove its artifacts, reference-safe (N174), N172 undo-aware. */
+export function executeUninstall(t: InstallTarget, projectRoot: string): EmitReport[] {
+  return uninstallTarget(projectRoot, targetBucketId(t));
 }

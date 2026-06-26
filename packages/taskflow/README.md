@@ -611,6 +611,20 @@ Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and 
 
 **Agent as a runnable command (N138).** A composed agent may opt in (`command: { install: true, as: "command" | "skill" }`, set via the agent form's "runnable command" checkbox) to install **itself** — its composed prompt — as a slash command (`.claude/commands/<name>.md`) or skill (`.claude/skills/<name>/SKILL.md`) when its flow is installed. The name is derived as `task-<slug>` from the agent id (no double-prefix; names colliding with the 10 built-in commands are rejected on save). Like the other artifacts it is tracked per agent in `taskflow-managed.json`: re-apply is idempotent and clearing the opt-in removes the file on the next install. Pick `as: "skill"` for Cursor portability (skills map to `.cursor/skills/` via `insight-flow init`).
 
+### Composer MCP
+
+**The composer MCP server is how an AI assistant helps you set up and customize insight-flow itself** — building and wiring your modules, agents, and flows by asking in plain language instead of clicking through the dashboard. `insight-flow mcp` runs it over stdio, exposing the module/agent/flow registry as [Model Context Protocol](https://modelcontextprotocol.io) tools (`list`, `get`, `create_*`, `update_*`, `install`, `uninstall`, `delete`), so an MCP client like Claude Code can manage your composer definitions programmatically with the same validation, locked/eject tiers, and reference-safe install/uninstall as the dashboard. Register it in `.mcp.json`:
+
+```jsonc
+{
+  "mcpServers": {
+    "composer": { "command": "insight-flow", "args": ["mcp"] }
+  }
+}
+```
+
+The built-in `mcp-composer` module writes exactly that entry — install it (or add it to a flow's `install` list) instead of hand-editing `.mcp.json`. Tools run autonomously; locked modules and the default flow are refused, and uninstall/delete stay reference-safe. Full tool reference: the [Composer MCP docs](https://slavo775.github.io/insight-flow/docs/composer-mcp/).
+
 ## Programmatic API
 
 ```ts

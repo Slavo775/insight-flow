@@ -48,6 +48,26 @@ export function isLockedModule(def: { id: string; kind?: string }): boolean {
   );
 }
 
+/**
+ * N188 — whether a module create/edit/override is LOCKED (read-only), matching
+ * exactly what the loader (`readKind` → `isLockedModule`) will accept:
+ *   - a locked id (security/enforcement/protocol) is always read-only;
+ *   - a CUSTOM (`custom:`) module of any kind is editable — including
+ *     `status-transition` / `handover` (the loader permits custom ones);
+ *   - overriding a BUILT-IN `status-transition` / `handover` is refused
+ *     (locked by KIND, not just by id — the loader would reject the override).
+ * Single source of truth for the write-path guard (custom-defs `writeDefinition`)
+ * and the composer `locked` display flag, so they can never drift.
+ */
+export function isModuleEditLocked(
+  def: { id: string; kind?: string },
+  isCustom: boolean = def.id.startsWith(CUSTOM_ID_PREFIX),
+): boolean {
+  if (LOCKED_MODULE_IDS.has(def.id)) return true;
+  if (isCustom) return false;
+  return def.kind === "status-transition" || def.kind === "handover";
+}
+
 export interface UserRegistries {
   modules: Record<string, AgentModule>;
   agents: Record<string, ComposedAgent>;
@@ -148,6 +168,16 @@ export function loadUserRegistries(projectDir: string = resolveProjectRoot()): U
       resolveModules(def, mergedModules); // dangling refs + bundle cycles throw
     } catch (err) {
       throw new UserRegistryError(agentFiles[def.id], (err as Error).message);
+    }
+    // N191 — declared subagents must resolve to `subagent`-kind modules.
+    for (const id of def.subagents ?? []) {
+      const m = mergedModules[id];
+      if (!m || m.kind !== "subagent") {
+        throw new UserRegistryError(
+          agentFiles[def.id],
+          `subagents references '${id}' which is not a subagent module`,
+        );
+      }
     }
   }
   const mergedAgents = { ...COMPOSED_AGENTS, ...agents };
