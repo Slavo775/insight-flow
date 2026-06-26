@@ -2,6 +2,15 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.1.0](https://github.com/Slavo775/insight-flow/compare/v2.0.1...v2.1.0) (2026-06-26)
+
+
+### Features
+
+* **docs:** add Docusaurus documentation site with GitHub Pages deploy (N178) ([#132](https://github.com/Slavo775/insight-flow/issues/132)) ([213f6fe](https://github.com/Slavo775/insight-flow/commit/213f6feaa64af213e1b2d109431fb5782d25699f))
+* **mcp:** composer MCP server over stdio (N188) ([1b14790](https://github.com/Slavo775/insight-flow/commit/1b14790860767724d2c95cd7dda9259fe29bd3c5))
+* **subagents:** native subagents, orchestrators & handover intent (N189–N192) ([5f3c70d](https://github.com/Slavo775/insight-flow/commit/5f3c70ddfdd145936716eb1323deb36187f916bd))
+
 ## [2.0.0] — 2026-06-23
 
 A major release. insight-flow gained a React/Vite dashboard, a full visual **flow**
