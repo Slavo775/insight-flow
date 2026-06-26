@@ -1,14 +1,21 @@
 name: release-please
 
 # Maintains a Release PR (CHANGELOG + version bump from conventional commits).
-# Merging that PR tags the release (bare `v*`) and creates the GitHub release,
-# which in turn triggers release-publish.yml.
+# Merging that PR tags the release (bare `v*`) and creates the GitHub release.
+#
+# N193 — the release-please Action creates that release as `github-actions[bot]`
+# (default GITHUB_TOKEN), and GitHub does NOT trigger workflows from GITHUB_TOKEN
+# events — so `release-publish.yml`'s `release: published` trigger never fires for
+# our own releases. Instead of depending on that event (or a PAT), we CHAIN the
+# publish here off release-please's `release_created` output: when a release is
+# created, the `publish` job calls release-publish.yml as a reusable workflow.
+# (Human-published releases still publish via `release: published` directly.)
 
 on:
   push:
     branches: [main]
 
-# Least privilege by default; the job elevates only what it needs.
+# Least privilege by default; each job elevates only what it needs.
 permissions:
   contents: read
 
@@ -18,8 +25,24 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
+      - id: release
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  # N193 — only runs when release-please actually cut a release on this push.
+  # Calls the reusable publish workflow (OIDC + provenance + the npm-publish
+  # approval gate live inside it). `id-token: write` must be granted here so the
+  # OIDC token flows into the called workflow.
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/release-publish.yml

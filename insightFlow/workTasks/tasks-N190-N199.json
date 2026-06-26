@@ -323,6 +323,77 @@
       "mrUrl": null,
       "mergedAt": "2026-06-26T15:11:05.160Z",
       "flowId": "default"
+    },
+    {
+      "id": "N193",
+      "title": "Auto-publish on release — chain release-publish off release-please output (reusable workflow)",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N193-auto-publish-on-release-chain-release-publish-off-",
+      "createdAt": "2026-06-26T16:11:38.158Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-26T16:11:38.159Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-26T16:16:48.531Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-26T16:38:59.281Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T16:40:27.672Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T16:55:36.519Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T16:57:13.519Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T16:58:30.978Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-26T16:16:48.532Z",
+        "completedAt": "2026-06-26T16:38:59.282Z",
+        "filesChanged": [
+          ".github/workflows/release-please.yml",
+          ".github/workflows/release-publish.yml"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "ci",
+        "release",
+        "release-please"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
