@@ -1,15 +1,23 @@
 name: release-publish
 
-# Publishes to npm when a GitHub release is published (i.e. after the
-# release-please PR is merged and its release fires). Uses npm Trusted
-# Publishing (OIDC) — there is no NPM_TOKEN secret; provenance is attached.
+# Publishes to npm. Uses npm Trusted Publishing (OIDC) — there is no NPM_TOKEN
+# secret; provenance is attached.
 #
-# Triggers ONLY on `release: published` — never on pull_request — so secrets /
-# OIDC are never exposed to untrusted fork code.
+# Two entry points, both trusted (never `pull_request`, so OIDC is never exposed
+# to untrusted fork code):
+#   - `release: published` — a human-published GitHub release (their token's event
+#     cascades here).
+#   - `workflow_call` — invoked by release-please.yml's chained `publish` job when
+#     release-please created a release. This handles release-please's own
+#     (bot/GITHUB_TOKEN) releases, whose `release: published` event GitHub
+#     suppresses (N193). The two paths are mutually exclusive: a bot release only
+#     reaches here via workflow_call; a human release only via `release:
+#     published` (release-please didn't create it, so the chained job is skipped).
 
 on:
   release:
     types: [published]
+  workflow_call:
 
 permissions:
   contents: read
