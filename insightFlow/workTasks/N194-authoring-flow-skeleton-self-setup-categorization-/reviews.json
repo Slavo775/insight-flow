@@ -1,0 +1,32 @@
+{
+  "taskId": "N194",
+  "reviews": [
+    {
+      "startedAt": "2026-06-26T21:50:07.464Z",
+      "endedAt": "2026-06-26T21:57:59.424Z",
+      "verdict": "approved",
+      "comment": "Second built-in flow + BUILTIN_PROJECTS generalization: complete & consistent (fan-out correctness review found no blockers). Minor: stale MCP update_* tool description (1-line). 314 tests + docs green.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-29T20:04:55.785Z",
+      "endedAt": "2026-06-29T20:05:24.868Z",
+      "verdict": "fix-needed",
+      "comment": "Authoring flow missing the events/activity engine: install is ['mcp-composer'] but agents emit phase markers (actions) and default flow ships ['activity']. Add 'activity' to authoring flow install → ['activity','mcp-composer'].",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-29T20:06:49.940Z",
+        "endedAt": "2026-06-29T20:26:28.414Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json"
+        ],
+        "comment": "Added 'activity' to authoring flow install (now ['activity','mcp-composer']) — events engine now installs with the flow; agents' phase markers land. Verified hooks register. 315/315.",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

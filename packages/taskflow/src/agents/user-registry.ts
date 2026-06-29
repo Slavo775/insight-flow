@@ -16,7 +16,7 @@ import {
   type AgentModule,
   type ComposedAgent,
 } from "./compose.js";
-import { DEFAULT_PROJECT, type Project } from "./project.js";
+import { BUILTIN_PROJECTS, type Project } from "./project.js";
 
 export const CUSTOM_ID_PREFIX = "custom:";
 export const USER_SPACE_DIRS = ["modules", "agents", "projects"] as const;
@@ -185,7 +185,7 @@ export function loadUserRegistries(projectDir: string = resolveProjectRoot()): U
   const { items: projects, files: projectFiles } = readKind(
     resolve(root, "projects"),
     ProjectSchema,
-    new Set([DEFAULT_PROJECT.id]),
+    new Set(Object.keys(BUILTIN_PROJECTS)),
   );
   for (const project of Object.values(projects)) {
     const file = projectFiles[project.id];
@@ -233,5 +233,6 @@ export function mergedComposedAgents(projectDir?: string): Record<string, Compos
 }
 
 export function mergedProjects(projectDir?: string): Record<string, Project> {
-  return { [DEFAULT_PROJECT.id]: DEFAULT_PROJECT, ...loadUserRegistries(projectDir).projects };
+  // N194 — all built-in flows (default + authoring), then user-space projects.
+  return { ...BUILTIN_PROJECTS, ...loadUserRegistries(projectDir).projects };
 }

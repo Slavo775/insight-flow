@@ -37,7 +37,20 @@ import actions from "./modules/actions.json";
 import minimalDiff from "./modules/minimal-diff.json";
 import scopeGuard from "./modules/scope-guard.json";
 import recorderDiscipline from "./modules/recorder-discipline.json";
+import composerMcpNote from "./modules/composer-mcp-note.json";
+import { CONVENTIONS_MODULE_BODY } from "./composer-conventions.js";
 import handovers from "./modules/handovers.json";
+
+// N196 — shared "how to author" conventions composed into the authoring
+// orchestrators (B); the same rules back the composer MCP `describe` tool (C).
+const composerAuthoringConventions = {
+  id: "composer-authoring-conventions",
+  title: "Composer authoring conventions",
+  source: "builtin",
+  kind: "section" as const,
+  heading: "## Authoring conventions",
+  body: CONVENTIONS_MODULE_BODY,
+};
 import taskAnalyzeModules from "./modules/roles/task-analyze.json";
 import taskmasterModules from "./modules/roles/taskmaster.json";
 import taskmasterChangeModules from "./modules/roles/taskmaster-change.json";
@@ -53,6 +66,9 @@ import activityModules from "./modules/integrations/activity.json";
 import langfuseModules from "./modules/integrations/langfuse.json";
 import composerModules from "./modules/integrations/composer.json";
 import reviewSubagents from "./modules/integrations/review-subagents.json";
+import composerSubagents from "./modules/integrations/composer-subagents.json";
+import authoringRoleModules from "./modules/roles/authoring.json";
+import authoringHandovers from "./modules/handovers-authoring.json";
 import taskAnalyze from "./composed/task-analyze.json";
 import taskmaster from "./composed/taskmaster.json";
 import taskmasterChange from "./composed/taskmaster-change.json";
@@ -63,6 +79,7 @@ import taskHumanReview from "./composed/task-human-review.json";
 import taskIncident from "./composed/task-incident.json";
 import taskRequestChanges from "./composed/task-request-changes.json";
 import taskGit from "./composed/task-git.json";
+import authoringAgents from "./composed/authoring.json";
 
 export type AgentModule = z.infer<typeof AgentModuleSchema>;
 export type ComposedAgent = z.infer<typeof ComposedAgentSchema>;
@@ -93,6 +110,8 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     minimalDiff,
     scopeGuard,
     recorderDiscipline,
+    composerMcpNote,
+    composerAuthoringConventions,
     ...handovers,
     ...taskAnalyzeModules,
     ...taskmasterModules,
@@ -116,6 +135,12 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     ...composerModules,
     // N192 — built-in review subagents the Task Reviewer fans out to (showcase).
     ...reviewSubagents,
+    // N196 — lean subagents for the authoring flow (composer-analyst/author/reviewer).
+    // Registry-only; wired onto the authoring agents (N195) via their `subagents`.
+    ...composerSubagents,
+    // N195 — authoring-flow role sections + handover modules (the second flow's agents).
+    ...authoringRoleModules,
+    ...authoringHandovers,
   ],
   AgentModuleSchema,
 );
@@ -136,6 +161,8 @@ export const COMPOSED_AGENTS: Record<string, ComposedAgent> = indexById(
     taskIncident,
     taskRequestChanges,
     taskGit,
+    // N195 — the authoring flow's 8 agents (analyze → … → install).
+    ...authoringAgents,
   ],
   ComposedAgentSchema,
 );

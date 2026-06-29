@@ -1,0 +1,40 @@
+{
+  "id": "composer-authoring",
+  "title": "Composer authoring",
+  "description": "Second built-in flow: a guided lifecycle for authoring insight-flow's own customizations — designing and building custom modules, agents, and flows (analyze → create → implement → review → fix → human-review → test → install). Tasks bound to this flow are the 'self-setup' category (filter by flowId).",
+  "agents": [
+    "authoring-analyze",
+    "authoring-create",
+    "authoring-implement",
+    "authoring-review",
+    "authoring-fix",
+    "authoring-human-review",
+    "authoring-test",
+    "authoring-install"
+  ],
+  "flow": [
+    { "from": "authoring-analyze", "to": "authoring-create" },
+    { "from": "authoring-create", "to": "authoring-implement", "on": "ready" },
+    { "from": "authoring-create", "to": "authoring-analyze" },
+    { "from": "authoring-implement", "to": "authoring-review", "on": "implemented" },
+    { "from": "authoring-review", "to": "authoring-fix", "on": "fix-needed" },
+    { "from": "authoring-review", "to": "authoring-human-review", "on": "approved" },
+    { "from": "authoring-fix", "to": "authoring-review", "on": "fixed" },
+    { "from": "authoring-human-review", "to": "authoring-test", "on": "approved" },
+    { "from": "authoring-test", "to": "authoring-install" },
+    { "from": "authoring-install", "to": "done" }
+  ],
+  "install": ["activity", "mcp-composer"],
+  "statuses": [
+    { "id": "ready", "title": "ready", "color": "#94a3b8" },
+    { "id": "in-progress", "title": "in-progress", "color": "#f59e0b" },
+    { "id": "implemented", "title": "implemented", "color": "#06b6d4" },
+    { "id": "reviewing", "title": "reviewing", "color": "#a855f7" },
+    { "id": "approved", "title": "approved", "color": "#22c55e" },
+    { "id": "fix-needed", "title": "fix-needed", "color": "#ef4444" },
+    { "id": "fixing", "title": "fixing", "color": "#dc2626" },
+    { "id": "fixed", "title": "fixed", "color": "#22c55e" },
+    { "id": "done", "title": "done", "terminal": true }
+  ],
+  "entryAgents": ["authoring-analyze", "authoring-create"]
+}

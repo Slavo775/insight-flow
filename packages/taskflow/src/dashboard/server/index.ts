@@ -33,7 +33,7 @@ import {
   type AgentModule,
   type ComposedAgent,
 } from "../../agents/compose.js";
-import { DEFAULT_PROJECT } from "../../agents/project.js";
+import { DEFAULT_PROJECT, BUILTIN_PROJECTS, isBuiltinProjectId } from "../../agents/project.js";
 import {
   targetArtifacts,
   planFromArtifacts,
@@ -61,12 +61,12 @@ import type { Project } from "../../agents/project.js";
 // before a force overwrite, keyed by server name; drained by /api/mcp-restore.
 const overwriteSnapshots = new Map<string, unknown>();
 
-/** N108 — shipped default + user-space flows; degrades to default-only. */
+/** N108/N194 — shipped built-in flows + user-space flows; degrades to built-ins only. */
 function mergedProjectsView(): Record<string, Project> {
   try {
-    return { [DEFAULT_PROJECT.id]: DEFAULT_PROJECT, ...loadUserRegistries().projects };
+    return { ...BUILTIN_PROJECTS, ...loadUserRegistries().projects };
   } catch {
-    return { [DEFAULT_PROJECT.id]: DEFAULT_PROJECT };
+    return { ...BUILTIN_PROJECTS };
   }
 }
 
@@ -770,15 +770,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       res.end(
         JSON.stringify({
           ...project,
-          source: project.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
-          // N121 — true when a user-space override file shadows the shipped def
-          // (drives the "Revert to shipped" affordance for the default flow).
+          source: isBuiltinProjectId(project.id) ? "builtin" : "custom",
+          // N121 — true when a user-space override file shadows a shipped def
+          // (drives the "Revert to shipped" affordance for a built-in flow).
           ejected: definitionRevision("projects", project.id) !== null,
           // N111 — optimistic-concurrency token; PUTs echo it via x-revision.
-          revision:
-            project.id === DEFAULT_PROJECT.id
-              ? undefined
-              : (definitionRevision("projects", project.id) ?? undefined),
+          revision: isBuiltinProjectId(project.id)
+            ? undefined
+            : (definitionRevision("projects", project.id) ?? undefined),
           agentTitles: Object.fromEntries(project.agents.map((a) => [a, agentTitle(a)])),
           installModules: project.install.map((id) => {
             const mod = moduleRegistry[id];
@@ -1012,7 +1011,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         id: p.id,
         title: p.title,
         description: p.description,
-        source: p.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
+        source: isBuiltinProjectId(p.id) ? "builtin" : "custom",
         agentCount: p.agents.length,
         flowCount: p.flow.length,
         // N122 — empty ⇒ not selectable by agent (only by type / explicit).

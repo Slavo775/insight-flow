@@ -404,6 +404,372 @@
       "mrUrl": null,
       "mergedAt": "2026-06-26T17:49:58.669Z",
       "flowId": "default"
+    },
+    {
+      "id": "N194",
+      "title": "Authoring flow skeleton + self-setup categorization (second built-in flow)",
+      "type": "feat",
+      "priority": "high",
+      "status": "fixed",
+      "folder": "insightFlow/workTasks/N194-authoring-flow-skeleton-self-setup-categorization-",
+      "createdAt": "2026-06-26T19:54:00.425Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-26T19:54:00.425Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-26T20:13:25.978Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-26T20:30:22.462Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T21:50:07.463Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T21:57:59.425Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-29T20:04:55.783Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-29T20:05:24.869Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-29T20:06:49.939Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-29T20:26:28.415Z",
+          "by": "task-review-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-26T20:13:25.979Z",
+        "completedAt": "2026-06-26T20:30:22.463Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/project.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/mcp/composer.ts",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "flow",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N195",
+      "title": "Authoring flow agents — analyze/create/implement/review/fix/human-review/test/install",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N195-authoring-flow-agents-analyze-create-implement-rev",
+      "createdAt": "2026-06-26T19:54:00.522Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-26T19:54:00.522Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-26T20:01:53.909Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-26T20:11:58.884Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T21:50:07.573Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T21:57:59.523Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-26T20:01:53.910Z",
+        "completedAt": "2026-06-26T20:11:58.885Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/modules/handovers-authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "agents",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N196",
+      "title": "Authoring subagents (lean) — composer-analyst/author/reviewer + dedup & best-practice",
+      "type": "feat",
+      "priority": "medium",
+      "status": "fixed",
+      "folder": "insightFlow/workTasks/N196-authoring-subagents-lean-composer-analyst-author-r",
+      "createdAt": "2026-06-26T19:54:00.617Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-26T19:54:00.618Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-26T19:54:57.104Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-26T20:00:41.821Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T21:50:07.673Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T21:57:59.615Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-28T19:32:51.273Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-28T19:41:23.627Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-28T19:57:49.516Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-28T20:00:57.371Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-28T20:06:20.254Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-28T20:11:15.752Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-28T20:41:59.387Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-28T20:45:19.208Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-29T07:09:58.402Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-29T07:10:35.088Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-29T10:43:06.189Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-29T11:12:11.600Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-29T11:13:16.126Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-29T11:16:35.732Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-29T15:29:31.132Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-06-29T15:31:37.526Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-06-29T15:33:50.244Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-06-29T15:39:15.370Z",
+          "by": "task-review-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-26T19:54:57.105Z",
+        "completedAt": "2026-06-26T20:00:41.823Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/test/emit.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 6,
+      "lastReviewVerdict": "fix-needed",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "subagents",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N197",
+      "title": "Authoring flow ↔ composer MCP wiring (mcp-composer install + stdio usage)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N197-authoring-flow-composer-mcp-wiring-mcp-composer-in",
+      "createdAt": "2026-06-26T19:54:00.701Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-26T19:54:00.702Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-26T20:34:41.935Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-26T20:40:09.520Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-26T21:50:07.774Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-26T21:57:59.709Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-26T20:34:41.936Z",
+        "completedAt": "2026-06-26T20:40:09.521Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/composer-mcp-note.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "website/docs/composer-mcp/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "mcp",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

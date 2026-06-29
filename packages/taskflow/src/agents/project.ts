@@ -16,6 +16,7 @@ import {
   type AgentArtifacts,
 } from "./compose.js";
 import defaultProject from "./project/default.json";
+import authoringProject from "./project/authoring.json";
 
 export type Project = z.infer<typeof ProjectSchema>;
 
@@ -69,3 +70,23 @@ export function collectProjectInstall(project: Project): AgentArtifacts {
 }
 
 export const DEFAULT_PROJECT: Project = loadProject(defaultProject);
+
+// N194 — the second built-in flow: a guided lifecycle for authoring custom
+// modules/agents/flows. Shipped alongside the default flow.
+export const AUTHORING_PROJECT: Project = loadProject(authoringProject);
+
+/**
+ * N194 — all shipped (built-in) flows, keyed by id. Generalizes the former
+ * "the one built-in project is `default`" assumption so a second built-in flow
+ * (authoring) is treated as built-in everywhere: immutable/ejectable like the
+ * default, `source: "builtin"`, refused for autonomous MCP edit, etc.
+ */
+export const BUILTIN_PROJECTS: Record<string, Project> = {
+  [DEFAULT_PROJECT.id]: DEFAULT_PROJECT,
+  [AUTHORING_PROJECT.id]: AUTHORING_PROJECT,
+};
+
+/** Whether `id` is a shipped built-in flow. */
+export function isBuiltinProjectId(id: string): boolean {
+  return Object.prototype.hasOwnProperty.call(BUILTIN_PROJECTS, id);
+}

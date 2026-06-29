@@ -67,7 +67,12 @@ test("N168: git is separated from the shared enforcement include into task-git o
 });
 
 test("all 9 shipped roles are registered as composed agents", () => {
-  assert.deepEqual(listComposedAgents().sort(), Object.keys(ROLE_FILES).sort());
+  // Superset-tolerant: the canonical roles must all be registered. Additional
+  // composed agents (e.g. the N195 authoring flow) are allowed and not drift-guarded.
+  const registered = new Set(listComposedAgents());
+  for (const id of Object.keys(ROLE_FILES)) {
+    assert.ok(registered.has(id), `${id} is registered as a composed agent`);
+  }
 });
 
 test("registry holds shared include + section modules and role-scoped modules", () => {

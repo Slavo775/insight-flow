@@ -1,0 +1,156 @@
+[
+  {
+    "id": "authoring-analyze",
+    "title": "Authoring Analyst",
+    "description": "Turns a customization request into a deduplicated design brief; asks the activity-engine opt-in.",
+    "command": { "install": true },
+    "modules": [
+      "authoring-analyze/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "authoring-analyze/handover-create",
+      "actions"
+    ],
+    "subagents": [
+      "composer/module-analyst",
+      "composer/agent-analyst",
+      "composer/flow-analyst",
+      "composer/relationship-analyst"
+    ]
+  },
+  {
+    "id": "authoring-create",
+    "title": "Composer Taskmaster",
+    "description": "Writes the authoring spec from the brief; hands back to analysis first if invoked without one.",
+    "command": { "install": true },
+    "modules": [
+      "authoring-create/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "authoring-create/handover-implement",
+      "authoring-create/handover-analyze",
+      "actions"
+    ]
+  },
+  {
+    "id": "authoring-implement",
+    "title": "Composer Implementer",
+    "description": "Builds the custom modules/agents/flows via the composer MCP, fanning out to the author subagent.",
+    "command": { "install": true },
+    "modules": [
+      "authoring-implement/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "authoring-implement/handover-review",
+      "actions"
+    ],
+    "subagents": [
+      "composer/module-author",
+      "composer/agent-author",
+      "composer/flow-author",
+      "composer/relationship-author"
+    ]
+  },
+  {
+    "id": "authoring-review",
+    "title": "Composer Reviewer",
+    "description": "AI-reviews the authored definitions (schema, dedup, best practice) via the reviewer subagent.",
+    "command": { "install": true },
+    "modules": [
+      "authoring-review/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "authoring-review/handover-fix",
+      "authoring-review/handover-human-review",
+      "actions"
+    ],
+    "subagents": [
+      "composer/module-reviewer",
+      "composer/agent-reviewer",
+      "composer/flow-reviewer",
+      "composer/relationship-reviewer"
+    ]
+  },
+  {
+    "id": "authoring-fix",
+    "title": "Composer Fixer",
+    "description": "Applies review blockers to the authored definitions, then re-reviews.",
+    "command": { "install": true },
+    "modules": [
+      "authoring-fix/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "authoring-fix/handover-review",
+      "actions"
+    ],
+    "subagents": [
+      "composer/module-author",
+      "composer/agent-author",
+      "composer/flow-author",
+      "composer/relationship-author"
+    ]
+  },
+  {
+    "id": "authoring-human-review",
+    "title": "Composer Human Review",
+    "description": "Records the human's decision on the authored definitions; approval advances to testing.",
+    "command": { "install": true },
+    "modules": [
+      "authoring-human-review/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "recorder-discipline",
+      "authoring-human-review/handover-test",
+      "actions"
+    ]
+  },
+  {
+    "id": "authoring-test",
+    "title": "Composer Tester",
+    "description": "Validates the approved definitions (load/compose/install dry-run) before install.",
+    "command": { "install": true },
+    "modules": [
+      "authoring-test/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "authoring-test/handover-install",
+      "actions"
+    ]
+  },
+  {
+    "id": "authoring-install",
+    "title": "Composer Installer",
+    "description": "Installs the approved, validated definitions via the composer MCP (terminal step).",
+    "command": { "install": true },
+    "modules": [
+      "authoring-install/identity",
+      "composer-mcp-note",
+      "composer-authoring-conventions",
+      "security",
+      "enforcement",
+      "protocol",
+      "actions"
+    ]
+  }
+]

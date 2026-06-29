@@ -296,9 +296,10 @@ test("/api/agents exposes an agent's subagents", async () => {
 test("projects list and ?id= lookup", async () => {
   await withServer(async () => {
     let list = await (await api("/api/projects", "GET")).json();
-    assert.equal(list.projects.length, 1);
-    assert.equal(list.projects[0].id, "default");
-    assert.equal(list.projects[0].source, "builtin");
+    // N194 — two built-in flows now ship: `default` + `composer-authoring`.
+    const builtinIds = list.projects.filter((p) => p.source === "builtin").map((p) => p.id).sort();
+    assert.deepEqual(builtinIds, ["composer-authoring", "default"]);
+    assert.ok(list.projects.find((p) => p.id === "default" && p.source === "builtin"));
 
     const def = await (await api("/api/project", "GET")).json();
     const dup = {
@@ -311,7 +312,7 @@ test("projects list and ?id= lookup", async () => {
     assert.equal((await api("/api/projects", "POST", dup)).status, 201);
 
     list = await (await api("/api/projects", "GET")).json();
-    assert.equal(list.projects.length, 2);
+    assert.equal(list.projects.length, 3); // default + composer-authoring + custom:hotfix2
     const custom = list.projects.find((p) => p.id === "custom:hotfix2");
     assert.equal(custom.source, "custom");
     assert.equal(custom.flowCount, def.flow.length);

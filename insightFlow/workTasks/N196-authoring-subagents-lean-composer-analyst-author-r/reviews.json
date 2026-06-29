@@ -1,0 +1,104 @@
+{
+  "taskId": "N196",
+  "reviews": [
+    {
+      "startedAt": "2026-06-26T21:50:07.674Z",
+      "endedAt": "2026-06-26T21:57:59.614Z",
+      "verdict": "approved",
+      "comment": "3 lean composer subagents (analyst/author/reviewer) registered + wired; dedup/reuse + best-practice in prompts. Clean.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-28T19:32:51.275Z",
+      "endedAt": "2026-06-28T19:41:23.623Z",
+      "verdict": "fix-needed",
+      "comment": "Grow from 3 broad subagents to per-kind (module/agent/flow/relationship) — reverses the 'start lean' decision #4. Exact decomposition (per-kind authors only ~4 vs per-kind at every stage ~12) to be pinned before the fix.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-28T19:57:49.518Z",
+        "endedAt": "2026-06-28T20:00:57.371Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/test/emit.test.mjs"
+        ],
+        "comment": "Grew to 12 per-kind subagents (analyst/author/reviewer × module/agent/flow/relationship); re-wired authoring agents (analyze→4 analysts, implement+fix→4 authors, review→4 reviewers). Install emits 12 subagents. 314 tests green.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-28T20:06:20.256Z",
+      "endedAt": "2026-06-28T20:11:15.751Z",
+      "verdict": "approved",
+      "comment": "Per-kind fix correct (12 subagents, 314 green). Flow evaluation surfaced improvements (non-blocking, N195-scoped): #1 authoring agents don't drive tracker status (no lifecycle cmds / status-transition) so status-edges+kanban don't advance; #2 'test' validates load not function; #3 no target-harness opt-in; #4 created ids not recorded. Recommend follow-up tasks.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-06-28T20:41:59.389Z",
+      "endedAt": "2026-06-28T20:45:19.207Z",
+      "verdict": "fix-needed",
+      "comment": "Subagent prompts too thin to author reliably — make them concrete: how each kind is created (create_* shapes/fields), the rules (custom: ids, locked tiers, baseline, handover semantics, single-token), worked examples. Pin approach: (A) inline / (B) shared conventions module / (C) MCP describe tool before fixing.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-29T07:09:58.403Z",
+        "endedAt": "2026-06-29T07:10:35.087Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/mcp/composer.ts",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json",
+          "packages/taskflow/test/emit.test.mjs"
+        ],
+        "comment": "B+C: single-source composer-conventions.ts → MCP describe tool (C, all 12 subagents call it) + composer-authoring-conventions module (B, composed into 8 orchestrators). Also fixed stale 'default flow' desc. 315/315.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-29T10:43:06.192Z",
+      "endedAt": "2026-06-29T11:12:11.599Z",
+      "verdict": "fix-needed",
+      "comment": "Add a tiered reuse-first policy everywhere: search first; exact→reuse; minor change + unreferenced→edit in place; minor but referenced→variant or ask; wider rework→ask user; new only as last resort. Encode in COMPOSER_RULES (→ describe + module) + analyst/author prompts; analyst reports reference status.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-29T11:13:16.127Z",
+        "endedAt": "2026-06-29T11:16:35.731Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json"
+        ],
+        "comment": "Tiered reuse-first rule in COMPOSER_RULES (→ describe + module) + 12 subagents: analysts report reference status, authors apply edit-in-place/variant/ask/create, reviewers flag duplicates. 315/315.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-06-29T15:29:31.136Z",
+      "endedAt": "2026-06-29T15:31:37.525Z",
+      "verdict": "fix-needed",
+      "comment": "(1) Subagents weak on what/how — add operating procedure + I/O contract + done criteria + boundaries (keep schema in describe). (2) Docs gap — no authoring-flow guide, per-kind subagents, reuse policy undocumented; describe missing from tools.md → recommend dedicated docs task.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-06-29T15:33:50.246Z",
+        "endedAt": "2026-06-29T15:39:15.369Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json",
+          "website/docs/composer-mcp/tools.md"
+        ],
+        "comment": "Strengthened all 12 subagents with Inputs/Steps/Output/Done/Boundaries (workflow; schema stays in describe). Documented describe in tools.md. Full authoring-flow docs remain a separate task. 315/315 + website build.",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
