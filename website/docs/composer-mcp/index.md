@@ -76,10 +76,11 @@ registers the `composer` server for you. You can also add it to any custom flow'
 > **Composer authoring flow.** insight-flow ships a second built-in flow whose
 > agents (analyze → create → implement → review → fix → human-review → test →
 > install) author and install custom modules/agents/flows through these MCP
-> tools, fanning out to `composer-analyst` / `composer-author` /
-> `composer-reviewer` subagents. Because the MCP is **stdio**, there's no server
-> to manage — the harness spawns it per session; if the tools are missing, the
-> fix is registering `mcp-composer`, not launching anything.
+> tools, fanning out to per-kind subagents (analyst / author / reviewer ×
+> module / agent / flow / relationship). Because the MCP is **stdio**, there's no
+> server to manage — the harness spawns it per session; if the tools are missing,
+> the fix is registering `mcp-composer`, not launching anything. See
+> [Authoring customizations](../authoring/index.md) for the full guide.
 
 > The server resolves the **current project** (the nearest ancestor with a
 > `taskflow.config.json`), so run the client from inside an insight-flow project.

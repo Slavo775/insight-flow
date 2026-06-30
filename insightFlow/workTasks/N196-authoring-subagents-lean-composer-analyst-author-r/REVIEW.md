@@ -450,3 +450,43 @@ scaffolding the docs task.
 
 **Gates:** tsc ✅ · build ✅ · lint ✅ · suite **315/315** ✅ · website build ✅.
 **Files:** `integrations/composer-subagents.json`, `composer-mcp/tools.md`.
+
+
+---
+
+## Round 11 — Re-review (subagent definitions + reuse + docs quick-win)
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-06-30
+**Verdict:** approved
+
+### Summary
+
+Re-review of the round-9 fix-needed ("subagents weak on what/how" + docs). All
+resolved and committed in `bf91837`.
+
+### Checklist verification
+
+- [x] 12 subagents carry a concrete spec (Inputs · Steps · Output · Done · Boundaries) — pass (verified 12/12 in the committed tree)
+- [x] Schema kept in `describe`, not re-inlined — pass
+- [x] Reuse-first decision rule present (analysts report reference status; authors apply edit-in-place/variant/ask/create; reviewers flag duplicates) — pass (rounds 7+9)
+- [x] `describe` tool registered + documented in `composer-mcp/tools.md` — pass
+- [x] 12 per-kind subagents registered + wired (rounds 2/5) — pass
+
+### Blockers
+
+None — the round-9 blocker (weak definitions) is resolved.
+
+### Non-blocking
+
+- Full authoring-flow documentation was correctly split out to **N198** (done) —
+  not N196's scope.
+
+### Security & edge cases
+
+- Analysts/reviewers remain read-only; authors write; none installs. No new surface.
+
+### Notes
+
+Closes the N196 review loop. tsc ✅ · website build ✅ · suite 315 (flaky
+master-boot aside).

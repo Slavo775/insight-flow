@@ -109,3 +109,41 @@ Scope: `project/authoring.json` install list (N194's deliverable; N197 had added
 **Verified:** installing `composer-authoring` registers the activity hooks
 (`.claude/settings.json` populated). **Gates:** tsc ✅ · build ✅ · lint ✅ · suite
 **315/315** ✅. **Files:** `project/authoring.json`.
+
+
+---
+
+## Round 4 — Re-review (activity-engine fix)
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-06-30
+**Verdict:** approved
+
+### Summary
+
+Re-review of the round-2 fix-needed (authoring flow missing the events engine).
+Resolved: `project/authoring.json` `install` is now `["activity", "mcp-composer"]`
+(committed in `bf91837`). The authoring agents' `actions` phase markers now have
+hooks to land in, matching the default flow.
+
+### Checklist verification
+
+- [x] Events/activity engine installs with the flow — pass (`install` = `["activity","mcp-composer"]`; install registers the activity hooks, verified during the fix)
+- [x] No regression to the flow definition / built-in generalization — pass (315 suite, flaky master-boot aside)
+
+### Blockers
+
+None — the round-2 blocker is resolved.
+
+### Non-blocking
+
+None.
+
+### Security & edge cases
+
+None — install-list addition of an existing built-in bundle.
+
+### Notes
+
+Closes the N194 review loop. tsc ✅ · website build ✅ · suite 315 (1 flaky
+master-boot, unrelated — only docs changed since `bf91837`).

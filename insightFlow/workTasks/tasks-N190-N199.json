@@ -410,7 +410,7 @@
       "title": "Authoring flow skeleton + self-setup categorization (second built-in flow)",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N194-authoring-flow-skeleton-self-setup-categorization-",
       "createdAt": "2026-06-26T19:54:00.425Z",
       "statusHistory": [
@@ -458,6 +458,16 @@
           "status": "fixed",
           "at": "2026-06-29T20:26:28.415Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-30T05:58:38.205Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-30T06:01:25.012Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -475,8 +485,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 2,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -560,7 +570,7 @@
       "title": "Authoring subagents (lean) — composer-analyst/author/reviewer + dedup & best-practice",
       "type": "feat",
       "priority": "medium",
-      "status": "fixed",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N196-authoring-subagents-lean-composer-analyst-author-r",
       "createdAt": "2026-06-26T19:54:00.617Z",
       "statusHistory": [
@@ -678,6 +688,16 @@
           "status": "fixed",
           "at": "2026-06-29T15:39:15.370Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-30T06:01:25.282Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-30T06:02:44.792Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -691,8 +711,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 6,
-      "lastReviewVerdict": "fix-needed",
+      "reviewCount": 7,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -764,6 +784,70 @@
         "authoring",
         "mcp",
         "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N198",
+      "title": "Authoring flow documentation — overview, walkthrough, agents & subagents reference",
+      "type": "docs",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N198-authoring-flow-documentation-overview-walkthrough-",
+      "createdAt": "2026-06-29T20:59:28.128Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-29T20:59:28.129Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-30T05:36:57.785Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-30T05:40:00.165Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-06-30T06:02:45.070Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-06-30T06:04:09.238Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-30T05:36:57.786Z",
+        "completedAt": "2026-06-30T05:40:00.167Z",
+        "filesChanged": [
+          "website/docs/authoring/_category_.json",
+          "website/docs/authoring/index.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/composer-mcp/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "composer",
+        "authoring"
       ],
       "pushes": [],
       "branch": null,
