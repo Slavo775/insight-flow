@@ -2,6 +2,14 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.2.0](https://github.com/Slavo775/insight-flow/compare/v2.1.0...v2.2.0) (2026-07-01)
+
+
+### Features
+
+* **agents:** plain-language module — simpler English for non-native speakers (N199) ([#139](https://github.com/Slavo775/insight-flow/issues/139)) ([a2f8ce9](https://github.com/Slavo775/insight-flow/commit/a2f8ce98917a025dad52a124009b84529bf52e1d))
+* **composer:** authoring flow — second built-in flow for creating modules/agents/flows (N194–N198) ([#137](https://github.com/Slavo775/insight-flow/issues/137)) ([4a83d9a](https://github.com/Slavo775/insight-flow/commit/4a83d9ac776302efb2812876e8df754918c92c83))
+
 ## [2.1.0](https://github.com/Slavo775/insight-flow/compare/v2.0.1...v2.1.0) (2026-06-26)
 
 
