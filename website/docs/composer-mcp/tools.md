@@ -29,6 +29,15 @@ Return one definition (built-in or custom) with its full `definition`, the
 `source` / `locked` / `installed` flags, and a **`revision`** token. Pass that
 token back to `update_*` for optimistic-concurrency safety.
 
+### `describe(kind?)`
+
+Return the authoritative **how-to-author** reference: the cross-cutting rules
+(`custom:` ids, the locked tier, the agent baseline, the handover / single-token
+model, and the **reuse-first decision rule**) plus the exact `create_*` shape and
+fields for a kind. Pass `kind` = `module` | `agent` | `flow`, or omit for all
+kinds. Read it before `create_*` / `update_*`; pair it with `get` on an existing
+definition as a working template.
+
 ## Authoring
 
 ### `create_module(def)` · `create_agent(def)` · `create_flow(def)`

@@ -28,6 +28,31 @@ const PILOT = {
   modules: ["testing/prompt", "testing/hook", "testing/skill"],
 };
 
+// N196 (round 5) — shared authoring-conventions module (B); the same source backs
+// the composer MCP `describe` tool (C, covered at the MCP layer).
+test("composer authoring conventions module is registered with the rules", () => {
+  const mod = MODULE_REGISTRY["composer-authoring-conventions"];
+  assert.equal(mod?.kind, "section", "conventions module registered as section");
+  assert.match(mod.body, /Authoring rules/, "conventions carry the rules");
+  assert.match(mod.body, /Locked tier/, "conventions carry the locked-tier rule");
+  assert.match(mod.body, /describe\(\{ kind \}\)/, "conventions point at the MCP describe tool");
+});
+
+// N196 — per-kind authoring subagents (analyst/author/reviewer × module/agent/flow/relationship).
+test("composer authoring subagents are registered per-kind (12)", () => {
+  const kinds = ["module", "agent", "flow", "relationship"];
+  for (const k of kinds) {
+    for (const role of ["analyst", "author", "reviewer"]) {
+      const id = `composer/${k}-${role}`;
+      assert.equal(MODULE_REGISTRY[id]?.kind, "subagent", `${id} is a subagent module`);
+    }
+    // analysts + reviewers are read-only; authors are not.
+    assert.equal(MODULE_REGISTRY[`composer/${k}-analyst`].readonly, true, `${k}-analyst read-only`);
+    assert.equal(MODULE_REGISTRY[`composer/${k}-reviewer`].readonly, true, `${k}-reviewer read-only`);
+    assert.notEqual(MODULE_REGISTRY[`composer/${k}-author`].readonly, true, `${k}-author writes`);
+  }
+});
+
 test("testing integration modules are registered with the right kinds", () => {
   assert.equal(MODULE_REGISTRY["testing/prompt"]?.kind, "section");
   assert.equal(MODULE_REGISTRY["testing/hook"]?.kind, "hook");

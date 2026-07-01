@@ -21,7 +21,8 @@ import {
   isModuleEditLocked,
   loadUserRegistries,
 } from "../agents/user-registry.js";
-import { DEFAULT_PROJECT } from "../agents/project.js";
+import { isBuiltinProjectId } from "../agents/project.js";
+import { describeComposer } from "../agents/composer-conventions.js";
 import { installedBuckets, InstallConflictError } from "../agents/emit.js";
 import {
   executeInstall,
@@ -121,7 +122,7 @@ function listDefinitions(kind: Kind): ToolResult {
     id: d.id,
     title: d.title,
     description: d.description,
-    source: d.id === DEFAULT_PROJECT.id ? "builtin" : "custom",
+    source: isBuiltinProjectId(d.id) ? "builtin" : "custom",
     agentCount: d.agents.length,
     entryAgents: d.entryAgents,
     installed: isInstalled(d.id),
@@ -150,7 +151,7 @@ function getDefinition(kind: Kind, id: string): ToolResult {
           ? id.startsWith("custom:")
             ? "custom"
             : "builtin"
-          : id === DEFAULT_PROJECT.id
+          : isBuiltinProjectId(id)
             ? "builtin"
             : "custom",
     locked: kind === "module" ? isModuleEditLocked(def as { id: string; kind?: string }) : false,
@@ -169,13 +170,14 @@ function createDefinition(kind: Kind, def: unknown): ToolResult {
 }
 
 function updateDefinition(kind: Kind, def: unknown, revision?: string): ToolResult {
-  // N188 — the default lifecycle flow is refused over MCP: ejecting/overriding it
-  // is a deliberate dashboard action, never an autonomous tool call. Editing any
-  // other built-in produces an eject override; locked modules are refused inside
-  // writeDefinition. (HTTP keeps full eject parity, default flow included.)
-  if (kind === "flow" && (def as { id?: string })?.id === DEFAULT_PROJECT.id) {
+  // N188/N194 — built-in flows are refused over MCP: ejecting/overriding one is a
+  // deliberate dashboard action, never an autonomous tool call. Editing any other
+  // built-in (module/agent) produces an eject override; locked modules are refused
+  // inside writeDefinition. (HTTP keeps full eject parity, built-in flows included.)
+  const flowId = (def as { id?: string })?.id;
+  if (kind === "flow" && flowId && isBuiltinProjectId(flowId)) {
     return fail(
-      `'${DEFAULT_PROJECT.id}' is the default flow — refused over MCP; edit it in the dashboard if you really must`,
+      `'${flowId}' is a built-in flow — refused over MCP; edit it in the dashboard if you really must`,
     );
   }
   const user = loadUserRegistries();
@@ -224,6 +226,20 @@ export function createComposerServer(): McpServer {
     async ({ kind, id }) => guard(() => getDefinition(kind, id)),
   );
 
+  // N196 — authoritative "how to author" reference: the cross-cutting rules plus
+  // the exact create_* shape per kind. Call before authoring (and `get` a live def
+  // as a template). Omit `kind` for all kinds.
+  server.registerTool(
+    "describe",
+    {
+      description:
+        "Describe how to author composer entities: the cross-cutting rules (custom: ids, locked tier, agent baseline, handover/single-token model) and the exact create_* shape + fields for a kind. Pass kind=module|agent|flow, or omit for all. Read this before create_*/update_*.",
+      inputSchema: { kind: kindSchema.optional() },
+    },
+    async ({ kind }) =>
+      guard(() => ok({ kind: kind ?? "all", conventions: describeComposer(kind) })),
+  );
+
   // create — per-kind for precise, kind-specific def schemas.
   for (const kind of ["module", "agent", "flow"] as const) {
     server.registerTool(
@@ -237,7 +253,7 @@ export function createComposerServer(): McpServer {
     server.registerTool(
       `update_${kind}`,
       {
-        description: `Update an existing ${kind} (custom def in place, or eject/override a built-in). ${DEF_SHAPE_HELP[kind]} Locked modules${kind === "flow" ? " and the default flow" : ""} are refused. Pass revision (from get) for optimistic-concurrency safety.`,
+        description: `Update an existing ${kind} (custom def in place, or eject/override a built-in). ${DEF_SHAPE_HELP[kind]} Locked modules${kind === "flow" ? " and built-in flows" : ""} are refused. Pass revision (from get) for optimistic-concurrency safety.`,
         inputSchema: { def: z.record(z.string(), z.unknown()), revision: z.string().optional() },
       },
       async ({ def, revision }) => guard(() => updateDefinition(kind, def, revision)),

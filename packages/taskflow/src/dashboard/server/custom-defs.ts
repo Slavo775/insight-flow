@@ -24,7 +24,7 @@ import {
   type AgentModule,
   type ComposedAgent,
 } from "../../agents/compose.js";
-import { DEFAULT_PROJECT, type Project } from "../../agents/project.js";
+import { BUILTIN_PROJECTS, type Project } from "../../agents/project.js";
 import { clearFlowReferences } from "../../core/config.js";
 import {
   CUSTOM_ID_PREFIX,
@@ -77,7 +77,7 @@ export function definitionRevision(
 function builtinIds(kind: Kind): Set<string> {
   if (kind === "modules") return new Set(Object.keys(MODULE_REGISTRY));
   if (kind === "agents") return new Set(Object.keys(COMPOSED_AGENTS));
-  return new Set([DEFAULT_PROJECT.id]);
+  return new Set(Object.keys(BUILTIN_PROJECTS));
 }
 
 /** Referential checks against the prospective registries (current + change). */

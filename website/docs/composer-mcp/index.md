@@ -67,9 +67,20 @@ hand-editing `.mcp.json` you can let insight-flow wire itself up:
 #   install(kind="module", id="mcp-composer")
 ```
 
-The `mcp-composer` module is registry-only — it ships built-in but is in no flow,
-so it never installs by default. Add it to a flow's `install` list, or install it
-directly, to register the server in a project.
+The `mcp-composer` module ships built-in. It's not in the **default** flow (so a
+normal project doesn't get it automatically), but the built-in **Composer
+authoring** flow (N194) lists it in its `install`, so installing that flow
+registers the `composer` server for you. You can also add it to any custom flow's
+`install`, or install it directly.
+
+> **Composer authoring flow.** insight-flow ships a second built-in flow whose
+> agents (analyze → create → implement → review → fix → human-review → test →
+> install) author and install custom modules/agents/flows through these MCP
+> tools, fanning out to per-kind subagents (analyst / author / reviewer ×
+> module / agent / flow / relationship). Because the MCP is **stdio**, there's no
+> server to manage — the harness spawns it per session; if the tools are missing,
+> the fix is registering `mcp-composer`, not launching anything. See
+> [Authoring customizations](../authoring/index.md) for the full guide.
 
 > The server resolves the **current project** (the nearest ancestor with a
 > `taskflow.config.json`), so run the client from inside an insight-flow project.

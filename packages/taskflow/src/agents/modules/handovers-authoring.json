@@ -1,0 +1,83 @@
+[
+  {
+    "id": "authoring-analyze/handover-create",
+    "title": "Authoring: analyze → create",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-create",
+    "mode": "gated",
+    "when": "the deduplicated design brief is ready"
+  },
+  {
+    "id": "authoring-create/handover-analyze",
+    "title": "Authoring: create → analyze (analysis-first)",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-analyze",
+    "mode": "gated",
+    "when": "you were invoked without a prior analysis — understand & dedupe the request first"
+  },
+  {
+    "id": "authoring-create/handover-implement",
+    "title": "Authoring: create → implement",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-implement",
+    "mode": "gated",
+    "when": "the authoring spec is approved"
+  },
+  {
+    "id": "authoring-implement/handover-review",
+    "title": "Authoring: implement → review",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-review",
+    "mode": "auto",
+    "when": "the definitions are authored"
+  },
+  {
+    "id": "authoring-review/handover-fix",
+    "title": "Authoring: review → fix",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-fix",
+    "mode": "gated",
+    "when": "blockers were found"
+  },
+  {
+    "id": "authoring-review/handover-human-review",
+    "title": "Authoring: review → human review",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-human-review",
+    "mode": "gated",
+    "when": "the authored definitions pass AI review"
+  },
+  {
+    "id": "authoring-fix/handover-review",
+    "title": "Authoring: fix → review",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-review",
+    "mode": "gated",
+    "when": "the blockers are fixed"
+  },
+  {
+    "id": "authoring-human-review/handover-test",
+    "title": "Authoring: human review → test",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-test",
+    "mode": "gated",
+    "when": "the human approved the definitions"
+  },
+  {
+    "id": "authoring-test/handover-install",
+    "title": "Authoring: test → install",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-install",
+    "mode": "gated",
+    "when": "validation passes"
+  }
+]
