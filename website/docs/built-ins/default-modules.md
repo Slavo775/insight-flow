@@ -48,6 +48,7 @@ under `modules/`.
 | `minimal-diff`        | section | no      | Discipline: never touch unrelated code, never refactor beyond the request.                                                                                    |
 | `scope-guard`         | section | no      | Discipline: stop and ask before leaving the declared scope; ask on ambiguity.                                                                                 |
 | `recorder-discipline` | section | no      | Discipline for recorder roles: preserve exact wording, invent nothing, never decide for the human.                                                            |
+| `plain-language`      | section | no      | Asks the agent to write in simple, plain English (short sentences, common words, define jargon) — for non-native speakers. Composed into `task-analyze`; opt-in for any other agent. |
 
 ---
 

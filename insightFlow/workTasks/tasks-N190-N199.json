@@ -497,7 +497,7 @@
       ],
       "pushes": [],
       "branch": null,
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/137",
       "mergedAt": null,
       "flowId": "default"
     },
@@ -561,7 +561,7 @@
       ],
       "pushes": [],
       "branch": null,
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/137",
       "mergedAt": null,
       "flowId": "default"
     },
@@ -723,7 +723,7 @@
       ],
       "pushes": [],
       "branch": null,
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/137",
       "mergedAt": null,
       "flowId": "default"
     },
@@ -787,7 +787,7 @@
       ],
       "pushes": [],
       "branch": null,
-      "mrUrl": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/137",
       "mergedAt": null,
       "flowId": "default"
     },
@@ -848,6 +848,61 @@
         "docs",
         "composer",
         "authoring"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/137",
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N199",
+      "title": "Plain-language module — built-in simple-English section, composed into task-analyze",
+      "type": "feat",
+      "priority": "medium",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N199-plain-language-module-built-in-simple-english-sect",
+      "createdAt": "2026-06-30T12:18:39.393Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-06-30T12:18:39.393Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-06-30T12:31:31.356Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-06-30T12:42:48.034Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-06-30T12:31:31.357Z",
+        "completedAt": "2026-06-30T12:42:48.041Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/plain-language.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/composed/task-analyze.json",
+          "TASK_ANALYZER_ROLE.md",
+          "packages/taskflow/templates/roles/TASK_ANALYZER_ROLE.md",
+          "website/docs/built-ins/default-modules.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "composer",
+        "module",
+        "accessibility"
       ],
       "pushes": [],
       "branch": null,
