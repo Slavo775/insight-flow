@@ -35,6 +35,7 @@ import notify from "./modules/notify.json";
 import config from "./modules/config.json";
 import actions from "./modules/actions.json";
 import minimalDiff from "./modules/minimal-diff.json";
+import plainLanguage from "./modules/plain-language.json";
 import scopeGuard from "./modules/scope-guard.json";
 import recorderDiscipline from "./modules/recorder-discipline.json";
 import composerMcpNote from "./modules/composer-mcp-note.json";
@@ -108,6 +109,7 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     config,
     actions,
     minimalDiff,
+    plainLanguage,
     scopeGuard,
     recorderDiscipline,
     composerMcpNote,
