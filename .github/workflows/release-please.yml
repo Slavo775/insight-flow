@@ -25,9 +25,16 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    # N201 — this is a MANIFEST config and the package lives at `packages/taskflow`
+    # (not the repo root `.`). release-please-action v4 only sets the bare
+    # `release_created` / `tag_name` outputs for a root-path package; for a nested
+    # path it sets the aggregate `releases_created` plus path-scoped outputs
+    # (`packages/taskflow--tag_name`). Reading the bare names left the gate empty,
+    # so the `publish` job below was skipped even though a release was cut
+    # (v2.2.0 got tagged on GitHub but never reached npm). Use the manifest outputs.
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
+      release_created: ${{ steps.release.outputs.releases_created }}
+      tag_name: ${{ steps.release.outputs['packages/taskflow--tag_name'] }}
     steps:
       - id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4

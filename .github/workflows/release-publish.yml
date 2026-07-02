@@ -18,6 +18,10 @@ on:
   release:
     types: [published]
   workflow_call:
+  # N201 — manual fallback: if the auto-chain ever misses (e.g. a skipped publish),
+  # run this workflow by hand from the Actions tab to publish the current default
+  # branch. Still gated by the `npm-publish` environment approval below.
+  workflow_dispatch:
 
 permissions:
   contents: read
