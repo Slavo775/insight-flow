@@ -16,21 +16,26 @@ worked example: **authoring a custom module**. It assumes the flow is installed
 /task-authoring-analyze "I want a module that adds our team's PR checklist to the git agent"
 ```
 
-The **analyst** clarifies the request and fans out to the read-only per-kind
-analyst subagents, which inventory the existing registry (via the composer MCP
-`list`/`get`) to answer: *does something already do this?* It also asks your
-opt-ins — whether the generated artifact should include the **activity engine**,
-and which **harness(es)** to target (Claude, Cursor, or both).
+The **analyst** works a fixed method — **intent** (a whole flow, one agent, or one
+module) → **goal** → design **top-down** (flow → agents → modules) → **reuse** →
+**impact** → **MCP discovery** — and fans out to the read-only per-kind analyst
+subagents, which inventory the existing registry (via the composer MCP `list`/`get`)
+to answer: *does something already do this?* If the design needs an MCP server, it
+finds one by **web search** — the free **[GitHub MCP Registry](https://github.com/mcp)**
+(`github.com/mcp`) and the Official MCP Registry — no API key and nothing to install.
+It also asks your opt-ins — whether the generated artifact should include the
+**activity engine**, and which **harness(es)** to target (Claude, Cursor, or both).
 
 You get back a **design brief**: the request restated, reuse candidates (each
 tagged with whether it needs only a small change and whether it's referenced
 elsewhere), what must be newly created, and the conventions to honour.
 
-:::tip Reuse first
-The whole flow prefers reuse. The brief's per-candidate `small-change? /
-referenced?` flags drive the [reuse-first rule](./agents-and-subagents.md#the-reuse-first-rule):
-reuse as-is → edit in place (if unreferenced) → variant or ask (if referenced) →
-ask before a wider rework → create new only as a last resort.
+:::tip Reuse first, custom-only
+The whole flow prefers reuse, and it treats **built-in defaults as read-only**. The
+brief's per-candidate `built-in? / referenced?` flags drive the
+[reuse-first rule](./agents-and-subagents.md#the-reuse-first-rule): reuse as-is →
+edit in place only your *own* `custom:` def (if unreferenced) → otherwise author a
+`custom:` variant or ask → create new only as a last resort.
 :::
 
 ## 2. Create the spec
@@ -103,11 +108,12 @@ renders, then `/task-authoring-install` runs
 You can now add `custom:coding-standards` to any agent's `modules` list.
 
 :::note Reuse in action
-If an existing section *almost* fit — say it only needed a different heading — and
-**nothing referenced it**, the author would have edited it in place
-(`update_module`) instead of creating a new one. If it *were* referenced
-elsewhere, the author would make a variant or ask you first. See the
-[reuse-first rule](./agents-and-subagents.md#the-reuse-first-rule).
+If an existing **`custom:`** section *almost* fit — say it only needed a different
+heading — and **nothing referenced it**, the author would have edited it in place
+(`update_module`) instead of creating a new one. A **built-in** section is never
+edited, though — the author would author a `custom:` variant instead. And if a
+candidate *were* referenced elsewhere, the author would make a variant or ask you
+first. See the [reuse-first rule](./agents-and-subagents.md#the-reuse-first-rule).
 :::
 
 ## See also

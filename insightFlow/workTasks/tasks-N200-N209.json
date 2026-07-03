@@ -1,0 +1,246 @@
+{
+  "range": {
+    "from": 200,
+    "to": 209
+  },
+  "tasks": [
+    {
+      "id": "N200",
+      "title": "Composer analyze v2 — flow/agent/module design strategist + custom-only rule + model context",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N200-composer-analyze-v2-flow-agent-module-design-strat",
+      "createdAt": "2026-07-02T20:43:23.401Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-02T20:43:23.401Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-02T20:55:14.939Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-02T21:06:28.316Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T06:06:45.704Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T06:20:10.865Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-03T06:25:36.400Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T08:10:17.362Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T09:13:15.797Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T09:14:00.155Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T09:38:57.676Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T09:41:06.932Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T09:45:49.746Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T15:12:49.938Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T15:13:36.983Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T15:14:52.886Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T15:18:22.769Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T15:19:08.033Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T15:27:59.796Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T15:28:34.729Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T15:32:23.397Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T15:36:37.551Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T15:41:12.221Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T15:42:37.073Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T17:35:31.419Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T17:36:05.310Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T17:57:16.261Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T19:24:00.924Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T19:26:36.976Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T19:28:28.420Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-03T19:36:20.645Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T19:42:50.895Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-03T19:43:14.278Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-02T20:55:14.942Z",
+        "completedAt": "2026-07-02T21:06:28.318Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 7,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer",
+        "analyze"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-03T06:06:45.704Z",
+          "commitHash": "3b5de5b21829e8c89ac54a0a6070fdbb0e3e6fbd",
+          "commitMessage": "feat(agents): composer analyze v2 — design strategist + custom-only rule + model primer (N200)"
+        },
+        {
+          "at": "2026-07-03T08:10:17.361Z",
+          "commitHash": "6ef61afabcd8ccc832a1cb94d2ccb061ad9c1a79",
+          "commitMessage": "refactor(agents): apply N200 non-blocking review fixes"
+        },
+        {
+          "at": "2026-07-03T09:45:49.746Z",
+          "commitHash": "26e89102f335cd1faf05e146b54d41faa40ac129",
+          "commitMessage": "fix(agents): specify project-local secrets in composer MCP guidance (N200)"
+        },
+        {
+          "at": "2026-07-03T15:19:08.033Z",
+          "commitHash": "83031acd243ff4deb076d7c2335ce8d64a5eade0",
+          "commitMessage": "fix(agents): make registry MCP opt-in, analyzer uses web search by default (N200)"
+        },
+        {
+          "at": "2026-07-03T15:41:12.220Z",
+          "commitHash": "b0af86d312d7b16014617b00aae99e63218db495",
+          "commitMessage": "fix(agents): drop Smithery MCP entirely; discover via github.com/mcp (N200)"
+        },
+        {
+          "at": "2026-07-03T15:42:37.073Z",
+          "commitHash": "2b254a0f18cc1a46ed16a0202572694dddf3f258",
+          "commitMessage": "fix(agents): rewire discovery to github.com/mcp after Smithery removal (N200)"
+        },
+        {
+          "at": "2026-07-03T19:26:36.975Z",
+          "commitHash": "fca6d0fab32be72b737b6e304a36ed727d49c97f",
+          "commitMessage": "docs: document composer analyze method + github.com/mcp discovery; custom-only (N200)"
+        }
+      ],
+      "branch": "feat/N200-composer-analyze-v2",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    }
+  ]
+}

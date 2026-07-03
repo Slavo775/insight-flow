@@ -18,8 +18,18 @@ ship discipline as the default task flow, with specialist
 
 - **A guided path** from "I want a module/agent/flow that does X" to an installed,
   reviewed definition — without hand-writing JSON or memorising the schema.
+- **A clear design method.** The analyst works top-down through a fixed method —
+  **intent** (a whole flow, one agent, or one module) → **goal** → design
+  **flow → agents → modules** → **reuse** → **impact** → **MCP discovery** — so
+  the design is deliberate before anything is built.
 - **Reuse over duplication.** Every request is first checked against the existing
-  registry; the flow prefers reusing or lightly editing what's there.
+  registry; the flow prefers reusing what's there.
+- **Custom-only, upgrade-safe.** Built-in defaults are treated as **read-only**:
+  to change a built-in the flow authors a `custom:` **variant** rather than
+  editing the shipped default, so your defaults stay clean and package-upgradable.
+- **Key-free MCP discovery.** When a design needs an MCP server, the analyst finds
+  one by **web search** — the free **[GitHub MCP Registry](https://github.com/mcp)**
+  (`github.com/mcp`) and the Official MCP Registry — no API key, nothing to install.
 - **Specialist subagents.** Each step fans out to per-kind experts (module /
   agent / flow / relationship) so the work is focused and parallel.
 - **Safety rails.** Human review before anything is installed; the locked tier

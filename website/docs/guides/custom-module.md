@@ -92,7 +92,10 @@ Common rules the loader enforces:
 
 - Non-`custom:` ids are rejected unless they exactly match a shipped built-in you
   are intentionally overriding (locked modules — `status-transition` / `handover`
-  and the cross-cutting baseline — can never be overridden).
+  and the cross-cutting baseline — can never be overridden). Overriding a built-in
+  is supported for one-off changes, but the [authoring flow](../authoring/index.md)
+  prefers a `custom:` **variant** — built-in defaults are treated as read-only so
+  they stay upgradable.
 - Duplicate ids across files throw.
 - `section` modules need a heading or a non-empty body; `skill` / hook-script
   names must be safe path segments.

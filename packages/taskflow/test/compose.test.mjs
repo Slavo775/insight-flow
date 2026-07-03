@@ -19,6 +19,8 @@ import {
   AgentModuleSchema,
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
+  AUTHORING_PROJECT,
+  flowRequiredInputs,
 } from "../dist/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -537,4 +539,65 @@ test("section module without heading or body is rejected by the schema", () => {
   assert.throws(() => AgentModuleSchema.parse({ id: "x", title: "X", kind: "section" }));
   AgentModuleSchema.parse({ id: "x", title: "X", kind: "section", heading: "NEVER" });
   AgentModuleSchema.parse({ id: "y", title: "Y", kind: "section", body: "- bullet" });
+});
+
+test("N200: authoring-analyze composes the ordered design method + plain language", () => {
+  const md = composeAgentById("authoring-analyze");
+  assert.ok(md.includes("## Plain language"), "analyst speaks simple English");
+  // The fixed method, in order.
+  for (const marker of [
+    "1. **Intent.**",
+    "2. **Goal.**",
+    "3. **Design top-down",
+    "Flow first",
+    "4. **Reuse pass.**",
+    "5. **Impact pass.**",
+    "6. **MCP pass.**",
+    "terminator / finish",
+  ]) {
+    assert.ok(md.includes(marker), `authoring-analyze method missing "${marker}"`);
+  }
+  assert.ok(md.includes("ANALYSIS.md"), "analyst produces an ANALYSIS.md on approval");
+  assert.ok(md.includes("build nothing"), "analyst is analyze-only");
+});
+
+test("N200: the model primer + custom-only rule reach the authoring agents", () => {
+  const md = composeAgentById("authoring-analyze");
+  assert.ok(md.includes("How the pieces fit"), "model primer composed in");
+  assert.ok(
+    md.includes("built-in defaults are read-only") || md.includes("read-only template"),
+    "custom-only rule composed in",
+  );
+});
+
+test("N200: every authoring agent carries the plain-language module", () => {
+  const authoring = Object.entries(COMPOSED_AGENTS).filter(([id]) => id.startsWith("authoring-"));
+  assert.ok(authoring.length >= 8, "the authoring flow's agents are registered");
+  for (const [id, def] of authoring) {
+    assert.ok(def.modules.includes("plain-language"), `${id} composes plain-language`);
+  }
+});
+
+test("N200 (Round 4): no paid/keyed MCP ships; discovery is web search via github.com/mcp", () => {
+  // The Smithery module is removed entirely — not in the catalog, no flow, no key.
+  assert.equal(MODULE_REGISTRY["mcp-registry-search"], undefined, "Smithery MCP module removed");
+  assert.ok(
+    !AUTHORING_PROJECT.install.includes("mcp-registry-search"),
+    "composer-authoring installs no registry MCP",
+  );
+  assert.ok(
+    !flowRequiredInputs(AUTHORING_PROJECT).some((i) => i.name === "SMITHERY_API_KEY"),
+    "the flow needs no Smithery key",
+  );
+  // No Smithery reference survives in any composed authoring agent prompt.
+  for (const id of Object.keys(COMPOSED_AGENTS).filter((k) => k.startsWith("authoring-"))) {
+    assert.ok(!/smithery/i.test(composeAgentById(id)), `${id} prompt has no Smithery reference`);
+  }
+  // Discovery guidance points at the GitHub MCP Registry.
+  const analyst = composeAgentById("authoring-analyze");
+  assert.ok(analyst.includes("github.com/mcp"), "analyst discovers via github.com/mcp");
+  assert.ok(
+    analyst.includes("registry.modelcontextprotocol.io"),
+    "analyst also names the Official MCP Registry",
+  );
 });
