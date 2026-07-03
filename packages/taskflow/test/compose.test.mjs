@@ -19,6 +19,9 @@ import {
   AgentModuleSchema,
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
+  AUTHORING_PROJECT,
+  flowInstallPlan,
+  flowRequiredInputs,
 } from "../dist/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -576,10 +579,7 @@ test("N200: every authoring agent carries the plain-language module", () => {
   }
 });
 
-test("N200: composer-authoring installs a registry-search MCP with a secret placeholder", async () => {
-  const { AUTHORING_PROJECT, flowInstallPlan, flowRequiredInputs } = await import(
-    "../dist/index.js"
-  );
+test("N200: composer-authoring installs a registry-search MCP with a secret placeholder", () => {
   assert.ok(
     AUTHORING_PROJECT.install.includes("mcp-registry-search"),
     "the flow installs the registry-search MCP",
