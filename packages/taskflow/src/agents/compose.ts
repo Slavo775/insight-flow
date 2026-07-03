@@ -66,7 +66,6 @@ import testingModules from "./modules/integrations/testing.json";
 import activityModules from "./modules/integrations/activity.json";
 import langfuseModules from "./modules/integrations/langfuse.json";
 import composerModules from "./modules/integrations/composer.json";
-import mcpRegistryModules from "./modules/integrations/mcp-registry.json";
 import reviewSubagents from "./modules/integrations/review-subagents.json";
 import composerSubagents from "./modules/integrations/composer-subagents.json";
 import authoringRoleModules from "./modules/roles/authoring.json";
@@ -136,12 +135,6 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     // Registry-only (not in any shipped flow); install it to register
     // `insight-flow mcp` in a project's .mcp.json.
     ...composerModules,
-    // N200 — registry-search MCP (Smithery Toolbox) the composer analyst can use
-    // to discover MCP servers by need. Registry-only / OPT-IN: NOT in any shipped
-    // flow's install list, so it never installs by default and forces no key.
-    // The analyst discovers via web research by default; add this module to an
-    // agent/flow for live semantic search (needs a free ${SMITHERY_API_KEY}).
-    ...mcpRegistryModules,
     // N192 — built-in review subagents the Task Reviewer fans out to (showcase).
     ...reviewSubagents,
     // N196 — lean subagents for the authoring flow (composer-analyst/author/reviewer).

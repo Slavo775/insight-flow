@@ -20,7 +20,6 @@ import {
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
   AUTHORING_PROJECT,
-  flowInstallPlan,
   flowRequiredInputs,
 } from "../dist/index.js";
 
@@ -579,31 +578,26 @@ test("N200: every authoring agent carries the plain-language module", () => {
   }
 });
 
-test("N200 (Round 3): the registry-search MCP is catalog-only, not in any shipped flow, and forces no key", () => {
-  // Opt-in: registered in the catalog as an mcp-server…
-  const mod = MODULE_REGISTRY["mcp-registry-search"];
-  assert.equal(mod?.kind, "mcp-server", "mcp-registry-search stays in the catalog");
-  assert.equal(mod.name, "mcp-registry");
-  // …but NOT wired into the composer-authoring flow, so installing that flow
-  // neither pulls the MCP nor forces the Smithery secret on anyone.
+test("N200 (Round 4): no paid/keyed MCP ships; discovery is web search via github.com/mcp", () => {
+  // The Smithery module is removed entirely — not in the catalog, no flow, no key.
+  assert.equal(MODULE_REGISTRY["mcp-registry-search"], undefined, "Smithery MCP module removed");
   assert.ok(
     !AUTHORING_PROJECT.install.includes("mcp-registry-search"),
-    "composer-authoring must not auto-install the registry MCP",
+    "composer-authoring installs no registry MCP",
   );
-  const plan = flowInstallPlan(AUTHORING_PROJECT);
   assert.ok(
-    !plan.some((s) => s.kind === "mcp" && s.key === mod.name),
-    "flow install plan has no registry MCP step",
+    !flowRequiredInputs(AUTHORING_PROJECT).some((i) => i.name === "SMITHERY_API_KEY"),
+    "the flow needs no Smithery key",
   );
-  const inputs = flowRequiredInputs(AUTHORING_PROJECT);
+  // No Smithery reference survives in any composed authoring agent prompt.
+  for (const id of Object.keys(COMPOSED_AGENTS).filter((k) => k.startsWith("authoring-"))) {
+    assert.ok(!/smithery/i.test(composeAgentById(id)), `${id} prompt has no Smithery reference`);
+  }
+  // Discovery guidance points at the GitHub MCP Registry.
+  const analyst = composeAgentById("authoring-analyze");
+  assert.ok(analyst.includes("github.com/mcp"), "analyst discovers via github.com/mcp");
   assert.ok(
-    !inputs.some((i) => i.name === "SMITHERY_API_KEY"),
-    "the flow forces no Smithery key",
-  );
-  // Opt-in path still works: adding the module to a flow surfaces the secret.
-  const optIn = { ...AUTHORING_PROJECT, install: [...AUTHORING_PROJECT.install, "mcp-registry-search"] };
-  assert.ok(
-    flowRequiredInputs(optIn).some((i) => i.name === "SMITHERY_API_KEY" && i.secret !== false),
-    "adding the module opt-in surfaces the Smithery secret",
+    analyst.includes("registry.modelcontextprotocol.io"),
+    "analyst also names the Official MCP Registry",
   );
 });

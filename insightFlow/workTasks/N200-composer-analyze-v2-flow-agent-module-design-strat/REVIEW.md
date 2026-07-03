@@ -149,3 +149,52 @@ All 5 Round-3 requests done inside N200 (no new task):
 5. **Documented in this task** — README + conventions + module description all updated; no separate task.
 
 Test updated: `compose.test.mjs` now asserts the MCP is catalog-only, absent from the flow install plan, forces no key, and that adding it opt-in still surfaces the secret. Gates: `pnpm build` ✅ · 319/319 tests ✅ · typecheck clean ✅.
+
+
+---
+
+## Round 4 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-07-03
+**Verdict:** fix-needed
+
+### Summary
+
+Drop the paid/keyed Smithery MCP entirely; use the GitHub MCP Registry (`github.com/mcp`) for discovery instead.
+
+### Blockers
+
+Human's exact words:
+
+> okej please drop totally  this paied mcp and add there this mcp from github
+
+Interpreted as these required changes (in N200):
+
+1. **Remove the Smithery MCP completely.** Delete `src/agents/modules/integrations/mcp-registry.json`, its import + registration in `compose.ts`, and every reference/guidance to Smithery / `SMITHERY_API_KEY` / `mcp-registry-search` (analyzer step 6, `MODEL_PRIMER`, `mcp-registry.json` description, README section, tests). No paid/keyed MCP anywhere.
+2. **Use the GitHub MCP Registry (`github.com/mcp`) for discovery.** Make it a named discovery source for the analyzer — it is curated, no-key, with a public API (`https://api.mcp.github.com/v0/servers`). The analyst discovers MCP servers by web search against `github.com/mcp` (plus the Official MCP Registry).
+
+### Non-blocking
+
+(none)
+
+### Security & edge cases
+
+- Removing the Smithery module removes the last secret-bearing MCP N200 introduced. After this, N200 ships **no MCP that needs a key**, so the earlier project-local-secret concern (Round 2/3) no longer applies to anything in this task.
+
+### Notes
+
+- **Recorder clarification (for the fixer):** `github.com/mcp` is a **registry / directory** (a curated list with a no-key REST API), **not** a runnable `mcp-server` package. So it is used as a **web-research discovery source**, not as an installed `mcp-server` module. There is therefore no new `mcp-server` module to add — discovery stays key-free web research, now pointed explicitly at `github.com/mcp`. (Note: GitHub's official `github/github-mcp-server` is a different thing — it operates on GitHub repos/issues/PRs, not registry search — so it is not what "add this mcp from github" means here.) If the human actually wants a runnable module, flag at re-review.
+- Supersedes Round 1 (Smithery MCP wired into flow) and Round 3 (Smithery MCP as opt-in catalog module): the Smithery module is now removed outright.
+- Recorded by `task-human-review` — no source changed here. Fix to be applied by `/task-review-fix`.
+
+### Fix applied (2026-07-03, `task-review-fix`)
+
+1. **Smithery MCP removed entirely** — deleted `src/agents/modules/integrations/mcp-registry.json`; removed its import + registration from `compose.ts`. No `mcp-registry-search` module, no `SMITHERY_API_KEY`, no `@smithery/*` anywhere in shipped source/README.
+2. **Discovery = web search via GitHub MCP Registry** — `authoring-analyze` step 6 + the `MODEL_PRIMER` "MCP discovery" block now name `github.com/mcp` (curated, no-auth API `api.mcp.github.com/v0/servers`) as the first source, plus `registry.modelcontextprotocol.io`. No key, no install.
+3. **README** — "Finding MCP servers when authoring" section rewritten to the two no-key registries (GitHub + Official); removed the Smithery opt-in paragraph.
+4. **Test** — replaced the Round-3 catalog/opt-in test with one asserting the Smithery module is gone, no authoring prompt mentions Smithery, and discovery names `github.com/mcp` + the Official Registry.
+
+As recorded: `github.com/mcp` is used as a **web-research source**, not a runnable `mcp-server` module (it is a registry/API, not a server package) — so no new module was added. Net: N200 now ships **no MCP module and no key**.
+
+Gates: `pnpm build` ✅ · 319/319 tests ✅ · typecheck clean ✅.

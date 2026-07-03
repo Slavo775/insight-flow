@@ -53,6 +53,29 @@
         "comment": "Round 3: analyzer uses web search only; registry MCP now catalog-only (removed from composer-authoring install list) = no forced key; added opt-in guidance + README usage section (web search vs MCP); documented in N200.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-07-03T15:27:59.798Z",
+      "endedAt": "2026-07-03T15:28:34.728Z",
+      "verdict": "fix-needed",
+      "comment": "Human: drop the paid Smithery MCP totally; use the GitHub MCP Registry (github.com/mcp, no-key API) as the discovery source instead. Remove mcp-registry.json + all Smithery references; point analyzer web-search discovery at github.com/mcp.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T15:32:23.399Z",
+        "endedAt": "2026-07-03T15:36:37.550Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/README.md",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "comment": "Round 4: removed the Smithery MCP module entirely (no key, no @smithery); analyzer + primer + README now discover via web search against github.com/mcp (GitHub MCP Registry, no-auth) + the Official Registry. N200 ships no MCP module and no key.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }
