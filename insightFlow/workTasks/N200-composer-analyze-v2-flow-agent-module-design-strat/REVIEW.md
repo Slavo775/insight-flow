@@ -292,3 +292,36 @@ None.
 - Drift guard on the 9 shipped role MD files still holds (the changed modules compose only into the authoring flow; `plain-language` itself unchanged).
 - No subagents this round: the cumulative change since the Round-1 fan-out is prose (prompts/docs), a test, and a module *removal* — verified by targeted greps, gates, and the docs build rather than a fresh correctness/security fan-out.
 - Recommendation: after the two non-blocking doc-hygiene items (optional), this is ready for human review → merge.
+
+
+---
+
+## Round 7 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-07-03
+**Verdict:** approved
+
+### Summary
+
+Human sign-off. Approved. Merge instruction: **do NOT merge into `main`/`master`** — merge the feature branch into a **new integration branch** (e.g. `agents-approved`).
+
+### Blockers
+
+None — approved.
+
+### Non-blocking
+
+Human's exact words:
+
+> approved please do not merge it into master merge into new branch called something like agents approved or something
+
+### Security & edge cases
+
+(none)
+
+### Notes
+
+- Merge target: a new branch `agents-approved` (chosen from the human's "something like agents approved"), created from `main`, with `feat/N200-composer-analyze-v2` merged in `--no-ff`. `main`/`master` left untouched.
+- The tracker is intentionally **not** marked `merged`/`done` here: N200 is integrated into a staging branch, not `main`. Final `insight-flow merge`/`done` is deferred until `agents-approved` → `main` happens (a separate human decision).
+- Recorded by `task-human-review`.
