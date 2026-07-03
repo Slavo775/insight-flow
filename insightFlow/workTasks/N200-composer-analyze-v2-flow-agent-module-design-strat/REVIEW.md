@@ -53,3 +53,46 @@ The review approved with no blockers; the human then asked to apply the non-bloc
 **Deferred (out of N200 scope):** the security follow-up (`ensureGitignored` in `executeInstall`, `agents/flow-install.ts`) touches shared install infra outside this task's declared scope — left as a recommended follow-up task per the scope guard. Public-API-surface note (NB-4) needs no change (intended).
 
 Gates after fixes: `pnpm build` ✅ · 319/319 tests ✅ · typecheck clean ✅. Since code changed after approval, the prior approval is stale — a quick re-review is warranted.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-07-03
+**Verdict:** fix-needed
+
+### Summary
+
+Human review of the MCP-secrets guidance. Requested change: the secret must be stored **in the project, not globally**.
+
+### Blockers
+
+1. **Secrets must be project-local, not global.** Human's exact words:
+
+   > If a server needs a key/token, plan an mcp-server module with a ${VAR} placeholder and note that the user must add the secret to .insight-flow/secrets.local.json please add there secrets must be in the project not globally
+
+   The MCP-secrets guidance must state explicitly that the `${VAR}` value goes in the **project's** `.insight-flow/secrets.local.json` (the project root), **not** a global/home location (`~/.insight-flow/`).
+
+### Non-blocking
+
+(none)
+
+### Security & edge cases
+
+- Recorder note (context for the fixer, not the human's words): the secrets file is already resolved per-project in code — `readSecrets(projectRoot)` reads `<projectRoot>/.insight-flow/secrets.local.json`. So this is a **wording/clarity** fix to remove any ambiguity with the global `~/.insight-flow/` (which holds the master lock + global config). The three places that carry the "add the secret to `.insight-flow/secrets.local.json`" wording: `src/agents/composer-conventions.ts` (MODEL_PRIMER, "MCP secrets" paragraph), `src/agents/modules/roles/authoring.json` (`authoring-analyze` step 6, "MCP pass"), and `src/agents/modules/integrations/mcp-registry.json` (module description).
+
+### Notes
+
+Recorded by `task-human-review` — no source changed here. Fix to be applied by `/task-review-fix`.
+
+### Fix applied (2026-07-03, `task-review-fix`)
+
+Blocker 1 resolved — the MCP-secrets guidance now says the secret goes in **this project's** `.insight-flow/secrets.local.json` (project root, gitignored), explicitly **not** the global `~/.insight-flow/`, in all three places:
+
+1. `src/agents/composer-conventions.ts` — MODEL_PRIMER "MCP secrets" paragraph ("Secrets live per-project, never globally").
+2. `src/agents/modules/roles/authoring.json` — `authoring-analyze` step 6 (MCP pass) ("Secrets are per-project, not global").
+3. `src/agents/modules/integrations/mcp-registry.json` — module description + the `SMITHERY_API_KEY` input hint.
+
+Gates: `pnpm build` ✅ · 319/319 tests ✅ · typecheck clean ✅. No code behavior changed (secrets were already resolved per-project); wording-only clarification.

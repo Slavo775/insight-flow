@@ -9,6 +9,26 @@
       "type": "ai",
       "by": "task-review",
       "fix": null
+    },
+    {
+      "startedAt": "2026-07-03T09:13:15.799Z",
+      "endedAt": "2026-07-03T09:14:00.154Z",
+      "verdict": "fix-needed",
+      "comment": "Human: MCP-secrets guidance must say the secret goes in the PROJECT's .insight-flow/secrets.local.json, not globally (~/.insight-flow). Wording fix in composer-conventions MODEL_PRIMER, authoring-analyze step 6, and mcp-registry.json description.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T09:38:57.678Z",
+        "endedAt": "2026-07-03T09:41:06.931Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json"
+        ],
+        "comment": "Fixed blocker 1: MCP-secrets guidance now specifies the project's .insight-flow/secrets.local.json (project root), not global ~/.insight-flow. Wording-only in composer-conventions MODEL_PRIMER, authoring-analyze step 6, and mcp-registry.json.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

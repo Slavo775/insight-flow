@@ -26,7 +26,7 @@ insight-flow builds AI roles from three nested parts — small parts make bigger
 
 **MCP discovery.** When a role needs a tool that is an MCP server, search a registry for it (the composer flow installs a registry-search MCP for this). Pick the smallest server that fits.
 
-**MCP secrets.** If a server needs a key or token, author it as an \`mcp-server\` module with a \`\${VAR}\` placeholder in its \`config\` and an \`inputs\` entry marked \`secret\`. Then tell the user to put the real value in \`.insight-flow/secrets.local.json\` (gitignored). Never hard-code a secret.`;
+**MCP secrets.** If a server needs a key or token, author it as an \`mcp-server\` module with a \`\${VAR}\` placeholder in its \`config\` and an \`inputs\` entry marked \`secret\`. Then tell the user to put the real value in **this project's** \`.insight-flow/secrets.local.json\` — the file at the project root (gitignored), **not** the global \`~/.insight-flow/\`. Secrets live per-project, never globally. Never hard-code a secret.`;
 
 /** Cross-cutting rules that bind every authored definition. */
 export const COMPOSER_RULES = `**Authoring rules (apply to every kind)**
