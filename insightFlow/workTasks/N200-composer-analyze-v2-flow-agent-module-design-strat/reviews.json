@@ -76,6 +76,28 @@
         "comment": "Round 4: removed the Smithery MCP module entirely (no key, no @smithery); analyzer + primer + README now discover via web search against github.com/mcp (GitHub MCP Registry, no-auth) + the Official Registry. N200 ships no MCP module and no key.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-07-03T17:35:31.421Z",
+      "endedAt": "2026-07-03T17:36:05.309Z",
+      "verdict": "fix-needed",
+      "comment": "Human: update the docs website in this task. Bring website/docs/ in line with N200 — document the authoring-analyze method, MCP discovery via github.com/mcp (no key, no Smithery), and reconcile the eject-vs-custom-only messaging.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T17:57:16.263Z",
+        "endedAt": "2026-07-03T19:24:00.923Z",
+        "status": "fixed",
+        "filesChanged": [
+          "website/docs/authoring/index.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/composer-mcp/tools.md",
+          "website/docs/guides/custom-module.md"
+        ],
+        "comment": "Round 5: documented the authoring-analyze method + key-free MCP discovery via github.com/mcp in the docs site; reconciled the reuse-first rule to custom-only (built-in defaults read-only, prefer custom: variants) with honest notes that the framework still permits eject. Docusaurus build passes (no broken links).",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

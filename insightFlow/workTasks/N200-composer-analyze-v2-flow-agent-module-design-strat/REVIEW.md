@@ -198,3 +198,52 @@ Interpreted as these required changes (in N200):
 As recorded: `github.com/mcp` is used as a **web-research source**, not a runnable `mcp-server` module (it is a registry/API, not a server package) — so no new module was added. Net: N200 now ships **no MCP module and no key**.
 
 Gates: `pnpm build` ✅ · 319/319 tests ✅ · typecheck clean ✅.
+
+
+---
+
+## Round 5 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-07-03
+**Verdict:** fix-needed
+
+### Summary
+
+Update the documentation website (`website/docs/`) inside this task to match what N200 shipped.
+
+### Blockers
+
+Human's exact words:
+
+> okej update the documentation also in this task please
+
+Interpreted as: bring the docs site in line with N200 (in N200, no new task). The gaps found while assessing the docs:
+
+1. **Authoring flow docs missing the new analyze method.** `website/docs/authoring/index.md` (+ `walkthrough.md`, `agents-and-subagents.md`) do not describe the `authoring-analyze` design method (Intent → Goal → flow → agents → modules → reuse → impact → MCP).
+2. **MCP discovery not documented.** No page mentions that the analyst discovers MCP servers by web search against the **GitHub MCP Registry** (`github.com/mcp`) + the Official MCP Registry (no key, no install). There is no Smithery/paid MCP.
+3. **Custom-only rule vs. "eject" messaging.** Several pages still present "eject a built-in" as a normal path (`authoring/index.md:36`, `authoring/agents-and-subagents.md:93`, `guides/custom-module.md`, `concepts/modules.md`, `composer-mcp/tools.md`). Reconcile with the shipped **custom-only** preference (built-in defaults are read-only; change them via a `custom:` variant). Note the split honestly: the framework/dashboard still *allows* eject for one-off changes, but the guided authoring flow now steers to custom variants.
+
+### Non-blocking
+
+(none)
+
+### Security & edge cases
+
+(none — documentation only)
+
+### Notes
+
+- Recorder note (for the fixer): touch the docs sources under `website/docs/` — primarily `authoring/index.md`, `authoring/walkthrough.md`, `authoring/agents-and-subagents.md`, and reconcile the eject wording in `concepts/modules.md` + `guides/custom-module.md` (+ a line in `composer-mcp/tools.md` if needed). Do not regenerate the `.docusaurus` build cache. Keep the docs consistent with the shipped agent prompts (`composer-conventions.ts`, `modules/roles/authoring.json`).
+- Documentation was already flagged in scope for N200 (Round 3: "document the flow also in this task"); this round extends that to the docs website.
+- Recorded by `task-human-review` — no source changed here. Fix to be applied by `/task-review-fix`.
+
+### Fix applied (2026-07-03, `task-review-fix`)
+
+Updated the docs site (`website/docs/`) to match what N200 shipped:
+
+1. **Analyze method** — documented the ordered method (intent → goal → flow → agents → modules → reuse → impact → MCP) in `authoring/index.md` ("What you get") and `authoring/walkthrough.md` (step 1).
+2. **Key-free MCP discovery** — `authoring/index.md` + `walkthrough.md` now say the analyst finds MCP servers by web search against the **GitHub MCP Registry** (`github.com/mcp`) + the Official Registry — no key, no install, no Smithery.
+3. **Custom-only reconciled honestly** — rewrote the reuse-first rule (`authoring/agents-and-subagents.md`) and the walkthrough tips to "built-in defaults are read-only; edit in place only your own `custom:` def, else author a `custom:` variant." Added short notes to the two framework pages that still document eject (`composer-mcp/tools.md`, `guides/custom-module.md`): the framework/dashboard still *permit* ejecting for one-off changes, but the guided authoring flow prefers variants so defaults stay upgradable. The `authoring/index.md` "one-off change" table row (direct dashboard/MCP path) is left as-is — eject is legitimate there.
+
+Files: `authoring/index.md`, `authoring/walkthrough.md`, `authoring/agents-and-subagents.md`, `composer-mcp/tools.md`, `guides/custom-module.md`. `concepts/modules.md` left unchanged — its only "eject" mention is about the locked tier, which is accurate. Links verified manually (target files + the `#the-reuse-first-rule` anchor exist); the `.docusaurus` build cache was not committed. Package build/tests unaffected: 319/319 still pass.

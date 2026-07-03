@@ -72,16 +72,19 @@ Every analyst, author, and reviewer applies the same decision rule (it lives in
 one place — the composer conventions, surfaced by
 [`describe`](../composer-mcp/tools.md#describekind)):
 
-1. **Exact / near match** → reuse it as-is.
-2. **Needs a small change** (an argument, a port, a label) **and isn't referenced
-   anywhere** → reuse it by **editing in place** (`update_*`); don't duplicate.
-3. **Small change but it's referenced elsewhere** → changing it would affect those
-   consumers → make a minimal variant, or **ask**.
-4. **Needs a wider rework** → **stop and ask** before reworking.
-5. **Create a new `custom:` definition only when nothing suitable exists.**
+1. **Exact / near match, no change** → reuse it as-is (reference its id).
+2. **Needs a small change** (an argument, a port, a label):
+   - it's **your own `custom:` def and isn't referenced anywhere** → edit it in
+     place (`update_*`).
+   - it's a **built-in, or it's referenced elsewhere** → don't edit it; author a
+     minimal **`custom:` variant**. Built-in defaults are read-only, and editing a
+     referenced def would change behaviour for its consumers.
+3. **Needs a wider rework** → **stop and ask** before authoring the reworked variant.
+4. **Create a new `custom:` definition only when nothing suitable exists.**
 
-This is why the analysts report whether each candidate is *referenced anywhere* —
-it's the signal that decides edit-in-place vs. variant vs. ask.
+This is why the analysts report whether each candidate is a *built-in* and whether
+it's *referenced anywhere* — those signals decide reuse-as-is vs. custom variant vs.
+ask.
 
 ## Guard rails
 
@@ -89,8 +92,11 @@ it's the signal that decides edit-in-place vs. variant vs. ask.
   `status-transition` / `handover` modules are never overridden.
 - **Built-in flows** — never edited silently over the MCP (a deliberate dashboard
   action).
-- **`custom:` ids** for anything new; built-in ids are reused only to
-  eject/override deliberately.
+- **`custom:` ids for anything new; built-in defaults are read-only.** The
+  authoring flow never edits a built-in in place — to change one it authors a
+  `custom:` variant. (The framework and dashboard still *permit* ejecting a
+  built-in for a deliberate one-off change; the guided flow just prefers variants
+  so defaults stay upgradable.)
 
 ## See also
 
