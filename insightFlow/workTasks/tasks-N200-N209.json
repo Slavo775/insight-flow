@@ -1,0 +1,65 @@
+{
+  "range": {
+    "from": 200,
+    "to": 209
+  },
+  "tasks": [
+    {
+      "id": "N200",
+      "title": "Composer analyze v2 — flow/agent/module design strategist + custom-only rule + model context",
+      "type": "feat",
+      "priority": "medium",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N200-composer-analyze-v2-flow-agent-module-design-strat",
+      "createdAt": "2026-07-02T20:43:23.401Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-02T20:43:23.401Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-02T20:55:14.939Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-02T21:06:28.316Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-02T20:55:14.942Z",
+        "completedAt": "2026-07-02T21:06:28.318Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer",
+        "analyze"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    }
+  ]
+}

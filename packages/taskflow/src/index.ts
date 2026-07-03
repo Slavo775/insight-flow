@@ -174,5 +174,11 @@ export {
 export type { InstallTarget, TargetKind, InstallStep } from "./agents/flow-install.js";
 // N166 — referential validator (terminal-status edge targets) exposed for tests.
 export { validateReferences } from "./dashboard/server/custom-defs.js";
-export { DEFAULT_PROJECT, projectBucketId, collectProjectInstall } from "./agents/project.js";
+export {
+  DEFAULT_PROJECT,
+  AUTHORING_PROJECT,
+  BUILTIN_PROJECTS,
+  projectBucketId,
+  collectProjectInstall,
+} from "./agents/project.js";
 export type { Project } from "./agents/project.js";

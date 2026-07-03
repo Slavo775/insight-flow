@@ -538,3 +538,61 @@ test("section module without heading or body is rejected by the schema", () => {
   AgentModuleSchema.parse({ id: "x", title: "X", kind: "section", heading: "NEVER" });
   AgentModuleSchema.parse({ id: "y", title: "Y", kind: "section", body: "- bullet" });
 });
+
+test("N200: authoring-analyze composes the ordered design method + plain language", () => {
+  const md = composeAgentById("authoring-analyze");
+  assert.ok(md.includes("## Plain language"), "analyst speaks simple English");
+  // The fixed method, in order.
+  for (const marker of [
+    "1. **Intent.**",
+    "2. **Goal.**",
+    "3. **Design top-down",
+    "Flow first",
+    "4. **Reuse pass.**",
+    "5. **Impact pass.**",
+    "6. **MCP pass.**",
+    "terminator / finish",
+  ]) {
+    assert.ok(md.includes(marker), `authoring-analyze method missing "${marker}"`);
+  }
+  assert.ok(md.includes("ANALYSIS.md"), "analyst produces an ANALYSIS.md on approval");
+  assert.ok(md.includes("build nothing"), "analyst is analyze-only");
+});
+
+test("N200: the model primer + custom-only rule reach the authoring agents", () => {
+  const md = composeAgentById("authoring-analyze");
+  assert.ok(md.includes("How the pieces fit"), "model primer composed in");
+  assert.ok(
+    md.includes("built-in defaults are read-only") || md.includes("read-only template"),
+    "custom-only rule composed in",
+  );
+});
+
+test("N200: every authoring agent carries the plain-language module", () => {
+  const authoring = Object.entries(COMPOSED_AGENTS).filter(([id]) => id.startsWith("authoring-"));
+  assert.ok(authoring.length >= 8, "the authoring flow's agents are registered");
+  for (const [id, def] of authoring) {
+    assert.ok(def.modules.includes("plain-language"), `${id} composes plain-language`);
+  }
+});
+
+test("N200: composer-authoring installs a registry-search MCP with a secret placeholder", async () => {
+  const { AUTHORING_PROJECT, flowInstallPlan, flowRequiredInputs } = await import(
+    "../dist/index.js"
+  );
+  assert.ok(
+    AUTHORING_PROJECT.install.includes("mcp-registry-search"),
+    "the flow installs the registry-search MCP",
+  );
+  const mod = MODULE_REGISTRY["mcp-registry-search"];
+  assert.equal(mod?.kind, "mcp-server", "mcp-registry-search is an mcp-server module");
+  const plan = flowInstallPlan(AUTHORING_PROJECT);
+  assert.ok(
+    plan.some((s) => s.kind === "mcp" && s.key === mod.name),
+    "install plan carries the registry MCP step",
+  );
+  const inputs = flowRequiredInputs(AUTHORING_PROJECT);
+  const secret = inputs.find((i) => i.name === "SMITHERY_API_KEY");
+  assert.ok(secret, "the flow requires the Smithery API key");
+  assert.notEqual(secret.secret, false, "the key is treated as a secret");
+});
