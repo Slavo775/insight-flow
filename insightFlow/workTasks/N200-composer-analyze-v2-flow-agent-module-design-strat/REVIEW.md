@@ -247,3 +247,48 @@ Updated the docs site (`website/docs/`) to match what N200 shipped:
 3. **Custom-only reconciled honestly** — rewrote the reuse-first rule (`authoring/agents-and-subagents.md`) and the walkthrough tips to "built-in defaults are read-only; edit in place only your own `custom:` def, else author a `custom:` variant." Added short notes to the two framework pages that still document eject (`composer-mcp/tools.md`, `guides/custom-module.md`): the framework/dashboard still *permit* ejecting for one-off changes, but the guided authoring flow prefers variants so defaults stay upgradable. The `authoring/index.md` "one-off change" table row (direct dashboard/MCP path) is left as-is — eject is legitimate there.
 
 Files: `authoring/index.md`, `authoring/walkthrough.md`, `authoring/agents-and-subagents.md`, `composer-mcp/tools.md`, `guides/custom-module.md`. `concepts/modules.md` left unchanged — its only "eject" mention is about the locked tier, which is accurate. Links verified manually (target files + the `#the-reuse-first-rule` anchor exist); the `.docusaurus` build cache was not committed. Package build/tests unaffected: 319/319 still pass.
+
+
+---
+
+## Round 6 — AI Re-review (closing)
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-07-03
+**Verdict:** approved
+
+### Summary
+
+Re-review of the full cumulative change after four human-review rounds. The final deliverable is coherent and matches the human-directed intent: `authoring-analyze` rewritten to the ordered design method, `plain-language` composed into all 8 authoring agents, custom-only rule + model primer in the composer conventions, **no MCP module and no key** (the Smithery module was removed outright), MCP discovery by web search against `github.com/mcp` + the Official Registry, and the docs site updated to match. Cumulative diff is prompt/config/docs + one test (no runtime logic). `compose.ts` nets back to unchanged vs `main`. No blockers.
+
+### Checklist verification
+
+Note: the original TASK.md/CHECKLIST described wiring an MCP into the flow with a secret; that was **intentionally reversed** across human-review Rounds 3–4. Verified against the *final* intent:
+
+- [x] `authoring-analyze` ordered method (intent → goal → flow → agents → modules → reuse → impact → MCP) — pass (asserted by the N200 method test).
+- [x] `plain-language` in all 8 authoring agents — pass.
+- [x] Custom-only rule + model primer in `composer-conventions.ts` — pass.
+- [x] No paid/keyed MCP; discovery via `github.com/mcp` — pass (`grep` finds zero `smithery`/`mcp-registry`/`SMITHERY_API_KEY` in shipped src/README/docs; the N200 Round-4 test asserts the module is gone and discovery names `github.com/mcp`).
+- [x] Docs site updated (authoring method, key-free discovery, custom-only reconciled) — pass (Docusaurus build ✅, no broken links).
+- [~] **Stale**: original CHECKLIST items about wiring the MCP into the flow with a secret are no longer met by design — see NB-1.
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+1. **Task CHECKLIST.md is stale.** Items 11 / 23 / 24 still assert the Smithery `mcp-registry-search` module is authored, in the flow install plan, and needs a key — all reversed in Rounds 3–4. Recommend updating CHECKLIST.md (and the TASK.md "In scope" MCP line) to the final state (no MCP module; web-search discovery via `github.com/mcp`) so the task record matches what shipped.
+2. **Unused barrel export.** `BUILTIN_PROJECTS` was exported from `src/index.ts` in Round 1 for a test that no longer uses it (only `AUTHORING_PROJECT` is consumed). Internally it's still used (via `project.js`). Either drop it from the barrel or keep as intentional public API — reviewer's preference is to trim to `AUTHORING_PROJECT` only, but harmless.
+
+### Security & edge cases
+
+- Security surface **decreased** vs the Round-1 AI review: the only secret-bearing MCP N200 had introduced (Smithery) is removed, so there is no `${SMITHERY_API_KEY}` in `.mcp.json`, no forced key at flow install, and the Round-1 "`ensureGitignored` in `executeInstall`" follow-up is no longer reachable *through anything N200 ships* (it remains a valid standalone hardening for other secret-bearing MCPs, unrelated to N200).
+- Untrusted-content boundary intact: the `security` module is composed and unchanged; the analyzer still treats fetched/registry content as data while discovering via web search.
+
+### Notes
+
+- Gates: `pnpm build` ✅ · `pnpm --dir packages/taskflow test` **319/319** ✅ (one run showed 318 — the known-flaky UI/master boot subtest; two clean re-runs confirm green) · typecheck ✅ · `eslint src` 0 errors (2 pre-existing warnings in untouched `FlowEditor.tsx`) · Docusaurus build ✅.
+- Drift guard on the 9 shipped role MD files still holds (the changed modules compose only into the authoring flow; `plain-language` itself unchanged).
+- No subagents this round: the cumulative change since the Round-1 fan-out is prose (prompts/docs), a test, and a module *removal* — verified by targeted greps, gates, and the docs build rather than a fresh correctness/security fan-out.
+- Recommendation: after the two non-blocking doc-hygiene items (optional), this is ready for human review → merge.

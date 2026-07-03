@@ -98,6 +98,15 @@
         "comment": "Round 5: documented the authoring-analyze method + key-free MCP discovery via github.com/mcp in the docs site; reconciled the reuse-first rule to custom-only (built-in defaults read-only, prefer custom: variants) with honest notes that the framework still permits eject. Docusaurus build passes (no broken links).",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-07-03T19:28:28.422Z",
+      "endedAt": "2026-07-03T19:36:20.644Z",
+      "verdict": "approved",
+      "comment": "Approved (closing re-review). Final state matches human-directed intent: ordered analyze method, plain-language on all 8 authoring agents, custom-only + model primer, NO MCP module and NO key, discovery via github.com/mcp; docs site updated (Docusaurus build clean). Gates green (319/319; earlier 318 was the known-flaky boot test). Non-blocking: task CHECKLIST.md/TASK.md still describe the removed Smithery MCP (update for accuracy); BUILTIN_PROJECTS barrel export now unused.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
     }
   ]
 }
