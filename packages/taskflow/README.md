@@ -625,6 +625,15 @@ Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and 
 
 The built-in `mcp-composer` module writes exactly that entry — install it (or add it to a flow's `install` list) instead of hand-editing `.mcp.json`. Tools run autonomously; locked modules and the default flow are refused, and uninstall/delete stay reference-safe. Full tool reference: the [Composer MCP docs](https://slavo775.github.io/insight-flow/docs/composer-mcp/).
 
+### Finding MCP servers when authoring (web search vs. the registry MCP)
+
+When the composer's authoring flow designs a new agent that needs an MCP server, it has to **discover** which server to use. There are two ways, and the default needs no setup:
+
+- **Web search (default, no API key).** The authoring analyst searches the free, no-auth **Official MCP Registry** (`registry.modelcontextprotocol.io`) and other public directories to find a server by need. This is the default path — nothing to install, no key, no secret.
+- **Registry-search MCP (opt-in, better results).** For live, in-session semantic search across the [Smithery](https://smithery.ai) registry (7k+ servers), add the built-in **`mcp-registry-search`** module (Smithery Toolbox) to your authoring agent or flow. It is **catalog-only — not installed by any shipped flow**, so it never forces a key on anyone. When you add it, it needs a **free** Smithery API key (Hobby tier): create one at [smithery.ai](https://smithery.ai) → dashboard → API Keys, then put it in **this project's** `.insight-flow/secrets.local.json` (project root, gitignored) as `SMITHERY_API_KEY` — never the global `~/.insight-flow/`. Secrets are per-project.
+
+**Which to use:** stick with web search — it's free and zero-setup. Reach for the registry MCP only when you want richer, live semantic search while authoring and don't mind creating a free Smithery key.
+
 ## Programmatic API
 
 ```ts

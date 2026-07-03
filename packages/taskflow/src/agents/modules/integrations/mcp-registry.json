@@ -2,7 +2,7 @@
   {
     "id": "mcp-registry-search",
     "title": "MCP registry search (Smithery Toolbox)",
-    "description": "A registry-search MCP so the composer analyst can DISCOVER MCP servers by need — semantic search over the Smithery registry (7k+ servers) via the Smithery Toolbox meta-MCP — instead of hard-coding server names. Wired into the composer-authoring flow's install list (N200). Needs a free Smithery API key; the install writes a `${SMITHERY_API_KEY}` placeholder and the user fills it in this project's `.insight-flow/secrets.local.json` (project root, gitignored) — not the global `~/.insight-flow/`. Trust note: this runs third-party code (`@smithery/cli`) via npx; the CLI version is pinned (not `@latest`) so an install is reproducible — bump it deliberately.",
+    "description": "OPT-IN registry-search MCP for the composer analyst: live semantic search over the Smithery registry (7k+ servers) via the Smithery Toolbox meta-MCP. Catalog-only — NOT installed by any shipped flow. By default the analyst discovers MCP servers by web search (free, no-auth Official MCP Registry, no key); add this module to an agent or flow only when you want live in-session search. When added, it needs a free Smithery API key: the install writes a `${SMITHERY_API_KEY}` placeholder and the user fills it in this project's `.insight-flow/secrets.local.json` (project root, gitignored) — not the global `~/.insight-flow/`. Trust note: this runs third-party code (`@smithery/cli`) via npx; the CLI version is pinned (not `@latest`) so an install is reproducible — bump it deliberately.",
     "source": "builtin",
     "kind": "mcp-server",
     "name": "mcp-registry",

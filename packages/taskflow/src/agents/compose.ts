@@ -136,9 +136,11 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     // Registry-only (not in any shipped flow); install it to register
     // `insight-flow mcp` in a project's .mcp.json.
     ...composerModules,
-    // N200 — registry-search MCP (Smithery Toolbox) the composer analyst uses to
-    // discover MCP servers by need. Wired into the composer-authoring flow's
-    // install list (project/authoring.json); carries a ${SMITHERY_API_KEY} secret.
+    // N200 — registry-search MCP (Smithery Toolbox) the composer analyst can use
+    // to discover MCP servers by need. Registry-only / OPT-IN: NOT in any shipped
+    // flow's install list, so it never installs by default and forces no key.
+    // The analyst discovers via web research by default; add this module to an
+    // agent/flow for live semantic search (needs a free ${SMITHERY_API_KEY}).
     ...mcpRegistryModules,
     // N192 — built-in review subagents the Task Reviewer fans out to (showcase).
     ...reviewSubagents,

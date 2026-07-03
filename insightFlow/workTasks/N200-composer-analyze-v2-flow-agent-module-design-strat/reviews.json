@@ -29,6 +29,30 @@
         "comment": "Fixed blocker 1: MCP-secrets guidance now specifies the project's .insight-flow/secrets.local.json (project root), not global ~/.insight-flow. Wording-only in composer-conventions MODEL_PRIMER, authoring-analyze step 6, and mcp-registry.json.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-07-03T15:12:49.940Z",
+      "endedAt": "2026-07-03T15:13:36.982Z",
+      "verdict": "fix-needed",
+      "comment": "Human: don't force the Smithery key. Analyzer uses web search only for now; keep mcp-registry-search as an opt-in catalog module (remove from composer-authoring install list); add guidance 'add this MCP for better results' + a usage section (MCP vs web search); document the flow inside N200, no new task.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T15:14:52.887Z",
+        "endedAt": "2026-07-03T15:18:22.768Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json",
+          "packages/taskflow/README.md",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "comment": "Round 3: analyzer uses web search only; registry MCP now catalog-only (removed from composer-authoring install list) = no forced key; added opt-in guidance + README usage section (web search vs MCP); documented in N200.",
+        "by": "task-review-fix"
+      }
     }
   ]
 }

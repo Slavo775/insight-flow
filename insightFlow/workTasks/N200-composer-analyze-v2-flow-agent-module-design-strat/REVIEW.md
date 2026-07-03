@@ -96,3 +96,56 @@ Blocker 1 resolved — the MCP-secrets guidance now says the secret goes in **th
 3. `src/agents/modules/integrations/mcp-registry.json` — module description + the `SMITHERY_API_KEY` input hint.
 
 Gates: `pnpm build` ✅ · 319/319 tests ✅ · typecheck clean ✅. No code behavior changed (secrets were already resolved per-project); wording-only clarification.
+
+
+---
+
+## Round 3 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-07-03
+**Verdict:** fix-needed
+
+### Summary
+
+Do not force the Smithery API key. The analyzer should use **web search only** for now; keep the Smithery MCP as an opt-in catalog module for better results; document the discovery flow (MCP vs web search) inside this task — no new task.
+
+### Blockers
+
+Human's exact words:
+
+> okej so keep only websearch in the analyzer so far and mcp server leave as a module in the catalog but we need to documented the flow also in this task no other new task and also leave this a guidance when you wanted to bedder results you need to add this mcp to the agent and also section for usage this mcp or websearch
+
+Interpreted as these required changes (all in N200 — no new task):
+
+1. **Analyzer uses web search only (for now).** `authoring-analyze` step 6 (MCP pass): the discovery method is web research against the free, no-auth Official MCP Registry. Do not depend on an installed MCP.
+2. **Smithery MCP stays a catalog module, not auto-installed.** Remove `mcp-registry-search` from `composer-authoring`'s default `install` list (`project/authoring.json`). Keep the module registered in the catalog (`compose.ts` / `modules/integrations/mcp-registry.json`) so it can be added opt-in. This removes the forced `SMITHERY_API_KEY`.
+3. **Guidance: "for better results, add this MCP to the agent."** State that web search is the default and that a user who wants better/live semantic search can add the Smithery registry MCP to the agent (opt-in, free Smithery key).
+4. **Usage section — "this MCP or web search."** Add documentation describing how discovery works and when to use each path (web search = default/no key; Smithery MCP = opt-in for better results, needs a free key in the project's `.insight-flow/secrets.local.json`).
+5. **Document the flow in this task.** The above documentation is part of N200 — do not spin a separate task.
+
+### Non-blocking
+
+(none)
+
+### Security & edge cases
+
+- Dropping the MCP from the default install list also removes the forced secret at flow-install time — the earlier "secret must be project-local" concern (Round 2) now only applies to the opt-in path, which is the desired outcome.
+
+### Notes
+
+- Recorder note (context for the fixer, not the human's words): candidate homes for the usage/flow documentation — a short section in `README.md` (composer/authoring flow), and/or the composer conventions `MODEL_PRIMER` "MCP discovery" paragraph, and/or the `mcp-registry-search` module description. The fixer decides placement.
+- This supersedes the Round 1 design choice (registry MCP wired into the flow) and the Round 2 fix's flow-install secret path: the MCP becomes opt-in.
+- Recorded by `task-human-review` — no source changed here. Fix to be applied by `/task-review-fix`.
+
+### Fix applied (2026-07-03, `task-review-fix`)
+
+All 5 Round-3 requests done inside N200 (no new task):
+
+1. **Analyzer = web search only** — `modules/roles/authoring.json` step 6 now discovers via web search against the free, no-auth Official MCP Registry; the registry MCP is mentioned only as an opt-in for better results.
+2. **MCP is catalog-only, not auto-installed** — removed `mcp-registry-search` from `composer-authoring`'s `install` list (`project/authoring.json`); the module stays registered in `compose.ts` (comment updated to "registry-only / opt-in"). No forced `SMITHERY_API_KEY`.
+3. **Guidance "add this MCP for better results"** — added to the `MODEL_PRIMER` "MCP discovery" block and the analyzer step 6.
+4. **Usage section (MCP vs web search)** — new README subsection "Finding MCP servers when authoring (web search vs. the registry MCP)"; the `MODEL_PRIMER` block also contrasts the two paths.
+5. **Documented in this task** — README + conventions + module description all updated; no separate task.
+
+Test updated: `compose.test.mjs` now asserts the MCP is catalog-only, absent from the flow install plan, forces no key, and that adding it opt-in still surfaces the secret. Gates: `pnpm build` ✅ · 319/319 tests ✅ · typecheck clean ✅.

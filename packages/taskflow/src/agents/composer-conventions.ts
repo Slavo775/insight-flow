@@ -24,7 +24,10 @@ insight-flow builds AI roles from three nested parts — small parts make bigger
   - **handovers** — the behaviour on an edge: \`gated\` stops and waits for a human go-ahead; \`auto\` chains the next command in the same session. A handover carries a \`when\` reason. For parallel work use \`subagents\` (fan-out), not handovers;
   - a **terminator / finish** — an edge whose \`to\` is a terminal status (e.g. \`done\`) instead of an agent. Every flow needs one finish point.
 
-**MCP discovery.** When a role needs a tool that is an MCP server, search a registry for it (the composer flow installs a registry-search MCP for this). Pick the smallest server that fits.
+**MCP discovery — web search vs. the registry MCP.** When a role needs a tool that is an MCP server, you have two ways to find one:
+  - **Web search (default, no key).** Search the free, no-auth Official MCP Registry (\`registry.modelcontextprotocol.io\`) and other directories. This needs no setup and no API key — use it by default.
+  - **Registry-search MCP (opt-in, better results).** For live, in-session semantic search, add the built-in \`mcp-registry-search\` module (Smithery Toolbox) to the agent or flow. It is NOT installed by default. It needs a free Smithery API key in this project's \`.insight-flow/secrets.local.json\` (project root, gitignored) — never the global \`~/.insight-flow/\`.
+  Pick the smallest server that fits.
 
 **MCP secrets.** If a server needs a key or token, author it as an \`mcp-server\` module with a \`\${VAR}\` placeholder in its \`config\` and an \`inputs\` entry marked \`secret\`. Then tell the user to put the real value in **this project's** \`.insight-flow/secrets.local.json\` — the file at the project root (gitignored), **not** the global \`~/.insight-flow/\`. Secrets live per-project, never globally. Never hard-code a secret.`;
 
