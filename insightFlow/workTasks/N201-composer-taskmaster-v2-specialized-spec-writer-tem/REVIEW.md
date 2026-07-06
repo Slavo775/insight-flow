@@ -46,3 +46,36 @@ Clean, well-scoped prompt/module/docs change on `feat/N201` (stacked on `agents-
 3. **NB-2 resolved (test nit)** — the loose `/change/i` assertion is now `/creating a new spec and changing an existing/i` (specific to the create-vs-change wording).
 
 Gates: `pnpm build` ✅ · 321/321 tests ✅ · typecheck ✅ · `eslint src` 0 errors ✅.
+
+
+---
+
+## Round 2 — Human Review
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-07-06
+**Verdict:** approved
+
+### Summary
+
+Human sign-off. Approved.
+
+### Blockers
+
+None — approved.
+
+### Non-blocking
+
+Human's exact word:
+
+> approve
+
+### Security & edge cases
+
+(none)
+
+### Notes
+
+- N201 was committed + pushed to `feat/N201-composer-taskmaster-v2` (commit `e4b9739`) before this review; the AI review's blocker + both non-blockers were already resolved (see the Round 1 "Fix applied" section). Gates green (321/321).
+- No merge instruction given this round. This line of work has been integrating into `agents-approved` (not `main`), matching N200 — final merge into `agents-approved` and the `insight-flow merge`/`done` bookkeeping are deferred to a separate human decision.
+- Recorded by `task-human-review`.
