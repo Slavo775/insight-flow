@@ -241,6 +241,116 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
+    },
+    {
+      "id": "N201",
+      "title": "Composer Taskmaster v2 — specialized spec-writer + templated scaffolding + change-handling",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N201-composer-taskmaster-v2-specialized-spec-writer-tem",
+      "createdAt": "2026-07-03T20:34:25.665Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-03T20:34:25.666Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-03T20:37:42.782Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-03T20:44:35.864Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T21:00:12.578Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T21:03:41.282Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T22:17:26.526Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T22:29:55.472Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-06T06:59:20.755Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-06T07:00:53.590Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-06T07:02:57.460Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-06T11:18:24.831Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-06T11:18:47.664Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-03T20:37:42.783Z",
+        "completedAt": "2026-07-03T20:44:35.867Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/template-copy.json",
+          "packages/taskflow/src/agents/modules/authoring-spec-structure.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/agents-and-subagents.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer",
+        "taskmaster"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-06T07:02:57.460Z",
+          "commitHash": "e4b973900062f57f7d29a075e1a8b26895178e10",
+          "commitMessage": "feat(agents): composer taskmaster v2 — templated spec-writer + change-handling (N201)"
+        }
+      ],
+      "branch": "feat/N201-composer-taskmaster-v2",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

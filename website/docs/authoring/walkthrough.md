@@ -45,6 +45,30 @@ writes the authoring spec and creates the tracked task, binding it to the
 `composer-authoring` flow. (If you'd jumped straight to `create`, it would hand
 back to analysis first.)
 
+It **scaffolds, then fills** — it runs `insight-flow create` (which copies the
+shared `templates/task/*.tpl` files into the folder) and fills each section in
+place, so every task keeps the same structure. The spec it writes is detailed and
+buildable:
+
+- **Description** and **Goal**.
+- An **inventory** of everything to build — grouped by kind: **modules**,
+  **subagents**, **agents**, **flows**, and **relationships** (each edge/handover
+  with its `on` trigger and `auto`/`gated` mode) — each item with enough detail to
+  build it.
+- **Implementer subtasks** — an ordered, checkable list of the little steps.
+- **Verification**.
+
+It synthesizes this from the analyst's brief (it doesn't re-run the per-kind
+analysis). The same agent also handles **changes** to an existing spec — it edits
+the current `TASK.md`/`CHECKLIST.md` in place rather than creating a new task.
+
+:::note Templated by default
+Every taskmaster is templated: it composes the `template-copy` module (scaffold →
+fill) so tasks share one structure, and an *authoring* taskmaster also composes
+`authoring-spec-structure` (the layout above). When you author your **own** custom
+taskmaster, the composer includes these by default — unless you opt out.
+:::
+
 ## 3. Implement
 
 `/task-authoring-implement` builds the definitions, delegating to the per-kind
