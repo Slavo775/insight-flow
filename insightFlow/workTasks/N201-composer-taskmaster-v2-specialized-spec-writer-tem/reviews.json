@@ -1,0 +1,25 @@
+{
+  "taskId": "N201",
+  "reviews": [
+    {
+      "startedAt": "2026-07-03T21:00:12.579Z",
+      "endedAt": "2026-07-03T21:03:41.282Z",
+      "verdict": "fix-needed",
+      "comment": "One blocker: authoring-create's 'insight-flow create' omits --with-analysis, so ANALYSIS.md is never scaffolded — the analyst (per N200) then writes it from scratch, violating the template-copy 'never write from scratch' rule this task ships. Fix: add --with-analysis. Non-blocking: stale custom-only reuse wording in author subagents (pre-existing); tighten the loose /change/ test assertion. Otherwise clean — 321/321, drift guard intact, docs build clean.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-06T06:59:20.757Z",
+        "endedAt": "2026-07-06T07:00:53.590Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "comment": "No new changes — all Round 1 review items (blocker --with-analysis + NB-1 custom-only reconciliation + NB-2 test tightening) were already resolved in the prior review-fix cycle. Gates green (321/321). Re-opened only because the fix-needed verdict lingers after status went to fixed.",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

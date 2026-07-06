@@ -1,0 +1,8 @@
+{
+  "id": "authoring-spec-structure",
+  "title": "Authoring spec structure",
+  "source": "builtin",
+  "kind": "section",
+  "heading": "## Authoring spec structure",
+  "body": "Fill the scaffolded `TASK.md` (and `CHECKLIST.md`) with this structure, so an implementer can build the customization without guessing:\n\n- **Description** — one short paragraph: what this customization is.\n- **Goal** — the outcome in one or two clear sentences.\n- **Inventory — everything to build or change**, grouped by kind (include only the groups that apply):\n  - **Modules** — each: id (`custom:…`), kind, what it holds, reuse-as-is / custom variant / new.\n  - **Subagents** — each: name, purpose, `tools` / `model`, `readonly` / `background`.\n  - **Agents** — each: id, its ordered `modules` list, any `subagents`, `command.install`.\n  - **Flows** — each: id, `agents`, `entryAgents`, the terminal/finish node, `install` list.\n  - **Relationships** — each edge/handover: from → to, the `on` trigger, `auto` / `gated` + a `when` reason.\n- **Implementer subtasks** — an ordered, checkable list of the little steps to build the inventory above (one line each, binary).\n- **Verification** — how to confirm it works: it composes/renders, an install dry-run is sane, and a trivial smoke run.\n\nUse `custom:` ids for anything new and follow the reuse-first / custom-only rule from the authoring conventions. Keep it specific — real ids, real module lists, real edges."
+}

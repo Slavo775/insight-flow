@@ -1,0 +1,8 @@
+{
+  "id": "template-copy",
+  "title": "Task files — scaffold then fill",
+  "source": "builtin",
+  "kind": "section",
+  "heading": "## Task files — scaffold, then fill",
+  "body": "Never write a task file from scratch. **Scaffold** the standard files with `insight-flow create` — it copies the shared templates (`templates/task/*.tpl`) into the task folder: `TASK.md` + `CHECKLIST.md` always, `ANALYSIS.md` with `--with-analysis`; `REVIEW.md` is scaffolded later by `review-start`. Then **fill each section in place** with Edit — do not overwrite the file. This keeps every task the same structure. If a file already exists (a change, or `create` reported it existed), edit the existing sections; never replace it."
+}

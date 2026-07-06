@@ -601,3 +601,44 @@ test("N200 (Round 4): no paid/keyed MCP ships; discovery is web search via githu
     "analyst also names the Official MCP Registry",
   );
 });
+
+test("N201: the composer taskmaster is a templated spec-writer (create + change)", () => {
+  // Both new section modules are registered.
+  assert.equal(MODULE_REGISTRY["template-copy"]?.kind, "section", "template-copy registered");
+  assert.equal(
+    MODULE_REGISTRY["authoring-spec-structure"]?.kind,
+    "section",
+    "authoring-spec-structure registered",
+  );
+  // Composed into authoring-create, keeping plain-language.
+  const mods = COMPOSED_AGENTS["authoring-create"].modules;
+  assert.ok(mods.includes("template-copy"), "authoring-create composes template-copy");
+  assert.ok(
+    mods.includes("authoring-spec-structure"),
+    "authoring-create composes authoring-spec-structure",
+  );
+  assert.ok(mods.includes("plain-language"), "plain-language retained");
+  // Behaviour surfaces in the composed prompt.
+  const md = composeAgentById("authoring-create");
+  assert.ok(/scaffold/i.test(md), "scaffold-then-fill discipline present");
+  // Scaffolds ALL task files, including ANALYSIS.md (the analyst fills it — N201 blocker fix).
+  assert.ok(
+    md.includes("insight-flow create") && md.includes("--with-analysis"),
+    "taskmaster scaffolds ANALYSIS.md via --with-analysis",
+  );
+  assert.ok(
+    /creating a new spec and changing an existing/i.test(md),
+    "handles change, not only create",
+  );
+  assert.ok(/inventory/i.test(md), "detailed inventory spec structure present");
+  assert.ok(/implementer subtasks/i.test(md), "implementer subtasks in the spec");
+});
+
+test("N201: composer conventions make taskmasters templated by default", () => {
+  // The convention reaches the authoring agents via composer-authoring-conventions.
+  const md = composeAgentById("authoring-create");
+  assert.ok(
+    md.includes("Taskmasters are templated by default"),
+    "the every-taskmaster convention is composed in",
+  );
+});

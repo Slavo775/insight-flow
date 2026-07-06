@@ -39,6 +39,8 @@ import plainLanguage from "./modules/plain-language.json";
 import scopeGuard from "./modules/scope-guard.json";
 import recorderDiscipline from "./modules/recorder-discipline.json";
 import composerMcpNote from "./modules/composer-mcp-note.json";
+import templateCopy from "./modules/template-copy.json";
+import authoringSpecStructure from "./modules/authoring-spec-structure.json";
 import { CONVENTIONS_MODULE_BODY } from "./composer-conventions.js";
 import handovers from "./modules/handovers.json";
 
@@ -113,6 +115,11 @@ export const MODULE_REGISTRY: Record<string, AgentModule> = indexById(
     scopeGuard,
     recorderDiscipline,
     composerMcpNote,
+    // N201 — shared, composable "template" for the composer taskmaster:
+    // `template-copy` (scaffold-then-fill discipline) + `authoring-spec-structure`
+    // (the detailed authoring-spec layout). Composed into authoring-create.
+    templateCopy,
+    authoringSpecStructure,
     composerAuthoringConventions,
     ...handovers,
     ...taskAnalyzeModules,
