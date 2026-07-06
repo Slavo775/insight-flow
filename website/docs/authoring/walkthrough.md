@@ -55,7 +55,8 @@ buildable:
   **subagents**, **agents**, **flows**, and **relationships** (each edge/handover
   with its `on` trigger and `auto`/`gated` mode) — each item with enough detail to
   build it.
-- **Implementer subtasks** — an ordered, checkable list of the little steps.
+- **Implementer subtasks** — an ordered **checkbox** list (`- [ ]`) of the little
+  steps, written into `CHECKLIST.md` so the implementer ticks each one as it builds.
 - **Verification**.
 
 It synthesizes this from the analyst's brief (it doesn't re-run the per-kind
@@ -74,7 +75,15 @@ taskmaster, the composer includes these by default — unless you opt out.
 `/task-authoring-implement` builds the definitions, delegating to the per-kind
 **author** subagents, which call the composer MCP. Before authoring, each author
 calls [`describe(kind)`](../composer-mcp/tools.md#describekind) for the exact
-shape and `get`s an existing definition as a template. Nothing is installed yet.
+shape and `get`s an existing definition as a template. The implementer works the
+`CHECKLIST.md` subtasks one by one and finishes with every box ticked.
+
+The implementer (and the fixer, which shares its **build-discipline core**) stays
+self-contained: it builds only from the spec + checklist + composer conventions —
+it never reads the insight-flow project (needing to is a bug to surface), never
+installs (that's the gated installer step), and stops on anything outside building
+the customization. Small edits — a few lines within one file — are allowed.
+Nothing is installed yet.
 
 ## 4. Review → (fix) → human review
 

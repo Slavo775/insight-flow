@@ -351,6 +351,59 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
+    },
+    {
+      "id": "N202",
+      "title": "Composer implementer + fixer v2 — shared build core, self-contained context, checklist tracking, no-install guard",
+      "type": "feat",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N202-composer-implementer-fixer-v2-shared-build-core-se",
+      "createdAt": "2026-07-06T21:03:33.379Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-06T21:03:33.379Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-06T21:17:33.605Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-06T21:23:15.028Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-06T21:17:33.606Z",
+        "completedAt": "2026-07-06T21:23:15.030Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/modules/authoring-spec-structure.json",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
