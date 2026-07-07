@@ -1,13 +1,12 @@
 {
   "id": "composer-authoring",
   "title": "Composer authoring",
-  "description": "Second built-in flow: a guided lifecycle for authoring insight-flow's own customizations — designing and building custom modules, agents, and flows (analyze → create → implement → review → fix → human-review → test → install). Tasks bound to this flow are the 'self-setup' category (filter by flowId).",
+  "description": "Second built-in flow: a guided lifecycle for authoring insight-flow's own customizations — designing and building custom modules, agents, and flows (analyze → create → implement ↔ review → human-review → test → install). The implementer both builds and fixes: review blockers (AI or human) route back to it. Tasks bound to this flow are the 'self-setup' category (filter by flowId).",
   "agents": [
     "authoring-analyze",
     "authoring-create",
     "authoring-implement",
     "authoring-review",
-    "authoring-fix",
     "authoring-human-review",
     "authoring-test",
     "authoring-install"
@@ -17,9 +16,10 @@
     { "from": "authoring-create", "to": "authoring-implement", "on": "ready" },
     { "from": "authoring-create", "to": "authoring-analyze" },
     { "from": "authoring-implement", "to": "authoring-review", "on": "implemented" },
-    { "from": "authoring-review", "to": "authoring-fix", "on": "fix-needed" },
+    { "from": "authoring-implement", "to": "authoring-review", "on": "fixed" },
+    { "from": "authoring-review", "to": "authoring-implement", "on": "fix-needed" },
     { "from": "authoring-review", "to": "authoring-human-review", "on": "approved" },
-    { "from": "authoring-fix", "to": "authoring-review", "on": "fixed" },
+    { "from": "authoring-human-review", "to": "authoring-implement", "on": "fix-needed" },
     { "from": "authoring-human-review", "to": "authoring-test", "on": "approved" },
     { "from": "authoring-test", "to": "authoring-install" },
     { "from": "authoring-install", "to": "done" }

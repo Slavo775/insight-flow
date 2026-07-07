@@ -55,7 +55,8 @@ buildable:
   **subagents**, **agents**, **flows**, and **relationships** (each edge/handover
   with its `on` trigger and `auto`/`gated` mode) — each item with enough detail to
   build it.
-- **Implementer subtasks** — an ordered, checkable list of the little steps.
+- **Implementer subtasks** — an ordered **checkbox** list (`- [ ]`) of the little
+  steps, written into `CHECKLIST.md` so the implementer ticks each one as it builds.
 - **Verification**.
 
 It synthesizes this from the analyst's brief (it doesn't re-run the per-kind
@@ -74,14 +75,24 @@ taskmaster, the composer includes these by default — unless you opt out.
 `/task-authoring-implement` builds the definitions, delegating to the per-kind
 **author** subagents, which call the composer MCP. Before authoring, each author
 calls [`describe(kind)`](../composer-mcp/tools.md#describekind) for the exact
-shape and `get`s an existing definition as a template. Nothing is installed yet.
+shape and `get`s an existing definition as a template. The implementer works the
+`CHECKLIST.md` subtasks one by one and finishes with every box ticked.
+
+The implementer stays self-contained: it builds from the spec + checklist +
+composer conventions and shouldn't need to read the insight-flow project — if it
+does need to, that signals a bug to surface and fix, not something to work around.
+It never installs (that's the gated installer step) and stops on anything outside
+building the customization. For a **small change** you can call the implementer
+directly, without the taskmaster. Nothing is installed yet.
 
 ## 4. Review → (fix) → human review
 
 `/task-authoring-review` fans out to the read-only **reviewer** subagents
-(schema, duplication/reuse, best practice). Blockers loop through
-`/task-authoring-fix` and back to review. When it's clean, it hands to
-`/task-authoring-human-review`, which records **your** decision verbatim.
+(schema, duplication/reuse, best practice). On blockers it routes back to the
+**implementer**, which fixes them (`/task-authoring-implement` in fix mode) and
+hands back to review. When it's clean, it hands to `/task-authoring-human-review`,
+which records **your** decision verbatim — and if the human finds blockers, those
+route back to the implementer too.
 
 ## 5. Test, then install
 

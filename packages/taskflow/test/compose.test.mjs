@@ -572,7 +572,8 @@ test("N200: the model primer + custom-only rule reach the authoring agents", () 
 
 test("N200: every authoring agent carries the plain-language module", () => {
   const authoring = Object.entries(COMPOSED_AGENTS).filter(([id]) => id.startsWith("authoring-"));
-  assert.ok(authoring.length >= 8, "the authoring flow's agents are registered");
+  // N202: the separate Composer Fixer was removed — the implementer fixes — so 7 authoring agents.
+  assert.ok(authoring.length >= 7, "the authoring flow's agents are registered");
   for (const [id, def] of authoring) {
     assert.ok(def.modules.includes("plain-language"), `${id} composes plain-language`);
   }
