@@ -78,19 +78,21 @@ calls [`describe(kind)`](../composer-mcp/tools.md#describekind) for the exact
 shape and `get`s an existing definition as a template. The implementer works the
 `CHECKLIST.md` subtasks one by one and finishes with every box ticked.
 
-The implementer (and the fixer, which shares its **build-discipline core**) stays
-self-contained: it builds only from the spec + checklist + composer conventions —
-it never reads the insight-flow project (needing to is a bug to surface), never
-installs (that's the gated installer step), and stops on anything outside building
-the customization. Small edits — a few lines within one file — are allowed.
-Nothing is installed yet.
+The implementer stays self-contained: it builds from the spec + checklist +
+composer conventions and shouldn't need to read the insight-flow project — if it
+does need to, that signals a bug to surface and fix, not something to work around.
+It never installs (that's the gated installer step) and stops on anything outside
+building the customization. For a **small change** you can call the implementer
+directly, without the taskmaster. Nothing is installed yet.
 
 ## 4. Review → (fix) → human review
 
 `/task-authoring-review` fans out to the read-only **reviewer** subagents
-(schema, duplication/reuse, best practice). Blockers loop through
-`/task-authoring-fix` and back to review. When it's clean, it hands to
-`/task-authoring-human-review`, which records **your** decision verbatim.
+(schema, duplication/reuse, best practice). On blockers it routes back to the
+**implementer**, which fixes them (`/task-authoring-implement` in fix mode) and
+hands back to review. When it's clean, it hands to `/task-authoring-human-review`,
+which records **your** decision verbatim — and if the human finds blockers, those
+route back to the implementer too.
 
 ## 5. Test, then install
 

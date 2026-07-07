@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Agents & subagents reference
 
-The authoring flow is **8 orchestrator agents** (the lifecycle steps) that fan out
+The authoring flow is **7 orchestrator agents** (the lifecycle steps) that fan out
 to **12 per-kind subagents** (the specialists). This page is the at-a-glance
 reference for what each does — and what it deliberately doesn't.
 
@@ -17,7 +17,7 @@ authoring, and each agent's subagent nodes) and the composer MCP
 [`describe`](../composer-mcp/tools.md#describekind) tool.
 :::
 
-## The 8 agents
+## The 7 agents
 
 Each runs as a slash command once the flow is installed (e.g.
 `/task-authoring-analyze`).
@@ -26,9 +26,8 @@ Each runs as a slash command once the flow is installed (e.g.
 | --- | --- | --- | --- |
 | **Authoring Analyst** | `task-authoring-analyze` | Turns a request into a deduplicated design brief; asks the opt-ins (activity engine, target harness); fans out to the 4 analyst subagents. Entry agent. | Doesn't author or install anything. |
 | **Composer Taskmaster** | `task-authoring-create` | Writes the **detailed** authoring spec (description · goal · inventory of modules/subagents/agents/flows/relationships · implementer subtasks · verification) by scaffolding via `insight-flow create` then filling each section; creates the tracked task and binds it to the flow. Also handles **changes** to an existing spec. | If invoked without a prior analysis, hands **back to analyze first** (gated). Synthesizes from the analyst brief (no per-kind fan-out of its own); doesn't build definitions. |
-| **Composer Implementer** | `task-authoring-implement` | Builds the definitions via the 4 author subagents (composer MCP `create_*`/`update_*`), working the implementer-subtask checklist item by item and finishing with every box ticked. Shares a **build-discipline core** with the Fixer. | Doesn't install (strictly — a later, approval-gated step), doesn't read the insight-flow project (everything is in the spec — needing to look is a bug to surface), and stops on anything outside building the customization. Small edits (a few lines in one file) are allowed. |
-| **Composer Reviewer** | `task-authoring-review` | AI-reviews the authored definitions via the 4 reviewer subagents (schema, dedup/reuse, best practice). | Doesn't fix or install; routes to fix or human review. |
-| **Composer Fixer** | `task-authoring-fix` | Applies the review blockers (via the author subagents), then re-reviews. Shares the same **build-discipline core** as the Implementer. | Touches only what review flagged; doesn't install, doesn't read the project, and doesn't do wider rework without asking. |
+| **Composer Implementer** | `task-authoring-implement` | **Builds and fixes** the definitions via the 4 author subagents (composer MCP `create_*`/`update_*`). Build mode: works the implementer-subtask checklist to every box ticked (`implement-start`/`-end`). Fix mode: on a `fix-needed` task (AI **or** human review) applies only the flagged blockers (`fix-start`/`-end`), then hands back to review. | Doesn't install (strictly — a later, approval-gated step), shouldn't need to read the insight-flow project (everything's in the spec — needing to look signals a bug to surface and fix), and stops on anything outside building the customization. A small change may be requested directly, without the taskmaster. |
+| **Composer Reviewer** | `task-authoring-review` | AI-reviews the authored definitions via the 4 reviewer subagents (schema, dedup/reuse, best practice). | Doesn't fix or install; on blockers routes back to the Implementer, else to human review. |
 | **Composer Human Review** | `task-authoring-human-review` | Records **your** decision verbatim; on approval advances to testing. | Never decides on your behalf or invents feedback. |
 | **Composer Tester** | `task-authoring-test` | Validates the approved definitions **and confirms they work** (compose/render, install dry-run, exercise, clean up). | Doesn't install the real artifacts. |
 | **Composer Installer** | `task-authoring-install` | Installs the approved definitions (composer MCP `install`), records the created `custom:` ids, marks the task done. Terminal step. | Doesn't start new authoring work. |
@@ -50,7 +49,7 @@ fans out to the relevant column; the parent waits and rejoins automatically (see
   `task-authoring-analyze`).
 - **Authors** build the definitions: `describe(kind)` + `get` a template → apply
   the reuse-first rule → `create_*`/`update_*` → verify it validated (used by
-  `implement` and `fix`).
+  `implement`, in both its build and fix modes).
 - **Reviewers** check schema, reuse, and best practice, returning
   `id — issue — severity — fix` findings (used by `review`).
 

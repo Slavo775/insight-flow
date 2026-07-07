@@ -29,7 +29,7 @@ insight-flow builds AI roles from three nested parts — small parts make bigger
   - **Official MCP Registry** — \`registry.modelcontextprotocol.io\`. The broad, canonical list, also a no-auth read API.
   Pick the smallest server that fits.
 
-**MCP secrets.** If a server needs a key or token, author it as an \`mcp-server\` module with a \`\${VAR}\` placeholder in its \`config\` and an \`inputs\` entry marked \`secret\`. Then tell the user to put the real value in **this project's** \`.insight-flow/secrets.local.json\` — the file at the project root (gitignored), **not** the global \`~/.insight-flow/\`. Secrets live per-project, never globally. Never hard-code a secret.`;
+**MCP secrets.** If a server needs a key or token, author it as an \`mcp-server\` module with a \`\${VAR}\` placeholder in its \`config\` and an \`inputs\` entry marked \`secret\`. Then tell the user they can supply the real value **either way** (same file, two ways in): (a) through the **dashboard install UI**, which prompts for each \`\${VAR}\`, masks the \`secret\` inputs, and writes them to \`.insight-flow/secrets.local.json\` for them; or (b) by editing **this project's** \`.insight-flow/secrets.local.json\` by hand — the file at the project root (gitignored), **not** the global \`~/.insight-flow/\`. Secrets live per-project, never globally. Never hard-code a secret.`;
 
 /** Cross-cutting rules that bind every authored definition. */
 export const COMPOSER_RULES = `**Authoring rules (apply to every kind)**

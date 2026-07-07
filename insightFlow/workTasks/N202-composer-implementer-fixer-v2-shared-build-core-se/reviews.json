@@ -1,0 +1,94 @@
+{
+  "taskId": "N202",
+  "reviews": [
+    {
+      "startedAt": "2026-07-07T05:31:56.538Z",
+      "endedAt": "2026-07-07T05:35:37.537Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: shared module id 'authoring-build/core' uses a role-scoped (/) form but is composed into two agents — violates the module-id convention and fails compose.test.mjs (320/1). Rename to a flat id (authoring-build-core). Content otherwise correct.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-07T05:42:07.566Z",
+        "endedAt": "2026-07-07T05:44:02.821Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json"
+        ],
+        "comment": "Fixed blocker 1: renamed shared module authoring-build/core -> flat id authoring-build-core (3 spots). Test suite 321/321.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-07T08:39:42.540Z",
+      "endedAt": "2026-07-07T08:40:55.409Z",
+      "verdict": "fix-needed",
+      "comment": "Human: make the Composer Implementer also do the fixing (route AI + human review fix-needed to authoring-implement); remove the separate Composer Fixer. Folded into N202.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-07T08:44:46.710Z",
+      "endedAt": "2026-07-07T08:45:30.678Z",
+      "verdict": "fix-needed",
+      "comment": "Human round 3: reword authoring-build-core — (1) searching insight-flow not strictly banned, needing to = a bug to fix; (2) job is create AND update custom things; (3) 'small adjustments' means user can call the implementer directly without the taskmaster.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-07T08:52:36.966Z",
+        "endedAt": "2026-07-07T09:05:03.534Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/modules/handovers-authoring.json",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md"
+        ],
+        "comment": "Rounds 2+3: removed Composer Fixer; implementer now builds AND fixes (fix-needed from AI + human review routes to it); reworded authoring-build-core (project-read not strictly banned, create+update job, small change = call implementer directly without taskmaster). Tests 321/321.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-07T13:29:34.067Z",
+      "endedAt": "2026-07-07T13:30:30.470Z",
+      "verdict": "fix-needed",
+      "comment": "Human round 4: MCP-secrets guidance should also point users to the dashboard UI (install modal collects ${VAR}/secret inputs and writes secrets.local.json). Offer both paths (UI + manual file). Update composer-conventions.ts COMPOSER_RULES + authoring-analyze MCP-pass note.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-07T13:35:07.144Z",
+        "endedAt": "2026-07-07T13:40:14.332Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json"
+        ],
+        "comment": "Round 4: MCP-secrets guidance now offers both paths — dashboard install UI (prompts/masks/writes secrets.local.json) or hand-edit the file. Updated COMPOSER_RULES + authoring-analyze MCP-pass note. Tests 321/321.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-07T14:56:50.097Z",
+      "endedAt": "2026-07-07T14:59:14.880Z",
+      "verdict": "approved",
+      "comment": "Re-review of full change set (Rounds 1-4): fixer removed, implementer dual-mode, fix-needed routes to implementer (AI+human), Round 3 wording + Round 4 secrets-UI applied. Flow validates (7 agents, no dangling edges), tests 321/321. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-07T15:08:51.048Z",
+      "endedAt": "2026-07-07T15:09:27.042Z",
+      "verdict": "approved",
+      "comment": "Human approved; merge into agents-approved (same branch as N200/N201).",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

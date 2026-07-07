@@ -1,23 +1,26 @@
 # N202 — Composer implementer + fixer v2 — shared build core, self-contained context, checklist tracking, no-install guard — Checklist
 
+> Reflects the **final** design (fixer removed, implementer builds + fixes). See `TASK.md` "Design evolution" and `REVIEW.md` for the round-by-round history.
+
 ## Done criteria
 
-- [x] `authoring-build/core` section module added to `modules/roles/authoring.json` (self-contained context, no-install guard, scope-lock, small-adjustment allowance, spec+checklist obligation).
-- [x] `authoring-implement/identity` trimmed to role-specifics; "Do NOT install" line moved to the core; adds "follow checklist, finish with all boxes ticked".
-- [x] `authoring-fix/identity` trimmed to role-specifics and relies on the shared core.
-- [x] `authoring-build/core` added to the `modules` list of both `authoring-implement` and `authoring-fix` in `composed/authoring.json` (right after the identity module).
-- [x] `authoring-spec-structure.json` — "Implementer subtasks" now specifies a markdown checkbox (`- [x]`) list the implementer ticks off.
-- [x] `website/docs/authoring/agents-and-subagents.md` (Implementer + Fixer rows) and `walkthrough.md` updated to describe the shared core, guards, and checklist tracking.
+- [x] `authoring-build-core` section module (flat id) added to `modules/roles/authoring.json` — self-contained context (project-read not strictly banned; needing it = a bug), never-install guard, scope-lock (create + update custom things), small-change-via-direct-invocation allowance, follow-checklist-to-completion.
+- [x] `authoring-implement/identity` is **dual-mode**: build (`implement-start/-end`, work the checklist) and fix (`fix-start/-end`, only review-flagged blockers, hand back to review); composes `authoring-build-core`.
+- [x] Separate **Composer Fixer removed** — `authoring-fix` gone from the flow `agents`, `composed/authoring.json`, `authoring-fix/identity`, and `authoring-fix/handover-review`; no `authoring-fix` / `task-authoring-fix` left in `src`.
+- [x] Composer flow routes `fix-needed` to the implementer — `authoring-review --fix-needed--> authoring-implement`, `authoring-human-review --fix-needed--> authoring-implement`, `authoring-implement --fixed--> authoring-review`; handover modules + reviewer/human-review identities updated to match.
+- [x] `authoring-spec-structure.json` — "Implementer subtasks" is a `- [ ]` checkbox list written into `CHECKLIST.md`.
+- [x] MCP-secrets guidance offers **both** paths (dashboard install UI **or** hand-edit `secrets.local.json`) in `composer-conventions.ts` (`COMPOSER_RULES`) and the `authoring-analyze` MCP-pass note.
+- [x] `website/docs/authoring/agents-and-subagents.md` (7 agents, Fixer row dropped, Implementer builds+fixes) and `walkthrough.md` (review→fix loops back to implementer; secrets both-ways) updated.
 
 ## Quality gates
 
 - [x] `pnpm --dir packages/taskflow run build` passes (JSON valid, composes)
 - [x] `npx tsc --noEmit` passes
 - [x] `npm run lint` passes (pre-commit prettier + eslint clean)
-- [x] No regressions in the other `authoring-*` agents (still compose)
+- [x] `pnpm --dir packages/taskflow test` → 321 / 321 (compose-test agent-count floor updated 8 → 7)
 
 ## Verification
 
-- [x] Rendered `authoring-implement` prompt includes the `authoring-build/core` section and forbids installing + reading the project, locks scope, allows small edits, and requires all checklist boxes ticked.
-- [x] Rendered `authoring-fix` prompt includes the same `authoring-build/core` section.
-- [x] `grep -c "authoring-build/core" composed/authoring.json` returns 2.
+- [x] Rendered `authoring-implement` prompt includes `authoring-build-core`, documents build + fix modes, forbids installing, treats project-reading as a bug signal (not a hard ban), locks scope to create/update custom things, allows a direct small change without the taskmaster, and requires all checklist boxes ticked.
+- [x] `composer-authoring` loads via the real loader: 7 agents, 11 edges, no dangling endpoints, valid path to `done`; both `fix-needed` edges target `authoring-implement`.
+- [x] Rendered `authoring-analyze` shows the MCP-secrets "either way" (install UI + file) wording.
