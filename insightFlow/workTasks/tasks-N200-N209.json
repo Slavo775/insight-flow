@@ -504,6 +504,93 @@
       "mrUrl": null,
       "mergedAt": "2026-07-07T15:23:51.574Z",
       "flowId": "default"
+    },
+    {
+      "id": "N203",
+      "title": "Composer review v2 — unify AI + human review into one dual-mode agent + consolidated requirements",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N203-composer-review-v2-unify-ai-human-review-into-one-",
+      "createdAt": "2026-07-07T18:33:31.977Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-07T18:33:31.977Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-07T19:43:33.867Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-07T21:15:27.108Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T22:11:51.564Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-07T22:30:07.578Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-08T07:30:55.964Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-08T07:32:54.479Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-08T09:12:35.414Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-08T09:13:15.597Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-07T19:43:33.868Z",
+        "completedAt": "2026-07-07T21:15:27.109Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/handovers-authoring.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

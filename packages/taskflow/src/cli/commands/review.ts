@@ -10,7 +10,7 @@ import {
 } from "../../core/storage.js";
 import { scaffoldReviewMd } from "../../core/spec.js";
 import { recordTaskLifecycle } from "../../core/observability/langfuse.js";
-import { writeStatus } from "./status-write.js";
+import { writeStatus, flowDeclaresStatus } from "./status-write.js";
 
 export function cmdReviewStart(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const id = resolveId(master, opts.id as string);
@@ -79,7 +79,18 @@ export function cmdReviewEnd(config: TaskflowConfig, master: MasterFile, opts: P
   if (opts.by) review.by = opts.by as string;
   jsonFileStorage.saveTaskReviews(config, task, reviews);
 
-  writeStatus(task, opts.verdict as string, (opts.by as string) || review.by || "task-review");
+  // Flow-aware AI approval. A flow with a single dual-mode review agent (e.g.
+  // `composer-authoring`) declares a distinct `ai-approved` status so an AI
+  // approval loops back to the same agent for the human pass instead of
+  // advancing on AI approval alone. Default-flow tasks declare no such status,
+  // so this stays `approved` — byte-identical to before. Keyed off the effective
+  // review type (set from `--type` or, failing that, from review-start), so an
+  // AI approval can't skip the human pass even if `--type` is omitted here.
+  let target = opts.verdict as string;
+  if (review.type === "ai" && target === "approved" && flowDeclaresStatus(task, "ai-approved")) {
+    target = "ai-approved";
+  }
+  writeStatus(task, target, (opts.by as string) || review.by || "task-review");
 
   recomputeTaskSummary(task, reviews, loadTaskIncidentsHybrid(config, task));
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);

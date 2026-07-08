@@ -20,6 +20,8 @@ import {
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
   AUTHORING_PROJECT,
+  BUILTIN_PROJECTS,
+  suggestNextSteps,
   flowRequiredInputs,
 } from "../dist/index.js";
 
@@ -572,11 +574,41 @@ test("N200: the model primer + custom-only rule reach the authoring agents", () 
 
 test("N200: every authoring agent carries the plain-language module", () => {
   const authoring = Object.entries(COMPOSED_AGENTS).filter(([id]) => id.startsWith("authoring-"));
-  // N202: the separate Composer Fixer was removed — the implementer fixes — so 7 authoring agents.
-  assert.ok(authoring.length >= 7, "the authoring flow's agents are registered");
+  // N202: removed the Composer Fixer (implementer fixes). N203: removed the separate
+  // Composer Human Review (one dual-mode review agent). So 6 authoring agents.
+  assert.ok(authoring.length >= 6, "the authoring flow's agents are registered");
   for (const [id, def] of authoring) {
     assert.ok(def.modules.includes("plain-language"), `${id} composes plain-language`);
   }
+});
+
+test("N203: composer review sequences AI → human via the ai-approved status", () => {
+  // The composer flow declares a distinct `ai-approved` status; the default flow does not
+  // (so the shared review-end command stays byte-identical for default-flow tasks).
+  assert.ok(
+    AUTHORING_PROJECT.statuses.some((s) => s.id === "ai-approved"),
+    "composer-authoring declares ai-approved",
+  );
+  assert.ok(
+    !BUILTIN_PROJECTS["default"].statuses.some((s) => s.id === "ai-approved"),
+    "default flow does NOT declare ai-approved",
+  );
+  // AI approval loops back to the same review agent for the human pass…
+  assert.deepEqual(
+    suggestNextSteps(AUTHORING_PROJECT.flow, "ai-approved", AUTHORING_PROJECT.statuses).map(
+      (s) => s.agentId,
+    ),
+    ["authoring-review"],
+    "ai-approved suggests the review agent again (human pass)",
+  );
+  // …and only a human approval advances to test — the human pass can't be skipped.
+  assert.deepEqual(
+    suggestNextSteps(AUTHORING_PROJECT.flow, "approved", AUTHORING_PROJECT.statuses).map(
+      (s) => s.agentId,
+    ),
+    ["authoring-test"],
+    "approved advances to test",
+  );
 });
 
 test("N200 (Round 4): no paid/keyed MCP ships; discovery is web search via github.com/mcp", () => {

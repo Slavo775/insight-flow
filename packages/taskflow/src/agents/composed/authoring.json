@@ -69,7 +69,7 @@
   {
     "id": "authoring-review",
     "title": "Composer Reviewer",
-    "description": "AI-reviews the authored definitions (schema, dedup, best practice) via the reviewer subagent.",
+    "description": "Runs both the AI review (verifies the authoring requirements via the reviewer subagents) and the human-feedback pass; picks the mode by intent.",
     "command": { "install": true },
     "modules": [
       "authoring-review/identity",
@@ -79,8 +79,9 @@
       "enforcement",
       "protocol",
       "plain-language",
+      "recorder-discipline",
       "authoring-review/handover-fix",
-      "authoring-review/handover-human-review",
+      "authoring-review/handover-test",
       "actions"
     ],
     "subagents": [
@@ -88,25 +89,6 @@
       "composer/agent-reviewer",
       "composer/flow-reviewer",
       "composer/relationship-reviewer"
-    ]
-  },
-  {
-    "id": "authoring-human-review",
-    "title": "Composer Human Review",
-    "description": "Records the human's decision on the authored definitions; approval advances to testing.",
-    "command": { "install": true },
-    "modules": [
-      "authoring-human-review/identity",
-      "composer-mcp-note",
-      "composer-authoring-conventions",
-      "security",
-      "enforcement",
-      "protocol",
-      "plain-language",
-      "recorder-discipline",
-      "authoring-human-review/handover-fix",
-      "authoring-human-review/handover-test",
-      "actions"
     ]
   },
   {
