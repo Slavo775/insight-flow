@@ -32,3 +32,13 @@ function resolveFlow(task: Task): StatusFlow | undefined {
 export function writeStatus(task: Task, target: string, by: string): void {
   setStatus(task, target, { by, at: now() }, resolveFlow(task));
 }
+
+/**
+ * Does the task's flow declare a status with this id? Used by flow-aware
+ * lifecycle commands (e.g. review-end mapping an AI approval to a distinct
+ * `ai-approved` status only when the flow — like `composer-authoring` — has one,
+ * leaving the default flow's `approved` behaviour byte-identical).
+ */
+export function flowDeclaresStatus(task: Task, statusId: string): boolean {
+  return (resolveFlow(task)?.statuses ?? []).some((s) => s.id === statusId);
+}

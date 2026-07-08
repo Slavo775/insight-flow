@@ -1,0 +1,32 @@
+{
+  "taskId": "N203",
+  "reviews": [
+    {
+      "startedAt": "2026-07-07T22:11:51.565Z",
+      "endedAt": "2026-07-07T22:30:07.577Z",
+      "verdict": "approved",
+      "comment": "Approved. Unified dual-mode review agent + consolidated requirements; flow validates (6 agents), tests 321/321, lint 0 errors. One non-blocking note: AI→human sequencing is prompt/handover-driven (flow points to test after AI approval) — accepted tradeoff, safeguarded by the gated handover 'when'.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-08T07:30:55.966Z",
+      "endedAt": "2026-07-08T07:32:54.479Z",
+      "verdict": "approved",
+      "comment": "Re-review of post-approval enhancements (ai-approved graph-enforced sequencing + reviewer dedupe). CLI change correctly flow-gated (default flow byte-identical, test-verified); flow validates; 322/322. 2 non-blocking hardening notes (opts.type vs review.type; kanban fallback column). Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-08T09:12:35.416Z",
+      "endedAt": "2026-07-08T09:13:15.597Z",
+      "verdict": "approved",
+      "comment": "Human approved; merge into agents-approved (same branch as N200-N202).",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

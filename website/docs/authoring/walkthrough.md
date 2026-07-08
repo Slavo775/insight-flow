@@ -85,14 +85,21 @@ It never installs (that's the gated installer step) and stops on anything outsid
 building the customization. For a **small change** you can call the implementer
 directly, without the taskmaster. Nothing is installed yet.
 
-## 4. Review → (fix) → human review
+## 4. Review → (fix) → approve
 
-`/task-authoring-review` fans out to the read-only **reviewer** subagents
-(schema, duplication/reuse, best practice). On blockers it routes back to the
-**implementer**, which fixes them (`/task-authoring-implement` in fix mode) and
-hands back to review. When it's clean, it hands to `/task-authoring-human-review`,
-which records **your** decision verbatim — and if the human finds blockers, those
-route back to the implementer too.
+`/task-authoring-review` is **one agent that runs both passes**, picked by intent:
+
+- **AI pass** (no feedback from you): it fans out to the read-only **reviewer**
+  subagents and is critical — it checks the new definitions against every
+  **authoring requirement** (minimal, valid MCP JSON, externalized secrets, no
+  name collision, reuse honoured, no read-only/built-in edits, custom-only) plus
+  schema and whether the implementation meets the spec, and writes `REVIEW.md`.
+- **Human pass** (you give feedback): it records **your** decision verbatim.
+
+On blockers (AI *or* human) it routes back to the **implementer**, which fixes
+them (`/task-authoring-implement` in fix mode) and hands back to review. After the
+AI pass approves it waits for your human pass — it does **not** advance to test on
+AI approval alone. Only your approval sends it onward.
 
 ## 5. Test, then install
 
@@ -133,9 +140,9 @@ create_module({ def: {
 
 It re-`get`s to confirm it validated.
 
-**Review → human review.** The module reviewer checks the schema, that it isn't a
-duplicate of an existing section, and that the id is `custom:`. Clean → you
-approve.
+**Review.** The AI pass checks the schema, that it isn't a duplicate of an
+existing section, and that the id is `custom:` (and the other requirements). Clean
+→ the human pass records your approval.
 
 **Test → install.** The tester composes it into a throwaway agent to confirm it
 renders, then `/task-authoring-install` runs

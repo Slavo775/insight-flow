@@ -45,31 +45,13 @@
     "when": "blockers were found — the implementer fixes them"
   },
   {
-    "id": "authoring-review/handover-human-review",
-    "title": "Authoring: review → human review",
-    "source": "builtin",
-    "kind": "handover",
-    "to": "authoring-human-review",
-    "mode": "gated",
-    "when": "the authored definitions pass AI review"
-  },
-  {
-    "id": "authoring-human-review/handover-fix",
-    "title": "Authoring: human review → implement (fix)",
-    "source": "builtin",
-    "kind": "handover",
-    "to": "authoring-implement",
-    "mode": "gated",
-    "when": "the human found blockers — the implementer fixes them"
-  },
-  {
-    "id": "authoring-human-review/handover-test",
-    "title": "Authoring: human review → test",
+    "id": "authoring-review/handover-test",
+    "title": "Authoring: review → test",
     "source": "builtin",
     "kind": "handover",
     "to": "authoring-test",
     "mode": "gated",
-    "when": "the human approved the definitions"
+    "when": "the human approved the definitions (after the human-feedback pass, not merely AI approval)"
   },
   {
     "id": "authoring-test/handover-install",
