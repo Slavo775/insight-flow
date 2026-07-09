@@ -83,7 +83,7 @@ install(kind="flow", id="composer-authoring")
 
 That emits, into your project:
 
-- `.claude/commands/task-authoring-*.md` — the 8 agent commands
+- `.claude/commands/task-authoring-*.md` — the 5 agent commands
 - `.claude/agents/*.md` — the 12 per-kind subagents
 - `.mcp.json` — the `composer` server entry (stdio; nothing to start/stop)
 - the activity-engine hooks (so authoring tasks record events)
