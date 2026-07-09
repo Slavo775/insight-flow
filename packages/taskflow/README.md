@@ -33,7 +33,9 @@ Run this inside your project root (the directory that contains your code):
 insight-flow init
 ```
 
-Add `--examples` to get commented `agents.extend` stubs in `taskflow.config.json` — useful when you want to wire up your stack-specific commands (typecheck, lint, PR CLI) right away:
+Add `--examples` to get commented config examples in `taskflow.config.json`. New projects have the **activity engine on by default**.
+
+> **Deprecated:** `agents.extend` (below) is deprecated and will be removed in a future release. It still works for existing configs, but don't use it for new projects.
 
 ```bash
 insight-flow init --examples
@@ -92,7 +94,11 @@ If you added hooks and Claude Code was already open, **restart the session** for
 
 ### 5. Configure for your stack
 
-insight-flow ships zero technology assumptions. Tell each agent how to run your project's quality gates and how to create PRs via `agents.extend` in `taskflow.config.json`:
+insight-flow ships zero technology assumptions.
+
+> **`agents.extend` is deprecated** (removed in a future release). It still works for now, but prefer authoring a custom flow/agent (see the composer authoring flow) over `agents.extend` for new projects.
+
+Historically you told each agent how to run your project's quality gates and how to create PRs via `agents.extend` in `taskflow.config.json`:
 
 ```json
 {

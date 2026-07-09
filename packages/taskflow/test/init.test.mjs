@@ -73,30 +73,28 @@ test("init writes a technology-agnostic config (no stack / gitTool / prStrategy 
   }
 });
 
-test("init --examples writes commented agents.extend stubs for every built-in agent", () => {
+test("N207: init --examples no longer promotes agents.extend (deprecated), events on by default", () => {
   const dir = makeTempDir();
   try {
     initProject(dir, false, { examples: true });
     const body = readFileSync(resolve(dir, "taskflow.config.json"), "utf-8");
-    // The stub block is a JSONC-ish helper: parse-tolerant for human edit.
-    assert.match(body, /"agents":/, "Should contain agents block");
-    assert.match(body, /"extend":/, "Should contain extend block");
-    for (const agent of [
-      "task-implement",
-      "task-review",
-      "task-review-fix",
-      "task-incident",
-      "task-git",
-      "taskmaster",
-      "task-human-review",
-      "task-request-changes",
-    ]) {
-      assert.match(
-        body,
-        new RegExp(`"${agent}":\\s*\\[\\]`),
-        `Should include empty stub for agent '${agent}'`,
-      );
-    }
+    assert.match(body, /"agents":/, "still has an agents block (for git permissions)");
+    // agents.extend is deprecated — no promoted `extend` stub, just a deprecation note.
+    assert.doesNotMatch(body, /"extend":\s*\{/, "no promoted agents.extend stub");
+    assert.match(body, /DEPRECATED.*agents\.extend/i, "carries the agents.extend deprecation note");
+    // Events on by default (N207).
+    assert.match(body, /"enabled":\s*true/, "activityEngine.enabled defaults to true");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("N207: plain init writes activityEngine.enabled: true", () => {
+  const dir = makeTempDir();
+  try {
+    initProject(dir, false, {});
+    const cfg = JSON.parse(readFileSync(resolve(dir, "taskflow.config.json"), "utf-8"));
+    assert.equal(cfg.activityEngine.enabled, true, "events on by default in a fresh init");
   } finally {
     rmSync(dir, { recursive: true });
   }
