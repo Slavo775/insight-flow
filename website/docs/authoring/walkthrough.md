@@ -98,16 +98,25 @@ directly, without the taskmaster. Nothing is installed yet.
 
 On blockers (AI *or* human) it routes back to the **implementer**, which fixes
 them (`/task-authoring-implement` in fix mode) and hands back to review. After the
-AI pass approves it waits for your human pass — it does **not** advance to test on
-AI approval alone. Only your approval sends it onward.
+AI pass approves it waits for your human pass — it does **not** advance to install
+on AI approval alone. Only your approval sends it onward.
 
-## 5. Test, then install
+## 5. Install, then validate
 
-After approval, `/task-authoring-test` validates the definitions **and confirms
-they work** (compose/render, an install dry-run, exercise on a trivial input,
-then clean up). Finally `/task-authoring-install` installs the approved
-definitions via the composer MCP `install`, records the `custom:` ids it created,
-and marks the task **done**.
+After your approval, `/task-authoring-install` **installs first, then validates
+the real install** — one agent, in order: a **pre-flight plan** (surface a
+dangling target, an `.mcp.json` conflict, or a missing secret before writing) →
+**install** the definitions (flows/agents/modules) via the composer MCP `install`
+→ **validate** that the install actually landed (the `.claude/` command + subagent
+files and `.mcp.json` entries are present, references resolve, a trivial smoke
+run) → mark the task **done**.
+
+It follows an install edge-case checklist and fixes **installs, not definitions**:
+if validation fails it **rolls back** (uninstall) and hands back to the implementer
+(`fix-needed`); if a fix would touch a setting unrelated to your task (e.g.
+overwrite an existing `.mcp.json` entry), it **stops for your approval** first; a
+missing `${VAR}` secret is reported so you can add it (install UI or
+`.insight-flow/secrets.local.json`) and retry.
 
 ---
 
@@ -144,9 +153,9 @@ It re-`get`s to confirm it validated.
 existing section, and that the id is `custom:` (and the other requirements). Clean
 → the human pass records your approval.
 
-**Test → install.** The tester composes it into a throwaway agent to confirm it
-renders, then `/task-authoring-install` runs
-`install(kind="module", id="custom:coding-standards")` and marks the task done.
+**Install → validate.** `/task-authoring-install` runs
+`install(kind="module", id="custom:coding-standards")`, then validates the real
+install (the module is registered and resolves) and marks the task done.
 You can now add `custom:coding-standards` to any agent's `modules` list.
 
 :::note Reuse in action

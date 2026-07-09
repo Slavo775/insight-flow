@@ -575,8 +575,9 @@ test("N200: the model primer + custom-only rule reach the authoring agents", () 
 test("N200: every authoring agent carries the plain-language module", () => {
   const authoring = Object.entries(COMPOSED_AGENTS).filter(([id]) => id.startsWith("authoring-"));
   // N202: removed the Composer Fixer (implementer fixes). N203: removed the separate
-  // Composer Human Review (one dual-mode review agent). So 6 authoring agents.
-  assert.ok(authoring.length >= 6, "the authoring flow's agents are registered");
+  // Composer Human Review (one dual-mode review agent). N204: merged the Tester into
+  // the Installer (install-first + validate). So 5 authoring agents.
+  assert.ok(authoring.length >= 5, "the authoring flow's agents are registered");
   for (const [id, def] of authoring) {
     assert.ok(def.modules.includes("plain-language"), `${id} composes plain-language`);
   }
@@ -606,8 +607,31 @@ test("N203: composer review sequences AI → human via the ai-approved status", 
     suggestNextSteps(AUTHORING_PROJECT.flow, "approved", AUTHORING_PROJECT.statuses).map(
       (s) => s.agentId,
     ),
-    ["authoring-test"],
-    "approved advances to test",
+    ["authoring-install"],
+    "approved advances to install",
+  );
+});
+
+test("N204: composer flow tail is install-first (validate) with rollback to implement", () => {
+  // The Tester was merged into the Installer; the flow ends review → install → done.
+  assert.ok(
+    !AUTHORING_PROJECT.agents.includes("authoring-test"),
+    "authoring-test removed from the flow",
+  );
+  const tail = (from, on) =>
+    AUTHORING_PROJECT.flow
+      .filter((e) => e.from === from && (on === undefined || e.on === on))
+      .map((e) => `${e.on ?? "*"}→${e.to}`);
+  assert.deepEqual(tail("authoring-review", "approved"), ["approved→authoring-install"]);
+  assert.deepEqual(
+    tail("authoring-install").sort(),
+    ["*→done", "fix-needed→authoring-implement"],
+    "install → done on success, → implement on validation failure (rollback)",
+  );
+  // The installer composes the edge-case checklist.
+  assert.ok(
+    COMPOSED_AGENTS["authoring-install"].modules.includes("composer-install-checklist"),
+    "installer composes composer-install-checklist",
   );
 });
 

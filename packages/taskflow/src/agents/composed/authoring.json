@@ -81,7 +81,7 @@
       "plain-language",
       "recorder-discipline",
       "authoring-review/handover-fix",
-      "authoring-review/handover-test",
+      "authoring-review/handover-install",
       "actions"
     ],
     "subagents": [
@@ -92,35 +92,20 @@
     ]
   },
   {
-    "id": "authoring-test",
-    "title": "Composer Tester",
-    "description": "Validates the approved definitions (load/compose/install dry-run) before install.",
-    "command": { "install": true },
-    "modules": [
-      "authoring-test/identity",
-      "composer-mcp-note",
-      "composer-authoring-conventions",
-      "security",
-      "enforcement",
-      "protocol",
-      "plain-language",
-      "authoring-test/handover-install",
-      "actions"
-    ]
-  },
-  {
     "id": "authoring-install",
     "title": "Composer Installer",
-    "description": "Installs the approved, validated definitions via the composer MCP (terminal step).",
+    "description": "Installs the approved definitions (flows/agents/modules) then validates the real install; rolls back + hands to the implementer on failure. Terminal step.",
     "command": { "install": true },
     "modules": [
       "authoring-install/identity",
+      "composer-install-checklist",
       "composer-mcp-note",
       "composer-authoring-conventions",
       "security",
       "enforcement",
       "protocol",
       "plain-language",
+      "authoring-install/handover-fix",
       "actions"
     ]
   }

@@ -1,13 +1,12 @@
 {
   "id": "composer-authoring",
   "title": "Composer authoring",
-  "description": "Second built-in flow: a guided lifecycle for authoring insight-flow's own customizations — designing and building custom modules, agents, and flows (analyze → create → implement ↔ review → test → install). One dual-mode review agent runs both the AI review and the human-feedback pass; an AI approval sets `ai-approved` (which loops back to the same review agent for the human pass), and only the human approval sets `approved` and advances to test — so the human pass can't be skipped. The implementer both builds and fixes (review blockers, AI or human, route back to it). Tasks bound to this flow are the 'self-setup' category (filter by flowId).",
+  "description": "Second built-in flow: a guided lifecycle for authoring insight-flow's own customizations — designing and building custom modules, agents, and flows (analyze → create → implement ↔ review → install). One dual-mode review agent runs both the AI review and the human-feedback pass; an AI approval sets `ai-approved` (which loops back to the same review agent for the human pass), and only the human approval sets `approved` and advances to install — so the human pass can't be skipped. The implementer both builds and fixes (review blockers, AI or human, route back to it). The installer installs the definitions then validates the real install; on failure it rolls back and hands back to the implementer. Tasks bound to this flow are the 'self-setup' category (filter by flowId).",
   "agents": [
     "authoring-analyze",
     "authoring-create",
     "authoring-implement",
     "authoring-review",
-    "authoring-test",
     "authoring-install"
   ],
   "flow": [
@@ -18,8 +17,8 @@
     { "from": "authoring-implement", "to": "authoring-review", "on": "fixed" },
     { "from": "authoring-review", "to": "authoring-implement", "on": "fix-needed" },
     { "from": "authoring-review", "to": "authoring-review", "on": "ai-approved" },
-    { "from": "authoring-review", "to": "authoring-test", "on": "approved" },
-    { "from": "authoring-test", "to": "authoring-install" },
+    { "from": "authoring-review", "to": "authoring-install", "on": "approved" },
+    { "from": "authoring-install", "to": "authoring-implement", "on": "fix-needed" },
     { "from": "authoring-install", "to": "done" }
   ],
   "install": ["activity", "mcp-composer"],
