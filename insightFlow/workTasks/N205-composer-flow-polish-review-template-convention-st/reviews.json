@@ -1,0 +1,32 @@
+{
+  "taskId": "N205",
+  "reviews": [
+    {
+      "startedAt": "2026-07-09T07:04:47.777Z",
+      "endedAt": "2026-07-09T07:07:05.892Z",
+      "verdict": "fix-needed",
+      "comment": "N205 changes all correct (A/B/C verified, 324/324). Doc-sync audit found 1 stale line: index.md:86 says '8 agent commands' — should be 5 (composer flow has 5 agents since N204). Fix that one line.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-09T07:12:09.219Z",
+        "endedAt": "2026-07-09T07:13:46.058Z",
+        "status": "fixed",
+        "filesChanged": [
+          "website/docs/authoring/index.md"
+        ],
+        "comment": "Fixed blocker: index.md agent-command count 8 -> 5. Doc-sync re-sweep clean (no stale counts, no removed-agent refs). 324/324.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-09T07:39:33.431Z",
+      "endedAt": "2026-07-09T07:41:36.870Z",
+      "verdict": "approved",
+      "comment": "Re-review: blocker fixed (index.md 8->5 agent commands); full doc-sync sweep clean; A/B/C all correct; 324/324. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

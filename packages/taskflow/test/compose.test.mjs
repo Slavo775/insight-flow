@@ -635,6 +635,25 @@ test("N204: composer flow tail is install-first (validate) with rollback to impl
   );
 });
 
+test("N205: polish — reviewers-templated convention, status titles, hooks in validation", () => {
+  // A — the reviewers-are-templated convention reaches the authoring agents.
+  assert.ok(
+    /Reviewers are templated too/.test(composeAgentById("authoring-create")),
+    "reviewers-templated convention is composed in",
+  );
+  // B — status *titles* changed; *ids* unchanged (so the CLI verdict=status model is intact).
+  const st = (id) => AUTHORING_PROJECT.statuses.find((s) => s.id === id);
+  assert.equal(st("ready").title, "ready to implement");
+  assert.equal(st("approved").title, "ready to install");
+  assert.ok(st("ready") && st("approved"), "the `ready` and `approved` ids are unchanged");
+  // C — the installer's validate step names hooks and requires correctness.
+  const inst = composeAgentById("authoring-install");
+  assert.ok(
+    /hooks\*\* were installed and are correct/.test(inst),
+    "validation checks hooks are correct",
+  );
+});
+
 test("N200 (Round 4): no paid/keyed MCP ships; discovery is web search via github.com/mcp", () => {
   // The Smithery module is removed entirely — not in the catalog, no flow, no key.
   assert.equal(MODULE_REGISTRY["mcp-registry-search"], undefined, "Smithery MCP module removed");

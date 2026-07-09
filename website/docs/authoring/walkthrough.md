@@ -108,8 +108,9 @@ the real install** — one agent, in order: a **pre-flight plan** (surface a
 dangling target, an `.mcp.json` conflict, or a missing secret before writing) →
 **install** the definitions (flows/agents/modules) via the composer MCP `install`
 → **validate** that the install actually landed (the `.claude/` command + subagent
-files and `.mcp.json` entries are present, references resolve, a trivial smoke
-run) → mark the task **done**.
+files, any hooks, and the `.mcp.json` entries are present **and correct** — an agent
+md that wasn't created, or a hook/command installed wrong, counts as a failure —
+references resolve, a trivial smoke run) → mark the task **done**.
 
 It follows an install edge-case checklist and fixes **installs, not definitions**:
 if validation fails it **rolls back** (uninstall) and hands back to the implementer

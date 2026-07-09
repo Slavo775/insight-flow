@@ -687,6 +687,128 @@
       "mrUrl": null,
       "mergedAt": "2026-07-09T06:21:28.315Z",
       "flowId": "default"
+    },
+    {
+      "id": "N205",
+      "title": "Composer flow polish — review-template convention, status display names, hooks in install validation",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N205-composer-flow-polish-review-template-convention-st",
+      "createdAt": "2026-07-09T06:27:19.269Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-09T06:27:19.269Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-09T06:33:38.691Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-09T07:03:47.339Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T07:04:47.776Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-09T07:07:05.892Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-09T07:12:09.218Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-09T07:13:46.059Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T07:39:33.430Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T07:41:36.870Z",
+          "by": "task-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-09T06:33:38.692Z",
+        "completedAt": "2026-07-09T07:03:47.340Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N206",
+      "title": "Composer flow layout — stack reviewer below implementer in the flow map",
+      "type": "feat",
+      "priority": "low",
+      "status": "ready",
+      "flowId": "default",
+      "folder": "insightFlow/workTasks/N206-composer-flow-layout-stack-reviewer-below-implemen",
+      "createdAt": "2026-07-09T11:20:20.648Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-09T11:20:20.648Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
