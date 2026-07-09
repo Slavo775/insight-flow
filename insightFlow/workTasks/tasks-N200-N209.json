@@ -596,6 +596,92 @@
       "mrUrl": null,
       "mergedAt": "2026-07-08T09:14:33.397Z",
       "flowId": "default"
+    },
+    {
+      "id": "N204",
+      "title": "Composer install v2 — one install+validate agent (install-first), edge-case checklist, rollback-on-failure",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N204-composer-install-v2-one-install-validate-agent-ins",
+      "createdAt": "2026-07-08T11:46:29.063Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-08T11:46:29.063Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-08T11:51:03.347Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-08T12:01:03.167Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-08T14:32:08.069Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-08T14:34:39.671Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-08T14:35:13.811Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-08T14:37:37.890Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T06:19:34.903Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T06:19:53.528Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-08T11:51:03.348Z",
+        "completedAt": "2026-07-08T12:01:03.168Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/handovers-authoring.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

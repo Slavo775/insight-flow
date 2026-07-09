@@ -45,21 +45,21 @@
     "when": "blockers were found — the implementer fixes them"
   },
   {
-    "id": "authoring-review/handover-test",
-    "title": "Authoring: review → test",
-    "source": "builtin",
-    "kind": "handover",
-    "to": "authoring-test",
-    "mode": "gated",
-    "when": "the human approved the definitions (after the human-feedback pass, not merely AI approval)"
-  },
-  {
-    "id": "authoring-test/handover-install",
-    "title": "Authoring: test → install",
+    "id": "authoring-review/handover-install",
+    "title": "Authoring: review → install",
     "source": "builtin",
     "kind": "handover",
     "to": "authoring-install",
     "mode": "gated",
-    "when": "validation passes"
+    "when": "the human approved the definitions (after the human-feedback pass, not merely AI approval)"
+  },
+  {
+    "id": "authoring-install/handover-fix",
+    "title": "Authoring: install → implement (fix)",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-implement",
+    "mode": "gated",
+    "when": "post-install validation failed — rolled back; the implementer fixes the definition"
   }
 ]

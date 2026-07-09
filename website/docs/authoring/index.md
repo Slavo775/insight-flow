@@ -51,19 +51,22 @@ where guidance, deduplication, and review pay off.
 ## The lifecycle at a glance
 
 ```
-analyze → create → implement → review → test → install → done
-                       ▲        │  ▲ │
-                       └── fix ◀─┘  └─┘  (review runs the AI pass, then loops
-                                          back for your human pass; blockers
-                                          route to fix. Only your approval
-                                          advances to test.)
+analyze → create → implement → review → install → done
+                       ▲  ▲     │  ▲ │      │
+                       │  └ fix ─┘  └─┘     │  (review runs the AI pass, then
+                       └──── fix ◀──────────┘   loops back for your human pass;
+                                                blockers route to fix. Install
+                                                installs then validates — on
+                                                failure it rolls back to fix.)
 ```
 
 - **Entry** at `analyze` (recommended) or `create`. If you start at `create`
   without a prior analysis, it hands **back to analyze first** (gated) so the
   request is understood and deduplicated.
 - **Install happens only after you approve** — review runs the AI pass then your
-  human pass, and only your approval moves it toward `install`, the terminal action.
+  human pass, and only your approval moves it to `install`. The installer installs
+  **then validates** the real install; on a validation failure it rolls back and
+  hands to fix. A clean install is the terminal action (`done`).
 - Each agent runs as a slash command (`/task-authoring-analyze`,
   `/task-authoring-implement`, …) once the flow is installed.
 
