@@ -741,6 +741,16 @@
           "status": "approved",
           "at": "2026-07-09T07:41:36.870Z",
           "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T13:44:52.585Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T13:45:25.675Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
@@ -757,7 +767,7 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
@@ -777,8 +787,7 @@
       "title": "Composer flow layout — stack reviewer below implementer in the flow map",
       "type": "feat",
       "priority": "low",
-      "status": "ready",
-      "flowId": "default",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N206-composer-flow-layout-stack-reviewer-below-implemen",
       "createdAt": "2026-07-09T11:20:20.648Z",
       "statusHistory": [
@@ -786,17 +795,49 @@
           "status": "ready",
           "at": "2026-07-09T11:20:20.648Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-09T11:27:58.640Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-09T11:42:57.159Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T12:36:55.541Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T12:43:31.393Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T13:44:52.695Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T13:45:25.770Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-07-09T11:27:58.641Z",
+        "completedAt": "2026-07-09T11:42:57.160Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -808,7 +849,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

@@ -90,3 +90,28 @@ Round-1 blocker fixed and re-verified. `index.md:86` now reads "the 5 agent comm
 ### Notes
 
 - N205 (composer-flow polish) is clean end-to-end; the composer-v2 series (N200–N205) is code-complete. Targets `agents-approved`.
+
+
+---
+
+## Round 3 — Human Review (approval)
+
+**Reviewer:** Human (Project Owner)
+**Date:** 2026-07-09
+**Verdict:** approved
+
+### Summary
+
+Human approved (both N205 and N206). Verbatim:
+
+> approved please merge both to the same branch as tasks before
+
+Direction: merge into `agents-approved` (same integration branch as N200–N204).
+
+### Blockers
+
+- None.
+
+### Notes
+
+- Covers the three N205 changes: reviewers-templated convention, status display labels, hooks in install validation (+ the doc-sync fix). Merge into `agents-approved`; N206 (layout) lands on top.
