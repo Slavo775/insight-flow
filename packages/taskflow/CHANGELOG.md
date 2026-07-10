@@ -2,6 +2,14 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.3.1](https://github.com/Slavo775/insight-flow/compare/v2.3.0...v2.3.1) (2026-07-10)
+
+
+### Bug Fixes
+
+* **agents:** flow-aware live-status — recognise all installed flows/agents; composer opt-in for activity (N211) ([889e70d](https://github.com/Slavo775/insight-flow/commit/889e70dbac49f84102b560dfb00abff8347cf0b7))
+* **agents:** flow-aware live-status — recognise all installed flows/agents; composer opt-in for activity (N211) ([eb571b2](https://github.com/Slavo775/insight-flow/commit/eb571b25a18b8488c72fdbf6621035b52590febe))
+
 ## [2.3.0](https://github.com/Slavo775/insight-flow/compare/v2.2.0...v2.3.0) (2026-07-10)
 
 
