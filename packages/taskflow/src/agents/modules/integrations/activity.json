@@ -17,7 +17,7 @@
   {
     "id": "activity/agent-active",
     "title": "Activity — agent active",
-    "description": "Emits agent-active when an insight-flow skill prompt is submitted.",
+    "description": "Emits agent-active when any installed insight-flow slash command is submitted.",
     "source": "builtin",
     "kind": "hook",
     "event": "UserPromptSubmit",
@@ -26,7 +26,7 @@
     "timeout": 10,
     "script": {
       "name": "lifecycle-agent-active.sh",
-      "content": "#!/bin/bash\n# insight-flow lifecycle — UserPromptSubmit → agent-active (only for insight-flow skills)\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\nPROMPT=$(echo \"$INPUT\" | grep -o '\"prompt\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nSKILL=$(echo \"$PROMPT\" | grep -o '^/[a-zA-Z][a-zA-Z0-9_-]*' | head -1 | cut -c2-)\ncase \"$SKILL\" in\n  task-implement|task-review|task-review-fix|task-human-review|taskmaster|taskmaster-change|task-git|task-incident|task-request-changes|complete-task)\n    __INSIGHT_FLOW_BIN__ log-event agent-active --source hook --hook-name UserPromptSubmit --session-id \"$SESSION_ID\" 2>/dev/null &\n    ;;\n  *)\n    exit 0\n    ;;\nesac\n"
+      "content": "#!/bin/bash\n# insight-flow lifecycle — UserPromptSubmit → agent-active for ANY installed insight-flow\n# slash command (default, composer, or a custom flow). Recognition is dynamic: the\n# command is treated as insight-flow work if its slash file exists under\n# .claude/commands/. No hardcoded per-flow whitelist, so new custom flows work\n# automatically (N211).\nINPUT=$(cat)\nSESSION_ID=\"${CLAUDE_SESSION_ID:-}\"\nif [ -z \"$SESSION_ID\" ]; then\n  SESSION_ID=$(echo \"$INPUT\" | grep -o '\"session_id\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nfi\n[ -z \"$SESSION_ID\" ] && exit 0\nPROMPT=$(echo \"$INPUT\" | grep -o '\"prompt\":\"[^\"]*\"' | head -1 | cut -d'\"' -f4)\nSKILL=$(echo \"$PROMPT\" | grep -o '^/[a-zA-Z][a-zA-Z0-9_-]*' | head -1 | cut -c2-)\n[ -z \"$SKILL\" ] && exit 0\nDIR=\"${CLAUDE_PROJECT_DIR:-.}\"\nif [ -f \"$DIR/.claude/commands/$SKILL.md\" ]; then\n  __INSIGHT_FLOW_BIN__ log-event agent-active --source hook --hook-name UserPromptSubmit --session-id \"$SESSION_ID\" 2>/dev/null &\nfi\n"
     }
   },
   {

@@ -70,6 +70,17 @@ analyze → create → implement → review → install → done
 - Each agent runs as a slash command (`/task-authoring-analyze`,
   `/task-authoring-implement`, …) once the flow is installed.
 
+### Live status for your custom flow (opt-in, tokenless)
+
+When you author a **custom flow**, the composer asks whether to include the
+**activity engine** — the lifecycle hooks that show live agent status
+(active / idle / permission-required) on the dashboard while the flow runs. It is
+**tokenless**: the status comes from shell hooks the editor fires, which run
+outside the model, so it costs no tokens. It is **opt-in** — say yes and the
+composer adds the `activity` bundle to the flow's `install`. The hooks recognise
+**any** installed slash command, so your flow's own commands light up
+automatically (the built-in flows already include it).
+
 ## Install it
 
 The flow is built-in, so it shows up in the dashboard **Flows** browser and over

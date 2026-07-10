@@ -1,0 +1,23 @@
+{
+  "taskId": "N211",
+  "reviews": [
+    {
+      "startedAt": "2026-07-10T15:43:56.160Z",
+      "endedAt": "2026-07-10T17:20:16.639Z",
+      "verdict": "approved",
+      "comment": "AI review: existence-check hook fixes composer + all custom flows (task-analyze fixed for free); path-traversal safe (SKILL regex-constrained); composer opt-in tokenless + attach + install validation + docs. 325/325. 2 non-blocking (regression test, pre-existing stdout redirect).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-10T17:21:33.848Z",
+      "endedAt": "2026-07-10T17:21:53.367Z",
+      "verdict": "approved",
+      "comment": "Human approved: ship as a fix (commit/push/merge/release).",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

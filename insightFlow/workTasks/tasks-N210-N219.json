@@ -117,6 +117,81 @@
       "mrUrl": null,
       "mergedAt": "2026-07-10T12:18:12.999Z",
       "flowId": "default"
+    },
+    {
+      "id": "N211",
+      "title": "Flow-aware live-status — recognize all installed flows/agents; composer opt-in for activity module",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N211-flow-aware-live-status-recognize-all-installed-flo",
+      "createdAt": "2026-07-10T14:17:42.190Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T14:17:42.190Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-10T14:34:56.993Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T14:45:38.259Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T15:43:56.158Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T17:20:16.641Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T17:21:33.846Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T17:21:53.368Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-10T14:34:56.994Z",
+        "completedAt": "2026-07-10T14:45:38.260Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/activity.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "website/docs/authoring/index.md",
+          "website/docs/built-ins/default-modules.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "agents",
+        "composer",
+        "activity",
+        "hooks"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
