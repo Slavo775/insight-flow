@@ -198,7 +198,7 @@
       "title": "Reverse-proxy spike: master serves a project dashboard (incl. SSE) on one origin",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N212-reverse-proxy-spike-master-serves-a-project-dashbo",
       "createdAt": "2026-07-10T18:31:24.289Z",
       "statusHistory": [
@@ -206,17 +206,59 @@
           "status": "ready",
           "at": "2026-07-10T18:31:24.290Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-10T19:16:15.018Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T19:32:32.620Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T19:56:23.026Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-10T19:59:04.298Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-10T20:09:13.043Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-10T20:27:29.713Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T20:30:13.248Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T20:30:30.444Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-07-10T19:16:15.019Z",
+        "completedAt": "2026-07-10T19:32:32.622Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -389,7 +431,6 @@
       "type": "feat",
       "priority": "medium",
       "status": "ready",
-      "flowId": "default",
       "folder": "insightFlow/workTasks/N217-installable-pwa-for-the-master-hub-manifest-offlin",
       "createdAt": "2026-07-10T18:31:24.978Z",
       "statusHistory": [
@@ -418,7 +459,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

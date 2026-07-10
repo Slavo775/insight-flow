@@ -1,4 +1,9 @@
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import {
+  createServer,
+  request as httpRequest,
+  type IncomingMessage,
+  type ServerResponse,
+} from "node:http";
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve, sep } from "node:path";
 import { homedir } from "node:os";
@@ -24,6 +29,130 @@ function readBody(req: IncomingMessage): Promise<string> {
     req.on("end", () => resolve(body));
     req.on("error", () => resolve(""));
   });
+}
+
+/**
+ * N212 — a project dashboard always runs locally, so the proxy only ever targets
+ * loopback. Refusing anything else keeps the master (which binds all interfaces
+ * and whose `/api/register` is open) from being turned into an SSRF / open proxy
+ * to arbitrary registrant-supplied URLs.
+ */
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+
+/** Hop-by-hop headers must not be forwarded by a proxy (RFC 7230 §6.1). */
+const HOP_BY_HOP = new Set([
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade",
+]);
+
+function stripHopByHop<T extends Record<string, unknown>>(headers: T): T {
+  for (const key of Object.keys(headers)) {
+    if (HOP_BY_HOP.has(key.toLowerCase())) delete headers[key];
+  }
+  return headers;
+}
+
+function escapeHtmlAttr(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
+ * N212 — reverse-proxy a registered project's dashboard under `/p/<id>/*` so the
+ * whole hub lives on one origin (prerequisite for the PWA + unified notifications).
+ *
+ * Streaming: everything except the SPA shell HTML is piped straight through
+ * unbuffered, so the dashboard's `text/event-stream` SSE stays live (no
+ * buffering, no content-length). The HTML shell is small, so it is buffered and
+ * lightly rewritten: absolute `/assets/` refs are prefixed to `/p/<id>/assets/`
+ * (so the browser fetches them back through the proxy), and a base hook is
+ * injected (`<base>` + `window.__IF_BASE__`) for the client to consume in N215.
+ */
+function proxyToProject(
+  targetBase: string,
+  prefix: string,
+  rest: string,
+  req: IncomingMessage,
+  res: ServerResponse,
+): void {
+  let target: URL;
+  try {
+    target = new URL(rest || "/", targetBase);
+  } catch {
+    res.writeHead(502, { "Content-Type": MIME_JSON });
+    res.end(JSON.stringify({ error: "bad proxy target" }));
+    return;
+  }
+  // SSRF guard: only ever proxy to a local dashboard (see LOOPBACK_HOSTS note).
+  if (!LOOPBACK_HOSTS.has(target.hostname)) {
+    res.writeHead(403, { "Content-Type": MIME_JSON });
+    res.end(JSON.stringify({ error: "proxy target must be loopback" }));
+    return;
+  }
+  const headers = stripHopByHop({ ...req.headers });
+  delete headers.host; // let the request default to the target host
+  delete headers["accept-encoding"]; // avoid compressed bodies we might rewrite
+
+  const proxyReq = httpRequest(
+    {
+      protocol: target.protocol,
+      hostname: target.hostname,
+      port: target.port,
+      path: target.pathname + target.search,
+      method: req.method,
+      headers,
+    },
+    (proxyRes) => {
+      const status = proxyRes.statusCode ?? 200;
+      const ctype = String(proxyRes.headers["content-type"] ?? "");
+      if (ctype.includes("text/html")) {
+        // Buffer the shell, rewrite asset refs + inject the base hook.
+        const chunks: Buffer[] = [];
+        proxyRes.on("data", (c: Buffer) => chunks.push(c));
+        proxyRes.on("end", () => {
+          let html = Buffer.concat(chunks).toString("utf8");
+          html = html.replace(/(["'(])\/assets\//g, `$1${prefix}/assets/`);
+          // Escape the prefix into both sinks: HTML-attr escaping for <base>,
+          // and < so a `</script>` in the prefix can't break out of the tag.
+          const baseHref = escapeHtmlAttr(prefix + "/");
+          const baseJs = JSON.stringify(prefix + "/").replace(/</g, "\\u003c");
+          const hook = `<base href="${baseHref}"><script>window.__IF_BASE__=${baseJs}</script>`;
+          html = html.includes("<head>") ? html.replace("<head>", `<head>${hook}`) : hook + html;
+          const out = stripHopByHop({ ...proxyRes.headers });
+          delete out["content-length"]; // length changed by the rewrite
+          res.writeHead(status, out as Record<string, string>);
+          res.end(html);
+        });
+        return;
+      }
+      // Everything else (assets, JSON APIs, and — crucially — SSE) streams
+      // through unbuffered so event frames arrive incrementally. Drop hop-by-hop
+      // headers (incl. transfer-encoding — Node re-frames the piped body).
+      res.writeHead(status, stripHopByHop({ ...proxyRes.headers }) as Record<string, string>);
+      proxyRes.pipe(res);
+    },
+  );
+  proxyReq.on("error", (err) => {
+    if (!res.headersSent) {
+      res.writeHead(502, { "Content-Type": MIME_JSON });
+      res.end(JSON.stringify({ error: "proxy target unreachable: " + (err as Error).message }));
+    } else {
+      res.end();
+    }
+  });
+  // When the client disconnects (esp. an SSE tab closing), tear down the upstream
+  // request so we don't leak a held-open connection to the project server.
+  res.on("close", () => proxyReq.destroy());
+  req.pipe(proxyReq); // forward the request body (POST/PUT)
 }
 
 export async function startMasterServer(
@@ -58,6 +187,23 @@ export async function startMasterServer(
       }
 
       const url = new URL(req.url ?? "/", `http://localhost:${config.port}`);
+
+      // N212 — reverse-proxy a registered project's dashboard under /p/<id>/*.
+      // Single-origin hub: the master serves each project through this prefix so
+      // a service worker / one notification permission / a PWA become possible.
+      const proxyMatch = /^\/p\/([^/]+)(\/.*)?$/.exec(url.pathname);
+      if (proxyMatch) {
+        const pid = decodeURIComponent(proxyMatch[1]);
+        const rest = (proxyMatch[2] ?? "/") + url.search;
+        const entry = registry.getById(pid) ?? registry.getAll().find((e) => e.projectId === pid);
+        if (!entry || !entry.url) {
+          res.writeHead(404, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: `No registered project '${pid}'` }));
+          return;
+        }
+        proxyToProject(entry.url, `/p/${proxyMatch[1]}`, rest, req, res);
+        return;
+      }
 
       // GET /events — SSE stream for overview clients (N83, replaced socket.io).
       if (req.method === "GET" && url.pathname === "/events") {
