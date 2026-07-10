@@ -867,7 +867,7 @@
       "title": "Init quick wins — events on by default, deprecate agents.extend",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "merged",
       "folder": "insightFlow/workTasks/N207-init-quick-wins-events-on-by-default-deprecate-age",
       "createdAt": "2026-07-09T16:51:29.730Z",
       "statusHistory": [
@@ -885,6 +885,21 @@
           "status": "implemented",
           "at": "2026-07-09T17:14:31.277Z",
           "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T05:38:03.793Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T05:38:03.900Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T05:38:03.991Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -900,11 +915,11 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 767,
       "tags": [
         "init",
         "config",
@@ -913,7 +928,7 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-10T05:38:03.992Z",
       "flowId": "default"
     }
   ]
