@@ -54,6 +54,7 @@ import {
   cmdBulkPromptBuild,
 } from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
+import { cmdInstallFlow } from "./commands/install-flow.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
@@ -230,6 +231,8 @@ async function run(): Promise<void> {
     cmdInstallActivityHook(config, opts);
   } else if (command === "install-lifecycle-hooks") {
     cmdInstallLifecycleHooks(opts);
+  } else if (command === "install-flow") {
+    cmdInstallFlow(opts);
   } else if (command === "migrate-hooks") {
     cmdMigrateHooks(opts);
   } else if (command === "notify") {
