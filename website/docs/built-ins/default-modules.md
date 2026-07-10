@@ -62,7 +62,7 @@ hook scripts.
 | id                       | kind   | event               | What it does                                                              |
 | ------------------------ | ------ | ------------------- | ------------------------------------------------------------------------- |
 | `activity/session-start` | hook   | `SessionStart`      | Emits `session-start` when a Claude Code session begins.                  |
-| `activity/agent-active`  | hook   | `UserPromptSubmit`  | Emits `agent-active` when an insight-flow skill prompt is submitted.      |
+| `activity/agent-active`  | hook   | `UserPromptSubmit`  | Emits `agent-active` for any installed insight-flow slash command (recognised by a matching file under `.claude/commands/` — default, composer, or custom). |
 | `activity/agent-idle`    | hook   | `Stop`              | Emits `agent-idle` (and notifies) when the agent stops.                   |
 | `activity/pre-tool`      | hook   | `PreToolUse`        | Emits `tool-requested` before each tool call while active.                |
 | `activity/post-tool`     | hook   | `PostToolUse`       | Emits `file-written` / `file-edited` / `tool-approved` after tool calls.  |
