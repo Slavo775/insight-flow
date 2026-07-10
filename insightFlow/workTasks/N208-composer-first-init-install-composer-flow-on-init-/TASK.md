@@ -4,6 +4,8 @@
 **Priority:** high
 **Created:** 2026-07-09
 
+> **Scope reduced (2026-07-10).** Delivered: the **`insight-flow install-flow <id>` command** (the reusable primitive). **Composer-first init is deferred to a follow-up** — implementing it revealed a real blocker: init's `skills` list is shared across providers, so dropping the default `task-*` commands strips them from **Cursor** too (the composer flow emits Claude artifacts only), and a byte-identical baseline test pins init's output. That needs a **per-provider skills refactor**, done carefully — see the follow-up task. Everything below marked "deferred" is out of this task.
+
 ## Problem
 
 `insight-flow init` starts every project on the **default task flow** (scaffolds `.claude/commands/task-*.md` and treats `default` as the flow). The human wants **composer-first onboarding**: a fresh project starts with the **composer flow** (for building flows/agents/modules), and the **default flow becomes opt-in** — the user installs it (`insight-flow install-flow default`) or builds their own. Today there's no "install a flow" CLI, and `default` is the hard-coded create fallback. Task B of the init review; see `ANALYSIS.md`.
