@@ -8,7 +8,9 @@ import {
 } from "node:fs";
 import { createInterface } from "node:readline";
 import { resolve } from "node:path";
+import { randomUUID } from "node:crypto";
 import type { TaskflowConfig } from "../../core/types.js";
+import { findHubProjectByPath, upsertHubProject, assignHubPort } from "../../core/global-config.js";
 import { resolvePackageAsset, resolveFlowRoot } from "../../core/paths.js";
 import { applyAgentExtensions } from "../agents.js";
 import {
@@ -52,7 +54,7 @@ function lifecycleHooksRegistered(cwd: string): boolean {
 export async function initProject(
   cwd: string = process.cwd(),
   force: boolean = false,
-  options: { examples?: boolean; yes?: boolean; editor?: string } = {},
+  options: { examples?: boolean; yes?: boolean; editor?: string; registerHub?: boolean } = {},
 ): Promise<void> {
   // Validate an explicit --editor *before* any writes so an unknown value fails
   // closed without leaving a partial config (preserves N75 behavior; the actual
@@ -325,6 +327,36 @@ export async function initProject(
   } else {
     writeFileSync(gitignorePath, activityLogEntry + "\n");
     console.log("Created .gitignore with " + activityLogEntry);
+  }
+
+  // 8. N213 — offer to register this project with the master hub, so it shows in
+  // the overview / multi-project switcher. Opt-in: default No, and skipped
+  // non-interactively unless `--register-hub` (options.registerHub) is set.
+  const projectDir = resolve(cwd);
+  if (!findHubProjectByPath(projectDir)) {
+    // Honor the same non-interactive gate as the prompts above: --yes / no TTY
+    // never blocks on a question (default No), unless --register-hub forces it.
+    const hubUseDefaults = options.yes || !process.stdout.isTTY;
+    const doRegister =
+      options.registerHub ??
+      (hubUseDefaults
+        ? false
+        : await promptUser(
+            "Register this project with the insight-flow hub (shows it in the master overview)? [y/N] ",
+            false,
+          ));
+    if (doRegister) {
+      const port = assignHubPort();
+      upsertHubProject({
+        id: randomUUID(),
+        label: config.projectName,
+        path: projectDir,
+        port,
+        bulkRegistered: true,
+        registeredAt: new Date().toISOString(),
+      });
+      console.log(`Registered with the insight-flow hub (dashboard port ${port}).`);
+    }
   }
 
   console.log(

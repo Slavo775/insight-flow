@@ -198,7 +198,7 @@
       "title": "Reverse-proxy spike: master serves a project dashboard (incl. SSE) on one origin",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N212-reverse-proxy-spike-master-serves-a-project-dashbo",
       "createdAt": "2026-07-10T18:31:24.289Z",
       "statusHistory": [
@@ -246,6 +246,16 @@
           "status": "approved",
           "at": "2026-07-10T20:30:30.444Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T20:35:02.619Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-10T20:35:02.750Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -260,8 +270,8 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-10T20:35:02.751Z",
+      "totalDurationMinutes": 124,
       "tags": [
         "master",
         "proxy",
@@ -271,7 +281,7 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-10T20:35:02.620Z",
       "flowId": "default"
     },
     {
@@ -279,7 +289,7 @@
       "title": "Unified persistent project registry + init opt-in to the master hub",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N213-unified-persistent-project-registry-init-opt-in-to",
       "createdAt": "2026-07-10T18:31:24.430Z",
       "statusHistory": [
@@ -287,17 +297,77 @@
           "status": "ready",
           "at": "2026-07-10T18:31:24.430Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-10T20:39:46.190Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T20:51:46.250Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T20:54:08.898Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-10T20:56:34.865Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-10T20:59:48.031Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-10T21:06:39.173Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T21:10:53.525Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T21:12:56.562Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T21:14:17.067Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T21:16:28.734Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-07-10T20:39:46.191Z",
+        "completedAt": "2026-07-10T20:51:46.251Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/types.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/global-config.ts",
+          "packages/taskflow/src/master/registry.ts",
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/hub-registry.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,

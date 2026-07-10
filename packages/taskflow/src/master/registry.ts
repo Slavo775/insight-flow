@@ -38,6 +38,18 @@ export function upsert(projectId: string, label: string, url: string): string {
   return newId;
 }
 
+/**
+ * N213 — seed a persisted hub project into the in-memory registry as a
+ * known-but-offline entry (empty url), so the overview lists it before its
+ * dashboard starts. When the dashboard later registers with the same
+ * `projectId`, `upsert` reconciles onto this entry and fills in the live url.
+ * No-op if the project is already known (seeded or live).
+ */
+export function seed(projectId: string, label: string): void {
+  if (projectIdIndex.has(projectId)) return;
+  upsert(projectId, label, "");
+}
+
 export function update(id: string, state: MasterProjectState): boolean {
   const entry = registry.get(id);
   if (!entry) return false;
