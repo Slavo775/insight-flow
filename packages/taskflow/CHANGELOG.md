@@ -2,6 +2,31 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.3.0](https://github.com/Slavo775/insight-flow/compare/v2.2.0...v2.3.0) (2026-07-10)
+
+
+### Features
+
+* **agents:** composer analyze v2 — design strategist + custom-only rule + model primer (N200) ([3b5de5b](https://github.com/Slavo775/insight-flow/commit/3b5de5b21829e8c89ac54a0a6070fdbb0e3e6fbd))
+* **agents:** composer flow layout — stack reviewer below implementer (N206) ([89273cf](https://github.com/Slavo775/insight-flow/commit/89273cf30eecb0c47aed6dd42b02533f9a86f3b6))
+* **agents:** composer flow polish — review-template convention, status labels, hooks in install validation (N205) ([ee27339](https://github.com/Slavo775/insight-flow/commit/ee27339e04b88a9d09053c2331811b71c9e13125))
+* **agents:** composer implementer + fixer v2 — shared build core (N202) ([641c61a](https://github.com/Slavo775/insight-flow/commit/641c61a16355f738d9056b7212cfa03884cb43ee))
+* **agents:** composer implementer builds + fixes; remove separate fixer (N202) ([4a24450](https://github.com/Slavo775/insight-flow/commit/4a244503e1095c47164794a69f2f9d4f56ad82e2))
+* **agents:** composer install v2 — one install+validate agent, install-first (N204) ([7ec0322](https://github.com/Slavo775/insight-flow/commit/7ec0322ced93ba4642def181689c6d9dfec4c50c))
+* **agents:** composer review v2 — unify AI + human review; consolidate requirements (N203) ([de6a553](https://github.com/Slavo775/insight-flow/commit/de6a553e8b3b4b1e52a3fb9b06e50cfc3fe46fe7))
+* **agents:** composer taskmaster v2 — templated spec-writer + change-handling (N201) ([e4b9739](https://github.com/Slavo775/insight-flow/commit/e4b973900062f57f7d29a075e1a8b26895178e10))
+* **cli:** add `insight-flow install-flow <id>` command (N208 part 1) ([8cdef69](https://github.com/Slavo775/insight-flow/commit/8cdef69c5de39723b936a6fb71e4834b66c6c10b))
+* **init:** events on by default, deprecate agents.extend (N207) ([8bfddad](https://github.com/Slavo775/insight-flow/commit/8bfddadcfbdc7d720902c05081d48df7b1159bcf))
+* **master:** global home base — project-less dashboard + create-project from UI (N210) ([3b9472b](https://github.com/Slavo775/insight-flow/commit/3b9472bdcc04557d51878a85d1da388dea2ae76e))
+
+
+### Bug Fixes
+
+* **agents:** drop Smithery MCP entirely; discover via github.com/mcp (N200) ([b0af86d](https://github.com/Slavo775/insight-flow/commit/b0af86d312d7b16014617b00aae99e63218db495))
+* **agents:** make registry MCP opt-in, analyzer uses web search by default (N200) ([83031ac](https://github.com/Slavo775/insight-flow/commit/83031acd243ff4deb076d7c2335ce8d64a5eade0))
+* **agents:** rewire discovery to github.com/mcp after Smithery removal (N200) ([2b254a0](https://github.com/Slavo775/insight-flow/commit/2b254a0f18cc1a46ed16a0202572694dddf3f258))
+* **agents:** specify project-local secrets in composer MCP guidance (N200) ([26e8910](https://github.com/Slavo775/insight-flow/commit/26e89102f335cd1faf05e146b54d41faa40ac129))
+
 ## [2.2.0](https://github.com/Slavo775/insight-flow/compare/v2.1.0...v2.2.0) (2026-07-01)
 
 
