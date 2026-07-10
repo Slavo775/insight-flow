@@ -930,6 +930,77 @@
       "mrUrl": null,
       "mergedAt": "2026-07-10T05:38:03.992Z",
       "flowId": "default"
+    },
+    {
+      "id": "N208",
+      "title": "Composer-first init — install composer flow on init, install-flow command, default flow opt-in",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N208-composer-first-init-install-composer-flow-on-init-",
+      "createdAt": "2026-07-09T19:39:39.695Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-09T19:39:39.695Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-09T19:54:23.136Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T05:54:02.914Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T05:54:03.038Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T05:55:24.759Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T05:55:24.861Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T05:55:24.966Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-09T19:54:23.137Z",
+        "completedAt": "2026-07-10T05:54:02.915Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/install-flow.ts",
+          "packages/taskflow/src/cli/cli.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "init",
+        "onboarding",
+        "cli"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

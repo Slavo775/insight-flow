@@ -54,6 +54,7 @@ import {
   cmdBulkPromptBuild,
 } from "./commands/batch-ui.js";
 import { cmdInstallActivityHook } from "./commands/install-activity-hook.js";
+import { cmdInstallFlow } from "./commands/install-flow.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
@@ -95,7 +96,7 @@ function printHelp(): void {
     insight-flow <command> [options]      Run a task command
 
   COMMANDS
-    init [--force] [--examples] [--editor claude|cursor|all]  Initialize insight-flow in current project (--force overwrites existing files; --examples adds commented agents.extend stubs; --editor picks scaffolding targets, default auto-detect)
+    init [--force] [--examples] [--editor claude|cursor|all]  Initialize insight-flow in current project (--force overwrites existing files; --examples adds commented config examples; --editor picks scaffolding targets, default auto-detect)
     ui [--port 6006]                      Launch dashboard server
     master [--port 6100]                  Launch the multi-project overview server (folded in; formerly insight-flow-master)
     mcp                                   Run the composer MCP server over stdio (list/create/edit/install/uninstall/delete modules·agents·flows). Register in .mcp.json as { "command": "insight-flow", "args": ["mcp"] }
@@ -143,6 +144,7 @@ function printHelp(): void {
     migrate-layout [--dry-run] [--fix-strays]  Move workTasks/ + .events into the consolidated insightFlow/ root (idempotent; N100). --fix-strays removes empty/scaffold-only doubled workTasks/workTasks/ dirs (N141)
     prompt-build [--apply]                Print or apply enforcement block from taskflow.config.json
     prompt-build --compose [<agent-id>] [--out <dir>]  Compose role MD from agent-module definitions (N88 spike)
+    install-flow <flow-id> [--force]      Install a built-in or custom flow (commands + subagents + mcp-server + hooks) into the project — e.g. 'install-flow default' for the standard task lifecycle, or 'install-flow composer-authoring' (idempotent)
     install-activity-hook [--force]       Install the Claude Code PostToolUse hook so the activity panel receives events (idempotent; refuses when activityEngine.enabled is false unless --force)
     install-lifecycle-hooks [--bin <path>] Install lifecycle event hooks (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) into .claude/settings.json (idempotent)
     migrate-hooks [--bin <path>]          Refresh hook scripts after upgrading the package; bumps taskflow.config.json.hooksVersion (idempotent)
@@ -230,6 +232,8 @@ async function run(): Promise<void> {
     cmdInstallActivityHook(config, opts);
   } else if (command === "install-lifecycle-hooks") {
     cmdInstallLifecycleHooks(opts);
+  } else if (command === "install-flow") {
+    cmdInstallFlow(opts);
   } else if (command === "migrate-hooks") {
     cmdMigrateHooks(opts);
   } else if (command === "notify") {
