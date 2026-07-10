@@ -182,3 +182,17 @@ export {
   collectProjectInstall,
 } from "./agents/project.js";
 export type { Project } from "./agents/project.js";
+
+// N213 — the persistent master-hub registry (`~/.insight-flow/hub.json`).
+export {
+  getGlobalConfigDir,
+  readHubRegistry,
+  writeHubRegistry,
+  findHubProjectByPath,
+  assignHubPort,
+  upsertHubProject,
+  migrateBatchUiIntoHub,
+  readBatchUiRegistry,
+  writeBatchUiRegistry,
+} from "./core/global-config.js";
+export type { HubProjectEntry, HubRegistry } from "./core/types.js";
