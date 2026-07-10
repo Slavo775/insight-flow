@@ -1,7 +1,11 @@
 import { existsSync, readFileSync, fstatSync } from "node:fs";
 import { resolveConfig, getMasterPath } from "../core/config.js";
 import { jsonFileStorage } from "../core/storage-port.js";
-import { resolvePackageAsset, TaskflowProjectNotFoundError } from "../core/paths.js";
+import {
+  resolvePackageAsset,
+  resolveProjectRoot,
+  TaskflowProjectNotFoundError,
+} from "../core/paths.js";
 import { TaskflowValidationError } from "../core/schema/index.js";
 import { InvalidStatusTransitionError } from "../core/set-status.js";
 import { flushObservability } from "../core/observability/langfuse.js";
@@ -191,6 +195,25 @@ if (command && DEPRECATED_COMMAND_ALIASES[command]) {
 async function run(): Promise<void> {
   // Commands that don't need master.json
   if (!command || command === "ui") {
+    // N210 — bare `insight-flow` with no project opens the global home base
+    // (the master), where you can create a project from the UI — instead of
+    // erroring "run init first". Explicit `ui` keeps the project-dashboard path.
+    if (!command) {
+      let inProject = true;
+      try {
+        resolveProjectRoot();
+      } catch (err) {
+        // Only "no project found" routes to the home base; a genuinely broken
+        // project (e.g. malformed config) should surface, not be masked.
+        if (!(err instanceof TaskflowProjectNotFoundError)) throw err;
+        inProject = false;
+      }
+      if (!inProject) {
+        const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
+        await runMaster(port);
+        return;
+      }
+    }
     const config = resolveConfig();
     const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
     startServer(config, port);

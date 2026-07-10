@@ -18,6 +18,22 @@ need to. Think of insight-flow as the engine the agents drive, plus a dashboard 
 to watch.
 :::
 
+## No terminal? Start from the home base
+
+If you'd rather not use a terminal, install insight-flow globally and just run it
+with **no project** — it opens the **home base** (the overview at
+`http://localhost:6100/overview`):
+
+```bash
+npm install -g insight-flow
+insight-flow           # opens the home base — no project needed
+```
+
+From there, click **“+ New project”**, give it a name, and insight-flow scaffolds
+a project for you under `~/insight-flow-projects/<name>` (override with
+`INSIGHT_FLOW_PROJECTS_HOME`). Open that folder and run `insight-flow` there to
+launch its dashboard. The rest of this page uses the terminal directly.
+
 ## 1. Initialize in your project
 
 ```bash

@@ -1,0 +1,51 @@
+{
+  "taskId": "N210",
+  "reviews": [
+    {
+      "startedAt": "2026-07-10T06:26:51.430Z",
+      "endedAt": "2026-07-10T06:29:34.494Z",
+      "verdict": "fix-needed",
+      "comment": "1 security blocker: POST /api/projects/create writes to disk (mkdir + initProject) but the master binds all interfaces (0.0.0.0), so it's LAN-reachable — and the comment falsely claims localhost-only. Fix: gate the endpoint to loopback callers (req.socket.remoteAddress). Rest works (325/325). 2 non-blocking (narrow the resolveProjectRoot catch; launch deferred).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-10T07:27:33.661Z",
+        "endedAt": "2026-07-10T07:29:45.823Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/cli/cli.ts"
+        ],
+        "comment": "Fixed security blocker: create-project endpoint now gated to loopback callers (403 for LAN peers); comment corrected. Also narrowed the global-entry catch to TaskflowProjectNotFoundError. Loopback create verified 200; 325/325.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-10T07:41:15.838Z",
+      "endedAt": "2026-07-10T07:43:25.052Z",
+      "verdict": "approved",
+      "comment": "Re-review: security blocker fixed (create-project loopback-gated, 403 for LAN; loopback verified 200). Catch narrowed. 325/325. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-10T09:09:58.948Z",
+      "endedAt": "2026-07-10T09:11:44.857Z",
+      "verdict": "approved",
+      "comment": "Docs review: closed both gaps — home base in master-server.md (section + create endpoint) and install-flow command in the CLI reference. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-10T12:13:49.732Z",
+      "endedAt": "2026-07-10T12:16:18.676Z",
+      "verdict": "approved",
+      "comment": "Human approval: home base MVP + docs. Loopback guard verified, 325/325.",
+      "type": "human",
+      "by": "Slavo",
+      "fix": null
+    }
+  ]
+}

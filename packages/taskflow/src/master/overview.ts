@@ -21,6 +21,7 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     '      <p class="subtitle" id="subtitle">Connecting...</p>\n' +
     "    </div>\n" +
     '    <div class="top-bar-actions">\n' +
+    '      <button class="settings-btn" id="new-project-btn" onclick="createProject()" title="Create a new project (scaffolds it and registers it here)">+ New project</button>\n' +
     '      <div class="settings-wrap"><button class="settings-btn" id="settings-btn" onclick="toggleSettings()" title="Notification settings">&#9881;</button>\n' +
     '      <div class="settings-popover" id="settings-popover">\n' +
     '        <div class="settings-header">Notifications</div>\n' +
@@ -121,6 +122,20 @@ function getScript(initialData: string): string {
     // outer literal terminates. Use single quotes for any inline samples.
     var PROJECTS = ${initialData};
     var prevStatuses = {};
+    // N210 — create a new project from the home base (non-coder onboarding).
+    function createProject() {
+      var name = prompt('Name your new project:');
+      if (!name) return;
+      fetch('/api/projects/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name })
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.error) { alert('Could not create project: ' + d.error); return; }
+        alert('Created "' + d.name + '" at:\\n' + d.path + '\\n\\nOpen it: run  insight-flow  in that folder.');
+        location.reload();
+      }).catch(function (e) { alert('Error: ' + e.message); });
+    }
     var NOTIF_WATCHED = ['implemented','approved','fix-needed','merged','changes-requested'];
     var notifSettings = { statuses: {}, sound: true, muteFocused: false };
 
