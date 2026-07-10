@@ -90,7 +90,7 @@ master server port under [`master`](#master--multi-project-overview).
 
 | Key | Type | Default | Controls |
 |-----|------|---------|----------|
-| `activityEngine.enabled` | `boolean` | `true` | Master switch for activity logging + the dashboard activity panel. |
+| `activityEngine.enabled` | `boolean` | `true` | Master switch for activity logging + the dashboard activity panel. **New projects are initialised with it on** (`insight-flow init` writes `true`). |
 | `activityEngine.logFile` | `string` | `".taskflow-activity.jsonl"` | JSONL file (relative to `workDir`) events are appended to. |
 | `activityEngine.maxEvents` | `number` | `200` | How many recent events are kept in memory / served to the panel. |
 | `activityEngine.phaseMarkers` | `boolean` | `true` | Whether status-transition markers are recorded. |
@@ -195,10 +195,17 @@ preserves `byType` and is what flow tooling expects.
 
 ### `agents.extend`
 
+:::warning Deprecated
+`agents.extend` is **deprecated and will be removed in a future release.** It
+still works for existing configs, but don't use it for new projects — prefer
+authoring a custom flow/agent (see the [composer authoring flow](./authoring/index.md)).
+`insight-flow init` no longer scaffolds `agents.extend` stubs.
+:::
+
 insight-flow's shipped prompts contain **zero** technology assumptions. This is
-where you inject your project's commands. Each key is an agent name; each value
-is an array of strings appended to that agent's prompt at `init` /
-`prompt-build` time.
+where you (historically) inject your project's commands. Each key is an agent
+name; each value is an array of strings appended to that agent's prompt at
+`init` / `prompt-build` time.
 
 ```jsonc
 {

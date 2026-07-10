@@ -73,7 +73,7 @@ export async function initProject(
     projectName: inferName(cwd),
     rolesDir: ".claude/roles",
     server: { port: 6006 },
-    activityEngine: { enabled: false, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
+    activityEngine: { enabled: true, logFile: ".taskflow-activity.jsonl", maxEvents: 200 },
     notifications: { browser: true, cli: true },
   };
 
@@ -100,7 +100,7 @@ export async function initProject(
     writeFileSync(configPath, body);
     console.log(
       options.examples
-        ? "Created taskflow.config.json with commented agents.extend stubs"
+        ? "Created taskflow.config.json with commented config examples"
         : "Created taskflow.config.json",
     );
   }
@@ -195,7 +195,13 @@ export async function initProject(
     }
 
     // 4b. Apply agent extensions to the built-in role files.
+    // `agents.extend` is deprecated (removed in a future release) but still
+    // honored for existing configs — warn once so users migrate off it.
     if (agentsConfig?.extend) {
+      console.warn(
+        "warning: `agents.extend` is deprecated and will be removed in a future release. " +
+          "It still works for now; avoid it for new projects.",
+      );
       applyAgentExtensions(resolve(cwd, config.rolesDir), agentsConfig.extend);
     }
 
@@ -439,8 +445,8 @@ function buildConfigWithExamples(config: TaskflowConfig): string {
   const base = JSON.stringify(baseConfig, null, 2);
   const stub = `,
   "activityEngine": {
-    "// enabled": "Set to true to enable Claude activity tracking in the dashboard (opt-in to save tokens).",
-    "enabled": false,
+    "// enabled": "Claude activity tracking in the dashboard. On by default; set to false to save tokens.",
+    "enabled": true,
     "logFile": ".taskflow-activity.jsonl",
     "maxEvents": 200,
     "// phaseMarkers": "Set to false to suppress agent PHASE MARKERS calls (zero token overhead).",
@@ -457,18 +463,7 @@ function buildConfigWithExamples(config: TaskflowConfig): string {
     "cli": true
   },
   "agents": {
-    "// extend": "Strings here are appended to each agent's prompt at runtime. insight-flow ships no technology assumptions — these stubs document the contract.",
-    "extend": {
-      "task-analyze":       [],
-      "task-implement":     [],
-      "task-review":        [],
-      "task-review-fix":    [],
-      "task-incident":      [],
-      "task-git":           [],
-      "taskmaster":         [],
-      "task-human-review":  [],
-      "task-request-changes": []
-    },
+    "// extend": "DEPRECATED — agents.extend is deprecated and will be removed in a future release; do not use it for new projects. (Existing configs still work.)",
     "// git": "Control which git operations task-git is allowed to perform. Use remoteOps: 'deny' to block all origin-touching ops at once, or set individual flags.",
     "git": {
       "permissions": {
