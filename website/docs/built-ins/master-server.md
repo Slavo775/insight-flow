@@ -7,13 +7,44 @@ description: The multi-project overview server — config keys, HTTP endpoints, 
 
 # Master server
 
-The **master server** is the multi-project overview. A single project dashboard
-shows one project; the master server aggregates many. It runs via
+The **master server** is the multi-project overview — and the **home base** you
+start from. A single project dashboard shows one project; the master server
+aggregates many, and lets you create new ones from the browser. It runs via
 `insight-flow master`, and `insight-flow ui` auto-starts it
-(`insight-flow master --port 6100`). The code lives under
+(`insight-flow master --port 6100`). It also opens automatically when you run
+bare **`insight-flow` in a folder with no project** (instead of erroring), so a
+non-coder can install globally and go straight to the UI. The code lives under
 `packages/taskflow/src/master/`. It is self-contained — its own lock at
 `~/.insight-flow/master.lock`, its own config, and an in-memory project
 registry.
+
+---
+
+## Home base — create projects from the UI
+
+For a **no-terminal / non-coder** start, install globally and just run it:
+
+```bash
+npm install -g insight-flow
+insight-flow          # in a folder with no project → opens the home base
+```
+
+The overview at `http://localhost:6100/overview` shows your projects and a
+**“+ New project”** button. Click it, give the project a name, and the master:
+
+1. scaffolds a folder at **`~/insight-flow-projects/<slug>`** — override the base
+   with the `INSIGHT_FLOW_PROJECTS_HOME` env var,
+2. runs `insight-flow init` on it (so it's a real project),
+3. registers it, so it appears on the overview.
+
+To open a created project's dashboard, run `insight-flow` in its folder.
+
+:::note Localhost-only
+`POST /api/projects/create` writes to disk (it scaffolds a project), so it is
+gated to **loopback callers** — a request from another machine on the network
+gets `403`. Project names are validated and confined to the projects-home root
+(no path traversal).
+:::
 
 ---
 
@@ -42,6 +73,7 @@ HTTP handlers in `master/server.ts`. All responses set permissive CORS headers
 | ------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`  | `/events`                  | Server-Sent Events stream (N83, replaced socket.io). Overview clients subscribe with `EventSource('/events')`; `project-update` frames broadcast on registry changes. Sends `retry: 1000` then a `: ping` heartbeat every 25 s. |
 | `POST` | `/api/register`            | Register / upsert a project (`{ label, url, projectId }`). Returns `{ id }`. Rejected with `503` when `standalone` is `true`.                                                                                                   |
+| `POST` | `/api/projects/create`     | **Create a project from the UI** (`{ name }`) — scaffolds `~/insight-flow-projects/<slug>`, runs `init`, and registers it. Returns `{ id, name, path }`. `400` for an invalid name, `409` if one already exists, **`403` for non-loopback callers** (writes to disk, so localhost-only). |
 | `POST` | `/api/projects/:id/update` | Replace a project's full state (`MasterProjectState`). `401` for an unknown id. Broadcasts `project-update`.                                                                                                                    |
 | `POST` | `/api/projects/:id/status` | Update only a project's `claudeStatus`. `400` for an invalid status value, `401` for an unknown id. Broadcasts `project-update`.                                                                                                |
 | `GET`  | `/api/activity/:projectId` | Last 3 activity events for a project (`{ project, events }`). `404` for an unknown id.                                                                                                                                          |

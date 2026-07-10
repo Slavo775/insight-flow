@@ -12,8 +12,9 @@ require existing task state.
 | Command | Purpose |
 |---------|---------|
 | `init` | Initialize insight-flow in the current project (scaffold roles, commands, config). Flags: `--force`, `--examples`, `--editor`. |
+| `install-flow <flow-id>` | Install a built-in or custom flow into the current project — its slash commands, subagents, any `mcp-server`, and hooks. E.g. `install-flow default` (the standard task lifecycle) or `install-flow composer-authoring`. Idempotent; validates the id against the flow registry; `--force` overwrites a conflicting `.mcp.json` entry. |
 | `ui` | Launch the dashboard server (default command). `--port` (default `6006`). |
-| `master` | Launch the multi-project master overview server. `--port` (default `6100`). |
+| `master` | Launch the multi-project master overview / [home base](../built-ins/master-server.md). `--port` (default `6100`). Bare `insight-flow` in a folder with **no project** opens this too. |
 | `help` | Show help text. |
 | `version` | Show the installed version. |
 
