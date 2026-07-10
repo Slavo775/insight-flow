@@ -38,7 +38,7 @@ export async function runMaster(portOverride?: number): Promise<void> {
   // legacy bulk-ui entries) so registered projects show up before their
   // dashboards start. They reconcile to live entries when a dashboard registers.
   if (!config.standalone) {
-    for (const p of migrateBatchUiIntoHub()) registry.seed(p.label, p.label);
+    for (const p of migrateBatchUiIntoHub()) registry.seed(p.label, p.label, p.path);
   }
 
   const { close } = await startMasterServer(config);

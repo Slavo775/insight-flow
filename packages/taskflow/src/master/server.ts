@@ -39,6 +39,20 @@ function readBody(req: IncomingMessage): Promise<string> {
  */
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 
+/** True if the host is loopback. Shared by the proxy (N212) and the health
+ *  probe (N214) so a registrant-controlled url can never point either at a
+ *  non-local host (SSRF / open-proxy). */
+function isLoopbackHost(hostname: string): boolean {
+  return LOOPBACK_HOSTS.has(hostname);
+}
+function isLoopbackUrl(u: string): boolean {
+  try {
+    return isLoopbackHost(new URL(u).hostname);
+  } catch {
+    return false;
+  }
+}
+
 /** Hop-by-hop headers must not be forwarded by a proxy (RFC 7230 §6.1). */
 const HOP_BY_HOP = new Set([
   "connection",
@@ -93,7 +107,7 @@ function proxyToProject(
     return;
   }
   // SSRF guard: only ever proxy to a local dashboard (see LOOPBACK_HOSTS note).
-  if (!LOOPBACK_HOSTS.has(target.hostname)) {
+  if (!isLoopbackHost(target.hostname)) {
     res.writeHead(403, { "Content-Type": MIME_JSON });
     res.end(JSON.stringify({ error: "proxy target must be loopback" }));
     return;
@@ -238,9 +252,9 @@ export async function startMasterServer(
           return;
         }
         const body = await readBody(req);
-        let parsed: { label?: unknown; url?: unknown; projectId?: unknown };
+        let parsed: { label?: unknown; url?: unknown; projectId?: unknown; path?: unknown };
         try {
-          parsed = JSON.parse(body) as { label?: unknown; url?: unknown; projectId?: unknown };
+          parsed = JSON.parse(body) as typeof parsed;
         } catch {
           res.writeHead(400, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "Invalid JSON" }));
@@ -249,11 +263,13 @@ export async function startMasterServer(
         const label = String(parsed.label ?? "unknown");
         const projectUrl = String(parsed.url ?? "");
         const projectId = String(parsed.projectId ?? parsed.label ?? "unknown");
-        const id = registry.upsert(projectId, label, projectUrl);
+        const path = typeof parsed.path === "string" ? parsed.path : undefined;
+        // N214 — returns a per-project token the project echoes on later calls.
+        const { id, token } = registry.upsert(projectId, label, projectUrl, { path });
         const entry = registry.getById(id);
         if (entry) broadcast("project-update", entry);
         res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ id }));
+        res.end(JSON.stringify({ id, token }));
         return;
       }
 
@@ -261,6 +277,11 @@ export async function startMasterServer(
       const updateMatch = /^\/api\/projects\/([^/]+)\/update$/.exec(url.pathname);
       if (req.method === "POST" && updateMatch) {
         const id = updateMatch[1];
+        if (!registry.verifyToken(id, url.searchParams.get("token") ?? undefined)) {
+          res.writeHead(401, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Unknown project id or bad token" }));
+          return;
+        }
         const body = await readBody(req);
         let state: MasterProjectState;
         try {
@@ -287,6 +308,11 @@ export async function startMasterServer(
       const statusMatch = /^\/api\/projects\/([^/]+)\/status$/.exec(url.pathname);
       if (req.method === "POST" && statusMatch) {
         const id = statusMatch[1];
+        if (!registry.verifyToken(id, url.searchParams.get("token") ?? undefined)) {
+          res.writeHead(401, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Unknown project id or bad token" }));
+          return;
+        }
         const body = await readBody(req);
         let parsed: { status?: unknown };
         try {
@@ -392,11 +418,89 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: `Could not create project: ${(err as Error).message}` }));
           return;
         }
-        const id = registry.upsert(slug, name, "");
+        const { id } = registry.upsert(slug, name, "", { path: dir });
         const entry = registry.getById(id);
         if (entry) broadcast("project-update", entry);
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ id, name, path: dir }));
+        return;
+      }
+
+      // N214 — GET /api/hub/projects — the registered projects + live status
+      // (id, label, url, online, lastSeenAt). Consumed by the switcher (N215).
+      if (req.method === "GET" && url.pathname === "/api/hub/projects") {
+        res.writeHead(200, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ projects: registry.getAll() }));
+        return;
+      }
+
+      // N214 — GET /api/hub/live?id&token — the passive liveness channel. While
+      // this SSE connection is open the project is `online`; on close → offline.
+      // No polling: liveness is the connection's lifetime.
+      if (req.method === "GET" && url.pathname === "/api/hub/live") {
+        const id = url.searchParams.get("id") ?? "";
+        if (!registry.verifyToken(id, url.searchParams.get("token") ?? undefined)) {
+          res.writeHead(401, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Unknown project id or bad token" }));
+          return;
+        }
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "X-Accel-Buffering": "no",
+        });
+        res.write("retry: 2000\n\n");
+        registry.setOnline(id, true);
+        {
+          const entry = registry.getById(id);
+          if (entry) broadcast("project-update", entry);
+        }
+        const heartbeat = setInterval(() => {
+          try {
+            res.write(": ping\n\n");
+          } catch {
+            /* stream gone */
+          }
+        }, 25000);
+        req.on("close", () => {
+          clearInterval(heartbeat);
+          registry.setOnline(id, false);
+          const entry = registry.getById(id);
+          if (entry) broadcast("project-update", entry);
+        });
+        return;
+      }
+
+      // N214 — POST /api/hub/refresh — on-demand active healthcheck. Probes every
+      // registered project's /health concurrently (short timeout) and updates
+      // online/lastSeenAt. Runs ONLY when called (switcher popup / manual
+      // refresh) — there is no background timer.
+      if (req.method === "POST" && url.pathname === "/api/hub/refresh") {
+        // SSRF guard: only probe loopback dashboards. A registrant-controlled
+        // url must never make the master fetch an arbitrary (internal) host.
+        const entries = registry.getAll().filter((e) => e.url && isLoopbackUrl(e.url));
+        await Promise.all(
+          entries.map(async (e) => {
+            let ok = false;
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), 1500);
+            try {
+              const r = await fetch(`${e.url}/health?token=${encodeURIComponent(e.token)}`, {
+                signal: ctrl.signal,
+              });
+              ok = r.ok;
+            } catch {
+              ok = false;
+            } finally {
+              clearTimeout(t);
+            }
+            registry.setOnline(e.id, ok);
+          }),
+        );
+        for (const e of registry.getAll()) broadcast("project-update", e);
+        res.writeHead(200, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ projects: registry.getAll() }));
         return;
       }
 
