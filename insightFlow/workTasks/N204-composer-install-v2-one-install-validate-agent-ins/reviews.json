@@ -1,0 +1,32 @@
+{
+  "taskId": "N204",
+  "reviews": [
+    {
+      "startedAt": "2026-07-08T14:32:08.071Z",
+      "endedAt": "2026-07-08T14:34:39.670Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: rollback uses 'insight-flow status --status fix-needed' which sets status but not the review record fix-start requires (fix.ts:20) — so install→implement fix path aborts. Fix: installer records a fix-needed review (review-start/review-end --type ai --verdict fix-needed) instead. Rest validates: 5 agents, 323/323.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-08T14:35:13.812Z",
+        "endedAt": "2026-07-08T14:37:37.889Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json"
+        ],
+        "comment": "Fixed blocker 1: installer rolls back via a recorded fix-needed review (review-start/review-end --type ai --verdict fix-needed) instead of the raw status command, so the implementer's fix-start works. Tests 323/323.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-09T06:19:34.905Z",
+      "endedAt": "2026-07-09T06:19:53.527Z",
+      "verdict": "approved",
+      "comment": "Human approved; merge into agents-approved (same branch as N200-N203).",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

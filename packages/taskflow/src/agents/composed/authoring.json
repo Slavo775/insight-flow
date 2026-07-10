@@ -11,6 +11,7 @@
       "security",
       "enforcement",
       "protocol",
+      "plain-language",
       "authoring-analyze/handover-create",
       "actions"
     ],
@@ -28,11 +29,14 @@
     "command": { "install": true },
     "modules": [
       "authoring-create/identity",
+      "template-copy",
+      "authoring-spec-structure",
       "composer-mcp-note",
       "composer-authoring-conventions",
       "security",
       "enforcement",
       "protocol",
+      "plain-language",
       "authoring-create/handover-implement",
       "authoring-create/handover-analyze",
       "actions"
@@ -41,15 +45,17 @@
   {
     "id": "authoring-implement",
     "title": "Composer Implementer",
-    "description": "Builds the custom modules/agents/flows via the composer MCP, fanning out to the author subagent.",
+    "description": "Builds AND fixes the custom modules/agents/flows via the composer MCP, fanning out to the author subagents. Review blockers (AI or human) route back here.",
     "command": { "install": true },
     "modules": [
       "authoring-implement/identity",
+      "authoring-build-core",
       "composer-mcp-note",
       "composer-authoring-conventions",
       "security",
       "enforcement",
       "protocol",
+      "plain-language",
       "authoring-implement/handover-review",
       "actions"
     ],
@@ -63,7 +69,7 @@
   {
     "id": "authoring-review",
     "title": "Composer Reviewer",
-    "description": "AI-reviews the authored definitions (schema, dedup, best practice) via the reviewer subagent.",
+    "description": "Runs both the AI review (verifies the authoring requirements via the reviewer subagents) and the human-feedback pass; picks the mode by intent.",
     "command": { "install": true },
     "modules": [
       "authoring-review/identity",
@@ -72,8 +78,10 @@
       "security",
       "enforcement",
       "protocol",
+      "plain-language",
+      "recorder-discipline",
       "authoring-review/handover-fix",
-      "authoring-review/handover-human-review",
+      "authoring-review/handover-install",
       "actions"
     ],
     "subagents": [
@@ -84,72 +92,20 @@
     ]
   },
   {
-    "id": "authoring-fix",
-    "title": "Composer Fixer",
-    "description": "Applies review blockers to the authored definitions, then re-reviews.",
-    "command": { "install": true },
-    "modules": [
-      "authoring-fix/identity",
-      "composer-mcp-note",
-      "composer-authoring-conventions",
-      "security",
-      "enforcement",
-      "protocol",
-      "authoring-fix/handover-review",
-      "actions"
-    ],
-    "subagents": [
-      "composer/module-author",
-      "composer/agent-author",
-      "composer/flow-author",
-      "composer/relationship-author"
-    ]
-  },
-  {
-    "id": "authoring-human-review",
-    "title": "Composer Human Review",
-    "description": "Records the human's decision on the authored definitions; approval advances to testing.",
-    "command": { "install": true },
-    "modules": [
-      "authoring-human-review/identity",
-      "composer-mcp-note",
-      "composer-authoring-conventions",
-      "security",
-      "enforcement",
-      "protocol",
-      "recorder-discipline",
-      "authoring-human-review/handover-test",
-      "actions"
-    ]
-  },
-  {
-    "id": "authoring-test",
-    "title": "Composer Tester",
-    "description": "Validates the approved definitions (load/compose/install dry-run) before install.",
-    "command": { "install": true },
-    "modules": [
-      "authoring-test/identity",
-      "composer-mcp-note",
-      "composer-authoring-conventions",
-      "security",
-      "enforcement",
-      "protocol",
-      "authoring-test/handover-install",
-      "actions"
-    ]
-  },
-  {
     "id": "authoring-install",
     "title": "Composer Installer",
-    "description": "Installs the approved, validated definitions via the composer MCP (terminal step).",
+    "description": "Installs the approved definitions (flows/agents/modules) then validates the real install; rolls back + hands to the implementer on failure. Terminal step.",
     "command": { "install": true },
     "modules": [
       "authoring-install/identity",
+      "composer-install-checklist",
       "composer-mcp-note",
       "composer-authoring-conventions",
       "security",
       "enforcement",
       "protocol",
+      "plain-language",
+      "authoring-install/handover-fix",
       "actions"
     ]
   }

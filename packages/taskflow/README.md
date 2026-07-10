@@ -33,7 +33,9 @@ Run this inside your project root (the directory that contains your code):
 insight-flow init
 ```
 
-Add `--examples` to get commented `agents.extend` stubs in `taskflow.config.json` — useful when you want to wire up your stack-specific commands (typecheck, lint, PR CLI) right away:
+Add `--examples` to get commented config examples in `taskflow.config.json`. New projects have the **activity engine on by default**.
+
+> **Deprecated:** `agents.extend` (below) is deprecated and will be removed in a future release. It still works for existing configs, but don't use it for new projects.
 
 ```bash
 insight-flow init --examples
@@ -92,7 +94,11 @@ If you added hooks and Claude Code was already open, **restart the session** for
 
 ### 5. Configure for your stack
 
-insight-flow ships zero technology assumptions. Tell each agent how to run your project's quality gates and how to create PRs via `agents.extend` in `taskflow.config.json`:
+insight-flow ships zero technology assumptions.
+
+> **`agents.extend` is deprecated** (removed in a future release). It still works for now, but prefer authoring a custom flow/agent (see the composer authoring flow) over `agents.extend` for new projects.
+
+Historically you told each agent how to run your project's quality gates and how to create PRs via `agents.extend` in `taskflow.config.json`:
 
 ```json
 {
@@ -624,6 +630,15 @@ Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and 
 ```
 
 The built-in `mcp-composer` module writes exactly that entry — install it (or add it to a flow's `install` list) instead of hand-editing `.mcp.json`. Tools run autonomously; locked modules and the default flow are refused, and uninstall/delete stay reference-safe. Full tool reference: the [Composer MCP docs](https://slavo775.github.io/insight-flow/docs/composer-mcp/).
+
+### Finding MCP servers when authoring
+
+When the composer's authoring flow designs a new agent that needs an MCP server, it has to **discover** which server to use. It does this by **web search** — no key, no install, no secret:
+
+- **GitHub MCP Registry** — [`github.com/mcp`](https://github.com/mcp). A **curated, reviewed** directory (each server backed by its GitHub repo, checked for reliability and security), with a public no-auth API at `https://api.mcp.github.com/v0/servers`. The recommended first stop for quality.
+- **Official MCP Registry** — [`registry.modelcontextprotocol.io`](https://registry.modelcontextprotocol.io). The broad, canonical list (also a no-auth read API), for wider coverage.
+
+The authoring analyst searches these to find a server by need and picks the smallest one that fits. There is no paid or key-bearing MCP in the shipped composer flow.
 
 ## Programmatic API
 

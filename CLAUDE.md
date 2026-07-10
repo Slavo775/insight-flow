@@ -61,6 +61,8 @@ Package manager: **pnpm**. The repo is a workspace; `packages/taskflow` is the p
 
 ## Extending agents with project-specific commands
 
+> **Deprecated (N207):** `agents.extend` is deprecated and will be removed in a future release. It still works for existing configs (and `insight-flow init` warns when a config uses it), but `init` no longer scaffolds `agents.extend` stubs — prefer authoring a custom flow/agent via the composer authoring flow for new projects. The examples below are retained for existing users.
+
 When `insight-flow init` runs in a consumer project, it scaffolds role files + commands but ships **zero technology assumptions**. Add your stack-specific commands to `taskflow.config.json`:
 
 ```jsonc

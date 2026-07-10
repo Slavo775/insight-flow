@@ -52,7 +52,9 @@ Update an existing definition:
 
 - **Custom def** → updated in place.
 - **Built-in id** → an **eject/override** is written (a custom file that shadows
-  the shipped definition).
+  the shipped definition). This is supported for deliberate one-off changes, but
+  the guided [authoring flow](../authoring/index.md) prefers authoring a `custom:`
+  **variant** instead, so shipped defaults stay read-only and upgradable.
 - **Locked module** → refused.
 - **The `default` flow** → refused over MCP (use the dashboard).
 

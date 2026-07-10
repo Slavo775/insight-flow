@@ -1,0 +1,122 @@
+{
+  "range": {
+    "from": 210,
+    "to": 219
+  },
+  "tasks": [
+    {
+      "id": "N210",
+      "title": "Global home base — project-less dashboard, create-project from UI (non-coder onboarding)",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N210-global-home-base-project-less-dashboard-create-pro",
+      "createdAt": "2026-07-10T05:56:49.764Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T05:56:49.764Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-10T06:10:45.449Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T06:18:27.069Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T06:26:51.428Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-10T06:29:34.495Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-10T07:27:33.660Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-10T07:29:45.823Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T07:41:15.836Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T07:43:25.053Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T09:09:58.945Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T09:11:44.857Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T12:13:49.729Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T12:16:18.677Z",
+          "by": "Slavo"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T12:18:12.998Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-10T12:18:13.097Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-10T06:10:45.450Z",
+        "completedAt": "2026-07-10T06:18:27.070Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "website/docs/get-started/getting-started.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 4,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-10T12:18:13.098Z",
+      "totalDurationMinutes": 381,
+      "tags": [
+        "dashboard",
+        "master",
+        "onboarding",
+        "ux"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-10T12:18:12.999Z",
+      "flowId": "default"
+    }
+  ]
+}

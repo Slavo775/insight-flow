@@ -33,51 +33,33 @@
     "kind": "handover",
     "to": "authoring-review",
     "mode": "auto",
-    "when": "the definitions are authored"
+    "when": "the definitions are authored, or the review blockers are fixed"
   },
   {
     "id": "authoring-review/handover-fix",
-    "title": "Authoring: review → fix",
+    "title": "Authoring: review → implement (fix)",
     "source": "builtin",
     "kind": "handover",
-    "to": "authoring-fix",
+    "to": "authoring-implement",
     "mode": "gated",
-    "when": "blockers were found"
+    "when": "blockers were found — the implementer fixes them"
   },
   {
-    "id": "authoring-review/handover-human-review",
-    "title": "Authoring: review → human review",
-    "source": "builtin",
-    "kind": "handover",
-    "to": "authoring-human-review",
-    "mode": "gated",
-    "when": "the authored definitions pass AI review"
-  },
-  {
-    "id": "authoring-fix/handover-review",
-    "title": "Authoring: fix → review",
-    "source": "builtin",
-    "kind": "handover",
-    "to": "authoring-review",
-    "mode": "gated",
-    "when": "the blockers are fixed"
-  },
-  {
-    "id": "authoring-human-review/handover-test",
-    "title": "Authoring: human review → test",
-    "source": "builtin",
-    "kind": "handover",
-    "to": "authoring-test",
-    "mode": "gated",
-    "when": "the human approved the definitions"
-  },
-  {
-    "id": "authoring-test/handover-install",
-    "title": "Authoring: test → install",
+    "id": "authoring-review/handover-install",
+    "title": "Authoring: review → install",
     "source": "builtin",
     "kind": "handover",
     "to": "authoring-install",
     "mode": "gated",
-    "when": "validation passes"
+    "when": "the human approved the definitions (after the human-feedback pass, not merely AI approval)"
+  },
+  {
+    "id": "authoring-install/handover-fix",
+    "title": "Authoring: install → implement (fix)",
+    "source": "builtin",
+    "kind": "handover",
+    "to": "authoring-implement",
+    "mode": "gated",
+    "when": "post-install validation failed — rolled back; the implementer fixes the definition"
   }
 ]

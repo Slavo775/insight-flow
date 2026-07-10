@@ -1,0 +1,121 @@
+{
+  "taskId": "N200",
+  "reviews": [
+    {
+      "startedAt": "2026-07-03T06:20:10.868Z",
+      "endedAt": "2026-07-03T06:25:36.399Z",
+      "verdict": "approved",
+      "comment": "Approved. No blockers. Ordered analyze method, custom-only rule, model primer, plain-language on all 8 authoring agents, and the Smithery registry MCP wired with a secret placeholder all verified. Drift guard intact (9 roles byte-identical); 319/319 tests, typecheck + lint clean. Non-blocking: pin @smithery/cli (unpinned @latest); clarify ANALYSIS.md sequencing wording; pre-existing follow-up — call ensureGitignored in executeInstall so composer-MCP installs can't commit a secret cleartext. Not launched end-to-end — tester should confirm Toolbox runs.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-03T09:13:15.799Z",
+      "endedAt": "2026-07-03T09:14:00.154Z",
+      "verdict": "fix-needed",
+      "comment": "Human: MCP-secrets guidance must say the secret goes in the PROJECT's .insight-flow/secrets.local.json, not globally (~/.insight-flow). Wording fix in composer-conventions MODEL_PRIMER, authoring-analyze step 6, and mcp-registry.json description.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T09:38:57.678Z",
+        "endedAt": "2026-07-03T09:41:06.931Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json"
+        ],
+        "comment": "Fixed blocker 1: MCP-secrets guidance now specifies the project's .insight-flow/secrets.local.json (project root), not global ~/.insight-flow. Wording-only in composer-conventions MODEL_PRIMER, authoring-analyze step 6, and mcp-registry.json.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-03T15:12:49.940Z",
+      "endedAt": "2026-07-03T15:13:36.982Z",
+      "verdict": "fix-needed",
+      "comment": "Human: don't force the Smithery key. Analyzer uses web search only for now; keep mcp-registry-search as an opt-in catalog module (remove from composer-authoring install list); add guidance 'add this MCP for better results' + a usage section (MCP vs web search); document the flow inside N200, no new task.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T15:14:52.887Z",
+        "endedAt": "2026-07-03T15:18:22.768Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json",
+          "packages/taskflow/README.md",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "comment": "Round 3: analyzer uses web search only; registry MCP now catalog-only (removed from composer-authoring install list) = no forced key; added opt-in guidance + README usage section (web search vs MCP); documented in N200.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-03T15:27:59.798Z",
+      "endedAt": "2026-07-03T15:28:34.728Z",
+      "verdict": "fix-needed",
+      "comment": "Human: drop the paid Smithery MCP totally; use the GitHub MCP Registry (github.com/mcp, no-key API) as the discovery source instead. Remove mcp-registry.json + all Smithery references; point analyzer web-search discovery at github.com/mcp.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T15:32:23.399Z",
+        "endedAt": "2026-07-03T15:36:37.550Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/README.md",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "comment": "Round 4: removed the Smithery MCP module entirely (no key, no @smithery); analyzer + primer + README now discover via web search against github.com/mcp (GitHub MCP Registry, no-auth) + the Official Registry. N200 ships no MCP module and no key.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-03T17:35:31.421Z",
+      "endedAt": "2026-07-03T17:36:05.309Z",
+      "verdict": "fix-needed",
+      "comment": "Human: update the docs website in this task. Bring website/docs/ in line with N200 — document the authoring-analyze method, MCP discovery via github.com/mcp (no key, no Smithery), and reconcile the eject-vs-custom-only messaging.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-03T17:57:16.263Z",
+        "endedAt": "2026-07-03T19:24:00.923Z",
+        "status": "fixed",
+        "filesChanged": [
+          "website/docs/authoring/index.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/composer-mcp/tools.md",
+          "website/docs/guides/custom-module.md"
+        ],
+        "comment": "Round 5: documented the authoring-analyze method + key-free MCP discovery via github.com/mcp in the docs site; reconciled the reuse-first rule to custom-only (built-in defaults read-only, prefer custom: variants) with honest notes that the framework still permits eject. Docusaurus build passes (no broken links).",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-03T19:28:28.422Z",
+      "endedAt": "2026-07-03T19:36:20.644Z",
+      "verdict": "approved",
+      "comment": "Approved (closing re-review). Final state matches human-directed intent: ordered analyze method, plain-language on all 8 authoring agents, custom-only + model primer, NO MCP module and NO key, discovery via github.com/mcp; docs site updated (Docusaurus build clean). Gates green (319/319; earlier 318 was the known-flaky boot test). Non-blocking: task CHECKLIST.md/TASK.md still describe the removed Smithery MCP (update for accuracy); BUILTIN_PROJECTS barrel export now unused.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-03T19:42:50.898Z",
+      "endedAt": "2026-07-03T19:43:14.277Z",
+      "verdict": "approved",
+      "comment": "Human approved. Merge instruction: do NOT merge to main/master — merge feat/N200 into a new integration branch (agents-approved). Tracker not marked merged/done since it's not on main.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

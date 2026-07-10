@@ -19,6 +19,10 @@ import {
   AgentModuleSchema,
   MODULE_REGISTRY,
   COMPOSED_AGENTS,
+  AUTHORING_PROJECT,
+  BUILTIN_PROJECTS,
+  suggestNextSteps,
+  flowRequiredInputs,
 } from "../dist/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -537,4 +541,180 @@ test("section module without heading or body is rejected by the schema", () => {
   assert.throws(() => AgentModuleSchema.parse({ id: "x", title: "X", kind: "section" }));
   AgentModuleSchema.parse({ id: "x", title: "X", kind: "section", heading: "NEVER" });
   AgentModuleSchema.parse({ id: "y", title: "Y", kind: "section", body: "- bullet" });
+});
+
+test("N200: authoring-analyze composes the ordered design method + plain language", () => {
+  const md = composeAgentById("authoring-analyze");
+  assert.ok(md.includes("## Plain language"), "analyst speaks simple English");
+  // The fixed method, in order.
+  for (const marker of [
+    "1. **Intent.**",
+    "2. **Goal.**",
+    "3. **Design top-down",
+    "Flow first",
+    "4. **Reuse pass.**",
+    "5. **Impact pass.**",
+    "6. **MCP pass.**",
+    "terminator / finish",
+  ]) {
+    assert.ok(md.includes(marker), `authoring-analyze method missing "${marker}"`);
+  }
+  assert.ok(md.includes("ANALYSIS.md"), "analyst produces an ANALYSIS.md on approval");
+  assert.ok(md.includes("build nothing"), "analyst is analyze-only");
+});
+
+test("N200: the model primer + custom-only rule reach the authoring agents", () => {
+  const md = composeAgentById("authoring-analyze");
+  assert.ok(md.includes("How the pieces fit"), "model primer composed in");
+  assert.ok(
+    md.includes("built-in defaults are read-only") || md.includes("read-only template"),
+    "custom-only rule composed in",
+  );
+});
+
+test("N200: every authoring agent carries the plain-language module", () => {
+  const authoring = Object.entries(COMPOSED_AGENTS).filter(([id]) => id.startsWith("authoring-"));
+  // N202: removed the Composer Fixer (implementer fixes). N203: removed the separate
+  // Composer Human Review (one dual-mode review agent). N204: merged the Tester into
+  // the Installer (install-first + validate). So 5 authoring agents.
+  assert.ok(authoring.length >= 5, "the authoring flow's agents are registered");
+  for (const [id, def] of authoring) {
+    assert.ok(def.modules.includes("plain-language"), `${id} composes plain-language`);
+  }
+});
+
+test("N203: composer review sequences AI → human via the ai-approved status", () => {
+  // The composer flow declares a distinct `ai-approved` status; the default flow does not
+  // (so the shared review-end command stays byte-identical for default-flow tasks).
+  assert.ok(
+    AUTHORING_PROJECT.statuses.some((s) => s.id === "ai-approved"),
+    "composer-authoring declares ai-approved",
+  );
+  assert.ok(
+    !BUILTIN_PROJECTS["default"].statuses.some((s) => s.id === "ai-approved"),
+    "default flow does NOT declare ai-approved",
+  );
+  // AI approval loops back to the same review agent for the human pass…
+  assert.deepEqual(
+    suggestNextSteps(AUTHORING_PROJECT.flow, "ai-approved", AUTHORING_PROJECT.statuses).map(
+      (s) => s.agentId,
+    ),
+    ["authoring-review"],
+    "ai-approved suggests the review agent again (human pass)",
+  );
+  // …and only a human approval advances to test — the human pass can't be skipped.
+  assert.deepEqual(
+    suggestNextSteps(AUTHORING_PROJECT.flow, "approved", AUTHORING_PROJECT.statuses).map(
+      (s) => s.agentId,
+    ),
+    ["authoring-install"],
+    "approved advances to install",
+  );
+});
+
+test("N204: composer flow tail is install-first (validate) with rollback to implement", () => {
+  // The Tester was merged into the Installer; the flow ends review → install → done.
+  assert.ok(
+    !AUTHORING_PROJECT.agents.includes("authoring-test"),
+    "authoring-test removed from the flow",
+  );
+  const tail = (from, on) =>
+    AUTHORING_PROJECT.flow
+      .filter((e) => e.from === from && (on === undefined || e.on === on))
+      .map((e) => `${e.on ?? "*"}→${e.to}`);
+  assert.deepEqual(tail("authoring-review", "approved"), ["approved→authoring-install"]);
+  assert.deepEqual(
+    tail("authoring-install").sort(),
+    ["*→done", "fix-needed→authoring-implement"],
+    "install → done on success, → implement on validation failure (rollback)",
+  );
+  // The installer composes the edge-case checklist.
+  assert.ok(
+    COMPOSED_AGENTS["authoring-install"].modules.includes("composer-install-checklist"),
+    "installer composes composer-install-checklist",
+  );
+});
+
+test("N205: polish — reviewers-templated convention, status titles, hooks in validation", () => {
+  // A — the reviewers-are-templated convention reaches the authoring agents.
+  assert.ok(
+    /Reviewers are templated too/.test(composeAgentById("authoring-create")),
+    "reviewers-templated convention is composed in",
+  );
+  // B — status *titles* changed; *ids* unchanged (so the CLI verdict=status model is intact).
+  const st = (id) => AUTHORING_PROJECT.statuses.find((s) => s.id === id);
+  assert.equal(st("ready").title, "ready to implement");
+  assert.equal(st("approved").title, "ready to install");
+  assert.ok(st("ready") && st("approved"), "the `ready` and `approved` ids are unchanged");
+  // C — the installer's validate step names hooks and requires correctness.
+  const inst = composeAgentById("authoring-install");
+  assert.ok(
+    /hooks\*\* were installed and are correct/.test(inst),
+    "validation checks hooks are correct",
+  );
+});
+
+test("N200 (Round 4): no paid/keyed MCP ships; discovery is web search via github.com/mcp", () => {
+  // The Smithery module is removed entirely — not in the catalog, no flow, no key.
+  assert.equal(MODULE_REGISTRY["mcp-registry-search"], undefined, "Smithery MCP module removed");
+  assert.ok(
+    !AUTHORING_PROJECT.install.includes("mcp-registry-search"),
+    "composer-authoring installs no registry MCP",
+  );
+  assert.ok(
+    !flowRequiredInputs(AUTHORING_PROJECT).some((i) => i.name === "SMITHERY_API_KEY"),
+    "the flow needs no Smithery key",
+  );
+  // No Smithery reference survives in any composed authoring agent prompt.
+  for (const id of Object.keys(COMPOSED_AGENTS).filter((k) => k.startsWith("authoring-"))) {
+    assert.ok(!/smithery/i.test(composeAgentById(id)), `${id} prompt has no Smithery reference`);
+  }
+  // Discovery guidance points at the GitHub MCP Registry.
+  const analyst = composeAgentById("authoring-analyze");
+  assert.ok(analyst.includes("github.com/mcp"), "analyst discovers via github.com/mcp");
+  assert.ok(
+    analyst.includes("registry.modelcontextprotocol.io"),
+    "analyst also names the Official MCP Registry",
+  );
+});
+
+test("N201: the composer taskmaster is a templated spec-writer (create + change)", () => {
+  // Both new section modules are registered.
+  assert.equal(MODULE_REGISTRY["template-copy"]?.kind, "section", "template-copy registered");
+  assert.equal(
+    MODULE_REGISTRY["authoring-spec-structure"]?.kind,
+    "section",
+    "authoring-spec-structure registered",
+  );
+  // Composed into authoring-create, keeping plain-language.
+  const mods = COMPOSED_AGENTS["authoring-create"].modules;
+  assert.ok(mods.includes("template-copy"), "authoring-create composes template-copy");
+  assert.ok(
+    mods.includes("authoring-spec-structure"),
+    "authoring-create composes authoring-spec-structure",
+  );
+  assert.ok(mods.includes("plain-language"), "plain-language retained");
+  // Behaviour surfaces in the composed prompt.
+  const md = composeAgentById("authoring-create");
+  assert.ok(/scaffold/i.test(md), "scaffold-then-fill discipline present");
+  // Scaffolds ALL task files, including ANALYSIS.md (the analyst fills it — N201 blocker fix).
+  assert.ok(
+    md.includes("insight-flow create") && md.includes("--with-analysis"),
+    "taskmaster scaffolds ANALYSIS.md via --with-analysis",
+  );
+  assert.ok(
+    /creating a new spec and changing an existing/i.test(md),
+    "handles change, not only create",
+  );
+  assert.ok(/inventory/i.test(md), "detailed inventory spec structure present");
+  assert.ok(/implementer subtasks/i.test(md), "implementer subtasks in the spec");
+});
+
+test("N201: composer conventions make taskmasters templated by default", () => {
+  // The convention reaches the authoring agents via composer-authoring-conventions.
+  const md = composeAgentById("authoring-create");
+  assert.ok(
+    md.includes("Taskmasters are templated by default"),
+    "the every-taskmaster convention is composed in",
+  );
 });

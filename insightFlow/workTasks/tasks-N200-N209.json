@@ -1,0 +1,1048 @@
+{
+  "range": {
+    "from": 200,
+    "to": 209
+  },
+  "tasks": [
+    {
+      "id": "N200",
+      "title": "Composer analyze v2 — flow/agent/module design strategist + custom-only rule + model context",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N200-composer-analyze-v2-flow-agent-module-design-strat",
+      "createdAt": "2026-07-02T20:43:23.401Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-02T20:43:23.401Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-02T20:55:14.939Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-02T21:06:28.316Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T06:06:45.704Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T06:20:10.865Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-03T06:25:36.400Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T08:10:17.362Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T09:13:15.797Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T09:14:00.155Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T09:38:57.676Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T09:41:06.932Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T09:45:49.746Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T15:12:49.938Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T15:13:36.983Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T15:14:52.886Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T15:18:22.769Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T15:19:08.033Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T15:27:59.796Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T15:28:34.729Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T15:32:23.397Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T15:36:37.551Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T15:41:12.221Z",
+          "by": "task-git"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T15:42:37.073Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T17:35:31.419Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T17:36:05.310Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T17:57:16.261Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T19:24:00.924Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-03T19:26:36.976Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T19:28:28.420Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-03T19:36:20.645Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T19:42:50.895Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-03T19:43:14.278Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-02T20:55:14.942Z",
+        "completedAt": "2026-07-02T21:06:28.318Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/integrations/mcp-registry.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 7,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "authoring",
+        "composer",
+        "analyze"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-03T06:06:45.704Z",
+          "commitHash": "3b5de5b21829e8c89ac54a0a6070fdbb0e3e6fbd",
+          "commitMessage": "feat(agents): composer analyze v2 — design strategist + custom-only rule + model primer (N200)"
+        },
+        {
+          "at": "2026-07-03T08:10:17.361Z",
+          "commitHash": "6ef61afabcd8ccc832a1cb94d2ccb061ad9c1a79",
+          "commitMessage": "refactor(agents): apply N200 non-blocking review fixes"
+        },
+        {
+          "at": "2026-07-03T09:45:49.746Z",
+          "commitHash": "26e89102f335cd1faf05e146b54d41faa40ac129",
+          "commitMessage": "fix(agents): specify project-local secrets in composer MCP guidance (N200)"
+        },
+        {
+          "at": "2026-07-03T15:19:08.033Z",
+          "commitHash": "83031acd243ff4deb076d7c2335ce8d64a5eade0",
+          "commitMessage": "fix(agents): make registry MCP opt-in, analyzer uses web search by default (N200)"
+        },
+        {
+          "at": "2026-07-03T15:41:12.220Z",
+          "commitHash": "b0af86d312d7b16014617b00aae99e63218db495",
+          "commitMessage": "fix(agents): drop Smithery MCP entirely; discover via github.com/mcp (N200)"
+        },
+        {
+          "at": "2026-07-03T15:42:37.073Z",
+          "commitHash": "2b254a0f18cc1a46ed16a0202572694dddf3f258",
+          "commitMessage": "fix(agents): rewire discovery to github.com/mcp after Smithery removal (N200)"
+        },
+        {
+          "at": "2026-07-03T19:26:36.975Z",
+          "commitHash": "fca6d0fab32be72b737b6e304a36ed727d49c97f",
+          "commitMessage": "docs: document composer analyze method + github.com/mcp discovery; custom-only (N200)"
+        }
+      ],
+      "branch": "feat/N200-composer-analyze-v2",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N201",
+      "title": "Composer Taskmaster v2 — specialized spec-writer + templated scaffolding + change-handling",
+      "type": "feat",
+      "priority": "medium",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N201-composer-taskmaster-v2-specialized-spec-writer-tem",
+      "createdAt": "2026-07-03T20:34:25.665Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-03T20:34:25.666Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-03T20:37:42.782Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-03T20:44:35.864Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-03T21:00:12.578Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-03T21:03:41.282Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-03T22:17:26.526Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-03T22:29:55.472Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-06T06:59:20.755Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-06T07:00:53.590Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-06T07:02:57.460Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-06T11:18:24.831Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-06T11:18:47.664Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-06T21:36:10.107Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-03T20:37:42.783Z",
+        "completedAt": "2026-07-03T20:44:35.867Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/template-copy.json",
+          "packages/taskflow/src/agents/modules/authoring-spec-structure.json",
+          "packages/taskflow/src/agents/compose.ts",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/integrations/composer-subagents.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/agents-and-subagents.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 4382,
+      "tags": [
+        "authoring",
+        "composer",
+        "taskmaster"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-06T07:02:57.460Z",
+          "commitHash": "e4b973900062f57f7d29a075e1a8b26895178e10",
+          "commitMessage": "feat(agents): composer taskmaster v2 — templated spec-writer + change-handling (N201)"
+        }
+      ],
+      "branch": "feat/N201-composer-taskmaster-v2",
+      "mrUrl": null,
+      "mergedAt": "2026-07-06T21:36:10.108Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N202",
+      "title": "Composer implementer + fixer v2 — shared build core, self-contained context, checklist tracking, no-install guard",
+      "type": "feat",
+      "priority": "high",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N202-composer-implementer-fixer-v2-shared-build-core-se",
+      "createdAt": "2026-07-06T21:03:33.379Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-06T21:03:33.379Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-06T21:17:33.605Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-06T21:23:15.028Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T05:31:56.536Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-07T05:35:37.538Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-07T05:42:07.565Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-07T05:44:02.822Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T08:39:42.538Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-07T08:40:55.409Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T08:44:46.708Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-07T08:45:30.678Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-07T08:52:36.965Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-07T09:05:03.535Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T13:29:34.065Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-07T13:30:30.471Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-07T13:35:07.142Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-07T13:40:14.333Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T14:56:50.095Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-07T14:59:14.881Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T15:08:51.046Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-07T15:09:27.043Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-07T15:23:51.573Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-06T21:17:33.606Z",
+        "completedAt": "2026-07-06T21:23:15.030Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/modules/authoring-spec-structure.json",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 6,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 1100,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-07T15:23:51.574Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N203",
+      "title": "Composer review v2 — unify AI + human review into one dual-mode agent + consolidated requirements",
+      "type": "feat",
+      "priority": "high",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N203-composer-review-v2-unify-ai-human-review-into-one-",
+      "createdAt": "2026-07-07T18:33:31.977Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-07T18:33:31.977Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-07T19:43:33.867Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-07T21:15:27.108Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-07T22:11:51.564Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-07T22:30:07.578Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-08T07:30:55.964Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-08T07:32:54.479Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-08T09:12:35.414Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-08T09:13:15.597Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-08T09:14:33.396Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-07T19:43:33.868Z",
+        "completedAt": "2026-07-07T21:15:27.109Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/handovers-authoring.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 881,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-08T09:14:33.397Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N204",
+      "title": "Composer install v2 — one install+validate agent (install-first), edge-case checklist, rollback-on-failure",
+      "type": "feat",
+      "priority": "high",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N204-composer-install-v2-one-install-validate-agent-ins",
+      "createdAt": "2026-07-08T11:46:29.063Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-08T11:46:29.063Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-08T11:51:03.347Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-08T12:01:03.167Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-08T14:32:08.069Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-08T14:34:39.671Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-08T14:35:13.811Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-08T14:37:37.890Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T06:19:34.903Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T06:19:53.528Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-09T06:21:28.314Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-08T11:51:03.348Z",
+        "completedAt": "2026-07-08T12:01:03.168Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/src/agents/composed/authoring.json",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/handovers-authoring.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 1115,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-09T06:21:28.315Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N205",
+      "title": "Composer flow polish — review-template convention, status display names, hooks in install validation",
+      "type": "feat",
+      "priority": "medium",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N205-composer-flow-polish-review-template-convention-st",
+      "createdAt": "2026-07-09T06:27:19.269Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-09T06:27:19.269Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-09T06:33:38.691Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-09T07:03:47.339Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T07:04:47.776Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-09T07:07:05.892Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-09T07:12:09.218Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-09T07:13:46.059Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T07:39:33.430Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T07:41:36.870Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T13:44:52.585Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T13:45:25.675Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-09T13:46:59.664Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-09T06:33:38.692Z",
+        "completedAt": "2026-07-09T07:03:47.340Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/composer-conventions.ts",
+          "packages/taskflow/src/agents/project/authoring.json",
+          "packages/taskflow/src/agents/modules/roles/authoring.json",
+          "packages/taskflow/test/compose.test.mjs",
+          "website/docs/authoring/agents-and-subagents.md",
+          "website/docs/authoring/walkthrough.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 440,
+      "tags": [
+        "authoring",
+        "composer"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-09T13:46:59.665Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N206",
+      "title": "Composer flow layout — stack reviewer below implementer in the flow map",
+      "type": "feat",
+      "priority": "low",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N206-composer-flow-layout-stack-reviewer-below-implemen",
+      "createdAt": "2026-07-09T11:20:20.648Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-09T11:20:20.648Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-09T11:27:58.640Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-09T11:42:57.159Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T12:36:55.541Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T12:43:31.393Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-09T13:44:52.695Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-09T13:45:25.770Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-09T13:46:59.754Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-09T11:27:58.641Z",
+        "completedAt": "2026-07-09T11:42:57.160Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/project/authoring.json"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 147,
+      "tags": [
+        "authoring",
+        "composer",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-09T13:46:59.755Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N207",
+      "title": "Init quick wins — events on by default, deprecate agents.extend",
+      "type": "feat",
+      "priority": "medium",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N207-init-quick-wins-events-on-by-default-deprecate-age",
+      "createdAt": "2026-07-09T16:51:29.730Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-09T16:51:29.731Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-09T16:59:47.812Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-09T17:14:31.277Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T05:38:03.793Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T05:38:03.900Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T05:38:03.991Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-09T16:59:47.813Z",
+        "completedAt": "2026-07-09T17:14:31.278Z",
+        "filesChanged": [
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/test/init.test.mjs",
+          "packages/taskflow/README.md",
+          "website/docs/configuration.md",
+          "CLAUDE.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 767,
+      "tags": [
+        "init",
+        "config",
+        "dx"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-10T05:38:03.992Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N208",
+      "title": "Composer-first init — install composer flow on init, install-flow command, default flow opt-in",
+      "type": "feat",
+      "priority": "high",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N208-composer-first-init-install-composer-flow-on-init-",
+      "createdAt": "2026-07-09T19:39:39.695Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-09T19:39:39.695Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-09T19:54:23.136Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T05:54:02.914Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T05:54:03.038Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T05:55:24.759Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T05:55:24.861Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T05:55:24.966Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T05:56:22.362Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-09T19:54:23.137Z",
+        "completedAt": "2026-07-10T05:54:02.915Z",
+        "filesChanged": [
+          "packages/taskflow/src/cli/commands/install-flow.ts",
+          "packages/taskflow/src/cli/cli.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 617,
+      "tags": [
+        "init",
+        "onboarding",
+        "cli"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-10T05:56:22.363Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N209",
+      "title": "Composer-first init (deferred from N208) — per-provider skills refactor",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "flowId": "default",
+      "folder": "insightFlow/workTasks/N209-composer-first-init-deferred-from-n208-per-provide",
+      "createdAt": "2026-07-10T05:56:49.656Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T05:56:49.656Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "init",
+        "onboarding"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
+    }
+  ]
+}

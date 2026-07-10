@@ -18,8 +18,18 @@ ship discipline as the default task flow, with specialist
 
 - **A guided path** from "I want a module/agent/flow that does X" to an installed,
   reviewed definition — without hand-writing JSON or memorising the schema.
+- **A clear design method.** The analyst works top-down through a fixed method —
+  **intent** (a whole flow, one agent, or one module) → **goal** → design
+  **flow → agents → modules** → **reuse** → **impact** → **MCP discovery** — so
+  the design is deliberate before anything is built.
 - **Reuse over duplication.** Every request is first checked against the existing
-  registry; the flow prefers reusing or lightly editing what's there.
+  registry; the flow prefers reusing what's there.
+- **Custom-only, upgrade-safe.** Built-in defaults are treated as **read-only**:
+  to change a built-in the flow authors a `custom:` **variant** rather than
+  editing the shipped default, so your defaults stay clean and package-upgradable.
+- **Key-free MCP discovery.** When a design needs an MCP server, the analyst finds
+  one by **web search** — the free **[GitHub MCP Registry](https://github.com/mcp)**
+  (`github.com/mcp`) and the Official MCP Registry — no API key, nothing to install.
 - **Specialist subagents.** Each step fans out to per-kind experts (module /
   agent / flow / relationship) so the work is focused and parallel.
 - **Safety rails.** Human review before anything is installed; the locked tier
@@ -41,16 +51,22 @@ where guidance, deduplication, and review pay off.
 ## The lifecycle at a glance
 
 ```
-analyze → create → implement → review → human-review → test → install → done
-                       ▲          │
-                       └─── fix ◀─┘        (review found blockers)
+analyze → create → implement → review → install → done
+                       ▲  ▲     │  ▲ │      │
+                       │  └ fix ─┘  └─┘     │  (review runs the AI pass, then
+                       └──── fix ◀──────────┘   loops back for your human pass;
+                                                blockers route to fix. Install
+                                                installs then validates — on
+                                                failure it rolls back to fix.)
 ```
 
 - **Entry** at `analyze` (recommended) or `create`. If you start at `create`
   without a prior analysis, it hands **back to analyze first** (gated) so the
   request is understood and deduplicated.
-- **Install happens only after human review approves** — the `install` step is
-  the terminal action.
+- **Install happens only after you approve** — review runs the AI pass then your
+  human pass, and only your approval moves it to `install`. The installer installs
+  **then validates** the real install; on a validation failure it rolls back and
+  hands to fix. A clean install is the terminal action (`done`).
 - Each agent runs as a slash command (`/task-authoring-analyze`,
   `/task-authoring-implement`, …) once the flow is installed.
 
@@ -67,7 +83,7 @@ install(kind="flow", id="composer-authoring")
 
 That emits, into your project:
 
-- `.claude/commands/task-authoring-*.md` — the 8 agent commands
+- `.claude/commands/task-authoring-*.md` — the 5 agent commands
 - `.claude/agents/*.md` — the 12 per-kind subagents
 - `.mcp.json` — the `composer` server entry (stdio; nothing to start/stop)
 - the activity-engine hooks (so authoring tasks record events)

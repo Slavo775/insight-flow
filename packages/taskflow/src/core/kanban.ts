@@ -33,7 +33,7 @@ export const CANONICAL_COLUMNS: Column[] = [
     label: "Fix",
     matches: ["fix-needed", "fixing", "fixed", "changes-requested", "request-changes"],
   },
-  { key: "approved", label: "Approved", matches: ["approved", "pushed"] },
+  { key: "approved", label: "Approved", matches: ["approved", "ai-approved", "pushed"] },
   { key: "merged", label: "Done", matches: ["merged", "done"] },
 ];
 
