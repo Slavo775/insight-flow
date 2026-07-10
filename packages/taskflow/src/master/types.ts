@@ -32,6 +32,12 @@ export interface MasterProjectEntry {
   projectId: string;
   label: string;
   url: string;
+  /** Absolute project dir, when known — lets the hub reconcile by path (N214). */
+  path?: string;
+  /** Per-project auth token issued at register; required on update/status/live. */
+  token: string;
+  /** Live: a liveness connection is open, or the last on-demand probe succeeded. */
+  online: boolean;
   registeredAt: string;
   lastSeenAt: string;
   state: MasterProjectState;

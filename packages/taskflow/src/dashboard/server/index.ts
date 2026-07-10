@@ -1,4 +1,4 @@
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { createServer, get as httpGet, type IncomingMessage, type ServerResponse } from "node:http";
 import {
   readFileSync,
   unlinkSync,
@@ -323,8 +323,8 @@ async function waitForMaster(port: number): Promise<boolean> {
   return false;
 }
 
-function pushStatusToMaster(masterUrl: string, id: string, status: string): void {
-  void fetch(`${masterUrl}/api/projects/${id}/status`, {
+function pushStatusToMaster(masterUrl: string, id: string, token: string, status: string): void {
+  void fetch(`${masterUrl}/api/projects/${id}/status?token=${encodeURIComponent(token)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
@@ -337,17 +337,18 @@ async function registerWithMaster(
   projectId: string,
   label: string,
   projectUrl: string,
-): Promise<string | null> {
+  path?: string,
+): Promise<{ id: string; token: string } | null> {
   try {
     const res = await fetch(`${masterUrl}/api/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ projectId, label, url: projectUrl }),
+      body: JSON.stringify({ projectId, label, url: projectUrl, path }),
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
-    const data = (await res.json()) as { id?: string };
-    return data.id ?? null;
+    const data = (await res.json()) as { id?: string; token?: string };
+    return data.id && data.token ? { id: data.id, token: data.token } : null;
   } catch {
     return null;
   }
@@ -356,19 +357,57 @@ async function registerWithMaster(
 async function pushStateToMaster(
   masterUrl: string,
   id: string,
+  token: string,
   state: Record<string, unknown>,
 ): Promise<number> {
   try {
-    const res = await fetch(`${masterUrl}/api/projects/${id}/update`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(state),
-      signal: AbortSignal.timeout(3000),
-    });
+    const res = await fetch(
+      `${masterUrl}/api/projects/${id}/update?token=${encodeURIComponent(token)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state),
+        signal: AbortSignal.timeout(3000),
+      },
+    );
     return res.status;
   } catch {
     return 0;
   }
+}
+
+/**
+ * N214 — hold a passive liveness connection to the master so it can mark this
+ * project online while the connection is open and offline the moment it drops.
+ * Reconnects with capped backoff; stops when a re-register mints a new token.
+ */
+function holdLiveness(masterUrl: string, id: string, token: string): void {
+  let attempts = 0;
+  const reconnect = (): void => {
+    if (masterToken !== token) return; // superseded by a re-register
+    attempts += 1;
+    const delay = Math.min(30000, 1000 * 2 ** Math.min(attempts, 5));
+    setTimeout(connect, delay).unref();
+  };
+  const connect = (): void => {
+    if (masterToken !== token) return;
+    const liveUrl = `${masterUrl}/api/hub/live?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}`;
+    let settled = false;
+    const done = (): void => {
+      if (settled) return;
+      settled = true;
+      reconnect();
+    };
+    const req = httpGet(liveUrl, (res) => {
+      if (res.statusCode === 200) attempts = 0;
+      res.on("data", () => {});
+      res.on("end", done);
+      res.on("error", done);
+    });
+    req.on("error", done);
+    req.setTimeout(0);
+  };
+  connect();
 }
 
 function buildProjectState(
@@ -415,6 +454,7 @@ function buildProjectState(
 }
 
 let masterId: string | null = null;
+let masterToken: string | null = null;
 
 async function setupMasterIntegration(
   config: TaskflowConfig,
@@ -448,41 +488,60 @@ async function setupMasterIntegration(
     }
   }
 
-  // Register with master
+  // Register with master (N214 — send our project path so the hub can reconcile
+  // a seeded/bulk-ui entry by path, and receive our per-project token).
   const projectUrl = `http://localhost:${serverPort}`;
-  masterId = await registerWithMaster(
+  let projectPath: string | undefined;
+  try {
+    projectPath = resolveProjectRoot();
+  } catch {
+    projectPath = undefined;
+  }
+  const reg = await registerWithMaster(
     masterUrl,
     config.projectName,
     config.projectName,
     projectUrl,
+    projectPath,
   );
-  if (!masterId) {
+  if (!reg) {
     console.log(
       "  [master] Could not register with master at " + masterUrl + " — overview disabled",
     );
     return null;
   }
+  masterId = reg.id;
+  masterToken = reg.token;
 
   console.log("  [master] Registered with " + masterUrl + " (id: " + masterId.slice(0, 8) + "...)");
 
+  // N214 — hold the passive liveness connection (online while open).
+  holdLiveness(masterUrl, masterId, masterToken);
+
   // Push initial state
   const state = buildProjectState(config, activity);
-  void pushStateToMaster(masterUrl, masterId, state);
-  pushStatusToMaster(masterUrl, masterId, "idle");
+  void pushStateToMaster(masterUrl, masterId, masterToken, state);
+  pushStatusToMaster(masterUrl, masterId, masterToken, "idle");
 
   // Return push function to call on file-change
   return async function pushOnChange(): Promise<void> {
-    if (!masterId) return;
+    if (!masterId || !masterToken) return;
     const s = buildProjectState(config, activity);
-    const status = await pushStateToMaster(masterUrl, masterId, s);
+    const status = await pushStateToMaster(masterUrl, masterId, masterToken, s);
     if (status === 401) {
-      masterId = await registerWithMaster(
+      const reg2 = await registerWithMaster(
         masterUrl,
         config.projectName,
         config.projectName,
         projectUrl,
+        projectPath,
       );
-      if (masterId) await pushStateToMaster(masterUrl, masterId, s);
+      if (reg2) {
+        masterId = reg2.id;
+        masterToken = reg2.token;
+        holdLiveness(masterUrl, masterId, masterToken);
+        await pushStateToMaster(masterUrl, masterId, masterToken, s);
+      }
     }
   };
 }
@@ -536,6 +595,20 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+
+    // N214 — GET /health: the master's on-demand liveness probe. If we hold a
+    // token, the probe must present it (rejects a stranger); then report healthy.
+    if (url.pathname === "/health") {
+      const token = url.searchParams.get("token");
+      if (masterToken && token !== masterToken) {
+        res.writeHead(401, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "bad token" }));
+        return;
+      }
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ status: "ok", projectName: config.projectName }));
+      return;
+    }
 
     // N85: React dashboard (Vite build in dist/dashboard), served on the same
     // port. Hashed assets at /assets/*; the SPA shell is served by the catch-all
@@ -1277,7 +1350,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
                 at: statusAt,
                 latestEventId: event.id,
               });
-              if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+              if (masterId && masterToken) pushStatusToMaster(masterUrl, masterId, masterToken, to);
             }
           }
 
@@ -1483,7 +1556,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           at: new Date().toISOString(),
           latestEventId: synthetic.id,
         });
-        if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+        if (masterId && masterToken) pushStatusToMaster(masterUrl, masterId, masterToken, to);
       }
     }
 

@@ -1,0 +1,33 @@
+{
+  "taskId": "N214",
+  "reviews": [
+    {
+      "startedAt": "2026-07-10T21:47:22.971Z",
+      "endedAt": "2026-07-10T21:49:24.778Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: /api/hub/refresh SSRF — probes registrant-controlled e.url with no loopback guard (LOOPBACK_HOSTS gates only the proxy); a LAN peer registers an internal URL then triggers refresh → master fetches it (blind reachability oracle). Fix: filter probe targets to loopback. 6 non-blocking (probe timer leak, token in query, unauth refresh/live callers, broadcast-all, reconcile re-key edge, half-open detection). Rest solid + tested: 333/333.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-10T21:50:51.039Z",
+        "endedAt": "2026-07-10T21:54:16.857Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "comment": "Fixed blocker: /api/hub/refresh probe now loopback-only (isLoopbackUrl filter) — non-loopback urls never fetched (test proves via fast refresh, no 1.5s hang). Also: clearTimeout in finally (no leak) + centralized isLoopbackHost/isLoopbackUrl helpers shared by proxy + probe. Deferred 5 minor NBs. 334/334.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-10T22:33:47.117Z",
+      "endedAt": "2026-07-10T22:36:14.269Z",
+      "verdict": "approved",
+      "comment": "Human approved: connection-based liveness + token + SSRF fix. Merge into dashboard-improvements.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
