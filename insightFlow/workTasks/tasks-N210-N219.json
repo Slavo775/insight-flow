@@ -192,6 +192,233 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
+    },
+    {
+      "id": "N212",
+      "title": "Reverse-proxy spike: master serves a project dashboard (incl. SSE) on one origin",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N212-reverse-proxy-spike-master-serves-a-project-dashbo",
+      "createdAt": "2026-07-10T18:31:24.289Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.290Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "proxy",
+        "pwa",
+        "spike"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N213",
+      "title": "Unified persistent project registry + init opt-in to the master hub",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N213-unified-persistent-project-registry-init-opt-in-to",
+      "createdAt": "2026-07-10T18:31:24.430Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.430Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "multi-project",
+        "init"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N214",
+      "title": "Connection-based liveness for the master hub (drop polling) + light per-project token",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N214-connection-based-liveness-for-the-master-hub-drop-",
+      "createdAt": "2026-07-10T18:31:24.563Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.563Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "multi-project"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N215",
+      "title": "Master single-origin app shell: project switcher + reverse-proxy /p/<id> + start-and-go",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N215-master-single-origin-app-shell-project-switcher-re",
+      "createdAt": "2026-07-10T18:31:24.703Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.703Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "dashboard",
+        "proxy"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N216",
+      "title": "Unified notifications + sounds via a service worker on the master origin",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N216-unified-notifications-sounds-via-a-service-worker-",
+      "createdAt": "2026-07-10T18:31:24.834Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.834Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "notifications",
+        "pwa"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N217",
+      "title": "Installable PWA for the master hub (manifest + offline shell)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "flowId": "default",
+      "folder": "insightFlow/workTasks/N217-installable-pwa-for-the-master-hub-manifest-offlin",
+      "createdAt": "2026-07-10T18:31:24.978Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.979Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "pwa"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
