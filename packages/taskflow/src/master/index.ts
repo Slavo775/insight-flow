@@ -72,26 +72,28 @@ export async function runMaster(portOverride?: number): Promise<void> {
 }
 
 /**
- * N218 — probe each registered project's `/health` at its known port and, for
- * those that are genuinely an insight-flow dashboard (status "ok"), mark them
- * online with their live url. Best-effort, concurrent, short timeout; no timer.
+ * N219 — reverse-registration handshake (Diagram 1). On boot the master asks
+ * each registered project to register itself: `POST /hub/reregister` at its known
+ * port. A running project re-registers against the master (fresh token + liveness
+ * → online); a stopped project doesn't answer and the master does nothing; a
+ * standalone project declines. The master never fabricates online state — it only
+ * triggers the project's real registration. Best-effort, concurrent, short timeout.
  */
 async function handshakeRegistered(
   projects: { label: string; port: number; path: string }[],
 ): Promise<void> {
   await Promise.all(
     projects.map(async (p) => {
-      const url = `http://localhost:${p.port}`;
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 1500);
-        const r = await fetch(`${url}/health`, { signal: ctrl.signal });
+        await fetch(`http://localhost:${p.port}/hub/reregister`, {
+          method: "POST",
+          signal: ctrl.signal,
+        });
         clearTimeout(t);
-        if (!r.ok) return;
-        const body = (await r.json().catch(() => ({}))) as { status?: string };
-        if (body.status === "ok") registry.markUp(p.label, url);
       } catch {
-        /* project not running — stays offline */
+        /* project not running / declined — stays offline */
       }
     }),
   );

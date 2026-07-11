@@ -382,7 +382,18 @@ export async function startMasterServer(
       const proxyMatch = /^\/p\/([^/]+)(\/.*)?$/.exec(url.pathname);
       if (proxyMatch) {
         const pid = decodeURIComponent(proxyMatch[1]);
-        const rest = (proxyMatch[2] ?? "/") + url.search;
+        const restPath = proxyMatch[2] ?? "/";
+        const rest = restPath + url.search;
+        // N219 review-fix (blocker 2) — never proxy a project's `/hub/*`
+        // control-plane routes (e.g. `/hub/reregister`). Those are localhost-only
+        // project↔master endpoints that trust a loopback source address; the
+        // proxy would let a LAN peer reach them from the master's own loopback
+        // socket, defeating the gate. They are never meant for a browser.
+        if (restPath === "/hub" || restPath.startsWith("/hub/")) {
+          res.writeHead(404, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Not found" }));
+          return;
+        }
         const entry = registry.getById(pid) ?? registry.getAll().find((e) => e.projectId === pid);
         if (!entry || !entry.url) {
           // N218 — friendly page for a browser navigation; JSON for other callers.
@@ -467,7 +478,7 @@ export async function startMasterServer(
         // N214 — returns a per-project token the project echoes on later calls.
         const { id, token } = registry.upsert(projectId, label, projectUrl, { path });
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", entry);
+        if (entry) broadcast("project-update", registry.toPublicView(entry));
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ id, token }));
         return;
@@ -498,7 +509,7 @@ export async function startMasterServer(
           return;
         }
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", entry);
+        if (entry) broadcast("project-update", registry.toPublicView(entry));
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ ok: true }));
         return;
@@ -547,7 +558,7 @@ export async function startMasterServer(
           return;
         }
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", entry);
+        if (entry) broadcast("project-update", registry.toPublicView(entry));
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ ok: true }));
         return;
@@ -620,7 +631,7 @@ export async function startMasterServer(
         }
         const { id } = registry.upsert(slug, name, "", { path: dir });
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", entry);
+        if (entry) broadcast("project-update", registry.toPublicView(entry));
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ id, name, path: dir }));
         return;
@@ -630,7 +641,7 @@ export async function startMasterServer(
       // (id, label, url, online, lastSeenAt). Consumed by the switcher (N215).
       if (req.method === "GET" && url.pathname === "/api/hub/projects") {
         res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ projects: registry.getAll() }));
+        res.end(JSON.stringify({ projects: registry.getAllPublic() }));
         return;
       }
 
@@ -654,7 +665,7 @@ export async function startMasterServer(
         registry.setOnline(id, true);
         {
           const entry = registry.getById(id);
-          if (entry) broadcast("project-update", entry);
+          if (entry) broadcast("project-update", registry.toPublicView(entry));
         }
         const heartbeat = setInterval(() => {
           try {
@@ -667,7 +678,7 @@ export async function startMasterServer(
           clearInterval(heartbeat);
           registry.setOnline(id, false);
           const entry = registry.getById(id);
-          if (entry) broadcast("project-update", entry);
+          if (entry) broadcast("project-update", registry.toPublicView(entry));
         });
         return;
       }
@@ -698,9 +709,9 @@ export async function startMasterServer(
             registry.setOnline(e.id, ok);
           }),
         );
-        for (const e of registry.getAll()) broadcast("project-update", e);
+        for (const e of registry.getAllPublic()) broadcast("project-update", e);
         res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ projects: registry.getAll() }));
+        res.end(JSON.stringify({ projects: registry.getAllPublic() }));
         return;
       }
 
@@ -823,7 +834,7 @@ export async function startMasterServer(
       // root too, so it's the PWA start_url and the landing page).
       if (req.method === "GET" && (url.pathname === "/overview" || url.pathname === "/")) {
         res.writeHead(200, { "Content-Type": MIME_HTML });
-        res.end(getOverviewHtml(registry.getAll()));
+        res.end(getOverviewHtml(registry.getAllPublic()));
         return;
       }
 

@@ -42,3 +42,19 @@ export interface MasterProjectEntry {
   lastSeenAt: string;
   state: MasterProjectState;
 }
+
+/**
+ * N219 — the client-safe view of a project entry. The per-project `token` (and
+ * the server-only `url`/`path`) are deliberately omitted: the browser only ever
+ * needs the stable `projectId` to build a `/project/<id>` link, plus display
+ * state. Every client sink (overview page data, `/api/hub/projects`, SSE frames)
+ * serializes this, never the full `MasterProjectEntry`.
+ */
+export interface PublicProjectEntry {
+  id: string;
+  projectId: string;
+  label: string;
+  online: boolean;
+  lastSeenAt: string;
+  state: MasterProjectState;
+}
