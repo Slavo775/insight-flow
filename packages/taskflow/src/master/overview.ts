@@ -11,6 +11,13 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     '  <meta charset="UTF-8">\n' +
     '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
     "  <title>Insight Flow — Overview</title>\n" +
+    // N217 — installable PWA: manifest, theme, and icon on the master origin.
+    '  <link rel="manifest" href="/manifest.webmanifest">\n' +
+    '  <meta name="theme-color" content="#0a0a0a">\n' +
+    '  <link rel="icon" type="image/svg+xml" href="/icon.svg">\n' +
+    '  <link rel="apple-touch-icon" href="/icon.svg">\n' +
+    '  <meta name="apple-mobile-web-app-capable" content="yes">\n' +
+    '  <meta name="apple-mobile-web-app-title" content="insight-flow">\n' +
     "  <style>\n" +
     CSS +
     "\n  </style>\n" +

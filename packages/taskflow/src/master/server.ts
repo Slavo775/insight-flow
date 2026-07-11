@@ -28,13 +28,55 @@ const MIME_HTML = "text/html; charset=utf-8";
 const MASTER_SOUNDS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "sounds");
 
 /**
- * N216 — the master-origin service worker: one SW for the whole hub, the basis
- * for unified notifications (the page calls `registration.showNotification`, so
- * alerts fire while the hub is open or backgrounded) and for the N217 PWA. It
- * itself only needs to claim clients and focus/open the hub on a click.
+ * N216/N217 — the master-origin service worker: one SW for the whole hub. It
+ * powers unified notifications (`registration.showNotification`, fires while the
+ * hub is backgrounded) AND makes the hub an installable PWA with an offline app
+ * shell. Caching strategy (N217): the shell (`/`) is network-first — fresh when
+ * online, the cached shell when offline (no white screen); static assets
+ * (manifest, icons, sounds) are cache-first. The live surfaces — `/p/<id>/*`,
+ * `/api/*`, `/events` — are NEVER cached (always network). Old caches are pruned
+ * on activate.
  */
-const MASTER_SW_JS = `self.addEventListener('install', function(e){ self.skipWaiting(); });
-self.addEventListener('activate', function(e){ e.waitUntil(self.clients.claim()); });
+const MASTER_SW_JS = `var CACHE = 'if-hub-v1';
+var SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg', '/sounds/idle-ping.mp3', '/sounds/permission-alert.mp3'];
+self.addEventListener('install', function(e){
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then(function(c){ return c.addAll(SHELL).catch(function(){}); }));
+});
+self.addEventListener('activate', function(e){
+  e.waitUntil(
+    caches.keys().then(function(keys){
+      return Promise.all(keys.map(function(k){ if (k !== CACHE) return caches.delete(k); }));
+    }).then(function(){ return self.clients.claim(); })
+  );
+});
+self.addEventListener('fetch', function(e){
+  if (e.request.method !== 'GET') return;
+  var url = new URL(e.request.url);
+  if (url.origin !== self.location.origin) return;
+  // Live surfaces are always network — never cached.
+  if (url.pathname.indexOf('/p/') === 0 || url.pathname.indexOf('/api/') === 0 || url.pathname === '/events') return;
+  if (e.request.mode === 'navigate') {
+    // Shell: fresh when online, cached shell when offline.
+    e.respondWith(
+      fetch(e.request).then(function(res){
+        // Only cache an OK shell — never let a 404/500 poison the offline shell.
+        if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put('/', copy); }); }
+        return res;
+      }).catch(function(){ return caches.match('/'); })
+    );
+    return;
+  }
+  // Static assets: cache-first, populate on first fetch.
+  e.respondWith(
+    caches.match(e.request).then(function(cached){
+      return cached || fetch(e.request).then(function(res){
+        if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put(e.request, copy); }); }
+        return res;
+      });
+    })
+  );
+});
 self.addEventListener('notificationclick', function(e){
   e.notification.close();
   var target = (e.notification.data && e.notification.data.url) || '/';
@@ -48,6 +90,43 @@ self.addEventListener('notificationclick', function(e){
     if (self.clients.openWindow) return self.clients.openWindow(target);
   }));
 });`;
+
+/** N217 — the PWA manifest, served on the master origin (start_url = the hub). */
+const MASTER_MANIFEST = JSON.stringify({
+  name: "insight-flow hub",
+  short_name: "insight-flow",
+  description: "One hub for all your insight-flow projects.",
+  start_url: "/",
+  scope: "/",
+  display: "standalone",
+  background_color: "#0a0a0a",
+  theme_color: "#0a0a0a",
+  icons: [
+    { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
+    { src: "/icon-maskable.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
+  ],
+});
+
+/** N217 — self-contained SVG app icon (a small flow graph on the hub's dark bg). */
+const ICON_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="insight-flow">' +
+  '<rect width="512" height="512" rx="96" fill="#0a0a0a"/>' +
+  '<path d="M176 256 L336 160 M176 256 L336 352" stroke="#e5e5e5" stroke-width="18" stroke-linecap="round"/>' +
+  '<circle cx="176" cy="256" r="44" fill="#3b82f6"/>' +
+  '<circle cx="336" cy="160" r="44" fill="#22c55e"/>' +
+  '<circle cx="336" cy="352" r="44" fill="#a855f7"/>' +
+  "</svg>";
+
+/** N217 — maskable variant: full-bleed square bg + content inside the safe zone. */
+const ICON_MASKABLE_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="insight-flow">' +
+  '<rect width="512" height="512" fill="#0a0a0a"/>' +
+  '<g transform="translate(102 102) scale(0.6)">' +
+  '<path d="M176 256 L336 160 M176 256 L336 352" stroke="#e5e5e5" stroke-width="18" stroke-linecap="round"/>' +
+  '<circle cx="176" cy="256" r="44" fill="#3b82f6"/>' +
+  '<circle cx="336" cy="160" r="44" fill="#22c55e"/>' +
+  '<circle cx="336" cy="352" r="44" fill="#a855f7"/>' +
+  "</g></svg>";
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve) => {
@@ -626,6 +705,27 @@ export async function startMasterServer(
         }
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ url: (live && live.url) || projectUrl }));
+        return;
+      }
+
+      // N217 — GET /manifest.webmanifest + app icons (the installable PWA).
+      if (req.method === "GET" && url.pathname === "/manifest.webmanifest") {
+        res.writeHead(200, {
+          "Content-Type": "application/manifest+json; charset=utf-8",
+          "Cache-Control": "no-cache",
+        });
+        res.end(MASTER_MANIFEST);
+        return;
+      }
+      if (
+        req.method === "GET" &&
+        (url.pathname === "/icon.svg" || url.pathname === "/icon-maskable.svg")
+      ) {
+        res.writeHead(200, {
+          "Content-Type": "image/svg+xml; charset=utf-8",
+          "Cache-Control": "max-age=86400",
+        });
+        res.end(url.pathname === "/icon-maskable.svg" ? ICON_MASKABLE_SVG : ICON_SVG);
         return;
       }
 
