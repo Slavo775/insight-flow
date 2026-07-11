@@ -67,6 +67,8 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
     .proj-card-header { display: flex; justify-content: space-between; align-items: center; }
     .proj-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .mute-btn { background: none; border: none; cursor: pointer; font-size: 13px; line-height: 1; padding: 0 2px; opacity: 0.75; }
+    .mute-btn:hover { opacity: 1; }
     .proj-task { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
     .proj-task-id { font-size: 11px; font-weight: 700; color: var(--accent); }
     .proj-task-title { font-size: 12px; color: var(--text); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -123,6 +125,7 @@ function getScript(initialData: string): string {
     // outer literal terminates. Use single quotes for any inline samples.
     var PROJECTS = ${initialData};
     var prevStatuses = {};
+    var swReg = null; // N216 — set once the hub service worker is active
     // N210 — create a new project from the home base (non-coder onboarding).
     function createProject() {
       var name = prompt('Name your new project:');
@@ -138,7 +141,23 @@ function getScript(initialData: string): string {
       }).catch(function (e) { alert('Error: ' + e.message); });
     }
     var NOTIF_WATCHED = ['implemented','approved','fix-needed','merged','changes-requested'];
-    var notifSettings = { statuses: {}, sound: true, muteFocused: false };
+    var notifSettings = { statuses: {}, sound: true, muteFocused: false, mutedProjects: [] };
+
+    // N216 — per-project mute (stored under the master origin with the other
+    // notif settings). Muted projects fire no hub notification/sound.
+    function isMuted(id) {
+      return !!(notifSettings.mutedProjects && notifSettings.mutedProjects.indexOf(id) >= 0);
+    }
+    function toggleMuteProject(id) {
+      if (window.event) window.event.stopPropagation();
+      if (!notifSettings.mutedProjects) notifSettings.mutedProjects = [];
+      var i = notifSettings.mutedProjects.indexOf(id);
+      if (i >= 0) notifSettings.mutedProjects.splice(i, 1);
+      else notifSettings.mutedProjects.push(id);
+      try { localStorage.setItem('tf-notif-settings', JSON.stringify(notifSettings)); } catch(e) {}
+      var el = document.querySelector('[data-mute="' + String(id).replace(/[^A-Za-z0-9_-]/g, '') + '"]');
+      if (el) el.textContent = isMuted(id) ? '🔕' : '🔔';
+    }
 
     function escHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -250,6 +269,7 @@ function getScript(initialData: string): string {
 
     function renderCard(p) {
       var s = p.state || {};
+      var mid = String(p.id).replace(/[^A-Za-z0-9_-]/g, ''); // sanitized id for attrs/onclick
       // N71: gate every claudeStatus-driven visual on liveness. A project
       // that hasn't checked in for 60s renders neutral, regardless of the
       // last-pushed status — registry never clears the value on disconnect,
@@ -297,7 +317,10 @@ function getScript(initialData: string): string {
       return '<div class="proj-card' + (statusCls ? ' ' + statusCls : '') + '" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
           '<span class="proj-label">' + escHtml(p.label) + '</span>' +
-          (claudeBadgeHtml ? '<div style="display:flex;gap:6px;align-items:center">' + claudeBadgeHtml + '</div>' : '') +
+          '<div style="display:flex;gap:6px;align-items:center">' +
+            (claudeBadgeHtml ? claudeBadgeHtml : '') +
+            '<button class="mute-btn" title="Mute notifications for this project" data-mute="' + mid + '" onclick="toggleMuteProject(\\'' + mid + '\\')">' + (isMuted(p.id) ? '🔕' : '🔔') + '</button>' +
+          '</div>' +
         '</div>' +
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +
@@ -359,9 +382,50 @@ function getScript(initialData: string): string {
       }
     }
 
+    // N216 — one service worker for the whole hub. Prefer registration.show-
+    // Notification (fires while the hub is backgrounded; basis for the N217 PWA),
+    // falling back to a page Notification. We keep the OS notification silent and
+    // play our own bundled mp3 from the master origin instead.
+    function showHubNotification(title, data) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      var opts = { silent: true, data: data || {} };
+      // Use the SW only once it's actually active (swReg set on registration).
+      // Falling back to a page Notification immediately avoids a silent no-op if
+      // SW registration ever fails (navigator.serviceWorker.ready never rejects).
+      if (swReg) {
+        try { swReg.showNotification(title, opts); return; } catch(e) {}
+      }
+      try { new Notification(title, opts); } catch(e) {}
+    }
+    function playTone(status) {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        var ctx = new AC();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = (status === 'awaiting-permission' || status === 'permission-required') ? 660 : 440;
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+        osc.start(); osc.stop(ctx.currentTime + 0.25);
+      } catch(e) {}
+    }
+    function playNotifSound(status) {
+      if (notifSettings.sound === false) return;
+      if (notifSettings.muteFocused && !document.hidden) return;
+      var src = (status === 'awaiting-permission' || status === 'permission-required')
+        ? '/sounds/permission-alert.mp3' : '/sounds/idle-ping.mp3';
+      // Prefer the bundled mp3 (from the master origin); fall back to a Web-Audio
+      // beep if it can't play (missing/empty file, autoplay policy).
+      try { new Audio(src).play().catch(function() { playTone(status); }); }
+      catch(e) { playTone(status); }
+    }
+
     function checkStatusTransitions(p) {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       if (notifSettings.muteFocused && !document.hidden) return;
+      if (notifSettings.mutedProjects && notifSettings.mutedProjects.indexOf(p.id) >= 0) return;
       var s = p.state || {};
       if (!s.currentTaskId || !s.currentTaskStatus) return;
       var prev = (prevStatuses[p.id] || {})[s.currentTaskId];
@@ -369,7 +433,8 @@ function getScript(initialData: string): string {
           notifSettings.statuses[s.currentTaskStatus] !== false &&
           NOTIF_WATCHED.indexOf(s.currentTaskStatus) >= 0) {
         var title = p.label + ': ' + s.currentTaskId + ' → ' + s.currentTaskStatus;
-        try { new Notification(title, { silent: !notifSettings.sound }); } catch(e) {}
+        showHubNotification(title, { url: '/p/' + encodeURIComponent(p.id) + '/' });
+        playNotifSound(s.currentTaskStatus);
       }
       if (!prevStatuses[p.id]) prevStatuses[p.id] = {};
       prevStatuses[p.id][s.currentTaskId] = s.currentTaskStatus;
@@ -460,6 +525,15 @@ function getScript(initialData: string): string {
       });
     }
 
+    // N216 — register the hub service worker (unified notifications + N217 PWA base).
+    // swReg is set only once it's active, so showHubNotification can fall back to
+    // a page Notification if registration ever fails (no silent no-op).
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function() { return navigator.serviceWorker.ready; })
+        .then(function(reg) { swReg = reg; })
+        .catch(function() {});
+    }
     renderAll();
     loadNotifSettings();
     requestNotifPermission();

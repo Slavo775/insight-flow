@@ -1,0 +1,23 @@
+{
+  "taskId": "N216",
+  "reviews": [
+    {
+      "startedAt": "2026-07-11T08:16:21.872Z",
+      "endedAt": "2026-07-11T08:31:14.751Z",
+      "verdict": "approved",
+      "comment": "Approved: SW served at /sw.js + registered; notifications via registration.showNotification (backgrounded + PWA base); origin /sounds + Web-Audio fallback; per-project mute; one permission prompt; no Web Push. /sounds traversal-safe (verified). 336/336. 5 non-blocking (main: showHubNotification .ready hangs if SW registration fails — localhost SW works, worth a ready-flag/timeout fallback).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-11T08:48:50.929Z",
+      "endedAt": "2026-07-11T08:54:58.925Z",
+      "verdict": "approved",
+      "comment": "Human approved: unified SW notifications + origin sounds + per-project mute. Merge into dashboard-improvements.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

@@ -491,7 +491,7 @@
       "title": "Master single-origin app shell: project switcher + reverse-proxy /p/<id> + start-and-go",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N215-master-single-origin-app-shell-project-switcher-re",
       "createdAt": "2026-07-10T18:31:24.703Z",
       "statusHistory": [
@@ -549,6 +549,16 @@
           "status": "approved",
           "at": "2026-07-11T07:53:20.084Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-11T07:54:29.584Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-11T07:54:29.717Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -569,8 +579,8 @@
       "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-11T07:54:29.718Z",
+      "totalDurationMinutes": 803,
       "tags": [
         "master",
         "dashboard",
@@ -579,7 +589,7 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-11T07:54:29.585Z",
       "flowId": "default"
     },
     {
@@ -587,7 +597,7 @@
       "title": "Unified notifications + sounds via a service worker on the master origin",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N216-unified-notifications-sounds-via-a-service-worker-",
       "createdAt": "2026-07-10T18:31:24.834Z",
       "statusHistory": [
@@ -595,17 +605,51 @@
           "status": "ready",
           "at": "2026-07-10T18:31:24.834Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T07:55:09.922Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T08:14:19.081Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T08:16:21.871Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T08:31:14.752Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T08:48:50.927Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T08:54:58.925Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-07-11T07:55:09.923Z",
+        "completedAt": "2026-07-11T08:14:19.082Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,

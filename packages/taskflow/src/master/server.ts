@@ -4,7 +4,7 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve, sep, dirname } from "node:path";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
@@ -22,6 +22,32 @@ export function projectsHomeRoot(): string {
 
 const MIME_JSON = "application/json; charset=utf-8";
 const MIME_HTML = "text/html; charset=utf-8";
+
+/** N216 — the bundled notification mp3s live in dist/sounds (same as the
+ *  dashboard). Served from the master origin so hub sounds work everywhere. */
+const MASTER_SOUNDS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "sounds");
+
+/**
+ * N216 — the master-origin service worker: one SW for the whole hub, the basis
+ * for unified notifications (the page calls `registration.showNotification`, so
+ * alerts fire while the hub is open or backgrounded) and for the N217 PWA. It
+ * itself only needs to claim clients and focus/open the hub on a click.
+ */
+const MASTER_SW_JS = `self.addEventListener('install', function(e){ self.skipWaiting(); });
+self.addEventListener('activate', function(e){ e.waitUntil(self.clients.claim()); });
+self.addEventListener('notificationclick', function(e){
+  e.notification.close();
+  var target = (e.notification.data && e.notification.data.url) || '/';
+  e.waitUntil(self.clients.matchAll({ type: 'window' }).then(function(list){
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].url.indexOf(self.registration.scope) === 0 && 'focus' in list[i]) {
+        list[i].navigate && list[i].navigate(target);
+        return list[i].focus();
+      }
+    }
+    if (self.clients.openWindow) return self.clients.openWindow(target);
+  }));
+});`;
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve) => {
@@ -600,6 +626,38 @@ export async function startMasterServer(
         }
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ url: (live && live.url) || projectUrl }));
+        return;
+      }
+
+      // N216 — GET /sw.js: the master-origin service worker (root scope).
+      if (req.method === "GET" && url.pathname === "/sw.js") {
+        res.writeHead(200, {
+          "Content-Type": "text/javascript; charset=utf-8",
+          "Service-Worker-Allowed": "/",
+          "Cache-Control": "no-cache",
+        });
+        res.end(MASTER_SW_JS);
+        return;
+      }
+
+      // N216 — GET /sounds/<file>.mp3: the bundled notification sounds, served
+      // from the master origin so hub notifications can play them.
+      if (req.method === "GET" && url.pathname.startsWith("/sounds/")) {
+        const file = url.pathname.slice("/sounds/".length);
+        if (!file || file.includes("..") || file.includes("/") || !file.endsWith(".mp3")) {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "bad sound" }));
+          return;
+        }
+        const soundPath = resolve(MASTER_SOUNDS_DIR, file);
+        if (!soundPath.startsWith(MASTER_SOUNDS_DIR + sep) || !existsSync(soundPath)) {
+          res.writeHead(404, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "not found" }));
+          return;
+        }
+        const data = readFileSync(soundPath);
+        res.writeHead(200, { "Content-Type": "audio/mpeg", "Content-Length": String(data.length) });
+        res.end(data);
         return;
       }
 

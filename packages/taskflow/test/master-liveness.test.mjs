@@ -149,6 +149,27 @@ test("shell (N215): / serves the switcher overview; start rejects an unknown pro
   }
 });
 
+test("N216: master serves the hub service worker + notification sounds", async () => {
+  const port = 7760 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const sw = await fetch(base + "/sw.js");
+    assert.equal(sw.status, 200, "/sw.js served");
+    assert.match(sw.headers.get("content-type") || "", /javascript/, "sw is javascript");
+    assert.match(await sw.text(), /notificationclick/, "sw handles notification clicks");
+
+    const snd = await fetch(base + "/sounds/idle-ping.mp3");
+    assert.equal(snd.status, 200, "/sounds/*.mp3 served from the master origin");
+    assert.match(snd.headers.get("content-type") || "", /audio\/mpeg/, "mp3 mime");
+
+    const bad = await fetch(base + "/sounds/evil.txt");
+    assert.equal(bad.status, 400, "non-mp3 sound → 400");
+  } finally {
+    close();
+  }
+});
+
 test("reconcile: a second register with the same path adopts the existing entry", async () => {
   const port = 7280 + Math.floor(Math.random() * 150);
   const base = "http://localhost:" + port;
