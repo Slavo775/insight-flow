@@ -679,7 +679,7 @@
       "title": "Installable PWA for the master hub (manifest + offline shell)",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N217-installable-pwa-for-the-master-hub-manifest-offlin",
       "createdAt": "2026-07-10T18:31:24.978Z",
       "statusHistory": [
@@ -737,6 +737,16 @@
           "status": "approved",
           "at": "2026-07-11T13:31:54.039Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-11T13:32:51.494Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-11T13:32:51.631Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -753,8 +763,8 @@
       "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-11T13:32:51.632Z",
+      "totalDurationMinutes": 1141,
       "tags": [
         "master",
         "pwa"
@@ -762,8 +772,101 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
+      "mergedAt": "2026-07-11T13:32:51.495Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N218",
+      "title": "Hub robustness + UX fixes: re-register on master restart, reliable Start, proxy error page, consistent Start button",
+      "type": "fix",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N218-hub-robustness-ux-fixes-re-register-on-master-rest",
+      "createdAt": "2026-07-11T15:07:02.206Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-11T15:07:02.206Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T15:09:30.669Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T15:19:59.397Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-11T15:09:30.670Z",
+        "completedAt": "2026-07-11T15:19:59.398Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "dashboard",
+        "hub",
+        "ux"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
+    },
+    {
+      "id": "N219",
+      "title": "Hub reverse-registration handshake + client token privacy",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready",
+      "flowId": "default",
+      "folder": "insightFlow/workTasks/N219-hub-reverse-registration-handshake-client-token-pr",
+      "createdAt": "2026-07-11T18:56:31.610Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-11T18:56:31.610Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "hub",
+        "security",
+        "handshake"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null
     }
   ]
 }
