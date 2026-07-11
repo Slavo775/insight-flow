@@ -1,0 +1,44 @@
+{
+  "taskId": "N219",
+  "reviews": [
+    {
+      "startedAt": "2026-07-11T19:59:05.543Z",
+      "endedAt": "2026-07-11T20:12:50.594Z",
+      "verdict": "fix-needed",
+      "comment": "Token privacy fully correct (verified clean + hermetic test). Handshake works, but the new POST /hub/reregister endpoint has 2 blockers: (1) DoS — each call leaks a liveness connection (no throttle/in-flight guard; holdLiveness never closes the prior conn; upsert returns existing token so old loop never superseded); (2) CSRF + proxy-bypass — simple-POST CSRF from any page, and the master proxy forwards /p/<id>/hub/reregister to the loopback endpoint so a LAN peer defeats the gate. Fixes localized to reregister/holdLiveness + a proxy /hub/ guard.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-11T20:17:04.982Z",
+        "endedAt": "2026-07-11T20:26:59.646Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/test/master-liveness.test.mjs",
+          "insightFlow/workTasks/N219-hub-reverse-registration-handshake-client-token-pr/REVIEW.md"
+        ],
+        "comment": "Fixed blockers 1-2. B1 (DoS/leak): reregister single-flight+throttled; holdLiveness epoch-supersedes + destroys prior conn (one liveness connection). B2 (CSRF+proxy-bypass): /hub/reregister rejects Origin/Sec-Fetch-Site; master proxy 404s /p/<id>/hub/*. Verified live + 340 tests.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-11T20:36:09.330Z",
+      "endedAt": "2026-07-11T20:37:43.209Z",
+      "verdict": "approved",
+      "comment": "Round 2 APPROVED. All 3 Round-1 blockers fixed + re-verified live (leak: 3->1 conn via epoch teardown+single-flight; CSRF: Origin/Sec-Fetch-Site->403; proxy /hub/* ->404) + hermetic test. Token privacy intact. 340 tests. One non-blocking edge: reregister 5s-cooldown can briefly strand offline after a rapid double master-restart; self-heals on next reregister trigger. Suggested follow-up hardening noted.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-11T20:39:51.909Z",
+      "endedAt": "2026-07-11T20:50:21.094Z",
+      "verdict": "approved",
+      "comment": "approved merge into base branch",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

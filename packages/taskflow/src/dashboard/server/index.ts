@@ -387,15 +387,31 @@ function holdLiveness(
   token: string,
   reregister: () => Promise<boolean>,
 ): void {
+  // N219 review-fix — claim the active slot and close any prior connection, so
+  // there is never more than one open `/api/hub/live`. A loop is superseded once
+  // a newer holdLiveness() bumps the epoch (or the token changes); superseded
+  // loops must NOT reconnect. Keyed on epoch, not just token, because a
+  // reconciled re-register returns the SAME token — token equality alone would
+  // fail to supersede the old loop.
+  const myEpoch = ++livenessEpoch;
+  if (activeLivenessReq) {
+    try {
+      activeLivenessReq.destroy();
+    } catch {
+      /* already gone */
+    }
+    activeLivenessReq = null;
+  }
+  const superseded = (): boolean => myEpoch !== livenessEpoch || masterToken !== token;
   let attempts = 0;
   const reconnect = (): void => {
-    if (masterToken !== token) return; // superseded by a re-register
+    if (superseded()) return;
     attempts += 1;
     const delay = Math.min(30000, 1000 * 2 ** Math.min(attempts, 5));
     setTimeout(connect, delay).unref();
   };
   const connect = (): void => {
-    if (masterToken !== token) return;
+    if (superseded()) return;
     const liveUrl = `${masterUrl}/api/hub/live?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}`;
     let settled = false;
     const done = (): void => {
@@ -421,6 +437,7 @@ function holdLiveness(
       res.on("end", done);
       res.on("error", done);
     });
+    activeLivenessReq = req;
     req.on("error", done);
     req.setTimeout(0);
   };
@@ -472,6 +489,17 @@ function buildProjectState(
 
 let masterId: string | null = null;
 let masterToken: string | null = null;
+// N219 — exposed so the `POST /hub/reregister` route (the master's boot
+// handshake, Diagram 1) can trigger a real re-register. Null until master
+// integration is set up, or when running standalone.
+let masterReregister: (() => Promise<boolean>) | null = null;
+// N219 review-fix (blocker 1) — guarantee at most ONE liveness connection is
+// ever open. Each holdLiveness() claims a new epoch and tears down the prior
+// open request; older-epoch loops stop instead of reconnecting. Without this,
+// repeatedly triggering re-register (e.g. via /hub/reregister) leaked one open
+// `/api/hub/live` connection + heartbeat per call on both project and master.
+let livenessEpoch = 0;
+let activeLivenessReq: ReturnType<typeof httpGet> | null = null;
 
 async function setupMasterIntegration(
   config: TaskflowConfig,
@@ -532,24 +560,48 @@ async function setupMasterIntegration(
 
   console.log("  [master] Registered with " + masterUrl + " (id: " + masterId.slice(0, 8) + "...)");
 
-  // N218 — re-register when the master stops recognizing us (it restarted).
-  // Mints a fresh {id, token}, restarts the liveness loop, and re-pushes state
-  // so a running dashboard comes back online after a master restart.
+  // N218 — re-register when the master stops recognizing us (it restarted): a
+  // fresh register, restart the liveness loop, re-push state, so a running
+  // dashboard comes back online after a master restart.
+  //
+  // N219 review-fix (blocker 1) — single-flight + throttle. Concurrent callers
+  // (the liveness-401 path AND the /hub/reregister route can both fire) share
+  // one in-flight registration; a successful re-register within the cooldown
+  // short-circuits to `true` (the token is already fresh + a liveness loop is
+  // live), so hammering /hub/reregister no longer spawns a register + liveness
+  // connection per call.
+  let reregisterInFlight: Promise<boolean> | null = null;
+  let lastReregisterOkAt = 0;
+  const REREGISTER_COOLDOWN_MS = 5000;
   const reregister = async (): Promise<boolean> => {
-    const r = await registerWithMaster(
-      masterUrl,
-      config.projectName,
-      config.projectName,
-      projectUrl,
-      projectPath,
-    );
-    if (!r) return false;
-    masterId = r.id;
-    masterToken = r.token;
-    holdLiveness(masterUrl, masterId, masterToken, reregister);
-    void pushStateToMaster(masterUrl, masterId, masterToken, buildProjectState(config, activity));
-    return true;
+    if (reregisterInFlight) return reregisterInFlight;
+    if (Date.now() - lastReregisterOkAt < REREGISTER_COOLDOWN_MS) return true;
+    reregisterInFlight = (async () => {
+      const r = await registerWithMaster(
+        masterUrl,
+        config.projectName,
+        config.projectName,
+        projectUrl,
+        projectPath,
+      );
+      if (!r) return false;
+      masterId = r.id;
+      masterToken = r.token;
+      holdLiveness(masterUrl, masterId, masterToken, reregister);
+      void pushStateToMaster(masterUrl, masterId, masterToken, buildProjectState(config, activity));
+      return true;
+    })();
+    try {
+      const ok = await reregisterInFlight;
+      if (ok) lastReregisterOkAt = Date.now();
+      return ok;
+    } finally {
+      reregisterInFlight = null;
+    }
   };
+
+  // N219 — let the `/hub/reregister` route drive this same closure.
+  masterReregister = reregister;
 
   // N214 — hold the passive liveness connection (online while open).
   holdLiveness(masterUrl, masterId, masterToken, reregister);
@@ -636,6 +688,46 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           authed: !masterToken || token === masterToken,
         }),
       );
+      return;
+    }
+
+    // N219 — POST /hub/reregister: the master's boot handshake (Diagram 1) asks
+    // this project to register itself. We run the real re-register (single-flight
+    // + throttled, restarts liveness); a standalone project — or one whose master
+    // integration never came up — declines. Either way the master takes no further
+    // action; online state comes from the real register + the liveness channel,
+    // never a fabricated mark.
+    //
+    // N219 review-fix (blocker 2) — this is a control-plane endpoint for the
+    // master (a server-to-server Node fetch), never for a browser. Reject:
+    //   - non-loopback callers (`req.socket.remoteAddress`), and
+    //   - any request carrying browser fetch-metadata (`Origin` /
+    //     `Sec-Fetch-Site`) — a CSRF POST from a page the user has open would
+    //     otherwise pass the loopback gate. The master's Node fetch sends
+    //     neither header, so the real handshake is unaffected.
+    // The master proxy is separately blocked from forwarding `/hub/*` (so a LAN
+    // peer can't reach this via `/p/<id>/hub/reregister`).
+    if (url.pathname === "/hub/reregister" && req.method === "POST") {
+      const remote = req.socket.remoteAddress ?? "";
+      if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
+        res.writeHead(403, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "reregister is localhost-only" }));
+        return;
+      }
+      const secFetchSite = req.headers["sec-fetch-site"];
+      if (req.headers.origin || (secFetchSite && secFetchSite !== "none")) {
+        res.writeHead(403, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "cross-site request refused" }));
+        return;
+      }
+      if (config.master?.standalone || !masterReregister) {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ declined: true }));
+        return;
+      }
+      void masterReregister();
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ ok: true }));
       return;
     }
 

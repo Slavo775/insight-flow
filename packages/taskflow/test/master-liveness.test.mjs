@@ -224,11 +224,106 @@ test("reconcile: a second register with the same path adopts the existing entry"
   const base = "http://localhost:" + port;
   const { close } = await startMasterServer({ port, standalone: false });
   try {
-    await register(base, { projectId: "old-label", label: "old-label", url: "", path: "/tmp/proj" });
-    await register(base, { projectId: "Real Name", label: "Real Name", url: "http://x", path: "/tmp/proj" });
-    const list = (await projects(base)).filter((p) => p.path === "/tmp/proj");
-    assert.equal(list.length, 1, "one entry for the path (reconciled, not duplicated)");
-    assert.equal(list[0].projectId, "Real Name", "re-keyed to the live projectId");
+    await register(base, { projectId: "old-label", label: "old-label", url: "", path: "/tmp/proj-recon" });
+    await register(base, { projectId: "Real Name", label: "Real Name", url: "http://x", path: "/tmp/proj-recon" });
+    // N219 — `path` is no longer exposed to clients, so discriminate by projectId:
+    // the shared path reconciled the two registers into one entry, re-keyed to
+    // the live projectId, and the old projectId is gone.
+    const list = await projects(base);
+    assert.equal(
+      list.filter((p) => p.projectId === "Real Name").length,
+      1,
+      "one entry re-keyed to the live projectId",
+    );
+    assert.equal(
+      list.filter((p) => p.projectId === "old-label").length,
+      0,
+      "old projectId reconciled away (not duplicated)",
+    );
+  } finally {
+    close();
+  }
+});
+
+test("N219: the per-project token never reaches any client surface", async () => {
+  const port = 7400 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const { id, token } = await register(base, {
+      projectId: "sec-N219",
+      label: "sec-N219",
+      url: "http://127.0.0.1:59999",
+      path: "/tmp/sec-N219",
+    });
+    assert.ok(token, "register still issues a token to the project (server-side auth)");
+
+    // (a) GET /api/hub/projects — client-safe projection only.
+    const list = await projects(base);
+    const me = list.find((p) => p.id === id);
+    assert.ok(me, "the project is listed");
+    assert.equal(me.token, undefined, "no token field in the hub API");
+    assert.equal(me.url, undefined, "no url field in the hub API");
+    assert.equal(me.path, undefined, "no path field in the hub API");
+    assert.equal(me.projectId, "sec-N219", "projectId IS exposed (needed for /project/<id>)");
+    assert.ok(!JSON.stringify(list).includes(token), "the token string is absent from the hub API");
+
+    // (b) overview HTML (SSR initial data) — token absent.
+    const html = await (await fetch(base + "/")).text();
+    assert.ok(!html.includes(token), "token absent from the overview page data");
+
+    // (c) SSE project-update frame — token absent. Re-register (same path
+    // reconciles) to trigger a broadcast while the stream is open.
+    const frame = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("no project-update frame")), 3000);
+      const req = httpGet(base + "/events", (res) => {
+        let buf = "";
+        res.on("data", (c) => {
+          buf += c.toString();
+          const m = buf.match(/event: project-update\ndata: (.*)\n/);
+          if (m) {
+            clearTimeout(timer);
+            res.destroy();
+            resolve(m[1]);
+          }
+        });
+        res.on("error", reject);
+      });
+      req.on("error", reject);
+      setTimeout(() => {
+        void register(base, {
+          projectId: "sec-N219",
+          label: "sec-N219",
+          url: "http://127.0.0.1:59999",
+          path: "/tmp/sec-N219",
+        });
+      }, 150);
+    });
+    assert.ok(!frame.includes(token), "token absent from the SSE frame");
+    assert.equal(JSON.parse(frame).token, undefined, "SSE frame has no token field");
+  } finally {
+    close();
+  }
+});
+
+test("N219: the master never proxies a project's /hub/* control-plane routes", async () => {
+  const port = 8300 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    // Registered + "live" project (url set), yet /hub/* under the proxy is
+    // refused — so a LAN peer can't reach the loopback-only /hub/reregister via
+    // /p/<id>/hub/reregister (which would arrive at the project from the master's
+    // own loopback socket, defeating its gate).
+    await register(base, { projectId: "hubguard", label: "hubguard", url: "http://127.0.0.1:59998" });
+    const blocked = await fetch(base + "/p/hubguard/hub/reregister", { method: "POST" });
+    assert.equal(blocked.status, 404, "/hub/* under the proxy is refused");
+    assert.equal((await blocked.json()).error, "Not found", "generic 404, endpoint not revealed");
+
+    // A non-/hub path for the same id still routes to the proxy (the stub port
+    // is dead → 502), proving only /hub/* is special-cased, not the whole project.
+    const proxied = await fetch(base + "/p/hubguard/whatever");
+    assert.notEqual(proxied.status, 404, "non-/hub paths still go through the proxy");
   } finally {
     close();
   }

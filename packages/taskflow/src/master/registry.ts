@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { ClaudeProjectStatus, MasterProjectEntry, MasterProjectState } from "./types.js";
+import type {
+  ClaudeProjectStatus,
+  MasterProjectEntry,
+  MasterProjectState,
+  PublicProjectEntry,
+} from "./types.js";
 
 const registry = new Map<string, MasterProjectEntry>();
 const projectIdIndex = new Map<string, string>(); // projectId → current UUID
@@ -79,18 +84,23 @@ export function seed(projectId: string, label: string, path?: string): void {
 }
 
 /**
- * N218 — the master's startup handshake found this project alive at `url`.
- * Fill in the live url + mark it online on its (seeded) entry, keyed by
- * projectId. Lets a fresh/restarted master reflect running projects immediately,
- * even old-build ones that never re-register.
+ * N219 — the client-safe projection of an entry: drops the auth `token` and the
+ * server-only `url`/`path`, keeping just what the browser needs to render + link.
  */
-export function markUp(projectId: string, url: string): void {
-  const id = projectIdIndex.get(projectId);
-  const entry = id ? registry.get(id) : undefined;
-  if (!entry) return;
-  entry.url = url;
-  entry.online = true;
-  entry.lastSeenAt = new Date().toISOString();
+export function toPublicView(entry: MasterProjectEntry): PublicProjectEntry {
+  return {
+    id: entry.id,
+    projectId: entry.projectId,
+    label: entry.label,
+    online: entry.online,
+    lastSeenAt: entry.lastSeenAt,
+    state: entry.state,
+  };
+}
+
+/** N219 — every registered project as a client-safe view (no tokens). */
+export function getAllPublic(): PublicProjectEntry[] {
+  return [...registry.values()].map(toPublicView);
 }
 
 /** N214 — the token issued at register must match on update/status/live. */

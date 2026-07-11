@@ -1,6 +1,6 @@
-import type { MasterProjectEntry } from "./types.js";
+import type { PublicProjectEntry } from "./types.js";
 
-export function getOverviewHtml(projects: MasterProjectEntry[]): string {
+export function getOverviewHtml(projects: PublicProjectEntry[]): string {
   const initialData = JSON.stringify(projects)
     .replace(/</g, "\\u003c")
     .replace(/>/g, "\\u003e")
