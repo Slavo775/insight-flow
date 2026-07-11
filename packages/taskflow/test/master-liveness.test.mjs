@@ -170,6 +170,36 @@ test("N216: master serves the hub service worker + notification sounds", async (
   }
 });
 
+test("N217: master serves a valid PWA manifest + icons; SW caches an offline shell", async () => {
+  const port = 7920 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const man = await fetch(base + "/manifest.webmanifest");
+    assert.equal(man.status, 200, "manifest served");
+    assert.match(man.headers.get("content-type") || "", /manifest\+json/, "manifest mime");
+    const m = await man.json();
+    assert.equal(m.start_url, "/", "start_url is the hub");
+    assert.equal(m.display, "standalone", "standalone display");
+    assert.ok(m.icons.some((i) => i.purpose === "maskable"), "has a maskable icon");
+
+    const icon = await fetch(base + "/icon.svg");
+    assert.equal(icon.status, 200, "icon served");
+    assert.match(icon.headers.get("content-type") || "", /image\/svg\+xml/, "svg mime");
+
+    const sw = await (await fetch(base + "/sw.js")).text();
+    assert.match(sw, /addEventListener\('fetch'/, "SW has a fetch handler");
+    assert.match(sw, /caches\.match\('\/'\)/, "SW serves the cached shell offline");
+    assert.match(sw, /indexOf\('\/api\/'\)/, "SW never caches /api");
+
+    const shell = await (await fetch(base + "/")).text();
+    assert.match(shell, /rel="manifest"/, "shell links the manifest");
+    assert.match(shell, /name="theme-color"/, "shell sets theme-color");
+  } finally {
+    close();
+  }
+});
+
 test("reconcile: a second register with the same path adopts the existing entry", async () => {
   const port = 7280 + Math.floor(Math.random() * 150);
   const base = "http://localhost:" + port;
