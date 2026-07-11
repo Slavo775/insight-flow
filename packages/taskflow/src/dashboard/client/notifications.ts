@@ -1,5 +1,6 @@
 // Notification + sound layer, ported from dashboard.ts. Settings persist in
 // localStorage; sounds prefer the bundled mp3s and fall back to Web-Audio beeps.
+import { apiUrl } from "./base.js";
 
 export interface NotifSettings {
   sound: boolean;
@@ -77,7 +78,8 @@ function playTone(state: StatusSound): void {
 export function playStatusSound(state: StatusSound, soundsEnabled: boolean): void {
   if (!soundsEnabled) return;
   if (notifSettings.sound === false) return;
-  const src = state === "idle" ? "/sounds/idle-ping.mp3" : "/sounds/permission-alert.mp3";
+  // N215 — base-aware so sounds resolve under the proxy (/p/<id>/sounds/…) too.
+  const src = apiUrl(state === "idle" ? "/sounds/idle-ping.mp3" : "/sounds/permission-alert.mp3");
   fetch(src, { method: "HEAD" })
     .then((r) => {
       const len = parseInt(r.headers.get("content-length") || "0", 10);

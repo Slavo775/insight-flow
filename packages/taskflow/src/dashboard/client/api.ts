@@ -1,4 +1,5 @@
 import type { Task, FlowStatus } from "./lib.js";
+import { apiFetch } from "./base.js";
 
 export interface ShardResponse {
   tasks?: Task[];
@@ -10,20 +11,20 @@ export interface MasterResponse {
 
 /** List the shard JSON files, newest range first (e.g. tasks-N80-N89.json). */
 export async function fetchShardIndex(): Promise<string[]> {
-  const res = await fetch("/api/work-tasks");
+  const res = await apiFetch("/api/work-tasks");
   const files: string[] = await res.json();
   return files.filter((f) => f.startsWith("tasks-")).sort((a, b) => b.localeCompare(a));
 }
 
 /** Load one shard's tasks (reviews/incidents already hydrated by the server). */
 export async function fetchShard(name: string): Promise<Task[]> {
-  const res = await fetch("/api/work-tasks/" + encodeURIComponent(name));
+  const res = await apiFetch("/api/work-tasks/" + encodeURIComponent(name));
   const shard: ShardResponse = await res.json();
   return shard.tasks || [];
 }
 
 export async function fetchMaster(): Promise<MasterResponse> {
-  const res = await fetch("/api/work-tasks/master.json");
+  const res = await apiFetch("/api/work-tasks/master.json");
   return res.json();
 }
 
@@ -140,7 +141,7 @@ export async function saveDefinition(
   opts: { revision?: string } = {},
 ): Promise<void> {
   const path = isUpdate ? `/api/${kind}/${encodeURIComponent(record.id)}` : `/api/${kind}`;
-  const res = await fetch(path, {
+  const res = await apiFetch(path, {
     method: isUpdate ? "PUT" : "POST",
     headers: {
       "Content-Type": "application/json",
@@ -153,7 +154,7 @@ export async function saveDefinition(
 }
 
 export async function deleteDefinition(kind: DefinitionKind, id: string): Promise<void> {
-  const res = await fetch(`/api/${kind}/${encodeURIComponent(id)}`, { method: "DELETE" });
+  const res = await apiFetch(`/api/${kind}/${encodeURIComponent(id)}`, { method: "DELETE" });
   if (!res.ok) await throwApiError(res);
 }
 
@@ -184,7 +185,7 @@ export interface AgentDto {
 }
 
 export async function fetchModules(): Promise<ModulesResponse> {
-  const res = await fetch("/api/modules");
+  const res = await apiFetch("/api/modules");
   if (!res.ok) throw new Error("Failed to load modules (" + res.status + ")");
   return res.json();
 }
@@ -216,7 +217,7 @@ export interface ProjectDto {
 }
 
 export async function fetchProject(id?: string): Promise<ProjectDto> {
-  const res = await fetch("/api/project" + (id ? `?id=${encodeURIComponent(id)}` : ""));
+  const res = await apiFetch("/api/project" + (id ? `?id=${encodeURIComponent(id)}` : ""));
   if (!res.ok) throw new Error("Failed to load project (" + res.status + ")");
   return res.json();
 }
@@ -235,7 +236,7 @@ export interface ProjectSummaryDto {
 }
 
 export async function fetchProjects(): Promise<ProjectSummaryDto[]> {
-  const res = await fetch("/api/projects");
+  const res = await apiFetch("/api/projects");
   if (!res.ok) throw new Error("Failed to load projects (" + res.status + ")");
   const data: { projects: ProjectSummaryDto[] } = await res.json();
   return data.projects;
@@ -293,7 +294,7 @@ export async function fetchInstallPlan(
   kind: InstallTargetKind,
   id: string,
 ): Promise<{ plan: InstallStepDto[]; requiredInputs: InputSpecDto[] }> {
-  const res = await fetch(`/api/install-plan?kind=${kind}&id=${encodeURIComponent(id)}`);
+  const res = await apiFetch(`/api/install-plan?kind=${kind}&id=${encodeURIComponent(id)}`);
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error ?? `Failed to load install plan (${res.status})`);
@@ -310,7 +311,7 @@ export async function runInstall(
   id: string,
   opts: { values?: Record<string, string>; force?: boolean } = {},
 ): Promise<InstallReport[]> {
-  const res = await fetch("/api/install", {
+  const res = await apiFetch("/api/install", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ kind, id, values: opts.values, force: opts.force }),
@@ -336,7 +337,7 @@ export async function fetchUninstallPlan(
   kind: InstallTargetKind,
   id: string,
 ): Promise<{ plan: UninstallStepDto[] }> {
-  const res = await fetch(`/api/uninstall-plan?kind=${kind}&id=${encodeURIComponent(id)}`);
+  const res = await apiFetch(`/api/uninstall-plan?kind=${kind}&id=${encodeURIComponent(id)}`);
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error ?? `Failed to load uninstall plan (${res.status})`);
@@ -346,7 +347,7 @@ export async function fetchUninstallPlan(
 }
 
 export async function runUninstall(kind: InstallTargetKind, id: string): Promise<InstallReport[]> {
-  const res = await fetch("/api/uninstall", {
+  const res = await apiFetch("/api/uninstall", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ kind, id }),
@@ -358,7 +359,7 @@ export async function runUninstall(kind: InstallTargetKind, id: string): Promise
 
 /** N117 — reassign a task's flow (ready-only; the server enforces the lock). */
 export async function setTaskFlow(id: string, flow: string): Promise<void> {
-  const res = await fetch("/api/task-flow", {
+  const res = await apiFetch("/api/task-flow", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, flow }),
@@ -381,7 +382,7 @@ export async function setTaskFlow(id: string, flow: string): Promise<void> {
  * client only names which server to roll back.
  */
 export async function restoreMcpServer(name: string): Promise<void> {
-  const res = await fetch("/api/mcp-restore", {
+  const res = await apiFetch("/api/mcp-restore", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
@@ -394,7 +395,7 @@ export async function restoreMcpServer(name: string): Promise<void> {
 
 /** N167 — make a flow the binding default (new tasks bind to it, no entryAgents needed). */
 export async function setDefaultFlow(flowId: string): Promise<void> {
-  const res = await fetch("/api/default-flow", {
+  const res = await apiFetch("/api/default-flow", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ flowId }),
@@ -407,13 +408,13 @@ export async function setDefaultFlow(flowId: string): Promise<void> {
 
 /** Markdown content behind an include module's @ref, or null if not present. */
 export async function fetchIncludeDoc(ref: string): Promise<string | null> {
-  const res = await fetch("/api/include-doc?ref=" + encodeURIComponent(ref));
+  const res = await apiFetch("/api/include-doc?ref=" + encodeURIComponent(ref));
   if (!res.ok) return null;
   return res.text();
 }
 
 export async function fetchAgents(): Promise<AgentDto[]> {
-  const res = await fetch("/api/agents");
+  const res = await apiFetch("/api/agents");
   if (!res.ok) throw new Error("Failed to load agents (" + res.status + ")");
   const data: { agents: AgentDto[] } = await res.json();
   return data.agents;
@@ -426,7 +427,9 @@ export type DocName = "TASK" | "CHECKLIST" | "REVIEW" | "ANALYSIS";
  * the file does not exist (e.g. a task with no REVIEW.md yet).
  */
 export async function fetchTaskDoc(folder: string, name: DocName): Promise<string | null> {
-  const res = await fetch("/api/task-doc?folder=" + encodeURIComponent(folder) + "&name=" + name);
+  const res = await apiFetch(
+    "/api/task-doc?folder=" + encodeURIComponent(folder) + "&name=" + name,
+  );
   if (res.status === 404) return null;
   if (!res.ok) throw new Error("Failed to load " + name + ".md (" + res.status + ")");
   return res.text();

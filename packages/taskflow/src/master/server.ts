@@ -5,12 +5,15 @@ import {
   type ServerResponse,
 } from "node:http";
 import { existsSync, mkdirSync } from "node:fs";
-import { resolve, sep } from "node:path";
+import { resolve, sep, dirname } from "node:path";
 import { homedir } from "node:os";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import type { MasterServerConfig, MasterProjectState } from "./types.js";
 import * as registry from "./registry.js";
 import { getOverviewHtml } from "./overview.js";
 import { initProject } from "../agents/init/index.js";
+import { readHubRegistry, assignHubPort } from "../core/global-config.js";
 
 /** N210 — where "New project" scaffolds live, so a non-coder never picks a path. */
 export function projectsHomeRoot(): string {
@@ -70,6 +73,23 @@ function stripHopByHop<T extends Record<string, unknown>>(headers: T): T {
     if (HOP_BY_HOP.has(key.toLowerCase())) delete headers[key];
   }
   return headers;
+}
+
+/** Poll a URL until it answers (any HTTP status) or the deadline passes. */
+async function waitReachable(url: string, timeoutMs = 12000): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 1000);
+      await fetch(url, { signal: ctrl.signal });
+      clearTimeout(t);
+      return true;
+    } catch {
+      await new Promise((r) => setTimeout(r, 300));
+    }
+  }
+  return false;
 }
 
 function escapeHtmlAttr(s: string): string {
@@ -141,6 +161,16 @@ function proxyToProject(
           const baseJs = JSON.stringify(prefix + "/").replace(/</g, "\\u003c");
           const hook = `<base href="${baseHref}"><script>window.__IF_BASE__=${baseJs}</script>`;
           html = html.includes("<head>") ? html.replace("<head>", `<head>${hook}`) : hook + html;
+          // N215 — a floating "Hub" link back to the switcher, so you can jump
+          // to another project from inside a project view. `href="/"` is absolute
+          // (ignores <base>) → the master root.
+          const hubLink =
+            '<a href="/" title="Back to the hub / switch project" style="position:fixed;top:8px;left:8px;z-index:2147483647;' +
+            "background:#141414;color:#e5e5e5;border:1px solid #333;border-radius:6px;padding:4px 8px;" +
+            'font:12px/1 monospace;text-decoration:none;opacity:.85">⌂ Hub</a>';
+          html = html.includes("</body>")
+            ? html.replace("</body>", hubLink + "</body>")
+            : html + hubLink;
           const out = stripHopByHop({ ...proxyRes.headers });
           delete out["content-length"]; // length changed by the rewrite
           res.writeHead(status, out as Record<string, string>);
@@ -246,6 +276,16 @@ export async function startMasterServer(
 
       // POST /api/register
       if (req.method === "POST" && url.pathname === "/api/register") {
+        // N215 — dashboards always register from localhost, so gate register to
+        // loopback callers. This closes the root cause behind the earlier
+        // proxy/probe SSRF guards (N212/N214) and the start-cwd surface: a LAN
+        // peer can no longer inject a registrant-controlled url/path into the hub.
+        const remote = req.socket.remoteAddress ?? "";
+        if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "register is localhost-only" }));
+          return;
+        }
         if (config.standalone) {
           res.writeHead(503, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "Master running in standalone mode" }));
@@ -504,8 +544,68 @@ export async function startMasterServer(
         return;
       }
 
-      // GET /overview
-      if (req.method === "GET" && url.pathname === "/overview") {
+      // N215 — POST /api/hub/projects/:id/start — spawn an offline project's
+      // dashboard (localhost-only; it execs + writes), then wait until reachable.
+      // The dashboard registers on boot (reconciling by path), so the entry gets
+      // its live url + goes online. Returns { url } for the client to route to.
+      const startMatch = /^\/api\/hub\/projects\/([^/]+)\/start$/.exec(url.pathname);
+      if (req.method === "POST" && startMatch) {
+        const remote = req.socket.remoteAddress ?? "";
+        if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "start is localhost-only" }));
+          return;
+        }
+        const entry = registry.getById(startMatch[1]);
+        if (!entry || !entry.path) {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "unknown project or no known path" }));
+          return;
+        }
+        // Already live (authoritative from the liveness signal, not a port guess).
+        if (entry.online && entry.url) {
+          res.writeHead(200, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ url: entry.url, alreadyRunning: true }));
+          return;
+        }
+        const hub = readHubRegistry().find((h) => h.path === entry.path);
+        const port = hub?.port ?? assignHubPort();
+        const projectUrl = `http://localhost:${port}`;
+        try {
+          const selfCli = resolve(dirname(fileURLToPath(import.meta.url)), "cli.js");
+          const child = spawn(process.execPath, [selfCli, "ui", "--port", String(port)], {
+            cwd: entry.path,
+            detached: true,
+            stdio: "ignore",
+          });
+          child.unref();
+        } catch (err) {
+          res.writeHead(500, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: `Could not start: ${(err as Error).message}` }));
+          return;
+        }
+        if (!(await waitReachable(projectUrl, 12000))) {
+          res.writeHead(504, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "project server did not become reachable" }));
+          return;
+        }
+        // Wait for the spawned dashboard to register (it reconciles by path onto
+        // this entry and fills its url), so the proxy has a target when the
+        // client routes to /p/<id>/.
+        const deadline = Date.now() + 5000;
+        let live = registry.getById(entry.id);
+        while ((!live || !live.url) && Date.now() < deadline) {
+          await new Promise((r) => setTimeout(r, 150));
+          live = registry.getById(entry.id);
+        }
+        res.writeHead(200, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ url: (live && live.url) || projectUrl }));
+        return;
+      }
+
+      // GET / or /overview — the hub shell / switcher (N215 serves it at the
+      // root too, so it's the PWA start_url and the landing page).
+      if (req.method === "GET" && (url.pathname === "/overview" || url.pathname === "/")) {
         res.writeHead(200, { "Content-Type": MIME_HTML });
         res.end(getOverviewHtml(registry.getAll()));
         return;

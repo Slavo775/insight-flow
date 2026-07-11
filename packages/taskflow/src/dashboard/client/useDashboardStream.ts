@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { ActivityEvent } from "./activity.js";
 import { claudeStatusFromEvent } from "./activity.js";
+import { apiUrl } from "./base.js";
 import {
   fireDesktopNotif,
   firePermissionAlert,
@@ -31,7 +32,7 @@ interface SnapshotFrame {
  */
 export function useDashboardStream(): void {
   useEffect(() => {
-    const es = new EventSource("/sse");
+    const es = new EventSource(apiUrl("/sse"));
     let syncedOnce = false;
     const store = () => useDashboardStore.getState();
 
