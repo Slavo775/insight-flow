@@ -5,6 +5,7 @@ import { ThemeProvider } from "styled-components";
 import { App } from "./App.js";
 import { GlobalStyle } from "./GlobalStyle.js";
 import { theme } from "./theme.js";
+import { BASE } from "./base.js";
 import "./styles.css";
 
 const rootEl = document.getElementById("root");
@@ -13,7 +14,8 @@ if (rootEl) {
     <StrictMode>
       <ThemeProvider theme={theme}>
         <GlobalStyle />
-        <BrowserRouter>
+        {/* N218 — basename so the router matches under the hub proxy (/p/<id>/); BASE is "" standalone. */}
+        <BrowserRouter basename={BASE || "/"}>
           <App />
         </BrowserRouter>
       </ThemeProvider>

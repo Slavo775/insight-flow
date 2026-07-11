@@ -381,7 +381,12 @@ async function pushStateToMaster(
  * project online while the connection is open and offline the moment it drops.
  * Reconnects with capped backoff; stops when a re-register mints a new token.
  */
-function holdLiveness(masterUrl: string, id: string, token: string): void {
+function holdLiveness(
+  masterUrl: string,
+  id: string,
+  token: string,
+  reregister: () => Promise<boolean>,
+): void {
   let attempts = 0;
   const reconnect = (): void => {
     if (masterToken !== token) return; // superseded by a re-register
@@ -399,7 +404,19 @@ function holdLiveness(masterUrl: string, id: string, token: string): void {
       reconnect();
     };
     const req = httpGet(liveUrl, (res) => {
-      if (res.statusCode === 200) attempts = 0;
+      if (res.statusCode === 200) {
+        attempts = 0;
+      } else if (res.statusCode === 401) {
+        // N218 — the master no longer knows us (it restarted with a fresh
+        // registry / new tokens). Re-register instead of retrying a dead token;
+        // on success a new liveness loop starts and this one is superseded.
+        settled = true;
+        res.resume();
+        void reregister().then((ok) => {
+          if (!ok) reconnect();
+        });
+        return;
+      }
       res.on("data", () => {});
       res.on("end", done);
       res.on("error", done);
@@ -515,8 +532,27 @@ async function setupMasterIntegration(
 
   console.log("  [master] Registered with " + masterUrl + " (id: " + masterId.slice(0, 8) + "...)");
 
+  // N218 — re-register when the master stops recognizing us (it restarted).
+  // Mints a fresh {id, token}, restarts the liveness loop, and re-pushes state
+  // so a running dashboard comes back online after a master restart.
+  const reregister = async (): Promise<boolean> => {
+    const r = await registerWithMaster(
+      masterUrl,
+      config.projectName,
+      config.projectName,
+      projectUrl,
+      projectPath,
+    );
+    if (!r) return false;
+    masterId = r.id;
+    masterToken = r.token;
+    holdLiveness(masterUrl, masterId, masterToken, reregister);
+    void pushStateToMaster(masterUrl, masterId, masterToken, buildProjectState(config, activity));
+    return true;
+  };
+
   // N214 — hold the passive liveness connection (online while open).
-  holdLiveness(masterUrl, masterId, masterToken);
+  holdLiveness(masterUrl, masterId, masterToken, reregister);
 
   // Push initial state
   const state = buildProjectState(config, activity);
@@ -529,18 +565,8 @@ async function setupMasterIntegration(
     const s = buildProjectState(config, activity);
     const status = await pushStateToMaster(masterUrl, masterId, masterToken, s);
     if (status === 401) {
-      const reg2 = await registerWithMaster(
-        masterUrl,
-        config.projectName,
-        config.projectName,
-        projectUrl,
-        projectPath,
-      );
-      if (reg2) {
-        masterId = reg2.id;
-        masterToken = reg2.token;
-        holdLiveness(masterUrl, masterId, masterToken);
-        await pushStateToMaster(masterUrl, masterId, masterToken, s);
+      if (await reregister()) {
+        await pushStateToMaster(masterUrl, masterId!, masterToken!, s);
       }
     }
   };
@@ -596,17 +622,20 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
 
-    // N214 — GET /health: the master's on-demand liveness probe. If we hold a
-    // token, the probe must present it (rejects a stranger); then report healthy.
+    // N214/N218 — GET /health: liveness + identity, always readable (localhost).
+    // The master's startup handshake probes this WITHOUT our token (a fresh
+    // master doesn't know it yet), so it must always answer with who we are; the
+    // `authed` flag just notes whether the caller's token matched.
     if (url.pathname === "/health") {
       const token = url.searchParams.get("token");
-      if (masterToken && token !== masterToken) {
-        res.writeHead(401, { "Content-Type": "application/json; charset=utf-8" });
-        res.end(JSON.stringify({ error: "bad token" }));
-        return;
-      }
       res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-      res.end(JSON.stringify({ status: "ok", projectName: config.projectName }));
+      res.end(
+        JSON.stringify({
+          status: "ok",
+          projectName: config.projectName,
+          authed: !masterToken || token === masterToken,
+        }),
+      );
       return;
     }
 

@@ -113,6 +113,9 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .claude-status-awaiting-permission { background: #3b1111; color: var(--red); }
     .proj-footer { display: flex; justify-content: flex-end; }
     .open-link { font-size: 11px; color: var(--accent); text-decoration: none; }
+    .card-btn { display: inline-block; background: var(--surface); border: 1px solid var(--border); color: var(--accent); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; line-height: 1; text-decoration: none; }
+    .card-btn:hover { border-color: var(--accent); }
+    .card-btn:disabled { opacity: 0.6; cursor: default; color: var(--text-muted); }
     .open-link:hover { text-decoration: underline; }
     .settings-wrap { position: relative; }
     .settings-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; line-height: 1; }
@@ -252,9 +255,9 @@ function getScript(initialData: string): string {
       // ids are registry UUIDs; sanitize defensively before the JS-string context.
       var sid = String(p.id).replace(/[^A-Za-z0-9_-]/g, '');
       if (p.online) {
-        return '<a href="/p/' + encodeURIComponent(p.id) + '/" class="open-link">Open →</a>';
+        return '<a href="/p/' + encodeURIComponent(p.id) + '/" class="card-btn">Open →</a>';
       }
-      return '<button class="open-link start-btn" onclick="startProject(\\'' + sid + '\\')">Start →</button>';
+      return '<button class="card-btn start-btn" onclick="startProject(\\'' + sid + '\\')">Start →</button>';
     }
     function startProject(id) {
       var btn = window.event && window.event.target;

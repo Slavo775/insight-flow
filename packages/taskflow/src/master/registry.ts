@@ -78,6 +78,21 @@ export function seed(projectId: string, label: string, path?: string): void {
   upsert(projectId, label, "", { path });
 }
 
+/**
+ * N218 — the master's startup handshake found this project alive at `url`.
+ * Fill in the live url + mark it online on its (seeded) entry, keyed by
+ * projectId. Lets a fresh/restarted master reflect running projects immediately,
+ * even old-build ones that never re-register.
+ */
+export function markUp(projectId: string, url: string): void {
+  const id = projectIdIndex.get(projectId);
+  const entry = id ? registry.get(id) : undefined;
+  if (!entry) return;
+  entry.url = url;
+  entry.online = true;
+  entry.lastSeenAt = new Date().toISOString();
+}
+
 /** N214 — the token issued at register must match on update/status/live. */
 export function verifyToken(id: string, token: string | undefined): boolean {
   const entry = registry.get(id);

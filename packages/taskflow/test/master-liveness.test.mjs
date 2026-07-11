@@ -200,6 +200,25 @@ test("N217: master serves a valid PWA manifest + icons; SW caches an offline she
   }
 });
 
+test("N218: an unknown /p/<id>/ shows an HTML page for navigations, JSON otherwise", async () => {
+  const port = 8080 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const nav = await fetch(base + "/p/bogus/", { headers: { Accept: "text/html" } });
+    assert.equal(nav.status, 404, "unknown project → 404");
+    assert.match(nav.headers.get("content-type") || "", /text\/html/, "navigation gets HTML");
+    const html = await nav.text();
+    assert.match(html, /Back to the hub/, "error page links back to the hub");
+    assert.doesNotMatch(html, /^\{/, "not raw JSON");
+
+    const api = await fetch(base + "/p/bogus/");
+    assert.match(api.headers.get("content-type") || "", /json/, "non-navigation gets JSON");
+  } finally {
+    close();
+  }
+});
+
 test("reconcile: a second register with the same path adopts the existing entry", async () => {
   const port = 7280 + Math.floor(Math.random() * 150);
   const base = "http://localhost:" + port;

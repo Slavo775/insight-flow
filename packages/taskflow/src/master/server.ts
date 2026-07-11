@@ -8,6 +8,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve, sep, dirname } from "node:path";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
+import { createServer as netCreateServer } from "node:net";
 import { fileURLToPath } from "node:url";
 import type { MasterServerConfig, MasterProjectState } from "./types.js";
 import * as registry from "./registry.js";
@@ -37,7 +38,7 @@ const MASTER_SOUNDS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "soun
  * `/api/*`, `/events` — are NEVER cached (always network). Old caches are pruned
  * on activate.
  */
-const MASTER_SW_JS = `var CACHE = 'if-hub-v1';
+const MASTER_SW_JS = `var CACHE = 'if-hub-v2';
 var SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg', '/sounds/idle-ping.mp3', '/sounds/permission-alert.mp3'];
 self.addEventListener('install', function(e){
   self.skipWaiting();
@@ -180,21 +181,49 @@ function stripHopByHop<T extends Record<string, unknown>>(headers: T): T {
   return headers;
 }
 
-/** Poll a URL until it answers (any HTTP status) or the deadline passes. */
-async function waitReachable(url: string, timeoutMs = 12000): Promise<boolean> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 1000);
-      await fetch(url, { signal: ctrl.signal });
-      clearTimeout(t);
-      return true;
-    } catch {
-      await new Promise((r) => setTimeout(r, 300));
-    }
+/** N218 — the preferred port if the OS has it free, else the next free one.
+ *  Avoids spawning a dashboard onto a port an unrelated app already holds.
+ *  Binds with NO host — the same all-interfaces (dual-stack) bind the dashboard
+ *  itself uses — so a port that's busy on IPv6 isn't wrongly seen as free. */
+async function findFreePort(preferred: number): Promise<number> {
+  const isFree = (p: number): Promise<boolean> =>
+    new Promise((res) => {
+      const srv = netCreateServer();
+      srv.once("error", () => res(false));
+      srv.once("listening", () => srv.close(() => res(true)));
+      srv.listen(p);
+    });
+  let p = preferred;
+  for (let i = 0; i < 50; i++) {
+    if (await isFree(p)) return p;
+    p += 1;
   }
-  return false;
+  return preferred;
+}
+
+/** N218 — a request that wants an HTML page (a browser navigation), so proxy
+ *  failures show a friendly page instead of raw JSON. */
+function wantsHtml(req: IncomingMessage): boolean {
+  return String(req.headers.accept ?? "").includes("text/html");
+}
+
+/** N218 — a small hub-styled error page with a link back to the switcher. */
+function hubErrorPage(heading: string, detail: string): string {
+  return (
+    '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1"><title>insight-flow hub</title>' +
+    "<style>body{font-family:'SF Mono','Fira Code',monospace;background:#0a0a0a;color:#e5e5e5;" +
+    "display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}" +
+    ".box{text-align:center;max-width:440px;padding:24px}.h{font-size:18px;margin-bottom:10px}" +
+    ".d{color:#737373;font-size:13px;margin-bottom:22px;line-height:1.6}" +
+    "a{display:inline-block;background:#141414;border:1px solid #262626;border-radius:6px;" +
+    "padding:8px 14px;color:#3b82f6;text-decoration:none;font-size:13px}a:hover{border-color:#3b82f6}</style>" +
+    '</head><body><div class="box"><div class="h">' +
+    heading +
+    '</div><div class="d">' +
+    detail +
+    '</div><a href="/">← Back to the hub</a></div></body></html>'
+  );
 }
 
 function escapeHtmlAttr(s: string): string {
@@ -292,8 +321,18 @@ function proxyToProject(
   );
   proxyReq.on("error", (err) => {
     if (!res.headersSent) {
-      res.writeHead(502, { "Content-Type": MIME_JSON });
-      res.end(JSON.stringify({ error: "proxy target unreachable: " + (err as Error).message }));
+      if (wantsHtml(req)) {
+        res.writeHead(502, { "Content-Type": MIME_HTML });
+        res.end(
+          hubErrorPage(
+            "Couldn’t reach this project",
+            "The project’s server isn’t responding — it may have stopped or crashed. Go back to the hub and start it again.",
+          ),
+        );
+      } else {
+        res.writeHead(502, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ error: "proxy target unreachable: " + (err as Error).message }));
+      }
     } else {
       res.end();
     }
@@ -346,8 +385,24 @@ export async function startMasterServer(
         const rest = (proxyMatch[2] ?? "/") + url.search;
         const entry = registry.getById(pid) ?? registry.getAll().find((e) => e.projectId === pid);
         if (!entry || !entry.url) {
-          res.writeHead(404, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: `No registered project '${pid}'` }));
+          // N218 — friendly page for a browser navigation; JSON for other callers.
+          if (wantsHtml(req)) {
+            res.writeHead(entry ? 502 : 404, { "Content-Type": MIME_HTML });
+            res.end(
+              entry
+                ? hubErrorPage(
+                    "This project isn’t running",
+                    "It’s registered with the hub but not live right now. Go back and press “Start” on its card.",
+                  )
+                : hubErrorPage(
+                    "Project not found",
+                    "No project with this id is registered with the hub. It may have been removed, or the hub restarted.",
+                  ),
+            );
+          } else {
+            res.writeHead(404, { "Content-Type": MIME_JSON });
+            res.end(JSON.stringify({ error: `No registered project '${pid}'` }));
+          }
           return;
         }
         proxyToProject(entry.url, `/p/${proxyMatch[1]}`, rest, req, res);
@@ -674,8 +729,9 @@ export async function startMasterServer(
           return;
         }
         const hub = readHubRegistry().find((h) => h.path === entry.path);
-        const port = hub?.port ?? assignHubPort();
-        const projectUrl = `http://localhost:${port}`;
+        // Use a genuinely free port (the assigned one if free, else the next),
+        // so a port an unrelated app holds doesn't make the spawn crash silently.
+        const port = await findFreePort(hub?.port ?? assignHubPort());
         try {
           const selfCli = resolve(dirname(fileURLToPath(import.meta.url)), "cli.js");
           const child = spawn(process.execPath, [selfCli, "ui", "--port", String(port)], {
@@ -689,22 +745,24 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: `Could not start: ${(err as Error).message}` }));
           return;
         }
-        if (!(await waitReachable(projectUrl, 12000))) {
-          res.writeHead(504, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "project server did not become reachable" }));
-          return;
-        }
-        // Wait for the spawned dashboard to register (it reconciles by path onto
-        // this entry and fills its url), so the proxy has a target when the
-        // client routes to /p/<id>/.
-        const deadline = Date.now() + 5000;
+        // Wait for the dashboard to actually REGISTER with the hub (reconcile by
+        // path → this entry gets its url + goes online), not merely for the port
+        // to answer — otherwise the proxy would have no target.
+        const deadline = Date.now() + 15000;
         let live = registry.getById(entry.id);
-        while ((!live || !live.url) && Date.now() < deadline) {
-          await new Promise((r) => setTimeout(r, 150));
+        while (Date.now() < deadline && !(live && live.online && live.url)) {
+          await new Promise((r) => setTimeout(r, 250));
           live = registry.getById(entry.id);
         }
+        if (!live || !live.online || !live.url) {
+          res.writeHead(504, { "Content-Type": MIME_JSON });
+          res.end(
+            JSON.stringify({ error: "project started but did not register with the hub in time" }),
+          );
+          return;
+        }
         res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ url: (live && live.url) || projectUrl }));
+        res.end(JSON.stringify({ url: live.url }));
         return;
       }
 
