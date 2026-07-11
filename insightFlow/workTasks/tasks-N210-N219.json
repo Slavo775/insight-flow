@@ -397,7 +397,7 @@
       "title": "Connection-based liveness for the master hub (drop polling) + light per-project token",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N214-connection-based-liveness-for-the-master-hub-drop-",
       "createdAt": "2026-07-10T18:31:24.563Z",
       "statusHistory": [
@@ -445,6 +445,16 @@
           "status": "approved",
           "at": "2026-07-10T22:36:14.269Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T22:52:34.846Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-10T22:52:34.994Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -464,8 +474,8 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-10T22:52:34.995Z",
+      "totalDurationMinutes": 261,
       "tags": [
         "master",
         "multi-project"
@@ -473,7 +483,7 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-10T22:52:34.848Z",
       "flowId": "default"
     },
     {
@@ -481,7 +491,7 @@
       "title": "Master single-origin app shell: project switcher + reverse-proxy /p/<id> + start-and-go",
       "type": "feat",
       "priority": "high",
-      "status": "ready",
+      "status": "approved",
       "folder": "insightFlow/workTasks/N215-master-single-origin-app-shell-project-switcher-re",
       "createdAt": "2026-07-10T18:31:24.703Z",
       "statusHistory": [
@@ -489,17 +499,75 @@
           "status": "ready",
           "at": "2026-07-10T18:31:24.703Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T06:35:18.250Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T07:10:12.528Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T07:18:58.184Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-11T07:22:05.774Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-11T07:23:51.604Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-11T07:28:58.912Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T07:39:37.385Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T07:43:28.010Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T07:49:57.216Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T07:53:20.084Z",
+          "by": "task-human-review"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-07-11T06:35:18.251Z",
+        "completedAt": "2026-07-11T07:10:12.529Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/base.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/useDashboardStream.ts",
+          "packages/taskflow/src/dashboard/client/components/InstallModal.tsx",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,

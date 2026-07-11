@@ -5,6 +5,7 @@
 // insight-flow writes them. Re-runnable (the emitter is idempotent) and safe to
 // close once finished.
 import { useEffect, useRef, useState } from "react";
+import { apiUrl } from "../base.js";
 import styled from "styled-components";
 import {
   fetchInstallPlan,
@@ -329,7 +330,7 @@ export function InstallModal({
     // server emits the progress frames synchronously inside the request handler,
     // so a listener attached after the POST would miss them. We await `onopen`
     // (with a short fallback so a blocked SSE never hangs the run).
-    const es = new EventSource("/sse");
+    const es = new EventSource(apiUrl("/sse"));
     const eventName = uninstalling ? "uninstall-progress" : "install-progress";
     es.addEventListener(eventName, (e) => {
       const frame = JSON.parse((e as MessageEvent).data) as ProgressFrame;

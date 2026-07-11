@@ -131,6 +131,24 @@ test("SSRF guard: the refresh probe never fetches a non-loopback registered url"
   }
 });
 
+test("shell (N215): / serves the switcher overview; start rejects an unknown project", async () => {
+  const port = 7600 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const root = await fetch(base + "/");
+    assert.equal(root.status, 200, "/ serves the shell");
+    const html = await root.text();
+    assert.match(html, /refreshProjects\(\)/, "shell has the on-demand refresh");
+    assert.match(html, /function startProject/, "shell has start-and-go");
+
+    const start = await fetch(base + "/api/hub/projects/does-not-exist/start", { method: "POST" });
+    assert.equal(start.status, 400, "start unknown project → 400");
+  } finally {
+    close();
+  }
+});
+
 test("reconcile: a second register with the same path adopts the existing entry", async () => {
   const port = 7280 + Math.floor(Math.random() * 150);
   const base = "http://localhost:" + port;

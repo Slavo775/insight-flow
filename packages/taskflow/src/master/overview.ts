@@ -21,6 +21,7 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     '      <p class="subtitle" id="subtitle">Connecting...</p>\n' +
     "    </div>\n" +
     '    <div class="top-bar-actions">\n' +
+    '      <button class="settings-btn" id="refresh-btn" onclick="refreshProjects()" title="Re-check which projects are running (on-demand healthcheck)">&#8635; Refresh</button>\n' +
     '      <button class="settings-btn" id="new-project-btn" onclick="createProject()" title="Create a new project (scaffolds it and registers it here)">+ New project</button>\n' +
     '      <div class="settings-wrap"><button class="settings-btn" id="settings-btn" onclick="toggleSettings()" title="Notification settings">&#9881;</button>\n' +
     '      <div class="settings-popover" id="settings-popover">\n' +
@@ -218,6 +219,35 @@ function getScript(initialData: string): string {
       return '<div class="proj-task">' + header + '<div class="proj-activity-feed">' + rows + '</div></div>';
     }
 
+    // N215 — the overview doubles as the launcher/switcher: open an online
+    // project through the single-origin proxy (/p/<id>/) in the same tab, or
+    // start an offline one first, then go.
+    function openControlHtml(p) {
+      // ids are registry UUIDs; sanitize defensively before the JS-string context.
+      var sid = String(p.id).replace(/[^A-Za-z0-9_-]/g, '');
+      if (p.online) {
+        return '<a href="/p/' + encodeURIComponent(p.id) + '/" class="open-link">Open →</a>';
+      }
+      return '<button class="open-link start-btn" onclick="startProject(\\'' + sid + '\\')">Start →</button>';
+    }
+    function startProject(id) {
+      var btn = window.event && window.event.target;
+      if (btn) { btn.textContent = 'Starting…'; btn.disabled = true; }
+      fetch('/api/hub/projects/' + encodeURIComponent(id) + '/start', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d && d.url) { window.location.href = '/p/' + encodeURIComponent(id) + '/'; }
+          else { if (btn) { btn.textContent = 'Start →'; btn.disabled = false; } alert('Could not start: ' + ((d && d.error) || 'unknown')); }
+        })
+        .catch(function() { if (btn) { btn.textContent = 'Start →'; btn.disabled = false; } });
+    }
+    function refreshProjects() {
+      fetch('/api/hub/refresh', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { if (d && d.projects) { PROJECTS = d.projects; renderAll(); } })
+        .catch(function() {});
+    }
+
     function renderCard(p) {
       var s = p.state || {};
       // N71: gate every claudeStatus-driven visual on liveness. A project
@@ -272,12 +302,16 @@ function getScript(initialData: string): string {
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +
         (activityHtml ? activityHtml : '') +
-        '<div class="proj-footer"><a href="' + escHtml(p.url) + '" class="open-link" target="_blank">Open dashboard →</a></div>' +
+        '<div class="proj-footer">' + openControlHtml(p) + '</div>' +
         '</div>';
     }
 
+    // N215 — online projects first so the switcher surfaces what you can open now.
+    function displayOrder() {
+      return PROJECTS.slice().sort(function(a, b) { return (b.online ? 1 : 0) - (a.online ? 1 : 0); });
+    }
     function renderAll() {
-      document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
+      document.getElementById('grid').innerHTML = displayOrder().map(renderCard).join('');
       updateSubtitle();
       snapshotStatuses();
     }
@@ -297,7 +331,7 @@ function getScript(initialData: string): string {
     // animation is added to .status-active, switch to per-card targeted
     // updates or skip the rerender when no card crossed the 60s threshold.
     function refreshStaleCards() {
-      document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
+      document.getElementById('grid').innerHTML = displayOrder().map(renderCard).join('');
       updateSubtitle();
     }
 
@@ -430,5 +464,6 @@ function getScript(initialData: string): string {
     loadNotifSettings();
     requestNotifPermission();
     connectStream();
+    refreshProjects(); // N215 — on-demand healthcheck on load so the list is fresh
     setInterval(refreshStaleCards, 30000);`;
 }
