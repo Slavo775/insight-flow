@@ -38,7 +38,7 @@ const MASTER_SOUNDS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "soun
  * `/api/*`, `/events` — are NEVER cached (always network). Old caches are pruned
  * on activate.
  */
-const MASTER_SW_JS = `var CACHE = 'if-hub-v2';
+const MASTER_SW_JS = `var CACHE = 'if-hub-v3';
 var SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg', '/sounds/idle-ping.mp3', '/sounds/permission-alert.mp3'];
 self.addEventListener('install', function(e){
   self.skipWaiting();
@@ -55,8 +55,8 @@ self.addEventListener('fetch', function(e){
   if (e.request.method !== 'GET') return;
   var url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
-  // Live surfaces are always network — never cached.
-  if (url.pathname.indexOf('/p/') === 0 || url.pathname.indexOf('/api/') === 0 || url.pathname === '/events') return;
+  // Live surfaces are always network — never cached (N220 adds /project/*).
+  if (url.pathname.indexOf('/project/') === 0 || url.pathname.indexOf('/p/') === 0 || url.pathname.indexOf('/api/') === 0 || url.pathname === '/events') return;
   if (e.request.mode === 'navigate') {
     // Shell: fresh when online, cached shell when offline.
     e.respondWith(
@@ -235,13 +235,44 @@ function escapeHtmlAttr(s: string): string {
 }
 
 /**
- * N212 — reverse-proxy a registered project's dashboard under `/p/<id>/*` so the
- * whole hub lives on one origin (prerequisite for the PWA + unified notifications).
+ * N218/N220 — respond when a project path can't be proxied: a friendly HTML page
+ * for a browser navigation, JSON otherwise. `entry` present but with no live url
+ * → registered-but-not-running (502 for HTML); absent → unknown project (404).
+ */
+function respondNoProject(
+  req: IncomingMessage,
+  res: ServerResponse,
+  entry: { url: string } | undefined,
+  pid: string,
+): void {
+  if (wantsHtml(req)) {
+    res.writeHead(entry ? 502 : 404, { "Content-Type": MIME_HTML });
+    res.end(
+      entry
+        ? hubErrorPage(
+            "This project isn’t running",
+            "It’s registered with the hub but not live right now. Go back and press “Start” on its card.",
+          )
+        : hubErrorPage(
+            "Project not found",
+            "No project with this id is registered with the hub. It may have been removed, or the hub restarted.",
+          ),
+    );
+  } else {
+    res.writeHead(404, { "Content-Type": MIME_JSON });
+    res.end(JSON.stringify({ error: `No registered project '${pid}'` }));
+  }
+}
+
+/**
+ * N212/N220 — reverse-proxy a registered project's dashboard under the caller's
+ * `prefix` (canonically `/project/<projectId>`) so the whole hub lives on one
+ * origin (prerequisite for the PWA + unified notifications).
  *
  * Streaming: everything except the SPA shell HTML is piped straight through
  * unbuffered, so the dashboard's `text/event-stream` SSE stays live (no
  * buffering, no content-length). The HTML shell is small, so it is buffered and
- * lightly rewritten: absolute `/assets/` refs are prefixed to `/p/<id>/assets/`
+ * lightly rewritten: absolute `/assets/` refs are prefixed to `<prefix>/assets/`
  * (so the browser fetches them back through the proxy), and a base hook is
  * injected (`<base>` + `window.__IF_BASE__`) for the client to consume in N215.
  */
@@ -351,6 +382,10 @@ export async function startMasterServer(
   // N83: native Server-Sent Events (replaced socket.io). Overview clients
   // subscribe with EventSource('/events'); project-update frames broadcast here.
   const sseClients = new Set<ServerResponse>();
+
+  // N220 review-fix — ids with a spawn in flight, so a second /start (e.g. from a
+  // double-click) doesn't launch a second dashboard process for the same project.
+  const startingProjects = new Set<string>();
   function broadcast(event: string, payload: unknown): void {
     const frame = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
     for (const client of sseClients) {
@@ -376,13 +411,16 @@ export async function startMasterServer(
 
       const url = new URL(req.url ?? "/", `http://localhost:${config.port}`);
 
-      // N212 — reverse-proxy a registered project's dashboard under /p/<id>/*.
-      // Single-origin hub: the master serves each project through this prefix so
-      // a service worker / one notification permission / a PWA become possible.
-      const proxyMatch = /^\/p\/([^/]+)(\/.*)?$/.exec(url.pathname);
-      if (proxyMatch) {
-        const pid = decodeURIComponent(proxyMatch[1]);
-        const restPath = proxyMatch[2] ?? "/";
+      // N212/N220 — reverse-proxy a registered project's dashboard under the
+      // canonical `/project/<projectId>/*`. Single-origin hub: the master serves
+      // each project through this prefix so a service worker / one notification
+      // permission / a PWA become possible. N220 — keyed on the STABLE `projectId`
+      // (falls back to the registry id) so the URL survives a master restart
+      // (the id is a per-registration UUID; projectId is the project's name).
+      const projectMatch = /^\/project\/([^/]+)(\/.*)?$/.exec(url.pathname);
+      if (projectMatch) {
+        const pid = decodeURIComponent(projectMatch[1]);
+        const restPath = projectMatch[2] ?? "/";
         const rest = restPath + url.search;
         // N219 review-fix (blocker 2) — never proxy a project's `/hub/*`
         // control-plane routes (e.g. `/hub/reregister`). Those are localhost-only
@@ -394,29 +432,45 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: "Not found" }));
           return;
         }
-        const entry = registry.getById(pid) ?? registry.getAll().find((e) => e.projectId === pid);
+        const entry = registry.getByProjectId(pid) ?? registry.getById(pid);
         if (!entry || !entry.url) {
-          // N218 — friendly page for a browser navigation; JSON for other callers.
-          if (wantsHtml(req)) {
-            res.writeHead(entry ? 502 : 404, { "Content-Type": MIME_HTML });
-            res.end(
-              entry
-                ? hubErrorPage(
-                    "This project isn’t running",
-                    "It’s registered with the hub but not live right now. Go back and press “Start” on its card.",
-                  )
-                : hubErrorPage(
-                    "Project not found",
-                    "No project with this id is registered with the hub. It may have been removed, or the hub restarted.",
-                  ),
-            );
-          } else {
-            res.writeHead(404, { "Content-Type": MIME_JSON });
-            res.end(JSON.stringify({ error: `No registered project '${pid}'` }));
-          }
+          respondNoProject(req, res, entry, pid);
           return;
         }
-        proxyToProject(entry.url, `/p/${proxyMatch[1]}`, rest, req, res);
+        proxyToProject(
+          entry.url,
+          `/project/${encodeURIComponent(entry.projectId)}`,
+          rest,
+          req,
+          res,
+        );
+        return;
+      }
+
+      // N220 — back-compat: the old `/p/<id>/*` path 301-redirects to the
+      // canonical `/project/<projectId>/*`, so open tabs, the cached PWA shell,
+      // and any bookmarks keep working after the rename.
+      const legacyMatch = /^\/p\/([^/]+)(\/.*)?$/.exec(url.pathname);
+      if (legacyMatch) {
+        const pid = decodeURIComponent(legacyMatch[1]);
+        const restPath = legacyMatch[2] ?? "/";
+        // Never redirect (or reveal) control-plane routes — mirror the /project/
+        // guard so `/p/<id>/hub/*` 404s directly instead of 301-hopping to it.
+        if (restPath === "/hub" || restPath.startsWith("/hub/")) {
+          res.writeHead(404, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Not found" }));
+          return;
+        }
+        const entry = registry.getById(pid) ?? registry.getByProjectId(pid);
+        if (!entry) {
+          respondNoProject(req, res, undefined, pid);
+          return;
+        }
+        const location = `/project/${encodeURIComponent(entry.projectId)}${restPath}${url.search}`;
+        // no-store: 301s are cached indefinitely by browsers; avoid a stale
+        // redirect resolving to a different project if a projectId is reused.
+        res.writeHead(301, { Location: location, "Cache-Control": "no-store" });
+        res.end();
         return;
       }
 
@@ -739,42 +793,56 @@ export async function startMasterServer(
           res.end(JSON.stringify({ url: entry.url, alreadyRunning: true }));
           return;
         }
-        const hub = readHubRegistry().find((h) => h.path === entry.path);
-        // Use a genuinely free port (the assigned one if free, else the next),
-        // so a port an unrelated app holds doesn't make the spawn crash silently.
-        const port = await findFreePort(hub?.port ?? assignHubPort());
+        // N220 review-fix — a spawn is already in flight for this project; don't
+        // launch a second dashboard process (guards against a double-click).
+        if (startingProjects.has(entry.id)) {
+          res.writeHead(202, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ starting: true }));
+          return;
+        }
+        startingProjects.add(entry.id);
         try {
-          const selfCli = resolve(dirname(fileURLToPath(import.meta.url)), "cli.js");
-          const child = spawn(process.execPath, [selfCli, "ui", "--port", String(port)], {
-            cwd: entry.path,
-            detached: true,
-            stdio: "ignore",
-          });
-          child.unref();
-        } catch (err) {
-          res.writeHead(500, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: `Could not start: ${(err as Error).message}` }));
+          const hub = readHubRegistry().find((h) => h.path === entry.path);
+          // Use a genuinely free port (the assigned one if free, else the next),
+          // so a port an unrelated app holds doesn't make the spawn crash silently.
+          const port = await findFreePort(hub?.port ?? assignHubPort());
+          try {
+            const selfCli = resolve(dirname(fileURLToPath(import.meta.url)), "cli.js");
+            const child = spawn(process.execPath, [selfCli, "ui", "--port", String(port)], {
+              cwd: entry.path,
+              detached: true,
+              stdio: "ignore",
+            });
+            child.unref();
+          } catch (err) {
+            res.writeHead(500, { "Content-Type": MIME_JSON });
+            res.end(JSON.stringify({ error: `Could not start: ${(err as Error).message}` }));
+            return;
+          }
+          // Wait for the dashboard to actually REGISTER with the hub (reconcile by
+          // path → this entry gets its url + goes online), not merely for the port
+          // to answer — otherwise the proxy would have no target.
+          const deadline = Date.now() + 15000;
+          let live = registry.getById(entry.id);
+          while (Date.now() < deadline && !(live && live.online && live.url)) {
+            await new Promise((r) => setTimeout(r, 250));
+            live = registry.getById(entry.id);
+          }
+          if (!live || !live.online || !live.url) {
+            res.writeHead(504, { "Content-Type": MIME_JSON });
+            res.end(
+              JSON.stringify({
+                error: "project started but did not register with the hub in time",
+              }),
+            );
+            return;
+          }
+          res.writeHead(200, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ url: live.url }));
           return;
+        } finally {
+          startingProjects.delete(entry.id);
         }
-        // Wait for the dashboard to actually REGISTER with the hub (reconcile by
-        // path → this entry gets its url + goes online), not merely for the port
-        // to answer — otherwise the proxy would have no target.
-        const deadline = Date.now() + 15000;
-        let live = registry.getById(entry.id);
-        while (Date.now() < deadline && !(live && live.online && live.url)) {
-          await new Promise((r) => setTimeout(r, 250));
-          live = registry.getById(entry.id);
-        }
-        if (!live || !live.online || !live.url) {
-          res.writeHead(504, { "Content-Type": MIME_JSON });
-          res.end(
-            JSON.stringify({ error: "project started but did not register with the hub in time" }),
-          );
-          return;
-        }
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ url: live.url }));
-        return;
       }
 
       // N217 — GET /manifest.webmanifest + app icons (the installable PWA).

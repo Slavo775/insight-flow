@@ -2,24 +2,24 @@
 
 ## Done criteria
 
-- [ ] `/project/<projectId>/*` reverse-proxies the project (resolve by `projectId`, then `id`)
-- [ ] `<base>` / `__IF_BASE__` / asset rewrite use the `/project/<projectId>/` prefix
-- [ ] `/p/<id>/*` 301-redirects to the canonical `/project/<projectId>/` (unknown id keeps friendly 404)
-- [ ] Service worker never caches `/project/*`; `CACHE` bumped to `if-hub-v3`
-- [ ] Card "Open" link + `startProject` navigation use `/project/<projectId>/`
-- [ ] Overview renders two labeled sections: **Running (n)** and **Stopped (n)**; empty section hidden
-- [ ] Cards regroup on `project-update` and on the stale sweep
+- [x] `/project/<projectId>/*` reverse-proxies the project (resolve by `projectId`, then `id`)
+- [x] `<base>` / `__IF_BASE__` / asset rewrite use the `/project/<projectId>/` prefix
+- [x] `/p/<id>/*` 301-redirects to the canonical `/project/<projectId>/` (unknown id keeps friendly 404 via `respondNoProject`)
+- [x] Service worker never caches `/project/*`; `CACHE` bumped to `if-hub-v3`
+- [x] Card "Open" link + `startProject` navigation use `/project/<projectId>/`
+- [x] Overview renders two labeled sections: **Running (n)** and **Stopped (n)**; empty section hidden
+- [x] Cards regroup on `project-update` and on the stale sweep (both call `renderSections`)
 
 ## Quality gates
 
-- [ ] `npx tsc --noEmit` passes
-- [ ] `npm run lint` passes
-- [ ] Related tests pass (`npm test`)
-- [ ] No regressions in affected area
+- [x] `npx tsc --noEmit` passes (`npm run typecheck`)
+- [x] `npm run lint` passes (eslint clean)
+- [x] Related tests pass (`npm test` → 342, +2 new; N212 proxy test updated to `/project/`)
+- [x] No regressions in affected area
 
 ## Verification
 
-- [ ] `curl -sI localhost:6100/p/<uuid>/` → `301` to `/project/<projectId>/`
-- [ ] `curl -s localhost:6100/project/<projectId>/` → project shell, assets under `/project/<projectId>/assets/`
-- [ ] Overview shows Running + Stopped groups; Start moves a card Stopped → Running
-- [ ] New test: `/project/<projectId>` proxies; `/p/<id>` redirects; HTML has section markers
+- [x] `curl /p/<uuid>/kanban` → `301` → `/project/insight-flow/kanban` (query preserved) — verified live
+- [x] `curl /project/insight-flow/` → project shell with `<base href="/project/insight-flow/">`; assets under `/project/insight-flow/assets/` load (200, 673KB) — verified live
+- [x] Overview shows Running + Stopped groups (`'Running'`/`'Stopped'`/`/project/` in HTML); grouping reflects online state live (Running 2 / Stopped 3)
+- [x] New tests: `/project/<projectId>` proxies + `/p/<id>` 301-redirects (query preserved) + overview section markers
