@@ -81,6 +81,9 @@ export function getOverviewHtml(projects: PublicProjectEntry[]): string {
     "  <script>\n" +
     getScript(initialData) +
     "\n  </script>\n" +
+    // N225 — the shared notification client (also injected into proxied project
+    // pages) is the single notification authority across the hub.
+    '  <script src="/hub-notify.js"></script>\n' +
     "</body>\n</html>"
   );
 }
@@ -770,7 +773,9 @@ function getScript(initialData: string): string {
 
       es.addEventListener('project-update', function(e) {
         var p = JSON.parse(e.data);
-        checkStatusTransitions(p);
+        // N225 — notifications are now fired by the shared /hub-notify.js client
+        // (which also runs on proxied project pages); this stream only drives the
+        // card UI. checkStatusTransitions is retired to avoid double-notifying.
         upsertProject(p);
       });
     }

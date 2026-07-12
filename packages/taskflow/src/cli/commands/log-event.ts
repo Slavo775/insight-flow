@@ -22,6 +22,8 @@ import type {
 import { EVENT_TYPES, CLAUDE_HOOK_EVENT_TYPES } from "../../core/types.js";
 import { EventsFileSchema } from "../../core/schema/index.js";
 import { getWorkDir, getEventsDir, getMasterPath } from "../../core/config.js";
+import { resolveProjectRoot } from "../../core/paths.js";
+import { readServerPortPointer } from "../../core/global-config.js";
 
 const INSIGHT_FLOW_DIR = resolve(homedir(), ".insight-flow");
 
@@ -265,7 +267,16 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
       ...(provider ? { provider } : {}),
     };
     appendToDailyBackup(getEventsDir(config), hookEventPostPayload);
-    postToLogEvents(config.server.port, hookEventPostPayload);
+    // N225 — post to the dashboard's ACTUAL port (the hub may have started it on
+    // an assigned port), falling back to the configured default. Wrapped so a
+    // resolveProjectRoot() throw (no project root) can never break the hook.
+    let livePort = config.server.port;
+    try {
+      livePort = readServerPortPointer(resolveProjectRoot()) ?? config.server.port;
+    } catch {
+      /* keep the configured port */
+    }
+    postToLogEvents(livePort, hookEventPostPayload);
 
     process.stdout.write(
       JSON.stringify({ event: eventType, source: "hook", taskId: taskId ?? null, ts }) + "\n",

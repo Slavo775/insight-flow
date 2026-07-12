@@ -20,10 +20,42 @@ export class ActivityEngine {
   start(): void {
     if (!this.enabled) return;
 
-    // Clear ephemeral log on start
-    writeFileSync(this.logPath, "");
+    // N225 — durable feed: seed from the existing log (last maxEvents) instead of
+    // wiping it, so the activity feed survives a dashboard restart (the hub
+    // restarts projects on new ports). The file is trimmed to the tail so it
+    // stays bounded; `linesProcessed`/`lastSize` line up with the rewritten file
+    // so `readNewLines` continues from the end.
+    this.events = [];
     this.lastSize = 0;
     this.linesProcessed = 0;
+    try {
+      const existing = existsSync(this.logPath) ? readFileSync(this.logPath, "utf-8") : "";
+      const tail = existing
+        .split("\n")
+        .filter((l) => l.trim())
+        .slice(-this.maxEvents);
+      for (const line of tail) {
+        try {
+          this.events.push(JSON.parse(line) as ActivityEvent);
+        } catch {
+          /* skip malformed */
+        }
+      }
+      const rewritten = tail.length ? tail.join("\n") + "\n" : "";
+      writeFileSync(this.logPath, rewritten);
+      this.lastSize = Buffer.byteLength(rewritten);
+      this.linesProcessed = tail.length;
+    } catch {
+      // Best-effort: fall back to an empty feed.
+      try {
+        writeFileSync(this.logPath, "");
+      } catch {
+        /* ignore */
+      }
+      this.events = [];
+      this.lastSize = 0;
+      this.linesProcessed = 0;
+    }
 
     // Start watching the log file
     this.watcher = watch(this.logPath, () => {

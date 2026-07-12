@@ -1,0 +1,70 @@
+{
+  "taskId": "N225",
+  "reviews": [
+    {
+      "startedAt": "2026-07-12T19:36:22.629Z",
+      "endedAt": "2026-07-12T19:46:40.163Z",
+      "verdict": "fix-needed",
+      "comment": "Delivery core (port pointer, durable feed, /unknown) correct + verified; security clean. 2 blockers in the new /hub-notify.js: (1) HIGH — permission branch lacks a first-frame guard, so refreshProjects' state re-broadcast fires a spurious 'needs permission' notif+sound on every hub page load; fix: guard the claudeStatus block on pc!==undefined. (2) MEDIUM — notifications not deduped across multiple open hub tabs (no showNotification tag). Non-blocking: log-event resolveProjectRoot can throw on the hook path (use safe variant); active->idle flicker; pid-reuse; events-tab + native-hook deferred by design.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-12T19:48:07.101Z",
+        "endedAt": "2026-07-12T19:50:51.071Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/cli/commands/log-event.ts",
+          "insightFlow/workTasks/N225-hub-activity-delivery-sw-unified-notifications-ove/REVIEW.md"
+        ],
+        "comment": "Fixed both blockers + 2 non-blocking. B1: first-frame guard (pc!==undefined) on the claudeStatus block -> no spurious permission notif on load. B2: stable notification tag + renotify -> dedup across hub tabs. NB1: log-event resolveProjectRoot wrapped in try/catch (never breaks the hook). NB2: 'Claude finished' now active->done only (no idle flicker). 350 tests, /hub-notify.js re-validated.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-12T19:55:33.716Z",
+      "endedAt": "2026-07-12T19:56:32.334Z",
+      "verdict": "approved",
+      "comment": "Round 2 APPROVED. Both blockers fixed + verified: first-frame guard (pc!==undefined) kills the spurious permission-on-load; notification tag collapses cross-tab duplicates to one bubble. Non-blocking hook-safety (try/catch) + flicker (active->done only) also fixed. No new issues. Residual (non-blocking): multi-tab AUDIBLE dedup (renotify:true + per-tab sound) — uncommon; follow-up. Recommend a live smoke test to confirm the 'done' signal fires end-to-end. 350 tests, security unchanged.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-12T19:59:17.381Z",
+      "endedAt": "2026-07-12T20:01:59.614Z",
+      "verdict": "fix-needed",
+      "comment": null,
+      "type": "human",
+      "by": "task-human-review",
+      "fix": {
+        "startedAt": "2026-07-12T20:03:10.413Z",
+        "endedAt": "2026-07-12T20:05:36.152Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts"
+        ],
+        "comment": "Round-3 sound regression fixed: hub /hub-notify.js now plays the mp3 first (no pre-gesture short-circuit) and falls back to the richer multi-note chime matching notifications.ts",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-12T20:09:57.551Z",
+      "endedAt": "2026-07-12T20:12:11.031Z",
+      "verdict": "approved",
+      "comment": "Round 4: sound-regression fix restores the rich chime (== pre-N225 playTone). Discovery: mp3s are 0-byte placeholders so the chime is the real sound everywhere. Approve; empty-mp3 is a non-blocking follow-up.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-12T20:12:56.597Z",
+      "endedAt": "2026-07-12T20:13:25.022Z",
+      "verdict": "approved",
+      "comment": "Human approved after live hub reinstall; sound restored. Merge into dashboard-improvements.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

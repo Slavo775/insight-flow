@@ -52,6 +52,7 @@ import {
   restoreMcpServer,
 } from "../../agents/emit.js";
 import { resolveProjectRoot } from "../../core/paths.js";
+import { writeServerPortPointer, clearServerPortPointer } from "../../core/global-config.js";
 import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
@@ -1701,7 +1702,13 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
   const watcher = watchWorkDir(workDir, scheduleFileChangeBroadcast);
 
+  // N225 — advertise the ACTUAL port so `log-event` (a separate process that
+  // only knows config.server.port) posts /log/events here even when the hub
+  // started us on an assigned port. Keyed by project root; cleared on shutdown.
+  const portPointerRoot = resolveProjectRoot();
+
   server.listen(serverPort, () => {
+    writeServerPortPointer(portPointerRoot, serverPort);
     const engineStatus = configEnabled ? "Activity engine ON" : "Activity engine OFF";
     console.log("\n  Taskflow Dashboard\n");
     console.log("  Local:   http://localhost:" + serverPort);
@@ -1739,17 +1746,20 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     }
   });
 
-  process.on("SIGINT", () => {
+  let shuttingDown = false;
+  const shutdown = (): void => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     activity.stop();
     watcher.close();
     if (debounceTimer) clearTimeout(debounceTimer);
     transport.close();
-    try {
-      if (existsSync(activityLogPath)) unlinkSync(activityLogPath);
-    } catch {
-      // ignore
-    }
+    clearServerPortPointer(portPointerRoot); // N225
+    // N225 — keep the activity log on shutdown (the engine trims it to the tail
+    // on next start), so the feed survives a hub-driven restart on a new port.
     server.close();
     process.exit(0);
-  });
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown); // N225 — the hub stops projects via SIGTERM
 }

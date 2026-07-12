@@ -304,6 +304,214 @@
       "mrUrl": null,
       "mergedAt": "2026-07-12T17:51:22.933Z",
       "flowId": "default"
+    },
+    {
+      "id": "N223",
+      "title": "LAN/mobile hub access via a trusted-host allowlist",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N223-lan-mobile-hub-access-via-a-trusted-host-allowlist",
+      "createdAt": "2026-07-12T18:28:00.851Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-12T18:28:00.851Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "hub",
+        "security",
+        "mobile"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N224",
+      "title": "Rewrite hub/dashboard docs for the single-origin PWA hub",
+      "type": "docs",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N224-rewrite-hub-dashboard-docs-for-the-single-origin-p",
+      "createdAt": "2026-07-12T18:28:00.994Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-12T18:28:00.995Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "master",
+        "hub"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N225",
+      "title": "Hub activity delivery + SW-unified notifications overhaul",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N225-hub-activity-delivery-sw-unified-notifications-ove",
+      "createdAt": "2026-07-12T18:57:32.854Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-12T18:57:32.855Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-12T19:04:04.775Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-12T19:36:00.298Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-12T19:36:22.628Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-12T19:46:40.164Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-12T19:48:07.100Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-12T19:50:51.072Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-12T19:55:33.714Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-12T19:56:32.337Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-12T19:59:17.379Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-12T20:01:59.615Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-12T20:03:10.412Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-12T20:05:36.152Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-12T20:09:57.549Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-12T20:12:11.033Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-12T20:12:56.595Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-12T20:13:25.023Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-12T19:04:04.776Z",
+        "completedAt": "2026-07-12T19:36:00.300Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/global-config.ts",
+          "packages/taskflow/src/core/index.ts",
+          "packages/taskflow/src/cli/commands/log-event.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/server/activity.ts",
+          "packages/taskflow/src/dashboard/client/notifications.ts",
+          "packages/taskflow/src/agents/activity-hook.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/hub-registry.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 5,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "hub",
+        "activity",
+        "notifications",
+        "service-worker"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
