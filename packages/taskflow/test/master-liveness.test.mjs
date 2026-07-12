@@ -523,6 +523,47 @@ test("N221: /api/projects/create scaffolds under the chosen folder; rejects outs
   }
 });
 
+test("N222: /api/projects/create forwards install options (composer-authoring flow) to init", async () => {
+  const root = mkdtempSync(join(tmpdir(), "if-n222-"));
+  const prev = process.env.INSIGHT_FLOW_BROWSE_ROOT;
+  process.env.INSIGHT_FLOW_BROWSE_ROOT = root;
+  const port = 8940 + Math.floor(Math.random() * 50);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const r = await fetch(base + "/api/projects/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: "Authoring Proj",
+        dir: root,
+        lifecycle: true,
+        activity: false,
+        registerHub: false,
+        editor: "claude",
+        installFlows: ["composer-authoring"],
+      }),
+    });
+    assert.equal(r.status, 200, "create with options succeeds");
+    const d = await r.json();
+    assert.ok(
+      existsSync(join(d.path, ".claude/commands/task-authoring-create.md")),
+      "composer-authoring flow installed through the endpoint",
+    );
+    assert.ok(
+      existsSync(join(d.path, ".claude/commands/taskmaster.md")),
+      "default flow commands still present",
+    );
+    // N222 review-fix (blocker 1) — a clean install reports no warnings.
+    assert.deepEqual(d.warnings, [], "no flow-install warnings on success");
+  } finally {
+    close();
+    if (prev === undefined) delete process.env.INSIGHT_FLOW_BROWSE_ROOT;
+    else process.env.INSIGHT_FLOW_BROWSE_ROOT = prev;
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("N219: the master never proxies a project's /hub/* control-plane routes", async () => {
   const port = 8300 + Math.floor(Math.random() * 150);
   const base = "http://localhost:" + port;

@@ -1,0 +1,46 @@
+{
+  "taskId": "N222",
+  "reviews": [
+    {
+      "startedAt": "2026-07-12T14:30:06.351Z",
+      "endedAt": "2026-07-12T14:37:45.673Z",
+      "verdict": "fix-needed",
+      "comment": "Wiring clean, security clean (verified: installFlows double-gated, editor validated, .mcp.json fixed, N221 guards intact). 2 blockers: (1) a failed composer-flow install is silently swallowed in init step-6c -> endpoint reports success with no flow; surface the failure. (2) editor:cursor silently no-ops lifecycle/activity + writes dead .claude composer artifacts while the modal still offers them; disable/note those options for cursor. Non-blocking: activity config enabled:true quirk, re-init precedence, installFlows dedupe.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-12T14:40:00.166Z",
+        "endedAt": "2026-07-12T15:48:09.360Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/init.test.mjs",
+          "packages/taskflow/test/master-liveness.test.mjs",
+          "insightFlow/workTasks/N222-new-project-install-options-composer-authoring-flo/REVIEW.md"
+        ],
+        "comment": "Fixed both blockers + non-blocking. B1: initProject returns {flowErrors}; step-6c records failures; create returns warnings; modal shows them. B2: modal disables/unchecks lifecycle+activity+composer for editor:cursor with a note. NB: activity:false persists enabled:false; installFlows deduped; unknown flow reported. 349 tests.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-12T16:30:04.682Z",
+      "endedAt": "2026-07-12T16:54:02.727Z",
+      "verdict": "approved",
+      "comment": "Round 2 APPROVED. Both blockers verified fixed (initProject returns flowErrors -> endpoint warnings -> modal shows them; modal disables lifecycle/activity/composer for editor:cursor). Non-blocking (activity:false persists enabled:false; installFlows deduped) verified. Independent correctness pass: return-type change safe for all callers, no new bugs. Found+fixed 1 LOW UX (cursor->claude checkbox restore + reopen reset). 349 tests, security unchanged.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-12T17:21:28.079Z",
+      "endedAt": "2026-07-12T17:49:52.905Z",
+      "verdict": "approved",
+      "comment": "Okej I approved it merge to base",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

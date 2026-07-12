@@ -59,6 +59,18 @@ export function getOverviewHtml(projects: PublicProjectEntry[]): string {
     '        <label class="np-label" for="np-name">Project name</label>\n' +
     '        <input class="np-input" id="np-name" type="text" placeholder="my-project" maxlength="60" autocomplete="off">\n' +
     "      </div>\n" +
+    // N222 — install options (what to scaffold into the new project).
+    '      <div class="np-field">\n' +
+    '        <label class="np-label">Install</label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-lifecycle" checked> Task lifecycle events <span class="np-hint">zero tokens</span></label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-activity"> Agent activity tracking <span class="np-hint">~50 tokens/turn</span></label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-composer"> Composer-authoring flow <span class="np-hint">build custom agents/flows</span></label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-registerhub" checked> Register with this hub</label>\n' +
+    '        <label class="np-opt np-opt-row">Editor\n' +
+    '          <select id="np-editor" class="np-select" onchange="npEditorChanged()"><option value="claude">Claude</option><option value="cursor">Cursor</option><option value="all">Both</option></select>\n' +
+    "        </label>\n" +
+    '        <div class="np-hint" id="np-editor-note"></div>\n' +
+    "      </div>\n" +
     '      <div class="np-status" id="np-status"></div>\n' +
     '      <div class="np-actions">\n' +
     '        <button class="np-btn" onclick="npClose()">Cancel</button>\n' +
@@ -173,7 +185,13 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .np-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit; }
     .np-btn:hover { border-color: var(--accent); }
     .np-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .np-btn:disabled { opacity: 0.5; cursor: default; }`;
+    .np-btn:disabled { opacity: 0.5; cursor: default; }
+    /* N222 — install options */
+    .np-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; color: var(--text); cursor: pointer; }
+    .np-opt input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
+    .np-opt-row { justify-content: space-between; }
+    .np-hint { color: var(--text-muted); font-size: 10px; }
+    .np-select { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--text); font-family: inherit; font-size: 12px; }`;
 
 function getScript(initialData: string): string {
   return `
@@ -208,12 +226,54 @@ function getScript(initialData: string): string {
       if (path) path.textContent = '';
       var list = document.getElementById('np-list');
       if (list) list.innerHTML = '';
+      // N222 review-fix — reset the install options to their defaults on each
+      // open (so a prior Cursor selection / toggled boxes don't persist).
+      function setChecked(id, val) {
+        var el = document.getElementById(id);
+        if (el) { el.checked = val; el.disabled = false; el.removeAttribute('data-prev'); }
+      }
+      setChecked('np-lifecycle', true);
+      setChecked('np-activity', false);
+      setChecked('np-composer', false);
+      setChecked('np-registerhub', true);
+      var ed = document.getElementById('np-editor');
+      if (ed) ed.value = 'claude';
       setNpStatus('', '');
+      npEditorChanged();
       npBrowse(null);
     }
     function npClose() {
       var ov = document.getElementById('np-overlay');
       if (ov) ov.classList.remove('open');
+    }
+    // N222 review-fix (blocker 2) — lifecycle, activity, and the composer-authoring
+    // flow are Claude-shaped (their hooks/commands emit under .claude/). For a
+    // cursor-only project they wouldn't apply, so disable + uncheck them (and note
+    // why) instead of letting the selections silently do nothing. "Both" keeps
+    // Claude, so they stay enabled.
+    function npEditorChanged() {
+      var ed = document.getElementById('np-editor');
+      var cursorOnly = !!(ed && ed.value === 'cursor');
+      var ids = ['np-lifecycle', 'np-activity', 'np-composer'];
+      for (var i = 0; i < ids.length; i++) {
+        var el = document.getElementById(ids[i]);
+        if (!el) continue;
+        if (cursorOnly) {
+          // Remember the state before disabling (only on the enabled->disabled
+          // edge), so switching back to Claude restores the user's choices.
+          if (!el.disabled) el.setAttribute('data-prev', el.checked ? '1' : '0');
+          el.checked = false;
+          el.disabled = true;
+        } else {
+          el.disabled = false;
+          var prev = el.getAttribute('data-prev');
+          if (prev !== null) { el.checked = prev === '1'; el.removeAttribute('data-prev'); }
+        }
+      }
+      var note = document.getElementById('np-editor-note');
+      if (note) note.textContent = cursorOnly
+        ? 'Lifecycle, activity, and the composer flow are Claude-only.'
+        : '';
     }
     function npBrowse(dir) {
       var qs = dir ? ('?dir=' + encodeURIComponent(dir)) : '';
@@ -249,14 +309,33 @@ function getScript(initialData: string): string {
       var btn = document.getElementById('np-create');
       if (btn) btn.disabled = true;
       setNpStatus('Creating\\u2026', '');
+      // N222 — gather the install options from the modal.
+      function chk(id) { var el = document.getElementById(id); return !!(el && el.checked); }
+      var editorEl = document.getElementById('np-editor');
+      var installFlows = chk('np-composer') ? ['composer-authoring'] : [];
       fetch('/api/projects/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, dir: npDir })
+        body: JSON.stringify({
+          name: name,
+          dir: npDir,
+          lifecycle: chk('np-lifecycle'),
+          activity: chk('np-activity'),
+          registerHub: chk('np-registerhub'),
+          editor: editorEl ? editorEl.value : 'claude',
+          installFlows: installFlows
+        })
       }).then(function(r) { return r.json(); }).then(function(d) {
         // N221 review-fix — on success keep the button disabled (we reload
         // shortly), so a second click can't re-POST and flip green -> 409 red.
         if (d.error) { if (btn) btn.disabled = false; setNpStatus(d.error, 'err'); return; }
+        // N222 review-fix (blocker 1) — the project was created, but a requested
+        // flow may have failed to install; show that instead of a plain success.
+        if (d.warnings && d.warnings.length) {
+          setNpStatus('Created at ' + d.path + ' \\u2014 ' + d.warnings.join('; '), 'err');
+          setTimeout(function() { npClose(); location.reload(); }, 3000);
+          return;
+        }
         setNpStatus('Created at ' + d.path, 'ok');
         setTimeout(function() { npClose(); location.reload(); }, 900);
       }).catch(function() { if (btn) btn.disabled = false; setNpStatus('Could not create project.', 'err'); });

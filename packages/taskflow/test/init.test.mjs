@@ -199,3 +199,70 @@ test("init with agents.custom — registers agent in CLAUDE.md", () => {
     rmSync(dir, { recursive: true });
   }
 });
+
+test("N222: init installs the composer-authoring flow when requested", async () => {
+  const dir = makeTempDir();
+  try {
+    await initProject(dir, false, { yes: true, installFlows: ["composer-authoring"] });
+    const cmds = resolve(dir, ".claude/commands");
+    for (const c of [
+      "task-authoring-analyze",
+      "task-authoring-create",
+      "task-authoring-implement",
+      "task-authoring-review",
+      "task-authoring-install",
+    ]) {
+      assert.ok(existsSync(resolve(cmds, c + ".md")), c + " command installed");
+    }
+    assert.ok(
+      existsSync(resolve(dir, ".claude/agents/module-author.md")),
+      "an authoring subagent installed",
+    );
+    const mcp = JSON.parse(readFileSync(resolve(dir, ".mcp.json"), "utf-8"));
+    assert.ok(mcp.mcpServers && mcp.mcpServers.composer, "composer MCP server registered");
+    // The default flow's commands are still there.
+    assert.ok(existsSync(resolve(cmds, "taskmaster.md")), "default commands still present");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("N222: init surfaces an unknown flow id via flowErrors (no throw, no files)", async () => {
+  const dir = makeTempDir();
+  try {
+    // N222 review-fix (blocker 1) — a requested flow that can't install is
+    // reported back, not silently swallowed.
+    const res = await initProject(dir, false, { yes: true, installFlows: ["not-a-real-flow"] });
+    assert.ok(!existsSync(resolve(dir, ".mcp.json")), "no flow artifacts for an unknown id");
+    assert.equal(res.flowErrors.length, 1, "the failure is reported");
+    assert.equal(res.flowErrors[0].id, "not-a-real-flow");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("N222: init honors the explicit activity option (hook + persisted config)", async () => {
+  const on = makeTempDir();
+  const off = makeTempDir();
+  try {
+    const rOn = await initProject(on, false, { yes: true, activity: true });
+    const rOff = await initProject(off, false, { yes: true, activity: false });
+    assert.deepEqual(rOn.flowErrors, [], "no flow errors on a clean init");
+    assert.ok(
+      existsSync(resolve(on, ".claude/hooks/taskflow-activity.sh")),
+      "activity:true installs the activity hook",
+    );
+    assert.ok(
+      !existsSync(resolve(off, ".claude/hooks/taskflow-activity.sh")),
+      "activity:false leaves the hook out",
+    );
+    // N222 review-fix (nb1) — explicit off persists enabled:false (so a later
+    // init re-run won't silently re-enable it).
+    const offCfg = JSON.parse(readFileSync(resolve(off, "taskflow.config.json"), "utf-8"));
+    assert.equal(offCfg.activityEngine?.enabled, false, "activity:false persisted to config");
+    void rOff;
+  } finally {
+    rmSync(on, { recursive: true });
+    rmSync(off, { recursive: true });
+  }
+});
