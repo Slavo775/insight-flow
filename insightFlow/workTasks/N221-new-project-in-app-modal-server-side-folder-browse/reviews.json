@@ -1,0 +1,44 @@
+{
+  "taskId": "N221",
+  "reviews": [
+    {
+      "startedAt": "2026-07-12T10:33:29.432Z",
+      "endedAt": "2026-07-12T10:44:44.158Z",
+      "verdict": "fix-needed",
+      "comment": "Modal + folder browser + traversal confinement are sound. 1 HIGH blocker: /api/fs/list + /api/projects/create are reachable cross-origin via DNS rebinding (no Host-header validation; ACAO:* global; loopback+Sec-Fetch-Site both pass under rebinding) -> remote home-dir read + file creation. Also Sec-Fetch-Site fails open when absent. Fix: validate Host is loopback + treat cross-origin Origin/absent-metadata as untrusted; extend to /start. Non-blocking: stale npDir on failed reopen, double-POST on success, symlinked dirs undiscoverable, minor path disclosure + root-'/' edges.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-12T10:56:20.842Z",
+        "endedAt": "2026-07-12T11:00:58.599Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs",
+          "insightFlow/workTasks/N221-new-project-in-app-modal-server-side-folder-browse/REVIEW.md"
+        ],
+        "comment": "Fixed HIGH blocker + 5 non-blocking. Blocker: replaced Sec-Fetch-Site-only guard with isTrustedLocalRequest (Host loopback validation defeats DNS rebinding + cross-origin Origin/Sec-Fetch-Site) on fs/list + create + start. NB: reset stale npDir, no double-POST on success, symlinked dirs browsable, generic fs errors, root-'/' edges. 344 tests incl. Host/Origin/rebinding assertions.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-12T11:02:18.349Z",
+      "endedAt": "2026-07-12T11:30:11.832Z",
+      "verdict": "approved",
+      "comment": "Round 2 APPROVED. Blocker fix (isTrustedLocalRequest: Host-loopback validation) independently verified sound — DNS rebinding blocked (Host is browser-forbidden), cross-origin POSTs always carry Origin, no parse bypass, legit hub page unaffected. All 5 non-blocking fixed. Verification surfaced 2 adjacent pre-existing CSRF/disclosure holes (register poisoning; hub/projects+refresh open reads) — closed those too with the same guard. 345 tests. Residuals benign (Safari no-cors opaque GET; custom /etc/hosts alias; non-browser clients).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-12T11:58:25.379Z",
+      "endedAt": "2026-07-12T12:02:39.438Z",
+      "verdict": "approved",
+      "comment": "approved land it on dashboard-improvements",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

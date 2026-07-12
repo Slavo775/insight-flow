@@ -8,6 +8,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, get as httpGet } from "node:http";
+import { mkdtempSync, mkdirSync, rmSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { startMasterServer } from "../dist/index.js";
 
 function startHealthStub(healthy = true) {
@@ -378,6 +381,145 @@ test("N220: the overview renders Running and Stopped sections + /project links",
     assert.match(html, /\/project\/'/, "Open links use the /project/ path");
   } finally {
     close();
+  }
+});
+
+test("N221: control-plane endpoints reject cross-origin browser requests (CSRF)", async () => {
+  const port = 8330 + Math.floor(Math.random() * 120);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    // register: server-to-server (no browser headers) works; a cross-site POST
+    // (which could poison a registry url/path) is refused.
+    const ok = await register(base, { projectId: "csrf-ok", label: "csrf-ok", url: "" });
+    assert.ok(ok.id && ok.token, "same-origin/server register works");
+    const evilReg = await fetch(base + "/api/register", {
+      method: "POST",
+      headers: { "content-type": "application/json", "sec-fetch-site": "cross-site" },
+      body: JSON.stringify({ projectId: "csrf-ok", label: "hijacked", url: "http://127.0.0.1:1" }),
+    });
+    assert.equal(evilReg.status, 403, "cross-site register is refused");
+
+    // hub/projects + hub/refresh: same-origin reads work; cross-site refused.
+    assert.equal((await fetch(base + "/api/hub/projects")).status, 200, "same-origin list works");
+    const evilList = await fetch(base + "/api/hub/projects", {
+      headers: { origin: "http://evil.example" },
+    });
+    assert.equal(evilList.status, 403, "cross-origin project-list read is refused");
+    const evilRefresh = await fetch(base + "/api/hub/refresh", {
+      method: "POST",
+      headers: { "sec-fetch-site": "cross-site" },
+    });
+    assert.equal(evilRefresh.status, 403, "cross-site refresh is refused");
+  } finally {
+    close();
+  }
+});
+
+test("N221: /api/fs/list lists sub-folders within the browse root and rejects escape", async () => {
+  const root = mkdtempSync(join(tmpdir(), "if-browse-"));
+  mkdirSync(join(root, "alpha"));
+  mkdirSync(join(root, "beta"));
+  mkdirSync(join(root, ".hidden"));
+  const prev = process.env.INSIGHT_FLOW_BROWSE_ROOT;
+  process.env.INSIGHT_FLOW_BROWSE_ROOT = root;
+  const port = 8760 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    // Default dir = root: lists alpha + beta (sorted), hides dot-dirs, no parent.
+    const r = await (await fetch(base + "/api/fs/list")).json();
+    assert.deepEqual(
+      r.entries.map((e) => e.name),
+      ["alpha", "beta"],
+      "sorted directories, hidden excluded",
+    );
+    assert.equal(r.parent, null, "no parent above the root");
+
+    // Descend into alpha → it has a parent (back toward the root).
+    const a = await (
+      await fetch(base + "/api/fs/list?dir=" + encodeURIComponent(join(root, "alpha")))
+    ).json();
+    assert.ok(a.parent, "sub-folder exposes a parent");
+
+    // Escape attempts (outside root / traversal) are refused.
+    const outside = await fetch(base + "/api/fs/list?dir=" + encodeURIComponent(tmpdir()));
+    assert.equal(outside.status, 400, "a path outside the root is refused");
+    const traversal = await fetch(
+      base + "/api/fs/list?dir=" + encodeURIComponent(join(root, "..", "..")),
+    );
+    assert.equal(traversal.status, 400, "traversal outside the root is refused");
+
+    // A cross-site browser fetch (ACAO:* would otherwise leak the listing) → 403.
+    const crossSite = await fetch(base + "/api/fs/list", {
+      headers: { "sec-fetch-site": "cross-site" },
+    });
+    assert.equal(crossSite.status, 403, "cross-site fetch of the folder listing is refused");
+
+    // N221 review-fix — DNS rebinding: the socket is loopback but the Host header
+    // carries the attacker's hostname → refused (Host validation).
+    const rawStatus = (headers) =>
+      new Promise((resolve, reject) => {
+        const rq = httpGet({ hostname: "127.0.0.1", port, path: "/api/fs/list", headers }, (res) => {
+          resolve(res.statusCode);
+          res.resume();
+        });
+        rq.on("error", reject);
+      });
+    assert.equal(
+      await rawStatus({ Host: "evil.example:" + port }),
+      403,
+      "a non-loopback Host (DNS rebinding) is refused",
+    );
+    assert.equal(
+      await rawStatus({ Origin: "http://evil.example" }),
+      403,
+      "a cross-origin Origin is refused",
+    );
+    assert.equal(
+      await rawStatus({ Host: "localhost:" + port }),
+      200,
+      "a loopback Host + no cross-origin markers is allowed",
+    );
+  } finally {
+    close();
+    if (prev === undefined) delete process.env.INSIGHT_FLOW_BROWSE_ROOT;
+    else process.env.INSIGHT_FLOW_BROWSE_ROOT = prev;
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("N221: /api/projects/create scaffolds under the chosen folder; rejects outside root", async () => {
+  const root = mkdtempSync(join(tmpdir(), "if-create-"));
+  mkdirSync(join(root, "sub"));
+  const prev = process.env.INSIGHT_FLOW_BROWSE_ROOT;
+  process.env.INSIGHT_FLOW_BROWSE_ROOT = root;
+  const port = 8910 + Math.floor(Math.random() * 80);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const ok = await fetch(base + "/api/projects/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "My Proj", dir: join(root, "sub") }),
+    });
+    assert.equal(ok.status, 200, "create under the chosen folder succeeds");
+    const d = await ok.json();
+    assert.match(d.path, /[/\\]sub[/\\]my-proj$/, "scaffolded as <chosen>/<slug>");
+    assert.ok(existsSync(join(d.path, "taskflow.config.json")), "project was scaffolded");
+
+    // A chosen folder outside the browse root is refused (no filesystem write).
+    const bad = await fetch(base + "/api/projects/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "Evil", dir: tmpdir() }),
+    });
+    assert.equal(bad.status, 400, "create outside the root is refused");
+  } finally {
+    close();
+    if (prev === undefined) delete process.env.INSIGHT_FLOW_BROWSE_ROOT;
+    else process.env.INSIGHT_FLOW_BROWSE_ROOT = prev;
+    rmSync(root, { recursive: true, force: true });
   }
 });
 

@@ -4,7 +4,7 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { resolve, sep, dirname } from "node:path";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
@@ -19,6 +19,31 @@ import { readHubRegistry, assignHubPort } from "../core/global-config.js";
 /** N210 — where "New project" scaffolds live, so a non-coder never picks a path. */
 export function projectsHomeRoot(): string {
   return process.env.INSIGHT_FLOW_PROJECTS_HOME || resolve(homedir(), "insight-flow-projects");
+}
+
+/**
+ * N221 — the ceiling for the "New project" folder browser. The fs-list + create
+ * endpoints may only read/create inside this (realpath-checked), so the hub can
+ * never touch the filesystem outside it. Defaults to the user's home dir.
+ */
+export function browseRoot(): string {
+  return process.env.INSIGHT_FLOW_BROWSE_ROOT || homedir();
+}
+
+/**
+ * N221 — resolve `p` to its real path and require it to sit inside `root` (also
+ * real-pathed), defeating symlink escapes and `..` traversal. Returns the real
+ * path, or null if it escapes / doesn't exist. `p` must be an existing dir.
+ */
+function realDirWithinRoot(p: string, root: string): string | null {
+  try {
+    const realRoot = realpathSync(root);
+    const real = realpathSync(p);
+    if (real === realRoot || real.startsWith(realRoot + sep)) return real;
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 const MIME_JSON = "application/json; charset=utf-8";
@@ -160,6 +185,40 @@ function isLoopbackUrl(u: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** The hostname of a `Host` (host:port) or `Origin` (scheme://host:port) header
+ *  value, or "" if unparseable. */
+function headerHost(value: string | undefined): string {
+  if (!value) return "";
+  try {
+    return new URL(value.includes("://") ? value : "http://" + value).hostname;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * N221 review-fix — is this a trusted, same-machine same-origin request to a
+ * sensitive local endpoint (folder listing / project creation / start)? The
+ * server binds all interfaces and sets `Access-Control-Allow-Origin: *`, so a
+ * loopback `remoteAddress` alone does NOT keep a remote website out. A request
+ * is trusted only if:
+ *   - its `Host` header host is loopback — this defeats **DNS rebinding**, where
+ *     the socket lands on 127.0.0.1 but the browser sends the attacker's
+ *     hostname in `Host`;
+ *   - it carries no cross-origin `Origin` (a cross-origin browser fetch sends an
+ *     `Origin` whose host is not loopback); and
+ *   - its `Sec-Fetch-Site`, if present, is `same-origin`/`none` (not cross-site).
+ * The hub page itself sends a loopback Host + same-origin Origin, so it passes.
+ */
+function isTrustedLocalRequest(req: IncomingMessage): boolean {
+  if (!isLoopbackHost(headerHost(req.headers.host))) return false;
+  const origin = req.headers.origin;
+  if (origin && !isLoopbackHost(headerHost(origin))) return false;
+  const site = req.headers["sec-fetch-site"];
+  if (site && site !== "same-origin" && site !== "none") return false;
+  return true;
 }
 
 /** Hop-by-hop headers must not be forwarded by a proxy (RFC 7230 §6.1). */
@@ -511,6 +570,15 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: "register is localhost-only" }));
           return;
         }
+        // N221 review-fix — reject cross-origin browser POSTs (CSRF): register is
+        // called server-to-server by dashboards (Host loopback, no Origin) → this
+        // passes; a website POSTing here (to poison a registry url/path) is
+        // refused. registry.upsert keys on caller-supplied projectId.
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
+          return;
+        }
         if (config.standalone) {
           res.writeHead(503, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "Master running in standalone mode" }));
@@ -634,12 +702,70 @@ export async function startMasterServer(
         return;
       }
 
+      // N221 — GET /api/fs/list?dir=<abs> — the "New project" folder browser.
+      // Lists sub-directories of `dir` (default: the browse root). Loopback-only
+      // (reads the filesystem, server binds all interfaces) and confined to
+      // browseRoot() via realpath (no `..`/symlink escape). Directories only.
+      if (req.method === "GET" && url.pathname === "/api/fs/list") {
+        const remote = req.socket.remoteAddress ?? "";
+        if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "fs-list is localhost-only" }));
+          return;
+        }
+        // N221 review-fix — reject DNS-rebound / cross-origin browser reads
+        // (ACAO:* + all-interfaces bind would otherwise leak the home listing).
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
+          return;
+        }
+        const root = browseRoot();
+        const requested = url.searchParams.get("dir") || root;
+        const real = realDirWithinRoot(requested, root);
+        if (!real) {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(
+            JSON.stringify({ error: "Folder is outside the allowed root or does not exist" }),
+          );
+          return;
+        }
+        let entries: { name: string; isDir: true }[];
+        try {
+          // N221 review-fix — include symlinks that resolve to directories, so a
+          // symlinked project folder (common on dev machines) is still browsable.
+          entries = readdirSync(real, { withFileTypes: true })
+            .filter((d) => {
+              if (d.name.startsWith(".")) return false;
+              if (d.isDirectory()) return true;
+              if (d.isSymbolicLink()) {
+                try {
+                  return statSync(resolve(real, d.name)).isDirectory();
+                } catch {
+                  return false;
+                }
+              }
+              return false;
+            })
+            .map((d) => ({ name: d.name, isDir: true as const }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        } catch {
+          res.writeHead(500, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Could not read folder" }));
+          return;
+        }
+        const realRoot = realpathSync(root);
+        const parent = real === realRoot ? null : dirname(real);
+        res.writeHead(200, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ dir: real, root: realRoot, parent, entries }));
+        return;
+      }
+
       // POST /api/projects/create — N210: scaffold a new project from the home
-      // UI (non-coder onboarding). Creates <projects-home>/<slug>, runs init,
-      // and registers it. Path is confined to the projects-home root (no
-      // traversal). This endpoint writes to the filesystem, so — because the
-      // server binds all interfaces — it is gated to **loopback callers only**
-      // (the browser on this machine); a LAN peer gets 403.
+      // UI (non-coder onboarding). N221 — creates <chosen-dir>/<slug> where the
+      // chosen dir is confined to browseRoot() (realpath); runs init, registers
+      // it. This endpoint writes to the filesystem, so — because the server binds
+      // all interfaces — it is gated to **loopback callers only**; a LAN peer 403s.
       if (req.method === "POST" && url.pathname === "/api/projects/create") {
         const remote = req.socket.remoteAddress ?? "";
         if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
@@ -647,10 +773,17 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: "create-project is localhost-only" }));
           return;
         }
+        // N221 review-fix — reject DNS-rebound / cross-origin browser POSTs
+        // (CSRF — this writes to the filesystem + runs init).
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
+          return;
+        }
         const body = await readBody(req);
-        let parsed: { name?: unknown };
+        let parsed: { name?: unknown; dir?: unknown };
         try {
-          parsed = JSON.parse(body) as { name?: unknown };
+          parsed = JSON.parse(body) as { name?: unknown; dir?: unknown };
         } catch {
           res.writeHead(400, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "Invalid JSON" }));
@@ -662,12 +795,28 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: "Invalid name (use letters, numbers, spaces, _ or -)" }));
           return;
         }
-        const root = projectsHomeRoot();
-        const slug = name.trim().replace(/\s+/g, "-").toLowerCase();
-        const dir = resolve(root, slug);
-        if (dir !== root && !dir.startsWith(root + sep)) {
+        // N221 — the chosen parent folder (from the browser); default the browse
+        // root. Confined to browseRoot() by realpath, same as fs-list.
+        const root = browseRoot();
+        const chosenDir = typeof parsed.dir === "string" && parsed.dir ? parsed.dir : root;
+        const realParent = realDirWithinRoot(chosenDir, root);
+        if (!realParent) {
           res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Resolved path escapes the projects home" }));
+          res.end(
+            JSON.stringify({ error: "Chosen folder is outside the allowed root or missing" }),
+          );
+          return;
+        }
+        // slug is a single path segment (the name regex forbids `/` and `.`), so
+        // the target can't traverse out of the confined parent.
+        const slug = name.replace(/\s+/g, "-").toLowerCase();
+        const dir = resolve(realParent, slug);
+        // Confinement — `realParent + sep` collapses to `//` when realParent is
+        // the fs root, so normalize the prefix (handles INSIGHT_FLOW_BROWSE_ROOT=/).
+        const parentPrefix = realParent.endsWith(sep) ? realParent : realParent + sep;
+        if (!dir.startsWith(parentPrefix)) {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Resolved path escapes the chosen folder" }));
           return;
         }
         if (existsSync(resolve(dir, "taskflow.config.json"))) {
@@ -694,6 +843,13 @@ export async function startMasterServer(
       // N214 — GET /api/hub/projects — the registered projects + live status
       // (id, label, url, online, lastSeenAt). Consumed by the switcher (N215).
       if (req.method === "GET" && url.pathname === "/api/hub/projects") {
+        // N221 review-fix — same-origin only; ACAO:* would otherwise let any
+        // website read the project list (names + activity state).
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
+          return;
+        }
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ projects: registry.getAllPublic() }));
         return;
@@ -742,6 +898,13 @@ export async function startMasterServer(
       // online/lastSeenAt. Runs ONLY when called (switcher popup / manual
       // refresh) — there is no background timer.
       if (req.method === "POST" && url.pathname === "/api/hub/refresh") {
+        // N221 review-fix — same-origin only, so a website can't trigger the
+        // health-probe sweep / read the returned list.
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
+          return;
+        }
         // SSRF guard: only probe loopback dashboards. A registrant-controlled
         // url must never make the master fetch an arbitrary (internal) host.
         const entries = registry.getAll().filter((e) => e.url && isLoopbackUrl(e.url));
@@ -779,6 +942,13 @@ export async function startMasterServer(
         if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
           res.writeHead(403, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "start is localhost-only" }));
+          return;
+        }
+        // N221 review-fix — start spawns a process; reject DNS-rebound /
+        // cross-origin browser POSTs, same as fs-list/create.
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
           return;
         }
         const entry = registry.getById(startMatch[1]);
