@@ -781,9 +781,17 @@ export async function startMasterServer(
           return;
         }
         const body = await readBody(req);
-        let parsed: { name?: unknown; dir?: unknown };
+        let parsed: {
+          name?: unknown;
+          dir?: unknown;
+          lifecycle?: unknown;
+          activity?: unknown;
+          registerHub?: unknown;
+          editor?: unknown;
+          installFlows?: unknown;
+        };
         try {
-          parsed = JSON.parse(body) as { name?: unknown; dir?: unknown };
+          parsed = JSON.parse(body) as typeof parsed;
         } catch {
           res.writeHead(400, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "Invalid JSON" }));
@@ -824,9 +832,28 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: `A project already exists at ${dir}` }));
           return;
         }
+        // N222 — install options from the modal. `editor` is validated by
+        // initProject; `installFlows` is filtered to the known built-in flows so
+        // an arbitrary string can't be passed through.
+        const editor =
+          parsed.editor === "cursor" || parsed.editor === "all" || parsed.editor === "claude"
+            ? parsed.editor
+            : undefined;
+        const installFlows = Array.isArray(parsed.installFlows)
+          ? parsed.installFlows.filter((f): f is string => f === "composer-authoring")
+          : undefined;
+        let flowErrors: { id: string; error: string }[] = [];
         try {
           mkdirSync(dir, { recursive: true });
-          await initProject(dir, false, { yes: true });
+          const result = await initProject(dir, false, {
+            yes: true,
+            lifecycle: parsed.lifecycle === undefined ? undefined : parsed.lifecycle === true,
+            activity: parsed.activity === undefined ? undefined : parsed.activity === true,
+            registerHub: parsed.registerHub === true,
+            editor,
+            installFlows,
+          });
+          flowErrors = result.flowErrors;
         } catch (err) {
           res.writeHead(500, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: `Could not create project: ${(err as Error).message}` }));
@@ -836,7 +863,11 @@ export async function startMasterServer(
         const entry = registry.getById(id);
         if (entry) broadcast("project-update", registry.toPublicView(entry));
         res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ id, name, path: dir }));
+        // N222 review-fix (blocker 1) — the project was created, but surface any
+        // requested flow that failed to install (the modal shows the warning)
+        // instead of reporting an unqualified success.
+        const warnings = flowErrors.map((e) => `Flow "${e.id}" did not install: ${e.error}`);
+        res.end(JSON.stringify({ id, name, path: dir, warnings }));
         return;
       }
 
