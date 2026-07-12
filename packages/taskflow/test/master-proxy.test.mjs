@@ -42,7 +42,7 @@ function startStub() {
   });
 }
 
-test("master proxies a project dashboard under /p/<id>/* (HTML/asset/SSE + SSRF guard)", async () => {
+test("master proxies a project dashboard under /project/<projectId>/* (HTML/asset/SSE + SSRF guard)", async () => {
   const { server: stub, base: stubBase } = await startStub();
   const port = 6700 + Math.floor(Math.random() * 200);
   const master = "http://localhost:" + port;
@@ -61,22 +61,26 @@ test("master proxies a project dashboard under /p/<id>/* (HTML/asset/SSE + SSRF 
       body: JSON.stringify({ projectId: "proxy-evil", label: "evil", url: "http://example.com" }),
     });
 
-    // HTML shell: asset refs rewritten under the prefix + base hook injected.
-    const htmlRes = await fetch(master + "/p/proxy-ok/");
+    // HTML shell: asset refs rewritten under the canonical /project/ prefix + base hook injected.
+    const htmlRes = await fetch(master + "/project/proxy-ok/");
     assert.equal(htmlRes.status, 200, "shell should proxy 200");
     const html = await htmlRes.text();
-    assert.match(html, /<base href="\/p\/proxy-ok\/">/, "base tag injected");
-    assert.match(html, /window\.__IF_BASE__="\/p\/proxy-ok\/"/, "base hook injected");
-    assert.match(html, /src="\/p\/proxy-ok\/assets\/app\.js"/, "asset ref rewritten under prefix");
+    assert.match(html, /<base href="\/project\/proxy-ok\/">/, "base tag injected");
+    assert.match(html, /window\.__IF_BASE__="\/project\/proxy-ok\/"/, "base hook injected");
+    assert.match(
+      html,
+      /src="\/project\/proxy-ok\/assets\/app\.js"/,
+      "asset ref rewritten under prefix",
+    );
 
     // Asset passes through.
-    const assetRes = await fetch(master + "/p/proxy-ok/assets/app.js");
+    const assetRes = await fetch(master + "/project/proxy-ok/assets/app.js");
     assert.equal(assetRes.status, 200, "asset should proxy 200");
     assert.match(await assetRes.text(), /console\.log\('stub'\)/, "asset body proxied");
 
     // SSE streams incrementally.
     const controller = new AbortController();
-    const sseRes = await fetch(master + "/p/proxy-ok/sse", { signal: controller.signal });
+    const sseRes = await fetch(master + "/project/proxy-ok/sse", { signal: controller.signal });
     assert.match(
       sseRes.headers.get("content-type") || "",
       /text\/event-stream/,
@@ -90,7 +94,7 @@ test("master proxies a project dashboard under /p/<id>/* (HTML/asset/SSE + SSRF 
     await reader.cancel().catch(() => {});
 
     // SSRF guard: a non-loopback target is refused.
-    const evilRes = await fetch(master + "/p/proxy-evil/");
+    const evilRes = await fetch(master + "/project/proxy-evil/");
     assert.equal(evilRes.status, 403, "non-loopback proxy target must be refused");
   } finally {
     close();

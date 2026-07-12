@@ -306,6 +306,81 @@ test("N219: the per-project token never reaches any client surface", async () =>
   }
 });
 
+test("N220: /project/<projectId> proxies (by stable projectId); /p/<id> 301-redirects", async () => {
+  const port = 8500 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  // A stub 'project dashboard' that echoes the path it was asked for.
+  const stub = createServer((req, res) => {
+    res.writeHead(200, { "content-type": "text/plain" });
+    res.end("stub:" + req.url);
+  });
+  await new Promise((r) => stub.listen(0, "127.0.0.1", r));
+  const stubUrl = "http://127.0.0.1:" + stub.address().port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const { id } = await register(base, {
+      projectId: "proj-by-pid",
+      label: "proj-by-pid",
+      url: stubUrl,
+    });
+
+    // /project/<projectId>/ resolves by the stable projectId and proxies through.
+    const viaPid = await fetch(base + "/project/proj-by-pid/kanban");
+    assert.equal(viaPid.status, 200, "proxied via projectId");
+    assert.equal(await viaPid.text(), "stub:/kanban", "sub-path forwarded to the project");
+
+    // /p/<registry-id> 301-redirects to the canonical /project/<projectId>/ path.
+    const redir = await new Promise((resolve, reject) => {
+      const rq = httpGet(base + "/p/" + id + "/kanban?x=1", (r) => {
+        resolve({
+          status: r.statusCode,
+          location: r.headers.location,
+          cacheControl: r.headers["cache-control"],
+        });
+        r.resume();
+      });
+      rq.on("error", reject);
+    });
+    assert.equal(redir.status, 301, "old /p/<id> path is a permanent redirect");
+    assert.equal(
+      redir.location,
+      "/project/proj-by-pid/kanban?x=1",
+      "redirects to the canonical projectId path (query preserved)",
+    );
+    // N220 review-fix — the 301 is not cached (avoids a stale redirect on id reuse).
+    assert.equal(redir.cacheControl, "no-store", "301 is marked no-store");
+
+    // /project/<id>/hub/* control-plane stays blocked (N219 guard still applies).
+    const hub = await fetch(base + "/project/proj-by-pid/hub/reregister", { method: "POST" });
+    assert.equal(hub.status, 404, "/hub/* is not proxied");
+
+    // N220 review-fix — /p/<id>/hub/* 404s directly (does not 301-hop to it).
+    const legacyHub = await fetch(base + "/p/" + id + "/hub/reregister", {
+      method: "POST",
+      redirect: "manual",
+    });
+    assert.equal(legacyHub.status, 404, "legacy /p/<id>/hub/* is not redirected");
+  } finally {
+    close();
+    stub.close();
+  }
+});
+
+test("N220: the overview renders Running and Stopped sections + /project links", async () => {
+  const port = 8650 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    const html = await (await fetch(base + "/")).text();
+    assert.match(html, /'Running'/, "overview has a Running section");
+    assert.match(html, /'Stopped'/, "overview has a Stopped section");
+    assert.match(html, /section-label/, "section styling present");
+    assert.match(html, /\/project\/'/, "Open links use the /project/ path");
+  } finally {
+    close();
+  }
+});
+
 test("N219: the master never proxies a project's /hub/* control-plane routes", async () => {
   const port = 8300 + Math.floor(Math.random() * 150);
   const base = "http://localhost:" + port;

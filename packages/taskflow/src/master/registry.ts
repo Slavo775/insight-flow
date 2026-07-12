@@ -154,3 +154,13 @@ export function getAll(): MasterProjectEntry[] {
 export function getById(id: string): MasterProjectEntry | undefined {
   return registry.get(id);
 }
+
+/**
+ * N220 — resolve by `projectId` through the authoritative `projectIdIndex`
+ * rather than a `getAll().find(...)` scan, so a stale/duplicate entry that
+ * happens to share a `projectId` can't shadow the live one.
+ */
+export function getByProjectId(projectId: string): MasterProjectEntry | undefined {
+  const id = projectIdIndex.get(projectId);
+  return id ? registry.get(id) : undefined;
+}

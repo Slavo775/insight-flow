@@ -45,7 +45,7 @@ export function getOverviewHtml(projects: PublicProjectEntry[]): string {
     "      </div></div>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    '  <div id="grid" class="card-grid"></div>\n' +
+    '  <div id="grid"></div>\n' +
     "  <script>\n" +
     getScript(initialData) +
     "\n  </script>\n" +
@@ -71,6 +71,10 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .card-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     @media (max-width: 800px) { .card-grid { grid-template-columns: 1fr; } }
+    /* N220 — running vs stopped sections */
+    .section-label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 12px; }
+    .section-label:not(:first-child) { margin-top: 28px; }
+    .section-count { color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 500; }
     .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
     .proj-card-header { display: flex; justify-content: space-between; align-items: center; }
     .proj-label { font-size: 14px; font-weight: 600; color: var(--text); }
@@ -136,6 +140,7 @@ function getScript(initialData: string): string {
     var PROJECTS = ${initialData};
     var prevStatuses = {};
     var swReg = null; // N216 — set once the hub service worker is active
+    var startingIds = {}; // N220 review-fix — project ids with a Start in flight
     // N210 — create a new project from the home base (non-coder onboarding).
     function createProject() {
       var name = prompt('Name your new project:');
@@ -255,20 +260,53 @@ function getScript(initialData: string): string {
       // ids are registry UUIDs; sanitize defensively before the JS-string context.
       var sid = String(p.id).replace(/[^A-Za-z0-9_-]/g, '');
       if (p.online) {
-        return '<a href="/p/' + encodeURIComponent(p.id) + '/" class="card-btn">Open →</a>';
+        // N220 — open via the STABLE /project/<projectId>/ path (survives restarts).
+        return '<a href="/project/' + encodeURIComponent(p.projectId) + '/" class="card-btn">Open →</a>';
       }
       return '<button class="card-btn start-btn" onclick="startProject(\\'' + sid + '\\')">Start →</button>';
     }
+    // N220 review-fix — the "Starting…" state is tracked in startingIds (not just
+    // on the clicked button), so it survives re-renders: applyStartingState()
+    // re-disables the button after any render, preventing a lost state + an
+    // accidental double-start.
+    function applyStartingState() {
+      for (var sid in startingIds) {
+        if (!startingIds[sid]) continue;
+        var card = document.querySelector('[data-id="' + sid + '"]');
+        var b = card && card.querySelector('.start-btn');
+        if (b) { b.textContent = 'Starting…'; b.disabled = true; }
+      }
+    }
+    function clearStarting(id) {
+      delete startingIds[id];
+      var card = document.querySelector('[data-id="' + id + '"]');
+      var b = card && card.querySelector('.start-btn');
+      if (b) { b.textContent = 'Start →'; b.disabled = false; }
+    }
     function startProject(id) {
-      var btn = window.event && window.event.target;
-      if (btn) { btn.textContent = 'Starting…'; btn.disabled = true; }
+      startingIds[id] = true;
+      applyStartingState();
+      // Safety net: never leave a button stuck on "Starting…". The initiating
+      // tab navigates away on success; but a tab that only ever got a 202 (a
+      // concurrent start deduped by the server) or a start that fails to register
+      // would otherwise keep the flag. Clear it after the server's ~15s deadline.
+      setTimeout(function() { if (startingIds[id]) clearStarting(id); }, 20000);
       fetch('/api/hub/projects/' + encodeURIComponent(id) + '/start', { method: 'POST' })
         .then(function(r) { return r.json(); })
         .then(function(d) {
-          if (d && d.url) { window.location.href = '/p/' + encodeURIComponent(id) + '/'; }
-          else { if (btn) { btn.textContent = 'Start →'; btn.disabled = false; } alert('Could not start: ' + ((d && d.error) || 'unknown')); }
+          if (d && d.url) {
+            // N220 — navigate to the stable /project/<projectId>/ path.
+            var proj = PROJECTS.filter(function(p) { return p.id === id; })[0];
+            var pid = proj ? proj.projectId : id;
+            window.location.href = '/project/' + encodeURIComponent(pid) + '/';
+          } else if (d && d.starting) {
+            // A spawn is already in flight (server dedup) — keep it disabled.
+          } else {
+            clearStarting(id);
+            alert('Could not start: ' + ((d && d.error) || 'unknown'));
+          }
         })
-        .catch(function() { if (btn) { btn.textContent = 'Start →'; btn.disabled = false; } });
+        .catch(function() { clearStarting(id); });
     }
     function refreshProjects() {
       fetch('/api/hub/refresh', { method: 'POST' })
@@ -339,13 +377,25 @@ function getScript(initialData: string): string {
         '</div>';
     }
 
-    // N215 — online projects first so the switcher surfaces what you can open now.
-    function displayOrder() {
-      return PROJECTS.slice().sort(function(a, b) { return (b.online ? 1 : 0) - (a.online ? 1 : 0); });
+    // N220 — group projects into Running (online) and Stopped sections. Each
+    // section is hidden when empty; a card moves between them on the next render
+    // once its online state flips.
+    function sectionHtml(title, list) {
+      if (!list.length) return '';
+      return '<div class="section-label">' + title +
+        '<span class="section-count">' + list.length + '</span></div>' +
+        '<div class="card-grid">' + list.map(renderCard).join('') + '</div>';
+    }
+    function renderSections() {
+      var online = PROJECTS.filter(function(p) { return p.online; });
+      var offline = PROJECTS.filter(function(p) { return !p.online; });
+      document.getElementById('grid').innerHTML =
+        sectionHtml('Running', online) + sectionHtml('Stopped', offline);
+      updateSubtitle();
+      applyStartingState();
     }
     function renderAll() {
-      document.getElementById('grid').innerHTML = displayOrder().map(renderCard).join('');
-      updateSubtitle();
+      renderSections();
       snapshotStatuses();
     }
 
@@ -357,28 +407,33 @@ function getScript(initialData: string): string {
     }
 
     // N71: project cards auto-decay when a project goes stale. Re-render
-    // all cards every 30s so stale claudeStatus highlights drop off
-    // even when no other project pushes an update.
-    // TODO: full innerHTML replace drops in-flight CSS transitions / hover
-    // states. Fine for static colors today; if a pulsing border or other
-    // animation is added to .status-active, switch to per-card targeted
-    // updates or skip the rerender when no card crossed the 60s threshold.
+    // every 30s so stale claudeStatus highlights drop off even when no other
+    // project pushes an update. N220 — re-renders both sections (full innerHTML
+    // replace; fine for static colors at this scale).
     function refreshStaleCards() {
-      document.getElementById('grid').innerHTML = displayOrder().map(renderCard).join('');
-      updateSubtitle();
+      renderSections();
     }
 
+    // N220 review-fix — targeted per-card update keeps other cards' DOM intact
+    // (an in-flight Start button, hover, text selection, activity tooltips). Only
+    // rebuild both sections when a card is new, its node is missing, or it
+    // crosses the online<->offline boundary (an actual move between sections).
     function upsertProject(p) {
       var idx = PROJECTS.findIndex(function(x) { return x.id === p.id; });
-      if (idx >= 0) {
-        PROJECTS[idx] = p;
-        var existing = document.querySelector('[data-id="' + p.id + '"]');
-        if (existing) { existing.outerHTML = renderCard(p); }
+      var wasOnline = idx >= 0 ? PROJECTS[idx].online : null;
+      if (idx >= 0) { PROJECTS[idx] = p; } else { PROJECTS.push(p); }
+      // The project is up now — clear any in-flight Start flag (covers a tab that
+      // didn't navigate, e.g. one that only got a 202), so a later Stop doesn't
+      // render a wrongly-disabled "Starting…" button.
+      if (p.online && startingIds[p.id]) { delete startingIds[p.id]; }
+      var node = document.querySelector('[data-id="' + p.id + '"]');
+      if (idx < 0 || node === null || wasOnline !== p.online) {
+        renderSections();
       } else {
-        PROJECTS.push(p);
-        document.getElementById('grid').insertAdjacentHTML('beforeend', renderCard(p));
+        node.outerHTML = renderCard(p);
+        updateSubtitle();
+        applyStartingState();
       }
-      updateSubtitle();
     }
 
     function snapshotStatuses() {
@@ -443,7 +498,7 @@ function getScript(initialData: string): string {
           notifSettings.statuses[s.currentTaskStatus] !== false &&
           NOTIF_WATCHED.indexOf(s.currentTaskStatus) >= 0) {
         var title = p.label + ': ' + s.currentTaskId + ' → ' + s.currentTaskStatus;
-        showHubNotification(title, { url: '/p/' + encodeURIComponent(p.id) + '/' });
+        showHubNotification(title, { url: '/project/' + encodeURIComponent(p.projectId) + '/' });
         playNotifSound(s.currentTaskStatus);
       }
       if (!prevStatuses[p.id]) prevStatuses[p.id] = {};
