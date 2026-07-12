@@ -1,7 +1,7 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { homedir } from "node:os";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import type {
   BatchUiEntry,
   BatchUiRunningProcess,
@@ -16,6 +16,72 @@ export function getGlobalConfigDir(): string {
   // redirects the files owned by this module (hub.json / batch-ui.json), not the
   // master lock/config which resolve `~/.insight-flow` via homedir() directly.
   return process.env.INSIGHT_FLOW_CONFIG_DIR || join(homedir(), ".insight-flow");
+}
+
+// N225 — a running dashboard advertises its ACTUAL listening port here, keyed by
+// the project root path, so `insight-flow log-event` (a separate process, and
+// which only knows `config.server.port`) can POST `/log/events` to the real port
+// even when the hub started the dashboard on a different/assigned port. Without
+// this, the agent-status badge stays "idle" and lifecycle events never arrive.
+
+function serverPortsDir(): string {
+  return join(getGlobalConfigDir(), "ports");
+}
+function serverPortFile(projectRoot: string): string {
+  const key = createHash("sha1").update(resolve(projectRoot)).digest("hex").slice(0, 16);
+  return join(serverPortsDir(), key + ".json");
+}
+function pidAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    // ESRCH → no such process; EPERM → exists but not ours (treat as alive).
+    return (err as NodeJS.ErrnoException).code === "EPERM";
+  }
+}
+
+/** N225 — record this dashboard's real port for a project root. */
+export function writeServerPortPointer(projectRoot: string, port: number): void {
+  try {
+    mkdirSync(serverPortsDir(), { recursive: true });
+    writeFileSync(
+      serverPortFile(projectRoot),
+      JSON.stringify({
+        port,
+        pid: process.pid,
+        projectRoot: resolve(projectRoot),
+        startedAt: new Date().toISOString(),
+      }),
+    );
+  } catch {
+    /* best-effort — never break the server on a pointer write */
+  }
+}
+
+/** N225 — the live dashboard port for a project root, or null (missing/stale). */
+export function readServerPortPointer(projectRoot: string): number | null {
+  try {
+    const d = JSON.parse(readFileSync(serverPortFile(projectRoot), "utf-8")) as {
+      port?: number;
+      pid?: number;
+    };
+    if (typeof d.port !== "number") return null;
+    // Ignore a stale pointer whose writer is gone (e.g. killed -9 without cleanup).
+    if (typeof d.pid === "number" && !pidAlive(d.pid)) return null;
+    return d.port;
+  } catch {
+    return null;
+  }
+}
+
+/** N225 — remove the pointer on dashboard shutdown. */
+export function clearServerPortPointer(projectRoot: string): void {
+  try {
+    rmSync(serverPortFile(projectRoot), { force: true });
+  } catch {
+    /* best-effort */
+  }
 }
 
 // ── N213: the persistent master-hub registry (~/.insight-flow/hub.json) ──────

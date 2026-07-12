@@ -194,5 +194,9 @@ export {
   migrateBatchUiIntoHub,
   readBatchUiRegistry,
   writeBatchUiRegistry,
+  // N225 — the dashboard's real-port pointer (log-event delivery).
+  writeServerPortPointer,
+  readServerPortPointer,
+  clearServerPortPointer,
 } from "./core/global-config.js";
 export type { HubProjectEntry, HubRegistry } from "./core/types.js";

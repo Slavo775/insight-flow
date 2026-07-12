@@ -20,6 +20,9 @@ const {
   assignHubPort,
   migrateBatchUiIntoHub,
   writeBatchUiRegistry,
+  writeServerPortPointer,
+  readServerPortPointer,
+  clearServerPortPointer,
 } = await import("../dist/index.js");
 
 test("hub registry: empty read, upsert, idempotency, port assignment", () => {
@@ -88,4 +91,17 @@ test("hub registry: one malformed entry is dropped, not the whole list", () => {
   const entries = readHubRegistry();
   assert.equal(entries.length, 1, "only the valid entry survives");
   assert.equal(entries[0].id, "good", "kept the good one");
+});
+
+test("N225: server-port pointer round-trips per project root (log-event delivery)", () => {
+  const rootA = "/tmp/if-n225-proj-a";
+  const rootB = "/tmp/if-n225-proj-b";
+  assert.equal(readServerPortPointer(rootA), null, "unset root → null");
+  writeServerPortPointer(rootA, 6007);
+  writeServerPortPointer(rootB, 6008);
+  assert.equal(readServerPortPointer(rootA), 6007, "reads A's real port");
+  assert.equal(readServerPortPointer(rootB), 6008, "distinct per project root");
+  clearServerPortPointer(rootA);
+  assert.equal(readServerPortPointer(rootA), null, "cleared → null");
+  assert.equal(readServerPortPointer(rootB), 6008, "clearing A leaves B");
 });
