@@ -46,6 +46,26 @@ export function getOverviewHtml(projects: PublicProjectEntry[]): string {
     "    </div>\n" +
     "  </div>\n" +
     '  <div id="grid"></div>\n' +
+    // N221 — New project modal (folder browser + name). Hidden until opened.
+    '  <div id="np-overlay" class="np-overlay">\n' +
+    '    <div class="np-modal" role="dialog" aria-label="New project">\n' +
+    '      <div class="np-title">New project</div>\n' +
+    '      <div class="np-field">\n' +
+    '        <label class="np-label">Folder</label>\n' +
+    '        <div class="np-path" id="np-path"></div>\n' +
+    '        <div class="np-list" id="np-list"></div>\n' +
+    "      </div>\n" +
+    '      <div class="np-field">\n' +
+    '        <label class="np-label" for="np-name">Project name</label>\n' +
+    '        <input class="np-input" id="np-name" type="text" placeholder="my-project" maxlength="60" autocomplete="off">\n' +
+    "      </div>\n" +
+    '      <div class="np-status" id="np-status"></div>\n' +
+    '      <div class="np-actions">\n' +
+    '        <button class="np-btn" onclick="npClose()">Cancel</button>\n' +
+    '        <button class="np-btn np-btn-primary" id="np-create" onclick="npCreate()">Create</button>\n' +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
     "  <script>\n" +
     getScript(initialData) +
     "\n  </script>\n" +
@@ -130,7 +150,30 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .settings-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; cursor: pointer; color: var(--text); }
     .settings-row input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
     .settings-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
-    .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }`;
+    .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+    /* N221 — New project modal */
+    .np-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500; align-items: center; justify-content: center; padding: 16px; }
+    .np-overlay.open { display: flex; }
+    .np-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; width: min(520px, 94vw); max-height: 86vh; overflow: auto; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+    .np-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+    .np-field { margin-bottom: 14px; }
+    .np-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; }
+    .np-path { font-size: 11px; color: var(--text-muted); word-break: break-all; margin-bottom: 6px; }
+    .np-list { border: 1px solid var(--border); border-radius: 6px; max-height: 220px; overflow: auto; background: var(--bg); }
+    .np-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border); }
+    .np-item:last-child { border-bottom: none; }
+    .np-item:hover { background: var(--surface); }
+    .np-item-empty { padding: 10px; font-size: 12px; color: var(--text-muted); }
+    .np-input { width: 100%; box-sizing: border-box; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 13px; }
+    .np-input:focus { outline: none; border-color: var(--accent); }
+    .np-status { font-size: 12px; min-height: 16px; margin-bottom: 12px; color: var(--text-muted); }
+    .np-status.err { color: var(--red); }
+    .np-status.ok { color: var(--green); }
+    .np-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .np-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit; }
+    .np-btn:hover { border-color: var(--accent); }
+    .np-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .np-btn:disabled { opacity: 0.5; cursor: default; }`;
 
 function getScript(initialData: string): string {
   return `
@@ -141,19 +184,82 @@ function getScript(initialData: string): string {
     var prevStatuses = {};
     var swReg = null; // N216 — set once the hub service worker is active
     var startingIds = {}; // N220 review-fix — project ids with a Start in flight
-    // N210 — create a new project from the home base (non-coder onboarding).
+    // N221 — create a new project via an in-app modal with a server-side folder
+    // browser (no prompt/alert). npDir tracks the browsed folder (a server
+    // realpath, confined to the browse root); Create scaffolds npDir/<slug>.
+    var npDir = null;
+    function trimSlash(s) {
+      while (s.length > 1 && s.charAt(s.length - 1) === '/') s = s.slice(0, -1);
+      return s;
+    }
+    function setNpStatus(msg, cls) {
+      var s = document.getElementById('np-status');
+      if (s) { s.textContent = msg; s.className = 'np-status' + (cls ? ' ' + cls : ''); }
+    }
     function createProject() {
-      var name = prompt('Name your new project:');
-      if (!name) return;
+      var ov = document.getElementById('np-overlay');
+      if (ov) ov.classList.add('open');
+      var nameEl = document.getElementById('np-name');
+      if (nameEl) nameEl.value = '';
+      // N221 review-fix — reset browse state so a failed re-open can't leave a
+      // stale npDir (which Create would otherwise target).
+      npDir = null;
+      var path = document.getElementById('np-path');
+      if (path) path.textContent = '';
+      var list = document.getElementById('np-list');
+      if (list) list.innerHTML = '';
+      setNpStatus('', '');
+      npBrowse(null);
+    }
+    function npClose() {
+      var ov = document.getElementById('np-overlay');
+      if (ov) ov.classList.remove('open');
+    }
+    function npBrowse(dir) {
+      var qs = dir ? ('?dir=' + encodeURIComponent(dir)) : '';
+      fetch('/api/fs/list' + qs)
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.error) { setNpStatus(d.error, 'err'); return; }
+          npDir = d.dir;
+          var path = document.getElementById('np-path');
+          if (path) path.textContent = d.dir;
+          var html = '';
+          if (d.parent) {
+            html += '<div class="np-item" data-dir="' + escHtml(d.parent) + '">\\u2b06 ..</div>';
+          }
+          var e = d.entries || [];
+          var basePath = d.dir === '/' ? '' : trimSlash(d.dir);
+          for (var i = 0; i < e.length; i++) {
+            var full = basePath + '/' + e[i].name;
+            html += '<div class="np-item" data-dir="' + escHtml(full) + '">\\uD83D\\uDCC1 ' + escHtml(e[i].name) + '</div>';
+          }
+          if (!e.length && !d.parent) {
+            html += '<div class="np-item-empty">No sub-folders here.</div>';
+          }
+          var list = document.getElementById('np-list');
+          if (list) list.innerHTML = html;
+        })
+        .catch(function() { setNpStatus('Could not list folders.', 'err'); });
+    }
+    function npCreate() {
+      var name = ((document.getElementById('np-name') || {}).value || '').trim();
+      if (!name) { setNpStatus('Enter a project name.', 'err'); return; }
+      if (!npDir) { setNpStatus('Pick a folder first.', 'err'); return; }
+      var btn = document.getElementById('np-create');
+      if (btn) btn.disabled = true;
+      setNpStatus('Creating\\u2026', '');
       fetch('/api/projects/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name })
-      }).then(function (r) { return r.json(); }).then(function (d) {
-        if (d.error) { alert('Could not create project: ' + d.error); return; }
-        alert('Created "' + d.name + '" at:\\n' + d.path + '\\n\\nOpen it: run  insight-flow  in that folder.');
-        location.reload();
-      }).catch(function (e) { alert('Error: ' + e.message); });
+        body: JSON.stringify({ name: name, dir: npDir })
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        // N221 review-fix — on success keep the button disabled (we reload
+        // shortly), so a second click can't re-POST and flip green -> 409 red.
+        if (d.error) { if (btn) btn.disabled = false; setNpStatus(d.error, 'err'); return; }
+        setNpStatus('Created at ' + d.path, 'ok');
+        setTimeout(function() { npClose(); location.reload(); }, 900);
+      }).catch(function() { if (btn) btn.disabled = false; setNpStatus('Could not create project.', 'err'); });
     }
     var NOTIF_WATCHED = ['implemented','approved','fix-needed','merged','changes-requested'];
     var notifSettings = { statuses: {}, sound: true, muteFocused: false, mutedProjects: [] };
@@ -599,6 +705,23 @@ function getScript(initialData: string): string {
         .then(function(reg) { swReg = reg; })
         .catch(function() {});
     }
+    // N221 — folder-browser clicks (delegated, so the re-rendered list keeps
+    // working), backdrop click, and Escape all interact with the modal.
+    var npListEl = document.getElementById('np-list');
+    if (npListEl) {
+      npListEl.addEventListener('click', function(e) {
+        var item = e.target && e.target.closest ? e.target.closest('.np-item') : null;
+        if (item && item.getAttribute('data-dir') !== null) npBrowse(item.getAttribute('data-dir'));
+      });
+    }
+    var npOverlayEl = document.getElementById('np-overlay');
+    if (npOverlayEl) {
+      npOverlayEl.addEventListener('click', function(e) { if (e.target === npOverlayEl) npClose(); });
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && npOverlayEl && npOverlayEl.classList.contains('open')) npClose();
+    });
+
     renderAll();
     loadNotifSettings();
     requestNotifPermission();
