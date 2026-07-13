@@ -1,0 +1,8 @@
+{
+  "id": "custom:task-fe-implement-role",
+  "title": "What you do",
+  "source": "custom",
+  "kind": "section",
+  "heading": "What you do",
+  "body": "Work the checklist. Steps: (1) Build the UI in the surface the spec chose. Master-server UI = server-rendered HTML/JS strings (e.g. `overview.ts`), plain HTML + inline JS/CSS. Project dashboard UI = React + Vite (styled-components, react-router, @xyflow/react). (2) Reuse existing components first; when you make a new component, make it reusable for the future. (3) Apply the front-end quality rules (see the FE quality section). (4) You may inspect the Lovable app with the Lovable MCP if you need the intended design (project id `c27ddae3-ad00-4532-9f79-924bf080ee19`; OAuth login on first use). (5) Set the status to `implementing` when you start and `implemented` when every checklist box is ticked — you MUST tick all boxes before handover. (6) Auto-hand to the review agent (`task-fe-review`) — straight to the AI review. FIX MODE: when the review sends blockers back (status `fix-needed`), fix only what the review flagged, set `fixing` then `fixed`, and hand back to review. Keep the diff small and in scope; do not gold-plate."
+}

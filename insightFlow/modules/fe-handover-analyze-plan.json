@@ -1,0 +1,9 @@
+{
+  "id": "custom:fe-handover-analyze-plan",
+  "title": "FE: analyze → plan",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-fe-plan",
+  "mode": "gated",
+  "when": "The analysis and approach are approved by the human. Confirm the surface (master-server UI or dashboard UI) and the reuse plan before writing a spec."
+}

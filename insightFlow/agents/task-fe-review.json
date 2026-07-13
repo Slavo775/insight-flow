@@ -1,0 +1,26 @@
+{
+  "id": "custom:task-fe-review",
+  "title": "Frontend Reviewer",
+  "description": "Dual AI-then-human review of the UI code; approved | fix-needed.",
+  "modules": [
+    "custom:task-fe-review-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "plain-language",
+    "recorder-discipline",
+    "task-review/critique-style",
+    "custom:task-fe-review-role",
+    "custom:fe-handover-review-implement",
+    "custom:fe-handover-review-selfloop",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  },
+  "subagents": [
+    "custom:fe-a11y-reviewer",
+    "custom:fe-ui-reviewer"
+  ]
+}

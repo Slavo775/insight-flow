@@ -1,0 +1,102 @@
+{
+  "id": "custom:frontend",
+  "title": "Frontend Flow",
+  "description": "UI work flow: analyze a request against the code and the user's Lovable app (via the Lovable MCP), resolve master-server UI vs project dashboard UI and new vs rework, plan into a reuse-first checklist, implement with FE quality discipline (performance, WCAG, semantic HTML, CSS hygiene), and review the UI code in a dual AI-then-human pass. Ends in done, human-gated.",
+  "agents": [
+    "custom:task-fe-analyze",
+    "custom:task-fe-plan",
+    "custom:task-fe-implement",
+    "custom:task-fe-review"
+  ],
+  "flow": [
+    {
+      "from": "custom:task-fe-analyze",
+      "to": "custom:task-fe-plan"
+    },
+    {
+      "from": "custom:task-fe-plan",
+      "to": "custom:task-fe-implement",
+      "on": "ready"
+    },
+    {
+      "from": "custom:task-fe-implement",
+      "to": "custom:task-fe-review",
+      "on": "implemented"
+    },
+    {
+      "from": "custom:task-fe-implement",
+      "to": "custom:task-fe-review",
+      "on": "fixed"
+    },
+    {
+      "from": "custom:task-fe-review",
+      "to": "custom:task-fe-implement",
+      "on": "fix-needed"
+    },
+    {
+      "from": "custom:task-fe-review",
+      "to": "custom:task-fe-review",
+      "on": "ai-approved"
+    },
+    {
+      "from": "custom:task-fe-review",
+      "to": "done",
+      "on": "approved"
+    }
+  ],
+  "install": [
+    "activity",
+    "custom:mcp-lovable"
+  ],
+  "states": [],
+  "statuses": [
+    {
+      "id": "in-progress",
+      "title": "Analyzing"
+    },
+    {
+      "id": "ready",
+      "title": "Ready"
+    },
+    {
+      "id": "implementing",
+      "title": "Implementing"
+    },
+    {
+      "id": "implemented",
+      "title": "Implemented"
+    },
+    {
+      "id": "reviewing",
+      "title": "Reviewing"
+    },
+    {
+      "id": "ai-approved",
+      "title": "AI approved"
+    },
+    {
+      "id": "approved",
+      "title": "Approved"
+    },
+    {
+      "id": "fix-needed",
+      "title": "Fix needed"
+    },
+    {
+      "id": "fixing",
+      "title": "Fixing"
+    },
+    {
+      "id": "fixed",
+      "title": "Fixed"
+    },
+    {
+      "id": "done",
+      "title": "Done",
+      "terminal": true
+    }
+  ],
+  "entryAgents": [
+    "custom:task-fe-analyze"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "custom:fe-handover-implement-review",
+  "title": "FE: implement → review",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-fe-review",
+  "on": "implemented",
+  "mode": "auto",
+  "when": "The build is done and all checklist boxes are ticked. Go straight to the AI review (this also applies after a fix pass, status fixed)."
+}

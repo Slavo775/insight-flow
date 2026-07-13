@@ -1,0 +1,10 @@
+{
+  "id": "custom:fe-handover-review-implement",
+  "title": "FE: review → implement (fix)",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-fe-implement",
+  "on": "fix-needed",
+  "mode": "gated",
+  "when": "The AI or the human found blockers. Send them back to the implementer. This is a cycle back-edge — never auto."
+}
