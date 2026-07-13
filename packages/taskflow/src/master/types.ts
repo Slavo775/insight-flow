@@ -32,7 +32,29 @@ export interface MasterProjectEntry {
   projectId: string;
   label: string;
   url: string;
+  /** Absolute project dir, when known — lets the hub reconcile by path (N214). */
+  path?: string;
+  /** Per-project auth token issued at register; required on update/status/live. */
+  token: string;
+  /** Live: a liveness connection is open, or the last on-demand probe succeeded. */
+  online: boolean;
   registeredAt: string;
+  lastSeenAt: string;
+  state: MasterProjectState;
+}
+
+/**
+ * N219 — the client-safe view of a project entry. The per-project `token` (and
+ * the server-only `url`/`path`) are deliberately omitted: the browser only ever
+ * needs the stable `projectId` to build a `/project/<id>` link, plus display
+ * state. Every client sink (overview page data, `/api/hub/projects`, SSE frames)
+ * serializes this, never the full `MasterProjectEntry`.
+ */
+export interface PublicProjectEntry {
+  id: string;
+  projectId: string;
+  label: string;
+  online: boolean;
   lastSeenAt: string;
   state: MasterProjectState;
 }

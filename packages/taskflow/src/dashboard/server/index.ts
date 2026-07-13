@@ -1,4 +1,4 @@
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { createServer, get as httpGet, type IncomingMessage, type ServerResponse } from "node:http";
 import {
   readFileSync,
   unlinkSync,
@@ -52,6 +52,7 @@ import {
   restoreMcpServer,
 } from "../../agents/emit.js";
 import { resolveProjectRoot } from "../../core/paths.js";
+import { writeServerPortPointer, clearServerPortPointer } from "../../core/global-config.js";
 import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
 import { loadUserRegistries } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
@@ -323,8 +324,8 @@ async function waitForMaster(port: number): Promise<boolean> {
   return false;
 }
 
-function pushStatusToMaster(masterUrl: string, id: string, status: string): void {
-  void fetch(`${masterUrl}/api/projects/${id}/status`, {
+function pushStatusToMaster(masterUrl: string, id: string, token: string, status: string): void {
+  void fetch(`${masterUrl}/api/projects/${id}/status?token=${encodeURIComponent(token)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
@@ -337,17 +338,18 @@ async function registerWithMaster(
   projectId: string,
   label: string,
   projectUrl: string,
-): Promise<string | null> {
+  path?: string,
+): Promise<{ id: string; token: string } | null> {
   try {
     const res = await fetch(`${masterUrl}/api/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ projectId, label, url: projectUrl }),
+      body: JSON.stringify({ projectId, label, url: projectUrl, path }),
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
-    const data = (await res.json()) as { id?: string };
-    return data.id ?? null;
+    const data = (await res.json()) as { id?: string; token?: string };
+    return data.id && data.token ? { id: data.id, token: data.token } : null;
   } catch {
     return null;
   }
@@ -356,19 +358,91 @@ async function registerWithMaster(
 async function pushStateToMaster(
   masterUrl: string,
   id: string,
+  token: string,
   state: Record<string, unknown>,
 ): Promise<number> {
   try {
-    const res = await fetch(`${masterUrl}/api/projects/${id}/update`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(state),
-      signal: AbortSignal.timeout(3000),
-    });
+    const res = await fetch(
+      `${masterUrl}/api/projects/${id}/update?token=${encodeURIComponent(token)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state),
+        signal: AbortSignal.timeout(3000),
+      },
+    );
     return res.status;
   } catch {
     return 0;
   }
+}
+
+/**
+ * N214 — hold a passive liveness connection to the master so it can mark this
+ * project online while the connection is open and offline the moment it drops.
+ * Reconnects with capped backoff; stops when a re-register mints a new token.
+ */
+function holdLiveness(
+  masterUrl: string,
+  id: string,
+  token: string,
+  reregister: () => Promise<boolean>,
+): void {
+  // N219 review-fix — claim the active slot and close any prior connection, so
+  // there is never more than one open `/api/hub/live`. A loop is superseded once
+  // a newer holdLiveness() bumps the epoch (or the token changes); superseded
+  // loops must NOT reconnect. Keyed on epoch, not just token, because a
+  // reconciled re-register returns the SAME token — token equality alone would
+  // fail to supersede the old loop.
+  const myEpoch = ++livenessEpoch;
+  if (activeLivenessReq) {
+    try {
+      activeLivenessReq.destroy();
+    } catch {
+      /* already gone */
+    }
+    activeLivenessReq = null;
+  }
+  const superseded = (): boolean => myEpoch !== livenessEpoch || masterToken !== token;
+  let attempts = 0;
+  const reconnect = (): void => {
+    if (superseded()) return;
+    attempts += 1;
+    const delay = Math.min(30000, 1000 * 2 ** Math.min(attempts, 5));
+    setTimeout(connect, delay).unref();
+  };
+  const connect = (): void => {
+    if (superseded()) return;
+    const liveUrl = `${masterUrl}/api/hub/live?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}`;
+    let settled = false;
+    const done = (): void => {
+      if (settled) return;
+      settled = true;
+      reconnect();
+    };
+    const req = httpGet(liveUrl, (res) => {
+      if (res.statusCode === 200) {
+        attempts = 0;
+      } else if (res.statusCode === 401) {
+        // N218 — the master no longer knows us (it restarted with a fresh
+        // registry / new tokens). Re-register instead of retrying a dead token;
+        // on success a new liveness loop starts and this one is superseded.
+        settled = true;
+        res.resume();
+        void reregister().then((ok) => {
+          if (!ok) reconnect();
+        });
+        return;
+      }
+      res.on("data", () => {});
+      res.on("end", done);
+      res.on("error", done);
+    });
+    activeLivenessReq = req;
+    req.on("error", done);
+    req.setTimeout(0);
+  };
+  connect();
 }
 
 function buildProjectState(
@@ -415,6 +489,18 @@ function buildProjectState(
 }
 
 let masterId: string | null = null;
+let masterToken: string | null = null;
+// N219 — exposed so the `POST /hub/reregister` route (the master's boot
+// handshake, Diagram 1) can trigger a real re-register. Null until master
+// integration is set up, or when running standalone.
+let masterReregister: (() => Promise<boolean>) | null = null;
+// N219 review-fix (blocker 1) — guarantee at most ONE liveness connection is
+// ever open. Each holdLiveness() claims a new epoch and tears down the prior
+// open request; older-epoch loops stop instead of reconnecting. Without this,
+// repeatedly triggering re-register (e.g. via /hub/reregister) leaked one open
+// `/api/hub/live` connection + heartbeat per call on both project and master.
+let livenessEpoch = 0;
+let activeLivenessReq: ReturnType<typeof httpGet> | null = null;
 
 async function setupMasterIntegration(
   config: TaskflowConfig,
@@ -448,41 +534,93 @@ async function setupMasterIntegration(
     }
   }
 
-  // Register with master
+  // Register with master (N214 — send our project path so the hub can reconcile
+  // a seeded/bulk-ui entry by path, and receive our per-project token).
   const projectUrl = `http://localhost:${serverPort}`;
-  masterId = await registerWithMaster(
+  let projectPath: string | undefined;
+  try {
+    projectPath = resolveProjectRoot();
+  } catch {
+    projectPath = undefined;
+  }
+  const reg = await registerWithMaster(
     masterUrl,
     config.projectName,
     config.projectName,
     projectUrl,
+    projectPath,
   );
-  if (!masterId) {
+  if (!reg) {
     console.log(
       "  [master] Could not register with master at " + masterUrl + " — overview disabled",
     );
     return null;
   }
+  masterId = reg.id;
+  masterToken = reg.token;
 
   console.log("  [master] Registered with " + masterUrl + " (id: " + masterId.slice(0, 8) + "...)");
 
-  // Push initial state
-  const state = buildProjectState(config, activity);
-  void pushStateToMaster(masterUrl, masterId, state);
-  pushStatusToMaster(masterUrl, masterId, "idle");
-
-  // Return push function to call on file-change
-  return async function pushOnChange(): Promise<void> {
-    if (!masterId) return;
-    const s = buildProjectState(config, activity);
-    const status = await pushStateToMaster(masterUrl, masterId, s);
-    if (status === 401) {
-      masterId = await registerWithMaster(
+  // N218 — re-register when the master stops recognizing us (it restarted): a
+  // fresh register, restart the liveness loop, re-push state, so a running
+  // dashboard comes back online after a master restart.
+  //
+  // N219 review-fix (blocker 1) — single-flight + throttle. Concurrent callers
+  // (the liveness-401 path AND the /hub/reregister route can both fire) share
+  // one in-flight registration; a successful re-register within the cooldown
+  // short-circuits to `true` (the token is already fresh + a liveness loop is
+  // live), so hammering /hub/reregister no longer spawns a register + liveness
+  // connection per call.
+  let reregisterInFlight: Promise<boolean> | null = null;
+  let lastReregisterOkAt = 0;
+  const REREGISTER_COOLDOWN_MS = 5000;
+  const reregister = async (): Promise<boolean> => {
+    if (reregisterInFlight) return reregisterInFlight;
+    if (Date.now() - lastReregisterOkAt < REREGISTER_COOLDOWN_MS) return true;
+    reregisterInFlight = (async () => {
+      const r = await registerWithMaster(
         masterUrl,
         config.projectName,
         config.projectName,
         projectUrl,
+        projectPath,
       );
-      if (masterId) await pushStateToMaster(masterUrl, masterId, s);
+      if (!r) return false;
+      masterId = r.id;
+      masterToken = r.token;
+      holdLiveness(masterUrl, masterId, masterToken, reregister);
+      void pushStateToMaster(masterUrl, masterId, masterToken, buildProjectState(config, activity));
+      return true;
+    })();
+    try {
+      const ok = await reregisterInFlight;
+      if (ok) lastReregisterOkAt = Date.now();
+      return ok;
+    } finally {
+      reregisterInFlight = null;
+    }
+  };
+
+  // N219 — let the `/hub/reregister` route drive this same closure.
+  masterReregister = reregister;
+
+  // N214 — hold the passive liveness connection (online while open).
+  holdLiveness(masterUrl, masterId, masterToken, reregister);
+
+  // Push initial state
+  const state = buildProjectState(config, activity);
+  void pushStateToMaster(masterUrl, masterId, masterToken, state);
+  pushStatusToMaster(masterUrl, masterId, masterToken, "idle");
+
+  // Return push function to call on file-change
+  return async function pushOnChange(): Promise<void> {
+    if (!masterId || !masterToken) return;
+    const s = buildProjectState(config, activity);
+    const status = await pushStateToMaster(masterUrl, masterId, masterToken, s);
+    if (status === 401) {
+      if (await reregister()) {
+        await pushStateToMaster(masterUrl, masterId!, masterToken!, s);
+      }
     }
   };
 }
@@ -536,6 +674,63 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+
+    // N214/N218 — GET /health: liveness + identity, always readable (localhost).
+    // The master's startup handshake probes this WITHOUT our token (a fresh
+    // master doesn't know it yet), so it must always answer with who we are; the
+    // `authed` flag just notes whether the caller's token matched.
+    if (url.pathname === "/health") {
+      const token = url.searchParams.get("token");
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(
+        JSON.stringify({
+          status: "ok",
+          projectName: config.projectName,
+          authed: !masterToken || token === masterToken,
+        }),
+      );
+      return;
+    }
+
+    // N219 — POST /hub/reregister: the master's boot handshake (Diagram 1) asks
+    // this project to register itself. We run the real re-register (single-flight
+    // + throttled, restarts liveness); a standalone project — or one whose master
+    // integration never came up — declines. Either way the master takes no further
+    // action; online state comes from the real register + the liveness channel,
+    // never a fabricated mark.
+    //
+    // N219 review-fix (blocker 2) — this is a control-plane endpoint for the
+    // master (a server-to-server Node fetch), never for a browser. Reject:
+    //   - non-loopback callers (`req.socket.remoteAddress`), and
+    //   - any request carrying browser fetch-metadata (`Origin` /
+    //     `Sec-Fetch-Site`) — a CSRF POST from a page the user has open would
+    //     otherwise pass the loopback gate. The master's Node fetch sends
+    //     neither header, so the real handshake is unaffected.
+    // The master proxy is separately blocked from forwarding `/hub/*` (so a LAN
+    // peer can't reach this via `/p/<id>/hub/reregister`).
+    if (url.pathname === "/hub/reregister" && req.method === "POST") {
+      const remote = req.socket.remoteAddress ?? "";
+      if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
+        res.writeHead(403, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "reregister is localhost-only" }));
+        return;
+      }
+      const secFetchSite = req.headers["sec-fetch-site"];
+      if (req.headers.origin || (secFetchSite && secFetchSite !== "none")) {
+        res.writeHead(403, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "cross-site request refused" }));
+        return;
+      }
+      if (config.master?.standalone || !masterReregister) {
+        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ declined: true }));
+        return;
+      }
+      void masterReregister();
+      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
 
     // N85: React dashboard (Vite build in dist/dashboard), served on the same
     // port. Hashed assets at /assets/*; the SPA shell is served by the catch-all
@@ -1277,7 +1472,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
                 at: statusAt,
                 latestEventId: event.id,
               });
-              if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+              if (masterId && masterToken) pushStatusToMaster(masterUrl, masterId, masterToken, to);
             }
           }
 
@@ -1483,7 +1678,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           at: new Date().toISOString(),
           latestEventId: synthetic.id,
         });
-        if (masterId) pushStatusToMaster(masterUrl, masterId, to);
+        if (masterId && masterToken) pushStatusToMaster(masterUrl, masterId, masterToken, to);
       }
     }
 
@@ -1507,7 +1702,13 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
   const watcher = watchWorkDir(workDir, scheduleFileChangeBroadcast);
 
+  // N225 — advertise the ACTUAL port so `log-event` (a separate process that
+  // only knows config.server.port) posts /log/events here even when the hub
+  // started us on an assigned port. Keyed by project root; cleared on shutdown.
+  const portPointerRoot = resolveProjectRoot();
+
   server.listen(serverPort, () => {
+    writeServerPortPointer(portPointerRoot, serverPort);
     const engineStatus = configEnabled ? "Activity engine ON" : "Activity engine OFF";
     console.log("\n  Taskflow Dashboard\n");
     console.log("  Local:   http://localhost:" + serverPort);
@@ -1545,17 +1746,20 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     }
   });
 
-  process.on("SIGINT", () => {
+  let shuttingDown = false;
+  const shutdown = (): void => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     activity.stop();
     watcher.close();
     if (debounceTimer) clearTimeout(debounceTimer);
     transport.close();
-    try {
-      if (existsSync(activityLogPath)) unlinkSync(activityLogPath);
-    } catch {
-      // ignore
-    }
+    clearServerPortPointer(portPointerRoot); // N225
+    // N225 — keep the activity log on shutdown (the engine trims it to the tail
+    // on next start), so the feed survives a hub-driven restart on a new port.
     server.close();
     process.exit(0);
-  });
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown); // N225 — the hub stops projects via SIGTERM
 }

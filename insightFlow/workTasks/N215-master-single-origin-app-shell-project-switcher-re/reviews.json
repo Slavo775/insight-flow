@@ -1,0 +1,43 @@
+{
+  "taskId": "N215",
+  "reviews": [
+    {
+      "startedAt": "2026-07-11T07:18:58.185Z",
+      "endedAt": "2026-07-11T07:22:05.773Z",
+      "verdict": "fix-needed",
+      "comment": "1 small blocker: base-awareness (the critical deliverable) misses /sounds/ in notifications.ts — absolute path breaks sounds under the proxy; wrap with apiUrl (1-2 lines). 5 non-blocking (systemic register-auth/Start-cwd surface, start alreadyRunning false-positive, start→navigate race, switcher onclick raw id, no base.ts unit test). Core works + tested: 335/335.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-11T07:23:51.606Z",
+        "endedAt": "2026-07-11T07:28:58.911Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/notifications.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts"
+        ],
+        "comment": "Fixed blocker (sounds base-aware via apiUrl) + all non-blockings: register now loopback-only (closes the systemic SSRF/start-cwd root cause across N212/N214/N215 — no separate task needed), start uses entry.online for already-running + waits for registration before returning, switcher onclick id sanitized. NB5 (base.ts unit test) deferred — browser module not importable by node harness; verified via bundle + proxy E2E. 335/335.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-11T07:39:37.386Z",
+      "endedAt": "2026-07-11T07:43:28.009Z",
+      "verdict": "approved",
+      "comment": "Re-review: blocker fixed (sounds base-aware) + all NBs closed — register now loopback-only (systemic SSRF/start-cwd root cause closed at source; legit registration still works, 335/335), start uses entry.online + waits for registration, id sanitized. NB5 deferred (browser module). Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-11T07:49:57.218Z",
+      "endedAt": "2026-07-11T07:53:20.083Z",
+      "verdict": "approved",
+      "comment": "Human approved: single-origin hub shell + switcher. Merge into dashboard-improvements.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

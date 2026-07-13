@@ -1,6 +1,6 @@
-import type { MasterProjectEntry } from "./types.js";
+import type { PublicProjectEntry } from "./types.js";
 
-export function getOverviewHtml(projects: MasterProjectEntry[]): string {
+export function getOverviewHtml(projects: PublicProjectEntry[]): string {
   const initialData = JSON.stringify(projects)
     .replace(/</g, "\\u003c")
     .replace(/>/g, "\\u003e")
@@ -11,6 +11,13 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     '  <meta charset="UTF-8">\n' +
     '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
     "  <title>Insight Flow — Overview</title>\n" +
+    // N217 — installable PWA: manifest, theme, and icon on the master origin.
+    '  <link rel="manifest" href="/manifest.webmanifest">\n' +
+    '  <meta name="theme-color" content="#0a0a0a">\n' +
+    '  <link rel="icon" type="image/svg+xml" href="/icon.svg">\n' +
+    '  <link rel="apple-touch-icon" href="/icon.svg">\n' +
+    '  <meta name="apple-mobile-web-app-capable" content="yes">\n' +
+    '  <meta name="apple-mobile-web-app-title" content="insight-flow">\n' +
     "  <style>\n" +
     CSS +
     "\n  </style>\n" +
@@ -21,6 +28,7 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     '      <p class="subtitle" id="subtitle">Connecting...</p>\n' +
     "    </div>\n" +
     '    <div class="top-bar-actions">\n' +
+    '      <button class="settings-btn" id="refresh-btn" onclick="refreshProjects()" title="Re-check which projects are running (on-demand healthcheck)">&#8635; Refresh</button>\n' +
     '      <button class="settings-btn" id="new-project-btn" onclick="createProject()" title="Create a new project (scaffolds it and registers it here)">+ New project</button>\n' +
     '      <div class="settings-wrap"><button class="settings-btn" id="settings-btn" onclick="toggleSettings()" title="Notification settings">&#9881;</button>\n' +
     '      <div class="settings-popover" id="settings-popover">\n' +
@@ -37,10 +45,45 @@ export function getOverviewHtml(projects: MasterProjectEntry[]): string {
     "      </div></div>\n" +
     "    </div>\n" +
     "  </div>\n" +
-    '  <div id="grid" class="card-grid"></div>\n' +
+    '  <div id="grid"></div>\n' +
+    // N221 — New project modal (folder browser + name). Hidden until opened.
+    '  <div id="np-overlay" class="np-overlay">\n' +
+    '    <div class="np-modal" role="dialog" aria-label="New project">\n' +
+    '      <div class="np-title">New project</div>\n' +
+    '      <div class="np-field">\n' +
+    '        <label class="np-label">Folder</label>\n' +
+    '        <div class="np-path" id="np-path"></div>\n' +
+    '        <div class="np-list" id="np-list"></div>\n' +
+    "      </div>\n" +
+    '      <div class="np-field">\n' +
+    '        <label class="np-label" for="np-name">Project name</label>\n' +
+    '        <input class="np-input" id="np-name" type="text" placeholder="my-project" maxlength="60" autocomplete="off">\n' +
+    "      </div>\n" +
+    // N222 — install options (what to scaffold into the new project).
+    '      <div class="np-field">\n' +
+    '        <label class="np-label">Install</label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-lifecycle" checked> Task lifecycle events <span class="np-hint">zero tokens</span></label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-activity"> Agent activity tracking <span class="np-hint">~50 tokens/turn</span></label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-composer"> Composer-authoring flow <span class="np-hint">build custom agents/flows</span></label>\n' +
+    '        <label class="np-opt"><input type="checkbox" id="np-registerhub" checked> Register with this hub</label>\n' +
+    '        <label class="np-opt np-opt-row">Editor\n' +
+    '          <select id="np-editor" class="np-select" onchange="npEditorChanged()"><option value="claude">Claude</option><option value="cursor">Cursor</option><option value="all">Both</option></select>\n' +
+    "        </label>\n" +
+    '        <div class="np-hint" id="np-editor-note"></div>\n' +
+    "      </div>\n" +
+    '      <div class="np-status" id="np-status"></div>\n' +
+    '      <div class="np-actions">\n' +
+    '        <button class="np-btn" onclick="npClose()">Cancel</button>\n' +
+    '        <button class="np-btn np-btn-primary" id="np-create" onclick="npCreate()">Create</button>\n' +
+    "      </div>\n" +
+    "    </div>\n" +
+    "  </div>\n" +
     "  <script>\n" +
     getScript(initialData) +
     "\n  </script>\n" +
+    // N225 — the shared notification client (also injected into proxied project
+    // pages) is the single notification authority across the hub.
+    '  <script src="/hub-notify.js"></script>\n' +
     "</body>\n</html>"
   );
 }
@@ -63,9 +106,15 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .card-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     @media (max-width: 800px) { .card-grid { grid-template-columns: 1fr; } }
+    /* N220 — running vs stopped sections */
+    .section-label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 12px; }
+    .section-label:not(:first-child) { margin-top: 28px; }
+    .section-count { color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 500; }
     .proj-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
     .proj-card-header { display: flex; justify-content: space-between; align-items: center; }
     .proj-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .mute-btn { background: none; border: none; cursor: pointer; font-size: 13px; line-height: 1; padding: 0 2px; opacity: 0.75; }
+    .mute-btn:hover { opacity: 1; }
     .proj-task { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
     .proj-task-id { font-size: 11px; font-weight: 700; color: var(--accent); }
     .proj-task-title { font-size: 12px; color: var(--text); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -103,6 +152,9 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .claude-status-awaiting-permission { background: #3b1111; color: var(--red); }
     .proj-footer { display: flex; justify-content: flex-end; }
     .open-link { font-size: 11px; color: var(--accent); text-decoration: none; }
+    .card-btn { display: inline-block; background: var(--surface); border: 1px solid var(--border); color: var(--accent); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; line-height: 1; text-decoration: none; }
+    .card-btn:hover { border-color: var(--accent); }
+    .card-btn:disabled { opacity: 0.6; cursor: default; color: var(--text-muted); }
     .open-link:hover { text-decoration: underline; }
     .settings-wrap { position: relative; }
     .settings-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; line-height: 1; }
@@ -113,7 +165,36 @@ const CSS = `    *, *::before, *::after { box-sizing: border-box; margin: 0; pad
     .settings-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; cursor: pointer; color: var(--text); }
     .settings-row input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
     .settings-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
-    .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }`;
+    .settings-hint { font-size: 11px; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+    /* N221 — New project modal */
+    .np-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500; align-items: center; justify-content: center; padding: 16px; }
+    .np-overlay.open { display: flex; }
+    .np-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; width: min(520px, 94vw); max-height: 86vh; overflow: auto; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+    .np-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+    .np-field { margin-bottom: 14px; }
+    .np-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; }
+    .np-path { font-size: 11px; color: var(--text-muted); word-break: break-all; margin-bottom: 6px; }
+    .np-list { border: 1px solid var(--border); border-radius: 6px; max-height: 220px; overflow: auto; background: var(--bg); }
+    .np-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border); }
+    .np-item:last-child { border-bottom: none; }
+    .np-item:hover { background: var(--surface); }
+    .np-item-empty { padding: 10px; font-size: 12px; color: var(--text-muted); }
+    .np-input { width: 100%; box-sizing: border-box; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 13px; }
+    .np-input:focus { outline: none; border-color: var(--accent); }
+    .np-status { font-size: 12px; min-height: 16px; margin-bottom: 12px; color: var(--text-muted); }
+    .np-status.err { color: var(--red); }
+    .np-status.ok { color: var(--green); }
+    .np-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .np-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: inherit; }
+    .np-btn:hover { border-color: var(--accent); }
+    .np-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .np-btn:disabled { opacity: 0.5; cursor: default; }
+    /* N222 — install options */
+    .np-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 0; color: var(--text); cursor: pointer; }
+    .np-opt input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
+    .np-opt-row { justify-content: space-between; }
+    .np-hint { color: var(--text-muted); font-size: 10px; }
+    .np-select { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--text); font-family: inherit; font-size: 12px; }`;
 
 function getScript(initialData: string): string {
   return `
@@ -122,22 +203,164 @@ function getScript(initialData: string): string {
     // outer literal terminates. Use single quotes for any inline samples.
     var PROJECTS = ${initialData};
     var prevStatuses = {};
-    // N210 — create a new project from the home base (non-coder onboarding).
+    var swReg = null; // N216 — set once the hub service worker is active
+    var startingIds = {}; // N220 review-fix — project ids with a Start in flight
+    // N221 — create a new project via an in-app modal with a server-side folder
+    // browser (no prompt/alert). npDir tracks the browsed folder (a server
+    // realpath, confined to the browse root); Create scaffolds npDir/<slug>.
+    var npDir = null;
+    function trimSlash(s) {
+      while (s.length > 1 && s.charAt(s.length - 1) === '/') s = s.slice(0, -1);
+      return s;
+    }
+    function setNpStatus(msg, cls) {
+      var s = document.getElementById('np-status');
+      if (s) { s.textContent = msg; s.className = 'np-status' + (cls ? ' ' + cls : ''); }
+    }
     function createProject() {
-      var name = prompt('Name your new project:');
-      if (!name) return;
+      var ov = document.getElementById('np-overlay');
+      if (ov) ov.classList.add('open');
+      var nameEl = document.getElementById('np-name');
+      if (nameEl) nameEl.value = '';
+      // N221 review-fix — reset browse state so a failed re-open can't leave a
+      // stale npDir (which Create would otherwise target).
+      npDir = null;
+      var path = document.getElementById('np-path');
+      if (path) path.textContent = '';
+      var list = document.getElementById('np-list');
+      if (list) list.innerHTML = '';
+      // N222 review-fix — reset the install options to their defaults on each
+      // open (so a prior Cursor selection / toggled boxes don't persist).
+      function setChecked(id, val) {
+        var el = document.getElementById(id);
+        if (el) { el.checked = val; el.disabled = false; el.removeAttribute('data-prev'); }
+      }
+      setChecked('np-lifecycle', true);
+      setChecked('np-activity', false);
+      setChecked('np-composer', false);
+      setChecked('np-registerhub', true);
+      var ed = document.getElementById('np-editor');
+      if (ed) ed.value = 'claude';
+      setNpStatus('', '');
+      npEditorChanged();
+      npBrowse(null);
+    }
+    function npClose() {
+      var ov = document.getElementById('np-overlay');
+      if (ov) ov.classList.remove('open');
+    }
+    // N222 review-fix (blocker 2) — lifecycle, activity, and the composer-authoring
+    // flow are Claude-shaped (their hooks/commands emit under .claude/). For a
+    // cursor-only project they wouldn't apply, so disable + uncheck them (and note
+    // why) instead of letting the selections silently do nothing. "Both" keeps
+    // Claude, so they stay enabled.
+    function npEditorChanged() {
+      var ed = document.getElementById('np-editor');
+      var cursorOnly = !!(ed && ed.value === 'cursor');
+      var ids = ['np-lifecycle', 'np-activity', 'np-composer'];
+      for (var i = 0; i < ids.length; i++) {
+        var el = document.getElementById(ids[i]);
+        if (!el) continue;
+        if (cursorOnly) {
+          // Remember the state before disabling (only on the enabled->disabled
+          // edge), so switching back to Claude restores the user's choices.
+          if (!el.disabled) el.setAttribute('data-prev', el.checked ? '1' : '0');
+          el.checked = false;
+          el.disabled = true;
+        } else {
+          el.disabled = false;
+          var prev = el.getAttribute('data-prev');
+          if (prev !== null) { el.checked = prev === '1'; el.removeAttribute('data-prev'); }
+        }
+      }
+      var note = document.getElementById('np-editor-note');
+      if (note) note.textContent = cursorOnly
+        ? 'Lifecycle, activity, and the composer flow are Claude-only.'
+        : '';
+    }
+    function npBrowse(dir) {
+      var qs = dir ? ('?dir=' + encodeURIComponent(dir)) : '';
+      fetch('/api/fs/list' + qs)
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.error) { setNpStatus(d.error, 'err'); return; }
+          npDir = d.dir;
+          var path = document.getElementById('np-path');
+          if (path) path.textContent = d.dir;
+          var html = '';
+          if (d.parent) {
+            html += '<div class="np-item" data-dir="' + escHtml(d.parent) + '">\\u2b06 ..</div>';
+          }
+          var e = d.entries || [];
+          var basePath = d.dir === '/' ? '' : trimSlash(d.dir);
+          for (var i = 0; i < e.length; i++) {
+            var full = basePath + '/' + e[i].name;
+            html += '<div class="np-item" data-dir="' + escHtml(full) + '">\\uD83D\\uDCC1 ' + escHtml(e[i].name) + '</div>';
+          }
+          if (!e.length && !d.parent) {
+            html += '<div class="np-item-empty">No sub-folders here.</div>';
+          }
+          var list = document.getElementById('np-list');
+          if (list) list.innerHTML = html;
+        })
+        .catch(function() { setNpStatus('Could not list folders.', 'err'); });
+    }
+    function npCreate() {
+      var name = ((document.getElementById('np-name') || {}).value || '').trim();
+      if (!name) { setNpStatus('Enter a project name.', 'err'); return; }
+      if (!npDir) { setNpStatus('Pick a folder first.', 'err'); return; }
+      var btn = document.getElementById('np-create');
+      if (btn) btn.disabled = true;
+      setNpStatus('Creating\\u2026', '');
+      // N222 — gather the install options from the modal.
+      function chk(id) { var el = document.getElementById(id); return !!(el && el.checked); }
+      var editorEl = document.getElementById('np-editor');
+      var installFlows = chk('np-composer') ? ['composer-authoring'] : [];
       fetch('/api/projects/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name })
-      }).then(function (r) { return r.json(); }).then(function (d) {
-        if (d.error) { alert('Could not create project: ' + d.error); return; }
-        alert('Created "' + d.name + '" at:\\n' + d.path + '\\n\\nOpen it: run  insight-flow  in that folder.');
-        location.reload();
-      }).catch(function (e) { alert('Error: ' + e.message); });
+        body: JSON.stringify({
+          name: name,
+          dir: npDir,
+          lifecycle: chk('np-lifecycle'),
+          activity: chk('np-activity'),
+          registerHub: chk('np-registerhub'),
+          editor: editorEl ? editorEl.value : 'claude',
+          installFlows: installFlows
+        })
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        // N221 review-fix — on success keep the button disabled (we reload
+        // shortly), so a second click can't re-POST and flip green -> 409 red.
+        if (d.error) { if (btn) btn.disabled = false; setNpStatus(d.error, 'err'); return; }
+        // N222 review-fix (blocker 1) — the project was created, but a requested
+        // flow may have failed to install; show that instead of a plain success.
+        if (d.warnings && d.warnings.length) {
+          setNpStatus('Created at ' + d.path + ' \\u2014 ' + d.warnings.join('; '), 'err');
+          setTimeout(function() { npClose(); location.reload(); }, 3000);
+          return;
+        }
+        setNpStatus('Created at ' + d.path, 'ok');
+        setTimeout(function() { npClose(); location.reload(); }, 900);
+      }).catch(function() { if (btn) btn.disabled = false; setNpStatus('Could not create project.', 'err'); });
     }
     var NOTIF_WATCHED = ['implemented','approved','fix-needed','merged','changes-requested'];
-    var notifSettings = { statuses: {}, sound: true, muteFocused: false };
+    var notifSettings = { statuses: {}, sound: true, muteFocused: false, mutedProjects: [] };
+
+    // N216 — per-project mute (stored under the master origin with the other
+    // notif settings). Muted projects fire no hub notification/sound.
+    function isMuted(id) {
+      return !!(notifSettings.mutedProjects && notifSettings.mutedProjects.indexOf(id) >= 0);
+    }
+    function toggleMuteProject(id) {
+      if (window.event) window.event.stopPropagation();
+      if (!notifSettings.mutedProjects) notifSettings.mutedProjects = [];
+      var i = notifSettings.mutedProjects.indexOf(id);
+      if (i >= 0) notifSettings.mutedProjects.splice(i, 1);
+      else notifSettings.mutedProjects.push(id);
+      try { localStorage.setItem('tf-notif-settings', JSON.stringify(notifSettings)); } catch(e) {}
+      var el = document.querySelector('[data-mute="' + String(id).replace(/[^A-Za-z0-9_-]/g, '') + '"]');
+      if (el) el.textContent = isMuted(id) ? '🔕' : '🔔';
+    }
 
     function escHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -218,8 +441,71 @@ function getScript(initialData: string): string {
       return '<div class="proj-task">' + header + '<div class="proj-activity-feed">' + rows + '</div></div>';
     }
 
+    // N215 — the overview doubles as the launcher/switcher: open an online
+    // project through the single-origin proxy (/p/<id>/) in the same tab, or
+    // start an offline one first, then go.
+    function openControlHtml(p) {
+      // ids are registry UUIDs; sanitize defensively before the JS-string context.
+      var sid = String(p.id).replace(/[^A-Za-z0-9_-]/g, '');
+      if (p.online) {
+        // N220 — open via the STABLE /project/<projectId>/ path (survives restarts).
+        return '<a href="/project/' + encodeURIComponent(p.projectId) + '/" class="card-btn">Open →</a>';
+      }
+      return '<button class="card-btn start-btn" onclick="startProject(\\'' + sid + '\\')">Start →</button>';
+    }
+    // N220 review-fix — the "Starting…" state is tracked in startingIds (not just
+    // on the clicked button), so it survives re-renders: applyStartingState()
+    // re-disables the button after any render, preventing a lost state + an
+    // accidental double-start.
+    function applyStartingState() {
+      for (var sid in startingIds) {
+        if (!startingIds[sid]) continue;
+        var card = document.querySelector('[data-id="' + sid + '"]');
+        var b = card && card.querySelector('.start-btn');
+        if (b) { b.textContent = 'Starting…'; b.disabled = true; }
+      }
+    }
+    function clearStarting(id) {
+      delete startingIds[id];
+      var card = document.querySelector('[data-id="' + id + '"]');
+      var b = card && card.querySelector('.start-btn');
+      if (b) { b.textContent = 'Start →'; b.disabled = false; }
+    }
+    function startProject(id) {
+      startingIds[id] = true;
+      applyStartingState();
+      // Safety net: never leave a button stuck on "Starting…". The initiating
+      // tab navigates away on success; but a tab that only ever got a 202 (a
+      // concurrent start deduped by the server) or a start that fails to register
+      // would otherwise keep the flag. Clear it after the server's ~15s deadline.
+      setTimeout(function() { if (startingIds[id]) clearStarting(id); }, 20000);
+      fetch('/api/hub/projects/' + encodeURIComponent(id) + '/start', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d && d.url) {
+            // N220 — navigate to the stable /project/<projectId>/ path.
+            var proj = PROJECTS.filter(function(p) { return p.id === id; })[0];
+            var pid = proj ? proj.projectId : id;
+            window.location.href = '/project/' + encodeURIComponent(pid) + '/';
+          } else if (d && d.starting) {
+            // A spawn is already in flight (server dedup) — keep it disabled.
+          } else {
+            clearStarting(id);
+            alert('Could not start: ' + ((d && d.error) || 'unknown'));
+          }
+        })
+        .catch(function() { clearStarting(id); });
+    }
+    function refreshProjects() {
+      fetch('/api/hub/refresh', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { if (d && d.projects) { PROJECTS = d.projects; renderAll(); } })
+        .catch(function() {});
+    }
+
     function renderCard(p) {
       var s = p.state || {};
+      var mid = String(p.id).replace(/[^A-Za-z0-9_-]/g, ''); // sanitized id for attrs/onclick
       // N71: gate every claudeStatus-driven visual on liveness. A project
       // that hasn't checked in for 60s renders neutral, regardless of the
       // last-pushed status — registry never clears the value on disconnect,
@@ -267,18 +553,37 @@ function getScript(initialData: string): string {
       return '<div class="proj-card' + (statusCls ? ' ' + statusCls : '') + '" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
           '<span class="proj-label">' + escHtml(p.label) + '</span>' +
-          (claudeBadgeHtml ? '<div style="display:flex;gap:6px;align-items:center">' + claudeBadgeHtml + '</div>' : '') +
+          '<div style="display:flex;gap:6px;align-items:center">' +
+            (claudeBadgeHtml ? claudeBadgeHtml : '') +
+            '<button class="mute-btn" title="Mute notifications for this project" data-mute="' + mid + '" onclick="toggleMuteProject(\\'' + mid + '\\')">' + (isMuted(p.id) ? '🔕' : '🔔') + '</button>' +
+          '</div>' +
         '</div>' +
         taskHtml +
         '<div class="proj-counts">' + renderCounts(s.taskCounts || {}) + '</div>' +
         (activityHtml ? activityHtml : '') +
-        '<div class="proj-footer"><a href="' + escHtml(p.url) + '" class="open-link" target="_blank">Open dashboard →</a></div>' +
+        '<div class="proj-footer">' + openControlHtml(p) + '</div>' +
         '</div>';
     }
 
-    function renderAll() {
-      document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
+    // N220 — group projects into Running (online) and Stopped sections. Each
+    // section is hidden when empty; a card moves between them on the next render
+    // once its online state flips.
+    function sectionHtml(title, list) {
+      if (!list.length) return '';
+      return '<div class="section-label">' + title +
+        '<span class="section-count">' + list.length + '</span></div>' +
+        '<div class="card-grid">' + list.map(renderCard).join('') + '</div>';
+    }
+    function renderSections() {
+      var online = PROJECTS.filter(function(p) { return p.online; });
+      var offline = PROJECTS.filter(function(p) { return !p.online; });
+      document.getElementById('grid').innerHTML =
+        sectionHtml('Running', online) + sectionHtml('Stopped', offline);
       updateSubtitle();
+      applyStartingState();
+    }
+    function renderAll() {
+      renderSections();
       snapshotStatuses();
     }
 
@@ -290,28 +595,33 @@ function getScript(initialData: string): string {
     }
 
     // N71: project cards auto-decay when a project goes stale. Re-render
-    // all cards every 30s so stale claudeStatus highlights drop off
-    // even when no other project pushes an update.
-    // TODO: full innerHTML replace drops in-flight CSS transitions / hover
-    // states. Fine for static colors today; if a pulsing border or other
-    // animation is added to .status-active, switch to per-card targeted
-    // updates or skip the rerender when no card crossed the 60s threshold.
+    // every 30s so stale claudeStatus highlights drop off even when no other
+    // project pushes an update. N220 — re-renders both sections (full innerHTML
+    // replace; fine for static colors at this scale).
     function refreshStaleCards() {
-      document.getElementById('grid').innerHTML = PROJECTS.map(renderCard).join('');
-      updateSubtitle();
+      renderSections();
     }
 
+    // N220 review-fix — targeted per-card update keeps other cards' DOM intact
+    // (an in-flight Start button, hover, text selection, activity tooltips). Only
+    // rebuild both sections when a card is new, its node is missing, or it
+    // crosses the online<->offline boundary (an actual move between sections).
     function upsertProject(p) {
       var idx = PROJECTS.findIndex(function(x) { return x.id === p.id; });
-      if (idx >= 0) {
-        PROJECTS[idx] = p;
-        var existing = document.querySelector('[data-id="' + p.id + '"]');
-        if (existing) { existing.outerHTML = renderCard(p); }
+      var wasOnline = idx >= 0 ? PROJECTS[idx].online : null;
+      if (idx >= 0) { PROJECTS[idx] = p; } else { PROJECTS.push(p); }
+      // The project is up now — clear any in-flight Start flag (covers a tab that
+      // didn't navigate, e.g. one that only got a 202), so a later Stop doesn't
+      // render a wrongly-disabled "Starting…" button.
+      if (p.online && startingIds[p.id]) { delete startingIds[p.id]; }
+      var node = document.querySelector('[data-id="' + p.id + '"]');
+      if (idx < 0 || node === null || wasOnline !== p.online) {
+        renderSections();
       } else {
-        PROJECTS.push(p);
-        document.getElementById('grid').insertAdjacentHTML('beforeend', renderCard(p));
+        node.outerHTML = renderCard(p);
+        updateSubtitle();
+        applyStartingState();
       }
-      updateSubtitle();
     }
 
     function snapshotStatuses() {
@@ -325,9 +635,50 @@ function getScript(initialData: string): string {
       }
     }
 
+    // N216 — one service worker for the whole hub. Prefer registration.show-
+    // Notification (fires while the hub is backgrounded; basis for the N217 PWA),
+    // falling back to a page Notification. We keep the OS notification silent and
+    // play our own bundled mp3 from the master origin instead.
+    function showHubNotification(title, data) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      var opts = { silent: true, data: data || {} };
+      // Use the SW only once it's actually active (swReg set on registration).
+      // Falling back to a page Notification immediately avoids a silent no-op if
+      // SW registration ever fails (navigator.serviceWorker.ready never rejects).
+      if (swReg) {
+        try { swReg.showNotification(title, opts); return; } catch(e) {}
+      }
+      try { new Notification(title, opts); } catch(e) {}
+    }
+    function playTone(status) {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        var ctx = new AC();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = (status === 'awaiting-permission' || status === 'permission-required') ? 660 : 440;
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+        osc.start(); osc.stop(ctx.currentTime + 0.25);
+      } catch(e) {}
+    }
+    function playNotifSound(status) {
+      if (notifSettings.sound === false) return;
+      if (notifSettings.muteFocused && !document.hidden) return;
+      var src = (status === 'awaiting-permission' || status === 'permission-required')
+        ? '/sounds/permission-alert.mp3' : '/sounds/idle-ping.mp3';
+      // Prefer the bundled mp3 (from the master origin); fall back to a Web-Audio
+      // beep if it can't play (missing/empty file, autoplay policy).
+      try { new Audio(src).play().catch(function() { playTone(status); }); }
+      catch(e) { playTone(status); }
+    }
+
     function checkStatusTransitions(p) {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       if (notifSettings.muteFocused && !document.hidden) return;
+      if (notifSettings.mutedProjects && notifSettings.mutedProjects.indexOf(p.id) >= 0) return;
       var s = p.state || {};
       if (!s.currentTaskId || !s.currentTaskStatus) return;
       var prev = (prevStatuses[p.id] || {})[s.currentTaskId];
@@ -335,7 +686,8 @@ function getScript(initialData: string): string {
           notifSettings.statuses[s.currentTaskStatus] !== false &&
           NOTIF_WATCHED.indexOf(s.currentTaskStatus) >= 0) {
         var title = p.label + ': ' + s.currentTaskId + ' → ' + s.currentTaskStatus;
-        try { new Notification(title, { silent: !notifSettings.sound }); } catch(e) {}
+        showHubNotification(title, { url: '/project/' + encodeURIComponent(p.projectId) + '/' });
+        playNotifSound(s.currentTaskStatus);
       }
       if (!prevStatuses[p.id]) prevStatuses[p.id] = {};
       prevStatuses[p.id][s.currentTaskId] = s.currentTaskStatus;
@@ -421,14 +773,43 @@ function getScript(initialData: string): string {
 
       es.addEventListener('project-update', function(e) {
         var p = JSON.parse(e.data);
-        checkStatusTransitions(p);
+        // N225 — notifications are now fired by the shared /hub-notify.js client
+        // (which also runs on proxied project pages); this stream only drives the
+        // card UI. checkStatusTransitions is retired to avoid double-notifying.
         upsertProject(p);
       });
     }
+
+    // N216 — register the hub service worker (unified notifications + N217 PWA base).
+    // swReg is set only once it's active, so showHubNotification can fall back to
+    // a page Notification if registration ever fails (no silent no-op).
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function() { return navigator.serviceWorker.ready; })
+        .then(function(reg) { swReg = reg; })
+        .catch(function() {});
+    }
+    // N221 — folder-browser clicks (delegated, so the re-rendered list keeps
+    // working), backdrop click, and Escape all interact with the modal.
+    var npListEl = document.getElementById('np-list');
+    if (npListEl) {
+      npListEl.addEventListener('click', function(e) {
+        var item = e.target && e.target.closest ? e.target.closest('.np-item') : null;
+        if (item && item.getAttribute('data-dir') !== null) npBrowse(item.getAttribute('data-dir'));
+      });
+    }
+    var npOverlayEl = document.getElementById('np-overlay');
+    if (npOverlayEl) {
+      npOverlayEl.addEventListener('click', function(e) { if (e.target === npOverlayEl) npClose(); });
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && npOverlayEl && npOverlayEl.classList.contains('open')) npClose();
+    });
 
     renderAll();
     loadNotifSettings();
     requestNotifPermission();
     connectStream();
+    refreshProjects(); // N215 — on-demand healthcheck on load so the list is fresh
     setInterval(refreshStaleCards, 30000);`;
 }

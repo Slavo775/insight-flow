@@ -34,8 +34,10 @@ wins — please open an issue.
   its one-line role and the exact list of module ids it composes.
 - **[Default flow](./default-flow.md)** — the `default` project: its agents,
   edges, statuses, entry agents, and install list.
-- **[Master server](./master-server.md)** — the multi-project overview server:
-  config, endpoints, the in-memory registry, and project status states.
+- **[Master hub](./master-server.md)** — the single-origin, installable PWA hub
+  that switches between all your projects: reverse-proxy `/project/<id>/`,
+  running/stopped switcher, New-project modal, persistent `hub.json` registry,
+  liveness, and the security / LAN-mobile model.
 
 ## Related
 

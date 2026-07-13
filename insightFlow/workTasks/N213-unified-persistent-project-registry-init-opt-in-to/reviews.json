@@ -1,0 +1,43 @@
+{
+  "taskId": "N213",
+  "reviews": [
+    {
+      "startedAt": "2026-07-10T20:54:08.899Z",
+      "endedAt": "2026-07-10T20:56:34.864Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: init --yes on a TTY blocks on the new hub prompt — it skips the useDefaults gate (options.yes || !isTTY) that every sibling init prompt respects. Fix: gate it. 6 non-blocking (batch-ui reconcile label≠projectName, assignHubPort not OS-checked, corrupt-entry drops all, write race, config-dir override scope, let→const). Rest solid + tested: 328/328.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-10T20:59:48.032Z",
+        "endedAt": "2026-07-10T21:06:39.172Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/core/global-config.ts",
+          "packages/taskflow/test/hub-registry.test.mjs"
+        ],
+        "comment": "Fixed blocker (init --yes now honors the non-interactive gate — default No, no TTY hang) + non-blocking 2/3/5/6 (assignHubPort doc, per-entry registry tolerance + test, config-dir override comment, let→const). Deferred NB1 (batch-ui reconcile — needs dashboard to send path, → N214) + NB4 (write-lock — over-engineering) with reasons. 329/329.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-10T21:10:53.527Z",
+      "endedAt": "2026-07-10T21:12:56.561Z",
+      "verdict": "approved",
+      "comment": "Re-review: blocker fixed (init --yes gated → no TTY hang, E2E verified) + NB2/3/5/6 resolved (per-entry registry tolerance tested, no unused import) + NB1/NB4 deferred with sound reasons. 329/329. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-10T21:14:17.068Z",
+      "endedAt": "2026-07-10T21:16:28.734Z",
+      "verdict": "approved",
+      "comment": "Human approved: unified registry + init opt-in. Merge into dashboard-improvements.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { Task, Column, FlowStatus } from "./lib.js";
 import {
   COLUMNS,
@@ -16,24 +17,30 @@ export function Nav({ projectName }: { projectName: string }) {
     <nav className="top-nav">
       <span className="nav-project">{projectName || "insight-flow"}</span>
       <div className="nav-links">
-        <a href="/" className="nav-link">
+        {/* N218/N220 — use Link so nav respects the router basename under the hub
+            proxy (/project/<id>/…); a raw <a href="/agent"> would drop the prefix
+            and 404 at the master root. */}
+        <Link to="/" className="nav-link">
           Home
-        </a>
-        <a href="/project" className="nav-link">
+        </Link>
+        <Link to="/project" className="nav-link">
           Project
-        </a>
-        <a href="/agent" className="nav-link">
+        </Link>
+        <Link to="/agent" className="nav-link">
           Agents
-        </a>
-        <a href="/module" className="nav-link">
+        </Link>
+        <Link to="/module" className="nav-link">
           Modules
-        </a>
+        </Link>
+        {/* Overview is the master hub, not a project SPA route — a root-absolute
+            anchor is correct: under the proxy `/overview` resolves to the master's
+            hub overview (same as the injected "⌂ Hub" link). */}
         <a href="/overview" className="nav-link">
           Overview
         </a>
-        <a href="/config" className="nav-link">
+        <Link to="/config" className="nav-link">
           Config
-        </a>
+        </Link>
       </div>
     </nav>
   );

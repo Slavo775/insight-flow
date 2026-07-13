@@ -8,7 +8,9 @@ import {
 } from "node:fs";
 import { createInterface } from "node:readline";
 import { resolve } from "node:path";
+import { randomUUID } from "node:crypto";
 import type { TaskflowConfig } from "../../core/types.js";
+import { findHubProjectByPath, upsertHubProject, assignHubPort } from "../../core/global-config.js";
 import { resolvePackageAsset, resolveFlowRoot } from "../../core/paths.js";
 import { applyAgentExtensions } from "../agents.js";
 import {
@@ -18,6 +20,8 @@ import {
 } from "../activity-hook.js";
 import { installNotifyHook } from "../notify-hook.js";
 import { applyEnforcement } from "../../cli/commands/prompt-build.js";
+import { installFlow } from "../../cli/commands/install-flow.js";
+import { isBuiltinProjectId } from "../project.js";
 import { buildSkillList, selectProviders, type ProviderContext } from "./providers/index.js";
 
 async function promptUser(question: string, defaultYes: boolean): Promise<boolean> {
@@ -52,14 +56,30 @@ function lifecycleHooksRegistered(cwd: string): boolean {
 export async function initProject(
   cwd: string = process.cwd(),
   force: boolean = false,
-  options: { examples?: boolean; yes?: boolean; editor?: string } = {},
-): Promise<void> {
+  options: {
+    examples?: boolean;
+    yes?: boolean;
+    editor?: string;
+    registerHub?: boolean;
+    // N222 — explicit install choices (from the hub "New project" modal). When
+    // set they override the interactive/default answers; when undefined the
+    // existing default/prompt behavior applies.
+    lifecycle?: boolean;
+    activity?: boolean;
+    // Built-in flows to install in addition to the default scaffold (e.g.
+    // "composer-authoring"), via the shared installFlow engine.
+    installFlows?: string[];
+  } = {},
+): Promise<{ flowErrors: { id: string; error: string }[] }> {
+  // N222 — collected so a caller (the hub "New project" endpoint) can surface a
+  // requested flow that failed to install, instead of reporting silent success.
+  const flowErrors: { id: string; error: string }[] = [];
   // Validate an explicit --editor *before* any writes so an unknown value fails
   // closed without leaving a partial config (preserves N75 behavior; the actual
   // provider selection — incl. config.editor precedence — happens after load).
   if (options.editor && !["claude", "cursor", "all"].includes(options.editor)) {
     console.error(`Unknown --editor "${options.editor}". Use claude | cursor | all.`);
-    return;
+    return { flowErrors };
   }
   const configPath = resolve(cwd, "taskflow.config.json");
 
@@ -113,7 +133,7 @@ export async function initProject(
     providers = selectProviders(cwd, editorChoice);
   } catch (err) {
     console.error((err as Error).message);
-    return;
+    return { flowErrors };
   }
   const claudeSelected = providers.some((p) => p.id === "claude");
   console.log(`insight-flow init — editors: ${providers.map((p) => p.id).join(", ")}`);
@@ -251,6 +271,8 @@ export async function initProject(
     let installLifecycle = true;
     if (lifecycleAlreadyInstalled) {
       installLifecycle = false; // already installed, skip
+    } else if (options.lifecycle !== undefined) {
+      installLifecycle = options.lifecycle; // N222 — explicit choice
     } else if (useDefaults) {
       installLifecycle = true;
     } else {
@@ -264,6 +286,8 @@ export async function initProject(
     let enableActivity = config.activityEngine?.enabled !== false;
     if (activityAlreadyConfigured) {
       enableActivity = config.activityEngine?.enabled !== false; // respect existing
+    } else if (options.activity !== undefined) {
+      enableActivity = options.activity; // N222 — explicit choice
     } else if (useDefaults) {
       enableActivity = false;
     } else {
@@ -292,6 +316,22 @@ export async function initProject(
         enabled: true,
       };
       console.log("Updated taskflow.config.json with activityEngine.enabled: true");
+    } else if (!activityAlreadyConfigured && options.activity === false) {
+      // N222 review-fix (nb1) — the base config template serializes
+      // `enabled: true`; when the user *explicitly* turned activity off (the hub
+      // modal), persist `enabled: false` so a later `init` re-run doesn't see it
+      // as already-configured-on and silently re-enable the hook.
+      let diskData: Record<string, unknown> = {};
+      try {
+        diskData = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>;
+      } catch {
+        /* ignore */
+      }
+      const ae = (diskData.activityEngine ?? {}) as Record<string, unknown>;
+      ae.enabled = false;
+      diskData.activityEngine = ae;
+      writeFileSync(configPath, JSON.stringify(diskData, null, 2) + "\n");
+      if (config.activityEngine) config.activityEngine.enabled = false;
     }
 
     // Install lifecycle hooks
@@ -313,6 +353,29 @@ export async function initProject(
     }
   }
 
+  // 6c. N222 — install any requested built-in flows (e.g. composer-authoring) on
+  // top of the default scaffold, via the shared installFlow engine (writes
+  // .claude/commands/*.md + .claude/agents/*.md + .mcp.json). Idempotent; only
+  // known built-in flow ids are honored. Editor-agnostic (emits under .claude/).
+  for (const flowId of [...new Set(options.installFlows ?? [])]) {
+    if (!isBuiltinProjectId(flowId)) {
+      const msg = `Unknown flow "${flowId}"`;
+      console.error(msg);
+      flowErrors.push({ id: flowId, error: msg });
+      continue;
+    }
+    try {
+      installFlow(flowId, cwd);
+      console.log(`Installed flow "${flowId}".`);
+    } catch (err) {
+      const msg = (err as Error).message;
+      console.error(`Could not install flow "${flowId}": ${msg}`);
+      // N222 review-fix (blocker 1) — record it so the caller doesn't report a
+      // silent success for a flow the user explicitly requested.
+      flowErrors.push({ id: flowId, error: msg });
+    }
+  }
+
   // 7. Add .taskflow-activity.jsonl to .gitignore
   const gitignorePath = resolve(cwd, ".gitignore");
   const activityLogEntry = ".taskflow-activity.jsonl";
@@ -327,10 +390,42 @@ export async function initProject(
     console.log("Created .gitignore with " + activityLogEntry);
   }
 
+  // 8. N213 — offer to register this project with the master hub, so it shows in
+  // the overview / multi-project switcher. Opt-in: default No, and skipped
+  // non-interactively unless `--register-hub` (options.registerHub) is set.
+  const projectDir = resolve(cwd);
+  if (!findHubProjectByPath(projectDir)) {
+    // Honor the same non-interactive gate as the prompts above: --yes / no TTY
+    // never blocks on a question (default No), unless --register-hub forces it.
+    const hubUseDefaults = options.yes || !process.stdout.isTTY;
+    const doRegister =
+      options.registerHub ??
+      (hubUseDefaults
+        ? false
+        : await promptUser(
+            "Register this project with the insight-flow hub (shows it in the master overview)? [y/N] ",
+            false,
+          ));
+    if (doRegister) {
+      const port = assignHubPort();
+      upsertHubProject({
+        id: randomUUID(),
+        label: config.projectName,
+        path: projectDir,
+        port,
+        bulkRegistered: true,
+        registeredAt: new Date().toISOString(),
+      });
+      console.log(`Registered with the insight-flow hub (dashboard port ${port}).`);
+    }
+  }
+
   console.log(
     "\ninsight-flow initialized! Run 'insight-flow create --title \"My task\" --type feat' to create your first task.",
   );
   console.log("Run 'insight-flow' to launch the dashboard.\n");
+
+  return { flowErrors };
 }
 
 function generateActivityHook(cwd: string, config: TaskflowConfig): void {

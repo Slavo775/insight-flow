@@ -220,10 +220,14 @@ async function run(): Promise<void> {
   } else if (command === "init") {
     const yesFlag = !!(opts.yes || opts.y) || (opts._ as string[]).includes("-y");
     const editor = typeof opts.editor === "string" ? opts.editor : undefined;
+    // N213 — --register-hub / --no-register-hub force the hub opt-in
+    // non-interactively; omit to be prompted (default No).
+    const registerHub = opts["register-hub"] ? true : opts["no-register-hub"] ? false : undefined;
     await initProject(process.cwd(), !!opts.force, {
       examples: !!opts.examples,
       yes: yesFlag,
       editor,
+      registerHub,
     });
   } else if (command === "master") {
     const port = opts.port ? parseInt(opts.port as string, 10) : undefined;

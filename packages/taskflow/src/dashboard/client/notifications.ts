@@ -1,5 +1,14 @@
 // Notification + sound layer, ported from dashboard.ts. Settings persist in
 // localStorage; sounds prefer the bundled mp3s and fall back to Web-Audio beeps.
+import { apiUrl, BASE } from "./base.js";
+
+// N225 — when this dashboard is viewed THROUGH the hub proxy (BASE set, e.g.
+// /project/<id>/), the shared /hub-notify.js client on the master origin is the
+// single notification authority (SW-backed, works backgrounded). Suppress the
+// project page's own foreground notifications/sounds here to avoid double-firing.
+function underHub(): boolean {
+  return !!BASE;
+}
 
 export interface NotifSettings {
   sound: boolean;
@@ -75,9 +84,11 @@ function playTone(state: StatusSound): void {
 }
 
 export function playStatusSound(state: StatusSound, soundsEnabled: boolean): void {
+  if (underHub()) return; // N225 — hub-notify.js owns sound under the proxy
   if (!soundsEnabled) return;
   if (notifSettings.sound === false) return;
-  const src = state === "idle" ? "/sounds/idle-ping.mp3" : "/sounds/permission-alert.mp3";
+  // N215 — base-aware so sounds resolve under the proxy (/p/<id>/sounds/…) too.
+  const src = apiUrl(state === "idle" ? "/sounds/idle-ping.mp3" : "/sounds/permission-alert.mp3");
   fetch(src, { method: "HEAD" })
     .then((r) => {
       const len = parseInt(r.headers.get("content-length") || "0", 10);
@@ -128,6 +139,7 @@ export function permissionHint(): string {
 }
 
 export function fireDesktopNotif(projectName: string, soundsEnabled: boolean): void {
+  if (underHub()) return; // N225 — hub-notify.js owns notifications under the proxy
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   if (notifSettings.muteFocused && !document.hidden) return;
   const title = (projectName ? projectName + ": " : "") + "Done";
@@ -144,6 +156,7 @@ export function fireStatusDesktopNotif(
   projectName: string,
   soundsEnabled: boolean,
 ): void {
+  if (underHub()) return; // N225 — hub-notify.js owns notifications under the proxy
   if (toStatus !== "done" && toStatus !== "awaiting-permission") return;
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   if (notifSettings.muteFocused && !document.hidden) return;

@@ -461,3 +461,28 @@ export interface BatchUiRegistry {
   lastSelected: string[];
   runningPids: BatchUiRunningProcess[];
 }
+
+/**
+ * N213 — a project registered with the master hub. Persisted to
+ * `~/.insight-flow/hub.json` (the single source of truth for hub membership;
+ * folds in the legacy `batch-ui.json` list). "Online" is derived at runtime
+ * from a live connection (N214), not stored here.
+ */
+export interface HubProjectEntry {
+  /** Stable id (uuid). */
+  id: string;
+  /** Human label; for init-registered projects this is the project name. */
+  label: string;
+  /** Absolute project directory. */
+  path: string;
+  /** Assigned dashboard port (persisted so launches don't collide). */
+  port: number;
+  /** Whether this project opted into the hub / bulk instances. */
+  bulkRegistered: boolean;
+  /** ISO timestamp of first registration. */
+  registeredAt: string;
+}
+
+export interface HubRegistry {
+  projects: HubProjectEntry[];
+}

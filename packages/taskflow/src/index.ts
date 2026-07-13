@@ -125,7 +125,7 @@ export {
   StatusHistoryEntrySchema,
   TaskflowValidationError,
 } from "./core/schema/index.js";
-export { runMaster, startMasterServer } from "./master/index.js";
+export { runMaster, startMasterServer, isTrustedActionRequest } from "./master/index.js";
 export { jsonFileStorage } from "./core/storage-port.js";
 export type { Storage } from "./core/storage-port.js";
 export { SseTransport } from "./dashboard/server/transport.js";
@@ -182,3 +182,21 @@ export {
   collectProjectInstall,
 } from "./agents/project.js";
 export type { Project } from "./agents/project.js";
+
+// N213 — the persistent master-hub registry (`~/.insight-flow/hub.json`).
+export {
+  getGlobalConfigDir,
+  readHubRegistry,
+  writeHubRegistry,
+  findHubProjectByPath,
+  assignHubPort,
+  upsertHubProject,
+  migrateBatchUiIntoHub,
+  readBatchUiRegistry,
+  writeBatchUiRegistry,
+  // N225 — the dashboard's real-port pointer (log-event delivery).
+  writeServerPortPointer,
+  readServerPortPointer,
+  clearServerPortPointer,
+} from "./core/global-config.js";
+export type { HubProjectEntry, HubRegistry } from "./core/types.js";

@@ -1,0 +1,33 @@
+{
+  "taskId": "N212",
+  "reviews": [
+    {
+      "startedAt": "2026-07-10T19:56:23.027Z",
+      "endedAt": "2026-07-10T19:59:04.297Z",
+      "verdict": "fix-needed",
+      "comment": "1 security blocker: the /p/<id> proxy server-side-fetches a registrant-controlled entry.url on a LAN-exposed, unauthenticated master (/api/register has no loopback guard, listen binds 0.0.0.0) → SSRF/open-proxy. Fix: restrict proxy targets to loopback. 3 non-blocking (unescaped prefix→XSS, no proxy test, hop-by-hop headers). Spike itself proven: HTML/asset/API/SSE all pass through; SSE streams. 325/325.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-10T20:09:13.044Z",
+        "endedAt": "2026-07-10T20:27:29.713Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/test/master-proxy.test.mjs"
+        ],
+        "comment": "Fixed blocker (loopback-only proxy guard, 403 for non-loopback → closes SSRF) + all 3 non-blocking (escape injected prefix; add hermetic proxy test incl. SSRF case; strip hop-by-hop headers) + destroy upstream on client disconnect. 326/326.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-10T20:30:13.250Z",
+      "endedAt": "2026-07-10T20:30:30.444Z",
+      "verdict": "approved",
+      "comment": "Human approved: reverse-proxy spike + SSRF fix. Stage on dashboard-improvements.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

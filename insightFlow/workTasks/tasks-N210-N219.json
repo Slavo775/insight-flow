@@ -192,6 +192,755 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
+    },
+    {
+      "id": "N212",
+      "title": "Reverse-proxy spike: master serves a project dashboard (incl. SSE) on one origin",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N212-reverse-proxy-spike-master-serves-a-project-dashbo",
+      "createdAt": "2026-07-10T18:31:24.289Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.290Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-10T19:16:15.018Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T19:32:32.620Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T19:56:23.026Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-10T19:59:04.298Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-10T20:09:13.043Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-10T20:27:29.713Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T20:30:13.248Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T20:30:30.444Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T20:35:02.619Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-10T20:35:02.750Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-10T19:16:15.019Z",
+        "completedAt": "2026-07-10T19:32:32.622Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-10T20:35:02.751Z",
+      "totalDurationMinutes": 124,
+      "tags": [
+        "master",
+        "proxy",
+        "pwa",
+        "spike"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-10T20:35:02.620Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N213",
+      "title": "Unified persistent project registry + init opt-in to the master hub",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N213-unified-persistent-project-registry-init-opt-in-to",
+      "createdAt": "2026-07-10T18:31:24.430Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.430Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-10T20:39:46.190Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T20:51:46.250Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T20:54:08.898Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-10T20:56:34.865Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-10T20:59:48.031Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-10T21:06:39.173Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T21:10:53.525Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T21:12:56.562Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T21:14:17.067Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T21:16:28.734Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T21:17:15.425Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-10T21:17:15.567Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-10T20:39:46.191Z",
+        "completedAt": "2026-07-10T20:51:46.251Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/types.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/global-config.ts",
+          "packages/taskflow/src/master/registry.ts",
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/hub-registry.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-10T21:17:15.568Z",
+      "totalDurationMinutes": 166,
+      "tags": [
+        "master",
+        "multi-project",
+        "init"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-10T21:17:15.426Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N214",
+      "title": "Connection-based liveness for the master hub (drop polling) + light per-project token",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N214-connection-based-liveness-for-the-master-hub-drop-",
+      "createdAt": "2026-07-10T18:31:24.563Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.563Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-10T21:19:38.396Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-10T21:33:02.215Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T21:47:22.970Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-10T21:49:24.778Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-10T21:50:51.038Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-10T21:54:16.857Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-10T22:33:47.115Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-10T22:36:14.269Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-10T22:52:34.846Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-10T22:52:34.994Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-10T21:19:38.397Z",
+        "completedAt": "2026-07-10T21:33:02.216Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/types.ts",
+          "packages/taskflow/src/master/registry.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-10T22:52:34.995Z",
+      "totalDurationMinutes": 261,
+      "tags": [
+        "master",
+        "multi-project"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-10T22:52:34.848Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N215",
+      "title": "Master single-origin app shell: project switcher + reverse-proxy /p/<id> + start-and-go",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N215-master-single-origin-app-shell-project-switcher-re",
+      "createdAt": "2026-07-10T18:31:24.703Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.703Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T06:35:18.250Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T07:10:12.528Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T07:18:58.184Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-11T07:22:05.774Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-11T07:23:51.604Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-11T07:28:58.912Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T07:39:37.385Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T07:43:28.010Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T07:49:57.216Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T07:53:20.084Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-11T07:54:29.584Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-11T07:54:29.717Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-11T06:35:18.251Z",
+        "completedAt": "2026-07-11T07:10:12.529Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/base.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/useDashboardStream.ts",
+          "packages/taskflow/src/dashboard/client/components/InstallModal.tsx",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-11T07:54:29.718Z",
+      "totalDurationMinutes": 803,
+      "tags": [
+        "master",
+        "dashboard",
+        "proxy"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-11T07:54:29.585Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N216",
+      "title": "Unified notifications + sounds via a service worker on the master origin",
+      "type": "feat",
+      "priority": "medium",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N216-unified-notifications-sounds-via-a-service-worker-",
+      "createdAt": "2026-07-10T18:31:24.834Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.834Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T07:55:09.922Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T08:14:19.081Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T08:16:21.871Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T08:31:14.752Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T08:48:50.927Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T08:54:58.925Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-11T08:55:20.429Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-11T08:55:20.560Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-11T07:55:09.923Z",
+        "completedAt": "2026-07-11T08:14:19.082Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-11T08:55:20.561Z",
+      "totalDurationMinutes": 864,
+      "tags": [
+        "master",
+        "notifications",
+        "pwa"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-11T08:55:20.430Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N217",
+      "title": "Installable PWA for the master hub (manifest + offline shell)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N217-installable-pwa-for-the-master-hub-manifest-offlin",
+      "createdAt": "2026-07-10T18:31:24.978Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-10T18:31:24.979Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T08:56:28.074Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T09:28:13.450Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T09:51:26.906Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-11T09:58:01.013Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-11T13:24:30.739Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-11T13:25:56.400Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T13:25:56.532Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T13:31:31.187Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T13:31:53.904Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T13:31:54.039Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-11T13:32:51.494Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-11T13:32:51.631Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-11T08:56:28.075Z",
+        "completedAt": "2026-07-11T09:28:13.451Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-11T13:32:51.632Z",
+      "totalDurationMinutes": 1141,
+      "tags": [
+        "master",
+        "pwa"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-11T13:32:51.495Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N218",
+      "title": "Hub robustness + UX fixes: re-register on master restart, reliable Start, proxy error page, consistent Start button",
+      "type": "fix",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N218-hub-robustness-ux-fixes-re-register-on-master-rest",
+      "createdAt": "2026-07-11T15:07:02.206Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-11T15:07:02.206Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T15:09:30.669Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T15:19:59.397Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-12T09:17:25.633Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-12T09:20:44.991Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-11T15:09:30.670Z",
+        "completedAt": "2026-07-11T15:19:59.398Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-12T09:20:44.992Z",
+      "totalDurationMinutes": 1094,
+      "tags": [
+        "master",
+        "dashboard",
+        "hub",
+        "ux"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-12T09:17:25.635Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N219",
+      "title": "Hub reverse-registration handshake + client token privacy",
+      "type": "feat",
+      "priority": "high",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N219-hub-reverse-registration-handshake-client-token-pr",
+      "createdAt": "2026-07-11T18:56:31.610Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-11T18:56:31.610Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-11T19:17:59.302Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-11T19:44:17.599Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T19:59:05.541Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-11T20:12:50.594Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-11T20:17:04.981Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-11T20:26:59.647Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T20:36:09.328Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T20:37:43.210Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-11T20:39:51.907Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-11T20:50:21.094Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-11T20:53:34.492Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-11T19:17:59.304Z",
+        "completedAt": "2026-07-11T19:44:17.600Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/types.ts",
+          "packages/taskflow/src/master/registry.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/master/overview.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/master-liveness.test.mjs",
+          "insightFlow/workTasks/N219-hub-reverse-registration-handshake-client-token-pr/CHECKLIST.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 117,
+      "tags": [
+        "master",
+        "hub",
+        "security",
+        "handshake"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": "2026-07-11T20:53:34.493Z",
+      "flowId": "default"
     }
   ]
 }

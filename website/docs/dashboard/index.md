@@ -25,8 +25,17 @@ insight-flow ui
 ```
 
 This starts the dashboard at **http://localhost:6006** and auto-starts the
-[master overview server](../built-ins/master-server.md) on port 6100 (the
-multi-project switcher). Open the printed URL in your browser.
+[master hub](../built-ins/master-server.md) on port 6100 — the single-origin,
+installable switcher that manages all your projects at once. Open the printed URL
+in your browser.
+
+:::tip Managing several projects?
+Open the [master hub](../built-ins/master-server.md) at
+`http://localhost:6100/overview`. It reverse-proxies each project's dashboard at
+`/project/<id>/`, starts stopped projects, creates new ones from the browser, and
+can be **installed as a PWA** (including on your phone). This single-project
+dashboard is one project's view; the hub is the home base across projects.
+:::
 
 If you are working inside this repository's sandbox, the playground wires the
 same thing up:

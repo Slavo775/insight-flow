@@ -17,7 +17,7 @@ import { applyArtifacts, renameManifestBucket } from "./emit.js";
  *       in modules/integrations/activity.json. A version bump now simply means
  *       the module data changed (the emitter rewrites on content difference).
  */
-export const BUNDLED_HOOKS_VERSION = 3;
+export const BUNDLED_HOOKS_VERSION = 4; // N225 — Done hook no longer emits "/unknown"
 
 export type ActivityHookStatus = "ok" | "hook-missing" | "settings-missing" | "both-missing";
 
@@ -185,15 +185,16 @@ printf '{"ts":"%s","tool":"Skill","action":"started","skill":"%s"}\\n' "$TS" "$S
 `;
 
 const DONE_HOOK_SCRIPT = `#!/bin/bash
-# Taskflow Done Hook — emits Skill completed event (Stop)
+# Taskflow Done Hook — emits a Skill completed event (Stop) ONLY when a skill was
+# actually captured on start. N225: a plain turn (or a Skill-tool invocation the
+# UserPromptSubmit grep can't see) leaves no .last-skill — stay silent instead of
+# spamming "/unknown".
 LOG_FILE="__LOG_FILE__"
 SKILL_FILE="\${LOG_FILE%.jsonl}.last-skill"
-if [ -f "$SKILL_FILE" ]; then
-  SKILL=$(cat "$SKILL_FILE")
-  rm -f "$SKILL_FILE"
-else
-  SKILL="unknown"
-fi
+[ -f "$SKILL_FILE" ] || exit 0
+SKILL=$(cat "$SKILL_FILE")
+rm -f "$SKILL_FILE"
+[ -z "$SKILL" ] && exit 0
 TS=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
 printf '{"ts":"%s","tool":"Skill","action":"completed","skill":"%s"}\\n' "$TS" "$SKILL" >> "$LOG_FILE"
 `;

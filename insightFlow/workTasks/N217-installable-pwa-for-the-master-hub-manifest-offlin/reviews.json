@@ -1,0 +1,41 @@
+{
+  "taskId": "N217",
+  "reviews": [
+    {
+      "startedAt": "2026-07-11T09:51:26.908Z",
+      "endedAt": "2026-07-11T09:58:01.013Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: SW navigate branch caches the shell under '/' without an res.ok guard → a 404 top-level navigation poisons the offline shell (self-heals on next good nav, but undermines the headline feature). Fix: guard with res.ok (static-asset branch already does). 3 non-blocking (SVG-only install caveat, static-asset cache-version discipline, flaky random-port test). Manifest/icons/SW-cache otherwise correct: 337/337.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-11T13:24:30.741Z",
+        "endedAt": "2026-07-11T13:25:56.399Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts"
+        ],
+        "comment": "Fixed blocker: SW navigate branch now caches the offline shell only when res.ok (no 404/500 poisoning). Non-blockings left as documented. 337/337.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-11T13:25:56.533Z",
+      "endedAt": "2026-07-11T13:31:31.185Z",
+      "verdict": "approved",
+      "comment": "Re-review: blocker fixed (navigate branch caches /  only when res.ok — verified in served sw.js; offline shell no longer poisonable). All features intact. 337/337. Approved.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-11T13:31:53.906Z",
+      "endedAt": "2026-07-11T13:31:54.038Z",
+      "verdict": "approved",
+      "comment": "Human approved: installable PWA (manifest + offline shell). Land into dashboard-improvements; completes N212-N217.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

@@ -40,6 +40,20 @@ export const IncidentStatusEntrySchema = z.object({
   by: z.string().optional(),
 });
 
+// N213 — the persisted master-hub registry (`~/.insight-flow/hub.json`).
+export const HubProjectEntrySchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  path: z.string(),
+  port: z.number().int().positive(),
+  bulkRegistered: z.boolean(),
+  registeredAt: z.string(),
+});
+
+export const HubRegistrySchema = z.object({
+  projects: z.array(HubProjectEntrySchema),
+});
+
 export const IncidentSeveritySchema = z.enum(["critical", "high", "medium", "low"]);
 
 export const IncidentSchema = z.object({
