@@ -1,0 +1,21 @@
+{
+  "id": "custom:task-release-plan",
+  "title": "Release Taskmaster",
+  "description": "Creates the release-prep task from templates; sets ready-to-release or changes-needed; refuses without a prior check.",
+  "modules": [
+    "custom:task-release-plan-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "template-copy",
+    "custom:task-release-plan-guard",
+    "custom:task-release-plan-role",
+    "custom:handover-plan-to-fix",
+    "custom:handover-plan-to-ship",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  }
+}

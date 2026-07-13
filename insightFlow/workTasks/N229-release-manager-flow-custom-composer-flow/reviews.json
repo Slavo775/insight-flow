@@ -1,0 +1,42 @@
+{
+  "taskId": "N229",
+  "reviews": [
+    {
+      "startedAt": "2026-07-13T15:34:54.272Z",
+      "endedAt": "2026-07-13T15:38:11.854Z",
+      "verdict": "approved",
+      "comment": null,
+      "type": "ai",
+      "by": "authoring-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-13T15:40:32.522Z",
+      "endedAt": "2026-07-13T15:40:47.446Z",
+      "verdict": "fix-needed",
+      "comment": null,
+      "type": "human",
+      "by": "authoring-review",
+      "fix": {
+        "startedAt": "2026-07-13T15:41:06.798Z",
+        "endedAt": "2026-07-13T15:42:01.110Z",
+        "status": "fixed",
+        "filesChanged": [
+          "custom:task-release-ship-identity",
+          "custom:task-release-ship-publish"
+        ],
+        "comment": null,
+        "by": "authoring-implement"
+      }
+    },
+    {
+      "startedAt": "2026-07-13T15:42:37.201Z",
+      "endedAt": "2026-07-13T15:42:52.734Z",
+      "verdict": "approved",
+      "comment": null,
+      "type": "human",
+      "by": "authoring-review",
+      "fix": null
+    }
+  ]
+}

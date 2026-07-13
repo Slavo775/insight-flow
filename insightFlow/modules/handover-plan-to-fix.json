@@ -1,0 +1,10 @@
+{
+  "id": "custom:handover-plan-to-fix",
+  "title": "Handover — plan → fix",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-release-fix",
+  "on": "changes-needed",
+  "mode": "auto",
+  "when": "The check found doc or test gaps to fix. The edits are reversible, so it is safe to chain to the implementer."
+}

@@ -1,0 +1,96 @@
+{
+  "id": "custom:release-manager",
+  "title": "Release Manager Flow",
+  "description": "Checks release readiness (tests, intent, docs), creates a release-prep task, fixes gaps, publishes to npm behind one human gate, then rolls the new version out globally and to every bulk-registered project. Ends in done (released + rolled out) or not-able-to-release (needs wider work).",
+  "agents": [
+    "custom:task-release-check",
+    "custom:task-release-plan",
+    "custom:task-release-fix",
+    "custom:task-release-ship",
+    "custom:task-release-rollout"
+  ],
+  "flow": [
+    {
+      "from": "custom:task-release-check",
+      "to": "custom:task-release-plan",
+      "on": "release-checked"
+    },
+    {
+      "from": "custom:task-release-plan",
+      "to": "custom:task-release-fix",
+      "on": "changes-needed"
+    },
+    {
+      "from": "custom:task-release-plan",
+      "to": "custom:task-release-ship",
+      "on": "ready-to-release"
+    },
+    {
+      "from": "custom:task-release-fix",
+      "to": "custom:task-release-check",
+      "on": "release-fixed"
+    },
+    {
+      "from": "custom:task-release-fix",
+      "to": "not-able-to-release",
+      "on": "not-able-to-release"
+    },
+    {
+      "from": "custom:task-release-ship",
+      "to": "custom:task-release-rollout",
+      "on": "published"
+    },
+    {
+      "from": "custom:task-release-rollout",
+      "to": "done",
+      "on": "done"
+    }
+  ],
+  "install": [
+    "activity"
+  ],
+  "states": [],
+  "statuses": [
+    {
+      "id": "release-checked",
+      "title": "Release checked"
+    },
+    {
+      "id": "changes-needed",
+      "title": "Changes needed"
+    },
+    {
+      "id": "ready-to-release",
+      "title": "Ready to release"
+    },
+    {
+      "id": "fixing",
+      "title": "Fixing"
+    },
+    {
+      "id": "release-fixed",
+      "title": "Release fixed"
+    },
+    {
+      "id": "publishing",
+      "title": "Publishing"
+    },
+    {
+      "id": "published",
+      "title": "Published"
+    },
+    {
+      "id": "not-able-to-release",
+      "title": "Not able to release",
+      "terminal": true
+    },
+    {
+      "id": "done",
+      "title": "Done",
+      "terminal": true
+    }
+  ],
+  "entryAgents": [
+    "custom:task-release-check"
+  ]
+}

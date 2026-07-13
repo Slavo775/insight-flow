@@ -1,0 +1,10 @@
+{
+  "id": "custom:handover-ship-to-rollout",
+  "title": "Handover — ship → rollout",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-release-rollout",
+  "on": "published",
+  "mode": "auto",
+  "when": "The new version is published. Spread it globally and to the registered projects. No new irreversible decision, so it chains automatically."
+}

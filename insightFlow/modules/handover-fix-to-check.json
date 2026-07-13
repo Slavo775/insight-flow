@@ -1,0 +1,10 @@
+{
+  "id": "custom:handover-fix-to-check",
+  "title": "Handover — fix → check",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-release-check",
+  "on": "release-fixed",
+  "mode": "gated",
+  "when": "The gaps are fixed. Re-run every check before shipping. This is a loop back-edge, so it is gated and never automatic."
+}

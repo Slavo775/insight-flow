@@ -1,0 +1,24 @@
+{
+  "id": "custom:task-release-fix",
+  "title": "Release Implementer",
+  "description": "Fixes doc/test gaps via 2 subagents; stops to not-able-to-release on wider rework.",
+  "modules": [
+    "custom:task-release-fix-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "minimal-diff",
+    "scope-guard",
+    "custom:task-release-fix-role",
+    "custom:handover-fix-to-check",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  },
+  "subagents": [
+    "custom:documentation-expert",
+    "custom:test-fixer"
+  ]
+}

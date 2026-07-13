@@ -1,0 +1,8 @@
+{
+  "id": "custom:task-release-rollout-install",
+  "title": "Release Rollout — rollout steps",
+  "source": "custom",
+  "kind": "section",
+  "heading": "Rollout steps",
+  "body": "Precondition: the status is `published`. Steps: (1) Wait for the version to be available: poll `npm view insight-flow@X.Y.Z version` until it returns (npm needs a short time after publish). (2) Global install: `npm i -g insight-flow@X.Y.Z`. (3) Read the bulk-registered projects from `~/.insight-flow/hub.json` — the entries where `bulkRegistered` is true; each has a `path`. (4) For EACH such project, fan out a `release-project-installer` subagent: detect the package manager, bump the local insight-flow dependency to X.Y.Z, and run install. A project with no insight-flow dependency is reported as 'nothing to bump'. (5) Best-effort: if one project fails, record it and keep going — do not stop the whole rollout. (6) Print a per-project result table: project · action · result · notes. Flag any project that is far behind (for example pinned at 0.5.0 jumping to 2.x) — that big jump may need the layout migration; show it in the table, do not silently break it. (7) When all projects are done, set the status to `done`. Never commit or push changes inside the other projects."
+}
