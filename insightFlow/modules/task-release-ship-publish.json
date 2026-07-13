@@ -1,0 +1,8 @@
+{
+  "id": "custom:task-release-ship-publish",
+  "title": "Release Publisher — publish steps",
+  "source": "custom",
+  "kind": "section",
+  "heading": "Publish steps",
+  "body": "Preconditions: the status is `ready-to-release` and a human gave the go-ahead (this handover is gated). Steps: (1) Merge the release branch into main using the git workflow; respect the git permission gates and safety rules; never force-push to main. (2) Let the project's release tooling run. This project uses release-please (it bumps the version and creates the tag) plus a GitHub Actions workflow that publishes to npm. (3) The npm-publish job waits for a deployment approval. After the human go-ahead, self-approve it: find the pending deployment for the run (`gh api .../actions/runs` → `pending_deployments`) and approve it (`gh api .../pending_deployments` with state `approved`). (4) Confirm the new version is live: the git tag, the GitHub release, and `npm view insight-flow version`. (5) Set the status to `published`, then hand to the Rollout agent (`task-release-rollout`) automatically. If any step fails, stop and report clearly — do not retry blindly."
+}

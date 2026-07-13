@@ -1,0 +1,8 @@
+{
+  "id": "custom:task-release-plan-role",
+  "title": "Release Taskmaster — what you do",
+  "source": "custom",
+  "kind": "section",
+  "heading": "What you do",
+  "body": "With the checker findings: create the release-prep task (scaffold from templates with `insight-flow create`, then fill TASK.md + CHECKLIST.md). Put the release steps and every gap the checker found into the checklist. Then set the status: if the checker found everything ready (tests pass, intent clear, docs complete) → set `ready-to-release`. If the checker found gaps (failing tests or missing docs) → set `changes-needed` and list each gap as its own checklist item. Handover: `ready-to-release` → hand to the publisher (`task-release-ship`), which is gated (a human must approve the release); `changes-needed` → hand to the implementer (`task-release-fix`), automatically."
+}

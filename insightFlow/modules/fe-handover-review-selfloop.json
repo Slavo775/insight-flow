@@ -1,0 +1,10 @@
+{
+  "id": "custom:fe-handover-review-selfloop",
+  "title": "FE: review → review (human pass)",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-fe-review",
+  "on": "ai-approved",
+  "mode": "gated",
+  "when": "The AI pass is clean. Hand to the human review pass. This is a self-loop — gated, never auto, so the human pass is a deliberate step."
+}

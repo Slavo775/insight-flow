@@ -934,6 +934,118 @@
       "mrUrl": null,
       "mergedAt": "2026-07-13T11:55:55.053Z",
       "flowId": "default"
+    },
+    {
+      "id": "N229",
+      "title": "Release Manager Flow (custom composer flow)",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N229-release-manager-flow-custom-composer-flow",
+      "createdAt": "2026-07-13T15:07:51.062Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-13T15:07:51.062Z",
+          "by": "authoring-create"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-13T15:15:52.313Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-13T15:34:27.981Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T15:34:54.264Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "ai-approved",
+          "at": "2026-07-13T15:38:11.859Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T15:40:32.516Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-13T15:40:47.447Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-13T15:41:06.793Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-13T15:42:01.111Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T15:42:37.199Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-13T15:42:52.735Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-13T15:45:04.793Z",
+          "by": "authoring-install"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-13T15:15:52.315Z",
+        "completedAt": "2026-07-13T15:34:27.987Z",
+        "filesChanged": [
+          "custom:release-manager",
+          "custom:task-release-check",
+          "custom:task-release-plan",
+          "custom:task-release-fix",
+          "custom:task-release-ship",
+          "custom:task-release-rollout",
+          "custom:test-runner",
+          "custom:release-intent-detector",
+          "custom:docs-auditor",
+          "custom:documentation-expert",
+          "custom:test-fixer",
+          "custom:project-installer",
+          "custom:handover-check-to-plan",
+          "custom:handover-plan-to-fix",
+          "custom:handover-plan-to-ship",
+          "custom:handover-fix-to-check",
+          "custom:handover-ship-to-rollout"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-13T15:45:04.798Z",
+      "totalDurationMinutes": 37,
+      "tags": [
+        "composer",
+        "flow",
+        "release",
+        "authoring"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/148",
+      "mergedAt": null,
+      "flowId": "composer-authoring"
     }
   ]
 }

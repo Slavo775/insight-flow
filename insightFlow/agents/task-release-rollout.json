@@ -1,0 +1,20 @@
+{
+  "id": "custom:task-release-rollout",
+  "title": "Release Rollout",
+  "description": "After publish, installs the new version globally and bumps every bulk-registered project's local dep; terminal done.",
+  "modules": [
+    "custom:task-release-rollout-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "custom:task-release-rollout-install",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  },
+  "subagents": [
+    "custom:project-installer"
+  ]
+}

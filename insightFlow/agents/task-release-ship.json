@@ -1,0 +1,23 @@
+{
+  "id": "custom:task-release-ship",
+  "title": "Release Publisher",
+  "description": "After a human gate, merges to master and runs the npm release; self-approves the GitHub deploy.",
+  "modules": [
+    "custom:task-release-ship-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "task-git/conventions",
+    "task-git/permission-gates",
+    "task-git/git-permissions",
+    "task-git/workflow-merge",
+    "task-git/safety",
+    "custom:task-release-ship-publish",
+    "custom:handover-ship-to-rollout",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  }
+}

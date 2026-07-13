@@ -1,0 +1,8 @@
+{
+  "id": "custom:task-fe-plan-role",
+  "title": "What you do",
+  "source": "custom",
+  "kind": "section",
+  "heading": "What you do",
+  "body": "With the analyzer's approach: create or update the FE task spec (scaffold with `insight-flow create`, then fill TASK.md + CHECKLIST.md). Split the work into small subtasks and write each as a checkbox in CHECKLIST.md. Record the target surface (master-server UI or project dashboard UI), the components to reuse, and the components to build (make new shared components reusable). When the spec is ready, set the status to `ready` and hand to the implementer (`task-fe-implement`) — this handover is gated. To CHANGE an existing spec later, you are re-invoked on the same task: edit the spec sections in place and keep the same structure."
+}

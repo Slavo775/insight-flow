@@ -1,0 +1,23 @@
+{
+  "id": "custom:task-release-check",
+  "title": "Release Checker",
+  "description": "Entry agent: checks release readiness (tests, intent, docs) via 3 subagents, sets status release-checked.",
+  "modules": [
+    "custom:task-release-check-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "custom:task-release-check-role",
+    "custom:handover-check-to-plan",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  },
+  "subagents": [
+    "custom:test-runner",
+    "custom:release-intent-detector",
+    "custom:docs-auditor"
+  ]
+}

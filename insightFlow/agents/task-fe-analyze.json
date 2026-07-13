@@ -1,0 +1,23 @@
+{
+  "id": "custom:task-fe-analyze",
+  "title": "Frontend Analyzer",
+  "description": "Entry: inspects code + the Lovable app; resolves master-UI vs dashboard-UI and new vs rework; proposes a reuse-first approach.",
+  "modules": [
+    "custom:task-fe-analyze-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "plain-language",
+    "custom:task-fe-analyze-role",
+    "custom:fe-handover-analyze-plan",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  },
+  "subagents": [
+    "custom:fe-surface-resolver",
+    "custom:fe-component-scout"
+  ]
+}

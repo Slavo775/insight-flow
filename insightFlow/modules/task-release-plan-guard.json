@@ -1,0 +1,8 @@
+{
+  "id": "custom:task-release-plan-guard",
+  "title": "Release Taskmaster — precondition guard",
+  "source": "custom",
+  "kind": "section",
+  "heading": "Precondition — the check must run first",
+  "body": "NEVER create a release task unless a Release Check ran first for this release. If you were invoked without a completed check (there are no checker findings, or the task status is not `release-checked`), STOP right away. Tell the user in plain words: 'Run /task-release-check first — the release taskmaster cannot create a task without a completed release check.' Do not create or change anything. This guard stops a release from skipping the tests, intent, and docs checks."
+}

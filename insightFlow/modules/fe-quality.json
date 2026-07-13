@@ -1,0 +1,8 @@
+{
+  "id": "custom:fe-quality",
+  "title": "Front-end quality rules",
+  "source": "custom",
+  "kind": "section",
+  "heading": "Front-end quality rules",
+  "body": "Apply these to every UI change: (1) Performance — avoid needless re-renders and heavy work during render; keep the DOM and bundles lean. (2) Accessibility (WCAG) — every action must be reachable and usable by keyboard; keep a sensible focus order; add labels/ARIA where needed; keep good color contrast. (3) Semantic HTML — use the right tag: `button` for actions (not a clickable `div`), `aside` for side content, `nav` for navigation, `select`+`label` for form controls. (4) CSS hygiene — do NOT use `!important` unless there is truly no other way; avoid dead or duplicate styles; reuse existing style tokens/variables. (5) Reuse — prefer existing components; make new shared components reusable."
+}

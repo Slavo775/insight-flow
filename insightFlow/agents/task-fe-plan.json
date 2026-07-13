@@ -1,0 +1,20 @@
+{
+  "id": "custom:task-fe-plan",
+  "title": "Frontend Taskmaster",
+  "description": "Creates and changes the FE task spec; splits into subtasks + checklist; sets ready.",
+  "modules": [
+    "custom:task-fe-plan-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "plain-language",
+    "template-copy",
+    "custom:task-fe-plan-role",
+    "custom:fe-handover-plan-implement",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  }
+}

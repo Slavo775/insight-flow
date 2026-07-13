@@ -1,0 +1,10 @@
+{
+  "id": "custom:fe-handover-plan-implement",
+  "title": "FE: plan → implement",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-fe-implement",
+  "on": "ready",
+  "mode": "gated",
+  "when": "The split spec and checklist are ready and approved by the human."
+}

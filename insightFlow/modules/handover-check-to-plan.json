@@ -1,0 +1,10 @@
+{
+  "id": "custom:handover-check-to-plan",
+  "title": "Handover — check → plan",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-release-plan",
+  "on": "release-checked",
+  "mode": "auto",
+  "when": "The release check finished and the readiness findings are ready. The checker is read-only, so it is safe to chain to the taskmaster without a human stop."
+}

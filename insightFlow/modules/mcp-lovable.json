@@ -1,0 +1,12 @@
+{
+  "id": "custom:mcp-lovable",
+  "title": "Lovable MCP server",
+  "description": "Official Lovable MCP (remote HTTP, OAuth). Lets FE agents read/inspect a Lovable app. No API key — OAuth browser login on first tool use. Add to a flow's install list.",
+  "source": "custom",
+  "kind": "mcp-server",
+  "name": "lovable",
+  "config": {
+    "type": "http",
+    "url": "https://mcp.lovable.dev"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "custom:task-fe-implement",
+  "title": "Frontend Implementer",
+  "description": "Builds the UI in the resolved surface with FE quality discipline; ticks all boxes; also fixes review blockers.",
+  "modules": [
+    "custom:task-fe-implement-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "plain-language",
+    "minimal-diff",
+    "scope-guard",
+    "custom:fe-quality",
+    "custom:task-fe-implement-role",
+    "custom:fe-handover-implement-review",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  }
+}

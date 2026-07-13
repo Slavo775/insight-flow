@@ -1,0 +1,108 @@
+{
+  "range": {
+    "from": 230,
+    "to": 239
+  },
+  "tasks": [
+    {
+      "id": "N230",
+      "title": "Frontend Flow (custom composer flow)",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N230-frontend-flow-custom-composer-flow",
+      "createdAt": "2026-07-13T17:19:59.544Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-13T17:19:59.544Z",
+          "by": "authoring-create"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-13T17:24:23.579Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-13T17:31:03.096Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T17:31:20.489Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "ai-approved",
+          "at": "2026-07-13T17:33:41.503Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T17:37:34.095Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-13T17:37:47.112Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-13T17:42:03.975Z",
+          "by": "authoring-install"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-13T17:24:23.584Z",
+        "completedAt": "2026-07-13T17:31:03.096Z",
+        "filesChanged": [
+          "custom:frontend",
+          "custom:task-fe-analyze",
+          "custom:task-fe-plan",
+          "custom:task-fe-implement",
+          "custom:task-fe-review",
+          "custom:mcp-lovable",
+          "custom:fe-surface-resolver",
+          "custom:fe-component-scout",
+          "custom:fe-a11y-reviewer",
+          "custom:fe-ui-reviewer",
+          "custom:fe-quality",
+          "custom:task-fe-analyze-identity",
+          "custom:task-fe-analyze-role",
+          "custom:task-fe-plan-identity",
+          "custom:task-fe-plan-role",
+          "custom:task-fe-implement-identity",
+          "custom:task-fe-implement-role",
+          "custom:task-fe-review-identity",
+          "custom:task-fe-review-role",
+          "custom:fe-handover-analyze-plan",
+          "custom:fe-handover-plan-implement",
+          "custom:fe-handover-implement-review",
+          "custom:fe-handover-review-implement",
+          "custom:fe-handover-review-selfloop"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-13T17:42:03.985Z",
+      "totalDurationMinutes": 22,
+      "tags": [
+        "composer",
+        "flow",
+        "frontend",
+        "lovable",
+        "authoring"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "composer-authoring"
+    }
+  ]
+}
