@@ -847,7 +847,7 @@
       "title": "Dashboard/hub multi-minute loading hangs — bound all upstream waits and self-heal stale proxy targets",
       "type": "fix",
       "priority": "high",
-      "status": "approved",
+      "status": "merged",
       "folder": "insightFlow/workTasks/N228-dashboard-hub-multi-minute-loading-hangs-bound-all",
       "createdAt": "2026-07-13T09:55:23.528Z",
       "statusHistory": [
@@ -885,6 +885,16 @@
           "status": "approved",
           "at": "2026-07-13T11:54:30.688Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-13T11:55:54.907Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-13T11:55:55.052Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -905,7 +915,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 121,
       "tags": [
         "performance",
         "dashboard",
@@ -913,10 +923,16 @@
         "proxy",
         "sse"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-07-13T11:55:54.906Z",
+          "commitHash": "739ca74",
+          "commitMessage": "fix(hub): bound all upstream waits"
+        }
+      ],
+      "branch": "fix/N228-dashboard-hub-loading-hangs",
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-13T11:55:55.053Z",
       "flowId": "default"
     }
   ]
