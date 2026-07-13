@@ -394,7 +394,13 @@ function getScript(initialData: string): string {
       return parts.join('');
     }
 
-    function deriveIdleStatus(recentActivity) {
+    // N227 — prefer the backend's authoritative agent status (single source of
+    // truth) so this pill can never disagree with the project dashboard. Falls
+    // back to the local recentActivity derivation for older projects that don't
+    // yet send agentStatus. A permission-needed status reads as active (the
+    // agent is mid-turn, awaiting input).
+    function deriveIdleStatus(agentStatus, recentActivity) {
+      if (agentStatus) return agentStatus === 'idle' ? 'idle' : 'active';
       if (!recentActivity || !recentActivity.length) return 'none';
       var last = recentActivity[recentActivity.length - 1];
       if (last && last.tool === 'Phase' && last.action === 'done') return 'idle';
@@ -548,7 +554,7 @@ function getScript(initialData: string): string {
       } else {
         taskHtml = '<div class="proj-task"><span class="proj-task-empty">No active task</span></div>';
       }
-      var idleStatus = deriveIdleStatus(s.recentActivity);
+      var idleStatus = deriveIdleStatus(s.agentStatus, s.recentActivity);
       var activityHtml = renderActivityMini(s.recentActivity, idleStatus);
       return '<div class="proj-card' + (statusCls ? ' ' + statusCls : '') + '" data-id="' + escHtml(p.id) + '">' +
         '<div class="proj-card-header">' +
