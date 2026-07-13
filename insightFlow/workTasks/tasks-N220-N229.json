@@ -745,7 +745,7 @@
       "title": "Dashboard agent status stuck on idle on load — make backend the single source of truth over SSE",
       "type": "fix",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "insightFlow/workTasks/N227-dashboard-agent-status-stuck-on-idle-on-load-make-",
       "createdAt": "2026-07-13T08:18:51.844Z",
       "statusHistory": [
@@ -793,6 +793,16 @@
           "status": "approved",
           "at": "2026-07-13T09:21:42.447Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-13T09:24:19.149Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-13T09:24:19.288Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -813,17 +823,23 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 65,
       "tags": [
         "dashboard",
         "activity",
         "sse",
         "backend"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-07-13T09:24:19.149Z",
+          "commitHash": "eaad3bc",
+          "commitMessage": "fix(dashboard): backend single source of truth for agent status"
+        }
+      ],
+      "branch": "fix/N227-dashboard-agent-status-single-source",
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-13T09:24:19.289Z",
       "flowId": "default"
     }
   ]
