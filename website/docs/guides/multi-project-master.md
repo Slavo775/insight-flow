@@ -1,85 +1,124 @@
 ---
-title: Run the multi-project master
-sidebar_label: Multi-project master
+title: Manage many projects with the hub
+sidebar_label: Multi-project hub
 sidebar_position: 8
 ---
 
-# Run the multi-project master
+# Manage many projects with the hub
 
-The **master** is a single overview server that tracks several insight-flow
-projects at once — one page showing each project's current task, live agent
-status, and a link to its own dashboard. It runs on port **6100**.
+The **master hub** is one installable web app that manages every insight-flow
+project on your machine. From a single page you switch between projects, open a
+running one, start a stopped one, and create new ones — all on **one origin**
+(`http://localhost:6100`), which is what makes it installable as a PWA and usable
+from your phone.
 
-## 1. Start the master
+> For the full reference (endpoints, config, registry, security model) see
+> [Master hub](../built-ins/master-server.md). This guide is the walkthrough.
 
-Most of the time you don't start it by hand: launching any project dashboard
-auto-starts the master and registers the project with it.
+## 1. Start the hub
+
+Most of the time you don't start it by hand — launching any project dashboard
+auto-starts it:
 
 ```bash
-insight-flow ui            # project dashboard on :6006; auto-starts master on :6100
+insight-flow ui            # project dashboard on :6006; auto-starts the hub on :6100
 ```
 
-Open `http://localhost:6100` to see the overview. To run the master explicitly
-(e.g. as a long-lived process), use:
+To run it explicitly (e.g. as a long-lived process), or from a folder with no
+project:
 
 ```bash
-insight-flow master                # → http://localhost:6100
+insight-flow master                # → http://localhost:6100/overview
 insight-flow master --port 6200    # custom port
+insight-flow                       # in a NON-project folder → opens the hub
 ```
 
-The master is self-contained — its own lock lives at
-`~/.insight-flow/master.lock`, and its project registry is in-memory.
+Open `http://localhost:6100/overview` to see the switcher.
 
-## 2. How projects register
+## 2. Register your projects
 
-Each project's dashboard registers itself with the master when `insight-flow ui`
-runs, and pushes live status updates as agents work. Registration is automatic;
-the relevant `taskflow.config.json` knobs are under `master`:
+A project shows on the hub once it's registered. The easiest ways:
+
+- **When you `init`** — answer "register with the hub?" (or pass
+  `--register-hub`).
+- **From the hub** — the **+ New project** modal registers by default.
+- **Automatically** — running `insight-flow ui` in a project self-registers it.
+
+Registrations persist in `~/.insight-flow/hub.json`, so your projects are still
+listed after a restart (they show as *stopped* until their dashboards run).
 
 ```jsonc
-// taskflow.config.json (all optional)
+// taskflow.config.json — a project's link to the hub (all optional)
 {
   "master": {
     "url": "http://localhost:6100",
     "port": 6100,
-    "startMasterLocally": true,
-    "standalone": false,
-  },
+    "startMasterLocally": true, // auto-spawn the hub if none is running
+    "standalone": false          // true → this project never registers
+  }
 }
 ```
 
-- **`startMasterLocally`** (default `true`) — the dashboard auto-spawns a master
-  if one isn't already running.
-- **`standalone: true`** — this project never registers with a master (runs
-  solo).
-- **`url` / `port`** — point at a master on another host/port.
+## 3. Open, start, and switch
 
-## 3. Launch several projects at once
+On the overview, projects are split into **Running** and **Stopped**:
 
-To bring up dashboards for multiple registered projects in one go, use the
-**bulk** commands. Register projects once, then launch:
+- **Running** → **`Open →`** takes you to that project's dashboard at
+  `http://localhost:6100/project/<id>/` — served through the hub, same origin, so
+  the `⌂ Hub` link brings you back.
+- **Stopped** → **`Start →`** spawns the dashboard and drops you into it once it's
+  live.
+- **`↻ Refresh`** re-checks which projects are up.
+
+## 4. Create a new project from the browser
+
+Click **+ New project**:
+
+1. Browse to a parent folder (a server-side folder browser).
+2. Name it.
+3. Pick install options — **task lifecycle events** (on), **agent activity
+   tracking** (off), **composer-authoring flow** (off), **register with the hub**
+   (on), and the **editor** (Claude / Cursor / all).
+
+The hub scaffolds the folder, runs `init`, and adds it to the switcher.
+
+## 5. Install it as an app (and use it on your phone)
+
+Because it's a single origin, your browser can **install the hub as a PWA** (look
+for "Install app"). Installed, it's one icon that switches between all your
+projects, with **desktop/OS notifications** when a task changes status or Claude
+finishes / needs permission — even while backgrounded.
+
+To reach it from your phone or another device on the LAN, allowlist the machine's
+address:
 
 ```bash
-insight-flow bulk-ui --add "web-app" /path/to/web-app   # register by path
-insight-flow bulk-ui --add "api" /path/to/api
-insight-flow bulk-ui --list                             # list registered projects
-insight-flow bulk-ui                                    # interactive multi-select launcher
+INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow master --port 6100
+# on the phone (same Wi-Fi): http://192.168.0.77:6100/overview  → then "Install app"
 ```
 
-Each launched dashboard registers with the master, so they all appear on the
-`:6100` overview. Stop everything the last `bulk-ui` started with:
+The hub prints a `LAN:` URL for each allowlisted host on startup.
+
+:::warning Trust boundary
+`INSIGHT_FLOW_TRUSTED_HOSTS` means "trust this network." With it set, **any device
+on the LAN that reaches the port can create and start projects on the hub host.**
+Use it only on networks you trust; leave it unset (localhost-only) on shared
+Wi-Fi.
+:::
+
+## Legacy `bulk-*`
+
+The older `bulk-register` / `bulk-ui` / `bulk-down` commands still work and their
+entries fold into `hub.json`, but the hub above is the recommended path.
 
 ```bash
-insight-flow bulk-down
+insight-flow bulk-ui --add "web-app" /path/to/web-app   # register by path (legacy)
+insight-flow bulk-ui                                    # multi-select launcher (legacy)
+insight-flow bulk-down                                  # stop what the last bulk-ui started
 ```
-
-## 4. Verify
-
-With one or more dashboards running, open `http://localhost:6100`. Each project
-shows as a card with its current task and a live status badge; cards go neutral
-when a project's server goes offline (no heartbeat for ~60s).
 
 ## See also
 
+- [Master hub reference](../built-ins/master-server.md)
 - [CLI → setup & dashboard](../cli/setup-and-dashboard.md)
 - [Configuration → `master`](../configuration.md)

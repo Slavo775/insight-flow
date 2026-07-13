@@ -58,7 +58,7 @@ And you get:
 - **Flows** — define and edit your project's lifecycle visually (flow map + editor: nodes, ports, custom states, terminal "done" nodes). Tasks bind to a flow, and kanban columns, status badges, pickers, and agent prompts all read that flow's status set.
 - **Install / uninstall engine** — derive an install plan from a flow and run it with live progress; install or uninstall agents & modules straight from the dashboard, with templated `${VAR}` inputs and overwrite undo.
 - **Agent composition v2** — an everything-is-a-module registry (with `mcp` / `hook` / `skill` / bundle kinds) plus user-space registries and CRUD forms to author your own modules, agents, and projects.
-- **Multi-project overview** — a master server aggregates all your registered insight-flow projects into one live card grid.
+- **Multi-project hub** — a single-origin, installable PWA that switches between all your insight-flow projects: it reverse-proxies each dashboard at `/project/<id>/`, starts stopped projects, creates new ones from the browser, and streams live status + unified notifications (works from your phone via `INSIGHT_FLOW_TRUSTED_HOSTS`). Run `insight-flow master` → `http://localhost:6100/overview`.
 
 ## Dashboard
 
