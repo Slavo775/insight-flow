@@ -841,6 +841,99 @@
       "mrUrl": null,
       "mergedAt": "2026-07-13T09:24:19.289Z",
       "flowId": "default"
+    },
+    {
+      "id": "N228",
+      "title": "Dashboard/hub multi-minute loading hangs — bound all upstream waits and self-heal stale proxy targets",
+      "type": "fix",
+      "priority": "high",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N228-dashboard-hub-multi-minute-loading-hangs-bound-all",
+      "createdAt": "2026-07-13T09:55:23.528Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-13T09:55:23.528Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-13T09:57:35.798Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-13T11:30:25.362Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T11:30:56.098Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-13T11:40:04.674Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T11:54:09.127Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-13T11:54:30.688Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-13T11:55:54.907Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-13T11:55:55.052Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-13T09:57:35.799Z",
+        "completedAt": "2026-07-13T11:30:25.365Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/dashboard/client/base.ts",
+          "packages/taskflow/src/dashboard/client/api.ts",
+          "packages/taskflow/src/dashboard/client/store.ts",
+          "packages/taskflow/src/dashboard/client/App.tsx",
+          "packages/taskflow/src/dashboard/client/useDashboardStream.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 121,
+      "tags": [
+        "performance",
+        "dashboard",
+        "master",
+        "proxy",
+        "sse"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-13T11:55:54.906Z",
+          "commitHash": "739ca74",
+          "commitMessage": "fix(hub): bound all upstream waits"
+        }
+      ],
+      "branch": "fix/N228-dashboard-hub-loading-hangs",
+      "mrUrl": null,
+      "mergedAt": "2026-07-13T11:55:55.053Z",
+      "flowId": "default"
     }
   ]
 }

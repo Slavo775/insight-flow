@@ -99,6 +99,8 @@ function DashboardView() {
   const currentShard = useDashboardStore((s) => s.currentShard);
   const tasks = useDashboardStore((s) => s.tasks);
   const label = useDashboardStore((s) => s.label);
+  const loadError = useDashboardStore((s) => s.loadError);
+  const sync = useDashboardStore((s) => s.sync);
   const selectedTaskId = useDashboardStore((s) => s.selectedTaskId);
   const loadShard = useDashboardStore((s) => s.loadShard);
   const selectTask = useDashboardStore((s) => s.selectTask);
@@ -127,6 +129,24 @@ function DashboardView() {
           <Text as="p" $variant="subtitle">
             {label}
           </Text>
+          {loadError ? (
+            <div
+              role="alert"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginTop: 4,
+                color: "var(--red, #e5484d)",
+                fontSize: 12,
+              }}
+            >
+              <span>{loadError} — retrying…</span>
+              <Button $variant="secondary" onClick={() => void sync()}>
+                Retry now
+              </Button>
+            </div>
+          ) : null}
         </div>
         <div className="top-bar-actions">
           {snapshot && !activityEnabled ? (
