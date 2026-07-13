@@ -739,6 +739,92 @@
       "mrUrl": null,
       "mergedAt": "2026-07-13T08:01:19.659Z",
       "flowId": "default"
+    },
+    {
+      "id": "N227",
+      "title": "Dashboard agent status stuck on idle on load — make backend the single source of truth over SSE",
+      "type": "fix",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N227-dashboard-agent-status-stuck-on-idle-on-load-make-",
+      "createdAt": "2026-07-13T08:18:51.844Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-13T08:18:51.844Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-13T08:24:57.567Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-13T09:04:20.856Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T09:05:16.369Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-13T09:17:30.302Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-13T09:18:12.767Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-13T09:20:22.445Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T09:21:28.498Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-13T09:21:42.447Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-13T08:24:57.568Z",
+        "completedAt": "2026-07-13T09:04:20.858Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/activity-status.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/activity.ts",
+          "packages/taskflow/src/dashboard/client/store.ts",
+          "packages/taskflow/src/dashboard/client/useDashboardStream.ts",
+          "packages/taskflow/src/master/overview.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "activity",
+        "sse",
+        "backend"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

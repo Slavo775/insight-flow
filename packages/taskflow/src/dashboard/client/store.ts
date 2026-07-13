@@ -36,7 +36,11 @@ interface DashboardStore {
   // actions
   setConnection: (c: ConnStatus) => void;
   setAgentStatus: (s: ClaudeStatus) => void;
-  applySnapshot: (snap: DashboardSnapshot, activity: ActivityEvent[]) => void;
+  applySnapshot: (
+    snap: DashboardSnapshot,
+    activity: ActivityEvent[],
+    agentStatus?: ClaudeStatus | null,
+  ) => void;
   addActivityEvent: (ev: ActivityEvent) => void;
   selectTask: (id: string | null) => void;
   loadShard: (name: string) => Promise<void>;
@@ -61,7 +65,7 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   setConnection: (c) => set({ connection: c }),
   setAgentStatus: (s) => set({ agentStatus: s }),
 
-  applySnapshot: (snap, activity) => {
+  applySnapshot: (snap, activity, agentStatus) => {
     // Reset the feed to the server's authoritative state on every snapshot
     // (incl. reconnects) so stale client events are not duplicated.
     seen.clear();
@@ -72,7 +76,14 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
       seen.add(key);
       fresh.unshift(ev);
     }
-    set({ snapshot: snap, activityEvents: fresh.slice(0, ACTIVITY_CAP) });
+    // N227 — seed the agent badge from the server's derived status (single
+    // source of truth) so a fresh load reflects reality instead of the "idle"
+    // default. Older servers omit it → keep the current value.
+    set({
+      snapshot: snap,
+      activityEvents: fresh.slice(0, ACTIVITY_CAP),
+      ...(agentStatus ? { agentStatus } : {}),
+    });
   },
 
   addActivityEvent: (ev) => {

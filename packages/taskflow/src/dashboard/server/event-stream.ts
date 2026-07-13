@@ -22,7 +22,12 @@ export function statusFromEvent(event: HookEventInput): ProjectStatus {
   }
   // Derived event names emitted by the existing log-event CLI path. Kept so
   // legacy callers POSTing the old naming still get a sensible status.
-  if (t === "agent-idle" || t === "session-end") return "done";
+  // N227 — also recognize the bare agent-lifecycle terminals (`log-event
+  // done`/`idle`, EVENT_TYPES): these flow through the seeded activity feed and
+  // must read as not-working, else the badge shows "active" while idle. The
+  // working lifecycle names (`edit-start`, `research-end`, …) correctly fall
+  // through to the "active" default below.
+  if (t === "agent-idle" || t === "session-end" || t === "idle" || t === "done") return "done";
   if (t === "approval-required") return "awaiting-permission";
   return "active";
 }
