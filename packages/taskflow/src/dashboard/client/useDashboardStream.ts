@@ -34,10 +34,17 @@ interface SnapshotFrame {
  * glyphs, sounds, and browser notifications — matching the legacy dashboard.
  * Returns nothing; components read state from the store.
  */
+// N228 — coalesce a burst of file-change frames (rapid writes during active
+// agent work) into at most one re-sync per interval. Without this, every frame
+// triggered a full index+shard re-fetch in every open tab, piling load onto a
+// server that may already be busy.
+const FILE_CHANGE_DEBOUNCE_MS = 400;
+
 export function useDashboardStream(): void {
   useEffect(() => {
     const es = new EventSource(apiUrl("/sse"));
     let syncedOnce = false;
+    let fileChangeTimer: ReturnType<typeof setTimeout> | null = null;
     const store = () => useDashboardStore.getState();
 
     es.onopen = () => {
@@ -70,7 +77,13 @@ export function useDashboardStream(): void {
       store().addActivityEvent(ev);
     });
 
-    es.addEventListener("file-change", () => void store().sync());
+    es.addEventListener("file-change", () => {
+      if (fileChangeTimer) return; // a re-sync is already scheduled for this burst
+      fileChangeTimer = setTimeout(() => {
+        fileChangeTimer = null;
+        void store().sync();
+      }, FILE_CHANGE_DEBOUNCE_MS);
+    });
 
     // N103 review-fix — a custom-definition CRUD write (possibly from another
     // tab) invalidates the shared registry cache so the next /module, /agent,
@@ -115,6 +128,9 @@ export function useDashboardStream(): void {
       );
     });
 
-    return () => es.close();
+    return () => {
+      es.close();
+      if (fileChangeTimer) clearTimeout(fileChangeTimer);
+    };
   }, []);
 }

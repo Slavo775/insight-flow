@@ -23,6 +23,9 @@ function shardStart(name: string): number {
 /** List the shard JSON files, newest range first (e.g. tasks-N200-N209.json). */
 export async function fetchShardIndex(): Promise<string[]> {
   const res = await apiFetch("/api/work-tasks");
+  // N228 — surface a timed-out/proxy-error response (504/502) as a throw so the
+  // store shows an error + retry instead of silently rendering an empty board.
+  if (!res.ok) throw new Error("Failed to load task list (" + res.status + ")");
   const files: string[] = await res.json();
   return files.filter((f) => f.startsWith("tasks-")).sort((a, b) => shardStart(b) - shardStart(a));
 }
@@ -30,6 +33,7 @@ export async function fetchShardIndex(): Promise<string[]> {
 /** Load one shard's tasks (reviews/incidents already hydrated by the server). */
 export async function fetchShard(name: string): Promise<Task[]> {
   const res = await apiFetch("/api/work-tasks/" + encodeURIComponent(name));
+  if (!res.ok) throw new Error("Failed to load tasks (" + res.status + ")");
   const shard: ShardResponse = await res.json();
   return shard.tasks || [];
 }
