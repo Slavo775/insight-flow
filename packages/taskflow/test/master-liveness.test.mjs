@@ -11,7 +11,7 @@ import { createServer, get as httpGet } from "node:http";
 import { mkdtempSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { startMasterServer } from "../dist/index.js";
+import { startMasterServer, isTrustedActionRequest } from "../dist/index.js";
 
 function startHealthStub(healthy = true) {
   const server = createServer((req, res) => {
@@ -584,5 +584,185 @@ test("N219: the master never proxies a project's /hub/* control-plane routes", a
     assert.notEqual(proxied.status, 404, "non-/hub paths still go through the proxy");
   } finally {
     close();
+  }
+});
+
+// Raw HTTP over the loopback socket so we control the Host/Origin headers a
+// browser on the LAN would send. NOTE: the request's `remoteAddress` is always
+// 127.0.0.1 here — a loopback-socket test *cannot* reproduce a real phone's LAN
+// peer IP. So these tests verify the Host/Origin trust gate (isTrustedLocalRequest);
+// the actual remote-peer reachability of the widened write/exec endpoints (N223
+// option B) is only confirmable by the manual live phone check (CHECKLIST).
+const statusForPath = (port, path, headers) =>
+  new Promise((resolve, reject) => {
+    const rq = httpGet({ hostname: "127.0.0.1", port, path, headers }, (res) => {
+      resolve(res.statusCode);
+      res.resume();
+    });
+    rq.on("error", reject);
+  });
+
+test("N223: INSIGHT_FLOW_TRUSTED_HOSTS widens the Host/Origin trust gate to allowlisted hosts only", async () => {
+  const trusted = "192.168.0.77"; // an allowlisted LAN host
+  const prev = process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+  const statusFor = (port, headers) => statusForPath(port, "/api/hub/projects", headers);
+
+  // (1) Default (env unset): a non-loopback Host is refused — behavior unchanged.
+  delete process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+  const p1 = 8960 + Math.floor(Math.random() * 15);
+  let close = (await startMasterServer({ port: p1, standalone: false })).close;
+  try {
+    assert.equal(
+      await statusFor(p1, { Host: trusted + ":" + p1 }),
+      403,
+      "without the env, an allowlist-candidate Host is still refused (default localhost-only)",
+    );
+    assert.equal(
+      await statusFor(p1, { Host: "localhost:" + p1 }),
+      200,
+      "loopback Host still works by default",
+    );
+  } finally {
+    close();
+  }
+
+  // (2) With the env set: a same-origin request whose Host is the allowlisted host
+  //     passes the trust gate; a non-allowlisted Host and a cross-origin Origin are
+  //     both still refused. (Verifies the gate widening on a read endpoint; does NOT
+  //     assert phone reachability — see the note above.)
+  process.env.INSIGHT_FLOW_TRUSTED_HOSTS = trusted + ":9999"; // host:port form normalizes to the host
+  const p2 = 8980 + Math.floor(Math.random() * 15);
+  close = (await startMasterServer({ port: p2, standalone: false })).close;
+  try {
+    assert.equal(
+      await statusFor(p2, { Host: trusted + ":" + p2, Origin: "http://" + trusted + ":" + p2 }),
+      200,
+      "allowlisted Host + same-origin Origin passes the trust gate",
+    );
+    assert.equal(
+      await statusFor(p2, { Host: "localhost:" + p2 }),
+      200,
+      "loopback is always trusted regardless of the env",
+    );
+    assert.equal(
+      await statusFor(p2, { Host: "evil.example:" + p2 }),
+      403,
+      "a non-allowlisted Host (DNS rebinding) is still refused",
+    );
+    assert.equal(
+      await statusFor(p2, { Host: trusted + ":" + p2, Origin: "http://evil.example" }),
+      403,
+      "a cross-origin Origin is still refused even with a trusted Host (CSRF)",
+    );
+  } finally {
+    close();
+    if (prev === undefined) delete process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+    else process.env.INSIGHT_FLOW_TRUSTED_HOSTS = prev;
+  }
+});
+
+test("N223 (option B): the widened write/exec endpoints are governed by the trusted-host gate", async () => {
+  // fs/list (and, by the same edit, create/start) is now gated by
+  // isTrustedLocalRequest instead of a raw remoteAddress-loopback check. What a
+  // loopback-socket test CAN show: with the host allowlisted, an allowlisted Host
+  // reaches the handler while a non-allowlisted Host is refused — i.e. the endpoint
+  // is governed by the same Host/Origin trust gate as the read control-plane.
+  // What it CANNOT show (remoteAddress is always 127.0.0.1 here): that a real LAN
+  // peer is no longer hard-blocked — that removal is verified by code review + the
+  // manual live phone check (CHECKLIST). /api/register is intentionally NOT widened
+  // and keeps its loopback-only remoteAddress gate (unchanged in this task).
+  const root = mkdtempSync(join(tmpdir(), "if-n223-fs-"));
+  mkdirSync(join(root, "sub"));
+  const prevRoot = process.env.INSIGHT_FLOW_BROWSE_ROOT;
+  const prevTrusted = process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+  process.env.INSIGHT_FLOW_BROWSE_ROOT = root;
+  const trusted = "192.168.0.77";
+  const port = 8940 + Math.floor(Math.random() * 15);
+  process.env.INSIGHT_FLOW_TRUSTED_HOSTS = trusted;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    // Allowlisted Host → reaches the handler (200), governed only by the trust gate.
+    assert.equal(
+      await statusForPath(port, "/api/fs/list", {
+        Host: trusted + ":" + port,
+        Origin: "http://" + trusted + ":" + port,
+      }),
+      200,
+      "fs/list is reachable through the allowlisted-host trust gate (write-family endpoint widened)",
+    );
+    // Non-allowlisted Host → still refused; the endpoint is not open to all hosts.
+    assert.equal(
+      await statusForPath(port, "/api/fs/list", { Host: "evil.example:" + port }),
+      403,
+      "fs/list still refuses a non-allowlisted Host",
+    );
+    // Default (env unset) keeps fs/list localhost-only: a non-loopback Host is refused.
+    delete process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+    assert.equal(
+      await statusForPath(port, "/api/fs/list", { Host: trusted + ":" + port }),
+      403,
+      "without the env, fs/list refuses a non-loopback Host (default unchanged)",
+    );
+  } finally {
+    close();
+    if (prevRoot === undefined) delete process.env.INSIGHT_FLOW_BROWSE_ROOT;
+    else process.env.INSIGHT_FLOW_BROWSE_ROOT = prevRoot;
+    if (prevTrusted === undefined) delete process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+    else process.env.INSIGHT_FLOW_TRUSTED_HOSTS = prevTrusted;
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("N223 (option B, security): the write/exec gate keeps a peer-IP defense — a forged loopback Host from a LAN peer is refused", () => {
+  // Unit-test the exported predicate directly, because a loopback-socket
+  // integration test can't set a non-loopback `remoteAddress`. This is the
+  // regression the round-2 security review caught: dropping the remoteAddress
+  // gate made `isTrustedLocalRequest` (header-only) forgeable by a curl-class
+  // LAN client sending `Host: 127.0.0.1`.
+  const req = (remoteAddress, headers) => ({ socket: { remoteAddress }, headers });
+  const prev = process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+  try {
+    // --- env UNSET → genuinely localhost-only for ALL client types ---
+    delete process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+    assert.equal(
+      isTrustedActionRequest(req("127.0.0.1", { host: "127.0.0.1:6100" })),
+      true,
+      "the local machine (loopback peer, loopback Host) is allowed",
+    );
+    assert.equal(
+      isTrustedActionRequest(req("192.168.0.50", { host: "127.0.0.1:6100" })),
+      false,
+      "a NON-loopback peer forging a loopback Host is REFUSED (the regression)",
+    );
+    assert.equal(
+      isTrustedActionRequest(req("192.168.0.50", { host: "192.168.0.77:6100" })),
+      false,
+      "a non-loopback peer with a non-allowlisted Host is refused",
+    );
+
+    // --- env SET to the hub's LAN IP → a real allowlisted phone passes (option B) ---
+    process.env.INSIGHT_FLOW_TRUSTED_HOSTS = "192.168.0.77";
+    assert.equal(
+      isTrustedActionRequest(
+        req("192.168.0.50", { host: "192.168.0.77:6100", origin: "http://192.168.0.77:6100" }),
+      ),
+      true,
+      "a phone (non-loopback peer) targeting the allowlisted host is allowed",
+    );
+    assert.equal(
+      isTrustedActionRequest(req("192.168.0.50", { host: "127.0.0.1:6100" })),
+      false,
+      "even with the env set, a forged loopback Host from a LAN peer is refused (must target the allowlisted host)",
+    );
+    assert.equal(
+      isTrustedActionRequest(
+        req("127.0.0.1", { host: "192.168.0.77:6100", origin: "http://evil.example" }),
+      ),
+      false,
+      "a cross-origin Origin is refused even from a loopback peer (CSRF)",
+    );
+  } finally {
+    if (prev === undefined) delete process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+    else process.env.INSIGHT_FLOW_TRUSTED_HOSTS = prev;
   }
 });

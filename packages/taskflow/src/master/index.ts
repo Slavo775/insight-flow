@@ -10,7 +10,7 @@ import {
   LOCK_PATH,
 } from "./lock.js";
 
-export { startMasterServer } from "./server.js";
+export { startMasterServer, isTrustedActionRequest } from "./server.js";
 export type { MasterServerConfig, MasterProjectState, MasterProjectEntry } from "./types.js";
 
 /**
@@ -57,6 +57,15 @@ export async function runMaster(portOverride?: number): Promise<void> {
     : "accepting registrations";
   console.log("\n  insight-flow master\n");
   console.log("  Overview: http://localhost:" + config.port + "/overview");
+  // N223 — when the user allowlists LAN hosts (INSIGHT_FLOW_TRUSTED_HOSTS), print
+  // the reachable mobile URL(s) so they know where to open the PWA from a phone.
+  const trustedHosts = (process.env.INSIGHT_FLOW_TRUSTED_HOSTS || "")
+    .split(",")
+    .map((h) => h.trim().replace(/:\d+$/, "")) // strip any :port the user included
+    .filter(Boolean);
+  for (const host of trustedHosts) {
+    console.log("  LAN:      http://" + host + ":" + config.port + "/overview");
+  }
   console.log("  Mode:     " + mode);
   console.log("  Lock:     " + LOCK_PATH);
   console.log("");

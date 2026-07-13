@@ -125,7 +125,7 @@ export {
   StatusHistoryEntrySchema,
   TaskflowValidationError,
 } from "./core/schema/index.js";
-export { runMaster, startMasterServer } from "./master/index.js";
+export { runMaster, startMasterServer, isTrustedActionRequest } from "./master/index.js";
 export { jsonFileStorage } from "./core/storage-port.js";
 export type { Storage } from "./core/storage-port.js";
 export { SseTransport } from "./dashboard/server/transport.js";

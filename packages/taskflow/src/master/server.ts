@@ -292,26 +292,88 @@ function headerHost(value: string | undefined): string {
 }
 
 /**
+ * N223 — extra hosts the user has *explicitly* allowlisted for the hub
+ * control-plane (their LAN IP / hostname), so the installable PWA works over the
+ * LAN / on mobile. Read from `INSIGHT_FLOW_TRUSTED_HOSTS` (comma-separated, each
+ * a bare host or `host:port`, IP or hostname), normalized to a hostname via
+ * `headerHost`. Parsed per-request (cheap; gated endpoints are user-frequency)
+ * so it stays honest under tests that set/restore the env. Empty/unset ⇒ empty
+ * set ⇒ localhost-only, exactly as before N223.
+ */
+function trustedHostSet(): Set<string> {
+  const set = new Set<string>();
+  const raw = process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
+  if (!raw) return set;
+  for (const part of raw.split(",")) {
+    const h = headerHost(part.trim());
+    if (h) set.add(h);
+  }
+  return set;
+}
+
+/** True if the host is loopback OR an explicitly-allowlisted trusted host (N223).
+ *  Loopback is always trusted regardless of the env. */
+function isTrustedHost(hostname: string, trusted: Set<string>): boolean {
+  return isLoopbackHost(hostname) || trusted.has(hostname);
+}
+
+/**
  * N221 review-fix — is this a trusted, same-machine same-origin request to a
  * sensitive local endpoint (folder listing / project creation / start)? The
  * server binds all interfaces and sets `Access-Control-Allow-Origin: *`, so a
  * loopback `remoteAddress` alone does NOT keep a remote website out. A request
  * is trusted only if:
- *   - its `Host` header host is loopback — this defeats **DNS rebinding**, where
- *     the socket lands on 127.0.0.1 but the browser sends the attacker's
- *     hostname in `Host`;
+ *   - its `Host` header host is loopback (or an N223-allowlisted host) — this
+ *     defeats **DNS rebinding**, where the socket lands on 127.0.0.1 but the
+ *     browser sends the attacker's hostname in `Host`;
  *   - it carries no cross-origin `Origin` (a cross-origin browser fetch sends an
- *     `Origin` whose host is not loopback); and
+ *     `Origin` whose host is not loopback/allowlisted); and
  *   - its `Sec-Fetch-Site`, if present, is `same-origin`/`none` (not cross-site).
- * The hub page itself sends a loopback Host + same-origin Origin, so it passes.
+ * The hub page itself sends a loopback (or allowlisted) Host + same-origin
+ * Origin, so it passes. N223: the allowlist only *widens* the trusted host set
+ * to hosts the user named — a cross-origin attacker's Origin is still rejected,
+ * and a rebound request still carries the attacker's own hostname (not the
+ * allowlisted LAN IP), so neither CSRF nor DNS rebinding is reopened.
  */
 function isTrustedLocalRequest(req: IncomingMessage): boolean {
-  if (!isLoopbackHost(headerHost(req.headers.host))) return false;
+  const trusted = trustedHostSet();
+  if (!isTrustedHost(headerHost(req.headers.host), trusted)) return false;
   const origin = req.headers.origin;
-  if (origin && !isLoopbackHost(headerHost(origin))) return false;
+  if (origin && !isTrustedHost(headerHost(origin), trusted)) return false;
   const site = req.headers["sec-fetch-site"];
   if (site && site !== "same-origin" && site !== "none") return false;
   return true;
+}
+
+/** Socket peer addresses that count as the local machine. Distinct from
+ *  `LOOPBACK_HOSTS` (which are `Host`-header hostnames a client can forge):
+ *  `req.socket.remoteAddress` is the real TCP peer and cannot be spoofed over
+ *  the network. */
+const LOOPBACK_PEERS = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+
+/**
+ * N223 review-fix (round 2) — the gate for the LAN-reachable **write/exec**
+ * endpoints (`/api/fs/list`, `/api/projects/create`, `/api/hub/projects/:id/start`).
+ * `isTrustedLocalRequest` is decided purely from headers, so a non-browser LAN
+ * client (curl / script) could forge `Host: 127.0.0.1` (no Origin, no
+ * Sec-Fetch-Site) and pass it — that would make these filesystem-write / exec
+ * endpoints reachable from the network even with the env **unset**. So we keep a
+ * peer-IP defense-in-depth on top of the header trust check:
+ *   - the Host/Origin/Sec-Fetch checks must pass (defeats browser DNS-rebinding + CSRF);
+ *   - a **loopback socket peer** is always allowed (the local machine);
+ *   - a **non-loopback peer** is allowed ONLY when the request targets a host the
+ *     user *explicitly* allowlisted (`INSIGHT_FLOW_TRUSTED_HOSTS`) — the loopback
+ *     shortcut in `isTrustedHost` does NOT count here, so a forged loopback `Host`
+ *     from the LAN is rejected.
+ * Env unset ⇒ empty allowlist ⇒ every non-loopback peer is rejected ⇒ genuinely
+ * localhost-only for all client types, exactly as before N223. Env set ⇒ a real
+ * allowlisted LAN host (the PWA on a phone) passes — the accepted N223 trust boundary.
+ */
+export function isTrustedActionRequest(req: IncomingMessage): boolean {
+  if (!isTrustedLocalRequest(req)) return false;
+  const remote = req.socket.remoteAddress ?? "";
+  if (LOOPBACK_PEERS.has(remote)) return true;
+  return trustedHostSet().has(headerHost(req.headers.host));
 }
 
 /** Hop-by-hop headers must not be forwarded by a proxy (RFC 7230 §6.1). */
@@ -799,19 +861,19 @@ export async function startMasterServer(
       }
 
       // N221 — GET /api/fs/list?dir=<abs> — the "New project" folder browser.
-      // Lists sub-directories of `dir` (default: the browse root). Loopback-only
-      // (reads the filesystem, server binds all interfaces) and confined to
+      // Lists sub-directories of `dir` (default: the browse root), confined to
       // browseRoot() via realpath (no `..`/symlink escape). Directories only.
+      // N223 — trusted-host-gated: loopback by default, but the user may allowlist
+      // LAN hosts (INSIGHT_FLOW_TRUSTED_HOSTS) so the PWA folder browser works from
+      // a phone. A trusted LAN client can then read the (browseRoot-confined)
+      // listing — accepted trust boundary (documented in N224).
       if (req.method === "GET" && url.pathname === "/api/fs/list") {
-        const remote = req.socket.remoteAddress ?? "";
-        if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "fs-list is localhost-only" }));
-          return;
-        }
-        // N221 review-fix — reject DNS-rebound / cross-origin browser reads
+        // N221 review-fix / N223 — reject DNS-rebound / cross-origin browser reads
         // (ACAO:* + all-interfaces bind would otherwise leak the home listing).
-        if (!isTrustedLocalRequest(req)) {
+        // isTrustedActionRequest adds a peer-IP guard: a non-loopback client is
+        // only accepted for an explicitly-allowlisted host (a forged loopback Host
+        // from the LAN is rejected; env unset ⇒ localhost-only for all clients).
+        if (!isTrustedActionRequest(req)) {
           res.writeHead(403, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "request refused" }));
           return;
@@ -860,18 +922,17 @@ export async function startMasterServer(
       // POST /api/projects/create — N210: scaffold a new project from the home
       // UI (non-coder onboarding). N221 — creates <chosen-dir>/<slug> where the
       // chosen dir is confined to browseRoot() (realpath); runs init, registers
-      // it. This endpoint writes to the filesystem, so — because the server binds
-      // all interfaces — it is gated to **loopback callers only**; a LAN peer 403s.
+      // it. This endpoint writes to the filesystem + runs init. N223 — trusted-host
+      // gated: loopback by default, but an allowlisted LAN host (via
+      // INSIGHT_FLOW_TRUSTED_HOSTS) may create a project from the PWA on a phone.
+      // Accepted trust boundary: a trusted LAN client can write (browseRoot-confined)
+      // + spawn init on the hub host — documented in N224.
       if (req.method === "POST" && url.pathname === "/api/projects/create") {
-        const remote = req.socket.remoteAddress ?? "";
-        if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "create-project is localhost-only" }));
-          return;
-        }
-        // N221 review-fix — reject DNS-rebound / cross-origin browser POSTs
-        // (CSRF — this writes to the filesystem + runs init).
-        if (!isTrustedLocalRequest(req)) {
+        // N221 review-fix / N223 — reject DNS-rebound / cross-origin browser POSTs
+        // (CSRF — this writes to the filesystem + runs init). isTrustedActionRequest
+        // adds a peer-IP guard: a non-loopback client is only accepted for an
+        // explicitly-allowlisted host (env unset ⇒ localhost-only for all clients).
+        if (!isTrustedActionRequest(req)) {
           res.writeHead(403, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "request refused" }));
           return;
@@ -1060,20 +1121,20 @@ export async function startMasterServer(
       }
 
       // N215 — POST /api/hub/projects/:id/start — spawn an offline project's
-      // dashboard (localhost-only; it execs + writes), then wait until reachable.
-      // The dashboard registers on boot (reconciling by path), so the entry gets
-      // its live url + goes online. Returns { url } for the client to route to.
+      // dashboard (it execs + writes), then wait until reachable. The dashboard
+      // registers on boot (reconciling by path), so the entry gets its live url +
+      // goes online. Returns { url } for the client to route to. N223 — trusted-host
+      // gated: loopback by default, but an allowlisted LAN host (via
+      // INSIGHT_FLOW_TRUSTED_HOSTS) may start a stopped project from the PWA on a
+      // phone. Accepted trust boundary: a trusted LAN client can spawn a dashboard
+      // process on the hub host — documented in N224.
       const startMatch = /^\/api\/hub\/projects\/([^/]+)\/start$/.exec(url.pathname);
       if (req.method === "POST" && startMatch) {
-        const remote = req.socket.remoteAddress ?? "";
-        if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "start is localhost-only" }));
-          return;
-        }
-        // N221 review-fix — start spawns a process; reject DNS-rebound /
-        // cross-origin browser POSTs, same as fs-list/create.
-        if (!isTrustedLocalRequest(req)) {
+        // N221 review-fix / N223 — start spawns a process; reject DNS-rebound /
+        // cross-origin browser POSTs (CSRF). isTrustedActionRequest adds a peer-IP
+        // guard: a non-loopback client is only accepted for an explicitly-allowlisted
+        // host (env unset ⇒ localhost-only for all clients).
+        if (!isTrustedActionRequest(req)) {
           res.writeHead(403, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "request refused" }));
           return;
