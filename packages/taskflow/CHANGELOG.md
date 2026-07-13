@@ -2,6 +2,31 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.4.0](https://github.com/Slavo775/insight-flow/compare/v2.3.1...v2.4.0) (2026-07-13)
+
+
+### Features
+
+* **agents,dashboard:** hub activity delivery + SW-unified notifications (N225) ([a14028f](https://github.com/Slavo775/insight-flow/commit/a14028fcbee94b9f043691ddf51442058beb9a23))
+* **master:** connection-based liveness + per-project token + on-demand health (N214) ([34bc7aa](https://github.com/Slavo775/insight-flow/commit/34bc7aad533ec5bfc45c05f01854701ff2db0416))
+* **master:** hub robustness + UX fixes (N218) ([7563531](https://github.com/Slavo775/insight-flow/commit/75635318ef68ef17fff3c352c4eae46f67d23d75))
+* **master:** installable PWA for the hub — manifest + offline app shell (N217) ([0c97415](https://github.com/Slavo775/insight-flow/commit/0c97415d38e38a730b1176e587b22965de96f9ca))
+* **master:** LAN/mobile hub access via a trusted-host allowlist (N223) ([4a18a0d](https://github.com/Slavo775/insight-flow/commit/4a18a0d103af15c468fa181c33ca8b84fba5102a))
+* **master:** New Project install options + composer-authoring flow install (N222) ([57ebb84](https://github.com/Slavo775/insight-flow/commit/57ebb845840268b4e2786e1fe82c6c013b4ed7f4))
+* **master:** New Project modal + server-side folder browser (N221) ([cf87792](https://github.com/Slavo775/insight-flow/commit/cf87792ca62376b2e417f3b7cc23668cc16fb424))
+* **master:** reverse-proxy spike — serve a project dashboard on one origin (N212) ([70388de](https://github.com/Slavo775/insight-flow/commit/70388deae38f9641e0f3e4de8cc9c69c6510d5b8))
+* **master:** reverse-registration handshake + client token privacy (N219) ([dbd3a39](https://github.com/Slavo775/insight-flow/commit/dbd3a395389eb0cbb6a5cf5773ac04e213e69e64))
+* **master:** single-origin hub shell + project switcher + start-and-go (N215) ([a7f6fb3](https://github.com/Slavo775/insight-flow/commit/a7f6fb31fa33a12196566a50637245d87f5dd8c9))
+* **master:** stable /project/&lt;projectId&gt; proxy path + running/stopped split (N220) ([cf97208](https://github.com/Slavo775/insight-flow/commit/cf972089c96fa3243eb66a407f50fe74a8f47063))
+* **master:** unified notifications + sounds via a hub service worker (N216) ([de16a04](https://github.com/Slavo775/insight-flow/commit/de16a047b7c8211a773303fdad71ca8268b4172e))
+* **master:** unified persistent hub registry + init opt-in (N213) ([fada1fd](https://github.com/Slavo775/insight-flow/commit/fada1fd6fbb7b7078b93c02b3a14f63b09a81dbb))
+* single-origin PWA hub (N212–N225) → 2.4.0 ([381990b](https://github.com/Slavo775/insight-flow/commit/381990ba96975eece10063457ce2b6743f133ba6))
+
+
+### Bug Fixes
+
+* **dashboard:** base-aware project nav under the hub proxy ([c4dc149](https://github.com/Slavo775/insight-flow/commit/c4dc1497e2d807e51d430744cd936a57ac3f0218))
+
 ## [2.3.1](https://github.com/Slavo775/insight-flow/compare/v2.3.0...v2.3.1) (2026-07-10)
 
 
