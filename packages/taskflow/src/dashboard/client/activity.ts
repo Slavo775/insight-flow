@@ -23,7 +23,10 @@ export interface ActivityEvent {
   agentType?: string;
 }
 
-export type ClaudeStatus = "active" | "idle" | "permission-needed";
+// N227 — the badge status type + its derivation now live in core so the server
+// is the single source of truth. Re-exported here to keep existing client
+// imports (`./activity.js`) working.
+export type { ClaudeStatus } from "../../core/activity-status.js";
 
 export type HookStatus = "ok" | "hook-missing" | "settings-missing" | "both-missing" | string;
 
@@ -52,16 +55,6 @@ export function relativeTime(ts?: string): string {
   if (diff < 60000) return Math.floor(diff / 1000) + "s";
   if (diff < 3600000) return Math.floor(diff / 60000) + "m";
   return Math.floor(diff / 3600000) + "h";
-}
-
-export function claudeStatusFromEvent(ev: ActivityEvent): ClaudeStatus | null {
-  if (ev.tool === "Event" && ev.action === "start") return "active";
-  if (ev.tool === "Event" && ev.source === "hook" && ev.action === "agent-active") return "active";
-  if (ev.tool === "Event" && ev.source === "hook" && ev.action === "agent-idle") return "idle";
-  if (ev.tool === "Event" && ev.source === "hook" && ev.action === "approval-required")
-    return "permission-needed";
-  if (ev.tool === "Event" && ev.source === "hook" && ev.action === "tool-approved") return "active";
-  return null;
 }
 
 export function shouldShowEvent(ev: ActivityEvent, verbosity: string): boolean {

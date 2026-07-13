@@ -32,11 +32,18 @@ interface DashboardStore {
   currentShard: string | null;
   tasks: Task[];
   label: string;
+  // N228 — non-null when the initial/board data fetch failed or timed out; the
+  // UI shows this + a Retry instead of a permanent "Loading…" spinner.
+  loadError: string | null;
   selectedTaskId: string | null;
   // actions
   setConnection: (c: ConnStatus) => void;
   setAgentStatus: (s: ClaudeStatus) => void;
-  applySnapshot: (snap: DashboardSnapshot, activity: ActivityEvent[]) => void;
+  applySnapshot: (
+    snap: DashboardSnapshot,
+    activity: ActivityEvent[],
+    agentStatus?: ClaudeStatus | null,
+  ) => void;
   addActivityEvent: (ev: ActivityEvent) => void;
   selectTask: (id: string | null) => void;
   loadShard: (name: string) => Promise<void>;
@@ -47,6 +54,32 @@ interface DashboardStore {
 // Module-level dedupe set for activity events (mirrors the old hook's seenRef).
 const seen = new Set<string>();
 
+// N228 — a fetch aborted by the request timeout throws a raw AbortError
+// ("The operation was aborted"); show a human message on the retry banner.
+function loadErrorText(e: unknown, fallback: string): string {
+  if (e instanceof Error && e.name === "AbortError") return "Timed out — retrying…";
+  return (e as Error)?.message || fallback;
+}
+
+// N228 — auto-retry a failed board load on a fixed backoff so the dashboard
+// self-recovers once the (possibly wedged/restarting) server answers again,
+// without the user reloading. One timer at a time.
+const SYNC_RETRY_MS = 5000;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+function scheduleRetry(run: () => void): void {
+  if (retryTimer) return;
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    run();
+  }, SYNC_RETRY_MS);
+}
+function clearRetry(): void {
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+}
+
 export const useDashboardStore = create<DashboardStore>((set, get) => ({
   connection: "reconnecting",
   agentStatus: "idle",
@@ -56,12 +89,13 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   currentShard: null,
   tasks: [],
   label: "Loading...",
+  loadError: null,
   selectedTaskId: null,
 
   setConnection: (c) => set({ connection: c }),
   setAgentStatus: (s) => set({ agentStatus: s }),
 
-  applySnapshot: (snap, activity) => {
+  applySnapshot: (snap, activity, agentStatus) => {
     // Reset the feed to the server's authoritative state on every snapshot
     // (incl. reconnects) so stale client events are not duplicated.
     seen.clear();
@@ -72,7 +106,14 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
       seen.add(key);
       fresh.unshift(ev);
     }
-    set({ snapshot: snap, activityEvents: fresh.slice(0, ACTIVITY_CAP) });
+    // N227 — seed the agent badge from the server's derived status (single
+    // source of truth) so a fresh load reflects reality instead of the "idle"
+    // default. Older servers omit it → keep the current value.
+    set({
+      snapshot: snap,
+      activityEvents: fresh.slice(0, ACTIVITY_CAP),
+      ...(agentStatus ? { agentStatus } : {}),
+    });
   },
 
   addActivityEvent: (ev) => {
@@ -85,27 +126,40 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   selectTask: (id) => set({ selectedTaskId: id }),
 
   loadShard: async (name) => {
-    const [shardTasks, master] = await Promise.all([
-      fetchShard(name),
-      fetchMaster().catch((): MasterResponse => ({})),
-    ]);
-    const current = master?.meta?.currentTaskId ?? null;
-    let label =
-      "Shard: " +
-      name.replace("tasks-", "").replace(".json", "") +
-      " · " +
-      shardTasks.length +
-      " tasks";
-    if (current) label += " · current " + current;
-    set({ currentShard: name, tasks: shardTasks, label });
+    try {
+      const [shardTasks, master] = await Promise.all([
+        fetchShard(name),
+        fetchMaster().catch((): MasterResponse => ({})),
+      ]);
+      const current = master?.meta?.currentTaskId ?? null;
+      let label =
+        "Shard: " +
+        name.replace("tasks-", "").replace(".json", "") +
+        " · " +
+        shardTasks.length +
+        " tasks";
+      if (current) label += " · current " + current;
+      set({ currentShard: name, tasks: shardTasks, label, loadError: null });
+      clearRetry();
+    } catch (e) {
+      // N228 — a timed-out/failed shard load surfaces as an error + auto-retry
+      // instead of leaving the board on a stale/empty state indefinitely.
+      set({ loadError: loadErrorText(e, "Couldn't load tasks") });
+      scheduleRetry(() => void get().sync());
+    }
   },
 
   // file-change / reconnect → re-fetch the shard index + the current shard.
   sync: async () => {
-    const index = await fetchShardIndex();
-    set({ shards: index });
-    const name = get().currentShard || index[0];
-    if (name) await get().loadShard(name);
+    try {
+      const index = await fetchShardIndex();
+      set({ shards: index, loadError: null });
+      const name = get().currentShard || index[0];
+      if (name) await get().loadShard(name);
+    } catch (e) {
+      set({ loadError: loadErrorText(e, "Couldn't load the dashboard") });
+      scheduleRetry(() => void get().sync());
+    }
   },
 
   // N87: ensure the task for `id` is loaded — it may live in a different shard

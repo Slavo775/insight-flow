@@ -1,0 +1,32 @@
+{
+  "taskId": "N227",
+  "reviews": [
+    {
+      "startedAt": "2026-07-13T09:05:16.370Z",
+      "endedAt": "2026-07-13T09:17:30.301Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: agent-lifecycle done/idle events misclassify as active in statusFromEvent, now load-bearing on the badge. 1-line fix in event-stream.ts. Core fix otherwise correct + verified.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-13T09:18:12.768Z",
+        "endedAt": "2026-07-13T09:20:22.444Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/event-stream.ts"
+        ],
+        "comment": "Fixed blocker 1: statusFromEvent now maps bare lifecycle done/idle to not-working; verified done/idle->idle and agent-active->active end-to-end.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-13T09:21:28.501Z",
+      "endedAt": "2026-07-13T09:21:42.446Z",
+      "verdict": "approved",
+      "comment": "Human approved; merge into base branch 'fixes'.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

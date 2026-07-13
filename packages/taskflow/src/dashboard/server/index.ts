@@ -13,8 +13,9 @@ import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
 import { SseTransport, type Transport } from "./transport.js";
-import type { TaskflowConfig, HookEventInput } from "../../core/types.js";
+import type { TaskflowConfig, HookEventInput, ActivityEvent } from "../../core/types.js";
 import { getWorkDir, setDefaultFlow } from "../../core/config.js";
+import { claudeStatusFromProjectStatus } from "../../core/activity-status.js";
 import { ActivityEngine, NoopActivityEngine } from "./activity.js";
 import { getNavHtml, getNavCss, getConfigPageHtml } from "./dashboard.js";
 import {
@@ -445,9 +446,29 @@ function holdLiveness(
   connect();
 }
 
+/**
+ * N227 — project an activity-feed "Event" row (hook-sourced) onto the
+ * {@link HookEventInput} the {@link EventStore} derives status from. Non-Event
+ * rows (Tool / Skill / Phase) carry no hook-level state and return null. Shared
+ * by the startup seed loop and the live `activity.onEvent` handler so both
+ * funnel through the same `statusFromEvent` vocabulary.
+ */
+function activityRowToHookEvent(event: ActivityEvent, seq: number): HookEventInput | null {
+  if (event.tool !== "Event" || typeof event.action !== "string") return null;
+  return {
+    id: `act_${event.ts}_${seq}`,
+    timestamp: event.ts,
+    // Pass the dash-case derived action directly; `statusFromEvent` accepts both
+    // the raw Claude/Cursor hook names and these derived names.
+    type: event.action,
+    payload: {},
+  };
+}
+
 function buildProjectState(
   config: TaskflowConfig,
   activity: ActivityEngine | NoopActivityEngine,
+  eventStore: EventStore,
 ): Record<string, unknown> {
   const workDir = getWorkDir(config);
   let currentTaskId: string | null = null;
@@ -485,6 +506,9 @@ function buildProjectState(
     currentTaskStatus,
     taskCounts,
     recentActivity: activity.getRecentEvents().slice(-50),
+    // N227 — the authoritative agent status so the master overview renders the
+    // same value as the dashboard instead of re-deriving it from recentActivity.
+    agentStatus: claudeStatusFromProjectStatus(eventStore.getStatus()),
   };
 }
 
@@ -506,6 +530,7 @@ async function setupMasterIntegration(
   config: TaskflowConfig,
   serverPort: number,
   activity: ActivityEngine | NoopActivityEngine,
+  eventStore: EventStore,
 ): Promise<(() => void) | null> {
   const masterCfg = config.master;
   if (masterCfg?.standalone) return null;
@@ -589,7 +614,12 @@ async function setupMasterIntegration(
       masterId = r.id;
       masterToken = r.token;
       holdLiveness(masterUrl, masterId, masterToken, reregister);
-      void pushStateToMaster(masterUrl, masterId, masterToken, buildProjectState(config, activity));
+      void pushStateToMaster(
+        masterUrl,
+        masterId,
+        masterToken,
+        buildProjectState(config, activity, eventStore),
+      );
       return true;
     })();
     try {
@@ -608,14 +638,16 @@ async function setupMasterIntegration(
   holdLiveness(masterUrl, masterId, masterToken, reregister);
 
   // Push initial state
-  const state = buildProjectState(config, activity);
+  const state = buildProjectState(config, activity, eventStore);
   void pushStateToMaster(masterUrl, masterId, masterToken, state);
-  pushStatusToMaster(masterUrl, masterId, masterToken, "idle");
+  // N227 — push the real seeded status (not a hardcoded "idle") so the master
+  // reflects an already-active agent from the first registration.
+  pushStatusToMaster(masterUrl, masterId, masterToken, eventStore.getStatus());
 
   // Return push function to call on file-change
   return async function pushOnChange(): Promise<void> {
     if (!masterId || !masterToken) return;
-    const s = buildProjectState(config, activity);
+    const s = buildProjectState(config, activity, eventStore);
     const status = await pushStateToMaster(masterUrl, masterId, masterToken, s);
     if (status === 401) {
       if (await reregister()) {
@@ -652,16 +684,30 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
   activity.start();
 
-  // Master integration — runs async, non-blocking
-  let pushToMaster: (() => void) | null = null;
-  void setupMasterIntegration(config, serverPort, activity).then((fn) => {
-    pushToMaster = fn;
-  });
+  // N68: in-memory hook-event store driving derived project status.
+  const eventStore = new EventStore();
+
+  // N227 — seed the status store from the durable activity feed (N225) that
+  // `activity.start()` just restored, so the derived active/idle status is
+  // correct on the very first dashboard load / master push instead of
+  // defaulting to "idle" until the next live event arrives. `activitySeq` then
+  // continues past the seeded rows for the live `activity.onEvent` handler.
+  let activitySeq = 0;
+  for (const ev of activity.getRecentEvents()) {
+    const synthetic = activityRowToHookEvent(ev, activitySeq);
+    if (synthetic) {
+      eventStore.insert(synthetic);
+      activitySeq++;
+    }
+  }
 
   const masterUrl = config.master?.url ?? "http://localhost:6100";
 
-  // N68: in-memory hook-event store driving derived project status.
-  const eventStore = new EventStore();
+  // Master integration — runs async, non-blocking
+  let pushToMaster: (() => void) | null = null;
+  void setupMasterIntegration(config, serverPort, activity, eventStore).then((fn) => {
+    pushToMaster = fn;
+  });
 
   // N151 — the request dispatch lives in a named function so the createServer
   // callback can wrap it in a handler-wide error boundary (below).
@@ -1634,6 +1680,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   transport.onConnection((client) => {
     client.emit("snapshot", {
       activity: activity.getRecentEvents(),
+      // N227 — the derived agent status so the badge is correct on first paint.
+      // Previously the client defaulted to "idle" until the next live event,
+      // even though the seeded activity feed already implied "active".
+      agentStatus: claudeStatusFromProjectStatus(eventStore.getStatus()),
       hookStatus,
       configEnabled,
       // N85: read-only config flags the React SPA needs (the legacy dashboard
@@ -1654,21 +1704,15 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   // fallback writer keyed off the dash-case derived names (`agent-idle`,
   // `approval-required`, …) which `statusFromEvent` already knows.
   let activityDebounceTimer: NodeJS.Timeout | null = null;
-  let activitySeq = 0;
   activity.onEvent((event) => {
     transport.emit("activity", event);
 
     // Only forward Event-tool activity rows (hook-sourced) — Tool/Skill/Phase
     // activity rows don't carry hook-level state and would just add noise.
-    if (event.tool === "Event" && typeof event.action === "string") {
-      const synthetic: HookEventInput = {
-        id: `act_${event.ts}_${activitySeq++}`,
-        timestamp: event.ts,
-        // Pass the dash-case derived action directly; `statusFromEvent`
-        // accepts both vocabularies.
-        type: event.action,
-        payload: {},
-      };
+    // `activitySeq` continues from the startup seed loop above.
+    const synthetic = activityRowToHookEvent(event, activitySeq);
+    if (synthetic) {
+      activitySeq++;
       const { duplicate, from, to } = eventStore.insert(synthetic);
       if (!duplicate && from !== to) {
         transport.emit("status", {

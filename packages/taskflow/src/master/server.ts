@@ -49,6 +49,13 @@ function realDirWithinRoot(p: string, root: string): string | null {
 const MIME_JSON = "application/json; charset=utf-8";
 const MIME_HTML = "text/html; charset=utf-8";
 
+// N228 — time-to-first-byte ceiling for a proxied request. A healthy project
+// answers in ~1ms even under load, so 15s only ever fires on a wedged / half-
+// open / stale-port upstream — turning a multi-minute hang into a fast 504 +
+// self-heal. Cleared the instant the upstream response begins, so long-lived
+// SSE streams (which send their first bytes immediately) are never killed.
+const PROXY_TTFB_TIMEOUT_MS = 15_000;
+
 /** N216 — the bundled notification mp3s live in dist/sounds (same as the
  *  dashboard). Served from the master origin so hub sounds work everywhere. */
 const MASTER_SOUNDS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "sounds");
@@ -496,6 +503,7 @@ function proxyToProject(
   rest: string,
   req: IncomingMessage,
   res: ServerResponse,
+  onUpstreamFail?: (reason: "timeout" | "error") => void,
 ): void {
   let target: URL;
   try {
@@ -515,6 +523,30 @@ function proxyToProject(
   delete headers.host; // let the request default to the target host
   delete headers["accept-encoding"]; // avoid compressed bodies we might rewrite
 
+  // N228 — bound the time-to-first-byte only. Fires on a wedged/half-open
+  // upstream (multi-minute hang → fast 504); cleared once the response begins so
+  // streaming bodies, incl. long-lived SSE, are never interrupted mid-stream.
+  const startedAt = Date.now();
+  let timedOut = false;
+  let settled = false;
+  // Abort via a signal (not proxyReq.destroy) so proxyReq can stay `const` — the
+  // timer must not reference it before it's created.
+  const abort = new AbortController();
+  const ttfbTimer = setTimeout(() => {
+    if (settled) return;
+    settled = true;
+    timedOut = true;
+    // N228 — diagnostic: the next multi-minute stall is now a logged line.
+    console.warn(
+      `[hub] proxy TTFB timeout after ${PROXY_TTFB_TIMEOUT_MS}ms → 504: ${req.method} ${prefix}${rest}`,
+    );
+    abort.abort();
+  }, PROXY_TTFB_TIMEOUT_MS);
+  const clearTtfb = () => {
+    settled = true;
+    clearTimeout(ttfbTimer);
+  };
+
   const proxyReq = httpRequest(
     {
       protocol: target.protocol,
@@ -523,8 +555,26 @@ function proxyToProject(
       path: target.pathname + target.search,
       method: req.method,
       headers,
+      signal: abort.signal,
     },
     (proxyRes) => {
+      clearTtfb();
+      // N228 — pipe() does not forward source errors; without this a mid-stream
+      // upstream error/reset (e.g. on client-disconnect teardown) would surface
+      // as an unhandled 'error' and could crash the process on some Node builds.
+      proxyRes.on("error", () => {
+        try {
+          res.destroy();
+        } catch {
+          /* already torn down */
+        }
+      });
+      // N228 — flag a slow-but-alive upstream (near the timeout ceiling) so a
+      // degrading project is visible before it tips into a full 504.
+      const elapsed = Date.now() - startedAt;
+      if (elapsed > PROXY_TTFB_TIMEOUT_MS / 3) {
+        console.warn(`[hub] slow proxy ${elapsed}ms: ${req.method} ${prefix}${rest}`);
+      }
       const status = proxyRes.statusCode ?? 200;
       const ctype = String(proxyRes.headers["content-type"] ?? "");
       if (ctype.includes("text/html")) {
@@ -532,6 +582,10 @@ function proxyToProject(
         const chunks: Buffer[] = [];
         proxyRes.on("data", (c: Buffer) => chunks.push(c));
         proxyRes.on("end", () => {
+          // N228 — this writeHead is deferred (buffered shell). If the response
+          // was already ended by an error/timeout in the interim, don't write
+          // again (would throw ERR_HTTP_HEADERS_SENT in a bare callback).
+          if (res.headersSent || res.writableEnded || res.destroyed) return;
           let html = Buffer.concat(chunks).toString("utf8");
           html = html.replace(/(["'(])\/assets\//g, `$1${prefix}/assets/`);
           // Escape the prefix into both sinks: HTML-attr escaping for <base>,
@@ -568,18 +622,33 @@ function proxyToProject(
     },
   );
   proxyReq.on("error", (err) => {
-    if (!res.headersSent) {
+    clearTtfb();
+    // N228 — self-heal: a wedged/half-open/stale-port upstream is (re)probed so
+    // the registry's online flag self-corrects instead of proxying to it again.
+    onUpstreamFail?.(timedOut ? "timeout" : "error");
+    if (!res.headersSent && !res.writableEnded && !res.destroyed) {
+      // 504 for our TTFB timeout (upstream alive but not answering), 502 for a
+      // hard connection error (refused/reset). Either way: fast, not a hang.
+      const status = timedOut ? 504 : 502;
       if (wantsHtml(req)) {
-        res.writeHead(502, { "Content-Type": MIME_HTML });
+        res.writeHead(status, { "Content-Type": MIME_HTML });
         res.end(
           hubErrorPage(
-            "Couldn’t reach this project",
-            "The project’s server isn’t responding — it may have stopped or crashed. Go back to the hub and start it again.",
+            timedOut ? "This project is taking too long" : "Couldn’t reach this project",
+            timedOut
+              ? "The project’s server accepted the connection but didn’t respond in time — it may be overloaded or wedged. Go back to the hub and try again."
+              : "The project’s server isn’t responding — it may have stopped or crashed. Go back to the hub and start it again.",
           ),
         );
       } else {
-        res.writeHead(502, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ error: "proxy target unreachable: " + (err as Error).message }));
+        res.writeHead(status, { "Content-Type": MIME_JSON });
+        res.end(
+          JSON.stringify({
+            error:
+              (timedOut ? "proxy target timed out: " : "proxy target unreachable: ") +
+              (err as Error).message,
+          }),
+        );
       }
     } else {
       res.end();
@@ -587,7 +656,10 @@ function proxyToProject(
   });
   // When the client disconnects (esp. an SSE tab closing), tear down the upstream
   // request so we don't leak a held-open connection to the project server.
-  res.on("close", () => proxyReq.destroy());
+  res.on("close", () => {
+    clearTtfb();
+    proxyReq.destroy();
+  });
   req.pipe(proxyReq); // forward the request body (POST/PUT)
 }
 
@@ -612,6 +684,33 @@ export async function startMasterServer(
         /* stream gone */
       }
     }
+  }
+
+  // N228 — probe one project's /health (short timeout, loopback-only) and record
+  // the result in the registry. Shared by the on-demand refresh sweep and the
+  // proxy self-heal, so a wedged/stale-port upstream flips offline instead of
+  // being proxied to again on the next navigation.
+  async function probeProjectHealth(e: {
+    id: string;
+    url?: string;
+    token: string;
+  }): Promise<boolean> {
+    if (!e.url || !isLoopbackUrl(e.url)) return false;
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 1500);
+    let ok = false;
+    try {
+      const r = await fetch(`${e.url}/health?token=${encodeURIComponent(e.token)}`, {
+        signal: ctrl.signal,
+      });
+      ok = r.ok;
+    } catch {
+      ok = false;
+    } finally {
+      clearTimeout(t);
+    }
+    registry.setOnline(e.id, ok);
+    return ok;
   }
 
   server.on("request", async (req, res) => {
@@ -660,6 +759,19 @@ export async function startMasterServer(
           rest,
           req,
           res,
+          () => {
+            // N228 — self-heal: re-probe this project's health and push the
+            // corrected online state, so a wedged/stale-port upstream stops
+            // being proxied to and the overview reflects reality.
+            void probeProjectHealth(entry)
+              .then(() => {
+                const updated = registry.getById(entry.id);
+                if (updated) broadcast("project-update", registry.toPublicView(updated));
+              })
+              .catch(() => {
+                /* self-heal is best-effort; never surface as an unhandled rejection */
+              });
+          },
         );
         return;
       }
@@ -1096,24 +1208,7 @@ export async function startMasterServer(
         // SSRF guard: only probe loopback dashboards. A registrant-controlled
         // url must never make the master fetch an arbitrary (internal) host.
         const entries = registry.getAll().filter((e) => e.url && isLoopbackUrl(e.url));
-        await Promise.all(
-          entries.map(async (e) => {
-            let ok = false;
-            const ctrl = new AbortController();
-            const t = setTimeout(() => ctrl.abort(), 1500);
-            try {
-              const r = await fetch(`${e.url}/health?token=${encodeURIComponent(e.token)}`, {
-                signal: ctrl.signal,
-              });
-              ok = r.ok;
-            } catch {
-              ok = false;
-            } finally {
-              clearTimeout(t);
-            }
-            registry.setOnline(e.id, ok);
-          }),
-        );
+        await Promise.all(entries.map((e) => probeProjectHealth(e)));
         for (const e of registry.getAllPublic()) broadcast("project-update", e);
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ projects: registry.getAllPublic() }));
