@@ -659,7 +659,7 @@
       "title": "Fix dashboard shard-file ordering so newest tasks appear first (numeric, not lexicographic)",
       "type": "fix",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "insightFlow/workTasks/N226-fix-dashboard-shard-file-ordering-so-newest-tasks-",
       "createdAt": "2026-07-13T07:31:50.006Z",
       "statusHistory": [
@@ -697,6 +697,16 @@
           "status": "approved",
           "at": "2026-07-13T07:57:40.553Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-13T08:01:19.514Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-13T08:01:19.658Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -712,16 +722,22 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 29,
       "tags": [
         "dashboard",
         "pagination",
         "bug"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-07-13T08:01:19.514Z",
+          "commitHash": "66a5a68",
+          "commitMessage": "fix(web): order dashboard shard files numerically"
+        }
+      ],
+      "branch": "fix/N226-dashboard-shard-file-ordering",
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-13T08:01:19.659Z",
       "flowId": "default"
     }
   ]
