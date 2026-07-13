@@ -9,11 +9,22 @@ export interface MasterResponse {
   meta?: { currentTaskId?: string | null };
 }
 
-/** List the shard JSON files, newest range first (e.g. tasks-N80-N89.json). */
+/**
+ * Numeric start ID of a shard filename (e.g. "tasks-N200-N209.json" → 200).
+ * Non-conforming names return -1 so they sort last under the descending sort.
+ * A plain string sort mis-orders once IDs pass N99 ("N90" > "N200" as text),
+ * pushing the newest shards off the first page (N226).
+ */
+function shardStart(name: string): number {
+  const m = name.match(/^tasks-N(\d+)-N\d+\.json$/);
+  return m ? parseInt(m[1], 10) : -1;
+}
+
+/** List the shard JSON files, newest range first (e.g. tasks-N200-N209.json). */
 export async function fetchShardIndex(): Promise<string[]> {
   const res = await apiFetch("/api/work-tasks");
   const files: string[] = await res.json();
-  return files.filter((f) => f.startsWith("tasks-")).sort((a, b) => b.localeCompare(a));
+  return files.filter((f) => f.startsWith("tasks-")).sort((a, b) => shardStart(b) - shardStart(a));
 }
 
 /** Load one shard's tasks (reviews/incidents already hydrated by the server). */

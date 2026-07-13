@@ -653,6 +653,92 @@
       "mrUrl": null,
       "mergedAt": "2026-07-12T20:19:37.085Z",
       "flowId": "default"
+    },
+    {
+      "id": "N226",
+      "title": "Fix dashboard shard-file ordering so newest tasks appear first (numeric, not lexicographic)",
+      "type": "fix",
+      "priority": "medium",
+      "status": "merged",
+      "folder": "insightFlow/workTasks/N226-fix-dashboard-shard-file-ordering-so-newest-tasks-",
+      "createdAt": "2026-07-13T07:31:50.006Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-13T07:31:50.006Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-13T07:34:46.861Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-13T07:35:42.642Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T07:42:09.976Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-13T07:43:07.435Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-13T07:57:27.377Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-13T07:57:40.553Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-13T08:01:19.514Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-13T08:01:19.658Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-13T07:34:46.863Z",
+        "completedAt": "2026-07-13T07:35:42.643Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/api.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 29,
+      "tags": [
+        "dashboard",
+        "pagination",
+        "bug"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-13T08:01:19.514Z",
+          "commitHash": "66a5a68",
+          "commitMessage": "fix(web): order dashboard shard files numerically"
+        }
+      ],
+      "branch": "fix/N226-dashboard-shard-file-ordering",
+      "mrUrl": null,
+      "mergedAt": "2026-07-13T08:01:19.659Z",
+      "flowId": "default"
     }
   ]
 }
