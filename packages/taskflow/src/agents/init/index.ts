@@ -70,16 +70,19 @@ export async function initProject(
     // "composer-authoring"), via the shared installFlow engine.
     installFlows?: string[];
   } = {},
-): Promise<{ flowErrors: { id: string; error: string }[] }> {
+): Promise<{ flowErrors: { id: string; error: string }[]; conflicts: string[] }> {
   // N222 — collected so a caller (the hub "New project" endpoint) can surface a
   // requested flow that failed to install, instead of reporting silent success.
   const flowErrors: { id: string; error: string }[] = [];
+  // N236 — files skipped because an existing one has different content (name
+  // conflicts on an in-place init). Surfaced to the caller.
+  const conflicts: string[] = [];
   // Validate an explicit --editor *before* any writes so an unknown value fails
   // closed without leaving a partial config (preserves N75 behavior; the actual
   // provider selection — incl. config.editor precedence — happens after load).
   if (options.editor && !["claude", "cursor", "all"].includes(options.editor)) {
     console.error(`Unknown --editor "${options.editor}". Use claude | cursor | all.`);
-    return { flowErrors };
+    return { flowErrors, conflicts };
   }
   const configPath = resolve(cwd, "taskflow.config.json");
 
@@ -133,7 +136,7 @@ export async function initProject(
     providers = selectProviders(cwd, editorChoice);
   } catch (err) {
     console.error((err as Error).message);
-    return { flowErrors };
+    return { flowErrors, conflicts };
   }
   const claudeSelected = providers.some((p) => p.id === "claude");
   console.log(`insight-flow init — editors: ${providers.map((p) => p.id).join(", ")}`);
@@ -175,7 +178,7 @@ export async function initProject(
   const agentsConfig = config.agents;
   const customAgents = agentsConfig?.custom ?? [];
   const skills = buildSkillList(customAgents);
-  const providerCtx: ProviderContext = { cwd, config, skills, customAgents, force };
+  const providerCtx: ProviderContext = { cwd, config, skills, customAgents, force, conflicts };
 
   // 4. Claude-specific role infrastructure: role templates, agent extensions,
   //    and AGENT_ENFORCEMENT.md. These use the `.claude/roles` @-include
@@ -425,7 +428,7 @@ export async function initProject(
   );
   console.log("Run 'insight-flow' to launch the dashboard.\n");
 
-  return { flowErrors };
+  return { flowErrors, conflicts };
 }
 
 function generateActivityHook(cwd: string, config: TaskflowConfig): void {

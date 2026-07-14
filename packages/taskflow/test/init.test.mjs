@@ -266,3 +266,51 @@ test("N222: init honors the explicit activity option (hook + persisted config)",
     rmSync(off, { recursive: true });
   }
 });
+
+// N236 — in-place init into an existing folder must not clobber the user's
+// .claude/ or CLAUDE.md; it merges (marker section) and only adds its own files.
+test("in-place init preserves an existing .claude/ and CLAUDE.md", async () => {
+  const dir = makeTempDir();
+  try {
+    mkdirSync(resolve(dir, ".claude/commands"), { recursive: true });
+    writeFileSync(resolve(dir, ".claude/commands/my-cmd.md"), "USER COMMAND");
+    writeFileSync(resolve(dir, "CLAUDE.md"), "# My project\n\nUser notes.\n");
+
+    const result = await initProject(dir, false, { yes: true, registerHub: false });
+
+    assert.equal(
+      readFileSync(resolve(dir, ".claude/commands/my-cmd.md"), "utf-8"),
+      "USER COMMAND",
+      "user's command file is untouched",
+    );
+    const claudeMd = readFileSync(resolve(dir, "CLAUDE.md"), "utf-8");
+    assert.ok(claudeMd.includes("User notes."), "keeps the user's CLAUDE.md content");
+    assert.ok(claudeMd.includes("taskflow:start"), "adds the insight-flow marker section");
+    assert.ok(existsSync(resolve(dir, "insightFlow/workTasks/master.json")), "scaffolds the store");
+    assert.equal(result.conflicts.length, 0, "no conflict for an unrelated user command");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test("in-place init reports (does not overwrite) a same-named command with different content", async () => {
+  const dir = makeTempDir();
+  try {
+    mkdirSync(resolve(dir, ".claude/commands"), { recursive: true });
+    writeFileSync(resolve(dir, ".claude/commands/task-implement.md"), "MY OWN task-implement");
+
+    const result = await initProject(dir, false, { yes: true, registerHub: false });
+
+    assert.equal(
+      readFileSync(resolve(dir, ".claude/commands/task-implement.md"), "utf-8"),
+      "MY OWN task-implement",
+      "does not overwrite the user's file",
+    );
+    assert.ok(
+      result.conflicts.includes(".claude/commands/task-implement.md"),
+      "reports the conflict to the caller",
+    );
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});

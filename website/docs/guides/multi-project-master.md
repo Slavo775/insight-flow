@@ -74,15 +74,23 @@ On the overview, projects are split into **Running** and **Stopped**:
 
 Click **+ New project**:
 
-1. Browse to a parent folder (a server-side folder browser).
-2. Name it.
-3. Pick install options — **task lifecycle events** (on), **agent activity
+1. Browse to a folder (a server-side folder browser).
+2. Choose an **init location** — **Use the selected folder** (default) inits
+   insight-flow right in the folder you browsed to, like the `insight-flow init`
+   CLI (the name field becomes a registry label, defaulting to the folder's
+   name; existing `.claude/` / `CLAUDE.md` are preserved). **Create a new
+   subfolder** (opt-in) is the older behavior — it scaffolds `<folder>/<slug>`.
+3. Name it.
+4. Pick install options — **task lifecycle events** (on), **agent activity
    tracking** (off), **composer-authoring flow** (off), **register with the hub**
-   (on), and the **editor** (Claude / Cursor / all). When the parent folder is a
-   git repo root, a **git-ignore** radio also appears — keep the footprint out of
+   (on), and the **editor** (Claude / Cursor / all). When the folder is a git
+   repo root, a **git-ignore** radio also appears — keep the footprint out of
    that repo via the shared `.gitignore` (default) or a local `.git/info/exclude`.
+   In-place, it ignores only insight-flow's own footprint (`/insightFlow/` +
+   `/taskflow.config.json`, never the shared `.claude/`); in subfolder mode it
+   ignores the whole `/<slug>/` folder.
 
-The hub scaffolds the folder, runs `init`, and adds it to the switcher.
+The hub runs `init` and adds the project to the switcher.
 
 ## 5. Install it as an app (and use it on your phone)
 

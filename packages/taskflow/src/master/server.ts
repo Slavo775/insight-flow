@@ -97,14 +97,14 @@ function gitInfoExcludePath(repoRoot: string): string | null {
 /**
  * N233 — idempotently ignore the newly created project's subfolder from the
  * enclosing git repo. `repoRoot` is the folder the user browsed to (which must
- * hold a `.git`); the rule `/<slug>/` is anchored to the repo root so only the
- * top-level project folder is hidden, not a same-named dir nested elsewhere.
- * `mode: "shared"` writes the committed `.gitignore`; `mode: "local"` writes the
- * repo-local `info/exclude` (not committed), resolved for worktrees/submodules.
- * No-op if the rule is already present. Returns true if a line was written.
+ * hold a `.git`); `rules` are anchored to the repo root (e.g. `/<slug>/` for a
+ * subfolder project, or the specific footprint files for an in-place project — so
+ * we never ignore a shared `.claude/`). `mode: "shared"` writes the committed
+ * `.gitignore`; `mode: "local"` writes the repo-local `info/exclude` (not
+ * committed), resolved for worktrees/submodules. Skips rules already present.
+ * Returns true if any line was written.
  */
-function ignoreProjectFolder(repoRoot: string, slug: string, mode: "shared" | "local"): boolean {
-  const rule = `/${slug}/`;
+function ignoreProjectFolder(repoRoot: string, rules: string[], mode: "shared" | "local"): boolean {
   const path = mode === "shared" ? resolve(repoRoot, ".gitignore") : gitInfoExcludePath(repoRoot);
   if (!path) throw new Error("could not locate the repo's info/exclude file");
   // Refuse to read/write through a symlinked target — `readFileSync`/`writeFileSync`
@@ -126,12 +126,13 @@ function ignoreProjectFolder(repoRoot: string, slug: string, mode: "shared" | "l
   }
   const existing = existsSync(path) ? readFileSync(path, "utf-8") : "";
   const lines = existing.split("\n").map((l) => l.trim());
-  if (lines.includes(rule)) return false;
+  const missing = rules.filter((r) => !lines.includes(r));
+  if (!missing.length) return false;
   // The target's parent (`<gitdir>/info`, or a brand-new `.gitignore`'s dir) may
   // not exist yet; create it defensively.
   mkdirSync(dirname(path), { recursive: true });
   const prefix = existing.length ? (existing.endsWith("\n") ? "\n" : "\n\n") : "";
-  const block = `${prefix}# insight-flow — task workbench (do not commit)\n${rule}\n`;
+  const block = `${prefix}# insight-flow — task workbench (do not commit)\n${missing.join("\n")}\n`;
   writeFileSync(path, existing + block, "utf-8");
   return true;
 }
@@ -1198,6 +1199,7 @@ export async function startMasterServer(
           editor?: unknown;
           installFlows?: unknown;
           gitIgnore?: unknown;
+          location?: unknown;
         };
         try {
           parsed = JSON.parse(body) as typeof parsed;
@@ -1224,21 +1226,26 @@ export async function startMasterServer(
           );
           return;
         }
-        // slug is a single path segment (the name regex forbids `/` and `.`), so
-        // the target can't traverse out of the confined parent.
+        // N236 — init in the selected folder (default), or in a new subfolder
+        // named by the project name. slug is a single path segment (the name
+        // regex forbids `/` and `.`), so the subfolder can't traverse out.
+        const inPlace = parsed.location !== "subfolder";
         const slug = name.replace(/\s+/g, "-").toLowerCase();
-        const dir = resolve(realParent, slug);
-        // Confinement — `realParent + sep` collapses to `//` when realParent is
-        // the fs root, so normalize the prefix (handles INSIGHT_FLOW_BROWSE_ROOT=/).
+        const dir = inPlace ? realParent : resolve(realParent, slug);
+        // Confinement (subfolder only — in-place `dir` is `realParent`, already
+        // confined). `realParent + sep` collapses to `//` when realParent is the
+        // fs root, so normalize the prefix (handles INSIGHT_FLOW_BROWSE_ROOT=/).
         const parentPrefix = realParent.endsWith(sep) ? realParent : realParent + sep;
-        if (!dir.startsWith(parentPrefix)) {
+        if (!inPlace && !dir.startsWith(parentPrefix)) {
           res.writeHead(400, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: "Resolved path escapes the chosen folder" }));
           return;
         }
         if (existsSync(resolve(dir, "taskflow.config.json"))) {
           res.writeHead(409, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: `A project already exists at ${dir}` }));
+          res.end(
+            JSON.stringify({ error: `insight-flow is already initialized in this folder: ${dir}` }),
+          );
           return;
         }
         // N222 — install options from the modal. `editor` is validated by
@@ -1258,6 +1265,7 @@ export async function startMasterServer(
             ? parsed.gitIgnore
             : undefined;
         let flowErrors: { id: string; error: string }[] = [];
+        let conflicts: string[] = [];
         const gitIgnoreWarnings: string[] = [];
         try {
           mkdirSync(dir, { recursive: true });
@@ -1270,6 +1278,7 @@ export async function startMasterServer(
             installFlows,
           });
           flowErrors = result.flowErrors;
+          conflicts = result.conflicts;
         } catch (err) {
           res.writeHead(500, { "Content-Type": MIME_JSON });
           res.end(JSON.stringify({ error: `Could not create project: ${(err as Error).message}` }));
@@ -1279,8 +1288,13 @@ export async function startMasterServer(
         // the chosen parent is a git repo root. The project is already created, so
         // a failed ignore-write is surfaced as a warning, not a hard error.
         if (gitIgnore && existsSync(resolve(realParent, ".git"))) {
+          // In-place: the folder IS the repo, so ignore only insight-flow's own
+          // footprint — never `.claude/`, which is shared with the user's config.
+          // (`.taskflow-activity.jsonl` is already gitignored by initProject.)
+          // Subfolder: ignore the whole project subfolder.
+          const rules = inPlace ? ["/insightFlow/", "/taskflow.config.json"] : [`/${slug}/`];
           try {
-            ignoreProjectFolder(realParent, slug, gitIgnore);
+            ignoreProjectFolder(realParent, rules, gitIgnore);
           } catch (err) {
             gitIgnoreWarnings.push(`Could not gitignore the project: ${(err as Error).message}`);
           }
@@ -1295,6 +1309,9 @@ export async function startMasterServer(
         const warnings = [
           ...flowErrors.map((e) => `Flow "${e.id}" did not install: ${e.error}`),
           ...gitIgnoreWarnings,
+          ...(conflicts.length
+            ? [`Kept your existing files (insight-flow did not overwrite): ${conflicts.join(", ")}`]
+            : []),
         ];
         res.end(JSON.stringify({ id, name, path: dir, warnings }));
         return;

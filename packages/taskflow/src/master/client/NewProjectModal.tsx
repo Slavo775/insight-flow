@@ -311,6 +311,12 @@ function trimSlash(s: string): string {
 type Editor = "claude" | "cursor" | "all";
 type Tone = "" | "ok" | "err";
 type GitIgnore = "shared" | "local";
+type Location = "in-folder" | "subfolder";
+
+const baseName = (p: string): string => p.split("/").filter(Boolean).pop() ?? "";
+// The registry name/label must pass the server's `[A-Za-z0-9 _-]` check, so a
+// folder basename like `my.app` becomes `my-app` when used as the default label.
+const labelFrom = (dir: string): string => baseName(dir).replace(/[^A-Za-z0-9 _-]/g, "-");
 
 export function NewProjectModal({ onClose }: { onClose: () => void }) {
   const [dir, setDir] = useState<string | null>(null);
@@ -323,6 +329,8 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
   const [composer, setComposer] = useState(false);
   const [registerHub, setRegisterHub] = useState(true);
   const [editor, setEditor] = useState<Editor>("claude");
+  // N236 — init in the selected folder (default) or in a new subfolder named by `name`.
+  const [location, setLocation] = useState<Location>("in-folder");
   // N233 — the chosen folder's git state + the gitignore choice (default shared).
   const [hasGit, setHasGit] = useState(false);
   const [gitIgnore, setGitIgnore] = useState<GitIgnore>("shared");
@@ -358,20 +366,22 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
   const basePath = dir === "/" ? "" : dir ? trimSlash(dir) : "";
 
   const create = (): void => {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      setStatus({ msg: "Enter a project name.", tone: "err" });
-      return;
-    }
     if (!dir) {
       setStatus({ msg: "Pick a folder first.", tone: "err" });
+      return;
+    }
+    // In-folder: the name is just the registry label — default it to the folder name.
+    const effectiveName = name.trim() || (location === "in-folder" ? labelFrom(dir) : "");
+    if (!effectiveName) {
+      setStatus({ msg: "Enter a project name.", tone: "err" });
       return;
     }
     setCreating(true);
     setStatus({ msg: "Creating…", tone: "" });
     createProject({
-      name: trimmed,
+      name: effectiveName,
       dir,
+      location,
       lifecycle: cursorOnly ? false : lifecycle,
       activity: cursorOnly ? false : activity,
       registerHub,
@@ -388,11 +398,11 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
         // The project was created, but a requested flow may have failed to install.
         if (d.warnings && d.warnings.length) {
           setStatus({ msg: `Created at ${d.path} — ${d.warnings.join("; ")}`, tone: "err" });
-          setTimeout(() => location.reload(), 3000);
+          setTimeout(() => window.location.reload(), 3000);
           return;
         }
         setStatus({ msg: `Created at ${d.path}`, tone: "ok" });
-        setTimeout(() => location.reload(), 900);
+        setTimeout(() => window.location.reload(), 900);
       },
       () => {
         setCreating(false);
@@ -441,14 +451,32 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="np-name">Project name</FieldLabel>
+        <FieldLabel as="div">Init location</FieldLabel>
+        <GitOption
+          checked={location === "in-folder"}
+          onChange={() => setLocation("in-folder")}
+          label="Use the selected folder"
+          hint={dir ? `init into ${baseName(dir)}/` : "init in place"}
+        />
+        <GitOption
+          checked={location === "subfolder"}
+          onChange={() => setLocation("subfolder")}
+          label="Create a new subfolder"
+          hint="named by the project name below"
+        />
+      </Field>
+
+      <Field>
+        <FieldLabel htmlFor="np-name">
+          {location === "in-folder" ? "Project name (label)" : "New folder name"}
+        </FieldLabel>
         <TextInput
           id="np-name"
           type="text"
           value={name}
           maxLength={60}
           autoComplete="off"
-          placeholder="my-project"
+          placeholder={location === "in-folder" && dir ? labelFrom(dir) : "my-project"}
           onChange={(e) => setName(e.target.value)}
         />
       </Field>

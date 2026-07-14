@@ -62,6 +62,9 @@ export interface CreateProjectBody {
   registerHub: boolean;
   editor: string;
   installFlows: string[];
+  // N236 — init in the selected folder ("in-folder", default) or in a new
+  // subfolder named by `name` ("subfolder").
+  location?: "in-folder" | "subfolder";
   // N233 — how to gitignore the project footprint; omitted when the chosen
   // folder is not a git repo root (no options shown).
   gitIgnore?: "shared" | "local";

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve, basename } from "node:path";
 import type { EditorProvider, ProviderContext } from "./types.js";
 import { generateContextSection, upsertMarkerSection } from "./context.js";
@@ -29,6 +29,11 @@ export const claudeProvider: EditorProvider = {
         created++;
       } else {
         skipped++;
+        // N236 — a same-named file with *different* content is a real conflict;
+        // an identical one is just an idempotent re-init and not worth reporting.
+        if (readFileSync(dest, "utf-8") !== skill.body) {
+          ctx.conflicts?.push(`.claude/commands/${basename(skill.name)}.md`);
+        }
       }
     }
     if (created > 0) {
