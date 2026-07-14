@@ -1,0 +1,10 @@
+{
+  "id": "custom:handover-merge-to-ship",
+  "title": "Handover — merge → ship",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-release-ship",
+  "on": "feature-merged",
+  "mode": "gated",
+  "when": "The feature is on main and release-please has prepared the release PR. The next step merges that release PR and publishes to npm — which cannot be undone — so a human must approve first (and can review the generated changelog)."
+}

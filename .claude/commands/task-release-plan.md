@@ -23,7 +23,7 @@ With the checker findings: create the release-prep task (scaffold from templates
 When your work is complete, hand the task to the next agent — pick the handover that matches your outcome:
 
 - `custom:task-release-fix` once `changes-needed` — when The check found doc or test gaps to fix. The edits are reversible, so it is safe to chain to the implementer. (auto) — invoke `/task-release-fix` directly to continue — no need to pause.
-- `custom:task-release-ship` once `ready-to-release` — when Everything is ready. The next step merges to master and publishes to npm, which cannot be undone, so a human must approve first. (gated) — stop and get an explicit human go-ahead before invoking `/task-release-ship`.
+- `custom:task-release-merge` once `ready-to-release` — when The feature is reviewed and the release is ready. Merging the approved feature PR into main only triggers release-please to prepare the version-bump/changelog PR — it is safe to chain automatically. (auto) — invoke `/task-release-merge` directly to continue — no need to pause.
 
 <!-- taskflow:phase-markers:start -->
 ACTIONS

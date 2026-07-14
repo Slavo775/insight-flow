@@ -1,11 +1,12 @@
 {
   "id": "custom:release-manager",
   "title": "Release Manager Flow",
-  "description": "Checks release readiness (tests, intent, docs), creates a release-prep task, fixes gaps, publishes to npm behind one human gate, then rolls the new version out globally and to every bulk-registered project. Ends in done (released + rolled out) or not-able-to-release (needs wider work).",
+  "description": "Checks release readiness (tests, intent, docs), creates a release-prep task, fixes gaps, merges the feature, publishes to npm behind one human gate, then rolls the new version out globally and to every bulk-registered project. Ends in done (released + rolled out) or not-able-to-release (needs wider work).",
   "agents": [
     "custom:task-release-check",
     "custom:task-release-plan",
     "custom:task-release-fix",
+    "custom:task-release-merge",
     "custom:task-release-ship",
     "custom:task-release-rollout"
   ],
@@ -22,8 +23,13 @@
     },
     {
       "from": "custom:task-release-plan",
-      "to": "custom:task-release-ship",
+      "to": "custom:task-release-merge",
       "on": "ready-to-release"
+    },
+    {
+      "from": "custom:task-release-merge",
+      "to": "custom:task-release-ship",
+      "on": "feature-merged"
     },
     {
       "from": "custom:task-release-fix",
@@ -70,6 +76,10 @@
     {
       "id": "release-fixed",
       "title": "Release fixed"
+    },
+    {
+      "id": "feature-merged",
+      "title": "Feature merged"
     },
     {
       "id": "publishing",

@@ -1,0 +1,10 @@
+{
+  "id": "custom:handover-plan-to-merge",
+  "title": "Handover — plan → merge",
+  "source": "custom",
+  "kind": "handover",
+  "to": "custom:task-release-merge",
+  "on": "ready-to-release",
+  "mode": "auto",
+  "when": "The feature is reviewed and the release is ready. Merging the approved feature PR into main only triggers release-please to prepare the version-bump/changelog PR — it is safe to chain automatically."
+}

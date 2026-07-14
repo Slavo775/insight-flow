@@ -1,0 +1,22 @@
+{
+  "id": "custom:task-release-merge",
+  "title": "Release Merger",
+  "description": "Merges the reviewed feature PR into main to trigger release-please, then hands off (gated) to the Release Publisher.",
+  "modules": [
+    "custom:task-release-merge-identity",
+    "security",
+    "enforcement",
+    "protocol",
+    "task-git/conventions",
+    "task-git/permission-gates",
+    "task-git/git-permissions",
+    "task-git/workflow-merge",
+    "task-git/safety",
+    "custom:handover-merge-to-ship",
+    "actions"
+  ],
+  "command": {
+    "install": true,
+    "as": "command"
+  }
+}
