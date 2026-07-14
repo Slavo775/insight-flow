@@ -4,8 +4,17 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs";
-import { resolve, sep, dirname } from "node:path";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { resolve, sep, dirname, isAbsolute } from "node:path";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
 import { createServer as netCreateServer } from "node:net";
@@ -43,6 +52,88 @@ function realDirWithinRoot(p: string, root: string): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * N233 — resolve the `info/exclude` file git actually reads for the repo at
+ * `repoRoot`. A normal repo → `<repoRoot>/.git/info/exclude`. A worktree or
+ * submodule has a `.git` *file* (gitlink "gitdir: <path>"), and git reads the
+ * COMMON dir's exclude — so follow the gitlink, then its `commondir`, and use
+ * `<commonDir>/info/exclude`. Returns null if `.git` is missing or unresolvable.
+ */
+function gitInfoExcludePath(repoRoot: string): string | null {
+  const dotGit = resolve(repoRoot, ".git");
+  let st;
+  try {
+    st = statSync(dotGit);
+  } catch {
+    return null;
+  }
+  if (st.isDirectory()) return resolve(dotGit, "info", "exclude");
+  let gitDir: string;
+  try {
+    const m = readFileSync(dotGit, "utf-8").match(/^gitdir:\s*(.+)$/m);
+    if (!m) return null;
+    const raw = m[1].trim();
+    gitDir = isAbsolute(raw) ? raw : resolve(repoRoot, raw);
+  } catch {
+    return null;
+  }
+  // A stale/pruned worktree or broken gitlink points at a gitdir that no longer
+  // exists — writing there would be a no-op git never reads, so bail (the caller
+  // surfaces a warning instead of silently "ignoring" nothing).
+  if (!existsSync(gitDir)) return null;
+  let commonDir = gitDir;
+  try {
+    const cd = readFileSync(resolve(gitDir, "commondir"), "utf-8").trim();
+    commonDir = isAbsolute(cd) ? cd : resolve(gitDir, cd);
+  } catch {
+    // No `commondir` file (e.g. a submodule gitdir) → gitDir is the common dir.
+  }
+  if (!existsSync(commonDir)) return null;
+  return resolve(commonDir, "info", "exclude");
+}
+
+/**
+ * N233 — idempotently ignore the newly created project's subfolder from the
+ * enclosing git repo. `repoRoot` is the folder the user browsed to (which must
+ * hold a `.git`); the rule `/<slug>/` is anchored to the repo root so only the
+ * top-level project folder is hidden, not a same-named dir nested elsewhere.
+ * `mode: "shared"` writes the committed `.gitignore`; `mode: "local"` writes the
+ * repo-local `info/exclude` (not committed), resolved for worktrees/submodules.
+ * No-op if the rule is already present. Returns true if a line was written.
+ */
+function ignoreProjectFolder(repoRoot: string, slug: string, mode: "shared" | "local"): boolean {
+  const rule = `/${slug}/`;
+  const path = mode === "shared" ? resolve(repoRoot, ".gitignore") : gitInfoExcludePath(repoRoot);
+  if (!path) throw new Error("could not locate the repo's info/exclude file");
+  // Refuse to read/write through a symlinked target — `readFileSync`/`writeFileSync`
+  // follow symlinks, which would let a pre-existing symlink at the ignore file
+  // escape the realpath confinement the rest of the endpoint enforces. `lstat`
+  // (not `existsSync`, which follows the link) so a *dangling* symlink is caught
+  // too — otherwise the write would create its out-of-tree target. (We do not
+  // realpath-confine the resolved gitdir itself: a legitimate worktree's common dir
+  // may sit outside the browse root, so confining it would reject valid setups.)
+  let targetIsSymlink = false;
+  try {
+    targetIsSymlink = lstatSync(path).isSymbolicLink();
+  } catch (err) {
+    // ENOENT — no file at `path` yet; nothing to follow, safe to create.
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+  }
+  if (targetIsSymlink) {
+    throw new Error("refusing to write through a symlinked ignore file");
+  }
+  const existing = existsSync(path) ? readFileSync(path, "utf-8") : "";
+  const lines = existing.split("\n").map((l) => l.trim());
+  if (lines.includes(rule)) return false;
+  // The target's parent (`<gitdir>/info`, or a brand-new `.gitignore`'s dir) may
+  // not exist yet; create it defensively.
+  mkdirSync(dirname(path), { recursive: true });
+  const prefix = existing.length ? (existing.endsWith("\n") ? "\n" : "\n\n") : "";
+  const block = `${prefix}# insight-flow — task workbench (do not commit)\n${rule}\n`;
+  writeFileSync(path, existing + block, "utf-8");
+  return true;
 }
 
 const MIME_JSON = "application/json; charset=utf-8";
@@ -1071,8 +1162,11 @@ export async function startMasterServer(
         }
         const realRoot = realpathSync(root);
         const parent = real === realRoot ? null : dirname(real);
+        // N233 — is this folder itself a git repo root? Drives the New-project
+        // modal's gitignore options (shallow: `.git` directly here, no walking up).
+        const hasGit = existsSync(resolve(real, ".git"));
         res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ dir: real, root: realRoot, parent, entries }));
+        res.end(JSON.stringify({ dir: real, root: realRoot, parent, entries, hasGit }));
         return;
       }
 
@@ -1103,6 +1197,7 @@ export async function startMasterServer(
           registerHub?: unknown;
           editor?: unknown;
           installFlows?: unknown;
+          gitIgnore?: unknown;
         };
         try {
           parsed = JSON.parse(body) as typeof parsed;
@@ -1156,7 +1251,14 @@ export async function startMasterServer(
         const installFlows = Array.isArray(parsed.installFlows)
           ? parsed.installFlows.filter((f): f is string => f === "composer-authoring")
           : undefined;
+        // N233 — how to gitignore the new project's footprint. Only honored when
+        // the chosen parent is itself a git repo root (shallow, no walking up).
+        const gitIgnore =
+          parsed.gitIgnore === "shared" || parsed.gitIgnore === "local"
+            ? parsed.gitIgnore
+            : undefined;
         let flowErrors: { id: string; error: string }[] = [];
+        const gitIgnoreWarnings: string[] = [];
         try {
           mkdirSync(dir, { recursive: true });
           const result = await initProject(dir, false, {
@@ -1173,6 +1275,16 @@ export async function startMasterServer(
           res.end(JSON.stringify({ error: `Could not create project: ${(err as Error).message}` }));
           return;
         }
+        // N233 — ignore the footprint from the enclosing repo when requested and
+        // the chosen parent is a git repo root. The project is already created, so
+        // a failed ignore-write is surfaced as a warning, not a hard error.
+        if (gitIgnore && existsSync(resolve(realParent, ".git"))) {
+          try {
+            ignoreProjectFolder(realParent, slug, gitIgnore);
+          } catch (err) {
+            gitIgnoreWarnings.push(`Could not gitignore the project: ${(err as Error).message}`);
+          }
+        }
         const { id } = registry.upsert(slug, name, "", { path: dir });
         const entry = registry.getById(id);
         if (entry) broadcast("project-update", registry.toPublicView(entry));
@@ -1180,7 +1292,10 @@ export async function startMasterServer(
         // N222 review-fix (blocker 1) — the project was created, but surface any
         // requested flow that failed to install (the modal shows the warning)
         // instead of reporting an unqualified success.
-        const warnings = flowErrors.map((e) => `Flow "${e.id}" did not install: ${e.error}`);
+        const warnings = [
+          ...flowErrors.map((e) => `Flow "${e.id}" did not install: ${e.error}`),
+          ...gitIgnoreWarnings,
+        ];
         res.end(JSON.stringify({ id, name, path: dir, warnings }));
         return;
       }

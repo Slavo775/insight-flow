@@ -78,7 +78,9 @@ Click **+ New project**:
 2. Name it.
 3. Pick install options — **task lifecycle events** (on), **agent activity
    tracking** (off), **composer-authoring flow** (off), **register with the hub**
-   (on), and the **editor** (Claude / Cursor / all).
+   (on), and the **editor** (Claude / Cursor / all). When the parent folder is a
+   git repo root, a **git-ignore** radio also appears — keep the footprint out of
+   that repo via the shared `.gitignore` (default) or a local `.git/info/exclude`.
 
 The hub scaffolds the folder, runs `init`, and adds it to the switcher.
 
