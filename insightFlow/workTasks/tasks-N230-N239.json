@@ -587,7 +587,7 @@
       "title": "Release insight-flow — ship N233 (New-project gitignore feature)",
       "type": "feat",
       "priority": "high",
-      "status": "ready-to-release",
+      "status": "done",
       "folder": "insightFlow/workTasks/N234-release-insight-flow-ship-n233-new-project-gitigno",
       "createdAt": "2026-07-14T15:10:19.336Z",
       "statusHistory": [
@@ -620,6 +620,16 @@
           "status": "ready-to-release",
           "at": "2026-07-14T15:21:53.513Z",
           "by": "custom:task-release-plan"
+        },
+        {
+          "status": "published",
+          "at": "2026-07-14T15:53:53.798Z",
+          "by": "custom:task-release-ship"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-14T15:56:09.839Z",
+          "by": "custom:task-release-rollout"
         }
       ],
       "implementation": {
@@ -643,6 +653,76 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
+    },
+    {
+      "id": "N235",
+      "title": "Add release-merge step to Release Manager flow (feature to master)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N235-add-release-merge-step-to-release-manager-flow-fea",
+      "createdAt": "2026-07-14T16:12:51.536Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-14T16:12:51.537Z",
+          "by": "authoring-create"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-14T16:16:02.439Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-14T16:39:19.976Z",
+          "by": "authoring-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-14T16:49:50.094Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "ai-approved",
+          "at": "2026-07-14T16:53:30.240Z",
+          "by": "authoring-review"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-14T17:02:55.950Z",
+          "by": "authoring-install"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-14T16:16:02.444Z",
+        "completedAt": "2026-07-14T16:39:19.983Z",
+        "filesChanged": [
+          "custom:task-release-merge-identity",
+          "custom:handover-plan-to-merge",
+          "custom:handover-merge-to-ship",
+          "custom:task-release-merge",
+          "custom:task-release-plan",
+          "custom:release-manager"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-14T17:02:55.956Z",
+      "totalDurationMinutes": 50,
+      "tags": [
+        "composer",
+        "release-flow",
+        "flow-authoring"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "composer:installed:custom:release-manager",
+      "mergedAt": null,
+      "flowId": "composer-authoring"
     }
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "taskId": "N235",
+  "reviews": [
+    {
+      "startedAt": "2026-07-14T16:49:50.101Z",
+      "endedAt": "2026-07-14T16:53:30.233Z",
+      "verdict": "approved",
+      "comment": "Composer review PASS. 4 per-kind reviewers (module/agent/relationship/flow) all approved. Merge behavior is reused task-git/* modules; merge→ship gate correctly gated before npm publish; flow graph coherent (check→plan→merge→ship→rollout→done); old plan→ship edge removed. Non-blocking: orphaned custom:handover-plan-to-ship (harmless, optional delete). Nothing installed — live flow unchanged until the gated Installer.",
+      "type": "ai",
+      "by": "authoring-review",
+      "fix": null
+    }
+  ]
+}
