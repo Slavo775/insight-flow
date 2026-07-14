@@ -428,7 +428,7 @@
       "title": "Release insight-flow 2.5.0 — merge N231 and publish",
       "type": "chore",
       "priority": "high",
-      "status": "ready-to-release",
+      "status": "done",
       "folder": "insightFlow/workTasks/N232-release-insight-flow-2-5-0-merge-n231-and-publish",
       "createdAt": "2026-07-14T10:58:12.237Z",
       "statusHistory": [
@@ -441,6 +441,16 @@
           "status": "ready-to-release",
           "at": "2026-07-14T10:59:42.074Z",
           "by": "custom:task-release-plan"
+        },
+        {
+          "status": "published",
+          "at": "2026-07-14T11:40:53.961Z",
+          "by": "custom:task-release-ship"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-14T12:08:48.269Z",
+          "by": "custom:task-release-rollout"
         }
       ],
       "implementation": {
@@ -458,6 +468,175 @@
       "tags": [
         "release",
         "publish"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N233",
+      "title": "New-project modal — gitignore the insight-flow footprint (shared or local)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N233-new-project-modal-gitignore-the-insight-flow-footp",
+      "createdAt": "2026-07-14T12:33:55.249Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-14T12:33:55.249Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-14T12:36:06.663Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-14T12:43:44.275Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-14T12:44:31.025Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-14T12:49:11.680Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-14T12:56:40.698Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-14T12:57:35.855Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-14T14:36:58.889Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-14T14:38:09.167Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-14T14:43:51.344Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-14T14:44:14.427Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-14T15:09:26.451Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-14T15:38:14.649Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-14T15:38:14.786Z",
+          "by": "git-agent"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-14T12:36:06.670Z",
+        "completedAt": "2026-07-14T12:43:44.282Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/client/api.ts",
+          "packages/taskflow/src/master/client/NewProjectModal.tsx"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 4,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": "2026-07-14T15:38:14.789Z",
+      "totalDurationMinutes": 184,
+      "tags": [
+        "master-ui",
+        "git",
+        "new-project"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/151",
+      "mergedAt": "2026-07-14T15:38:14.655Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N234",
+      "title": "Release insight-flow — ship N233 (New-project gitignore feature)",
+      "type": "feat",
+      "priority": "high",
+      "status": "ready-to-release",
+      "folder": "insightFlow/workTasks/N234-release-insight-flow-ship-n233-new-project-gitigno",
+      "createdAt": "2026-07-14T15:10:19.336Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-14T15:10:19.336Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "changes-needed",
+          "at": "2026-07-14T15:11:34.909Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-07-14T15:12:19.922Z",
+          "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-fixed",
+          "at": "2026-07-14T15:15:09.642Z",
+          "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-14T15:20:50.140Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "ready-to-release",
+          "at": "2026-07-14T15:21:53.513Z",
+          "by": "custom:task-release-plan"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "master-ui"
       ],
       "pushes": [],
       "branch": null,
