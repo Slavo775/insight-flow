@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.5.0](https://github.com/Slavo775/insight-flow/compare/v2.4.1...v2.5.0) (2026-07-14)
+
+
+### Features
+
+* **master:** redesign overview as React island with shared component kit (N231) ([#149](https://github.com/Slavo775/insight-flow/issues/149)) ([fc671dd](https://github.com/Slavo775/insight-flow/commit/fc671dd36f1e4a57b77d8cc799fffcdb576e8fbb))
+
 ## [2.4.1](https://github.com/Slavo775/insight-flow/compare/v2.4.0...v2.4.1) (2026-07-13)
 
 
