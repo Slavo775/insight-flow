@@ -7,6 +7,7 @@ export type ButtonVariant =
   | "close"
   | "docTab"
   | "primary"
+  | "success"
   | "secondary"
   | "danger";
 
@@ -77,6 +78,28 @@ const buttonVariants = {
     padding: 6px 16px;
     border-radius: ${(p) => p.theme.radius.md};
     font-size: ${(p) => p.theme.font.size.md};
+    &:hover {
+      opacity: 0.9;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  `,
+  // N231 — green solid call-to-action (New project, Create, Start server). Dark
+  // green text keeps AA contrast on the green fill.
+  success: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: ${(p) => p.theme.space.md};
+    background: ${(p) => p.theme.color.green};
+    border: 1px solid ${(p) => p.theme.color.green};
+    color: #052e16;
+    padding: 6px 16px;
+    border-radius: ${(p) => p.theme.radius.md};
+    font-size: ${(p) => p.theme.font.size.md};
+    font-weight: ${(p) => p.theme.font.weight.semibold};
     &:hover {
       opacity: 0.9;
     }

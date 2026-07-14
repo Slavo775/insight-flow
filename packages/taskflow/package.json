@@ -22,11 +22,12 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup && vite build && rm -rf dist/sounds && cp -r src/dashboard/server/sounds dist/sounds",
+    "build": "tsup && vite build && vite build --config vite.master.config.ts && rm -rf dist/sounds && cp -r src/dashboard/server/sounds dist/sounds",
     "dev": "tsup --watch",
     "dev:dashboard": "vite",
-    "typecheck": "tsc --noEmit && tsc -p src/dashboard/client/tsconfig.json --noEmit",
-    "typecheck:client": "tsc -p src/dashboard/client/tsconfig.json --noEmit",
+    "dev:master": "vite --config vite.master.config.ts",
+    "typecheck": "tsc --noEmit && tsc -p src/dashboard/client/tsconfig.json --noEmit && tsc -p src/master/client/tsconfig.json --noEmit",
+    "typecheck:client": "tsc -p src/dashboard/client/tsconfig.json --noEmit && tsc -p src/master/client/tsconfig.json --noEmit",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\" \"test/**/*.mjs\"",
