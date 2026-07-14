@@ -345,3 +345,22 @@ No issues. The `/assets/*` route rejects `..` / nested paths, `resolve`s + prefi
 - Follow-up polish on the same branch `feat/N231-master-overview-react-island`.
 
 ### Notes
+
+
+---
+
+## Round 14 — human review
+
+**Reviewer:** Human (Slavo)
+**Date:** 2026-07-14
+**Verdict:** approved
+
+### Human feedback (verbatim)
+
+> approved open the PR
+
+### Notes
+
+- Final approval after the modal polish rounds (12 + 13). Task → done; PR opened against `main` from `feat/N231-master-overview-react-island`.
+
+### Notes
