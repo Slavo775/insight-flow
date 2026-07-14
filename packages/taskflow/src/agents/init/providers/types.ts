@@ -33,6 +33,13 @@ export interface ProviderContext {
   customAgents: CustomAgent[];
   /** When true, overwrite existing provider files instead of skipping them. */
   force: boolean;
+  /**
+   * N236 — collector: provider pushes the name of any file it skipped because an
+   * existing one has *different* content (a real name conflict, not an identical
+   * re-init). The init caller surfaces these so an in-place init reports what it
+   * kept instead of silently under-installing.
+   */
+  conflicts?: string[];
 }
 
 /**
