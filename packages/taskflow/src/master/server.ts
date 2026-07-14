@@ -12,7 +12,6 @@ import { createServer as netCreateServer } from "node:net";
 import { fileURLToPath } from "node:url";
 import type { MasterServerConfig, MasterProjectState } from "./types.js";
 import * as registry from "./registry.js";
-import { getOverviewHtml } from "./overview.js";
 import { initProject } from "../agents/init/index.js";
 import { readHubRegistry, assignHubPort } from "../core/global-config.js";
 
@@ -59,6 +58,52 @@ const PROXY_TTFB_TIMEOUT_MS = 15_000;
 /** N216 — the bundled notification mp3s live in dist/sounds (same as the
  *  dashboard). Served from the master origin so hub sounds work everywhere. */
 const MASTER_SOUNDS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "sounds");
+
+/**
+ * N231 — the built master overview React island. Vite builds `src/master/client`
+ * into `dist/master` (index.html + assets/*), resolved here relative to the
+ * bundled server file (same pattern as the sounds dir). The server serves the
+ * shell at `/` and `/overview` and the bundle at `/assets/*`.
+ */
+const MASTER_CLIENT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "master");
+const MASTER_ASSETS_DIR = resolve(MASTER_CLIENT_DIR, "assets");
+const MASTER_ASSET_MIME: Record<string, string> = {
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".svg": "image/svg+xml; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".json": "application/json; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+};
+
+// The shell rarely changes (only on a rebuild → server restart), so read + patch
+// it once. `/hub-notify.js` (the shared notification client, N225) is injected
+// here rather than baked into index.html so the built shell stays free of a
+// script Vite would try to resolve at build time.
+let overviewShellCache: string | null = null;
+function getOverviewShell(): string {
+  if (overviewShellCache !== null) return overviewShellCache;
+  let html: string;
+  try {
+    html = readFileSync(resolve(MASTER_CLIENT_DIR, "index.html"), "utf8");
+  } catch {
+    // Not built yet — a minimal shell so the route still answers (and boots the
+    // dev message instead of a 500). Not cached, so a later build is picked up.
+    return (
+      '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+      "<title>Insight Flow — Overview</title></head><body>" +
+      "<p>The master overview is not built. Run <code>pnpm build</code>.</p>" +
+      "</body></html>"
+    );
+  }
+  const notifyTag = '<script src="/hub-notify.js" defer></script>';
+  if (!html.includes(notifyTag)) html = html.replace("</body>", notifyTag + "</body>");
+  overviewShellCache = html;
+  return html;
+}
 
 /**
  * N216/N217 — the master-origin service worker: one SW for the whole hub. It
@@ -1363,11 +1408,39 @@ export async function startMasterServer(
         return;
       }
 
+      // N231 — GET /assets/<file>: the built master overview bundle (JS/CSS/
+      // fonts, hashed + immutable). Flat vite assets dir, path-confined.
+      if (req.method === "GET" && url.pathname.startsWith("/assets/")) {
+        const rel = url.pathname.slice("/assets/".length);
+        if (!rel || rel.includes("..") || rel.includes("/")) {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "bad asset" }));
+          return;
+        }
+        const assetPath = resolve(MASTER_ASSETS_DIR, rel);
+        if (!assetPath.startsWith(MASTER_ASSETS_DIR + sep) || !existsSync(assetPath)) {
+          res.writeHead(404, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "not found" }));
+          return;
+        }
+        const ext = assetPath.slice(assetPath.lastIndexOf("."));
+        const data = readFileSync(assetPath);
+        res.writeHead(200, {
+          "Content-Type": MASTER_ASSET_MIME[ext] ?? "application/octet-stream",
+          "Content-Length": String(data.length),
+          "Cache-Control": "public, max-age=31536000, immutable",
+        });
+        res.end(data);
+        return;
+      }
+
       // GET / or /overview — the hub shell / switcher (N215 serves it at the
-      // root too, so it's the PWA start_url and the landing page).
+      // root too, so it's the PWA start_url and the landing page). N231 — this is
+      // now the built React island's shell (the app fetches /api/hub/projects and
+      // subscribes to /events on mount); assets are served from /assets/* above.
       if (req.method === "GET" && (url.pathname === "/overview" || url.pathname === "/")) {
-        res.writeHead(200, { "Content-Type": MIME_HTML });
-        res.end(getOverviewHtml(registry.getAllPublic()));
+        res.writeHead(200, { "Content-Type": MIME_HTML, "Cache-Control": "no-cache" });
+        res.end(getOverviewShell());
         return;
       }
 

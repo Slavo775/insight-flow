@@ -14,6 +14,6 @@
     "sourceMap": true
   },
   "include": ["src"],
-  "comment": "The React dashboard client (src/dashboard/client) is built by Vite and type-checked via its own tsconfig (typecheck:client) — excluded here so the CLI's tsc doesn't choke on JSX/DOM.",
-  "exclude": ["src/dashboard/client", "node_modules", "dist"]
+  "comment": "The React clients (src/dashboard/client, src/master/client) are built by Vite and type-checked via their own tsconfigs (typecheck:client) — excluded here so the CLI's tsc doesn't choke on JSX/DOM.",
+  "exclude": ["src/dashboard/client", "src/master/client", "node_modules", "dist"]
 }

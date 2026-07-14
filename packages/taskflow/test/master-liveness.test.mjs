@@ -142,8 +142,12 @@ test("shell (N215): / serves the switcher overview; start rejects an unknown pro
     const root = await fetch(base + "/");
     assert.equal(root.status, 200, "/ serves the shell");
     const html = await root.text();
-    assert.match(html, /refreshProjects\(\)/, "shell has the on-demand refresh");
-    assert.match(html, /function startProject/, "shell has start-and-go");
+    // N231 — the overview is now a React island: the shell mounts the app + loads
+    // the bundle (refresh / start-and-go run client-side) and injects the shared
+    // notification client. The start-and-go contract is asserted via the API below.
+    assert.match(html, /<div id="root">/, "shell mounts the React overview app");
+    assert.match(html, /\/assets\/[\w.-]+\.js/, "shell loads the overview bundle");
+    assert.match(html, /hub-notify\.js/, "shell injects the shared notification client");
 
     const start = await fetch(base + "/api/hub/projects/does-not-exist/start", { method: "POST" });
     assert.equal(start.status, 400, "start unknown project → 400");
@@ -369,16 +373,24 @@ test("N220: /project/<projectId> proxies (by stable projectId); /p/<id> 301-redi
   }
 });
 
-test("N220: the overview renders Running and Stopped sections + /project links", async () => {
+test("N220/N231: the overview shell mounts the app that groups projects by online state", async () => {
   const port = 8650 + Math.floor(Math.random() * 150);
   const base = "http://localhost:" + port;
   const { close } = await startMasterServer({ port, standalone: false });
   try {
+    // N231 — Running/Stopped grouping + the /project/ Open links now render
+    // client-side. The server contract behind them is the per-project data: an
+    // `online` flag (which section) and the stable `projectId` (the link target).
+    await register(base, { projectId: "grp-proj", label: "grp-proj", url: "" });
+    const entry = (await projects(base)).find((p) => p.projectId === "grp-proj");
+    assert.ok(entry, "registered project appears in /api/hub/projects");
+    assert.equal(typeof entry.online, "boolean", "carries the online flag the client groups by");
+    assert.ok("projectId" in entry, "carries projectId for the /project/ Open link");
+
+    // The shell serves the React island that renders those sections.
     const html = await (await fetch(base + "/")).text();
-    assert.match(html, /'Running'/, "overview has a Running section");
-    assert.match(html, /'Stopped'/, "overview has a Stopped section");
-    assert.match(html, /section-label/, "section styling present");
-    assert.match(html, /\/project\/'/, "Open links use the /project/ path");
+    assert.match(html, /<div id="root">/, "shell mounts the React overview app");
+    assert.match(html, /\/assets\/[\w.-]+\.js/, "shell loads the overview bundle");
   } finally {
     close();
   }
