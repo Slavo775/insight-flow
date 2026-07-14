@@ -143,9 +143,27 @@ project's own `/hub/*` control routes are **never** proxied.
    | **Composer-authoring flow** | off | Installs the `composer-authoring` flow. |
    | **Register with this hub** | on | Adds the project to `hub.json`. |
    | **Editor** | Claude | `claude` \| `cursor` \| `all`. |
+   | **Git ignore** | shared | Only shown when the chosen folder is a git repo root — `shared` \| `local`. |
 
    Choosing **Cursor** disables the Claude-shaped options (they're
    Claude-specific) with a note.
+
+4. **Choose how to ignore the footprint** — a **Git ignore** radio group that
+   appears **only when the folder you browsed to is itself a git repo root** (a
+   `.git` exists directly in it); it's hidden otherwise. When the folder is a git
+   repo, the new project's footprint (`insightFlow/`, `.claude/`,
+   `taskflow.config.json`, …) is now **ignored by default** — there is no
+   "commit it" opt-out, you only choose where the rule lives:
+
+   - **Shared `.gitignore`** (default) — writes the rule to the committed
+     `.gitignore`, so teammates get it too.
+   - **Local only (`.git/info/exclude`)** — writes to the repo-local exclude
+     file, which is not committed (private to you).
+
+   Either option writes a single anchored rule `/<slug>/` that ignores the whole
+   new-project subfolder from the enclosing repo. It's worktree/submodule-aware
+   and idempotent. A failed ignore-write is surfaced as a **non-fatal warning**
+   (the project is still created), the same as per-flow install warnings.
 
 The hub then scaffolds the folder, runs `init` with those options, registers it,
 and returns any per-flow install warnings. Creating a project writes to disk, so
@@ -274,8 +292,8 @@ unknown path returns `404`.
 | `POST` | `/api/projects/:id/update` | Push a project's full state | per-project token |
 | `POST` | `/api/projects/:id/status` | Push `claudeStatus` | per-project token |
 | `GET` | `/api/activity/:projectId` | Last 3 activity events | — |
-| `GET` | `/api/fs/list?dir=` | New-project folder browser | trusted-action |
-| `POST` | `/api/projects/create` | Scaffold + `init` + register a project | trusted-action |
+| `GET` | `/api/fs/list?dir=` | New-project folder browser (response includes `hasGit` for the listed dir) | trusted-action |
+| `POST` | `/api/projects/create` | Scaffold + `init` + register a project (accepts optional `gitIgnore: "shared" \| "local"`) | trusted-action |
 | `GET` | `/api/hub/projects` | Project list (client-safe views) | trusted |
 | `GET` | `/api/hub/live?id&token` | Liveness stream | per-project token |
 | `POST` | `/api/hub/refresh` | On-demand health probe | trusted |
