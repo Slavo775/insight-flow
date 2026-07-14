@@ -321,3 +321,27 @@ No issues. The `/assets/*` route rejects `..` / nested paths, `resolve`s + prefi
 
 - Applied after the task was approved + pushed to `feat/N231-master-overview-react-island`; this is a follow-up commit on the same branch.
 - Create text `oklch(0.15 0.02 260)` is dark; to keep it readable I set the Create background to Lovable's lighter indigo `oklch(0.7 0.18 260)` (was `#6366f1`), matching the Lovable modal exactly.
+
+
+---
+
+## Round 13 — human review (post-approval polish)
+
+**Reviewer:** Human (Slavo)
+**Date:** 2026-07-14
+**Verdict:** fix-needed
+
+### Human feedback (verbatim)
+
+> please folders should have font font-size 14px font weight 400 line height 20px also please install description like zero token font size 12px line height 16px
+
+### Blockers (New-project modal)
+
+1. **Folder list items:** font-size 14px, font-weight 400, line-height 20px.
+2. **Install feature description/hint** (e.g. "zero tokens"): font-size 12px, line-height 16px.
+
+### Notes
+
+- Follow-up polish on the same branch `feat/N231-master-overview-react-island`.
+
+### Notes

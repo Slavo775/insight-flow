@@ -49,7 +49,9 @@ const FolderItem = styled.button`
   min-height: 44px;
   text-align: left;
   padding: 0 ${(p) => p.theme.space.lg};
-  font-size: ${(p) => p.theme.font.size.base};
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   font-family: inherit;
   color: ${(p) => p.theme.color.text};
   background: none;
@@ -139,7 +141,8 @@ const FeatureName = styled.span`
 
 const FeatureHint = styled.span`
   color: ${(p) => p.theme.color.textMuted};
-  font-size: ${(p) => p.theme.font.size.xs};
+  font-size: 12px;
+  line-height: 16px;
   margin-left: ${(p) => p.theme.space.md};
 `;
 
