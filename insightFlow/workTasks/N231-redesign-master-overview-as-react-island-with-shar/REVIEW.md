@@ -295,3 +295,29 @@ No issues. The `/assets/*` route rejects `..` / nested paths, `resolve`s + prefi
 ### Notes
 
 - Approved after 9 rounds of design-fidelity iteration against the Lovable prototype (layout, modal, font, colors, buttons, section headings, project item, hero card, section icon boxes) on top of the Round 1 AI a11y fixes. Task → done; branch + push next.
+
+
+---
+
+## Round 12 — human review (post-approval polish)
+
+**Reviewer:** Human (Slavo)
+**Date:** 2026-07-14
+**Verdict:** fix-needed
+
+### Human feedback (verbatim)
+
+> i forgot on modal in modal "Folder" title 12px font weight 600 line height 16px same for Project Name same for Install title for the path under folder title 14px line height 20px color for all oklch(0.82 0.02 260) Editor label color oklch(0.97 0.01 260) weight 600 size 14px cancel is smaller than Create height for both should 44px plus the font 14px color for create oklch(0.15 0.02 260) font weight for both 600 for cancel color white
+
+### Blockers (New-project modal)
+
+1. **Field labels ("Folder", "Project name", "Install"):** 12px, weight 600, line-height 16px, color `oklch(0.82 0.02 260)`.
+2. **Path line** (under "Folder"): 14px, line-height 20px, color `oklch(0.82 0.02 260)`.
+3. **Editor label:** color `oklch(0.97 0.01 260)`, weight 600, size 14px.
+4. **Cancel + Create buttons:** both height 44px, font-size 14px, font-weight 600.
+5. **Create:** text color `oklch(0.15 0.02 260)`. **Cancel:** text color white.
+
+### Notes
+
+- Applied after the task was approved + pushed to `feat/N231-master-overview-react-island`; this is a follow-up commit on the same branch.
+- Create text `oklch(0.15 0.02 260)` is dark; to keep it readable I set the Create background to Lovable's lighter indigo `oklch(0.7 0.18 260)` (was `#6366f1`), matching the Lovable modal exactly.

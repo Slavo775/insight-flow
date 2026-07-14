@@ -16,16 +16,19 @@ const Field = styled.div`
 
 const FieldLabel = styled.label`
   display: block;
-  font-size: ${(p) => p.theme.font.size.sm};
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: ${(p) => p.theme.color.textMuted};
+  color: oklch(0.82 0.02 260);
   margin-bottom: ${(p) => p.theme.space.md};
 `;
 
 const PathLine = styled.div`
-  font-size: ${(p) => p.theme.font.size.sm};
-  color: ${(p) => p.theme.color.textMuted};
+  font-size: 14px;
+  line-height: 20px;
+  color: oklch(0.82 0.02 260);
   word-break: break-all;
   margin-bottom: ${(p) => p.theme.space.md};
 `;
@@ -199,6 +202,12 @@ const EditorRow = styled.div`
   color: ${(p) => p.theme.color.text};
 `;
 
+const EditorLabel = styled.label`
+  color: oklch(0.97 0.01 260);
+  font-weight: 600;
+  font-size: 14px;
+`;
+
 const StatusLine = styled.div<{ $tone: "" | "ok" | "err" }>`
   font-size: ${(p) => p.theme.font.size.base};
   min-height: 16px;
@@ -211,21 +220,22 @@ const StatusLine = styled.div<{ $tone: "" | "ok" | "err" }>`
         : p.theme.color.textMuted};
 `;
 
-// Lovable's Create CTA is an indigo/purple button.
+// Lovable's Create CTA: lighter indigo fill with dark text.
 const CreateBtn = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: ${(p) => p.theme.space.md};
-  min-height: 44px;
+  height: 44px;
   padding: 0 16px;
   border: none;
   border-radius: ${(p) => p.theme.radius.xl};
-  font-size: ${(p) => p.theme.font.size.lg};
-  font-weight: ${(p) => p.theme.font.weight.semibold};
+  font-size: 14px;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  background: #6366f1;
-  color: #fff;
+  background: oklch(0.7 0.18 260);
+  color: oklch(0.15 0.02 260);
   &:hover {
     opacity: 0.9;
   }
@@ -235,12 +245,14 @@ const CreateBtn = styled.button`
   }
 `;
 
-// Cancel at the Lovable 44px height.
+// Cancel at the Lovable 44px height, white text.
 const CancelBtn = styled(Button)`
-  min-height: 44px;
+  height: 44px;
   padding: 0 16px;
   border-radius: ${(p) => p.theme.radius.xl};
-  font-size: ${(p) => p.theme.font.size.lg};
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
 `;
 
 function trimSlash(s: string): string {
@@ -418,7 +430,7 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
           label="Register with this hub"
         />
         <EditorRow>
-          <label htmlFor="np-editor">Editor</label>
+          <EditorLabel htmlFor="np-editor">Editor</EditorLabel>
           <Select
             id="np-editor"
             value={editor}
