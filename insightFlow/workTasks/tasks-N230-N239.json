@@ -109,7 +109,7 @@
       "title": "Redesign master overview as React island with shared component kit",
       "type": "feat",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N231-redesign-master-overview-as-react-island-with-shar",
       "createdAt": "2026-07-14T06:35:43.895Z",
       "statusHistory": [
@@ -387,6 +387,16 @@
           "status": "approved",
           "at": "2026-07-14T10:48:30.540Z",
           "by": "custom:task-fe-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-14T11:23:07.321Z",
+          "by": "custom:task-release-ship"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-14T11:23:07.527Z",
+          "by": "custom:task-release-ship"
         }
       ],
       "implementation": {
@@ -399,13 +409,55 @@
       "reviewCount": 14,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-14T11:23:07.531Z",
+      "totalDurationMinutes": 287,
       "tags": [
         "frontend",
         "master-ui",
         "components",
         "redesign"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/149",
+      "mergedAt": "2026-07-14T11:23:07.329Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N232",
+      "title": "Release insight-flow 2.5.0 — merge N231 and publish",
+      "type": "chore",
+      "priority": "high",
+      "status": "ready-to-release",
+      "folder": "insightFlow/workTasks/N232-release-insight-flow-2-5-0-merge-n231-and-publish",
+      "createdAt": "2026-07-14T10:58:12.237Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-14T10:58:12.237Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "ready-to-release",
+          "at": "2026-07-14T10:59:42.074Z",
+          "by": "custom:task-release-plan"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "publish"
       ],
       "pushes": [],
       "branch": null,
