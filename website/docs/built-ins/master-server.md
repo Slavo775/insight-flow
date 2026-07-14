@@ -128,13 +128,28 @@ project's own `/hub/*` control routes are **never** proxied.
 
 **`+ New project`** opens an in-app modal (no terminal, no `prompt()`):
 
-1. **Browse to a parent folder** — a server-side folder browser
+1. **Browse to a folder** — a server-side folder browser
    (`GET /api/fs/list`) lists sub-directories, confined to a root
    (`INSIGHT_FLOW_BROWSE_ROOT`, default your home folder). No `..` / symlink
    escape.
-2. **Name it** — validated (`A–Z a–z 0–9 space _ -`, ≤ 60 chars); the folder is
-   `<parent>/<slug>`.
-3. **Pick install options** (forwarded to `insight-flow init`):
+2. **Choose an init location** — a radio group:
+
+   - **Use the selected folder** (default) — inits insight-flow **directly** in
+     the folder you browsed to, exactly like the `insight-flow init` CLI. The
+     name field below becomes a **registry label** ("Project name (label)"),
+     defaulting to the selected folder's basename. In-place init is
+     **merge-only / non-destructive**: an existing `.claude/` and `CLAUDE.md`
+     are preserved (only insight-flow's marker section is appended to
+     `CLAUDE.md`), and a same-named `.claude/commands/*.md` whose content
+     differs is **kept** (not overwritten) and surfaced as a non-fatal warning
+     ("Kept your existing files…"). Re-initing an already-initialized folder
+     returns a clear **409 "insight-flow is already initialized in this
+     folder"**.
+   - **Create a new subfolder** (opt-in) — the older behavior: scaffolds
+     `<chosenFolder>/<slug>`; the name field is the **new folder name**.
+3. **Name it** — validated (`A–Z a–z 0–9 space _ -`, ≤ 60 chars). In-place it is
+   the registry label; in subfolder mode the folder is `<chosenFolder>/<slug>`.
+4. **Pick install options** (forwarded to `insight-flow init`):
 
    | Option | Default | Effect |
    | --- | --- | --- |
@@ -148,11 +163,10 @@ project's own `/hub/*` control routes are **never** proxied.
    Choosing **Cursor** disables the Claude-shaped options (they're
    Claude-specific) with a note.
 
-4. **Choose how to ignore the footprint** — a **Git ignore** radio group that
+5. **Choose how to ignore the footprint** — a **Git ignore** radio group that
    appears **only when the folder you browsed to is itself a git repo root** (a
    `.git` exists directly in it); it's hidden otherwise. When the folder is a git
-   repo, the new project's footprint (`insightFlow/`, `.claude/`,
-   `taskflow.config.json`, …) is now **ignored by default** — there is no
+   repo, insight-flow's footprint is now **ignored by default** — there is no
    "commit it" opt-out, you only choose where the rule lives:
 
    - **Shared `.gitignore`** (default) — writes the rule to the committed
@@ -160,10 +174,18 @@ project's own `/hub/*` control routes are **never** proxied.
    - **Local only (`.git/info/exclude`)** — writes to the repo-local exclude
      file, which is not committed (private to you).
 
-   Either option writes a single anchored rule `/<slug>/` that ignores the whole
-   new-project subfolder from the enclosing repo. It's worktree/submodule-aware
-   and idempotent. A failed ignore-write is surfaced as a **non-fatal warning**
-   (the project is still created), the same as per-flow install warnings.
+   What gets ignored depends on the init location:
+
+   - **In-place** — writes only insight-flow's own footprint rules
+     `/insightFlow/` and `/taskflow.config.json`. It deliberately does **not**
+     ignore `.claude/`, because that folder is shared with your editor and may
+     already be committed.
+   - **Subfolder** — writes a single anchored rule `/<slug>/` that ignores the
+     whole new-project subfolder from the enclosing repo.
+
+   Either way the write is worktree/submodule-aware and idempotent. A failed
+   ignore-write is surfaced as a **non-fatal warning** (the project is still
+   created), the same as per-flow install warnings.
 
 The hub then scaffolds the folder, runs `init` with those options, registers it,
 and returns any per-flow install warnings. Creating a project writes to disk, so
@@ -293,7 +315,7 @@ unknown path returns `404`.
 | `POST` | `/api/projects/:id/status` | Push `claudeStatus` | per-project token |
 | `GET` | `/api/activity/:projectId` | Last 3 activity events | — |
 | `GET` | `/api/fs/list?dir=` | New-project folder browser (response includes `hasGit` for the listed dir) | trusted-action |
-| `POST` | `/api/projects/create` | Scaffold + `init` + register a project (accepts optional `gitIgnore: "shared" \| "local"`) | trusted-action |
+| `POST` | `/api/projects/create` | Init + register a project — accepts optional `location: "in-folder" \| "subfolder"` (default `"in-folder"`, in-place) and `gitIgnore: "shared" \| "local"`; re-initing an already-initialized folder returns **409 "already initialized"** | trusted-action |
 | `GET` | `/api/hub/projects` | Project list (client-safe views) | trusted |
 | `GET` | `/api/hub/live?id&token` | Liveness stream | per-project token |
 | `POST` | `/api/hub/refresh` | On-demand health probe | trusted |
