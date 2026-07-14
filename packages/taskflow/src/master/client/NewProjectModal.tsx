@@ -196,6 +196,50 @@ function Feature({
   );
 }
 
+// N233 — git-ignore choice (radio). Same feature-card shell as the installs, but
+// a round indicator to read as single-choice.
+const RadioDot = styled.span<{ $checked: boolean }>`
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: ${(p) => (p.$checked ? p.theme.color.green : "oklch(0.26 0.02 260)")};
+  border: 1px solid ${(p) => (p.$checked ? p.theme.color.green : "oklch(0.45 0.02 260)")};
+  color: #0a0a0a;
+`;
+
+function GitOption({
+  checked,
+  onChange,
+  label,
+  hint,
+}: {
+  checked: boolean;
+  onChange: () => void;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <FeatureCard $checked={checked} $disabled={false}>
+      <HiddenCheckbox
+        type="radio"
+        name="np-gitignore"
+        checked={checked}
+        onChange={() => onChange()}
+      />
+      <RadioDot $checked={checked} aria-hidden="true">
+        {checked ? <CheckGlyph /> : null}
+      </RadioDot>
+      <span>
+        <FeatureName>{label}</FeatureName>
+        {hint ? <FeatureHint>{hint}</FeatureHint> : null}
+      </span>
+    </FeatureCard>
+  );
+}
+
 const EditorRow = styled.div`
   display: flex;
   align-items: center;
@@ -266,6 +310,7 @@ function trimSlash(s: string): string {
 
 type Editor = "claude" | "cursor" | "all";
 type Tone = "" | "ok" | "err";
+type GitIgnore = "shared" | "local";
 
 export function NewProjectModal({ onClose }: { onClose: () => void }) {
   const [dir, setDir] = useState<string | null>(null);
@@ -278,6 +323,9 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
   const [composer, setComposer] = useState(false);
   const [registerHub, setRegisterHub] = useState(true);
   const [editor, setEditor] = useState<Editor>("claude");
+  // N233 — the chosen folder's git state + the gitignore choice (default shared).
+  const [hasGit, setHasGit] = useState(false);
+  const [gitIgnore, setGitIgnore] = useState<GitIgnore>("shared");
   const [status, setStatus] = useState<{ msg: string; tone: Tone }>({ msg: "", tone: "" });
   const [creating, setCreating] = useState(false);
 
@@ -296,6 +344,7 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
         setPath(d.dir);
         setParent(d.parent ?? null);
         setEntries(d.entries ?? []);
+        setHasGit(Boolean(d.hasGit));
       },
       () => setStatus({ msg: "Could not list folders.", tone: "err" }),
     );
@@ -328,6 +377,7 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
       registerHub,
       editor,
       installFlows: !cursorOnly && composer ? ["composer-authoring"] : [],
+      gitIgnore: hasGit ? gitIgnore : undefined,
     }).then(
       (d) => {
         if (d.error) {
@@ -448,6 +498,27 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
           <FeatureHint>Lifecycle, activity, and the composer flow are Claude-only.</FeatureHint>
         ) : null}
       </Field>
+
+      {hasGit ? (
+        <Field>
+          <FieldLabel as="div">Git ignore</FieldLabel>
+          <PathLine>
+            This folder is a git repo. Hide the new project&apos;s files from it?
+          </PathLine>
+          <GitOption
+            checked={gitIgnore === "shared"}
+            onChange={() => setGitIgnore("shared")}
+            label="Shared .gitignore"
+            hint="committed — teammates get it"
+          />
+          <GitOption
+            checked={gitIgnore === "local"}
+            onChange={() => setGitIgnore("local")}
+            label="Local only (.git/info/exclude)"
+            hint="not committed — private to you"
+          />
+        </Field>
+      ) : null}
 
       <StatusLine $tone={status.tone} role={status.tone === "err" ? "alert" : "status"}>
         {status.msg}

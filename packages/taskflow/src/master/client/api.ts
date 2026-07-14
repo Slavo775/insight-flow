@@ -42,6 +42,9 @@ export interface FsListResult {
   dir: string;
   parent?: string | null;
   entries?: FsEntry[];
+  // N233 — true when this folder is itself a git repo root; drives the
+  // New-project modal's gitignore options.
+  hasGit?: boolean;
   error?: string;
 }
 
@@ -59,6 +62,9 @@ export interface CreateProjectBody {
   registerHub: boolean;
   editor: string;
   installFlows: string[];
+  // N233 — how to gitignore the project footprint; omitted when the chosen
+  // folder is not a git repo root (no options shown).
+  gitIgnore?: "shared" | "local";
 }
 
 export interface CreateProjectResult {
