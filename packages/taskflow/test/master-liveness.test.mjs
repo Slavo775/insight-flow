@@ -504,12 +504,15 @@ test("N221: /api/fs/list lists sub-folders within the browse root and rejects es
 test("N221: /api/projects/create scaffolds under the chosen folder; rejects outside root", async () => {
   const root = mkdtempSync(join(tmpdir(), "if-create-"));
   mkdirSync(join(root, "sub"));
+  mkdirSync(join(root, "sub-subfolder"));
   const prev = process.env.INSIGHT_FLOW_BROWSE_ROOT;
   process.env.INSIGHT_FLOW_BROWSE_ROOT = root;
   const port = 8910 + Math.floor(Math.random() * 80);
   const base = "http://localhost:" + port;
   const { close } = await startMasterServer({ port, standalone: false });
   try {
+    // N236 — default is IN-PLACE: with no `location` field the project is
+    // scaffolded in the chosen folder itself, not a <slug> subfolder.
     const ok = await fetch(base + "/api/projects/create", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -517,8 +520,35 @@ test("N221: /api/projects/create scaffolds under the chosen folder; rejects outs
     });
     assert.equal(ok.status, 200, "create under the chosen folder succeeds");
     const d = await ok.json();
-    assert.match(d.path, /[/\\]sub[/\\]my-proj$/, "scaffolded as <chosen>/<slug>");
-    assert.ok(existsSync(join(d.path, "taskflow.config.json")), "project was scaffolded");
+    assert.match(d.path, /[/\\]sub$/, "scaffolded in the chosen folder itself (in-place)");
+    assert.doesNotMatch(d.path, /[/\\]my-proj$/, "no <slug> subfolder for the default case");
+    assert.ok(
+      existsSync(join(d.path, "taskflow.config.json")),
+      "project was scaffolded directly under the chosen folder",
+    );
+    assert.ok(existsSync(join(d.path, "insightFlow")), "insightFlow/ lives in the chosen folder");
+
+    // N236 — `location: "subfolder"` restores the old <chosen>/<slug> behavior.
+    const sub = await fetch(base + "/api/projects/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: "My Proj",
+        dir: join(root, "sub-subfolder"),
+        location: "subfolder",
+      }),
+    });
+    assert.equal(sub.status, 200, "create in a named subfolder succeeds");
+    const ds = await sub.json();
+    assert.match(
+      ds.path,
+      /[/\\]sub-subfolder[/\\]my-proj$/,
+      "scaffolded as <chosen>/<slug> when location=subfolder",
+    );
+    assert.ok(
+      existsSync(join(ds.path, "taskflow.config.json")),
+      "subfolder project was scaffolded",
+    );
 
     // A chosen folder outside the browse root is refused (no filesystem write).
     const bad = await fetch(base + "/api/projects/create", {
