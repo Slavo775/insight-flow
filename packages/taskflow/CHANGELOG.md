@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.7.0](https://github.com/Slavo775/insight-flow/compare/v2.6.0...v2.7.0) (2026-07-14)
+
+
+### Features
+
+* **master:** new-project init in the selected folder, respecting existing .claude/ (N236) ([#153](https://github.com/Slavo775/insight-flow/issues/153)) ([2a479eb](https://github.com/Slavo775/insight-flow/commit/2a479eb5e20a0873a33d53c02d7b0f99d521f323))
+
 ## [2.6.0](https://github.com/Slavo775/insight-flow/compare/v2.5.0...v2.6.0) (2026-07-14)
 
 
