@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.6.0](https://github.com/Slavo775/insight-flow/compare/v2.5.0...v2.6.0) (2026-07-14)
+
+
+### Features
+
+* **master:** gitignore new-project footprint, shared or local (N233) ([#151](https://github.com/Slavo775/insight-flow/issues/151)) ([39b05a1](https://github.com/Slavo775/insight-flow/commit/39b05a1acf7c2031dd72c3d4f9413dfc8fa11182))
+
 ## [2.5.0](https://github.com/Slavo775/insight-flow/compare/v2.4.1...v2.5.0) (2026-07-14)
 
 
