@@ -1,0 +1,113 @@
+{
+  "range": {
+    "from": 240,
+    "to": 249
+  },
+  "tasks": [
+    {
+      "id": "N240",
+      "title": "Robust hub project auto-launch + reliable live agent-status to master (notifications fire)",
+      "type": "fix",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "insightFlow/workTasks/N240-robust-hub-project-auto-launch-reliable-live-agent",
+      "createdAt": "2026-07-15T14:41:32.359Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-15T14:41:32.359Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-15T14:50:33.640Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-15T15:12:03.284Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-15T15:28:47.441Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-15T15:32:42.184Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-15T16:19:50.700Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-15T16:22:50.728Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-15T16:39:05.961Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-15T16:40:06.579Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-15T16:50:12.637Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-15T16:50:30.796Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-15T16:51:50.862Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-15T14:50:33.647Z",
+        "completedAt": "2026-07-15T15:12:03.290Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/master-liveness.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master",
+        "hub",
+        "notifications",
+        "status",
+        "reliability"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-15T16:51:50.861Z",
+          "commitHash": "ecf2e07",
+          "commitMessage": "fix(master): don't crash the hub on a missing project path; keep notifications after a master restart (N240)"
+        }
+      ],
+      "branch": "fix/N240-hub-auto-launch-crash-status",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    }
+  ]
+}
