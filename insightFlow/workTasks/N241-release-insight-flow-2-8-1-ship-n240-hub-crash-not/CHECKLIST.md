@@ -1,0 +1,17 @@
+# N241 — Release insight-flow 2.8.1 — ship N240 hub crash + notification-restart fix — Checklist
+
+## Done criteria
+
+- [ ] <specific checkable item>
+- [ ] <specific checkable item>
+
+## Quality gates
+
+- [ ] `npx tsc --noEmit` passes
+- [ ] `npm run lint` passes
+- [ ] Related tests pass
+- [ ] No regressions in affected area
+
+## Verification
+
+- [ ] <manual or automated verification step with expected result>
