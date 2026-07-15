@@ -1,7 +1,8 @@
 // N231 — notification preferences for the overview settings menu + per-project
-// mute. The overview only READS/WRITES these; the actual notifications are fired
-// by the shared /hub-notify.js client (N225), which reads the same localStorage
-// key. So this module is purely the settings UI's model, matching overview.ts.
+// mute. N238 — this is now the SINGLE source of truth for the settings model
+// AND the watched-status list: the settings UI (SettingsMenu) and the notifier
+// (hub-notify.ts) both import from here, so the two can no longer drift (they
+// previously watched 5 vs 8 statuses). Persisted under one localStorage key.
 
 export interface NotifSettings {
   statuses: Record<string, boolean>;
@@ -12,13 +13,20 @@ export interface NotifSettings {
 
 const KEY = "tf-notif-settings";
 
-/** The five task-status transitions the settings menu can toggle. */
+/**
+ * The task-status transitions the hub notifies on — the settings menu renders a
+ * toggle per entry and the notifier only fires for statuses in this list. Keep
+ * the two in lockstep by importing this single list in both.
+ */
 export const WATCHED_STATUSES = [
   "implemented",
   "approved",
   "fix-needed",
+  "fixed",
   "merged",
   "changes-requested",
+  "changes-implemented",
+  "done",
 ] as const;
 
 export function loadNotifSettings(): NotifSettings {

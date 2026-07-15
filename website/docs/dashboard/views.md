@@ -32,9 +32,10 @@ _Screenshot to add: the Kanban board showing tasks in flow-status columns._
 - **Flow-status columns** — the columns are derived from the statuses of the
   bound [flow](../concepts/flows.md), so a custom flow with custom states shows
   its own columns. Click any card to open its detail panel.
-- **Settings popover** — the ⚙ button opens notification settings: toggle
-  **Sound** and **Mute when tab focused** for the desktop / sound alerts that
-  fire when an agent finishes or needs permission.
+
+Notification and sound settings are not on the project dashboard — they live in
+the [hub](../built-ins/master-server.md), which is the single notifier. Open
+your projects through the hub to get notified.
 
 When the activity engine is enabled, the board also carries the **Agent
 Activity** and **Recent Activity** tabs (see [Activity feed](#activity-feed)
@@ -153,8 +154,8 @@ _Screenshot to add: the activity feed showing the live Claude status and an even
 
 - **Live Claude status** — a status chip reflects whether the agent is
   **active**, **idle**, **awaiting permission**, or **done**. The same signal
-  drives the page-title glyph, sound, and desktop notifications you toggle in
-  the board's settings popover.
+  drives the page-title glyph on the project dashboard; sound and desktop
+  notifications fire from the [hub](../built-ins/master-server.md), not here.
 - **Event timeline** — a stream of activity events (tool use, status changes)
   rendered as they arrive, filtered by the configured verbosity.
 

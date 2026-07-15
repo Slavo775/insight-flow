@@ -33,7 +33,12 @@ test("SPA ships the provider badge classes (claude + cursor)", () => {
   assert.match(CSS, /activity-badge-provider-cursor/, "cursor provider badge class present");
 });
 
-test("SPA ships the notification/sound layer (permission-alert sound + status glyphs)", () => {
-  assert.match(JS, /permission-alert\.mp3/, "permission-alert sound wired in the SPA");
-  assert.match(JS, /Taskflow Dashboard/, "page-title base string present");
+test("N238: the project SPA no longer ships notifications/sounds (hub owns them)", () => {
+  // Sound + browser-notification firing moved wholly to the hub (/hub-notify.js).
+  assert.ok(
+    !JS.includes("permission-alert.mp3") && !JS.includes("idle-ping.mp3"),
+    "project SPA must not wire notification sounds anymore",
+  );
+  // The visual page-title glyphs stay in the project SPA.
+  assert.match(JS, /Taskflow Dashboard/, "page-title base string still present");
 });

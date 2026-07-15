@@ -4,13 +4,10 @@ import type { ClaudeStatus } from "../../core/activity-status.js";
 import { claudeStatusFromProjectStatus } from "../../core/activity-status.js";
 import type { ProjectStatus } from "../../core/types.js";
 import { apiUrl } from "./base.js";
-import {
-  fireDesktopNotif,
-  firePermissionAlert,
-  fireStatusDesktopNotif,
-  playStatusSound,
-  updatePageTitle,
-} from "./notifications.js";
+// N238 — the project dashboard no longer fires notifications/sounds. The hub
+// (master, /hub-notify.js) is the single notifier. Only the visual page title
+// stays here.
+import { updatePageTitle } from "./notifications.js";
 import { useDashboardStore } from "./store.js";
 import { invalidateRegistry } from "./registry.js";
 import { invalidateFlows } from "./flow-columns.js";
@@ -96,36 +93,12 @@ export function useDashboardStream(): void {
     es.addEventListener("status", (e) => {
       const frame = JSON.parse((e as MessageEvent).data) as { to?: string };
       if (!frame || typeof frame.to !== "string") return;
-      const cfg = store().snapshot;
       // N227 — reflect the server's status transition on the badge (single
       // source of truth). `to` is always one of the four ProjectStatus values.
+      // N238 — notifications/sounds now live only in the hub; this just updates
+      // the visual badge + tab title.
       store().setAgentStatus(claudeStatusFromProjectStatus(frame.to as ProjectStatus));
       updatePageTitle(frame.to);
-      if (frame.to === "done") {
-        playStatusSound("idle", cfg?.soundsEnabled !== false);
-        if (cfg?.browserNotifications !== false)
-          fireStatusDesktopNotif("done", cfg?.projectName || "", cfg?.soundsEnabled !== false);
-      } else if (frame.to === "awaiting-permission") {
-        firePermissionAlert(
-          cfg?.soundsEnabled !== false,
-          cfg?.browserNotifications !== false,
-          cfg?.projectName || "",
-        );
-      }
-    });
-
-    es.addEventListener("agent-done", () => {
-      const cfg = store().snapshot;
-      if (cfg?.browserNotifications !== false)
-        fireDesktopNotif(cfg?.projectName || "", cfg?.soundsEnabled !== false);
-    });
-    es.addEventListener("agent-permission", () => {
-      const cfg = store().snapshot;
-      firePermissionAlert(
-        cfg?.soundsEnabled !== false,
-        cfg?.browserNotifications !== false,
-        cfg?.projectName || "",
-      );
     });
 
     return () => {
