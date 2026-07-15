@@ -1,0 +1,33 @@
+{
+  "taskId": "N238",
+  "reviews": [
+    {
+      "startedAt": "2026-07-15T07:27:02.827Z",
+      "endedAt": "2026-07-15T07:36:51.216Z",
+      "verdict": "fix-needed",
+      "comment": "1 HIGH blocker: dash-case 'session-start' (and 'notification') misrouted to active in status-machine.ts — breaks determinism via the activity-feed insert path. Plus MEDIUM notification gap, a scope-creep blocker (12 unrelated files reformatted), and 2 non-blocking (done-toggle mislabel, decay resume-lag). Core engine, deletion, and un-blob are otherwise correct; security clean; 360/360 tests.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-15T07:51:59.430Z",
+        "endedAt": "2026-07-15T07:55:35.340Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/core/status-machine.ts",
+          "packages/taskflow/test/event-stream.test.mjs"
+        ],
+        "comment": "Fixed blockers 1-3: dash-case session-start + notification now routed correctly in actionFromEvent (was falling through to active, breaking determinism); reverted 12 unrelated prettier-only files to scope the diff. Added dash-case unit tests. Gates green, 362/362.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-15T08:20:52.579Z",
+      "endedAt": "2026-07-15T08:21:21.877Z",
+      "verdict": "approved",
+      "comment": "Human approved for release: 'okej approved please pu it to done i can go to the release'",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

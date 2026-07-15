@@ -723,6 +723,276 @@
       "mrUrl": "composer:installed:custom:release-manager",
       "mergedAt": null,
       "flowId": "composer-authoring"
+    },
+    {
+      "id": "N236",
+      "title": "New-project modal — init in the selected folder (in-place), respecting existing .claude/ and CLAUDE.md",
+      "type": "feat",
+      "priority": "high",
+      "status": "release-checked",
+      "folder": "insightFlow/workTasks/N236-new-project-modal-init-in-the-selected-folder-in-p",
+      "createdAt": "2026-07-14T18:18:41.039Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-14T18:18:41.039Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-14T18:22:02.625Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-14T18:43:27.922Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-14T18:46:16.571Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-14T18:52:38.445Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-14T19:01:02.037Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-14T19:01:20.126Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-14T19:51:41.586Z",
+          "by": "custom:task-release-check"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-14T18:22:02.632Z",
+        "completedAt": "2026-07-14T18:43:27.933Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/client/NewProjectModal.tsx",
+          "packages/taskflow/src/master/client/api.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/agents/init/providers/claude.ts",
+          "packages/taskflow/src/agents/init/providers/types.ts",
+          "packages/taskflow/test/init.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "master-ui",
+        "init",
+        "git"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/153",
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N237",
+      "title": "Release insight-flow 2.7.0 — ship N236 (in-place new-project init)",
+      "type": "feat",
+      "priority": "high",
+      "status": "done",
+      "folder": "insightFlow/workTasks/N237-release-insight-flow-2-7-0-ship-n236-in-place-new-",
+      "createdAt": "2026-07-14T19:52:15.713Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-14T19:52:15.713Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "changes-needed",
+          "at": "2026-07-14T19:53:34.529Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "changes-implementing",
+          "at": "2026-07-14T19:55:39.431Z",
+          "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-fixed",
+          "at": "2026-07-14T20:03:37.788Z",
+          "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-14T20:21:39.981Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "ready-to-release",
+          "at": "2026-07-14T20:22:57.337Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-14T21:37:50.620Z",
+          "by": "custom:task-release-merge"
+        },
+        {
+          "status": "feature-merged",
+          "at": "2026-07-14T22:33:46.730Z",
+          "by": "custom:task-release-merge"
+        },
+        {
+          "status": "published",
+          "at": "2026-07-15T00:16:40.444Z",
+          "by": "custom:task-release-ship"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-15T00:20:31.798Z",
+          "by": "custom:task-release-rollout"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": 106,
+      "tags": [
+        "release",
+        "master-ui"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/153",
+      "mergedAt": "2026-07-14T21:37:50.626Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N238",
+      "title": "Single-source status engine + hub-only notifications (deterministic + DRY)",
+      "type": "rework",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "insightFlow/workTasks/N238-single-source-status-engine-hub-only-notifications",
+      "createdAt": "2026-07-15T06:44:56.840Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-15T06:44:56.840Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-15T06:53:25.157Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-15T07:16:38.351Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-15T07:27:02.819Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-15T07:36:51.217Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-15T07:51:59.421Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-15T07:55:35.341Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-15T08:20:52.571Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-15T08:21:21.878Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-15T08:39:54.542Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-15T06:53:25.164Z",
+        "completedAt": "2026-07-15T07:16:38.355Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/status-machine.ts",
+          "packages/taskflow/src/dashboard/server/event-stream.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/notifications.ts",
+          "packages/taskflow/src/dashboard/client/useDashboardStream.ts",
+          "packages/taskflow/src/dashboard/client/App.tsx",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/client/hub-notify.ts",
+          "packages/taskflow/src/master/client/notif.ts",
+          "packages/taskflow/src/master/client/SettingsMenu.tsx",
+          "packages/taskflow/vite.hub-notify.config.ts",
+          "packages/taskflow/package.json",
+          "packages/taskflow/README.md",
+          "website/docs/built-ins/master-server.md",
+          "website/docs/dashboard/index.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "master",
+        "status",
+        "notifications",
+        "dry"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-15T08:39:54.541Z",
+          "commitHash": "0838c02",
+          "commitMessage": "feat(dashboard): deterministic status engine + hub-only notifications (N238)"
+        }
+      ],
+      "branch": "rework/N238-single-source-status-engine",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
