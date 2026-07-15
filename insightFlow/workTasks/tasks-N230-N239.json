@@ -1003,6 +1003,58 @@
       "mrUrl": null,
       "mergedAt": "2026-07-15T09:05:29.955Z",
       "flowId": "default"
+    },
+    {
+      "id": "N239",
+      "title": "Release insight-flow 2.8.0 — ship N238 deterministic status engine + hub-only notifications",
+      "type": "feat",
+      "priority": "high",
+      "status": "release-fixed",
+      "folder": "insightFlow/workTasks/N239-release-insight-flow-2-8-0-ship-n238-deterministic",
+      "createdAt": "2026-07-15T09:26:27.857Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-15T09:26:27.857Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-15T09:30:30.411Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "changes-needed",
+          "at": "2026-07-15T09:34:50.364Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "release-fixed",
+          "at": "2026-07-15T10:25:56.228Z",
+          "by": "custom:task-release-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "notifications"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "custom:release-manager"
     }
   ]
 }
