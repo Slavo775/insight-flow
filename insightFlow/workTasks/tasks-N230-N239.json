@@ -892,7 +892,7 @@
       "title": "Single-source status engine + hub-only notifications (deterministic + DRY)",
       "type": "rework",
       "priority": "high",
-      "status": "pushed",
+      "status": "done",
       "folder": "insightFlow/workTasks/N238-single-source-status-engine-hub-only-notifications",
       "createdAt": "2026-07-15T06:44:56.840Z",
       "statusHistory": [
@@ -945,6 +945,16 @@
           "status": "pushed",
           "at": "2026-07-15T08:39:54.542Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-15T09:05:29.952Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-15T09:05:37.116Z",
+          "by": "custom:task-release-check"
         }
       ],
       "implementation": {
@@ -973,8 +983,8 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-15T09:05:37.119Z",
+      "totalDurationMinutes": 141,
       "tags": [
         "dashboard",
         "master",
@@ -991,7 +1001,7 @@
       ],
       "branch": "rework/N238-single-source-status-engine",
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-15T09:05:29.955Z",
       "flowId": "default"
     }
   ]
