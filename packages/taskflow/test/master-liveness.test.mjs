@@ -808,3 +808,29 @@ test("N223 (option B, security): the write/exec gate keeps a peer-IP defense —
     else process.env.INSIGHT_FLOW_TRUSTED_HOSTS = prev;
   }
 });
+
+test("N240: /start for a project whose path is gone → 404, master stays up (no crash)", async () => {
+  const port = 6620 + Math.floor(Math.random() * 150);
+  const base = "http://localhost:" + port;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    // Register a project pointing at a folder that does not exist (a stale entry).
+    const { id } = await register(base, {
+      projectId: "gone",
+      label: "gone",
+      url: "",
+      path: "/no/such/insight-flow/project/path-xyz",
+    });
+    assert.ok(id, "register returns an id");
+
+    // Before N240 this spawned with a missing cwd → async ENOENT → master crash.
+    const r = await fetch(base + `/api/hub/projects/${id}/start`, { method: "POST" });
+    assert.equal(r.status, 404, "missing project path → 404, not a spawn");
+
+    // The master must still be alive and serving after the guarded /start.
+    const list = await projects(base);
+    assert.ok(Array.isArray(list), "master still serves /api/hub/projects (did not crash)");
+  } finally {
+    close();
+  }
+});
