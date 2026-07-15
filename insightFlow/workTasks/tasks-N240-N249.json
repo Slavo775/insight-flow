@@ -124,7 +124,7 @@
       "title": "Release insight-flow 2.8.1 — ship N240 hub crash + notification-restart fix",
       "type": "fix",
       "priority": "high",
-      "status": "published",
+      "status": "done",
       "folder": "insightFlow/workTasks/N241-release-insight-flow-2-8-1-ship-n240-hub-crash-not",
       "createdAt": "2026-07-15T17:07:40.174Z",
       "statusHistory": [
@@ -152,6 +152,16 @@
           "status": "published",
           "at": "2026-07-15T19:46:00.113Z",
           "by": "custom:task-release-ship"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-15T19:54:46.312Z",
+          "by": "custom:task-release-rollout"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-15T19:54:46.448Z",
+          "by": "custom:task-release-rollout"
         }
       ],
       "implementation": {
@@ -164,8 +174,8 @@
       "reviewCount": 0,
       "lastReviewVerdict": null,
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-15T19:54:46.452Z",
+      "totalDurationMinutes": 167,
       "tags": [
         "release",
         "master",
