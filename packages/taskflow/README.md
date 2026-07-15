@@ -255,7 +255,7 @@ The block below shows every supported key with its default. Strip the `//` comme
     "browser": true,               // Web Notification API on status changes
     "cli": true,                   // allow insight-flow notify calls
     "sounds": {
-      "enabled": true              // play sounds in the dashboard on notifications
+      "enabled": true              // play a sound with hub notifications
     }
   },
 
@@ -346,9 +346,9 @@ Controls the live activity panel in the dashboard. The panel shows what Claude C
 
 | Key | Default | Purpose |
 |-----|---------|---------|
-| `notifications.browser` | `true` | Web Notification API popups on task-status transitions (implemented, approved, fix-needed, merged). |
+| `notifications.browser` | `true` | Gates the hub's Web Notification API popups on task-status transitions (implemented, approved, fix-needed, merged). Fired by the hub, not the project dashboard. |
 | `notifications.cli` | `true` | Enable `insight-flow notify` calls. Set to `false` to silence all OS/CLI notifications. |
-| `notifications.sounds.enabled` | `true` | Play sounds in the dashboard tab when a notification fires. |
+| `notifications.sounds.enabled` | `true` | Play a sound from the hub when a notification fires. |
 
 ### Observability (opt-in Langfuse exporter)
 
@@ -391,15 +391,18 @@ insight-flow uses a **three-tier notification model**. All notifications fire fr
 
 All three call `insight-flow notify` under the hood, which respects the `notifications.cli` flag and auto-detects the platform (`osascript` on macOS, `notify-send` on Linux, PowerShell on Windows).
 
-#### Tier 2 — Browser notifications (dashboard tab)
+#### Tier 2 — Browser notifications (via the hub)
 
-When a watched task's status changes, the dashboard fires a `Notification` via the Web Notification API. A gear icon in the top bar opens a settings popover where you can:
+Browser notifications and sounds fire from the **hub** (`http://localhost:6100`), which serves `/hub-notify.js`. Because the hub is a single origin for all projects, one service worker and one notification permission cover every project, and notifications keep firing while the tab is backgrounded or the hub is installed as a PWA. A project dashboard opened directly (`http://localhost:6006`) is fully working but silent by design.
 
-- Toggle per-status notifications (`implemented`, `approved`, `fix-needed`, `merged`, `changes-requested`)
+When a watched task's status changes, the hub fires a `Notification` via the Web Notification API. A gear (⚙) icon in the hub's top bar opens a settings popover where you can:
+
+- Toggle per-status notifications (`implemented`, `approved`, `fix-needed`, `fixed`, `merged`, `changes-requested`, `changes-implemented`, `done`)
 - Enable/disable sound
 - Mute notifications when the tab is focused
+- Mute individual projects
 
-Settings are persisted to `localStorage`. The browser prompts for permission on first load; if denied, no notifications fire and no console errors appear.
+Settings are persisted to `localStorage` under `tf-notif-settings`. The browser prompts for permission once; if denied, no notifications fire and no console errors appear.
 
 #### Tier 3 — User-authorized agent notifications (opt-in via config)
 
