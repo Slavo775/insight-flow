@@ -262,97 +262,28 @@ self.addEventListener('notificationclick', function(e){
 });`;
 
 /**
- * N225 — the shared hub notification client, served at `/hub-notify.js` and
+ * N225/N238 — the shared hub notification client, served at `/hub-notify.js` and
  * injected into EVERY hub page (the overview AND every proxied `/project/<id>/`
  * shell). It registers the SW, holds the master `/events` SSE, and fires
  * `swReg.showNotification` on task-status transitions AND on a project's
- * `claudeStatus` going active→done/idle ("Claude is done") or → permission —
- * so notifications work from any hub page while backgrounded/installed, not just
- * the overview. Sounds attempt the bundled mp3 first (played after a user
- * gesture per autoplay policy) and fall back to a Web-Audio chime.
- * NOTE: template literal — no backticks below; single quotes only.
+ * `claudeStatus` going active→done or → permission.
+ *
+ * N238 — the source now lives in `src/master/client/hub-notify.ts` (a real
+ * module sharing the settings/watched-status model with the settings UI), built
+ * by vite into `dist/master/hub-notify.js`. Read + cached once; a minimal no-op
+ * shim is returned when the bundle isn't built yet so the route still answers.
  */
-const MASTER_NOTIFY_JS = `(function(){
-  var STORAGE='tf-notif-settings';
-  // N225 — includes done/fixed/changes-implemented (previously omitted).
-  var WATCHED=['implemented','approved','fix-needed','fixed','merged','changes-requested','changes-implemented','done'];
-  var settings={statuses:{},sound:true,muteFocused:false,mutedProjects:[]};
-  try{var raw=localStorage.getItem(STORAGE);if(raw)settings=JSON.parse(raw);}catch(e){}
-  window.addEventListener('storage',function(e){ if(e.key===STORAGE){ try{ settings=JSON.parse(e.newValue)||settings; }catch(_){} } });
-  var swReg=null, prevTask={}, prevClaude={};
-
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').then(function(){return navigator.serviceWorker.ready;}).then(function(r){swReg=r;}).catch(function(){});
+const HUB_NOTIFY_FALLBACK = "/* hub-notify not built — run `pnpm build` */";
+let hubNotifyCache: string | null = null;
+function getHubNotifyJs(): string {
+  if (hubNotifyCache !== null) return hubNotifyCache;
+  try {
+    hubNotifyCache = readFileSync(resolve(MASTER_CLIENT_DIR, "hub-notify.js"), "utf8");
+  } catch {
+    return HUB_NOTIFY_FALLBACK; // not cached — a later build is picked up
   }
-  try{
-    if('Notification' in window && Notification.permission==='default' && !localStorage.getItem('tf-notif-asked')){
-      Notification.requestPermission(); localStorage.setItem('tf-notif-asked','1');
-    }
-  }catch(e){}
-
-  function notify(title,url,tag){
-    if(!('Notification' in window)||Notification.permission!=='granted')return;
-    // N225 review-fix (blocker 2) — a stable tag so the same transition seen by
-    // multiple open hub pages collapses into one OS notification.
-    var opts={silent:true,data:{url:url||'/'},tag:tag||title,renotify:true};
-    if(swReg){try{swReg.showNotification(title,opts);return;}catch(e){}}
-    try{new Notification(title,opts);}catch(e){}
-  }
-  // N225 review-fix (round 3, sound regression) — richer multi-note chime that
-  // matches the pre-N225 project client (notifications.ts playTone): a sine
-  // melody with a gain ramp, not a single flat beep. alert=true → permission,
-  // alert=false → idle.
-  function tone(alert){try{var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;var c=new AC();if(c.state==='suspended')try{c.resume();}catch(e){}
-    function beep(f,t,d,v){var o=c.createOscillator();var g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);o.start(t);o.stop(t+d);}
-    var n=c.currentTime;
-    if(alert){ beep(660,n,0.18,0.3); beep(880,n+0.22,0.18,0.3); beep(660,n+0.44,0.25,0.3); }
-    else { beep(880,n,0.3,0.2); beep(660,n+0.12,0.3,0.15); }
-    setTimeout(function(){try{c.close();}catch(e){}},1200);
-  }catch(e){}}
-  function sound(alert){
-    if(settings.sound===false)return;
-    if(settings.muteFocused && !document.hidden)return;
-    // N225 review-fix (round 3) — always attempt the mp3 first (like the old
-    // playStatusSound); fall back to the chime only when playback is blocked
-    // (e.g. before a gesture). Do NOT short-circuit to the beep on !audioOn —
-    // that skipped the mp3 and always played the plainer synthesized tone.
-    var src=alert?'/sounds/permission-alert.mp3':'/sounds/idle-ping.mp3';
-    try{new Audio(src).play().catch(function(){tone(alert);});}catch(e){tone(alert);}
-  }
-  function track(p){
-    var s=p.state||{};
-    if(s.currentTaskId&&s.currentTaskStatus){ if(!prevTask[p.id])prevTask[p.id]={}; prevTask[p.id][s.currentTaskId]=s.currentTaskStatus; }
-    if(s.claudeStatus!==undefined) prevClaude[p.id]=s.claudeStatus;
-  }
-  function onUpdate(p){
-    if(!p||!p.id)return;
-    if(settings.muteFocused && !document.hidden){ track(p); return; }
-    if(settings.mutedProjects && settings.mutedProjects.indexOf(p.id)>=0){ track(p); return; }
-    var s=p.state||{};
-    var url='/project/'+encodeURIComponent(p.projectId)+'/';
-    if(s.currentTaskId&&s.currentTaskStatus){
-      var prev=(prevTask[p.id]||{})[s.currentTaskId];
-      if(prev&&prev!==s.currentTaskStatus&&settings.statuses[s.currentTaskStatus]!==false&&WATCHED.indexOf(s.currentTaskStatus)>=0){
-        notify(p.label+': '+s.currentTaskId+' -> '+s.currentTaskStatus,url,p.id+':'+s.currentTaskId+':'+s.currentTaskStatus); sound(false);
-      }
-    }
-    var cs=s.claudeStatus, pc=prevClaude[p.id];
-    // N225 review-fix (blocker 1) — only on a REAL transition (pc set): the first
-    // frame after connect / a refresh re-broadcast just seeds prevClaude, so it
-    // no longer fires a spurious "needs permission" on every hub page load.
-    // "Claude finished" is active->done only (not ->idle, which is a mid-turn
-    // pause) to avoid flicker (review nb2).
-    if(cs&&pc!==undefined&&cs!==pc){
-      if(cs==='done'&&pc==='active'){ notify(p.label+': Claude finished',url,p.id+':done'); sound(false); }
-      else if(cs==='permission-required'||cs==='awaiting-permission'){ notify(p.label+': needs permission',url,p.id+':perm'); sound(true); }
-    }
-    track(p);
-  }
-  try{
-    var es=new EventSource('/events');
-    es.addEventListener('project-update',function(e){ try{ onUpdate(JSON.parse(e.data)); }catch(err){} });
-  }catch(e){}
-})();`;
+  return hubNotifyCache;
+}
 
 /** N217 — the PWA manifest, served on the master origin (start_url = the hub). */
 const MASTER_MANIFEST = JSON.stringify({
@@ -1507,15 +1438,17 @@ export async function startMasterServer(
         return;
       }
 
-      // N225 — GET /hub-notify.js: the shared notification client, injected into
-      // every hub page (overview + proxied projects) so SW-backed notifications
-      // fire from anywhere in the hub, backgrounded.
+      // N225/N238 — GET /hub-notify.js: the shared notification client, injected
+      // into every hub page (overview + proxied projects) so SW-backed
+      // notifications fire from anywhere in the hub, backgrounded. N238 — now a
+      // real vite-built module (dist/master/hub-notify.js) importing the shared
+      // settings/watched-status model, not an inline string blob.
       if (req.method === "GET" && url.pathname === "/hub-notify.js") {
         res.writeHead(200, {
           "Content-Type": "text/javascript; charset=utf-8",
           "Cache-Control": "no-cache",
         });
-        res.end(MASTER_NOTIFY_JS);
+        res.end(getHubNotifyJs());
         return;
       }
 

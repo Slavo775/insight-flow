@@ -154,6 +154,12 @@ When you run `insight-flow` (or `insight-flow ui`):
 3. The dashboard reads task state (`insightFlow/workTasks/*.json`, legacy `workTasks/*.json`) via `/api/work-tasks*`.
 4. A native Server-Sent Events (SSE) stream on `/sse` pushes file-change events so the UI updates live as you (or AI agents) edit tasks.
 
+### Notifications: view through the hub
+
+Browser notifications and sounds (a task changed status, Claude finished, a permission is needed) are fired **only by the hub** — the multi-project overview that `insight-flow ui` auto-starts on `http://localhost:6100`. Open your projects **through the hub** (it reverse-proxies each project under a single origin) so one service worker and one notification permission cover every project, and notifications keep working while the tab is backgrounded or the hub is installed as a PWA.
+
+> Opening a single project dashboard **directly** (e.g. `http://localhost:6006`), or when the hub isn't running, gives you a fully working dashboard **without** notifications or sounds — that's expected. Use the hub if you want to be notified.
+
 ## CLI
 
 The `insight-flow` binary is the **single canonical entry point** for all task tracking. Run it from any project root that has an `insightFlow/` directory (legacy: a top-level `workTasks/`), or run `insight-flow init` first.

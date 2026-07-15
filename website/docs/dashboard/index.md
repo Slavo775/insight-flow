@@ -56,7 +56,7 @@ The dashboard is a handful of routes, all reachable from the top navigation:
 
 | View                                                     | What it is for                                                                                                                              |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Kanban board](./views.md#kanban-board)                  | The landing page — your tasks laid out in flow-status columns, with shard navigation, aggregate stats, and a notification settings popover. |
+| [Kanban board](./views.md#kanban-board)                  | The landing page — your tasks laid out in flow-status columns, with shard navigation and aggregate stats. (Notifications/sounds live in the [hub](../built-ins/master-server.md), not here.) |
 | [Task detail](./views.md#task-detail)                    | Everything about one task: metadata, status history, reviews, incidents, and its position in the lifecycle flow.                            |
 | [Agents browser](./views.md#agents-browser)              | Each agent's composed modules and the artifacts it installs.                                                                                |
 | [Modules browser](./views.md#modules-browser)            | The full module registry and each module's composition map.                                                                                 |

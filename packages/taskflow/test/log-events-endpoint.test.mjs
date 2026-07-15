@@ -191,7 +191,9 @@ test("GET /log/status returns current status + events array", async () => {
   await withServer(PORT, async () => {
     await post(PORT, {
       id: "evt-pre-1",
-      timestamp: "2026-05-28T10:00:00.000Z",
+      // N238 — a fresh timestamp: the stuck-active decay reads a >5min-stale
+      // event as idle, so "active" requires a recent event (as in real usage).
+      timestamp: new Date().toISOString(),
       type: "PreToolUse",
       payload: { tool_name: "Read" },
     });

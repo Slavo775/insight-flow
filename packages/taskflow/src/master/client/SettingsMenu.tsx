@@ -67,8 +67,11 @@ const STATUS_LABEL: Record<string, string> = {
   implemented: "Task implemented",
   approved: "Review approved",
   "fix-needed": "Fix needed",
+  fixed: "Fix applied",
   merged: "Merged",
   "changes-requested": "Changes requested",
+  "changes-implemented": "Changes implemented",
+  done: "Claude finished",
 };
 
 function permissionHint(): string {

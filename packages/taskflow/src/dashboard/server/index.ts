@@ -642,7 +642,21 @@ async function setupMasterIntegration(
   void pushStateToMaster(masterUrl, masterId, masterToken, state);
   // N227 — push the real seeded status (not a hardcoded "idle") so the master
   // reflects an already-active agent from the first registration.
-  pushStatusToMaster(masterUrl, masterId, masterToken, eventStore.getStatus());
+  let lastPushedStatus = eventStore.getStatus();
+  pushStatusToMaster(masterUrl, masterId, masterToken, lastPushedStatus);
+
+  // N238 — the status push is transition-only, so the stuck-active decay (an
+  // `active` turn gone silent past STUCK_ACTIVE_MS → idle) would never reach the
+  // hub without a tick. Poll getStatus() and push on change. unref() so it never
+  // keeps the process alive.
+  setInterval(() => {
+    if (!masterId || !masterToken) return;
+    const now = eventStore.getStatus();
+    if (now !== lastPushedStatus) {
+      lastPushedStatus = now;
+      pushStatusToMaster(masterUrl, masterId, masterToken, now);
+    }
+  }, 60_000).unref();
 
   // Return push function to call on file-change
   return async function pushOnChange(): Promise<void> {

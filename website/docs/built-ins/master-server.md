@@ -216,6 +216,14 @@ Because the hub is a single origin, it's an installable **Progressive Web App**:
   tabs collapses into one. Sounds play the bundled mp3 first and fall back to a
   Web-Audio chime. Per-status and per-project mutes live in the `⚙` popover.
 
+:::info The hub is the single notifier
+Notifications and sounds are fired **only** by the hub — a single service worker,
+a single notification permission, and one settings popover cover every project.
+Open your projects **through the hub** to get notified. A single project
+dashboard opened directly (e.g. `http://localhost:6006`), or viewed while the hub
+isn't running, works fully but is **silent** by design.
+:::
+
 Install it from your browser's "Install app" action, then launch it like any
 app — one icon that switches between all your projects.
 

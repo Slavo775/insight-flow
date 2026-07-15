@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ClaudeStatus } from "./activity.js";
 import { ActivityFeed } from "./ActivityFeed.js";
 import { Route, Routes } from "react-router-dom";
@@ -11,14 +11,9 @@ import { ProjectForm } from "./ProjectForm.js";
 import { ProjectPage } from "./ProjectPage.js";
 import { TaskDetailPage } from "./TaskDetailPage.js";
 import { Button, Text } from "./components/index.js";
-import {
-  loadNotifSettings,
-  maybeRequestPermissionOnce,
-  notifSettings,
-  permissionHint,
-  saveNotifSettings,
-  updatePageTitle,
-} from "./notifications.js";
+// N238 — notifications/sounds moved wholly to the hub (/hub-notify.js). The
+// project dashboard keeps only the visual tab-title helper.
+import { updatePageTitle } from "./notifications.js";
 import { useDashboardStore } from "./store.js";
 import { useDashboardStream } from "./useDashboardStream.js";
 import { useFlowColumns } from "./flow-columns.js";
@@ -30,61 +25,6 @@ function activityStatusView(s: ClaudeStatus | null): { text: string; cls: string
   if (s === "permission-needed")
     return { text: "🚨 permission", cls: "activity-status permission-needed" };
   return { text: "", cls: "activity-status" };
-}
-
-function SettingsPopover() {
-  const [open, setOpen] = useState(false);
-  const [sound, setSound] = useState(notifSettings.sound);
-  const [muteFocused, setMuteFocused] = useState(notifSettings.muteFocused);
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent): void => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("click", onDoc, true);
-    return () => document.removeEventListener("click", onDoc, true);
-  }, [open]);
-
-  const persist = (next: { sound: boolean; muteFocused: boolean }): void => {
-    setSound(next.sound);
-    setMuteFocused(next.muteFocused);
-    saveNotifSettings(next);
-  };
-
-  return (
-    <div className="settings-wrap" ref={wrapRef}>
-      <Button
-        $variant="icon"
-        type="button"
-        title="Notification settings"
-        onClick={() => setOpen((o) => !o)}
-      >
-        ⚙
-      </Button>
-      <div className={"settings-popover" + (open ? " open" : "")}>
-        <div className="settings-header">Notifications</div>
-        <label className="settings-row">
-          <input
-            type="checkbox"
-            checked={sound}
-            onChange={(e) => persist({ sound: e.target.checked, muteFocused })}
-          />{" "}
-          Sound
-        </label>
-        <label className="settings-row">
-          <input
-            type="checkbox"
-            checked={muteFocused}
-            onChange={(e) => persist({ sound, muteFocused: e.target.checked })}
-          />{" "}
-          Mute when tab focused
-        </label>
-        {open ? <div className="settings-hint">{permissionHint()}</div> : null}
-      </div>
-    </div>
-  );
 }
 
 function DashboardView() {
@@ -114,7 +54,6 @@ function DashboardView() {
 
   const dot = "live-dot" + (connection === "reconnecting" ? " reconnecting" : "");
   const activityEnabled = snapshot?.activityEnabled === true;
-  const browserNotifications = snapshot?.browserNotifications !== false;
   const st = activityStatusView(agentStatus);
 
   return (
@@ -157,7 +96,6 @@ function DashboardView() {
               Engine: off (config)
             </span>
           ) : null}
-          {browserNotifications ? <SettingsPopover /> : null}
         </div>
       </div>
 
@@ -216,8 +154,6 @@ export function App() {
   useDashboardStream();
 
   useEffect(() => {
-    loadNotifSettings();
-    maybeRequestPermissionOnce();
     updatePageTitle("idle");
     void useDashboardStore.getState().sync();
   }, []);
