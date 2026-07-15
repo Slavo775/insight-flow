@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.8.0](https://github.com/Slavo775/insight-flow/compare/v2.7.0...v2.8.0) (2026-07-15)
+
+
+### Features
+
+* **dashboard:** deterministic status engine + hub-only notifications (N238) ([#155](https://github.com/Slavo775/insight-flow/issues/155)) ([03f9ecb](https://github.com/Slavo775/insight-flow/commit/03f9ecb351bfb662783ec71b5a0bb1d0fafdef2b))
+
 ## [2.7.0](https://github.com/Slavo775/insight-flow/compare/v2.6.0...v2.7.0) (2026-07-14)
 
 
