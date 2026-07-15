@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.8.1](https://github.com/Slavo775/insight-flow/compare/v2.8.0...v2.8.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **master:** don't crash the hub on a missing project path; keep notifications after a master restart (N240) ([#157](https://github.com/Slavo775/insight-flow/issues/157)) ([5066877](https://github.com/Slavo775/insight-flow/commit/50668778391c87848843fce4060074d3710649d8))
+
 ## [2.8.0](https://github.com/Slavo775/insight-flow/compare/v2.7.0...v2.8.0) (2026-07-15)
 
 
