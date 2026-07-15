@@ -620,6 +620,13 @@ async function setupMasterIntegration(
         masterToken,
         buildProjectState(config, activity, eventStore),
       );
+      // N240 — re-push the raw claudeStatus on reconnect too. A fresh registration
+      // (after a master restart/crash) resets the master's registry claudeStatus to
+      // null, and pushStateToMaster only carries `agentStatus`. hub-notify.js reads
+      // `claudeStatus`, so without this it stays null and "Claude finished" / "needs
+      // permission" notifications never fire for a reconnected project until the next
+      // live transition. Mirrors the initial-registration push below.
+      pushStatusToMaster(masterUrl, masterId, masterToken, eventStore.getStatus());
       return true;
     })();
     try {

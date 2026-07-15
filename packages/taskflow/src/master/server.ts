@@ -1361,6 +1361,17 @@ export async function startMasterServer(
           res.end(JSON.stringify({ starting: true }));
           return;
         }
+        // N240 — guard the SPAWN path only (after the already-running / already-
+        // starting early-returns, so a live project whose folder is transiently gone
+        // still routes to its running url). A registered project whose folder is gone
+        // (e.g. a stale hub.json entry) must not spawn: `spawn` with a missing `cwd`
+        // emits an async `error` (ENOENT) the try/catch below CANNOT catch, and an
+        // unhandled 'error' event would crash the whole master. Return 404 instead.
+        if (!existsSync(entry.path)) {
+          res.writeHead(404, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "project path no longer exists" }));
+          return;
+        }
         startingProjects.add(entry.id);
         try {
           const hub = readHubRegistry().find((h) => h.path === entry.path);
@@ -1373,6 +1384,15 @@ export async function startMasterServer(
               cwd: entry.path,
               detached: true,
               stdio: "ignore",
+            });
+            // N240 — spawn failures (bad cwd, EACCES, missing node) surface as an
+            // ASYNC 'error' event, NOT a thrown exception — the try/catch can't see
+            // them. Without this handler an unhandled 'error' crashes the master.
+            // Log + swallow; the 15s registration wait below then times out cleanly.
+            child.on("error", (err) => {
+              console.error(
+                `[master] failed to launch ${entry.label} (${entry.path}): ${(err as Error).message}`,
+              );
             });
             child.unref();
           } catch (err) {
