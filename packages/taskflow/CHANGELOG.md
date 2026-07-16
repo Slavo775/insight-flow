@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.8.2](https://github.com/Slavo775/insight-flow/compare/v2.8.1...v2.8.2) (2026-07-16)
+
+
+### Bug Fixes
+
+* **master:** inject hub-notify.js before the last &lt;/body&gt; so it executes (N245) ([#160](https://github.com/Slavo775/insight-flow/issues/160)) ([21b7ece](https://github.com/Slavo775/insight-flow/commit/21b7ece01cf0ede1fb7f940a760ef3e39682ff9c))
+
 ## [2.8.1](https://github.com/Slavo775/insight-flow/compare/v2.8.0...v2.8.1) (2026-07-15)
 
 
