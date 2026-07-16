@@ -1,0 +1,23 @@
+{
+  "taskId": "N245",
+  "reviews": [
+    {
+      "startedAt": "2026-07-16T13:48:23.253Z",
+      "endedAt": "2026-07-16T13:49:18.585Z",
+      "verdict": "approved",
+      "comment": "Correct, minimal fix: lastIndexOf-based injectBeforeBodyClose targets the real closing </body> at both sites; misleading comment reworded. Static snippet, no user input, no new XSS surface. Verified against built shell.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-16T13:49:59.141Z",
+      "endedAt": "2026-07-16T13:50:15.175Z",
+      "verdict": "approved",
+      "comment": "approved!",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

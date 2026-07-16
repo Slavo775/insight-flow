@@ -193,6 +193,16 @@ const MASTER_ASSET_MIME: Record<string, string> = {
 // here rather than baked into index.html so the built shell stays free of a
 // script Vite would try to resolve at build time.
 let overviewShellCache: string | null = null;
+// N245 — inject a snippet before the *last* `</body>`. `String.replace` would
+// hit the FIRST match, and an HTML comment can legally contain the literal
+// `</body>` (the shell's own comment did), which buried the notify script in a
+// comment so it never ran. `lastIndexOf` targets the real closing tag; if there
+// is none, append.
+function injectBeforeBodyClose(html: string, snippet: string): string {
+  const i = html.lastIndexOf("</body>");
+  return i === -1 ? html + snippet : html.slice(0, i) + snippet + html.slice(i);
+}
+
 function getOverviewShell(): string {
   if (overviewShellCache !== null) return overviewShellCache;
   let html: string;
@@ -209,7 +219,7 @@ function getOverviewShell(): string {
     );
   }
   const notifyTag = '<script src="/hub-notify.js" defer></script>';
-  if (!html.includes(notifyTag)) html = html.replace("</body>", notifyTag + "</body>");
+  if (!html.includes(notifyTag)) html = injectBeforeBodyClose(html, notifyTag);
   overviewShellCache = html;
   return html;
 }
@@ -689,9 +699,7 @@ function proxyToProject(
           // N225 — the shared hub notification client, so SW-backed notifications
           // fire while viewing a project too (absolute src → master origin).
           const notifyTag = '<script src="/hub-notify.js" defer></script>';
-          html = html.includes("</body>")
-            ? html.replace("</body>", hubLink + notifyTag + "</body>")
-            : html + hubLink + notifyTag;
+          html = injectBeforeBodyClose(html, hubLink + notifyTag);
           const out = stripHopByHop({ ...proxyRes.headers });
           delete out["content-length"]; // length changed by the rewrite
           res.writeHead(status, out as Record<string, string>);
