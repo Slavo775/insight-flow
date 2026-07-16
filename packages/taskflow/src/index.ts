@@ -124,8 +124,20 @@ export {
   TaskStatusSchema,
   StatusHistoryEntrySchema,
   TaskflowValidationError,
+  LOG_TYPES,
+  LogInputSchema,
+  StoredLogSchema,
 } from "./core/schema/index.js";
-export { runMaster, startMasterServer, isTrustedActionRequest } from "./master/index.js";
+export type { LogType, LogInput, StoredLog } from "./core/schema/index.js";
+export {
+  appendLog,
+  readLogs,
+  readMerged,
+  clearLogs,
+  listProjects,
+  slugProject,
+} from "./core/log-store.js";
+export { runMaster, startMasterServer, isTrustedActionRequest, recordLog } from "./master/index.js";
 export { jsonFileStorage } from "./core/storage-port.js";
 export type { Storage } from "./core/storage-port.js";
 export { SseTransport } from "./dashboard/server/transport.js";

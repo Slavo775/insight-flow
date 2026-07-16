@@ -109,6 +109,13 @@ export function verifyToken(id: string, token: string | undefined): boolean {
   return !!entry && !!token && entry.token === token;
 }
 
+/** N242 — resolve a project by its auth token (the log "key"), or null. */
+export function getByToken(token: string | undefined): MasterProjectEntry | null {
+  if (!token) return null;
+  for (const entry of registry.values()) if (entry.token === token) return entry;
+  return null;
+}
+
 /** N214 — set liveness (connection open/close, or probe result) + refresh seen. */
 export function setOnline(id: string, online: boolean): boolean {
   const entry = registry.get(id);

@@ -3,6 +3,25 @@ import { TASK_STATUSES } from "../statuses.js";
 
 export const TaskStatusSchema = z.enum(TASK_STATUSES);
 
+// N242 — debug log engine. `LogInputSchema` is what a client/project sends;
+// `StoredLogSchema` is what the master persists (enriched with timestamp +
+// projectName). `data` is an open-ended bag (trace, method, timing, …).
+export const LOG_TYPES = ["error", "warning", "info"] as const;
+export type LogType = (typeof LOG_TYPES)[number];
+
+export const LogInputSchema = z.object({
+  type: z.enum(LOG_TYPES),
+  message: z.string(),
+  data: z.unknown().optional(),
+});
+export type LogInput = z.infer<typeof LogInputSchema>;
+
+export const StoredLogSchema = LogInputSchema.extend({
+  timestamp: z.string(),
+  projectName: z.string(),
+});
+export type StoredLog = z.infer<typeof StoredLogSchema>;
+
 export const StatusHistoryEntrySchema = z.object({
   status: z.string(),
   at: z.string(),

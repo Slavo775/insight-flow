@@ -15,6 +15,35 @@ export async function fetchProjects(): Promise<PublicProjectEntry[]> {
   return d.projects ?? [];
 }
 
+// N244 — debug logs (N242 engine).
+export interface LogEntry {
+  type: "error" | "warning" | "info";
+  message: string;
+  data?: unknown;
+  timestamp: string;
+  projectName: string;
+}
+export interface LogsResult {
+  total: number;
+  page: number;
+  pageSize: number;
+  logs: LogEntry[];
+}
+export async function fetchLogs(params: {
+  project: string;
+  type: string;
+  page: number;
+  pageSize: number;
+}): Promise<LogsResult> {
+  const qs = new URLSearchParams();
+  if (params.project) qs.set("project", params.project);
+  if (params.type && params.type !== "all") qs.set("type", params.type);
+  qs.set("page", String(params.page));
+  qs.set("pageSize", String(params.pageSize));
+  const res = await fetch(`/api/logs?${qs.toString()}`);
+  return json<LogsResult>(res);
+}
+
 export async function refreshProjects(): Promise<PublicProjectEntry[]> {
   const res = await fetch("/api/hub/refresh", { method: "POST" });
   const d = await json<{ projects?: PublicProjectEntry[] }>(res);

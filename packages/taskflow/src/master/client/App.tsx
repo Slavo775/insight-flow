@@ -267,6 +267,24 @@ const NewProjectBtn = styled(Button)`
   }
 `;
 
+// N244 — link to the debug logs page (a full navigation; the master serves the
+// same shell at /logs and main.tsx renders LogsPage there).
+const LogsLink = styled.a`
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-decoration: none;
+  color: ${(p) => p.theme.color.textMuted};
+  border: 1px solid ${(p) => p.theme.color.border};
+  background: ${(p) => p.theme.color.surface};
+  &:hover {
+    color: ${(p) => p.theme.color.text};
+  }
+`;
+
 // ---- component ------------------------------------------------------------
 
 function rowPill(p: PublicProjectEntry): ProjectCardPill {
@@ -463,6 +481,9 @@ export function App() {
             >
               <RefreshIcon size={16} />
             </SquareIconButton>
+            <LogsLink href="/logs" title="Debug logs">
+              Logs
+            </LogsLink>
             <SettingsMenu settings={settings} onChange={onSettingsChange} />
             <NewProjectBtn type="button" $variant="success" onClick={() => setNewOpen(true)}>
               <PlusIcon size={14} />

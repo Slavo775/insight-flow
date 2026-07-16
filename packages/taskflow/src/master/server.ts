@@ -23,6 +23,23 @@ import type { MasterServerConfig, MasterProjectState } from "./types.js";
 import * as registry from "./registry.js";
 import { initProject } from "../agents/init/index.js";
 import { readHubRegistry, assignHubPort } from "../core/global-config.js";
+import { appendLog, readMerged } from "../core/log-store.js";
+import { LogInputSchema } from "../core/schema/index.js";
+
+/**
+ * N242 — the shared debug-log write path. Resolves the project from the log key
+ * (a project's registration token, or the reserved `"master"` key), validates
+ * the payload, enriches it, and appends it to the store. The master calls this
+ * directly for its own logs (no self-HTTP); the `POST /log` route calls it too.
+ */
+export function recordLog(key: string, log: unknown): "ok" | "bad-key" | "bad-body" {
+  const projectName = key === "master" ? "master" : (registry.getByToken(key)?.projectId ?? null);
+  if (!projectName) return "bad-key";
+  const parsed = LogInputSchema.safeParse(log);
+  if (!parsed.success) return "bad-body";
+  appendLog({ ...parsed.data, timestamp: new Date().toISOString(), projectName });
+  return "ok";
+}
 
 /** N210 — where "New project" scaffolds live, so a non-coder never picks a path. */
 export function projectsHomeRoot(): string {
@@ -935,12 +952,95 @@ export async function startMasterServer(
         const projectUrl = String(parsed.url ?? "");
         const projectId = String(parsed.projectId ?? parsed.label ?? "unknown");
         const path = typeof parsed.path === "string" ? parsed.path : undefined;
+        // N243 — log the registration handshake (master side), before minting the code.
+        recordLog("master", {
+          type: "info",
+          message: "registration received",
+          data: { projectId, label, url: projectUrl, path },
+        });
         // N214 — returns a per-project token the project echoes on later calls.
         const { id, token } = registry.upsert(projectId, label, projectUrl, { path });
+        // N243 — code generated (the token itself is a secret — log the id, not it).
+        recordLog("master", {
+          type: "info",
+          message: "generated code",
+          data: { projectId, id },
+        });
         const entry = registry.getById(id);
         if (entry) broadcast("project-update", registry.toPublicView(entry));
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(JSON.stringify({ id, token }));
+        return;
+      }
+
+      // N242 — POST /log — a project (or the master) records a debug log.
+      // Body: { key, log: { type, message, data? } }. Trusted-local only; the key
+      // must be a known project token or the reserved "master" key. Fire-and-forget.
+      if (req.method === "POST" && url.pathname === "/log") {
+        // N242 review-fix — a write endpoint: use the peer-IP guard (parity with
+        // fs/create/start), so a non-browser LAN client can't forge Host:127.0.0.1
+        // to spam/forge logs (the reserved "master" key is tokenless).
+        if (!isTrustedActionRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
+          return;
+        }
+        const body = await readBody(req);
+        let parsed: { key?: unknown; log?: unknown };
+        try {
+          parsed = JSON.parse(body) as typeof parsed;
+        } catch {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "Invalid JSON" }));
+          return;
+        }
+        const result = recordLog(String(parsed.key ?? ""), parsed.log);
+        if (result === "bad-key") {
+          res.writeHead(401, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "unknown log key" }));
+          return;
+        }
+        if (result === "bad-body") {
+          res.writeHead(400, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "invalid log (type/message required)" }));
+          return;
+        }
+        res.writeHead(202, { "Content-Type": MIME_JSON });
+        res.end(JSON.stringify({ ok: true }));
+        return;
+      }
+
+      // N242 — GET /api/logs — read stored debug logs, merged + paginated.
+      // (Under /api/ so it doesn't collide with the /logs page shell — N244.)
+      // ?project=<name>|master|all (default all) &type=error|warning|info &page= &pageSize=
+      if (req.method === "GET" && url.pathname === "/api/logs") {
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403, { "Content-Type": MIME_JSON });
+          res.end(JSON.stringify({ error: "request refused" }));
+          return;
+        }
+        const project = url.searchParams.get("project") || "all";
+        const typeParam = url.searchParams.get("type");
+        const type =
+          typeParam === "error" || typeParam === "warning" || typeParam === "info"
+            ? typeParam
+            : undefined;
+        const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
+        const pageSize = Math.min(
+          500,
+          Math.max(1, parseInt(url.searchParams.get("pageSize") || "100", 10) || 100),
+        );
+        const merged = readMerged({ project, type });
+        const start = (page - 1) * pageSize;
+        res.writeHead(200, { "Content-Type": MIME_JSON });
+        res.end(
+          JSON.stringify({
+            total: merged.length,
+            page,
+            pageSize,
+            logs: merged.slice(start, start + pageSize),
+          }),
+        );
         return;
       }
 
@@ -1523,7 +1623,10 @@ export async function startMasterServer(
       // root too, so it's the PWA start_url and the landing page). N231 — this is
       // now the built React island's shell (the app fetches /api/hub/projects and
       // subscribes to /events on mount); assets are served from /assets/* above.
-      if (req.method === "GET" && (url.pathname === "/overview" || url.pathname === "/")) {
+      if (
+        req.method === "GET" &&
+        (url.pathname === "/overview" || url.pathname === "/" || url.pathname === "/logs")
+      ) {
         res.writeHead(200, { "Content-Type": MIME_HTML, "Cache-Control": "no-cache" });
         res.end(getOverviewShell());
         return;

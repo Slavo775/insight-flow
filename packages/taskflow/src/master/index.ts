@@ -1,5 +1,5 @@
 import { loadMasterConfig } from "./config.js";
-import { startMasterServer } from "./server.js";
+import { startMasterServer, recordLog } from "./server.js";
 import * as registry from "./registry.js";
 import { migrateBatchUiIntoHub } from "../core/global-config.js";
 import {
@@ -10,7 +10,7 @@ import {
   LOCK_PATH,
 } from "./lock.js";
 
-export { startMasterServer, isTrustedActionRequest } from "./server.js";
+export { startMasterServer, isTrustedActionRequest, recordLog } from "./server.js";
 export type { MasterServerConfig, MasterProjectState, MasterProjectEntry } from "./types.js";
 
 /**
@@ -37,6 +37,31 @@ export async function runMaster(portOverride?: number): Promise<void> {
   // N213 — seed the overview from the persisted hub registry (folding in any
   // legacy bulk-ui entries) so registered projects show up before their
   // dashboards start. They reconcile to live entries when a dashboard registers.
+  // N243 — master server-side "error boundary": record uncaught exceptions /
+  // rejections into the master's own debug log so a hub crash is visible in
+  // /logs. Registered here (the CLI run path), NOT inside startMasterServer,
+  // which tests call repeatedly — so it installs once and never swallows a
+  // test's uncaught error.
+  process.on("unhandledRejection", (reason) => {
+    // A rejection is logged; the hub stays up (localised async error).
+    recordLog("master", {
+      type: "error",
+      message: "unhandledRejection: " + String(reason instanceof Error ? reason.message : reason),
+      data: { stack: reason instanceof Error ? reason.stack : undefined },
+    });
+  });
+  process.on("uncaughtException", (err) => {
+    // recordLog is synchronous, so the log is flushed before we exit. An
+    // uncaughtException leaves the process undefined — log then exit (Node's
+    // default) rather than limping on.
+    recordLog("master", {
+      type: "error",
+      message: "uncaughtException: " + err.message,
+      data: { stack: err.stack },
+    });
+    process.exit(1);
+  });
+
   let hubProjects: { label: string; port: number; path: string }[] = [];
   if (!config.standalone) {
     hubProjects = migrateBatchUiIntoHub();

@@ -518,6 +518,32 @@ let masterToken: string | null = null;
 // handshake, Diagram 1) can trigger a real re-register. Null until master
 // integration is set up, or when running standalone.
 let masterReregister: (() => Promise<boolean>) | null = null;
+
+// N243 — the master's base URL, captured so the debug-log forwarders (client
+// /log route + uncaught handlers) can reach it. Set once master integration runs.
+let masterLogUrl: string | null = null;
+// N243 review-fix — install the process-level error handlers once per process,
+// so repeated startServer() calls don't stack listeners.
+let serverErrorHandlersInstalled = false;
+
+/**
+ * N243 — forward a debug log to the master's `/log`, keyed by this project's
+ * registration token. Fire-and-forget; a no-op until we've registered (no key
+ * yet). A logging path must never throw into whatever it's logging for.
+ */
+function forwardLogToMaster(log: { type: string; message: string; data?: unknown }): void {
+  if (!masterLogUrl || !masterToken) return;
+  try {
+    void fetch(`${masterLogUrl}/log`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ key: masterToken, log }),
+      signal: AbortSignal.timeout(2000),
+    }).catch(() => {});
+  } catch {
+    /* never let logging crash the caller */
+  }
+}
 // N219 review-fix (blocker 1) — guarantee at most ONE liveness connection is
 // ever open. Each holdLiveness() claims a new epoch and tears down the prior
 // open request; older-epoch loops stop instead of reconnecting. Without this,
@@ -568,6 +594,7 @@ async function setupMasterIntegration(
   } catch {
     projectPath = undefined;
   }
+  const regStartedAt = new Date().toISOString();
   const reg = await registerWithMaster(
     masterUrl,
     config.projectName,
@@ -583,8 +610,22 @@ async function setupMasterIntegration(
   }
   masterId = reg.id;
   masterToken = reg.token;
+  masterLogUrl = masterUrl;
 
   console.log("  [master] Registered with " + masterUrl + " (id: " + masterId.slice(0, 8) + "...)");
+
+  // N243 — log the registration handshake (project side). "start" is sent after
+  // the fact because the log key doesn't exist until registration returns it.
+  forwardLogToMaster({
+    type: "info",
+    message: "registration start",
+    data: { project: config.projectName, startedAt: regStartedAt, masterUrl },
+  });
+  forwardLogToMaster({
+    type: "info",
+    message: "registration finished",
+    data: { project: config.projectName, id: masterId, finishedAt: new Date().toISOString() },
+  });
 
   // N218 — re-register when the master stops recognizing us (it restarted): a
   // fresh register, restart the liveness loop, re-push state, so a running
@@ -1572,6 +1613,44 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
+    // N243 — POST /log: the project's own client (error boundary) sends a debug
+    // log here; the server forwards it to the master keyed by our token (the
+    // browser never sees the master key). Body: { log: { type, message, data? } }.
+    if (url.pathname === "/log" && req.method === "POST") {
+      // N243 review-fix — CSRF guard. This server sets ACAO:*, so without this a
+      // page the user visits could POST a `text/plain` log (a CORS-safe request,
+      // no preflight) and have it forwarded to the master under this project's
+      // token. Sec-Fetch-Site is browser-set and unforgeable by page JS; reject
+      // cross-site. Same-origin browser + server-to-server (no header) still pass.
+      const site = req.headers["sec-fetch-site"];
+      if (site && site !== "same-origin" && site !== "none") {
+        res.writeHead(403, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ error: "request refused" }));
+        return;
+      }
+      let body = "";
+      req.on("data", (c: Buffer) => (body += c.toString()));
+      req.on("end", () => {
+        try {
+          const parsed = JSON.parse(body) as {
+            log?: { type: string; message: string; data?: unknown };
+          };
+          if (
+            parsed.log &&
+            typeof parsed.log.type === "string" &&
+            typeof parsed.log.message === "string"
+          ) {
+            forwardLogToMaster(parsed.log);
+          }
+        } catch {
+          /* ignore malformed client log */
+        }
+        res.writeHead(202, { "Content-Type": MIME[".json"] });
+        res.end(JSON.stringify({ ok: true }));
+      });
+      return;
+    }
+
     if (url.pathname === "/api/events") {
       const taskId = url.searchParams.get("taskId");
       if (!taskId || !/^N\d{2,}$/.test(taskId)) {
@@ -1676,6 +1755,36 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       res.writeHead(500, { "Content-Type": MIME[".json"] });
       res.end(JSON.stringify({ error: "Dashboard build not found. Run `pnpm build`." }));
     }
+  }
+
+  // N243 — server-side "error boundary": forward uncaught exceptions / rejections
+  // to the master's debug log (keyed by our token) so a crash is visible in /logs.
+  // A rejection is logged and the process stays up (a rejection is usually a
+  // localised async error; this is the "keep the dev server alive" choice). An
+  // uncaughtException leaves the process in an undefined state, so we log then
+  // EXIT — preserving Node's default crash instead of silently limping on.
+  // Guarded so repeated startServer() calls in one process don't stack listeners.
+  if (!serverErrorHandlersInstalled) {
+    serverErrorHandlersInstalled = true;
+    process.on("unhandledRejection", (reason) => {
+      forwardLogToMaster({
+        type: "error",
+        message: "unhandledRejection: " + String(reason instanceof Error ? reason.message : reason),
+        data: {
+          stack: reason instanceof Error ? reason.stack : undefined,
+          project: config.projectName,
+        },
+      });
+    });
+    process.on("uncaughtException", (err) => {
+      forwardLogToMaster({
+        type: "error",
+        message: "uncaughtException: " + err.message,
+        data: { stack: err.stack, project: config.projectName },
+      });
+      // Exit on the next tick so the fire-and-forget forward flushes first.
+      setImmediate(() => process.exit(1));
+    });
   }
 
   // N151 — handler-wide error boundary: an unhandled throw anywhere in dispatch
