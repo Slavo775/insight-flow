@@ -1,0 +1,33 @@
+{
+  "taskId": "N243",
+  "reviews": [
+    {
+      "startedAt": "2026-07-16T11:57:09.808Z",
+      "endedAt": "2026-07-16T12:05:14.081Z",
+      "verdict": "fix-needed",
+      "comment": "2 blockers: (1) project /log route ungated + ACAO:* → cross-origin log injection via text/plain POST; (2) uncaughtException handlers suppress the crash (no exit) leaving undefined state + hiding crashes — project handler contradicts its own comment. Non-blocking: project handlers accumulate in startServer; early-boot logs dropped.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-16T12:08:00.903Z",
+        "endedAt": "2026-07-16T12:12:38.464Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/master/index.ts"
+        ],
+        "comment": "Fixed 2 blockers: project /log Sec-Fetch-Site CSRF guard; uncaughtException now logs-then-exits (project setImmediate exit, master sync exit) + once-guard. 369/369.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-16T12:57:32.305Z",
+      "endedAt": "2026-07-16T13:02:07.468Z",
+      "verdict": "approved",
+      "comment": "Round 2: both blockers fixed — project /log sec-fetch CSRF guard; uncaughtException logs-then-exits (+once-guard). No new issues. 369/369.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

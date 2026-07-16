@@ -1,0 +1,33 @@
+{
+  "taskId": "N242",
+  "reviews": [
+    {
+      "startedAt": "2026-07-16T11:57:09.662Z",
+      "endedAt": "2026-07-16T12:05:13.936Z",
+      "verdict": "fix-needed",
+      "comment": "1 blocker: path traversal in slugProject ('..' escapes ~/.insight-flow/logs; latent clearLogs wipe). Non-blocking: POST /log should use isTrustedActionRequest; slug collisions. Engine otherwise correct (no race, trim/sort/pagination verified), no secret leak, no XSS.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-16T12:08:00.761Z",
+        "endedAt": "2026-07-16T12:12:38.319Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/core/log-store.ts",
+          "packages/taskflow/src/master/server.ts"
+        ],
+        "comment": "Fixed blocker: slugProject path traversal (dot-only names → 'unknown'); + gate parity (POST /log → isTrustedActionRequest). 369/369.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-16T12:57:32.158Z",
+      "endedAt": "2026-07-16T13:02:07.318Z",
+      "verdict": "approved",
+      "comment": "Round 2: slug path traversal fixed (dot-only → unknown, verified) + POST /log → isTrustedActionRequest. No new issues. 369/369.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

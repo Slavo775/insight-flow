@@ -121,7 +121,7 @@
     },
     {
       "id": "N241",
-      "title": "Release insight-flow 2.8.1 — ship N240 hub crash + notification-restart fix",
+      "title": "Release insight-flow 2.8.1 \u2014 ship N240 hub crash + notification-restart fix",
       "type": "fix",
       "priority": "high",
       "status": "done",
@@ -186,6 +186,280 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "custom:release-manager"
+    },
+    {
+      "id": "N242",
+      "title": "Debug log engine \u2014 master /log + /logs API + log-store (Zod, per-project JSON, throttled trim)",
+      "type": "feat",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "insightFlow/workTasks/N242-debug-log-engine-master-log-logs-api-log-store-zod",
+      "createdAt": "2026-07-16T11:03:21.846Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-16T11:03:21.846Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-16T11:08:33.002Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-16T11:15:35.738Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-16T11:57:09.657Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-16T12:05:13.937Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-16T12:08:00.754Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-16T12:12:38.320Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-16T12:57:32.150Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-16T13:02:07.324Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-16T13:33:02.316Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-16T11:08:33.011Z",
+        "completedAt": "2026-07-16T11:15:35.744Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/log-store.ts",
+          "packages/taskflow/src/master/registry.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/log-store.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "logging",
+        "master",
+        "debug",
+        "api"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-16T13:33:02.316Z",
+          "commitHash": "e2b09fa",
+          "commitMessage": "feat(logs): central debug log engine (N242-N244)"
+        }
+      ],
+      "branch": "feat/N242-N244-debug-log-engine",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N243",
+      "title": "Debug log instrumentation \u2014 error boundaries (client+server) + registration logging (master+project)",
+      "type": "feat",
+      "priority": "high",
+      "status": "pushed",
+      "folder": "insightFlow/workTasks/N243-debug-log-instrumentation-error-boundaries-client-",
+      "createdAt": "2026-07-16T11:03:21.996Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-16T11:03:21.997Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-16T11:19:39.395Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-16T11:29:18.204Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-16T11:57:09.804Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-16T12:05:14.081Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-16T12:08:00.900Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-16T12:12:38.464Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-16T12:57:32.301Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-16T13:02:07.471Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-16T13:33:02.458Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-16T11:19:39.402Z",
+        "completedAt": "2026-07-16T11:29:18.208Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/dashboard/client/ErrorBoundary.tsx",
+          "packages/taskflow/src/dashboard/client/main.tsx",
+          "packages/taskflow/src/master/client/main.tsx",
+          "packages/taskflow/test/log-instrumentation.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "logging",
+        "debug",
+        "error-boundary",
+        "instrumentation"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-16T13:33:02.457Z",
+          "commitHash": "e2b09fa",
+          "commitMessage": "feat(logs): central debug log engine (N242-N244)"
+        }
+      ],
+      "branch": "feat/N242-N244-debug-log-engine",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N244",
+      "title": "Debug logs page \u2014 /logs route in master client (raw JSON, project/type filter, pagination)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "pushed",
+      "folder": "insightFlow/workTasks/N244-debug-logs-page-logs-route-in-master-client-raw-js",
+      "createdAt": "2026-07-16T11:03:22.149Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-16T11:03:22.149Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-16T11:48:24.816Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-16T11:54:12.021Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-16T11:57:09.939Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-16T12:05:14.231Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-16T13:33:02.597Z",
+          "by": "task-git"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-16T11:48:24.823Z",
+        "completedAt": "2026-07-16T11:54:12.027Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/client/api.ts",
+          "packages/taskflow/src/master/client/LogsPage.tsx",
+          "packages/taskflow/src/master/client/main.tsx",
+          "packages/taskflow/src/master/client/App.tsx",
+          "packages/taskflow/test/log-store.test.mjs",
+          "packages/taskflow/test/log-instrumentation.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "logging",
+        "debug",
+        "dashboard",
+        "ui"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-16T13:33:02.597Z",
+          "commitHash": "e2b09fa",
+          "commitMessage": "feat(logs): central debug log engine (N242-N244)"
+        }
+      ],
+      "branch": "feat/N242-N244-debug-log-engine",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     },
     {
       "id": "N245",
@@ -273,7 +547,7 @@
     },
     {
       "id": "N246",
-      "title": "Release insight-flow 2.8.2 — ship N245 hub-notify comment-injection fix",
+      "title": "Release insight-flow 2.8.2 \u2014 ship N245 hub-notify comment-injection fix",
       "type": "fix",
       "priority": "high",
       "status": "done",
