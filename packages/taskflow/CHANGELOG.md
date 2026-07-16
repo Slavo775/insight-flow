@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.9.0](https://github.com/Slavo775/insight-flow/compare/v2.8.2...v2.9.0) (2026-07-16)
+
+
+### Features
+
+* **logs:** central debug log engine — /log, /api/logs, error boundaries, /logs page (N242-N244) ([#159](https://github.com/Slavo775/insight-flow/issues/159)) ([df957f3](https://github.com/Slavo775/insight-flow/commit/df957f34526cd53c3b4f0dc02b8bbb04e847fd7a))
+
 ## [2.8.2](https://github.com/Slavo775/insight-flow/compare/v2.8.1...v2.8.2) (2026-07-16)
 
 
