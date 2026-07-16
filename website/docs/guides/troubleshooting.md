@@ -9,6 +9,13 @@ sidebar_position: 10
 Common problems and their fixes. Each entry is grounded in how insight-flow
 actually behaves — the commands below are copy-pasteable.
 
+:::tip Check the logs first
+When something crashes or a screen goes blank, the cause is usually captured on
+the hub's **[`/logs` page](./debug-logs.md)**. Open
+`http://localhost:6100/logs`, filter to **error**, and read the newest entry
+before digging further.
+:::
+
 ## Slash commands / hooks don't work right after `init`
 
 `insight-flow init` writes the role files, slash commands, and hook scripts your

@@ -1,7 +1,7 @@
 ---
 title: Using insight-flow with Cursor
 sidebar_label: Cursor
-sidebar_position: 11
+sidebar_position: 12
 ---
 
 # Using insight-flow with Cursor

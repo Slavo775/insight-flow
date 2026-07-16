@@ -1,7 +1,7 @@
 ---
 title: Set up observability (Langfuse)
 sidebar_label: Observability
-sidebar_position: 12
+sidebar_position: 13
 ---
 
 # Set up observability (Langfuse)
