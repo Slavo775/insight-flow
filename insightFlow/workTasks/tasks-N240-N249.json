@@ -186,6 +186,74 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "custom:release-manager"
+    },
+    {
+      "id": "N245",
+      "title": "hub-notify.js injected into HTML comment, never executes",
+      "type": "fix",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N245-hub-notify-js-injected-into-html-comment-never-exe",
+      "createdAt": "2026-07-16T13:42:47.714Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-16T13:42:47.715Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-16T13:45:42.040Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-16T13:47:06.035Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-16T13:48:23.250Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-16T13:49:18.588Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-16T13:49:59.135Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-16T13:50:15.176Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-16T13:45:42.046Z",
+        "completedAt": "2026-07-16T13:47:06.041Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "notifications",
+        "master",
+        "pwa"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
