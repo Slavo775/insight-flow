@@ -1,0 +1,59 @@
+{
+  "taskId": "N248",
+  "reviews": [
+    {
+      "startedAt": "2026-07-17T06:19:58.062Z",
+      "endedAt": "2026-07-17T06:25:06.722Z",
+      "verdict": "fix-needed",
+      "comment": "3 small row-toggle blockers in LogsPage.tsx: unstable/never-reset expansion key (wrong row can expand after paging), data-less rows falsely announce expandable + aria-controls to missing id, block content inside <button>. Backend search/counts correct; guard+pagination intact; StatusTone widening safe; reuse good.",
+      "type": "ai",
+      "by": "custom:task-fe-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-17T06:32:54.384Z",
+      "endedAt": "2026-07-17T06:33:51.146Z",
+      "verdict": "fix-needed",
+      "comment": "Human: fonts too small in logs list — badges/meta 10→12, message 13→14, make sizes bigger like Lovable. Folded into the fix pass with the AI row-toggle blockers.",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-17T06:51:17.302Z",
+      "endedAt": "2026-07-17T06:51:49.468Z",
+      "verdict": "approved",
+      "comment": "Re-review after fix: all 3 AI row-toggle blockers + human font feedback resolved (expansion reset, data-less rows non-interactive, button-safe spans, fonts 10→12/13→14). tsc+build+369 tests+live smoke all pass.",
+      "type": "ai",
+      "by": "custom:task-fe-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-17T06:56:57.642Z",
+      "endedAt": "2026-07-17T06:58:18.651Z",
+      "verdict": "fix-needed",
+      "comment": "Human round 4: header + filter-wrapper fonts also too small vs Lovable — check size AND line-height AND weight. Eyebrow 10→12, title line-height 1.25, back button 14+600, search+select 14 (logs-local).",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-17T07:14:26.867Z",
+      "endedAt": "2026-07-17T07:15:07.481Z",
+      "verdict": "approved",
+      "comment": "approved!",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-17T10:13:38.431Z",
+      "endedAt": "2026-07-17T10:14:15.640Z",
+      "verdict": "approved",
+      "comment": "approved! create branch, commit, push",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

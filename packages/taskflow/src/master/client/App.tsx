@@ -20,6 +20,8 @@ import {
 import { SettingsMenu } from "./SettingsMenu.js";
 import { NewProjectModal } from "./NewProjectModal.js";
 import { SquareIconButton } from "./ui.js";
+import { Header } from "./Header.js";
+import { Main, PANEL_GRADIENT } from "./layout.js";
 import {
   ActivityIcon,
   ArrowUpRightIcon,
@@ -35,76 +37,8 @@ import {
 
 // ---- layout ---------------------------------------------------------------
 
-const MAX_WIDTH = "1152px";
-
 const Root = styled.div`
   min-height: 100dvh;
-`;
-
-// Full-width sticky header with a bottom border (Lovable): 76px tall = 44px
-// controls + 16px top/bottom padding; 32px left/right; inner content centered.
-const HeaderBar = styled.header`
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  border-bottom: 1px solid ${(p) => p.theme.color.border};
-  background: oklch(0.19 0.02 260 / 0.9);
-  backdrop-filter: blur(8px);
-`;
-
-const HeaderInner = styled.div`
-  max-width: ${MAX_WIDTH};
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: ${(p) => p.theme.space["2xl"]};
-  padding: 16px 32px;
-  flex-wrap: wrap;
-`;
-
-const Main = styled.main`
-  max-width: ${MAX_WIDTH};
-  margin: 0 auto;
-  padding: 32px;
-`;
-
-const Brand = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${(p) => p.theme.space.lg};
-`;
-
-const BrandIcon = styled.span`
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: ${(p) => p.theme.radius.lg};
-  background: #12351f;
-  color: ${(p) => p.theme.color.green};
-`;
-
-const Eyebrow = styled.p`
-  font-size: ${(p) => p.theme.font.size.xs};
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: ${(p) => p.theme.color.textMuted};
-  margin: 0;
-`;
-
-const Title = styled.h1`
-  font-size: ${(p) => p.theme.font.size["2xl"]};
-  font-weight: ${(p) => p.theme.font.weight.semibold};
-  margin: 0;
-  line-height: 1.2;
-`;
-
-const Actions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${(p) => p.theme.space.md};
-  flex-wrap: wrap;
 `;
 
 const SearchBox = styled.div`
@@ -122,7 +56,7 @@ const HeroCard = styled.section`
   border-radius: ${(p) => p.theme.radius.xl};
   padding: ${(p) => p.theme.space["2xl"]};
   margin-bottom: ${(p) => p.theme.space["3xl"]};
-  background: linear-gradient(180deg, oklch(0.22 0.03 260) 0%, oklch(0.2 0.02 260) 100%);
+  background: ${PANEL_GRADIENT};
 `;
 
 // The hero "Currently working on" label — its own style (the header keeps Eyebrow).
@@ -452,46 +386,32 @@ export function App() {
 
   return (
     <Root>
-      <HeaderBar>
-        <HeaderInner>
-          <Brand>
-            <BrandIcon aria-hidden="true">
-              <ServerIcon size={20} />
-            </BrandIcon>
-            <div>
-              <Eyebrow>Insight Flow</Eyebrow>
-              <Title>Projects overview</Title>
-            </div>
-          </Brand>
-
-          <Actions>
-            <SearchBox>
-              <SearchInput
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search projects…"
-                aria-label="Search projects"
-              />
-            </SearchBox>
-            <SquareIconButton
-              type="button"
-              aria-label="Refresh"
-              title="Re-check which projects are running"
-              onClick={onRefresh}
-            >
-              <RefreshIcon size={16} />
-            </SquareIconButton>
-            <LogsLink href="/logs" title="Debug logs">
-              Logs
-            </LogsLink>
-            <SettingsMenu settings={settings} onChange={onSettingsChange} />
-            <NewProjectBtn type="button" $variant="success" onClick={() => setNewOpen(true)}>
-              <PlusIcon size={14} />
-              New project
-            </NewProjectBtn>
-          </Actions>
-        </HeaderInner>
-      </HeaderBar>
+      <Header icon={<ServerIcon size={20} />} eyebrow="Insight Flow" title="Projects overview">
+        <SearchBox>
+          <SearchInput
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search projects…"
+            aria-label="Search projects"
+          />
+        </SearchBox>
+        <SquareIconButton
+          type="button"
+          aria-label="Refresh"
+          title="Re-check which projects are running"
+          onClick={onRefresh}
+        >
+          <RefreshIcon size={16} />
+        </SquareIconButton>
+        <LogsLink href="/logs" title="Debug logs">
+          Logs
+        </LogsLink>
+        <SettingsMenu settings={settings} onChange={onSettingsChange} />
+        <NewProjectBtn type="button" $variant="success" onClick={() => setNewOpen(true)}>
+          <PlusIcon size={14} />
+          New project
+        </NewProjectBtn>
+      </Header>
 
       <Main>
         <HeroCard aria-labelledby="hero-h">
