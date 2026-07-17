@@ -659,7 +659,7 @@
       "title": "Redesign the master /logs page to the Lovable design (header, search, chips, colored rows)",
       "type": "rework",
       "priority": "medium",
-      "status": "approved",
+      "status": "merged",
       "folder": "insightFlow/workTasks/N248-redesign-the-master-logs-page-to-the-lovable-desig",
       "createdAt": "2026-07-17T06:02:24.584Z",
       "statusHistory": [
@@ -772,6 +772,16 @@
           "status": "approved",
           "at": "2026-07-17T10:14:15.641Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-17T11:02:36.778Z",
+          "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-17T14:18:11.490Z",
+          "by": "custom:task-release-merge"
         }
       ],
       "implementation": {
@@ -785,17 +795,91 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 496,
       "tags": [
         "frontend",
         "logs",
         "master-ui"
       ],
+      "pushes": [
+        {
+          "at": "2026-07-17T11:02:36.778Z",
+          "commitHash": "e5c2bf0211090fdc5d5140845c8a28c430182d8c",
+          "commitMessage": "feat(logs): redesign the master /logs page to the Lovable design (N248)"
+        }
+      ],
+      "branch": null,
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/163",
+      "mergedAt": "2026-07-17T14:18:11.496Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N249",
+      "title": "Release insight-flow 2.10.0 — ship N248 logs page Lovable redesign + search/counts",
+      "type": "feat",
+      "priority": "medium",
+      "status": "feature-merged",
+      "folder": "insightFlow/workTasks/N249-release-insight-flow-2-10-0-ship-n248-logs-page-lo",
+      "createdAt": "2026-07-17T13:59:54.749Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-17T13:59:54.750Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-17T14:00:01.948Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "changes-needed",
+          "at": "2026-07-17T14:01:20.333Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "release-fixed",
+          "at": "2026-07-17T14:04:07.367Z",
+          "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-17T14:16:46.769Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "ready-to-release",
+          "at": "2026-07-17T14:17:03.364Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "feature-merged",
+          "at": "2026-07-17T14:18:11.645Z",
+          "by": "custom:task-release-merge"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "logs",
+        "frontend"
+      ],
       "pushes": [],
       "branch": null,
       "mrUrl": null,
       "mergedAt": null,
-      "flowId": "default"
+      "flowId": "custom:release-manager"
     }
   ]
 }
