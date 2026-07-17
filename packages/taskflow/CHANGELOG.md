@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.10.0](https://github.com/Slavo775/insight-flow/compare/v2.9.0...v2.10.0) (2026-07-17)
+
+
+### Features
+
+* **logs:** redesign the master /logs page to the Lovable design (N248) ([#163](https://github.com/Slavo775/insight-flow/issues/163)) ([e452043](https://github.com/Slavo775/insight-flow/commit/e452043e301c6ea882d50cf1c8bd8fd5809bd3eb))
+
 ## [2.9.0](https://github.com/Slavo775/insight-flow/compare/v2.8.2...v2.9.0) (2026-07-16)
 
 
