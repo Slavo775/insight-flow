@@ -1,26 +1,27 @@
 name: release-publish
 
 # Publishes to npm. Uses npm Trusted Publishing (OIDC) — there is no NPM_TOKEN
-# secret; provenance is attached.
+# secret; provenance is attached. This workflow is the ONLY publisher, so its
+# filename is what npm's Trusted Publishing config must name (its OIDC identity
+# matches on every path below).
 #
 # Two entry points, both trusted (never `pull_request`, so OIDC is never exposed
 # to untrusted fork code):
-#   - `release: published` — a human-published GitHub release (their token's event
-#     cascades here).
-#   - `workflow_call` — invoked by release-please.yml's chained `publish` job when
-#     release-please created a release. This handles release-please's own
-#     (bot/GITHUB_TOKEN) releases, whose `release: published` event GitHub
-#     suppresses (N193). The two paths are mutually exclusive: a bot release only
-#     reaches here via workflow_call; a human release only via `release:
-#     published` (release-please didn't create it, so the chained job is skipped).
+#   - `release: published` — the primary path. release-please cuts the release
+#     with a bot token (N250), so the event fires and lands here; a
+#     human-published GitHub release lands here too.
+#   - `workflow_dispatch` — manual fallback: run this workflow by hand from the
+#     Actions tab to publish the current default branch. Still gated by the
+#     `npm-publish` environment approval below.
+#
+# N250 — a `workflow_call` entry was removed: chaining from release-please.yml
+# made the OIDC token's top-level workflow that file (not this one), so npm minted
+# no token and publish failed with ENEEDAUTH. The bot-token release event avoids
+# the chain entirely and keeps this workflow as the OIDC identity.
 
 on:
   release:
     types: [published]
-  workflow_call:
-  # N201 — manual fallback: if the auto-chain ever misses (e.g. a skipped publish),
-  # run this workflow by hand from the Actions tab to publish the current default
-  # branch. Still gated by the `npm-publish` environment approval below.
   workflow_dispatch:
 
 permissions:

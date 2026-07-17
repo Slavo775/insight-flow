@@ -1,0 +1,23 @@
+{
+  "taskId": "N236",
+  "reviews": [
+    {
+      "startedAt": "2026-07-14T18:46:16.578Z",
+      "endedAt": "2026-07-14T18:52:38.439Z",
+      "verdict": "approved",
+      "comment": "Approved. Correctness+security+ponytail review. Found 1 runtime BLOCKER (location state var shadowed window.location in location.reload() → TypeError on every create) and fixed it in-pass (window.location.reload()); tsc didn't catch it, server-only live test missed it. Fixed 2 non-blocking: dotted-folder default name rejected by name regex (added labelFrom sanitize); duplicate .taskflow-activity.jsonl gitignore line (dropped). Security clean (confinement preserved). Deferred follow-ups: installFlow conflict coverage; extend lstat symlink guard to initProject writes. Gates green after fixes (tsc, lint 0 err, build, 13/13 tests).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-14T19:01:02.048Z",
+      "endedAt": "2026-07-14T19:01:20.125Z",
+      "verdict": "approved",
+      "comment": "Human approved (Project Owner).",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}
