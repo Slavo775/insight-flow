@@ -82,8 +82,15 @@ Open the hub and go to:
 http://localhost:6100/logs
 ```
 
-You get a table of entries, newest first. You can filter by **project**
-(including `master`, or *all*) and by **level** (error / warning / info). This is
+You get a table of entries, newest first. Across the top:
+
+- **Search** — the box in the header filters across **all** logs (the message,
+  the project name, and the entry data), not just the page on screen.
+- **Level chips** — All / Error / Warning / Info, each showing a live **count**
+  of matching entries; click one to filter by level.
+- **Project filter** — narrow to one project (including `master`) or *all*.
+
+Each row is colored by level; click a row to expand its full JSON data. This is
 the fastest way to answer "what just went wrong?".
 
 ### The API
@@ -99,6 +106,9 @@ curl "http://localhost:6100/api/logs?project=master&type=error"
 
 # page through a busy project
 curl "http://localhost:6100/api/logs?project=my-app&page=2&pageSize=50"
+
+# search across all logs (message, project, and data)
+curl "http://localhost:6100/api/logs?search=ENEEDAUTH"
 ```
 
 **Query parameters**
@@ -107,14 +117,25 @@ curl "http://localhost:6100/api/logs?project=my-app&page=2&pageSize=50"
 | --- | --- | --- |
 | `project` | a project name, `master`, or `all` | `all` |
 | `type` | `error`, `warning`, `info` | all levels |
+| `search` | free text; matches message, project name, and data | (none) |
 | `page` | 1-based page number | `1` |
 | `pageSize` | 1–500 | `100` |
 
 **Response**
 
 ```json
-{ "total": 137, "page": 1, "pageSize": 100, "logs": [ /* newest first */ ] }
+{
+  "total": 137,
+  "page": 1,
+  "pageSize": 100,
+  "counts": { "error": 4, "warning": 11, "info": 122 },
+  "logs": [ /* newest first */ ]
+}
 ```
+
+`counts` holds the per-level totals across **all** levels for the current
+`project` + `search` (they ignore the `type` filter), so the level chips stay
+accurate even while a single level is selected.
 
 Both the page and the API are **local-only**: requests are accepted from your own
 machine (loopback) and refused otherwise. Nothing is ever sent off your machine.
