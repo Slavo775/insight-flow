@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { getGlobalConfigDir } from "./global-config.js";
-import { LOG_TYPES, type StoredLog } from "./schema/index.js";
+import { LOG_TYPES, type LogType, type StoredLog } from "./schema/index.js";
 
 /**
  * N242 — the debug log store. Per-project folders under
@@ -103,17 +103,58 @@ export function listProjects(): string[] {
 }
 
 /**
+ * N248 — case-insensitive text match over an entry's message, project name, and
+ * stringified `data`. Powers the `/logs` search box (server-side, across all logs).
+ */
+function matchesSearch(l: StoredLog, q: string): boolean {
+  if (l.message.toLowerCase().includes(q)) return true;
+  if (l.projectName.toLowerCase().includes(q)) return true;
+  if (l.data !== undefined) {
+    try {
+      return JSON.stringify(l.data).toLowerCase().includes(q);
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
  * Read merged logs, newest-first. `project`: a project name, `"master"`, or
  * `"all"`/undefined (every folder). `type`: one level or undefined (all levels).
+ * `search`: N248 — an optional case-insensitive query filtered across all logs.
  */
-export function readMerged(opts: { project?: string; type?: string } = {}): StoredLog[] {
+export function readMerged(
+  opts: { project?: string; type?: string; search?: string } = {},
+): StoredLog[] {
   const projects = opts.project && opts.project !== "all" ? [opts.project] : listProjects();
   const types = opts.type ? [opts.type] : [...LOG_TYPES];
+  const q = opts.search?.trim().toLowerCase();
   const all: StoredLog[] = [];
   for (const p of projects) {
     for (const t of types) all.push(...readFileLogs(logFile(p, t)));
   }
+  const filtered = q ? all.filter((l) => matchesSearch(l, q)) : all;
   // ISO timestamps sort lexicographically; newest first.
-  all.sort((a, b) => (a.timestamp < b.timestamp ? 1 : a.timestamp > b.timestamp ? -1 : 0));
-  return all;
+  filtered.sort((a, b) => (a.timestamp < b.timestamp ? 1 : a.timestamp > b.timestamp ? -1 : 0));
+  return filtered;
+}
+
+/**
+ * N248 — count logs per level across ALL levels (ignoring any level filter) for
+ * the given project + search, so the `/logs` level chips show real totals.
+ *
+ * ponytail: does its own full readMerged (a second disk scan when the caller
+ * also reads the page). Fine for a debug tool over <=1000-entry files; switch to
+ * a single read + in-memory tally if log volume ever grows.
+ */
+export function countByLevel(
+  opts: { project?: string; search?: string } = {},
+): Record<LogType, number> {
+  const merged = readMerged({ project: opts.project, search: opts.search });
+  const counts: Record<LogType, number> = { error: 0, warning: 0, info: 0 };
+  for (const l of merged) {
+    if (l.type in counts) counts[l.type as LogType]++;
+  }
+  return counts;
 }

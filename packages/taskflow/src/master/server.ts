@@ -23,7 +23,7 @@ import type { MasterServerConfig, MasterProjectState } from "./types.js";
 import * as registry from "./registry.js";
 import { initProject } from "../agents/init/index.js";
 import { readHubRegistry, assignHubPort } from "../core/global-config.js";
-import { appendLog, readMerged } from "../core/log-store.js";
+import { appendLog, readMerged, countByLevel } from "../core/log-store.js";
 import { LogInputSchema } from "../core/schema/index.js";
 
 /**
@@ -1038,7 +1038,10 @@ export async function startMasterServer(
           500,
           Math.max(1, parseInt(url.searchParams.get("pageSize") || "100", 10) || 100),
         );
-        const merged = readMerged({ project, type });
+        // N248 — server-side search across all logs + real per-level counts.
+        const search = url.searchParams.get("search") || undefined;
+        const merged = readMerged({ project, type, search });
+        const counts = countByLevel({ project, search });
         const start = (page - 1) * pageSize;
         res.writeHead(200, { "Content-Type": MIME_JSON });
         res.end(
@@ -1046,6 +1049,7 @@ export async function startMasterServer(
             total: merged.length,
             page,
             pageSize,
+            counts,
             logs: merged.slice(start, start + pageSize),
           }),
         );

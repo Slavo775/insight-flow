@@ -23,10 +23,17 @@ export interface LogEntry {
   timestamp: string;
   projectName: string;
 }
+export interface LogCounts {
+  error: number;
+  warning: number;
+  info: number;
+}
 export interface LogsResult {
   total: number;
   page: number;
   pageSize: number;
+  // N248 — real per-level totals across all logs (for the level chips).
+  counts: LogCounts;
   logs: LogEntry[];
 }
 export async function fetchLogs(params: {
@@ -34,10 +41,12 @@ export async function fetchLogs(params: {
   type: string;
   page: number;
   pageSize: number;
+  search?: string;
 }): Promise<LogsResult> {
   const qs = new URLSearchParams();
   if (params.project) qs.set("project", params.project);
   if (params.type && params.type !== "all") qs.set("type", params.type);
+  if (params.search && params.search.trim()) qs.set("search", params.search.trim());
   qs.set("page", String(params.page));
   qs.set("pageSize", String(params.pageSize));
   const res = await fetch(`/api/logs?${qs.toString()}`);
