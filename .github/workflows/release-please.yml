@@ -3,13 +3,21 @@ name: release-please
 # Maintains a Release PR (CHANGELOG + version bump from conventional commits).
 # Merging that PR tags the release (bare `v*`) and creates the GitHub release.
 #
-# N193 — the release-please Action creates that release as `github-actions[bot]`
-# (default GITHUB_TOKEN), and GitHub does NOT trigger workflows from GITHUB_TOKEN
-# events — so `release-publish.yml`'s `release: published` trigger never fires for
-# our own releases. Instead of depending on that event (or a PAT), we CHAIN the
-# publish here off release-please's `release_created` output: when a release is
-# created, the `publish` job calls release-publish.yml as a reusable workflow.
-# (Human-published releases still publish via `release: published` directly.)
+# N193/N250 — the release-please Action must create that release with a BOT
+# TOKEN (a PAT/GitHub App token in the `RELEASE_PLEASE_TOKEN` secret), NOT the
+# default GITHUB_TOKEN. GitHub does not trigger downstream workflows from
+# GITHUB_TOKEN events, so a GITHUB_TOKEN release never fires `release: published`.
+# With a bot token the release fires that event, which triggers
+# `release-publish.yml` directly — and there the OIDC token's top-level workflow
+# is `release-publish.yml`, which matches npm's Trusted Publishing config (a
+# `workflow_call` chain did NOT: its OIDC identity was this workflow, so npm
+# minted no token and `npm publish` failed with ENEEDAUTH). So this workflow now
+# only cuts the release; publishing lives entirely in release-publish.yml.
+#
+# Setup: create a fine-grained PAT (or GitHub App token) scoped to this repo with
+# Contents: read/write + Pull requests: read/write, and add it as the repo secret
+# `RELEASE_PLEASE_TOKEN`. Without it, release-please falls back to GITHUB_TOKEN
+# and the release event will not fire (no publish).
 
 on:
   push:
@@ -25,31 +33,13 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    # N201 — this is a MANIFEST config and the package lives at `packages/taskflow`
-    # (not the repo root `.`). release-please-action v4 only sets the bare
-    # `release_created` / `tag_name` outputs for a root-path package; for a nested
-    # path it sets the aggregate `releases_created` plus path-scoped outputs
-    # (`packages/taskflow--tag_name`). Reading the bare names left the gate empty,
-    # so the `publish` job below was skipped even though a release was cut
-    # (v2.2.0 got tagged on GitHub but never reached npm). Use the manifest outputs.
-    outputs:
-      release_created: ${{ steps.release.outputs.releases_created }}
-      tag_name: ${{ steps.release.outputs['packages/taskflow--tag_name'] }}
     steps:
       - id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
         with:
+          # N250 — a bot token so the created release fires `release: published`
+          # (GITHUB_TOKEN would suppress it). Publishing is handled by that event
+          # in release-publish.yml, not by a reusable-workflow chain.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-
-  # N193 — only runs when release-please actually cut a release on this push.
-  # Calls the reusable publish workflow (OIDC + provenance + the npm-publish
-  # approval gate live inside it). `id-token: write` must be granted here so the
-  # OIDC token flows into the called workflow.
-  publish:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    permissions:
-      contents: read
-      id-token: write
-    uses: ./.github/workflows/release-publish.yml
