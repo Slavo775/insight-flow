@@ -1,0 +1,41 @@
+{
+  "taskId": "N251",
+  "reviews": [
+    {
+      "startedAt": "2026-07-18T09:53:16.393Z",
+      "endedAt": "2026-07-18T09:56:55.684Z",
+      "verdict": "fix-needed",
+      "comment": "2 blockers: (1) fetchLatestVersion caches null on transient npm failure -> 12h toast suppression; (2) /api/version ungated, inconsistent with security-first + sibling /api reads. Security core holds otherwise.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-07-18T10:06:29.817Z",
+        "endedAt": "2026-07-18T10:08:37.308Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/server.ts"
+        ],
+        "comment": "Fixed blockers 1-2: cache latest only on success (no sticky-null TTL suppression); gate /api/version with isTrustedLocalRequest (same-origin only). Both verified; all gates pass.",
+        "by": "task-review-fix"
+      }
+    },
+    {
+      "startedAt": "2026-07-18T10:12:38.024Z",
+      "endedAt": "2026-07-18T10:16:02.648Z",
+      "verdict": "approved",
+      "comment": "Round 2: both round-1 blockers fixed (transient-null no longer cached; /api/version gated to same-origin). Full diff re-checked, tsc passes.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    },
+    {
+      "startedAt": "2026-07-18T10:22:06.216Z",
+      "endedAt": "2026-07-18T10:22:24.287Z",
+      "verdict": "approved",
+      "comment": "approved! — human sign-off after AI round-2 confirmed both blockers fixed",
+      "type": "human",
+      "by": "task-human-review",
+      "fix": null
+    }
+  ]
+}

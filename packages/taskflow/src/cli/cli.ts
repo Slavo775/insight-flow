@@ -44,6 +44,7 @@ import {
 } from "./commands/incident.js";
 import { cmdMigrate, cmdMigrateReviews } from "./commands/migrate.js";
 import { cmdMigrateLayout } from "./commands/migrate-layout.js";
+import { cmdUpdate } from "./commands/update.js";
 import { cmdPromptBuild } from "./commands/prompt-build.js";
 import { cmdShow } from "./commands/show.js";
 import {
@@ -168,6 +169,7 @@ function printHelp(): void {
     bulk-prompt-build                     Re-sync role files in all (or selected) registered projects
     (deprecated aliases: ui-batch-register / ui-batch-unregister / ui-batch-down / batch-ui → bulk-*)
 
+    update                                Update the global insight-flow install (npm i -g insight-flow@latest)
     help                                  Show this help
     version                               Show version
 `);
@@ -242,6 +244,8 @@ async function run(): Promise<void> {
     const pkgPath = resolvePackageAsset("package.json");
     const pkg = JSON.parse(readFileSync(pkgPath, "utf-8")) as { version: string };
     console.log(`insight-flow ${pkg.version}`);
+  } else if (command === "update") {
+    cmdUpdate();
   } else if (command === "migrate") {
     const config = resolveConfig();
     cmdMigrate(config);

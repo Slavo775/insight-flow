@@ -215,8 +215,18 @@ insight-flow migrate-reviews                    # Split inline reviews/incidents
 insight-flow migrate-hooks [--bin <path>]       # Refresh hook scripts after upgrading the package (idempotent)
 insight-flow prompt-build                       # Preview AGENT_ENFORCEMENT.md block (dry run)
 insight-flow prompt-build --apply               # Write AGENT_ENFORCEMENT.md + patch role files
+insight-flow update                             # Update the global install (npm i -g insight-flow@latest), then list hub projects to bump
 insight-flow help
 insight-flow version
+```
+
+The master hub (`insight-flow master` / the `ui` overview) checks npm for a newer published version on load and shows a dismissible "update available" toast pointing at `insight-flow update` (global) and `/task-release-rollout` (per-project). The check is informational only — it never runs an install for you. Throttle or disable it in `~/.insight-flow/master.json`:
+
+```jsonc
+{
+  "port": 6100,
+  "updateCheck": { "enabled": true, "intervalHours": 12 }  // set enabled:false to turn the check (and toast) off
+}
 ```
 
 Run `insight-flow help` for the full list.

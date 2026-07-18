@@ -23,6 +23,7 @@ import type { MasterServerConfig, MasterProjectState } from "./types.js";
 import * as registry from "./registry.js";
 import { initProject } from "../agents/init/index.js";
 import { readHubRegistry, assignHubPort } from "../core/global-config.js";
+import { resolvePackageAsset } from "../core/paths.js";
 import { appendLog, readMerged, countByLevel } from "../core/log-store.js";
 import { LogInputSchema } from "../core/schema/index.js";
 
@@ -756,6 +757,61 @@ function proxyToProject(
   req.pipe(proxyReq); // forward the request body (POST/PUT)
 }
 
+// N251 — the hub's own version + a throttled npm "latest" lookup that backs the
+// update-available toast. The npm response is untrusted DATA: we validate it is a
+// real semver before returning or comparing it, and it is never shell-interpolated
+// (the toast is informational only — the update runs via `insight-flow update`).
+const SEMVER_RE = /^\d+\.\d+\.\d+(?:[-+].*)?$/;
+
+function currentVersion(): string {
+  try {
+    const pkg = JSON.parse(readFileSync(resolvePackageAsset("package.json"), "utf-8")) as {
+      version?: string;
+    };
+    return typeof pkg.version === "string" ? pkg.version : "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
+
+function semverGt(a: string, b: string): boolean {
+  const pa = a.split(/[.+-]/);
+  const pb = b.split(/[.+-]/);
+  for (let i = 0; i < 3; i++) {
+    const da = Number(pa[i]);
+    const db = Number(pb[i]);
+    if (da !== db) return da > db;
+  }
+  return false;
+}
+
+let latestCache: { value: string | null; at: number } | null = null;
+
+async function fetchLatestVersion(intervalHours: number): Promise<string | null> {
+  const ttl = Math.max(1, intervalHours) * 3600_000;
+  if (latestCache && Date.now() - latestCache.at < ttl) return latestCache.value;
+  let value: string | null = null;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3000);
+    const r = await fetch("https://registry.npmjs.org/insight-flow/latest", {
+      signal: ctrl.signal,
+      headers: { accept: "application/vnd.npm.install-v1+json" },
+    });
+    clearTimeout(t);
+    if (r.ok) {
+      const body = (await r.json()) as { version?: unknown };
+      if (typeof body.version === "string" && SEMVER_RE.test(body.version)) value = body.version;
+    }
+  } catch {
+    value = null;
+  }
+  // Cache only on success — a transient npm blip (or a start while offline) must
+  // not suppress the check for the full TTL; the next request retries instead.
+  if (value !== null) latestCache = { value, at: Date.now() };
+  return value;
+}
+
 export async function startMasterServer(
   config: Required<MasterServerConfig>,
 ): Promise<{ close(): void }> {
@@ -893,6 +949,28 @@ export async function startMasterServer(
         // redirect resolving to a different project if a projectId is reused.
         res.writeHead(301, { Location: location, "Cache-Control": "no-store" });
         res.end();
+        return;
+      }
+
+      // N251 — GET /api/version — version + update-available signal for the hub
+      // toast. Read-only; never triggers an install (option A). When
+      // updateCheck.enabled is false, no npm call is made (latest: null).
+      if (req.method === "GET" && url.pathname === "/api/version") {
+        // Same-origin only — the hub client fetches this same-origin; gating
+        // keeps a cross-origin page from reading the installed version (matches
+        // the other /api reads). N251.
+        if (!isTrustedLocalRequest(req)) {
+          res.writeHead(403);
+          res.end();
+          return;
+        }
+        const uc = config.updateCheck ?? {};
+        const current = currentVersion();
+        const latest =
+          uc.enabled === false ? null : await fetchLatestVersion(uc.intervalHours ?? 12);
+        const updateAvailable = latest != null && semverGt(latest, current);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ current, latest, updateAvailable }));
         return;
       }
 

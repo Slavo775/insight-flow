@@ -61,6 +61,104 @@
       "mrUrl": null,
       "mergedAt": "2026-07-17T15:38:56.456Z",
       "flowId": "default"
+    },
+    {
+      "id": "N251",
+      "title": "Update-available toast in master hub + insight-flow update CLI",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N251-update-available-toast-in-master-hub-insight-flow-",
+      "createdAt": "2026-07-17T16:45:33.729Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-17T16:45:33.729Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-17T17:13:41.511Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-18T09:47:38.700Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-18T09:53:16.387Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-18T09:56:55.684Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-18T10:06:29.811Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-18T10:08:37.309Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-18T10:12:38.016Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-18T10:16:02.653Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-18T10:22:06.207Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-18T10:22:24.287Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-17T17:13:41.519Z",
+        "completedAt": "2026-07-18T09:47:38.708Z",
+        "filesChanged": [
+          "packages/taskflow/src/master/types.ts",
+          "packages/taskflow/src/master/config.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/cli/commands/update.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/src/master/client/api.ts",
+          "packages/taskflow/src/master/client/App.tsx",
+          "packages/taskflow/README.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dashboard",
+        "master",
+        "release",
+        "security"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

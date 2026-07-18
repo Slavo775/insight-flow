@@ -8,7 +8,7 @@ import {
   type ProjectCardPill,
 } from "../../dashboard/client/components/index.js";
 import type { PublicProjectEntry } from "../types.js";
-import { fetchProjects, refreshProjects, startProject } from "./api.js";
+import { fetchProjects, refreshProjects, startProject, fetchVersion } from "./api.js";
 import { currentlyWorking, effectiveClaudeStatus, taskText } from "./status.js";
 import {
   isMuted,
@@ -57,6 +57,42 @@ const HeroCard = styled.section`
   padding: ${(p) => p.theme.space["2xl"]};
   margin-bottom: ${(p) => p.theme.space["3xl"]};
   background: ${PANEL_GRADIENT};
+`;
+
+// N251 — informational update-available banner (option A: never executes an
+// install; it points the user at `insight-flow update` / `/task-release-rollout`).
+const UpdateBanner = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: ${(p) => p.theme.space.lg};
+  border: 1px solid ${(p) => p.theme.color.border};
+  border-radius: ${(p) => p.theme.radius.lg};
+  padding: ${(p) => p.theme.space.lg} ${(p) => p.theme.space.xl};
+  margin-bottom: ${(p) => p.theme.space["2xl"]};
+  background: ${(p) => p.theme.color.surface};
+  font-size: 13px;
+`;
+
+const UpdateText = styled.span`
+  flex: 1;
+`;
+
+const UpdateCmd = styled.code`
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 2px 6px;
+  border-radius: ${(p) => p.theme.radius.sm};
+  background: ${(p) => p.theme.color.border};
+`;
+
+const DismissBtn = styled.button`
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: ${(p) => p.theme.color.textMuted};
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 4px;
 `;
 
 // The hero "Currently working on" label — its own style (the header keeps Eyebrow).
@@ -247,6 +283,8 @@ export function App() {
   const [newOpen, setNewOpen] = useState(false);
   const [starting, setStarting] = useState<Set<string>>(() => new Set());
   const [settings, setSettings] = useState<NotifSettings>(() => loadNotifSettings());
+  // N251 — the latest version to advertise, or null when up-to-date / dismissed.
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null);
 
   const upsert = (p: PublicProjectEntry): void => {
     setProjects((prev) => {
@@ -276,6 +314,16 @@ export function App() {
       .then((list) => alive && setProjects(list))
       .catch(() => {});
 
+    // N251 — advertise a newer published version once (respects the dismissed
+    // version in localStorage so it doesn't nag on every reload).
+    fetchVersion()
+      .then((v) => {
+        if (!alive || !v.updateAvailable || !v.latest) return;
+        if (localStorage.getItem("tf-dismissed-update") === v.latest) return;
+        setUpdateVersion(v.latest);
+      })
+      .catch(() => {});
+
     const es = new EventSource("/events");
     es.addEventListener("project-update", (e) => {
       try {
@@ -295,6 +343,17 @@ export function App() {
       clearInterval(timer);
     };
   }, []);
+
+  const onDismissUpdate = (): void => {
+    if (updateVersion) {
+      try {
+        localStorage.setItem("tf-dismissed-update", updateVersion);
+      } catch {
+        /* private mode — just hide for this session */
+      }
+    }
+    setUpdateVersion(null);
+  };
 
   const onRefresh = (): void => {
     refreshProjects()
@@ -414,6 +473,19 @@ export function App() {
       </Header>
 
       <Main>
+        {updateVersion && (
+          <UpdateBanner role="status">
+            <UpdateText>
+              insight-flow <strong>{updateVersion}</strong> is available — run{" "}
+              <UpdateCmd>insight-flow update</UpdateCmd> or{" "}
+              <UpdateCmd>/task-release-rollout</UpdateCmd>
+            </UpdateText>
+            <DismissBtn type="button" aria-label="Dismiss update notice" onClick={onDismissUpdate}>
+              ×
+            </DismissBtn>
+          </UpdateBanner>
+        )}
+
         <HeroCard aria-labelledby="hero-h">
           <HeroLabel id="hero-h">Currently working on</HeroLabel>
           {current ? (
