@@ -269,7 +269,7 @@ edit these by hand.
 | Path | Purpose |
 |------|---------|
 | `~/.insight-flow/master.lock` | Master server lock: `{ pid, port, startedAt }`. Created on start, cleared on shutdown. |
-| `~/.insight-flow/master.json` | Optional master server config (`{ port, standalone }`, default port `6100`). |
+| `~/.insight-flow/master.json` | Optional master server config (`{ port, standalone, updateCheck }`, default port `6100`). |
 | `~/.insight-flow/batch-ui.json` | Registry of projects for the bulk/multi-project dashboard (`bulk-ui` subcommands). |
 | `~/.insight-flow/session-<id>.active` | Marker that a Claude session is active. |
 | `~/.insight-flow/events-<id>.jsonl` | Per-session event log. |

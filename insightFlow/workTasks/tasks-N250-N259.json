@@ -67,7 +67,7 @@
       "title": "Update-available toast in master hub + insight-flow update CLI",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N251-update-available-toast-in-master-hub-insight-flow-",
       "createdAt": "2026-07-17T16:45:33.729Z",
       "statusHistory": [
@@ -125,6 +125,11 @@
           "status": "approved",
           "at": "2026-07-18T10:22:24.287Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-18T10:33:31.086Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -154,11 +159,76 @@
         "release",
         "security"
       ],
+      "pushes": [
+        {
+          "at": "2026-07-18T10:33:31.086Z",
+          "commitHash": "d73acd5",
+          "commitMessage": "feat(master): update-available toast + insight-flow update CLI (N251)"
+        }
+      ],
+      "branch": "feat/N251-update-available-toast",
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N252",
+      "title": "Release insight-flow 2.11.0 — ship N251 update-available toast + insight-flow update CLI",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready-to-release",
+      "folder": "insightFlow/workTasks/N252-release-insight-flow-2-11-0-ship-n251-update-avail",
+      "createdAt": "2026-07-18T10:56:17.266Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-18T10:56:17.267Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-18T10:56:24.305Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "changes-needed",
+          "at": "2026-07-18T11:00:49.287Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "release-fixed",
+          "at": "2026-07-18T11:04:02.666Z",
+          "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-18T11:13:41.704Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "ready-to-release",
+          "at": "2026-07-18T11:21:56.558Z",
+          "by": "custom:task-release-plan"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [],
       "pushes": [],
       "branch": null,
       "mrUrl": null,
       "mergedAt": null,
-      "flowId": "default"
+      "flowId": "custom:release-manager"
     }
   ]
 }
