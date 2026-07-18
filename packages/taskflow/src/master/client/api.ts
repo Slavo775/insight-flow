@@ -16,6 +16,19 @@ export async function fetchProjects(): Promise<PublicProjectEntry[]> {
 }
 
 // N244 — debug logs (N242 engine).
+export interface VersionInfo {
+  current: string;
+  latest: string | null;
+  updateAvailable: boolean;
+}
+
+// N251 — version + update-available signal for the hub toast. Never throws to
+// the caller's UI path; a failed/absent check simply yields no toast.
+export async function fetchVersion(): Promise<VersionInfo> {
+  const res = await fetch("/api/version");
+  return json<VersionInfo>(res);
+}
+
 export interface LogEntry {
   type: "error" | "warning" | "info";
   message: string;

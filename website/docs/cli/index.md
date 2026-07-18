@@ -34,7 +34,7 @@ Commands are grouped by what they do — each group has its own page:
 
 | Group | What it covers |
 |-------|----------------|
-| **[Setup & Dashboard](./setup-and-dashboard.md)** | `init`, `ui`, `master`, `help`, `version`, `bulk-*` |
+| **[Setup & Dashboard](./setup-and-dashboard.md)** | `init`, `ui`, `master`, `update`, `help`, `version`, `bulk-*` |
 | **[Tasks & Query](./tasks-and-query.md)** | `create`, `list`, `current`, `show`, `stats`, `next*`, `status`, `rename` |
 | **[Implementation](./implementation.md)** | `implement-start`, `implement-end` |
 | **[Review & Fixes](./review-and-fixes.md)** | `review-start/-end`, `fix-start/-end` |

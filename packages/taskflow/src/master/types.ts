@@ -1,6 +1,12 @@
 export interface MasterServerConfig {
   port?: number;
   standalone?: boolean;
+  /**
+   * N251 — the hub's npm update check. When `enabled` is false the master never
+   * calls the npm registry and `/api/version` returns `latest: null` (no toast).
+   * `intervalHours` throttles the registry lookup (cached in-process).
+   */
+  updateCheck?: { enabled?: boolean; intervalHours?: number };
 }
 
 /**

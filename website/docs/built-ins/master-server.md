@@ -65,6 +65,11 @@ feed, and a live Claude-status badge. A section hides itself when empty. The top
 bar has **`↻ Refresh`** (re-probe liveness), **`+ New project`**, and a **`⚙`**
 settings popover for notification toggles.
 
+When a newer version is published to npm, the overview shows a dismissible
+**"update available" toast/banner** (backed by [`GET /api/version`](#endpoints)).
+Dismissal is remembered per-version in `localStorage`, so it won't nag again for
+the same release.
+
 When you open a project through the hub, a floating **`⌂ Hub`** link is injected
 into the page so you can jump back to the switcher.
 
@@ -247,8 +252,9 @@ falls back to defaults).
 
 | Key          | Type               | Default | Controls                                                                                       |
 | ------------ | ------------------ | ------- | ---------------------------------------------------------------------------------------------- |
-| `port`       | `number` (1–65535) | `6100`  | Port the hub listens on.                                                                        |
-| `standalone` | `boolean`          | `false` | When `true`, the hub rejects project registration (`POST /api/register` → `503`) — view-only.  |
+| `port`         | `number` (1–65535) | `6100`                            | Port the hub listens on.                                                                        |
+| `standalone`   | `boolean`          | `false`                           | When `true`, the hub rejects project registration (`POST /api/register` → `503`) — view-only.  |
+| `updateCheck`  | `object`           | `{ enabled: true, intervalHours: 12 }` | `{ enabled?: boolean; intervalHours?: number }` — controls the npm update check behind `/api/version`. When `enabled: false` the hub makes **no** npm call and `/api/version` returns `latest: null`. |
 
 The CLI flag `--port` overrides `port` per invocation. A project points at a hub
 via its own `taskflow.config.json` `master` key (`url`, `port`, `standalone`,
@@ -324,6 +330,7 @@ unknown path returns `404`.
 | `GET` | `/api/activity/:projectId` | Last 3 activity events | — |
 | `GET` | `/api/fs/list?dir=` | New-project folder browser (response includes `hasGit` for the listed dir) | trusted-action |
 | `POST` | `/api/projects/create` | Init + register a project — accepts optional `location: "in-folder" \| "subfolder"` (default `"in-folder"`, in-place) and `gitIgnore: "shared" \| "local"`; re-initing an already-initialized folder returns **409 "already initialized"** | trusted-action |
+| `GET` | `/api/version` | Update check → `{ current, latest, updateAvailable }` (`current` = hub version, `latest` = npm `latest` dist-tag cached ~12h / `null` on failure, `updateAvailable` = `latest > current`) | trusted (403 otherwise) |
 | `GET` | `/api/hub/projects` | Project list (client-safe views) | trusted |
 | `GET` | `/api/hub/live?id&token` | Liveness stream | per-project token |
 | `POST` | `/api/hub/refresh` | On-demand health probe | trusted |
