@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.11.0](https://github.com/Slavo775/insight-flow/compare/v2.10.0...v2.11.0) (2026-07-18)
+
+
+### Features
+
+* **master:** update-available toast + insight-flow update CLI (N251) ([#166](https://github.com/Slavo775/insight-flow/issues/166)) ([7f5742c](https://github.com/Slavo775/insight-flow/commit/7f5742c007e6cd187c83c8e43b841d1c8e903d17))
+
 ## [2.10.0](https://github.com/Slavo775/insight-flow/compare/v2.9.0...v2.10.0) (2026-07-17)
 
 
