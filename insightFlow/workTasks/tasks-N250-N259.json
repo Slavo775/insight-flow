@@ -250,7 +250,7 @@
       "title": "Delete confirmed dead code across dashboard-server, UI, agents, master",
       "type": "chore",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N253-delete-confirmed-dead-code-across-dashboard-server",
       "createdAt": "2026-07-18T14:10:11.292Z",
       "statusHistory": [
@@ -293,6 +293,16 @@
           "status": "approved",
           "at": "2026-07-20T09:25:19.170Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-20T09:29:49.551Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-20T09:29:49.697Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -312,8 +322,8 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-20T09:29:49.700Z",
+      "totalDurationMinutes": 2600,
       "tags": [
         "dead-code",
         "cleanup"
@@ -327,7 +337,7 @@
       ],
       "branch": "refactor/N253-N256-code-audit-cleanup",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
-      "mergedAt": null,
+      "mergedAt": "2026-07-20T09:29:49.557Z",
       "flowId": "default"
     },
     {
@@ -335,7 +345,7 @@
       "title": "Extract shared http-util and unify both Node servers onto it",
       "type": "refactor",
       "priority": "high",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N254-extract-shared-http-util-and-unify-both-node-serve",
       "createdAt": "2026-07-18T14:10:11.442Z",
       "statusHistory": [
@@ -378,6 +388,16 @@
           "status": "approved",
           "at": "2026-07-20T09:25:19.315Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-20T09:29:49.830Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-20T09:29:49.963Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -399,8 +419,8 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-20T09:29:49.966Z",
+      "totalDurationMinutes": 2600,
       "tags": [
         "refactor",
         "dedup",
@@ -415,7 +435,7 @@
       ],
       "branch": "refactor/N253-N256-code-audit-cleanup",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
-      "mergedAt": null,
+      "mergedAt": "2026-07-20T09:29:49.834Z",
       "flowId": "default"
     },
     {
@@ -423,7 +443,7 @@
       "title": "Deduplicate UI form components and agent hook installers; activity.ts to JSX",
       "type": "refactor",
       "priority": "medium",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N255-deduplicate-ui-form-components-and-agent-hook-inst",
       "createdAt": "2026-07-18T14:10:11.583Z",
       "statusHistory": [
@@ -486,6 +506,16 @@
           "status": "approved",
           "at": "2026-07-20T09:25:19.453Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-20T09:29:50.092Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-20T09:29:50.226Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -509,8 +539,8 @@
       "reviewCount": 3,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-20T09:29:50.229Z",
+      "totalDurationMinutes": 2600,
       "tags": [
         "refactor",
         "dedup",
@@ -525,7 +555,7 @@
       ],
       "branch": "refactor/N253-N256-code-audit-cleanup",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
-      "mergedAt": null,
+      "mergedAt": "2026-07-20T09:29:50.095Z",
       "flowId": "default"
     },
     {
@@ -533,7 +563,7 @@
       "title": "Trim agent role-prompt token waste via JSON modules + fix template sync",
       "type": "refactor",
       "priority": "low",
-      "status": "approved",
+      "status": "done",
       "folder": "insightFlow/workTasks/N256-trim-agent-role-prompt-token-waste-via-json-module",
       "createdAt": "2026-07-18T14:10:11.722Z",
       "statusHistory": [
@@ -576,6 +606,16 @@
           "status": "approved",
           "at": "2026-07-20T09:25:19.597Z",
           "by": "task-human-review"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-20T09:29:50.365Z",
+          "by": "task-git"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-20T09:29:50.507Z",
+          "by": "git-agent"
         }
       ],
       "implementation": {
@@ -593,8 +633,8 @@
       "reviewCount": 2,
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
-      "committedAt": null,
-      "totalDurationMinutes": null,
+      "committedAt": "2026-07-20T09:29:50.510Z",
+      "totalDurationMinutes": 2600,
       "tags": [
         "prompt",
         "tokens"
@@ -608,7 +648,7 @@
       ],
       "branch": "refactor/N253-N256-code-audit-cleanup",
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
-      "mergedAt": null,
+      "mergedAt": "2026-07-20T09:29:50.369Z",
       "flowId": "default"
     }
   ]
