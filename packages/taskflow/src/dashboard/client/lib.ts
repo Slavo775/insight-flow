@@ -125,9 +125,7 @@ export function formatTime(iso?: string | null): string {
   });
 }
 
-export const SEVERITY_CLASS: Record<string, string> = {
-  critical: "severity-critical",
-  high: "severity-high",
-  medium: "severity-medium",
-  low: "severity-low",
-};
+/** Whole minutes between two ISO timestamps (N255 — was inlined twice in DetailPanel). */
+export function minutesBetween(start: string, end: string): number {
+  return Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000);
+}

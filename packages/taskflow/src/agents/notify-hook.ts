@@ -1,9 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const NOTIFY_HOOK_REL_PATH = ".claude/hooks/taskflow-notify.sh";
-const SETTINGS_CANDIDATES = [".claude/settings.local.json", ".claude/settings.json"];
-
 // Stop hook: fires OS notification and browser agent-done signal when Claude finishes a turn.
 // Uses insight-flow current to detect the active task and its status.
 // Always exits 0 — never blocks Claude from stopping.
@@ -55,56 +52,6 @@ curl -sf -X POST "http://localhost:\${SERVER_PORT}/api/agent-done" >/dev/null 2>
 
 exit 0
 `;
-
-export type NotifyHookStatus = "ok" | "hook-missing" | "settings-missing" | "both-missing";
-
-function hookFilePath(cwd: string): string {
-  return resolve(cwd, NOTIFY_HOOK_REL_PATH);
-}
-
-function settingsRegistersHook(cwd: string): boolean {
-  for (const rel of SETTINGS_CANDIDATES) {
-    const path = resolve(cwd, rel);
-    if (!existsSync(path)) continue;
-    let raw: string;
-    try {
-      raw = readFileSync(path, "utf-8");
-    } catch {
-      continue;
-    }
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      continue;
-    }
-    const hooks = parsed.hooks as Record<string, unknown> | undefined;
-    const stop = hooks?.Stop as Array<Record<string, unknown>> | undefined;
-    if (!Array.isArray(stop)) continue;
-    const found = stop.some((entry) => {
-      if (!entry || typeof entry !== "object") return false;
-      const cmd = (entry.command as string) || "";
-      if (cmd.includes("taskflow-notify.sh")) return true;
-      const inner = (entry.hooks as Array<Record<string, unknown>>) || [];
-      return inner.some(
-        (h) =>
-          typeof (h?.command as string | undefined) === "string" &&
-          (h.command as string).includes("taskflow-notify.sh"),
-      );
-    });
-    if (found) return true;
-  }
-  return false;
-}
-
-export function detectNotifyHookStatus(cwd: string): NotifyHookStatus {
-  const hookExists = existsSync(hookFilePath(cwd));
-  const settingsOk = settingsRegistersHook(cwd);
-  if (hookExists && settingsOk) return "ok";
-  if (!hookExists && !settingsOk) return "both-missing";
-  if (!hookExists) return "hook-missing";
-  return "settings-missing";
-}
 
 export interface InstallNotifyHookResult {
   hookWritten: boolean;

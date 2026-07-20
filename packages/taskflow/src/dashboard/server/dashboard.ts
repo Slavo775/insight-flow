@@ -1,4 +1,5 @@
 import type { TaskflowConfig } from "../../core/types.js";
+import { escHtml } from "../../core/http-util.js";
 
 const NAV_CSS = `    .top-nav { position: sticky; top: -24px; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; margin: -24px -24px 24px -24px; }
     .nav-project { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
@@ -35,14 +36,6 @@ ${NAV_CSS}`;
 
 export function getNavCss(): string {
   return NAV_CSS;
-}
-
-function escHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 export function getNavHtml(

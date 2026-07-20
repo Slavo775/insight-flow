@@ -2,7 +2,7 @@
 // alongside this index; consumers import from "../components/index.js".
 export { Button } from "./Button.js";
 export type { ButtonVariant } from "./Button.js";
-export { Badge, statusTone } from "./Badge.js";
+export { Badge } from "./Badge.js";
 export { Severity } from "./Severity.js";
 export { Card, CardId, CardTitle, CardMeta } from "./Card.js";
 export { Chip } from "./Chip.js";

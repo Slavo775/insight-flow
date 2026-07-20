@@ -5,6 +5,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { Field, FieldError, TopError } from "./components/form.js";
 import { fetchProject, saveDefinition, slugifyIdTail } from "./api.js";
 import { Button, Section } from "./components/index.js";
 import { SideLayout } from "./components/SideLayout.js";
@@ -19,42 +20,12 @@ const FormBox = styled.form`
   gap: ${(p) => p.theme.space.lg};
 `;
 
-const Field = styled.label`
-  display: flex;
-  flex-direction: column;
-  gap: ${(p) => p.theme.space.sm};
-  font-size: ${(p) => p.theme.font.size.sm};
-  color: ${(p) => p.theme.color.textMuted};
-
-  input {
-    background: ${(p) => p.theme.color.bg};
-    color: ${(p) => p.theme.color.text};
-    border: 1px solid ${(p) => p.theme.color.border};
-    border-radius: ${(p) => p.theme.radius.lg};
-    padding: ${(p) => p.theme.space.md};
-    font-family: ${(p) => p.theme.font.family};
-    font-size: ${(p) => p.theme.font.size.md};
-  }
-`;
-
 const CheckRow = styled.label`
   display: flex;
   align-items: center;
   gap: ${(p) => p.theme.space.md};
   font-size: ${(p) => p.theme.font.size.sm};
   color: ${(p) => p.theme.color.text};
-`;
-
-const FieldError = styled.span`
-  color: ${(p) => p.theme.color.red};
-  font-size: ${(p) => p.theme.font.size.xs};
-`;
-
-const TopError = styled.div`
-  border: 1px solid ${(p) => p.theme.color.red};
-  border-radius: ${(p) => p.theme.radius.lg};
-  padding: ${(p) => p.theme.space.md};
-  font-size: ${(p) => p.theme.font.size.sm};
 `;
 
 // N113 — the agent multi-select (custom path only).

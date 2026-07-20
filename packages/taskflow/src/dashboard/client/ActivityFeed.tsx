@@ -1,10 +1,6 @@
 import type { ActivityEvent, HookStatus } from "./activity.js";
-import {
-  activityEmptyStateMessage,
-  itemBackground,
-  renderActivityItemHtml,
-  shouldShowEvent,
-} from "./activity.js";
+import { activityEmptyStateMessage, itemBackground, shouldShowEvent } from "./activity.js";
+import { ActivityItem } from "./ActivityItem.js";
 
 function EmptyState({ hookStatus }: { hookStatus: HookStatus }) {
   const msg = activityEmptyStateMessage(hookStatus);
@@ -40,12 +36,9 @@ export function ActivityFeed({
   return (
     <div className="activity-feed" id="activity-feed">
       {visible.map((ev, i) => (
-        <div
-          className="act-item"
-          key={ev.id || i}
-          style={itemBackground(ev)}
-          dangerouslySetInnerHTML={{ __html: renderActivityItemHtml(ev) }}
-        />
+        <div className="act-item" key={ev.id || i} style={itemBackground(ev)}>
+          <ActivityItem ev={ev} />
+        </div>
       ))}
     </div>
   );

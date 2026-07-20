@@ -26,6 +26,8 @@ import { readHubRegistry, assignHubPort } from "../core/global-config.js";
 import { resolvePackageAsset } from "../core/paths.js";
 import { appendLog, readMerged, countByLevel } from "../core/log-store.js";
 import { LogInputSchema } from "../core/schema/index.js";
+import { SseTransport } from "../core/transport.js";
+import { sendJson, readBody, escHtml, serveStaticFile, MIME_HTML } from "../core/http-util.js";
 
 /**
  * N242 — the shared debug-log write path. Resolves the project from the log key
@@ -40,11 +42,6 @@ export function recordLog(key: string, log: unknown): "ok" | "bad-key" | "bad-bo
   if (!parsed.success) return "bad-body";
   appendLog({ ...parsed.data, timestamp: new Date().toISOString(), projectName });
   return "ok";
-}
-
-/** N210 — where "New project" scaffolds live, so a non-coder never picks a path. */
-export function projectsHomeRoot(): string {
-  return process.env.INSIGHT_FLOW_PROJECTS_HOME || resolve(homedir(), "insight-flow-projects");
 }
 
 /**
@@ -155,9 +152,6 @@ function ignoreProjectFolder(repoRoot: string, rules: string[], mode: "shared" |
   return true;
 }
 
-const MIME_JSON = "application/json; charset=utf-8";
-const MIME_HTML = "text/html; charset=utf-8";
-
 // N228 — time-to-first-byte ceiling for a proxied request. A healthy project
 // answers in ~1ms even under load, so 15s only ever fires on a wedged / half-
 // open / stale-port upstream — turning a multi-minute hang into a fast 504 +
@@ -177,17 +171,6 @@ const MASTER_SOUNDS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "soun
  */
 const MASTER_CLIENT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "master");
 const MASTER_ASSETS_DIR = resolve(MASTER_CLIENT_DIR, "assets");
-const MASTER_ASSET_MIME: Record<string, string> = {
-  ".js": "text/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".svg": "image/svg+xml; charset=utf-8",
-  ".ico": "image/x-icon",
-  ".json": "application/json; charset=utf-8",
-  ".map": "application/json; charset=utf-8",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-  ".ttf": "font/ttf",
-};
 
 // The shell rarely changes (only on a rebuild → server restart), so read + patch
 // it once. `/hub-notify.js` (the shared notification client, N225) is injected
@@ -350,24 +333,13 @@ const ICON_MASKABLE_SVG =
   '<circle cx="336" cy="352" r="44" fill="#a855f7"/>' +
   "</g></svg>";
 
-function readBody(req: IncomingMessage): Promise<string> {
-  return new Promise((resolve) => {
-    let body = "";
-    req.on("data", (chunk: Buffer) => {
-      body += chunk.toString();
-    });
-    req.on("end", () => resolve(body));
-    req.on("error", () => resolve(""));
-  });
-}
-
 /**
  * N212 — a project dashboard always runs locally, so the proxy only ever targets
  * loopback. Refusing anything else keeps the master (which binds all interfaces
  * and whose `/api/register` is open) from being turned into an SSRF / open proxy
  * to arbitrary registrant-supplied URLs.
  */
-const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 /** True if the host is loopback. Shared by the proxy (N212) and the health
  *  probe (N214) so a registrant-controlled url can never point either at a
@@ -543,14 +515,6 @@ function hubErrorPage(heading: string, detail: string): string {
   );
 }
 
-function escapeHtmlAttr(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
 /**
  * N218/N220 — respond when a project path can't be proxied: a friendly HTML page
  * for a browser navigation, JSON otherwise. `entry` present but with no live url
@@ -576,8 +540,7 @@ function respondNoProject(
           ),
     );
   } else {
-    res.writeHead(404, { "Content-Type": MIME_JSON });
-    res.end(JSON.stringify({ error: `No registered project '${pid}'` }));
+    sendJson(res, 404, { error: `No registered project '${pid}'` });
   }
 }
 
@@ -605,14 +568,12 @@ function proxyToProject(
   try {
     target = new URL(rest || "/", targetBase);
   } catch {
-    res.writeHead(502, { "Content-Type": MIME_JSON });
-    res.end(JSON.stringify({ error: "bad proxy target" }));
+    sendJson(res, 502, { error: "bad proxy target" });
     return;
   }
   // SSRF guard: only ever proxy to a local dashboard (see LOOPBACK_HOSTS note).
   if (!isLoopbackHost(target.hostname)) {
-    res.writeHead(403, { "Content-Type": MIME_JSON });
-    res.end(JSON.stringify({ error: "proxy target must be loopback" }));
+    sendJson(res, 403, { error: "proxy target must be loopback" });
     return;
   }
   const headers = stripHopByHop({ ...req.headers });
@@ -686,7 +647,7 @@ function proxyToProject(
           html = html.replace(/(["'(])\/assets\//g, `$1${prefix}/assets/`);
           // Escape the prefix into both sinks: HTML-attr escaping for <base>,
           // and < so a `</script>` in the prefix can't break out of the tag.
-          const baseHref = escapeHtmlAttr(prefix + "/");
+          const baseHref = escHtml(prefix + "/");
           const baseJs = JSON.stringify(prefix + "/").replace(/</g, "\\u003c");
           const hook = `<base href="${baseHref}"><script>window.__IF_BASE__=${baseJs}</script>`;
           html = html.includes("<head>") ? html.replace("<head>", `<head>${hook}`) : hook + html;
@@ -735,14 +696,11 @@ function proxyToProject(
           ),
         );
       } else {
-        res.writeHead(status, { "Content-Type": MIME_JSON });
-        res.end(
-          JSON.stringify({
-            error:
-              (timedOut ? "proxy target timed out: " : "proxy target unreachable: ") +
-              (err as Error).message,
-          }),
-        );
+        sendJson(res, status, {
+          error:
+            (timedOut ? "proxy target timed out: " : "proxy target unreachable: ") +
+            (err as Error).message,
+        });
       }
     } else {
       res.end();
@@ -817,23 +775,14 @@ export async function startMasterServer(
 ): Promise<{ close(): void }> {
   const server = createServer();
 
-  // N83: native Server-Sent Events (replaced socket.io). Overview clients
-  // subscribe with EventSource('/events'); project-update frames broadcast here.
-  const sseClients = new Set<ServerResponse>();
+  // N83 → N254: native SSE via the shared SseTransport (replaced socket.io, then
+  // the hand-rolled copy). Overview clients subscribe with EventSource('/events');
+  // project-update frames broadcast via transport.emit.
+  const transport = new SseTransport({ path: "/events" });
 
   // N220 review-fix — ids with a spawn in flight, so a second /start (e.g. from a
   // double-click) doesn't launch a second dashboard process for the same project.
   const startingProjects = new Set<string>();
-  function broadcast(event: string, payload: unknown): void {
-    const frame = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
-    for (const client of sseClients) {
-      try {
-        client.write(frame);
-      } catch {
-        /* stream gone */
-      }
-    }
-  }
 
   // N228 — probe one project's /health (short timeout, loopback-only) and record
   // the result in the registry. Shared by the on-demand refresh sweep and the
@@ -893,8 +842,7 @@ export async function startMasterServer(
         // proxy would let a LAN peer reach them from the master's own loopback
         // socket, defeating the gate. They are never meant for a browser.
         if (restPath === "/hub" || restPath.startsWith("/hub/")) {
-          res.writeHead(404, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Not found" }));
+          sendJson(res, 404, { error: "Not found" });
           return;
         }
         const entry = registry.getByProjectId(pid) ?? registry.getById(pid);
@@ -915,7 +863,7 @@ export async function startMasterServer(
             void probeProjectHealth(entry)
               .then(() => {
                 const updated = registry.getById(entry.id);
-                if (updated) broadcast("project-update", registry.toPublicView(updated));
+                if (updated) transport.emit("project-update", registry.toPublicView(updated));
               })
               .catch(() => {
                 /* self-heal is best-effort; never surface as an unhandled rejection */
@@ -935,8 +883,7 @@ export async function startMasterServer(
         // Never redirect (or reveal) control-plane routes — mirror the /project/
         // guard so `/p/<id>/hub/*` 404s directly instead of 301-hopping to it.
         if (restPath === "/hub" || restPath.startsWith("/hub/")) {
-          res.writeHead(404, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Not found" }));
+          sendJson(res, 404, { error: "Not found" });
           return;
         }
         const entry = registry.getById(pid) ?? registry.getByProjectId(pid);
@@ -969,35 +916,12 @@ export async function startMasterServer(
         const latest =
           uc.enabled === false ? null : await fetchLatestVersion(uc.intervalHours ?? 12);
         const updateAvailable = latest != null && semverGt(latest, current);
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ current, latest, updateAvailable }));
+        sendJson(res, 200, { current, latest, updateAvailable });
         return;
       }
 
-      // GET /events — SSE stream for overview clients (N83, replaced socket.io).
-      if (req.method === "GET" && url.pathname === "/events") {
-        res.writeHead(200, {
-          "Content-Type": "text/event-stream; charset=utf-8",
-          "Cache-Control": "no-cache, no-transform",
-          Connection: "keep-alive",
-          "Access-Control-Allow-Origin": "*",
-          "X-Accel-Buffering": "no",
-        });
-        res.write("retry: 1000\n\n");
-        sseClients.add(res);
-        const heartbeat = setInterval(() => {
-          try {
-            res.write(": ping\n\n");
-          } catch {
-            /* stream gone */
-          }
-        }, 25000);
-        req.on("close", () => {
-          clearInterval(heartbeat);
-          sseClients.delete(res);
-        });
-        return;
-      }
+      // GET /events — SSE stream for overview clients (N83 → N254: shared SseTransport).
+      if (transport.handleRequest(req, res)) return;
 
       // POST /api/register
       if (req.method === "POST" && url.pathname === "/api/register") {
@@ -1007,8 +931,7 @@ export async function startMasterServer(
         // peer can no longer inject a registrant-controlled url/path into the hub.
         const remote = req.socket.remoteAddress ?? "";
         if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "register is localhost-only" }));
+          sendJson(res, 403, { error: "register is localhost-only" });
           return;
         }
         // N221 review-fix — reject cross-origin browser POSTs (CSRF): register is
@@ -1016,22 +939,20 @@ export async function startMasterServer(
         // passes; a website POSTing here (to poison a registry url/path) is
         // refused. registry.upsert keys on caller-supplied projectId.
         if (!isTrustedLocalRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
         if (config.standalone) {
-          res.writeHead(503, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Master running in standalone mode" }));
+          sendJson(res, 503, { error: "Master running in standalone mode" });
           return;
         }
-        const body = await readBody(req);
+        const body = await readBody(req, res);
+        if (body === null) return;
         let parsed: { label?: unknown; url?: unknown; projectId?: unknown; path?: unknown };
         try {
           parsed = JSON.parse(body) as typeof parsed;
         } catch {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Invalid JSON" }));
+          sendJson(res, 400, { error: "Invalid JSON" });
           return;
         }
         const label = String(parsed.label ?? "unknown");
@@ -1053,9 +974,8 @@ export async function startMasterServer(
           data: { projectId, id },
         });
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", registry.toPublicView(entry));
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ id, token }));
+        if (entry) transport.emit("project-update", registry.toPublicView(entry));
+        sendJson(res, 200, { id, token });
         return;
       }
 
@@ -1067,32 +987,28 @@ export async function startMasterServer(
         // fs/create/start), so a non-browser LAN client can't forge Host:127.0.0.1
         // to spam/forge logs (the reserved "master" key is tokenless).
         if (!isTrustedActionRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
-        const body = await readBody(req);
+        const body = await readBody(req, res);
+        if (body === null) return;
         let parsed: { key?: unknown; log?: unknown };
         try {
           parsed = JSON.parse(body) as typeof parsed;
         } catch {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Invalid JSON" }));
+          sendJson(res, 400, { error: "Invalid JSON" });
           return;
         }
         const result = recordLog(String(parsed.key ?? ""), parsed.log);
         if (result === "bad-key") {
-          res.writeHead(401, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "unknown log key" }));
+          sendJson(res, 401, { error: "unknown log key" });
           return;
         }
         if (result === "bad-body") {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "invalid log (type/message required)" }));
+          sendJson(res, 400, { error: "invalid log (type/message required)" });
           return;
         }
-        res.writeHead(202, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ ok: true }));
+        sendJson(res, 202, { ok: true });
         return;
       }
 
@@ -1101,8 +1017,7 @@ export async function startMasterServer(
       // ?project=<name>|master|all (default all) &type=error|warning|info &page= &pageSize=
       if (req.method === "GET" && url.pathname === "/api/logs") {
         if (!isTrustedLocalRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
         const project = url.searchParams.get("project") || "all";
@@ -1121,16 +1036,13 @@ export async function startMasterServer(
         const merged = readMerged({ project, type, search });
         const counts = countByLevel({ project, search });
         const start = (page - 1) * pageSize;
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(
-          JSON.stringify({
-            total: merged.length,
-            page,
-            pageSize,
-            counts,
-            logs: merged.slice(start, start + pageSize),
-          }),
-        );
+        sendJson(res, 200, {
+          total: merged.length,
+          page,
+          pageSize,
+          counts,
+          logs: merged.slice(start, start + pageSize),
+        });
         return;
       }
 
@@ -1139,29 +1051,26 @@ export async function startMasterServer(
       if (req.method === "POST" && updateMatch) {
         const id = updateMatch[1];
         if (!registry.verifyToken(id, url.searchParams.get("token") ?? undefined)) {
-          res.writeHead(401, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Unknown project id or bad token" }));
+          sendJson(res, 401, { error: "Unknown project id or bad token" });
           return;
         }
-        const body = await readBody(req);
+        const body = await readBody(req, res);
+        if (body === null) return;
         let state: MasterProjectState;
         try {
           state = JSON.parse(body) as MasterProjectState;
         } catch {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Invalid JSON" }));
+          sendJson(res, 400, { error: "Invalid JSON" });
           return;
         }
         const ok = registry.update(id, state);
         if (!ok) {
-          res.writeHead(401, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Unknown project id" }));
+          sendJson(res, 401, { error: "Unknown project id" });
           return;
         }
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", registry.toPublicView(entry));
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ ok: true }));
+        if (entry) transport.emit("project-update", registry.toPublicView(entry));
+        sendJson(res, 200, { ok: true });
         return;
       }
 
@@ -1170,17 +1079,16 @@ export async function startMasterServer(
       if (req.method === "POST" && statusMatch) {
         const id = statusMatch[1];
         if (!registry.verifyToken(id, url.searchParams.get("token") ?? undefined)) {
-          res.writeHead(401, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Unknown project id or bad token" }));
+          sendJson(res, 401, { error: "Unknown project id or bad token" });
           return;
         }
-        const body = await readBody(req);
+        const body = await readBody(req, res);
+        if (body === null) return;
         let parsed: { status?: unknown };
         try {
           parsed = JSON.parse(body) as { status?: unknown };
         } catch {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Invalid JSON" }));
+          sendJson(res, 400, { error: "Invalid JSON" });
           return;
         }
         const status = String(parsed.status ?? "");
@@ -1194,23 +1102,18 @@ export async function startMasterServer(
             "awaiting-permission",
           ];
           if (!validStatuses.includes(status)) {
-            res.writeHead(400, { "Content-Type": MIME_JSON });
-            res.end(
-              JSON.stringify({
-                error:
-                  "Invalid status; expected active|idle|done|permission-required|awaiting-permission",
-              }),
-            );
+            sendJson(res, 400, {
+              error:
+                "Invalid status; expected active|idle|done|permission-required|awaiting-permission",
+            });
           } else {
-            res.writeHead(401, { "Content-Type": MIME_JSON });
-            res.end(JSON.stringify({ error: "Unknown project id" }));
+            sendJson(res, 401, { error: "Unknown project id" });
           }
           return;
         }
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", registry.toPublicView(entry));
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ ok: true }));
+        if (entry) transport.emit("project-update", registry.toPublicView(entry));
+        sendJson(res, 200, { ok: true });
         return;
       }
 
@@ -1220,13 +1123,11 @@ export async function startMasterServer(
         const id = activityMatch[1];
         const entry = registry.getById(id);
         if (!entry) {
-          res.writeHead(404, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Unknown project id" }));
+          sendJson(res, 404, { error: "Unknown project id" });
           return;
         }
         const events = (entry.state.recentActivity ?? []).slice(-3);
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ project: entry.label, events }));
+        sendJson(res, 200, { project: entry.label, events });
         return;
       }
 
@@ -1244,18 +1145,14 @@ export async function startMasterServer(
         // only accepted for an explicitly-allowlisted host (a forged loopback Host
         // from the LAN is rejected; env unset ⇒ localhost-only for all clients).
         if (!isTrustedActionRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
         const root = browseRoot();
         const requested = url.searchParams.get("dir") || root;
         const real = realDirWithinRoot(requested, root);
         if (!real) {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(
-            JSON.stringify({ error: "Folder is outside the allowed root or does not exist" }),
-          );
+          sendJson(res, 400, { error: "Folder is outside the allowed root or does not exist" });
           return;
         }
         let entries: { name: string; isDir: true }[];
@@ -1278,8 +1175,7 @@ export async function startMasterServer(
             .map((d) => ({ name: d.name, isDir: true as const }))
             .sort((a, b) => a.name.localeCompare(b.name));
         } catch {
-          res.writeHead(500, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Could not read folder" }));
+          sendJson(res, 500, { error: "Could not read folder" });
           return;
         }
         const realRoot = realpathSync(root);
@@ -1287,8 +1183,7 @@ export async function startMasterServer(
         // N233 — is this folder itself a git repo root? Drives the New-project
         // modal's gitignore options (shallow: `.git` directly here, no walking up).
         const hasGit = existsSync(resolve(real, ".git"));
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ dir: real, root: realRoot, parent, entries, hasGit }));
+        sendJson(res, 200, { dir: real, root: realRoot, parent, entries, hasGit });
         return;
       }
 
@@ -1306,11 +1201,11 @@ export async function startMasterServer(
         // adds a peer-IP guard: a non-loopback client is only accepted for an
         // explicitly-allowlisted host (env unset ⇒ localhost-only for all clients).
         if (!isTrustedActionRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
-        const body = await readBody(req);
+        const body = await readBody(req, res);
+        if (body === null) return;
         let parsed: {
           name?: unknown;
           dir?: unknown;
@@ -1325,14 +1220,12 @@ export async function startMasterServer(
         try {
           parsed = JSON.parse(body) as typeof parsed;
         } catch {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Invalid JSON" }));
+          sendJson(res, 400, { error: "Invalid JSON" });
           return;
         }
         const name = String(parsed.name ?? "").trim();
         if (!name || !/^[A-Za-z0-9 _-]{1,60}$/.test(name)) {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Invalid name (use letters, numbers, spaces, _ or -)" }));
+          sendJson(res, 400, { error: "Invalid name (use letters, numbers, spaces, _ or -)" });
           return;
         }
         // N221 — the chosen parent folder (from the browser); default the browse
@@ -1341,10 +1234,7 @@ export async function startMasterServer(
         const chosenDir = typeof parsed.dir === "string" && parsed.dir ? parsed.dir : root;
         const realParent = realDirWithinRoot(chosenDir, root);
         if (!realParent) {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(
-            JSON.stringify({ error: "Chosen folder is outside the allowed root or missing" }),
-          );
+          sendJson(res, 400, { error: "Chosen folder is outside the allowed root or missing" });
           return;
         }
         // N236 — init in the selected folder (default), or in a new subfolder
@@ -1358,15 +1248,13 @@ export async function startMasterServer(
         // fs root, so normalize the prefix (handles INSIGHT_FLOW_BROWSE_ROOT=/).
         const parentPrefix = realParent.endsWith(sep) ? realParent : realParent + sep;
         if (!inPlace && !dir.startsWith(parentPrefix)) {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Resolved path escapes the chosen folder" }));
+          sendJson(res, 400, { error: "Resolved path escapes the chosen folder" });
           return;
         }
         if (existsSync(resolve(dir, "taskflow.config.json"))) {
-          res.writeHead(409, { "Content-Type": MIME_JSON });
-          res.end(
-            JSON.stringify({ error: `insight-flow is already initialized in this folder: ${dir}` }),
-          );
+          sendJson(res, 409, {
+            error: `insight-flow is already initialized in this folder: ${dir}`,
+          });
           return;
         }
         // N222 — install options from the modal. `editor` is validated by
@@ -1401,8 +1289,7 @@ export async function startMasterServer(
           flowErrors = result.flowErrors;
           conflicts = result.conflicts;
         } catch (err) {
-          res.writeHead(500, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: `Could not create project: ${(err as Error).message}` }));
+          sendJson(res, 500, { error: `Could not create project: ${(err as Error).message}` });
           return;
         }
         // N233 — ignore the footprint from the enclosing repo when requested and
@@ -1422,8 +1309,7 @@ export async function startMasterServer(
         }
         const { id } = registry.upsert(slug, name, "", { path: dir });
         const entry = registry.getById(id);
-        if (entry) broadcast("project-update", registry.toPublicView(entry));
-        res.writeHead(200, { "Content-Type": MIME_JSON });
+        if (entry) transport.emit("project-update", registry.toPublicView(entry));
         // N222 review-fix (blocker 1) — the project was created, but surface any
         // requested flow that failed to install (the modal shows the warning)
         // instead of reporting an unqualified success.
@@ -1434,7 +1320,7 @@ export async function startMasterServer(
             ? [`Kept your existing files (insight-flow did not overwrite): ${conflicts.join(", ")}`]
             : []),
         ];
-        res.end(JSON.stringify({ id, name, path: dir, warnings }));
+        sendJson(res, 200, { id, name, path: dir, warnings });
         return;
       }
 
@@ -1444,12 +1330,10 @@ export async function startMasterServer(
         // N221 review-fix — same-origin only; ACAO:* would otherwise let any
         // website read the project list (names + activity state).
         if (!isTrustedLocalRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ projects: registry.getAllPublic() }));
+        sendJson(res, 200, { projects: registry.getAllPublic() });
         return;
       }
 
@@ -1459,8 +1343,7 @@ export async function startMasterServer(
       if (req.method === "GET" && url.pathname === "/api/hub/live") {
         const id = url.searchParams.get("id") ?? "";
         if (!registry.verifyToken(id, url.searchParams.get("token") ?? undefined)) {
-          res.writeHead(401, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "Unknown project id or bad token" }));
+          sendJson(res, 401, { error: "Unknown project id or bad token" });
           return;
         }
         res.writeHead(200, {
@@ -1473,7 +1356,7 @@ export async function startMasterServer(
         registry.setOnline(id, true);
         {
           const entry = registry.getById(id);
-          if (entry) broadcast("project-update", registry.toPublicView(entry));
+          if (entry) transport.emit("project-update", registry.toPublicView(entry));
         }
         const heartbeat = setInterval(() => {
           try {
@@ -1486,7 +1369,7 @@ export async function startMasterServer(
           clearInterval(heartbeat);
           registry.setOnline(id, false);
           const entry = registry.getById(id);
-          if (entry) broadcast("project-update", registry.toPublicView(entry));
+          if (entry) transport.emit("project-update", registry.toPublicView(entry));
         });
         return;
       }
@@ -1499,17 +1382,15 @@ export async function startMasterServer(
         // N221 review-fix — same-origin only, so a website can't trigger the
         // health-probe sweep / read the returned list.
         if (!isTrustedLocalRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
         // SSRF guard: only probe loopback dashboards. A registrant-controlled
         // url must never make the master fetch an arbitrary (internal) host.
         const entries = registry.getAll().filter((e) => e.url && isLoopbackUrl(e.url));
         await Promise.all(entries.map((e) => probeProjectHealth(e)));
-        for (const e of registry.getAllPublic()) broadcast("project-update", e);
-        res.writeHead(200, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ projects: registry.getAllPublic() }));
+        for (const e of registry.getAllPublic()) transport.emit("project-update", e);
+        sendJson(res, 200, { projects: registry.getAllPublic() });
         return;
       }
 
@@ -1528,27 +1409,23 @@ export async function startMasterServer(
         // guard: a non-loopback client is only accepted for an explicitly-allowlisted
         // host (env unset ⇒ localhost-only for all clients).
         if (!isTrustedActionRequest(req)) {
-          res.writeHead(403, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "request refused" }));
+          sendJson(res, 403, { error: "request refused" });
           return;
         }
         const entry = registry.getById(startMatch[1]);
         if (!entry || !entry.path) {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "unknown project or no known path" }));
+          sendJson(res, 400, { error: "unknown project or no known path" });
           return;
         }
         // Already live (authoritative from the liveness signal, not a port guess).
         if (entry.online && entry.url) {
-          res.writeHead(200, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ url: entry.url, alreadyRunning: true }));
+          sendJson(res, 200, { url: entry.url, alreadyRunning: true });
           return;
         }
         // N220 review-fix — a spawn is already in flight for this project; don't
         // launch a second dashboard process (guards against a double-click).
         if (startingProjects.has(entry.id)) {
-          res.writeHead(202, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ starting: true }));
+          sendJson(res, 202, { starting: true });
           return;
         }
         // N240 — guard the SPAWN path only (after the already-running / already-
@@ -1558,8 +1435,7 @@ export async function startMasterServer(
         // emits an async `error` (ENOENT) the try/catch below CANNOT catch, and an
         // unhandled 'error' event would crash the whole master. Return 404 instead.
         if (!existsSync(entry.path)) {
-          res.writeHead(404, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "project path no longer exists" }));
+          sendJson(res, 404, { error: "project path no longer exists" });
           return;
         }
         startingProjects.add(entry.id);
@@ -1586,8 +1462,7 @@ export async function startMasterServer(
             });
             child.unref();
           } catch (err) {
-            res.writeHead(500, { "Content-Type": MIME_JSON });
-            res.end(JSON.stringify({ error: `Could not start: ${(err as Error).message}` }));
+            sendJson(res, 500, { error: `Could not start: ${(err as Error).message}` });
             return;
           }
           // Wait for the dashboard to actually REGISTER with the hub (reconcile by
@@ -1600,16 +1475,12 @@ export async function startMasterServer(
             live = registry.getById(entry.id);
           }
           if (!live || !live.online || !live.url) {
-            res.writeHead(504, { "Content-Type": MIME_JSON });
-            res.end(
-              JSON.stringify({
-                error: "project started but did not register with the hub in time",
-              }),
-            );
+            sendJson(res, 504, {
+              error: "project started but did not register with the hub in time",
+            });
             return;
           }
-          res.writeHead(200, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ url: live.url }));
+          sendJson(res, 200, { url: live.url });
           return;
         } finally {
           startingProjects.delete(entry.id);
@@ -1667,19 +1538,15 @@ export async function startMasterServer(
       if (req.method === "GET" && url.pathname.startsWith("/sounds/")) {
         const file = url.pathname.slice("/sounds/".length);
         if (!file || file.includes("..") || file.includes("/") || !file.endsWith(".mp3")) {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "bad sound" }));
+          sendJson(res, 400, { error: "bad sound" });
           return;
         }
         const soundPath = resolve(MASTER_SOUNDS_DIR, file);
         if (!soundPath.startsWith(MASTER_SOUNDS_DIR + sep) || !existsSync(soundPath)) {
-          res.writeHead(404, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "not found" }));
+          sendJson(res, 404, { error: "not found" });
           return;
         }
-        const data = readFileSync(soundPath);
-        res.writeHead(200, { "Content-Type": "audio/mpeg", "Content-Length": String(data.length) });
-        res.end(data);
+        serveStaticFile(res, soundPath);
         return;
       }
 
@@ -1688,24 +1555,15 @@ export async function startMasterServer(
       if (req.method === "GET" && url.pathname.startsWith("/assets/")) {
         const rel = url.pathname.slice("/assets/".length);
         if (!rel || rel.includes("..") || rel.includes("/")) {
-          res.writeHead(400, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "bad asset" }));
+          sendJson(res, 400, { error: "bad asset" });
           return;
         }
         const assetPath = resolve(MASTER_ASSETS_DIR, rel);
         if (!assetPath.startsWith(MASTER_ASSETS_DIR + sep) || !existsSync(assetPath)) {
-          res.writeHead(404, { "Content-Type": MIME_JSON });
-          res.end(JSON.stringify({ error: "not found" }));
+          sendJson(res, 404, { error: "not found" });
           return;
         }
-        const ext = assetPath.slice(assetPath.lastIndexOf("."));
-        const data = readFileSync(assetPath);
-        res.writeHead(200, {
-          "Content-Type": MASTER_ASSET_MIME[ext] ?? "application/octet-stream",
-          "Content-Length": String(data.length),
-          "Cache-Control": "public, max-age=31536000, immutable",
-        });
-        res.end(data);
+        serveStaticFile(res, assetPath, "public, max-age=31536000, immutable");
         return;
       }
 
@@ -1722,12 +1580,10 @@ export async function startMasterServer(
         return;
       }
 
-      res.writeHead(404, { "Content-Type": MIME_JSON });
-      res.end(JSON.stringify({ error: "Not found" }));
+      sendJson(res, 404, { error: "Not found" });
     } catch {
       if (!res.headersSent) {
-        res.writeHead(500, { "Content-Type": MIME_JSON });
-        res.end(JSON.stringify({ error: "Internal server error" }));
+        sendJson(res, 500, { error: "Internal server error" });
       }
     }
   });
@@ -1738,13 +1594,7 @@ export async function startMasterServer(
 
   return {
     close() {
-      for (const client of sseClients) {
-        try {
-          client.end();
-        } catch {
-          /* ignore */
-        }
-      }
+      transport.close();
       server.close();
     },
   };
