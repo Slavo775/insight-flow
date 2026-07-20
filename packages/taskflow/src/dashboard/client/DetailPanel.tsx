@@ -16,7 +16,7 @@ import type {
   StatusHistoryEntry,
   Task,
 } from "./lib.js";
-import { formatTime } from "./lib.js";
+import { formatTime, minutesBetween } from "./lib.js";
 import { Badge, Button, Chip, Section, Severity, Text } from "./components/index.js";
 import { useFlowStatusMap } from "./flow-columns.js";
 
@@ -90,11 +90,7 @@ function Info({ task }: { task: Task }) {
 function ImplementationView({ impl }: { impl?: Implementation }) {
   if (!impl) return <div className="empty">Not started</div>;
   const minutes =
-    impl.startedAt && impl.completedAt
-      ? Math.round(
-          (new Date(impl.completedAt).getTime() - new Date(impl.startedAt).getTime()) / 60000,
-        )
-      : null;
+    impl.startedAt && impl.completedAt ? minutesBetween(impl.startedAt, impl.completedAt) : null;
   return (
     <dl className="kv">
       <dt>Started</dt>
@@ -133,10 +129,7 @@ function ReviewItem({ review, round }: { review: Review; round: number }) {
   const verdict = review.verdict || "pending";
   const fixMinutes =
     review.fix && review.fix.startedAt && review.fix.endedAt
-      ? Math.round(
-          (new Date(review.fix.endedAt).getTime() - new Date(review.fix.startedAt).getTime()) /
-            60000,
-        )
+      ? minutesBetween(review.fix.startedAt, review.fix.endedAt)
       : null;
   return (
     <div className="item">

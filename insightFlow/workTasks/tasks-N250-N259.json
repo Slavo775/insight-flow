@@ -67,7 +67,7 @@
       "title": "Update-available toast in master hub + insight-flow update CLI",
       "type": "feat",
       "priority": "medium",
-      "status": "pushed",
+      "status": "merged",
       "folder": "insightFlow/workTasks/N251-update-available-toast-in-master-hub-insight-flow-",
       "createdAt": "2026-07-17T16:45:33.729Z",
       "statusHistory": [
@@ -130,6 +130,11 @@
           "status": "pushed",
           "at": "2026-07-18T10:33:31.086Z",
           "by": "task-git"
+        },
+        {
+          "status": "merged",
+          "at": "2026-07-18T12:30:46.205Z",
+          "by": "custom:task-release-ship"
         }
       ],
       "implementation": {
@@ -152,7 +157,7 @@
       "lastReviewVerdict": "approved",
       "openIncidentCount": 0,
       "committedAt": null,
-      "totalDurationMinutes": null,
+      "totalDurationMinutes": 1185,
       "tags": [
         "dashboard",
         "master",
@@ -168,7 +173,7 @@
       ],
       "branch": "feat/N251-update-available-toast",
       "mrUrl": null,
-      "mergedAt": null,
+      "mergedAt": "2026-07-18T12:30:46.210Z",
       "flowId": "default"
     },
     {
@@ -176,7 +181,7 @@
       "title": "Release insight-flow 2.11.0 — ship N251 update-available toast + insight-flow update CLI",
       "type": "feat",
       "priority": "medium",
-      "status": "ready-to-release",
+      "status": "done",
       "folder": "insightFlow/workTasks/N252-release-insight-flow-2-11-0-ship-n251-update-avail",
       "createdAt": "2026-07-18T10:56:17.266Z",
       "statusHistory": [
@@ -209,6 +214,16 @@
           "status": "ready-to-release",
           "at": "2026-07-18T11:21:56.558Z",
           "by": "custom:task-release-plan"
+        },
+        {
+          "status": "published",
+          "at": "2026-07-18T12:30:46.064Z",
+          "by": "custom:task-release-ship"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-18T12:35:31.764Z",
+          "by": "custom:task-release-rollout"
         }
       ],
       "implementation": {
@@ -229,6 +244,372 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "custom:release-manager"
+    },
+    {
+      "id": "N253",
+      "title": "Delete confirmed dead code across dashboard-server, UI, agents, master",
+      "type": "chore",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N253-delete-confirmed-dead-code-across-dashboard-server",
+      "createdAt": "2026-07-18T14:10:11.292Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-18T14:10:11.292Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-18T15:57:11.295Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-18T17:06:19.054Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T08:13:05.123Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T08:27:32.682Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-20T09:22:31.504Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T09:24:28.322Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T09:25:19.170Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-18T15:57:11.302Z",
+        "completedAt": "2026-07-18T17:06:19.060Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/client/lib.ts",
+          "packages/taskflow/src/dashboard/client/components/Badge.tsx",
+          "packages/taskflow/src/dashboard/client/components/index.ts",
+          "packages/taskflow/src/agents/notify-hook.ts",
+          "packages/taskflow/src/master/server.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "dead-code",
+        "cleanup"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-20T09:22:31.503Z",
+          "commitHash": "04661b3",
+          "commitMessage": "code-audit cleanup (N253–N256)"
+        }
+      ],
+      "branch": "refactor/N253-N256-code-audit-cleanup",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N254",
+      "title": "Extract shared http-util and unify both Node servers onto it",
+      "type": "refactor",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N254-extract-shared-http-util-and-unify-both-node-serve",
+      "createdAt": "2026-07-18T14:10:11.442Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-18T14:10:11.443Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-18T17:08:03.326Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-18T19:31:33.281Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T08:13:05.280Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T08:27:32.825Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-20T09:22:31.654Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T09:24:28.467Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T09:25:19.315Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-18T17:08:03.330Z",
+        "completedAt": "2026-07-18T19:31:33.288Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/http-util.ts",
+          "packages/taskflow/src/core/transport.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/server/dashboard.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/test/http-util.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "refactor",
+        "dedup",
+        "server"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-20T09:22:31.654Z",
+          "commitHash": "04661b3",
+          "commitMessage": "code-audit cleanup (N253–N256)"
+        }
+      ],
+      "branch": "refactor/N253-N256-code-audit-cleanup",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N255",
+      "title": "Deduplicate UI form components and agent hook installers; activity.ts to JSX",
+      "type": "refactor",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N255-deduplicate-ui-form-components-and-agent-hook-inst",
+      "createdAt": "2026-07-18T14:10:11.583Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-18T14:10:11.583Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-18T19:32:27.689Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-18T19:52:50.300Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T08:13:05.425Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-20T08:27:32.962Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-20T08:30:20.038Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-20T08:40:06.919Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T08:40:50.821Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T08:42:22.586Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-20T09:22:31.796Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T09:24:28.608Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T09:25:19.453Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-18T19:32:27.692Z",
+        "completedAt": "2026-07-18T19:52:50.309Z",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/client/components/form.ts",
+          "packages/taskflow/src/dashboard/client/ModuleForm.tsx",
+          "packages/taskflow/src/dashboard/client/AgentForm.tsx",
+          "packages/taskflow/src/dashboard/client/ProjectForm.tsx",
+          "packages/taskflow/src/dashboard/client/lib.ts",
+          "packages/taskflow/src/dashboard/client/DetailPanel.tsx",
+          "packages/taskflow/src/dashboard/client/activity.ts",
+          "packages/taskflow/src/dashboard/client/ActivityItem.tsx",
+          "packages/taskflow/src/dashboard/client/ActivityFeed.tsx",
+          "packages/taskflow/src/agents/emit.ts"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "refactor",
+        "dedup",
+        "ui"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-20T09:22:31.796Z",
+          "commitHash": "04661b3",
+          "commitMessage": "code-audit cleanup (N253–N256)"
+        }
+      ],
+      "branch": "refactor/N253-N256-code-audit-cleanup",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N256",
+      "title": "Trim agent role-prompt token waste via JSON modules + fix template sync",
+      "type": "refactor",
+      "priority": "low",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N256-trim-agent-role-prompt-token-waste-via-json-module",
+      "createdAt": "2026-07-18T14:10:11.722Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-18T14:10:11.722Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-18T19:53:40.022Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-20T05:50:26.888Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T08:13:05.567Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T08:27:33.111Z",
+          "by": "task-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-20T09:22:31.943Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-20T09:24:28.752Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-20T09:25:19.597Z",
+          "by": "task-human-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-18T19:53:40.028Z",
+        "completedAt": "2026-07-20T05:50:26.894Z",
+        "filesChanged": [
+          "AGENT_ENFORCEMENT.md",
+          "packages/taskflow/src/cli/commands/prompt-build.ts",
+          "packages/taskflow/src/index.ts",
+          "packages/taskflow/test/compose.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "prompt",
+        "tokens"
+      ],
+      "pushes": [
+        {
+          "at": "2026-07-20T09:22:31.943Z",
+          "commitHash": "04661b3",
+          "commitMessage": "code-audit cleanup (N253–N256)"
+        }
+      ],
+      "branch": "refactor/N253-N256-code-audit-cleanup",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/168",
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

@@ -21,7 +21,7 @@ const BADGE_TONES: Record<string, { bg: string; fg: string }> = {
   pushed: { bg: "#2a1a06", fg: "var(--orange)" },
 };
 
-export function statusTone(status: string): string {
+function statusTone(status: string): string {
   return badgeClass(status).replace("badge-", "");
 }
 

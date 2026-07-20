@@ -23,6 +23,7 @@ import {
   BUILTIN_PROJECTS,
   suggestNextSteps,
   flowRequiredInputs,
+  buildEnforcementBlock,
 } from "../dist/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -51,6 +52,15 @@ test("drift guard: composer output is byte-identical to every committed role fil
       `${file} differs from composeAgentById("${id}") — run \`prompt-build --compose --apply\` (JSON edited) or revert the hand-edit (MD edited)`,
     );
   }
+});
+
+test("drift guard: AGENT_ENFORCEMENT.md is byte-identical to buildEnforcementBlock() (N256)", () => {
+  const committed = readFileSync(resolve(repoRoot, "AGENT_ENFORCEMENT.md"), "utf-8");
+  assert.equal(
+    committed,
+    buildEnforcementBlock() + "\n",
+    "AGENT_ENFORCEMENT.md differs from its generator — run `prompt-build --apply`, never hand-edit the MD",
+  );
 });
 
 test("N168: git is separated from the shared enforcement include into task-git only", () => {

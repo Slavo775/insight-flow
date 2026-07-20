@@ -1,18 +1,11 @@
 import { createServer, get as httpGet, type IncomingMessage, type ServerResponse } from "node:http";
-import {
-  readFileSync,
-  unlinkSync,
-  existsSync,
-  readdirSync,
-  statSync,
-  watch,
-  type FSWatcher,
-} from "node:fs";
+import { readFileSync, unlinkSync, existsSync, readdirSync, watch, type FSWatcher } from "node:fs";
 import { normalize, resolve, sep, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
-import { SseTransport, type Transport } from "./transport.js";
+import { SseTransport, type Transport } from "../../core/transport.js";
+import { sendJson, readBody, serveStaticFile, MIME } from "../../core/http-util.js";
 import type { TaskflowConfig, HookEventInput, ActivityEvent } from "../../core/types.js";
 import { getWorkDir, setDefaultFlow } from "../../core/config.js";
 import { claudeStatusFromProjectStatus } from "../../core/activity-status.js";
@@ -96,18 +89,6 @@ function mergedView(): {
     };
   }
 }
-
-const MIME: Record<string, string> = {
-  ".html": "text/html; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".mp3": "audio/mpeg",
-  // N85: assets emitted by the Vite dashboard build (dist/dashboard).
-  ".js": "text/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".woff2": "font/woff2",
-  ".ico": "image/x-icon",
-};
 
 // N85: the Vite-built dashboard SPA ships in dist/dashboard alongside the bundled
 // cli.js (import.meta.url resolves to dist/ at runtime), served on the same port.
@@ -789,14 +770,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // `authed` flag just notes whether the caller's token matched.
     if (url.pathname === "/health") {
       const token = url.searchParams.get("token");
-      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-      res.end(
-        JSON.stringify({
-          status: "ok",
-          projectName: config.projectName,
-          authed: !masterToken || token === masterToken,
-        }),
-      );
+      sendJson(res, 200, {
+        status: "ok",
+        projectName: config.projectName,
+        authed: !masterToken || token === masterToken,
+      });
       return;
     }
 
@@ -819,24 +797,20 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     if (url.pathname === "/hub/reregister" && req.method === "POST") {
       const remote = req.socket.remoteAddress ?? "";
       if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote)) {
-        res.writeHead(403, { "Content-Type": "application/json; charset=utf-8" });
-        res.end(JSON.stringify({ error: "reregister is localhost-only" }));
+        sendJson(res, 403, { error: "reregister is localhost-only" });
         return;
       }
       const secFetchSite = req.headers["sec-fetch-site"];
       if (req.headers.origin || (secFetchSite && secFetchSite !== "none")) {
-        res.writeHead(403, { "Content-Type": "application/json; charset=utf-8" });
-        res.end(JSON.stringify({ error: "cross-site request refused" }));
+        sendJson(res, 403, { error: "cross-site request refused" });
         return;
       }
       if (config.master?.standalone || !masterReregister) {
-        res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-        res.end(JSON.stringify({ declined: true }));
+        sendJson(res, 200, { declined: true });
         return;
       }
       void masterReregister();
-      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-      res.end(JSON.stringify({ ok: true }));
+      sendJson(res, 200, { ok: true });
       return;
     }
 
@@ -851,18 +825,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         res.end();
         return;
       }
-      try {
-        const data = readFileSync(assetPath);
-        const ext = assetPath.slice(assetPath.lastIndexOf("."));
-        res.writeHead(200, {
-          "Content-Type": MIME[ext] || "application/octet-stream",
-          "Cache-Control": "public, max-age=31536000, immutable",
-        });
-        res.end(data);
-      } catch {
-        res.writeHead(404);
-        res.end();
-      }
+      serveStaticFile(res, assetPath, "public, max-age=31536000, immutable");
       return;
     }
 
@@ -879,8 +842,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const fileName = DOC_WHITELIST[url.searchParams.get("name") || ""];
       const folder = url.searchParams.get("folder") || "";
       if (!fileName) {
-        res.writeHead(400, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "name must be one of TASK|CHECKLIST|REVIEW|ANALYSIS" }));
+        sendJson(res, 400, { error: "name must be one of TASK|CHECKLIST|REVIEW|ANALYSIS" });
         return;
       }
       // Resolve via the live workDir + folder basename so pre-migration folder
@@ -888,21 +850,18 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const folderTail = folder.split(/[\\/]/).filter(Boolean).pop() ?? "";
       const docPath = resolve(workDir, folderTail, fileName);
       if (docPath !== workDir && !docPath.startsWith(workDir + sep)) {
-        res.writeHead(400, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "folder outside work directory" }));
+        sendJson(res, 400, { error: "folder outside work directory" });
         return;
       }
       if (!existsSync(docPath)) {
-        res.writeHead(404, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: fileName + " not found" }));
+        sendJson(res, 404, { error: fileName + " not found" });
         return;
       }
       try {
         res.writeHead(200, { "Content-Type": "text/markdown; charset=utf-8" });
         res.end(readFileSync(docPath, "utf-8"));
       } catch {
-        res.writeHead(500, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Failed to read doc" }));
+        sendJson(res, 500, { error: "Failed to read doc" });
       }
       return;
     }
@@ -917,8 +876,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // /overview — iframe proxy to master server
     if (url.pathname === "/overview") {
       if (config.master?.standalone) {
-        res.writeHead(404, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Overview not available in standalone mode" }));
+        sendJson(res, 404, { error: "Overview not available in standalone mode" });
         return;
       }
       const overviewCss =
@@ -947,11 +905,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     if (url.pathname === "/api/work-tasks") {
       try {
         const files = readdirSync(workDir).filter((f) => f.endsWith(".json"));
-        res.writeHead(200, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify(files));
+        sendJson(res, 200, files);
       } catch {
-        res.writeHead(500, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Failed to list files" }));
+        sendJson(res, 500, { error: "Failed to list files" });
       }
       return;
     }
@@ -959,14 +915,12 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     if (url.pathname.startsWith("/api/work-tasks/")) {
       const fileName = url.pathname.replace("/api/work-tasks/", "");
       if (fileName.includes("..") || fileName.includes("/")) {
-        res.writeHead(400, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Invalid filename" }));
+        sendJson(res, 400, { error: "Invalid filename" });
         return;
       }
       const filePath = resolve(workDir, fileName);
       if (!existsSync(filePath)) {
-        res.writeHead(404, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "File not found" }));
+        sendJson(res, 404, { error: "File not found" });
         return;
       }
       try {
@@ -979,15 +933,13 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           res.end(content);
         }
       } catch {
-        res.writeHead(500, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Failed to read file" }));
+        sendJson(res, 500, { error: "Failed to read file" });
       }
       return;
     }
 
     if (url.pathname === "/api/activity") {
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify(activity.getRecentEvents()));
+      sendJson(res, 200, activity.getRecentEvents());
       return;
     }
 
@@ -1002,30 +954,25 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // N172 — undo an install overwrite: restore a `.mcp.json` server entry to its
     // prior config. POST { name, config }.
     if (url.pathname === "/api/mcp-restore" && req.method === "POST") {
-      let body = "";
-      req.on("data", (c: Buffer) => (body += c.toString("utf-8")));
-      req.on("end", () => {
+      void readBody(req, res).then((body) => {
+        if (body === null) return;
         try {
           const { name } = JSON.parse(body || "{}") as { name?: string };
           if (!name) {
-            res.writeHead(400, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: "name is required" }));
+            sendJson(res, 400, { ok: false, error: "name is required" });
             return;
           }
           // N172 — restore from the server-side snapshot (the real prior value),
           // not the client's secret-scrubbed copy. No snapshot ⇒ nothing to undo.
           if (!overwriteSnapshots.has(name)) {
-            res.writeHead(409, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: `no overwrite to undo for '${name}'` }));
+            sendJson(res, 409, { ok: false, error: `no overwrite to undo for '${name}'` });
             return;
           }
           const action = restoreMcpServer(resolveProjectRoot(), name, overwriteSnapshots.get(name));
           overwriteSnapshots.delete(name);
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: true, name, action }));
+          sendJson(res, 200, { ok: true, name, action });
         } catch (err) {
-          res.writeHead(500, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+          sendJson(res, 500, { ok: false, error: (err as Error).message });
         }
       });
       return;
@@ -1034,22 +981,18 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // N167 — set the binding default flow (so new tasks use a custom flow without
     // needing entryAgents). POST { flowId }. Validates the flow exists.
     if (url.pathname === "/api/default-flow" && req.method === "POST") {
-      let body = "";
-      req.on("data", (c: Buffer) => (body += c.toString("utf-8")));
-      req.on("end", () => {
+      void readBody(req, res).then((body) => {
+        if (body === null) return;
         try {
           const flowId = (JSON.parse(body || "{}") as { flowId?: string }).flowId;
           if (!flowId || !mergedProjectsView()[flowId]) {
-            res.writeHead(400, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: `unknown flow '${flowId ?? ""}'` }));
+            sendJson(res, 400, { ok: false, error: `unknown flow '${flowId ?? ""}'` });
             return;
           }
           setDefaultFlow(flowId);
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: true, defaultFlow: flowId }));
+          sendJson(res, 200, { ok: true, defaultFlow: flowId });
         } catch (err) {
-          res.writeHead(500, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+          sendJson(res, 500, { ok: false, error: (err as Error).message });
         }
       });
       return;
@@ -1064,30 +1007,26 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const requestedId = url.searchParams.get("id") ?? DEFAULT_PROJECT.id;
       const project = projects[requestedId];
       if (!project) {
-        res.writeHead(404, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: `unknown project '${requestedId}'` }));
+        sendJson(res, 404, { error: `unknown project '${requestedId}'` });
         return;
       }
       const agentTitle = (id: string): string => composedAgents[id]?.title ?? id;
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(
-        JSON.stringify({
-          ...project,
-          source: isBuiltinProjectId(project.id) ? "builtin" : "custom",
-          // N121 — true when a user-space override file shadows a shipped def
-          // (drives the "Revert to shipped" affordance for a built-in flow).
-          ejected: definitionRevision("projects", project.id) !== null,
-          // N111 — optimistic-concurrency token; PUTs echo it via x-revision.
-          revision: isBuiltinProjectId(project.id)
-            ? undefined
-            : (definitionRevision("projects", project.id) ?? undefined),
-          agentTitles: Object.fromEntries(project.agents.map((a) => [a, agentTitle(a)])),
-          installModules: project.install.map((id) => {
-            const mod = moduleRegistry[id];
-            return { id, title: mod?.title ?? id, kind: mod?.kind ?? "unknown" };
-          }),
+      sendJson(res, 200, {
+        ...project,
+        source: isBuiltinProjectId(project.id) ? "builtin" : "custom",
+        // N121 — true when a user-space override file shadows a shipped def
+        // (drives the "Revert to shipped" affordance for a built-in flow).
+        ejected: definitionRevision("projects", project.id) !== null,
+        // N111 — optimistic-concurrency token; PUTs echo it via x-revision.
+        revision: isBuiltinProjectId(project.id)
+          ? undefined
+          : (definitionRevision("projects", project.id) ?? undefined),
+        agentTitles: Object.fromEntries(project.agents.map((a) => [a, agentTitle(a)])),
+        installModules: project.install.map((id) => {
+          const mod = moduleRegistry[id];
+          return { id, title: mod?.title ?? id, kind: mod?.kind ?? "unknown" };
         }),
-      );
+      });
       return;
     }
 
@@ -1098,8 +1037,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const kind = (url.searchParams.get("kind") ?? "") as TargetKind;
       const id = url.searchParams.get("id") ?? "";
       if (!["flow", "agent", "module"].includes(kind) || !id) {
-        res.writeHead(400, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "kind (flow|agent|module) and id are required" }));
+        sendJson(res, 400, { error: "kind (flow|agent|module) and id are required" });
         return;
       }
       const target: InstallTarget = { kind, id };
@@ -1111,15 +1049,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           ...inp,
           saved: Boolean(stored[inp.name] && stored[inp.name].length > 0),
         }));
-        res.writeHead(200, { "Content-Type": MIME[".json"] });
-        res.end(
-          JSON.stringify({ kind, id, plan: planFromArtifacts(art), requiredInputs: reqInputs }),
-        );
+        sendJson(res, 200, { kind, id, plan: planFromArtifacts(art), requiredInputs: reqInputs });
       } catch (err) {
         const status =
           err instanceof NotInstallableError ? 400 : err instanceof UnknownTargetError ? 404 : 500;
-        res.writeHead(status, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: (err as Error).message }));
+        sendJson(res, status, { error: (err as Error).message });
       }
       return;
     }
@@ -1128,20 +1062,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // bucket: `${VAR}` input resolution, conflict (409), N172 force snapshot, and
     // per-step SSE progress.
     if (url.pathname === "/api/install" && req.method === "POST") {
-      let body = "";
-      let aborted = false;
-      req.on("data", (chunk: Buffer) => {
-        if (aborted) return;
-        body += chunk.toString("utf-8");
-        if (body.length > 16 * 1024) {
-          aborted = true;
-          res.writeHead(413, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: "payload too large" }));
-          req.destroy();
-        }
-      });
-      req.on("end", () => {
-        if (aborted) return;
+      void readBody(req, res, 16 * 1024).then((body) => {
+        if (body === null) return;
         let secretValues: string[] = [];
         try {
           const parsed = body
@@ -1155,8 +1077,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           const kind = parsed.kind as TargetKind;
           const id = parsed.id ?? "";
           if (!["flow", "agent", "module"].includes(kind) || !id) {
-            res.writeHead(400, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: "kind and id are required" }));
+            sendJson(res, 400, { ok: false, error: "kind and id are required" });
             return;
           }
           const target: InstallTarget = { kind, id };
@@ -1225,15 +1146,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             });
           }
           transport.emit("install-progress", { phase: "done", kind, id, reports });
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: true, kind, id, reports }));
+          sendJson(res, 200, { ok: true, kind, id, reports });
         } catch (err) {
           if (err instanceof InstallConflictError) {
             transport.emit("install-progress", { phase: "failed", error: err.message });
-            res.writeHead(409, { "Content-Type": MIME[".json"] });
-            res.end(
-              JSON.stringify({ ok: false, conflict: scrubSecrets(err.conflict, secretValues) }),
-            );
+            sendJson(res, 409, { ok: false, conflict: scrubSecrets(err.conflict, secretValues) });
             return;
           }
           const status =
@@ -1244,8 +1161,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
                 : 500;
           const message = scrubSecrets((err as Error).message, secretValues);
           transport.emit("install-progress", { phase: "failed", error: message });
-          res.writeHead(status, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: message }));
+          sendJson(res, status, { ok: false, error: message });
         }
       });
       return;
@@ -1257,28 +1173,24 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       const kind = (url.searchParams.get("kind") ?? "") as TargetKind;
       const id = url.searchParams.get("id") ?? "";
       if (!["flow", "agent", "module"].includes(kind) || !id) {
-        res.writeHead(400, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "kind (flow|agent|module) and id are required" }));
+        sendJson(res, 400, { error: "kind (flow|agent|module) and id are required" });
         return;
       }
       const plan = uninstallPlan(resolveProjectRoot(), targetBucketId({ kind, id }));
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ kind, id, plan }));
+      sendJson(res, 200, { kind, id, plan });
       return;
     }
 
     // N174 — run the uninstall for any target (reference-safe removal) over SSE.
     if (url.pathname === "/api/uninstall" && req.method === "POST") {
-      let body = "";
-      req.on("data", (c: Buffer) => (body += c.toString("utf-8")));
-      req.on("end", () => {
+      void readBody(req, res).then((body) => {
+        if (body === null) return;
         try {
           const parsed = body ? (JSON.parse(body) as { kind?: TargetKind; id?: string }) : {};
           const kind = parsed.kind as TargetKind;
           const id = parsed.id ?? "";
           if (!["flow", "agent", "module"].includes(kind) || !id) {
-            res.writeHead(400, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: "kind and id are required" }));
+            sendJson(res, 400, { ok: false, error: "kind and id are required" });
             return;
           }
           const target: InstallTarget = { kind, id };
@@ -1297,13 +1209,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             });
           }
           transport.emit("uninstall-progress", { phase: "done", kind, id, reports });
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: true, kind, id, reports }));
+          sendJson(res, 200, { ok: true, kind, id, reports });
         } catch (err) {
           const message = (err as Error).message;
           transport.emit("uninstall-progress", { phase: "failed", error: message });
-          res.writeHead(500, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: message }));
+          sendJson(res, 500, { ok: false, error: message });
         }
       });
       return;
@@ -1322,8 +1232,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         // N128/N129 — the flow's status set drives the kanban columns.
         statuses: p.statuses,
       }));
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ projects }));
+      sendJson(res, 200, { projects });
       return;
     }
 
@@ -1357,14 +1266,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           if (!(referencedBy[id] ??= []).includes(def.id)) referencedBy[id].push(def.id);
         }
       }
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(
-        JSON.stringify({
-          modules: Object.values(moduleRegistry),
-          referencedBy,
-          ...(userSpaceError ? { userSpaceError } : {}),
-        }),
-      );
+      sendJson(res, 200, {
+        modules: Object.values(moduleRegistry),
+        referencedBy,
+        ...(userSpaceError ? { userSpaceError } : {}),
+      });
       return;
     }
 
@@ -1402,8 +1308,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             }
           : {}),
       }));
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ agents, ...(userSpaceError ? { userSpaceError } : {}) }));
+      sendJson(res, 200, { agents, ...(userSpaceError ? { userSpaceError } : {}) });
       return;
     }
 
@@ -1418,8 +1323,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
           .map((m) => (m.kind === "include" ? m.ref : "")),
       );
       if (!allowed.has(ref)) {
-        res.writeHead(404, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Unknown include ref" }));
+        sendJson(res, 404, { error: "Unknown include ref" });
         return;
       }
       // The include target lives at the project root (canonical repo) or in
@@ -1434,39 +1338,24 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         res.end(readFileSync(path, "utf-8"));
         return;
       }
-      res.writeHead(404, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ error: "Include file not found in this project" }));
+      sendJson(res, 404, { error: "Include file not found in this project" });
       return;
     }
 
     // N117 — reassign a task's flow from the dashboard (ready-only). Same
     // guards as the CLI `set-flow` via the shared setTaskFlow core.
     if (url.pathname === "/api/task-flow" && req.method === "POST") {
-      let body = "";
-      let aborted = false;
-      req.on("data", (chunk: Buffer) => {
-        if (aborted) return;
-        body += chunk.toString("utf-8");
-        if (body.length > 16 * 1024) {
-          aborted = true;
-          res.writeHead(413, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: "payload too large" }));
-          req.destroy();
-        }
-      });
-      req.on("end", () => {
-        if (aborted) return;
+      void readBody(req, res, 16 * 1024).then((body) => {
+        if (body === null) return;
         let parsed: { id?: string; flow?: string };
         try {
           parsed = JSON.parse(body);
         } catch {
-          res.writeHead(400, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: "invalid JSON" }));
+          sendJson(res, 400, { ok: false, error: "invalid JSON" });
           return;
         }
         if (!parsed.id || !parsed.flow) {
-          res.writeHead(400, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: "id and flow are required" }));
+          sendJson(res, 400, { ok: false, error: "id and flow are required" });
           return;
         }
         // N151 — async body callback: guard the master read/setTaskFlow so a
@@ -1483,12 +1372,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
                 ? 409
                 : 400;
           if (result.ok) transport.emit("file-change", { at: new Date().toISOString() });
-          res.writeHead(status, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify(result.ok ? { ok: true, flowId: result.flowId } : result));
+          sendJson(res, status, result.ok ? { ok: true, flowId: result.flowId } : result);
         } catch (err) {
           if (!res.headersSent) {
-            res.writeHead(500, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+            sendJson(res, 500, { ok: false, error: (err as Error).message });
           }
         }
       });
@@ -1499,8 +1386,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       if (config.notifications?.browser !== false) {
         transport.emit("agent-done", { ts: Date.now() });
       }
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ ok: true }));
+      sendJson(res, 200, { ok: true });
       return;
     }
 
@@ -1509,8 +1395,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       if (config.notifications?.browser !== false) {
         transport.emit("agent-permission", { ts: Date.now() });
       }
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ ok: true }));
+      sendJson(res, 200, { ok: true });
       return;
     }
 
@@ -1519,41 +1404,25 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // events and a `status` frame only on transitions, then forwards to
     // master.
     if (url.pathname === "/log/events" && req.method === "POST") {
-      let body = "";
-      let aborted = false;
-      req.on("data", (chunk: Buffer) => {
-        if (aborted) return;
-        body += chunk.toString("utf-8");
-        if (body.length > 64 * 1024) {
-          aborted = true;
-          res.writeHead(413, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: "payload too large" }));
-          req.destroy();
-        }
-      });
-      req.on("end", () => {
-        if (aborted) return;
+      void readBody(req, res, 64 * 1024).then((body) => {
+        if (body === null) return;
         let parsed: unknown;
         try {
           parsed = JSON.parse(body);
         } catch {
-          res.writeHead(400, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: false, error: "invalid JSON" }));
+          sendJson(res, 400, { ok: false, error: "invalid JSON" });
           return;
         }
         const validated = HookEventInputSchema.safeParse(parsed);
         if (!validated.success) {
-          res.writeHead(400, { "Content-Type": MIME[".json"] });
-          res.end(
-            JSON.stringify({
-              ok: false,
-              error: "validation failed",
-              issues: validated.error.issues.map((i) => ({
-                path: i.path.join("."),
-                message: i.message,
-              })),
-            }),
-          );
+          sendJson(res, 400, {
+            ok: false,
+            error: "validation failed",
+            issues: validated.error.issues.map((i) => ({
+              path: i.path.join("."),
+              message: i.message,
+            })),
+          });
           return;
         }
         // N151 — guard the post-parse work (eventStore.insert writes to disk;
@@ -1584,32 +1453,22 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             }
           }
 
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ ok: true, status: to, duplicate }));
+          sendJson(res, 200, { ok: true, status: to, duplicate });
         } catch (err) {
           if (!res.headersSent) {
-            res.writeHead(500, { "Content-Type": MIME[".json"] });
-            res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+            sendJson(res, 500, { ok: false, error: (err as Error).message });
           }
         }
-      });
-      req.on("error", () => {
-        if (aborted) return;
-        res.writeHead(500, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ ok: false, error: "read failed" }));
       });
       return;
     }
 
     // N68: read-only inspection — current derived status + recent event window.
     if (url.pathname === "/log/status") {
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(
-        JSON.stringify({
-          status: eventStore.getStatus(),
-          events: eventStore.getEvents(),
-        }),
-      );
+      sendJson(res, 200, {
+        status: eventStore.getStatus(),
+        events: eventStore.getEvents(),
+      });
       return;
     }
 
@@ -1624,13 +1483,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // cross-site. Same-origin browser + server-to-server (no header) still pass.
       const site = req.headers["sec-fetch-site"];
       if (site && site !== "same-origin" && site !== "none") {
-        res.writeHead(403, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "request refused" }));
+        sendJson(res, 403, { error: "request refused" });
         return;
       }
-      let body = "";
-      req.on("data", (c: Buffer) => (body += c.toString()));
-      req.on("end", () => {
+      void readBody(req, res).then((body) => {
+        if (body === null) return;
         try {
           const parsed = JSON.parse(body) as {
             log?: { type: string; message: string; data?: unknown };
@@ -1645,84 +1502,8 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         } catch {
           /* ignore malformed client log */
         }
-        res.writeHead(202, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ ok: true }));
+        sendJson(res, 202, { ok: true });
       });
-      return;
-    }
-
-    if (url.pathname === "/api/events") {
-      const taskId = url.searchParams.get("taskId");
-      if (!taskId || !/^N\d{2,}$/.test(taskId)) {
-        res.writeHead(400, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "valid taskId is required (e.g. ?taskId=N26)" }));
-        return;
-      }
-      try {
-        const entries = readdirSync(workDir, { withFileTypes: true });
-        const dir = entries.find((e) => e.isDirectory() && e.name.startsWith(taskId + "-"));
-        if (!dir) {
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ events: [] }));
-          return;
-        }
-        const eventsPath = resolve(workDir, dir.name, "events.json");
-        if (!existsSync(eventsPath)) {
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ events: [] }));
-          return;
-        }
-        const raw = JSON.parse(readFileSync(eventsPath, "utf-8")) as { events?: unknown[] };
-        res.writeHead(200, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ events: Array.isArray(raw.events) ? raw.events : [] }));
-      } catch {
-        res.writeHead(500, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Failed to read events" }));
-      }
-      return;
-    }
-
-    if (url.pathname === "/api/session-events") {
-      const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "100", 10), 500);
-      try {
-        const files = existsSync(MASTER_LOCK_DIR)
-          ? readdirSync(MASTER_LOCK_DIR)
-              .filter((f) => f.startsWith("events-") && f.endsWith(".jsonl"))
-              .map((f) => {
-                const p = resolve(MASTER_LOCK_DIR, f);
-                return { name: f, path: p, mtime: statSync(p).mtimeMs };
-              })
-              .sort((a, b) => b.mtime - a.mtime)
-          : [];
-
-        if (files.length === 0) {
-          res.writeHead(200, { "Content-Type": MIME[".json"] });
-          res.end(JSON.stringify({ events: [], sessionId: null }));
-          return;
-        }
-
-        const mostRecent = files[0];
-        const sessionId = mostRecent.name.replace("events-", "").replace(".jsonl", "");
-        const lines = readFileSync(mostRecent.path, "utf-8")
-          .split("\n")
-          .filter((l) => l.trim());
-        const events = lines
-          .map((l) => {
-            try {
-              return JSON.parse(l) as unknown;
-            } catch {
-              return null;
-            }
-          })
-          .filter(Boolean)
-          .slice(-limit);
-
-        res.writeHead(200, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ events, sessionId }));
-      } catch {
-        res.writeHead(500, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ error: "Failed to read session events" }));
-      }
       return;
     }
 
@@ -1734,14 +1515,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         return;
       }
       const soundPath = resolve(dirname(fileURLToPath(import.meta.url)), "sounds", soundFile);
-      try {
-        const data = readFileSync(soundPath);
-        res.writeHead(200, { "Content-Type": MIME[".mp3"], "Content-Length": String(data.length) });
-        res.end(data);
-      } catch {
-        res.writeHead(404);
-        res.end();
-      }
+      serveStaticFile(res, soundPath);
       return;
     }
 
@@ -1752,8 +1526,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       res.writeHead(200, { "Content-Type": MIME[".html"] });
       res.end(readFileSync(resolve(DASHBOARD_DIR, "index.html"), "utf-8"));
     } catch {
-      res.writeHead(500, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify({ error: "Dashboard build not found. Run `pnpm build`." }));
+      sendJson(res, 500, { error: "Dashboard build not found. Run `pnpm build`." });
     }
   }
 
@@ -1796,8 +1569,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       dispatch(req, res);
     } catch (err) {
       if (!res.headersSent) {
-        res.writeHead(500, { "Content-Type": MIME[".json"] });
-        res.end(JSON.stringify({ ok: false, error: (err as Error).message }));
+        sendJson(res, 500, { ok: false, error: (err as Error).message });
       }
     }
   });

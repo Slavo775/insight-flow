@@ -140,8 +140,19 @@ export {
 export { runMaster, startMasterServer, isTrustedActionRequest, recordLog } from "./master/index.js";
 export { jsonFileStorage } from "./core/storage-port.js";
 export type { Storage } from "./core/storage-port.js";
-export { SseTransport } from "./dashboard/server/transport.js";
-export type { Transport, TransportClient } from "./dashboard/server/transport.js";
+export { SseTransport } from "./core/transport.js";
+export type { Transport, TransportClient } from "./core/transport.js";
+export {
+  sendJson,
+  readBody,
+  escHtml,
+  serveStaticFile,
+  MIME,
+  MIME_JSON,
+  MIME_HTML,
+  DEFAULT_BODY_LIMIT,
+} from "./core/http-util.js";
+export { buildEnforcementBlock } from "./cli/commands/prompt-build.js";
 export {
   AgentModuleSchema,
   ComposedAgentSchema,

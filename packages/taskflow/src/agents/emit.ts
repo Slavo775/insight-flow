@@ -105,6 +105,25 @@ interface HookGroup {
   [key: string]: unknown;
 }
 
+/** Remove a previously-owned hook (matched by event + matcher + command) from a
+ *  parsed settings' hook groups, dropping the event key when its last group goes.
+ *  N255 — was inlined identically in applyHooks and uninstallTarget. */
+function removeOwnedHook(
+  hooks: Record<string, HookGroup[]>,
+  old: { event: string; matcher?: string; command: string },
+): void {
+  const groups = hooks[old.event];
+  if (!groups) return;
+  hooks[old.event] = groups.filter(
+    (g) =>
+      !(
+        (g.matcher ?? "") === (old.matcher ?? "") &&
+        g.hooks?.some((h) => h.type === "command" && h.command === old.command)
+      ),
+  );
+  if (!hooks[old.event].length) delete hooks[old.event];
+}
+
 function readJson<T>(path: string, fallback: T): T {
   if (!existsSync(path)) return fallback;
   return JSON.parse(readFileSync(path, "utf-8")) as T;
@@ -234,18 +253,7 @@ function applyHooks(
     ...owned.hooks,
     ...hooks.map((h) => ({ event: h.event, matcher: h.matcher, command: h.command })),
   ];
-  for (const old of toClear) {
-    const groups = settings.hooks[old.event];
-    if (!groups) continue;
-    settings.hooks[old.event] = groups.filter(
-      (g) =>
-        !(
-          (g.matcher ?? "") === (old.matcher ?? "") &&
-          g.hooks?.some((h) => h.type === "command" && h.command === old.command)
-        ),
-    );
-    if (!settings.hooks[old.event].length) delete settings.hooks[old.event];
-  }
+  for (const old of toClear) removeOwnedHook(settings.hooks, old);
   for (const hook of hooks) {
     const group: HookGroup = {
       ...(hook.matcher !== undefined ? { matcher: hook.matcher } : {}),
@@ -747,18 +755,7 @@ export function uninstallTarget(projectRoot: string, bucketId: string): EmitRepo
       {},
     );
     if (settings.hooks) {
-      for (const old of ownedHooks) {
-        const groups = settings.hooks[old.event];
-        if (!groups) continue;
-        settings.hooks[old.event] = groups.filter(
-          (g) =>
-            !(
-              (g.matcher ?? "") === (old.matcher ?? "") &&
-              g.hooks?.some((h) => h.type === "command" && h.command === old.command)
-            ),
-        );
-        if (!settings.hooks[old.event].length) delete settings.hooks[old.event];
-      }
+      for (const old of ownedHooks) removeOwnedHook(settings.hooks, old);
       if (!Object.keys(settings.hooks).length) delete settings.hooks;
       reports.push({ target: ".claude/settings.json", action: writeJsonIfChanged(path, settings) });
     }

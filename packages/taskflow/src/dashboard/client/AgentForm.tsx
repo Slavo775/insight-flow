@@ -6,6 +6,16 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 import {
+  Field,
+  FieldError,
+  TopError,
+  FormActions,
+  PickerRow,
+  OrderedRow,
+  RowTitle,
+  RowButton,
+} from "./components/form.js";
+import {
   ApiError,
   deleteDefinition,
   deriveCommandName,
@@ -28,36 +38,6 @@ const FormBox = styled.form`
   gap: ${(p) => p.theme.space.lg};
 `;
 
-const Field = styled.label`
-  display: flex;
-  flex-direction: column;
-  gap: ${(p) => p.theme.space.sm};
-  font-size: ${(p) => p.theme.font.size.sm};
-  color: ${(p) => p.theme.color.textMuted};
-
-  input {
-    background: ${(p) => p.theme.color.bg};
-    color: ${(p) => p.theme.color.text};
-    border: 1px solid ${(p) => p.theme.color.border};
-    border-radius: ${(p) => p.theme.radius.lg};
-    padding: ${(p) => p.theme.space.md};
-    font-family: ${(p) => p.theme.font.family};
-    font-size: ${(p) => p.theme.font.size.md};
-  }
-`;
-
-const FieldError = styled.span`
-  color: ${(p) => p.theme.color.red};
-  font-size: ${(p) => p.theme.font.size.xs};
-`;
-
-const TopError = styled.div`
-  border: 1px solid ${(p) => p.theme.color.red};
-  border-radius: ${(p) => p.theme.radius.lg};
-  padding: ${(p) => p.theme.space.md};
-  font-size: ${(p) => p.theme.font.size.sm};
-`;
-
 const Columns = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -75,77 +55,9 @@ const PickerList = styled.div`
   overflow-y: auto;
 `;
 
-const PickerRow = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${(p) => p.theme.space.md};
-  width: 100%;
-  background: none;
-  border: none;
-  border-bottom: 1px solid ${(p) => p.theme.color.border};
-  color: ${(p) => p.theme.color.text};
-  font-family: inherit;
-  font-size: ${(p) => p.theme.font.size.sm};
-  padding: ${(p) => p.theme.space.md};
-  cursor: pointer;
-  text-align: left;
-
-  &:hover {
-    background: ${(p) => p.theme.color.border};
-  }
-  &:disabled {
-    opacity: 0.35;
-    cursor: default;
-  }
-`;
-
-const OrderedRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${(p) => p.theme.space.md};
-  border: 1px solid ${(p) => p.theme.color.border};
-  border-radius: ${(p) => p.theme.radius.lg};
-  padding: ${(p) => p.theme.space.sm} ${(p) => p.theme.space.md};
-  margin-bottom: ${(p) => p.theme.space.sm};
-  font-size: ${(p) => p.theme.font.size.sm};
-  color: ${(p) => p.theme.color.text};
-`;
-
-const RowTitle = styled.span`
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-const RowButton = styled.button`
-  background: none;
-  border: 1px solid ${(p) => p.theme.color.border};
-  border-radius: ${(p) => p.theme.radius.md};
-  color: ${(p) => p.theme.color.textMuted};
-  cursor: pointer;
-  padding: 2px 8px;
-
-  &:hover {
-    border-color: ${(p) => p.theme.color.accent};
-    color: ${(p) => p.theme.color.text};
-  }
-  &:disabled {
-    opacity: 0.3;
-    cursor: default;
-  }
-`;
-
 const OriginTag = styled.span<{ $custom: boolean }>`
   color: ${(p) => (p.$custom ? p.theme.color.amber : p.theme.color.textMuted)};
   font-size: ${(p) => p.theme.font.size.xs};
-`;
-
-const FormActions = styled.div`
-  display: flex;
-  gap: ${(p) => p.theme.space.md};
-  align-items: center;
 `;
 
 const CheckRow = styled.label`

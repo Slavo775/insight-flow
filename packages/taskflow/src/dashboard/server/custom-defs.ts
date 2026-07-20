@@ -17,6 +17,7 @@ import { resolve } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { ZodError } from "zod";
 import { AgentModuleSchema, ComposedAgentSchema, ProjectSchema } from "../../core/schema/index.js";
+import { sendJson, readBody as readBodyRaw } from "../../core/http-util.js";
 import {
   COMPOSED_AGENTS,
   MODULE_REGISTRY,
@@ -35,8 +36,6 @@ import {
   type UserRegistries,
 } from "../../agents/user-registry.js";
 
-const JSON_MIME = "application/json; charset=utf-8";
-
 type Kind = "modules" | "agents" | "projects";
 const KINDS: readonly Kind[] = ["modules", "agents", "projects"];
 
@@ -45,11 +44,6 @@ const SCHEMAS = {
   agents: ComposedAgentSchema,
   projects: ProjectSchema,
 } as const;
-
-function send(res: ServerResponse, status: number, payload: unknown): void {
-  res.writeHead(status, { "Content-Type": JSON_MIME });
-  res.end(JSON.stringify(payload));
-}
 
 function fileFor(root: string, kind: Kind, id: string): string {
   // N120 — built-in override ids have no "custom:" prefix to strip; slug the
@@ -167,23 +161,12 @@ function readBody(
   res: ServerResponse,
   onJson: (parsed: unknown) => void,
 ): void {
-  let body = "";
-  let aborted = false;
-  req.on("data", (chunk: Buffer) => {
-    if (aborted) return;
-    body += chunk.toString("utf-8");
-    if (body.length > 256 * 1024) {
-      aborted = true;
-      send(res, 413, { ok: false, error: "payload too large" });
-      req.destroy();
-    }
-  });
-  req.on("end", () => {
-    if (aborted) return;
+  void readBodyRaw(req, res).then((body) => {
+    if (body === null) return;
     try {
       onJson(JSON.parse(body));
     } catch {
-      send(res, 400, { ok: false, error: "invalid JSON" });
+      sendJson(res, 400, { ok: false, error: "invalid JSON" });
     }
   });
 }
@@ -442,7 +425,7 @@ export function handleCustomDefsRequest(
   const root = userSpaceRoot();
 
   if (method !== "POST" && method !== "PUT" && method !== "DELETE") {
-    send(res, 405, { ok: false, error: "method not allowed" });
+    sendJson(res, 405, { ok: false, error: "method not allowed" });
     return true;
   }
 
@@ -450,18 +433,18 @@ export function handleCustomDefsRequest(
   try {
     user = loadUserRegistries();
   } catch (err) {
-    send(res, 500, { ok: false, error: `user space is unreadable: ${(err as Error).message}` });
+    sendJson(res, 500, { ok: false, error: `user space is unreadable: ${(err as Error).message}` });
     return true;
   }
 
   if (method === "DELETE") {
     if (!pathId) {
-      send(res, 400, { ok: false, error: "id required" });
+      sendJson(res, 400, { ok: false, error: "id required" });
       return true;
     }
     const result = removeDefinition(kind, pathId, user, root);
     if (result.status < 300) onChanged?.();
-    send(res, result.status, result.body);
+    sendJson(res, result.status, result.body);
     return true;
   }
 
@@ -473,7 +456,7 @@ export function handleCustomDefsRequest(
       pathId,
     });
     if (result.status < 300) onChanged?.();
-    send(res, result.status, result.body);
+    sendJson(res, result.status, result.body);
   });
   return true;
 }

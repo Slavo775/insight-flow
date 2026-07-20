@@ -7,7 +7,10 @@ import { applyArtifacts } from "../../agents/emit.js";
 import { ComposedAgentSchema } from "../../core/schema/index.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 
-function buildEnforcementBlock(): string {
+// N256 — exported so a test can byte-guard AGENT_ENFORCEMENT.md against this
+// generator (the HANDOVER RULE drifted into the committed file for a month
+// because nothing checked it, unlike the role files compose.test already guards).
+export function buildEnforcementBlock(): string {
   const lines: string[] = [];
 
   // N98: @AGENT_SECURITY.md is no longer embedded here — security is a
