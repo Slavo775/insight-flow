@@ -160,6 +160,8 @@ Browser notifications and sounds (a task changed status, Claude finished, a perm
 
 > Opening a single project dashboard **directly** (e.g. `http://localhost:6006`), or when the hub isn't running, gives you a fully working dashboard **without** notifications or sounds — that's expected. Use the hub if you want to be notified.
 
+> The hub and dashboard bound every `POST` request body at **256KB**; an oversized body is rejected with `413 payload too large` before it is buffered.
+
 ## CLI
 
 The `insight-flow` binary is the **single canonical entry point** for all task tracking. Run it from any project root that has an `insightFlow/` directory (legacy: a top-level `workTasks/`), or run `insight-flow init` first.
