@@ -289,6 +289,9 @@ control-plane is protected by header + peer checks:
   same machine) — it is *not* widened by the allowlist.
 - **Token privacy** — the client-facing project list strips each project's token,
   url, and filesystem path; only labels + task state are exposed.
+- **Request-body cap** — every `POST` route bounds the request body at **256KB**;
+  an oversized body is rejected with **`413 { ok: false, error: "payload too large" }`**
+  before it is buffered, so a large or open-ended upload cannot exhaust memory.
 
 ### Using the hub from your phone (`INSIGHT_FLOW_TRUSTED_HOSTS`)
 
