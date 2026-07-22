@@ -2,17 +2,20 @@
 
 ## Release gaps to resolve (from the release check)
 
-- [ ] **[BLOCKER — needs human decision]** Choose the release-please trigger: (A) force 2.12.0 minor via a `feat:` commit, (B) patch 2.11.1 via `fix:`, or (C) manual bump+tag. The merged `refactor:` commit alone produces no release PR.
-- [ ] Apply the chosen trigger and confirm release-please opens the release PR (or the manual bump is committed)
-- [ ] CHANGELOG surfaces the 256KB master-POST body-cap / 413 behavior change (add a manual line — a `refactor:` commit hides it under release-please defaults)
-- [ ] *(optional)* `website/docs/built-ins/master-server.md` — one-line note on the 256KB POST body limit
+- [x] **[BLOCKER — human decision]** Trigger chosen: **B — patch 2.11.1 via `fix:`**
+- [x] Applied: `fix(master):` commit + PR **#169** (squash-merged `fcf8fa3`); release-please opened release PR **#170** (`chore(main): release 2.11.1`)
+- [x] CHANGELOG surfaces the body-cap change — auto-generated under "Bug Fixes" in #170 (release-please owns CHANGELOG.md)
+- [x] Doc notes added: `website/docs/built-ins/master-server.md` + `packages/taskflow/README.md`
 
 ## Release steps
 
-- [ ] Merge the release-please PR (bumps `package.json` + `.release-please-manifest.json`, updates CHANGELOG, tags `v2.12.0`)
+- [x] Merge PR **#169** into `main` → release-please opened the `2.11.1` release PR (**#170**)
+- [ ] Merge release PR **#170** (bumps `package.json` + manifest to 2.11.1, updates CHANGELOG, tags `v2.11.1`) — **Publisher / gated**
 - [ ] Approve the npm-publish deployment env (`gh api ... pending_deployments`)
 - [ ] Publish succeeds (pin `npm@^11.5.1` — npm@latest v12 breaks Node 20 publish)
-- [ ] `npm view insight-flow version` == released version; tag pushed
+- [ ] `npm view insight-flow version` == `2.11.1`; tag pushed
+
+> **Version corrected to 2.11.1** (option B — patch). The task title still says 2.12.0 (created before the trigger decision); the actual release is **2.11.1**.
 
 ## Quality gates (confirmed by the release check — N257)
 
