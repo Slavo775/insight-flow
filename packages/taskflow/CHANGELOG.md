@@ -2,6 +2,13 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.11.1](https://github.com/Slavo775/insight-flow/compare/v2.11.0...v2.11.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* **master:** reject oversized POST request bodies with 413 (256KB cap) ([#169](https://github.com/Slavo775/insight-flow/issues/169)) ([fcf8fa3](https://github.com/Slavo775/insight-flow/commit/fcf8fa331e177f369d7257f6393af10f1c6bb2f1))
+
 ## [2.11.0](https://github.com/Slavo775/insight-flow/compare/v2.10.0...v2.11.0) (2026-07-18)
 
 
