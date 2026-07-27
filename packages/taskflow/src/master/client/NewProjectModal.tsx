@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Button, Modal, Select } from "../../dashboard/client/components/index.js";
 import { createProject, listFolders, type FsEntry } from "./api.js";
-import { FolderIcon, FolderUpIcon, PlusIcon } from "./icons.js";
+import { FolderIcon, FolderUpIcon, PlusIcon } from "../../dashboard/client/components/icons.js";
 
 // N231 — the "New project" modal, matching the Lovable prototype on the shared
 // Modal shell: a folder browser (real /api/fs/list navigation, styled like the

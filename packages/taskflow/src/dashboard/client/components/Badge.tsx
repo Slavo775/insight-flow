@@ -25,9 +25,14 @@ function statusTone(status: string): string {
   return badgeClass(status).replace("badge-", "");
 }
 
-const StyledBadge = styled.span<{ $tone: string }>`
-  font-size: ${(p) => p.theme.font.size.xs};
-  padding: 1px 6px;
+// N263 — optional size: "sm" (default, unchanged) | "md" (larger, for the
+// Lifecycle pane's from→to pills). Off the default path, so every existing caller
+// (Kanban cards, verdicts) stays byte-identical.
+export type BadgeSize = "sm" | "md";
+
+const StyledBadge = styled.span<{ $tone: string; $size?: BadgeSize }>`
+  font-size: ${(p) => (p.$size === "md" ? p.theme.font.size.base : p.theme.font.size.xs)};
+  padding: ${(p) => (p.$size === "md" ? "3px 8px" : "1px 6px")};
   border-radius: ${(p) => p.theme.radius.md};
   font-weight: ${(p) => p.theme.font.weight.medium};
   background: ${(p) => (BADGE_TONES[p.$tone] ?? BADGE_TONES.pushed).bg};
@@ -36,9 +41,9 @@ const StyledBadge = styled.span<{ $tone: string }>`
 
 // N130 — a non-canonical flow status carrying its own hex color is styled from
 // that color (translucent fill + hex text), mirroring the timeline chips.
-const HexBadge = styled.span<{ $color: string }>`
-  font-size: ${(p) => p.theme.font.size.xs};
-  padding: 1px 6px;
+const HexBadge = styled.span<{ $color: string; $size?: BadgeSize }>`
+  font-size: ${(p) => (p.$size === "md" ? p.theme.font.size.base : p.theme.font.size.xs)};
+  padding: ${(p) => (p.$size === "md" ? "3px 8px" : "1px 6px")};
   border-radius: ${(p) => p.theme.radius.md};
   font-weight: ${(p) => p.theme.font.weight.medium};
   background: ${(p) => `rgba(${hexToRgb(p.$color)}, 0.18)`};
@@ -58,15 +63,26 @@ export function Badge({
   status,
   statuses,
   children,
+  size,
 }: {
   status: string;
   statuses?: FlowStatus[];
   children?: ReactNode;
+  // N263 — omit for the default small pill (Kanban cards); "md" for a larger pill.
+  size?: BadgeSize;
 }) {
   const label = children ?? statusLabel(status, statuses);
   const custom = !isCanonicalStatus(status) ? statusColor(status, statuses) : undefined;
   if (custom && HEX6.test(custom)) {
-    return <HexBadge $color={custom}>{label}</HexBadge>;
+    return (
+      <HexBadge $color={custom} $size={size}>
+        {label}
+      </HexBadge>
+    );
   }
-  return <StyledBadge $tone={statusTone(status)}>{label}</StyledBadge>;
+  return (
+    <StyledBadge $tone={statusTone(status)} $size={size}>
+      {label}
+    </StyledBadge>
+  );
 }

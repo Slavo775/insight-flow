@@ -142,6 +142,13 @@ export const ArrowLeftIcon = ({ size }: IconProps) => (
   </Svg>
 );
 
+export const ArrowRightIcon = ({ size }: IconProps) => (
+  <Svg size={size}>
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </Svg>
+);
+
 export const AlertCircleIcon = ({ size }: IconProps) => (
   <Svg size={size}>
     <circle cx="12" cy="12" r="10" />

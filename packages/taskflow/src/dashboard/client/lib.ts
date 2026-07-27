@@ -2,6 +2,7 @@
 // reviews/incidents hydrated from side files by /api/work-tasks/:shard). Kept
 // local so the client bundle stays decoupled from the core/server modules.
 import { tokens } from "./theme.js";
+import type { Column } from "../../core/kanban.js";
 
 export interface StatusHistoryEntry {
   status: string;
@@ -105,6 +106,13 @@ export function badgeClass(status: string): string {
 
 export function taskStatusColor(status: string): string {
   return tokens.status[status] || tokens.color.textMuted;
+}
+
+// N260 — a Kanban column's representative color: the color of its first matching
+// status (e.g. the "Review" column → `reviewing` → purple). Used by the colored
+// column headers AND the ticket-card left border. Unknown/orphan → muted.
+export function statusHeaderColor(col: Column): string {
+  return taskStatusColor(col.matches[0] ?? "");
 }
 
 export function hexToRgb(hex: string): string {

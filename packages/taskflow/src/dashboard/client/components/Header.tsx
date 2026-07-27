@@ -1,11 +1,18 @@
 import type { ReactNode } from "react";
 import styled from "styled-components";
-import { MAX_WIDTH } from "./layout.js";
 
-// N248 — the shared master-UI header, extracted from App.tsx so the overview and
-// the /logs page use one sticky blur bar. Full-width bar with a bottom border
+// N248 — the shared UI header, extracted from App.tsx so the overview and the
+// /logs page use one sticky blur bar. Full-width bar with a bottom border
 // (Lovable): 44px controls + 16px top/bottom padding, 32px left/right, inner
-// content centered at MAX_WIDTH.
+// content centered at `maxWidth`.
+// N258 — promoted into the shared component barrel so the project dashboard header
+// reuses the same bar. Added an optional `center` slot (a middle strip, e.g. the
+// dashboard's scrollable nav) and a `maxWidth` prop; `className` is forwarded to
+// the bar so a consumer can restyle it with `styled(Header)`.
+
+// Mirrors master's layout.ts MAX_WIDTH (1152px); kept as the prop default so this
+// component carries no dependency back into master/client.
+const DEFAULT_MAX_WIDTH = "1152px";
 
 const Bar = styled.header`
   position: sticky;
@@ -16,21 +23,35 @@ const Bar = styled.header`
   backdrop-filter: blur(8px);
 `;
 
-const Inner = styled.div`
-  max-width: ${MAX_WIDTH};
+// N258 — with a center slot the bar stays on ONE line (nowrap): the center (menu)
+// shrinks and scrolls instead of wrapping the actions to a second row. Without a
+// center (master overview / logs), the actions still wrap on narrow, as before.
+const Inner = styled.div<{ $maxWidth: string; $hasCenter?: boolean }>`
+  max-width: ${(p) => p.$maxWidth};
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: ${(p) => p.theme.space["2xl"]};
   padding: 16px 32px;
-  flex-wrap: wrap;
+  flex-wrap: ${(p) => (p.$hasCenter ? "nowrap" : "wrap")};
 `;
 
+// N258 — Left/Actions keep their size (flex-shrink:0); only the center menu shrinks.
 const Left = styled.div`
   display: flex;
   align-items: center;
   gap: ${(p) => p.theme.space.lg};
+  flex-shrink: 0;
+`;
+
+// The middle slot hugs its content (flex:0 1 auto) so the wrapper stays tight around
+// the menu and — with the Inner's space-between — sits centered between Left and
+// Actions. min-width:0 lets the inner scroll container (the dashboard nav) shrink and
+// scroll on narrow widths instead of forcing the bar wider or wrapping.
+const Center = styled.div`
+  flex: 0 1 auto;
+  min-width: 0;
 `;
 
 const Brand = styled.div`
@@ -71,6 +92,7 @@ const Actions = styled.div`
   align-items: center;
   gap: ${(p) => p.theme.space.md};
   flex-wrap: wrap;
+  flex-shrink: 0;
 `;
 
 export function Header({
@@ -78,7 +100,10 @@ export function Header({
   before,
   eyebrow,
   title,
+  center,
   children,
+  maxWidth = DEFAULT_MAX_WIDTH,
+  className,
 }: {
   /** Brand icon shown in the green box (e.g. the overview's server icon). */
   icon?: ReactNode;
@@ -86,12 +111,18 @@ export function Header({
   before?: ReactNode;
   eyebrow: string;
   title: string;
+  /** Middle strip between the brand and the actions (e.g. a scrollable nav). */
+  center?: ReactNode;
   /** Right-side actions (search, buttons, menus). */
   children?: ReactNode;
+  /** Inner content max-width. Defaults to 1152px (the master overview width). */
+  maxWidth?: string;
+  /** Forwarded to the sticky bar so consumers can restyle it with styled(Header). */
+  className?: string;
 }) {
   return (
-    <Bar>
-      <Inner>
+    <Bar className={className}>
+      <Inner $maxWidth={maxWidth} $hasCenter={!!center}>
         <Left>
           {before}
           <Brand>
@@ -102,6 +133,7 @@ export function Header({
             </div>
           </Brand>
         </Left>
+        {center ? <Center>{center}</Center> : null}
         {children ? <Actions>{children}</Actions> : null}
       </Inner>
     </Bar>

@@ -4,8 +4,8 @@
 /* N86: color CSS vars are emitted from theme tokens via GlobalStyle (single source). */
 body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); color: var(--text); padding: 24px; }
 /* N86: h1 + .subtitle migrated to <Text $variant="h1|subtitle">. */
-.top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-.top-bar-actions { display: flex; gap: 8px; align-items: center; }
+/* N259 — .top-bar / .top-bar-actions removed: the title + stats moved into the
+   HeaderCard (App.tsx). .engine-chip is kept (still used inside the card). */
 .engine-chip { font-size: 11px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-muted); }
 .engine-chip.engine-off { background: var(--surface); }
 .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse 2s infinite; }
@@ -14,20 +14,24 @@ body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); co
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .layout { display: flex; gap: 16px; align-items: flex-start; }
 .main-content { flex: 1; min-width: 0; overflow-x: auto; }
-.stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; min-width: 120px; }
-.stat-value { font-size: 24px; font-weight: 700; }
-.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.kanban { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; }
+/* N259 — .stats / .stat* removed: migrated to the shared <StatTile> component. */
+/* N260 — the columns row no longer scrolls itself; it sits inside <ScrollShadow>
+   (edge fades, no scrollbar) within the bordered board <section>. */
+.kanban { display: flex; gap: 12px; }
 .column { flex: 1; min-width: 200px; max-width: 300px; }
 .column-header { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 0; border-bottom: 2px solid var(--border); margin-bottom: 8px; display: flex; justify-content: space-between; }
 .column-count { background: var(--border); border-radius: 10px; padding: 0 8px; font-size: 11px; }
 /* N86: .card* and .badge* migrated to <Card>/<Badge> styled components. */
-.shard-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+/* N260 — "Ticket Board" header row: title left, Newer/chip/Older right. */
+.shard-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.board-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.shard-controls { display: flex; align-items: center; gap: 8px; }
+.shard-controls button { display: inline-flex; align-items: center; gap: 4px; }
 /* N86: shard-nav buttons migrated to <Button $variant="nav">. */
-.shard-nav span { font-size: 12px; color: var(--text-muted); }
-.act-item-list { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
-.act-item { min-height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 6px; border-bottom: 1px solid transparent; font-size: 12px; }
+/* N260: the old `.shard-nav span` rule was removed — it clobbered the page Chip.
+   The title is styled via .board-title; the Chip keeps its own component styles. */
+/* N263 — .act-item-list / .act-item removed: the Timeline (Status Transitions)
+   was their only consumer and now reuses the .act-stream* rail (see below). */
 .activity-empty-state { padding: 18px 16px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
 .activity-empty-state strong { color: var(--text); display: block; margin-bottom: 6px; font-size: 12px; }
 .activity-empty-state code { background: var(--border); color: var(--text); padding: 2px 6px; border-radius: 3px; font-size: 11px; display: inline-block; margin-top: 4px; }
@@ -37,46 +41,49 @@ body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); co
 .activity-status.active { background: #0a3622; color: var(--green); }
 .activity-status.idle { background: var(--border); color: var(--text-muted); }
 .activity-status.permission-needed { background: #3b1a00; color: var(--yellow); }
-.activity-feed { overflow-y: auto; padding: 4px 0; display: flex; flex-direction: column; gap: 10px; max-height: 600px; }
+/* N262 — Agent Activity pane as a "live stream" timeline. The pane sits inside
+   the N261 .act-panel (border/radius/surface); this adds the header + rail. */
+.act-stream-wrap { margin: -12px; } /* cancel .act-panel padding so header spans full width */
+.act-stream-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.act-stream-live { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text); }
+.act-live-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+.act-stream-count { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.act-stream { list-style: none; position: relative; margin: 0; padding: 14px 14px 14px 38px; display: flex; flex-direction: column; gap: 16px; max-height: 600px; overflow-y: auto; }
+.act-stream::before { content: ""; position: absolute; left: 19px; top: 18px; bottom: 14px; width: 1px; background: var(--border); } /* the rail */
+.act-stream-item { position: relative; min-width: 0; }
+.act-stream-dot { position: absolute; left: -25px; top: 3px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid; }
+.act-stream-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* N262 — pill text is --text (readable at 10px on every event color, WCAG AA);
+   the event color is carried by the border + tinted background + the rail dot. */
+.act-stream-pill { flex-shrink: 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 4px; border: 1px solid; white-space: nowrap; color: var(--text); }
+.act-stream-label { font-size: 12px; font-weight: 500; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.act-stream-time { margin-left: auto; flex-shrink: 0; font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.act-stream-target { margin: 4px 0 0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* N263 — the "Current" marker on the newest lifecycle transition. */
+.lifecycle-current { flex-shrink: 0; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 1px 6px; border-radius: 4px; color: var(--green); background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); }
+/* N263 — the Lifecycle pane uses larger text than the (shared) Agent Activity
+   pane. Scoped to `.lifecycle` so the base .act-stream* (Agent Activity) is
+   untouched; the from→to pills grow via Badge size="md". */
+.lifecycle .act-stream { gap: 18px; }
+.lifecycle .act-stream-live { font-size: 12px; }
+.lifecycle .act-stream-count { font-size: 12px; }
+.lifecycle .act-stream-time { font-size: 12px; }
+.lifecycle .act-stream-target { font-size: 13px; }
+.lifecycle .lifecycle-current { font-size: 10px; }
 .act-tabs { margin-top: 24px; }
 .act-tab-bar { display: flex; align-items: center; border-bottom: 2px solid var(--border); }
-/* N86: .act-tab migrated to <Button $variant="tab">; .act-tab-bar/.act-pane kept. */
-.act-pane { padding: 12px 0; }
-.activity-icon { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
-.activity-icon.read { background: #1e3a5f; color: var(--cyan); }
-.activity-icon.edit { background: #3b2f06; color: var(--yellow); }
-.activity-icon.bash { background: #0a3622; color: var(--green); }
-.activity-icon.write { background: #2d1b4e; color: var(--purple); }
-.activity-icon.phase { background: #3b1a00; color: var(--orange); }
-.activity-icon.event-mandatory { background: #0a2a0a; color: var(--green); }
-.activity-icon.event-optional { background: #1a2a3b; color: var(--cyan); }
-.activity-icon.skill { background: #1a0a3b; color: var(--purple); }
-.activity-icon.other { background: var(--border); color: var(--text-muted); }
-.activity-icon.hook-amber { background: #3b2500; color: var(--yellow); }
-.activity-icon.hook-red { background: #3b1111; color: var(--red); }
-.activity-icon.hook-green { background: #0a3622; color: var(--green); }
-.activity-icon.hook-muted { background: #1a1a1a; color: var(--text-muted); }
-.activity-icon.hook-blue { background: #1e3a5f; color: var(--cyan); }
-.activity-icon.hook-purple { background: #2d1b4e; color: var(--purple); }
-.activity-tool { font-weight: 600; color: var(--text); }
-.activity-file { color: var(--text-muted); word-break: break-all; }
-.activity-file-muted { color: var(--text-muted); font-size: 10px; word-break: break-all; }
-.activity-time { color: var(--text); font-size: 10px; margin-left: auto; white-space: nowrap; flex-shrink: 0; }
+/* N86: .act-tab migrated to <Button $variant="tab">; .act-tab-bar kept.
+   N261: .act-pane → .act-panel — a bordered/rounded surface panel (matches the
+   N260 board frame tokens: --border, 6px radius, --surface). `hidden` handles the
+   inactive tab, so no display toggling here. */
+.act-panel { margin-top: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+/* N262 — the old glyph/icon activity markup was replaced by the .act-stream
+   timeline, so the .activity-icon* / .hook-* / .activity-badge-<kind> / -tool /
+   -file / -time / -phase-msg rules were removed as dead. Kept: the .activity-badge
+   base + the provider variants (still used by ProviderBadge in ActivityItem). */
 .activity-badge { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-.activity-badge-phase { background: #3b1a00; color: var(--orange); }
-.activity-badge-event-mandatory { background: #0a2a0a; color: var(--green); }
-.activity-badge-event-optional { background: #1a2a3b; color: var(--cyan); }
-.activity-badge-skill { background: #1a0a3b; color: var(--purple); }
-.activity-badge-hook-amber { background: #3b2500; color: var(--yellow); }
-.activity-badge-hook-red { background: #3b1111; color: var(--red); }
-.activity-badge-hook-green { background: #0a3622; color: var(--green); }
-.activity-badge-hook-muted { background: #1a1a1a; color: var(--text-muted); }
-.activity-badge-hook-blue { background: #1e3a5f; color: var(--cyan); }
-.activity-badge-hook-purple { background: #2d1b4e; color: var(--purple); }
-.activity-badge-provider-claude { background: #1a1a2e; color: #c4b5fd; }
 .activity-badge-provider-cursor { background: #07303a; color: #5eead4; }
 .activity-badge-provider-other { background: #2a2a2a; color: #cbd5e1; }
-.activity-phase-msg { font-weight: 600; color: var(--text); }
 .activity-idle { color: var(--text-muted); text-align: center; padding: 24px 16px; font-size: 12px; }
 /* Notification settings popover */
 .settings-wrap { position: relative; }
@@ -149,9 +156,16 @@ body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); co
 .markdown-body a:hover { text-decoration: underline; }
 .markdown-body input[type="checkbox"] { accent-color: var(--accent); margin-right: 6px; }
 .markdown-body blockquote { border-left: 3px solid var(--border); padding-left: 12px; color: var(--text-muted); margin: 8px 0; }
-.top-nav { position: sticky; top: -24px; z-index: 100; background: var(--surface); border-bottom: 1px solid var(--border); height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; margin: -24px -24px 24px -24px; }
-.nav-project { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-.nav-links { display: flex; gap: 4px; }
-.nav-link { font-size: 13px; color: var(--text-muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: background 0.15s, color 0.15s; }
-.nav-link:hover { background: var(--border); color: var(--text); }
-.nav-link.active { background: var(--accent); color: #fff; }
+/* N258 — the header moved to the shared <Header> (styled-components); the menu row
+   sits inside a <ScrollShadow> strip. The row is a grouped, natural-width strip
+   (max-content) so the menu stays together next to the project name; the Header's
+   flex:1 center slot then pushes the right-side actions to the far edge, putting the
+   empty space between the menu and the search/settings. no-shrink + nowrap links
+   overflow and scroll (with the edge fade) on narrow widths. */
+.nav-links { display: flex; gap: 4px; width: max-content; }
+/* Resting color #a3a3a3 (~5.6:1 on the dark header) meets WCAG AA at 13px; the
+   base transparent border reserves space so hover/active add no layout shift. */
+.nav-link { flex-shrink: 0; white-space: nowrap; font-size: 13px; color: #a3a3a3; text-decoration: none; padding: 6px 12px; border: 1px solid transparent; border-radius: 6px; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+/* Hover and the active route share the same green look (theme --green #22c55e). */
+.nav-link:hover, .nav-link.active { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.6); color: #4ade80; }
+.nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }

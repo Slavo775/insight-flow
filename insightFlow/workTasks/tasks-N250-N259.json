@@ -656,7 +656,7 @@
       "title": "Release insight-flow 2.12.0 — N253–N256 code-audit cleanup",
       "type": "chore",
       "priority": "high",
-      "status": "feature-merged",
+      "status": "done",
       "folder": "insightFlow/workTasks/N257-release-insight-flow-2-12-0-n253-n256-code-audit-c",
       "createdAt": "2026-07-21T16:29:40.403Z",
       "statusHistory": [
@@ -684,6 +684,16 @@
           "status": "feature-merged",
           "at": "2026-07-22T07:55:04.680Z",
           "by": "custom:task-release-merge"
+        },
+        {
+          "status": "published",
+          "at": "2026-07-22T11:26:02.146Z",
+          "by": "custom:task-release-ship"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-22T11:28:26.733Z",
+          "by": "custom:task-release-rollout"
         }
       ],
       "implementation": {
@@ -706,6 +716,246 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "custom:release-manager"
+    },
+    {
+      "id": "N258",
+      "title": "Unify project dashboard header (hub button, scrollable menu, search + settings)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N258-unify-project-dashboard-header-hub-button-scrollab",
+      "createdAt": "2026-07-22T11:52:21.746Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-22T11:52:21.747Z",
+          "by": "custom:task-fe-plan"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-22T11:54:07.649Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-22T12:21:10.963Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-22T12:21:39.066Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-22T12:30:08.948Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-22T13:05:48.490Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-22T13:12:31.886Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-22T13:13:02.595Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-22T13:41:53.944Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-22T13:42:25.915Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-22T13:46:37.825Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-22T13:47:40.769Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-22T13:53:58.874Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-22T13:54:39.364Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-22T14:22:46.256Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-22T14:23:35.156Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-22T14:27:31.906Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-22T14:27:54.862Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-22T14:30:25.656Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-22T14:30:56.988Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-22T14:43:11.873Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-23T05:57:58.530Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-23T05:59:27.104Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-23T06:00:03.949Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-23T06:01:35.739Z",
+          "by": "custom:task-fe-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-22T11:54:07.656Z",
+        "completedAt": "2026-07-22T12:21:10.970Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 6,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "frontend",
+        "dashboard-ui",
+        "header",
+        "scroll-shadow",
+        "component-promotion"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N259",
+      "title": "Project header card in dashboard (projectName Dashboard + shard/tasks/current + stat tiles)",
+      "type": "feat",
+      "priority": "medium",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N259-project-header-card-in-dashboard-projectname-dashb",
+      "createdAt": "2026-07-23T08:01:00.537Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-23T08:01:00.538Z",
+          "by": "custom:task-fe-plan"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-23T08:10:34.554Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-23T08:23:01.223Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-23T08:23:48.645Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-07-23T10:46:43.067Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-07-23T10:47:11.546Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-07-23T10:50:09.034Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-23T10:50:46.582Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-23T10:53:44.596Z",
+          "by": "custom:task-fe-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-23T08:10:34.561Z",
+        "completedAt": "2026-07-23T08:23:01.232Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 2,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "frontend",
+        "dashboard-ui",
+        "project-header",
+        "stat-tile",
+        "rework"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
