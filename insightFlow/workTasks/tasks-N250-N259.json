@@ -722,7 +722,7 @@
       "title": "Unify project dashboard header (hub button, scrollable menu, search + settings)",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N258-unify-project-dashboard-header-hub-button-scrollab",
       "createdAt": "2026-07-22T11:52:21.746Z",
       "statusHistory": [
@@ -850,6 +850,11 @@
           "status": "approved",
           "at": "2026-07-23T06:01:35.739Z",
           "by": "custom:task-fe-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-27T13:04:38.145Z",
+          "by": "custom:task-fe-implement"
         }
       ],
       "implementation": {
@@ -871,8 +876,14 @@
         "scroll-shadow",
         "component-promotion"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-07-27T13:04:38.145Z",
+          "commitHash": "060f1f9",
+          "commitMessage": "feat(dashboard): facelift the project dashboard (N258–N263)"
+        }
+      ],
+      "branch": "feat/N258-dashboard-facelift",
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
@@ -882,7 +893,7 @@
       "title": "Project header card in dashboard (projectName Dashboard + shard/tasks/current + stat tiles)",
       "type": "feat",
       "priority": "medium",
-      "status": "approved",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N259-project-header-card-in-dashboard-projectname-dashb",
       "createdAt": "2026-07-23T08:01:00.537Z",
       "statusHistory": [
@@ -930,6 +941,11 @@
           "status": "approved",
           "at": "2026-07-23T10:53:44.596Z",
           "by": "custom:task-fe-review"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-07-27T13:08:29.512Z",
+          "by": "custom:task-fe-implement"
         }
       ],
       "implementation": {
@@ -951,8 +967,14 @@
         "stat-tile",
         "rework"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-07-27T13:08:29.511Z",
+          "commitHash": "060f1f9",
+          "commitMessage": "feat(dashboard): facelift the project dashboard (N258–N263)"
+        }
+      ],
+      "branch": "feat/N258-dashboard-facelift",
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
