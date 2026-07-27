@@ -18,3 +18,12 @@ export { SearchInput } from "./SearchInput.js";
 export { Select } from "./Select.js";
 export { ProjectCard } from "./ProjectCard.js";
 export type { ProjectCardPill } from "./ProjectCard.js";
+// N258 — header primitives promoted from master/client so the project dashboard
+// shares them (the sticky bar + the 44px icon button), plus the new scroll-shadow
+// strip. Icons live in ./icons.js (imported directly, not via this barrel).
+export { Header } from "./Header.js";
+export { SquareIconButton } from "./SquareIconButton.js";
+export { ScrollShadow, useScrollEdges } from "./ScrollShadow.js";
+// N259 — shared KPI tile (label + tone-colored number) for the project-header card.
+export { StatTile } from "./StatTile.js";
+export type { StatTone } from "./StatTile.js";

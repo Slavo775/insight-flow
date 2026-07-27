@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { WATCHED_STATUSES, type NotifSettings } from "./notif.js";
-import { SettingsIcon } from "./icons.js";
-import { SquareIconButton } from "./ui.js";
+import { SettingsIcon } from "../../dashboard/client/components/icons.js";
+import { SquareIconButton } from "../../dashboard/client/components/index.js";
 
 // N231 — the notification settings popover, ported from overview.ts. Toggles the
 // per-status notifications, sound, and mute-when-focused prefs read by the shared

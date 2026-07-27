@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import {
   Button,
+  Header,
   ProjectCard,
   SearchInput,
   Section,
+  SquareIconButton,
   type ProjectCardPill,
 } from "../../dashboard/client/components/index.js";
 import type { PublicProjectEntry } from "../types.js";
@@ -19,8 +21,6 @@ import {
 } from "./notif.js";
 import { SettingsMenu } from "./SettingsMenu.js";
 import { NewProjectModal } from "./NewProjectModal.js";
-import { SquareIconButton } from "./ui.js";
-import { Header } from "./Header.js";
 import { Main, PANEL_GRADIENT } from "./layout.js";
 import {
   ActivityIcon,
@@ -33,7 +33,7 @@ import {
   RefreshIcon,
   ServerIcon,
   ShieldAlertIcon,
-} from "./icons.js";
+} from "../../dashboard/client/components/icons.js";
 
 // ---- layout ---------------------------------------------------------------
 

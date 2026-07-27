@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import {
   Button,
+  Header,
   SearchInput,
   Select,
   StatusPill,
   statusToneColors,
   type StatusTone,
 } from "../../dashboard/client/components/index.js";
-import { Header } from "./Header.js";
 import { Main, PANEL_GRADIENT } from "./layout.js";
 import {
   AlertCircleIcon,
@@ -19,7 +19,7 @@ import {
   FilterIcon,
   InfoIcon,
   ServerIcon,
-} from "./icons.js";
+} from "../../dashboard/client/components/icons.js";
 import { fetchLogs, fetchProjects, type LogCounts, type LogEntry } from "./api.js";
 
 // N244/N248 — the debug log viewer at /logs, redesigned to the Lovable design:
