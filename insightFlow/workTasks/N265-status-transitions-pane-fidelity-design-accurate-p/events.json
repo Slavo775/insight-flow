@@ -802,6 +802,30 @@
       "sessionId": "34f6c1eb-f267-4157-8858-e9b42a87125b",
       "taskId": "N265",
       "payload": {}
+    },
+    {
+      "id": "evt_1785219001739_37d1",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-07-28T06:10:01.738Z",
+      "sessionId": "34f6c1eb-f267-4157-8858-e9b42a87125b",
+      "taskId": "N265",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1785219015675_297d",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-07-28T06:10:15.674Z",
+      "sessionId": "34f6c1eb-f267-4157-8858-e9b42a87125b",
+      "taskId": "N265",
+      "payload": {
+        "tool_name": "Bash"
+      }
     }
   ]
 }
