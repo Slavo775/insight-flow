@@ -387,6 +387,124 @@
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/171",
       "mergedAt": "2026-07-27T13:11:21.912Z",
       "flowId": "default"
+    },
+    {
+      "id": "N264",
+      "title": "Release insight-flow 2.12.0 — dashboard facelift (N258–N263)",
+      "type": "chore",
+      "priority": "high",
+      "status": "release-fixed",
+      "folder": "insightFlow/workTasks/N264-release-insight-flow-2-12-0-dashboard-facelift-n25",
+      "createdAt": "2026-07-27T13:20:06.476Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-27T13:20:06.477Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-27T13:36:26.210Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "changes-needed",
+          "at": "2026-07-27T13:37:29.469Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "release-fixed",
+          "at": "2026-07-27T13:42:53.794Z",
+          "by": "custom:task-release-fix"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "release",
+        "dashboard",
+        "facelift"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "custom:release-manager"
+    },
+    {
+      "id": "N265",
+      "title": "Status Transitions pane fidelity — design-accurate pills, ring markers, actor bullet",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N265-status-transitions-pane-fidelity-design-accurate-p",
+      "createdAt": "2026-07-28T05:47:23.980Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-28T05:47:23.980Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "ready",
+          "at": "2026-07-28T05:48:33.817Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-07-28T05:49:16.190Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-07-28T05:54:34.592Z",
+          "by": "custom:task-fe-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-07-28T05:55:17.319Z",
+          "by": "custom:task-fe-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-07-28T06:07:23.300Z",
+          "by": "custom:task-fe-review"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-07-28T05:49:16.196Z",
+        "completedAt": "2026-07-28T05:54:34.602Z",
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 1,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "frontend",
+        "dashboard-ui",
+        "status-transitions",
+        "lifecycle",
+        "design-fidelity"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

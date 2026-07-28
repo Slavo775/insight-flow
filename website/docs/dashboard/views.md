@@ -38,7 +38,7 @@ the [hub](../built-ins/master-server.md), which is the single notifier. Open
 your projects through the hub to get notified.
 
 When the activity engine is enabled, the board also carries the **Agent
-Activity** and **Recent Activity** tabs (see [Activity feed](#activity-feed)
+Activity** and **Status Transitions** tabs (see [Activity feed](#activity-feed)
 below). If the engine is off, a chip explains how to enable it in
 [`taskflow.config.json`](../configuration.md).
 
