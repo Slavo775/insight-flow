@@ -70,6 +70,17 @@ body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); co
 .lifecycle .act-stream-time { font-size: 12px; }
 .lifecycle .act-stream-target { font-size: 13px; }
 .lifecycle .lifecycle-current { font-size: 10px; }
+/* N265 — design-accurate Status Transitions pane (bordered/dotted pills, ring rail
+   markers, actor bullet). Lifecycle-scoped; the Agent Activity .act-stream* is untouched. */
+.lifecycle-pill { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 5px; border: 1px solid; white-space: nowrap; }
+.lifecycle-pill-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+/* ring rail marker (replaces .act-stream-dot for the lifecycle rows): a colored ring
+   with an inner dot; the newest ("Current") row's ring glows. Centered on the rail. */
+.lifecycle-dot { position: absolute; left: -28px; top: 1px; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--c); background: var(--surface); }
+.lifecycle-dot::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--c); transform: translate(-50%, -50%); }
+.lifecycle-dot[data-current="true"] { box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent); }
+/* hollow-circle bullet before the "taskId · by X" actor line (lifecycle only). */
+.lifecycle .act-stream-target::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; border: 1px solid var(--text-muted); border-radius: 50%; vertical-align: middle; }
 .act-tabs { margin-top: 24px; }
 .act-tab-bar { display: flex; align-items: center; border-bottom: 2px solid var(--border); }
 /* N86: .act-tab migrated to <Button $variant="tab">; .act-tab-bar kept.

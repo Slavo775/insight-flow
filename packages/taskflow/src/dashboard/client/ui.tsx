@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { apiUrl } from "./base.js";
@@ -6,6 +7,7 @@ import {
   COLUMNS,
   orphanStatuses,
   statusColor,
+  statusLabel,
   statusHeaderColor,
   formatTime,
   hexToRgb,
@@ -325,10 +327,27 @@ interface TimelineEvent {
   flowId: string;
 }
 
+// N265 — the design-accurate Status Transitions pill: a bordered, translucent,
+// status-colored chip with a small colored dot inside and an UPPERCASE label
+// (matches the Lovable StatusPill). Local to this pane — the shared Badge (Kanban
+// cards, detail panel) keeps its own look.
+function LifecyclePill({ status, statuses }: { status: string; statuses?: FlowStatus[] }) {
+  const color = statusColor(status, statuses) ?? taskStatusColor(status);
+  const rgb = hexToRgb(color);
+  return (
+    <span
+      className="lifecycle-pill"
+      style={{ color, borderColor: `rgba(${rgb},0.5)`, background: `rgba(${rgb},0.18)` }}
+    >
+      <span className="lifecycle-pill-dot" aria-hidden="true" style={{ background: color }} />
+      {statusLabel(status, statuses)}
+    </span>
+  );
+}
+
 // N263 — "Lifecycle" pane: the cross-task status-transition timeline (all tasks'
-// statusHistory merged, newest first, cap 30) restyled to match the Lovable design
-// — a rail with status-colored dots + from→to Badges + a "Current" marker. Reuses
-// the N262 .act-stream* rail/dot/header CSS.
+// statusHistory merged, newest first, cap 30) restyled to match the Lovable design.
+// N265 — design-accurate pills (LifecyclePill) + ring rail markers + actor bullet.
 export function Timeline({ tasks }: { tasks: Task[] }) {
   const statusMap = useFlowStatusMap(); // N130 — per-flow status color/label
   const events: TimelineEvent[] = [];
@@ -373,20 +392,21 @@ export function Timeline({ tasks }: { tasks: Task[] }) {
           return (
             <li className="act-stream-item" key={e.taskId + e.at + i}>
               <span
-                className="act-stream-dot"
+                className="lifecycle-dot"
                 aria-hidden="true"
-                style={{ background: `rgba(${hexToRgb(color)},0.25)`, borderColor: color }}
+                data-current={i === 0 ? "true" : undefined}
+                style={{ ["--c"]: color } as CSSProperties}
               />
               <div className="act-stream-row">
                 {e.from ? (
                   <>
-                    <Badge status={e.from} statuses={flowStatuses} size="md" />
+                    <LifecyclePill status={e.from} statuses={flowStatuses} />
                     <span aria-hidden="true" style={{ color: "var(--text-muted)" }}>
                       →
                     </span>
                   </>
                 ) : null}
-                <Badge status={e.status} statuses={flowStatuses} size="md" />
+                <LifecyclePill status={e.status} statuses={flowStatuses} />
                 {i === 0 ? <span className="lifecycle-current">Current</span> : null}
                 <span className="act-stream-time">{formatTime(e.at)}</span>
               </div>

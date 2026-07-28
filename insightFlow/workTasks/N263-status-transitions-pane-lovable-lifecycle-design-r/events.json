@@ -1766,6 +1766,58 @@
       "sessionId": "34f6c1eb-f267-4157-8858-e9b42a87125b",
       "taskId": "N263",
       "payload": {}
+    },
+    {
+      "type": "git-end",
+      "taskId": "N263",
+      "timestamp": "2026-07-27T13:13:05.098Z",
+      "source": "agent"
+    },
+    {
+      "type": "done",
+      "taskId": "N263",
+      "timestamp": "2026-07-27T13:13:05.229Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1785157985431_7ba7",
+      "type": "tool-approved",
+      "source": "hook",
+      "hookName": "PostToolUse",
+      "timestamp": "2026-07-27T13:13:05.431Z",
+      "sessionId": "34f6c1eb-f267-4157-8858-e9b42a87125b",
+      "taskId": "N263",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "id": "evt_1785157999338_517c",
+      "type": "agent-idle",
+      "source": "hook",
+      "hookName": "Stop",
+      "timestamp": "2026-07-27T13:13:19.337Z",
+      "sessionId": "34f6c1eb-f267-4157-8858-e9b42a87125b",
+      "taskId": "N263",
+      "payload": {}
+    },
+    {
+      "type": "start",
+      "taskId": "N263",
+      "timestamp": "2026-07-27T13:13:59.879Z",
+      "source": "agent"
+    },
+    {
+      "type": "research-start",
+      "taskId": "N263",
+      "timestamp": "2026-07-27T13:14:00.039Z",
+      "source": "agent"
+    },
+    {
+      "type": "research-end",
+      "taskId": "N263",
+      "timestamp": "2026-07-27T13:14:40.142Z",
+      "source": "agent"
     }
   ]
 }

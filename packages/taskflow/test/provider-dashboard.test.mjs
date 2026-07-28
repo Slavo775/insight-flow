@@ -28,9 +28,13 @@ test("SPA bundle ships the unified 'Agent Activity' feed label (not Claude-speci
   assert.ok(!JS.includes("Claude Activity"), "old 'Claude Activity' label should be gone");
 });
 
-test("SPA ships the provider badge classes (claude + cursor)", () => {
-  assert.match(CSS, /activity-badge-provider-claude/, "claude provider badge class present");
+test("SPA ships the provider badge classes (cursor + other)", () => {
+  // ProviderBadge (ActivityItem.tsx) renders only for non-claude providers:
+  // "cursor" → .activity-badge-provider-cursor, anything else → -other. The claude
+  // badge is intentionally never rendered (returns null), so its dead CSS class was
+  // dropped in the N262 activity-pane redesign — assert the two that actually ship.
   assert.match(CSS, /activity-badge-provider-cursor/, "cursor provider badge class present");
+  assert.match(CSS, /activity-badge-provider-other/, "other provider badge class present");
 });
 
 test("N238: the project SPA no longer ships notifications/sounds (hub owns them)", () => {
