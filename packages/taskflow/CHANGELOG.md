@@ -2,6 +2,14 @@
 
 All notable changes to `insight-flow` are documented here.
 
+## [2.12.0](https://github.com/Slavo775/insight-flow/compare/v2.11.1...v2.12.0) (2026-07-28)
+
+
+### Features
+
+* **dashboard:** design-accurate Status Transitions pane (N265) + 2.12.0 release-fix (N264) ([#173](https://github.com/Slavo775/insight-flow/issues/173)) ([869bde4](https://github.com/Slavo775/insight-flow/commit/869bde42b04bbf30abd05751bbeb3575c915f55b))
+* **dashboard:** facelift the project dashboard to the Lovable design (N258–N263) ([#171](https://github.com/Slavo775/insight-flow/issues/171)) ([8d3f1d5](https://github.com/Slavo775/insight-flow/commit/8d3f1d59035251923db6741dd74d7c99fbbc9318))
+
 ## [2.11.1](https://github.com/Slavo775/insight-flow/compare/v2.11.0...v2.11.1) (2026-07-22)
 
 
