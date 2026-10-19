@@ -6,7 +6,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -111,6 +119,9 @@ test("ChainSchema: `when` is one line of at most 200 chars (it is printed in a `
   assert.ok(!forged.success);
   assert.match(forged.error.issues[0].message, /single line/);
   assert.ok(!ChainSchema.safeParse(withWhen("a\rb")).success);
+  for (const sep of ["\u2028", "\u2029", "\u0085", "\u000b", "\u001b[2K", "\u202e"]) {
+    assert.ok(!ChainSchema.safeParse(withWhen(`a${sep}b`)).success, JSON.stringify(sep));
+  }
   assert.ok(!ChainSchema.safeParse(withWhen("x".repeat(201))).success);
 });
 
@@ -282,11 +293,11 @@ test("several links from one terminal: --to is required and must be a candidate"
   json(dir, ["create", "--title", "T", "--chain", "custom:fork"]);
   const merged = run(dir, ["merge", "--id", "N00"]);
   assert.equal(merged.err.match(/chain next:/g)?.length, 2);
-  assert.match(merged.err, /\(mode: auto\) — when: hotfix/);
+  assert.match(merged.err, /\(mode: auto\) — when: "hotfix"/);
 
   const ambiguous = run(dir, ["chain-advance", "--id", "N00"]);
   assert.notEqual(ambiguous.code, 0);
-  assert.match(ambiguous.err, /pass --to: custom:beta, custom:beta2 \(when: hotfix\)/);
+  assert.match(ambiguous.err, /pass --to: custom:beta, custom:beta2 \(when: "hotfix"\)/);
   const wrong = run(dir, ["chain-advance", "--id", "N00", "--to", "custom:ghost"]);
   assert.notEqual(wrong.code, 0);
   assert.match(wrong.err, /no link to 'custom:ghost'/);
@@ -321,6 +332,13 @@ test("set-flow keeps a chained task inside its chain", () => {
     json(dir, ["set-flow", "--id", "N00", "--flow", "custom:beta"]).flowId,
     "custom:beta",
   );
+  // the chain can't be read → refuse instead of skipping the guard silently
+  writeFileSync(join(dir, "insightFlow/chains/broken.json"), "{ not json");
+  const unreadable = run(dir, ["set-flow", "--id", "N00", "--flow", "default"]);
+  assert.notEqual(unreadable.code, 0);
+  assert.match(unreadable.err, /cannot check chain "custom:ship".*set-chain --id N00 --chain none/);
+  rmSync(join(dir, "insightFlow/chains/broken.json"));
+
   json(dir, ["set-chain", "--id", "N00", "--chain", "none"]);
   assert.equal(
     json(dir, ["set-flow", "--id", "N00", "--flow", "custom:other"]).flowId,
@@ -390,6 +408,128 @@ test("composer MCP authors chains: describe, create/list/get, validation, and th
 
     assert.equal((await call("delete", { kind: "chain", id: "custom:ship2" })).isError, false);
     assert.ok(!existsSync(join(dir, "insightFlow/chains/ship2.json")));
+  } finally {
+    await client.close();
+  }
+});
+
+test("prototype-key ids miss: unknown chain/flow, no orphan folder, nothing re-seated", () => {
+  const dir = project();
+  const create = run(dir, ["create", "--title", "P", "--chain", "constructor"]);
+  assert.notEqual(create.code, 0);
+  assert.match(create.err, /Chain "constructor" not found/);
+  assert.ok(!existsSync(join(dir, "insightFlow/workTasks/N00-p")), "no orphan folder");
+
+  json(dir, ["create", "--title", "T"]);
+  const setChain = run(dir, ["set-chain", "--id", "N00", "--chain", "toString"]);
+  assert.notEqual(setChain.code, 0);
+  assert.match(setChain.err, /unknown chain "toString"/);
+  assert.equal(storedTask(dir).flowId, "default");
+
+  const proto = ChainSchema.parse({ ...SHIP, flows: ["default", "constructor"], links: [] });
+  assert.match(chainReferenceError(proto, { default: {} }), /unknown flow 'constructor'/);
+});
+
+test("chain-advance: a task whose flow no longer exists gets a clear unknown-flow error", () => {
+  const dir = project();
+  json(dir, ["create", "--title", "T", "--chain", "custom:ship"]);
+  const shardPath = join(dir, "insightFlow/workTasks/tasks-N00-N09.json");
+  const shard = JSON.parse(readFileSync(shardPath, "utf-8"));
+  shard.tasks[0].flowId = "custom:gone";
+  shard.tasks[0].status = "merged";
+  writeFileSync(shardPath, JSON.stringify(shard));
+  const adv = run(dir, ["chain-advance", "--id", "N00"]);
+  assert.notEqual(adv.code, 0);
+  assert.match(adv.err, /in flow 'custom:gone', which no longer exists/);
+});
+
+test("status writer: warns on a dangling chain binding; no hint when the save fails", () => {
+  const dir = project();
+  json(dir, ["create", "--title", "T", "--chain", "custom:ship"]);
+  json(dir, ["create", "--title", "U", "--chain", "custom:ship"]);
+
+  // the hint prints only after the shard is saved
+  if (process.getuid?.() !== 0) {
+    const shardPath = join(dir, "insightFlow/workTasks/tasks-N00-N09.json");
+    chmodSync(shardPath, 0o444);
+    const failed = run(dir, ["merge", "--id", "N01"]);
+    chmodSync(shardPath, 0o644);
+    assert.notEqual(failed.code, 0, "save must fail on a read-only shard");
+    assert.doesNotMatch(failed.err, /chain next/);
+    assert.equal(storedTask(dir).status, "ready");
+  }
+
+  rmSync(join(dir, "insightFlow/chains/ship.json"));
+  const merged = run(dir, ["merge", "--id", "N00"]);
+  assert.equal(merged.code, 0);
+  assert.match(merged.err, /N00 is bound to unknown chain 'custom:ship'; no chain hint/);
+});
+
+test("composer MCP: update_chain, prototype keys, size cap, and a malformed chain file", async () => {
+  const dir = project();
+  const client = new Client({ name: "n267-test", version: "0.0.0" });
+  await client.connect(
+    new StdioClientTransport({
+      command: process.execPath,
+      args: [CLI, "mcp"],
+      cwd: dir,
+      env: { ...process.env, HOME: dir },
+      stderr: "ignore",
+    }),
+  );
+  const call = async (name, args) => {
+    const r = await client.callTool({ name, arguments: args });
+    return { isError: !!r.isError, body: JSON.parse(r.content[0].text) };
+  };
+  try {
+    // update_chain: success with the current revision, stale revision 409, unknown 404
+    const { revision } = (await call("get", { kind: "chain", id: "custom:ship" })).body;
+    assert.ok(revision);
+    const ok = await call("update_chain", { def: { ...SHIP, title: "Ship v2" }, revision });
+    assert.equal(ok.isError, false);
+    assert.equal(
+      (await call("get", { kind: "chain", id: "custom:ship" })).body.definition.title,
+      "Ship v2",
+    );
+    const stale = await call("update_chain", { def: { ...SHIP, title: "Ship v3" }, revision });
+    assert.ok(stale.isError);
+    assert.match(stale.body.error, /stale revision/);
+    const unknown = await call("update_chain", { def: { ...SHIP, id: "custom:ghost" } });
+    assert.ok(unknown.isError);
+    assert.match(unknown.body.error, /unknown chain 'custom:ghost'/);
+
+    // prototype keys
+    assert.ok((await call("get", { kind: "chain", id: "constructor" })).isError);
+    assert.ok((await call("get", { kind: "flow", id: "toString" })).isError);
+    const protoFlow = await call("create_chain", {
+      def: { ...SHIP, id: "custom:proto", flows: ["default", "constructor"], links: [] },
+    });
+    assert.ok(protoFlow.isError);
+    assert.match(protoFlow.body.error, /unknown flow 'constructor'/);
+    const protoDel = await call("delete", { kind: "flow", id: "constructor" });
+    assert.ok(protoDel.isError);
+    assert.ok(!("reverted" in protoDel.body));
+
+    // same 256 KB cap as the HTTP body
+    const big = await call("create_chain", {
+      def: { ...SHIP, id: "custom:big", description: "x".repeat(300 * 1024) },
+    });
+    assert.ok(big.isError);
+    assert.match(big.body.error, /too large/);
+
+    // a malformed chain file: chain writes fail, flow writes proceed with a warning,
+    // and the broken chain can still be deleted
+    writeFileSync(join(dir, "insightFlow/chains/broken.json"), "{ not json");
+    const blocked = await call("create_chain", { def: { ...SHIP, id: "custom:new" } });
+    assert.ok(blocked.isError);
+    assert.match(blocked.body.error, /broken\.json/);
+    const flowEdit = await call("update_flow", { def: { ...BETA, title: "Beta v2" } });
+    assert.equal(flowEdit.isError, false);
+    assert.match(flowEdit.body.warning, /chain guard skipped/);
+    const delBroken = await call("delete", { kind: "chain", id: "custom:broken" });
+    assert.equal(delBroken.isError, false, JSON.stringify(delBroken.body));
+    assert.ok(!existsSync(join(dir, "insightFlow/chains/broken.json")));
+    assert.equal((await call("list", { kind: "chain" })).body.count, 1);
   } finally {
     await client.close();
   }

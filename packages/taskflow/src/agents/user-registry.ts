@@ -265,5 +265,7 @@ export function mergedChains(
     const error = chainReferenceError(chain, flows);
     if (error) throw new UserRegistryError(files[chain.id], error);
   }
-  return items;
+  // Null prototype: callers look chains up by a task's `chainId` / a CLI arg,
+  // so `constructor` & co. must miss instead of hitting Object.prototype.
+  return Object.assign(Object.create(null) as Record<string, Chain>, items);
 }

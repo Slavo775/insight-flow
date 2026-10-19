@@ -222,6 +222,19 @@ export interface DefResult {
 }
 
 /**
+ * N267 — the registries a write validates against. `chainsError` is set when
+ * the chains could not be loaded best-effort (a flow write still proceeds, but
+ * its chain guard is skipped and the success response says so).
+ */
+export type WriteRegistries = UserRegistries & { chainsError?: string };
+
+function chainGuardWarning(kind: Kind, user: WriteRegistries): { warning?: string } {
+  return kind === "projects" && user.chainsError
+    ? { warning: `chains could not be loaded (${user.chainsError}); chain guard skipped` }
+    : {};
+}
+
+/**
  * Delete a custom definition or revert a built-in override. Locked ids refuse
  * (403); a custom delete refuses while still referenced (409). Performs the
  * unlink + flow-reference cleanup; the caller is responsible for any
@@ -230,7 +243,7 @@ export interface DefResult {
 export function removeDefinition(
   kind: Kind,
   id: string,
-  user: UserRegistries,
+  user: WriteRegistries,
   root: string = userSpaceRoot(),
 ): DefResult {
   const existing = (user[kind] ?? {}) as Record<string, { id: string }>;
@@ -239,7 +252,12 @@ export function removeDefinition(
     return { status: 403, body: { ok: false, error: `'${id}' is locked (read-only)` } };
   }
   const isCustom = id.startsWith(CUSTOM_ID_PREFIX);
-  if (!existing[id]) {
+  // N267 — chains that failed to load (malformed file) can still be deleted by
+  // id: nothing references a chain, and deleting the broken file is the fix.
+  const brokenChain =
+    kind === "chains" && isCustom && !!user.chainsError && existsSync(fileFor(root, kind, id));
+  // hasOwn: a plain-object registry would resolve `constructor` & co.
+  if (!Object.hasOwn(existing, id) && !brokenChain) {
     // No user-space file. Custom → genuinely unknown (404). Built-in → there's
     // no override to revert and you can't delete a shipped definition (403).
     return {
@@ -272,7 +290,13 @@ export function removeDefinition(
     }
   }
   // Custom → deleted; built-in → reverted to the shipped definition.
-  return { status: 200, body: isCustom ? { ok: true, deleted: id } : { ok: true, reverted: id } };
+  return {
+    status: 200,
+    body: {
+      ...(isCustom ? { ok: true, deleted: id } : { ok: true, reverted: id }),
+      ...chainGuardWarning(kind, user),
+    },
+  };
 }
 
 /**
@@ -285,7 +309,7 @@ export function removeDefinition(
 export function writeDefinition(
   kind: Kind,
   parsed: unknown,
-  user: UserRegistries,
+  user: WriteRegistries,
   opts: { method: "POST" | "PUT"; revision?: string | null; pathId?: string | null; root?: string },
 ): DefResult {
   const { method, revision, pathId } = opts;
@@ -421,22 +445,31 @@ export function writeDefinition(
     }
     return { status: 500, body: { ok: false, error: (err as Error).message } };
   }
-  return { status: method === "POST" ? 201 : 200, body: { ok: true, id: record.id } };
+  return {
+    status: method === "POST" ? 201 : 200,
+    body: { ok: true, id: record.id, ...chainGuardWarning(kind, user) },
+  };
 }
 
 /**
  * The user registries a write of `kind` validates against. N267 — chains load
- * apart (a bad chain file must not block flow edits): chain writes need them
- * strictly (throws), flow writes use them best-effort for the delete guard and
- * PUT re-validation. Shared by the HTTP router and the composer MCP.
+ * apart (a bad chain file must not block flow edits): chain create/update needs
+ * them strictly (throws); flow writes and chain deletes load them best-effort
+ * and record `chainsError` (flow writes then warn that the chain guard was
+ * skipped; a chain delete can remove the broken file). Shared by the HTTP
+ * router and the composer MCP.
  */
-export function loadRegistriesForWrite(kind: Kind): UserRegistries {
-  const user = loadUserRegistries();
+export function loadRegistriesForWrite(
+  kind: Kind,
+  method: "POST" | "PUT" | "DELETE",
+): WriteRegistries {
+  const user: WriteRegistries = loadUserRegistries();
   if (kind === "chains" || kind === "projects") {
     try {
       user.chains = mergedChains(undefined, { ...BUILTIN_PROJECTS, ...user.projects });
     } catch (err) {
-      if (kind === "chains") throw err;
+      if (kind === "chains" && method !== "DELETE") throw err;
+      user.chainsError = (err as Error).message;
     }
   }
   return user;
@@ -472,9 +505,9 @@ export function handleCustomDefsRequest(
     return true;
   }
 
-  let user: UserRegistries;
+  let user: WriteRegistries;
   try {
-    user = loadRegistriesForWrite(kind);
+    user = loadRegistriesForWrite(kind, method);
   } catch (err) {
     sendJson(res, 500, { ok: false, error: `user space is unreadable: ${(err as Error).message}` });
     return true;

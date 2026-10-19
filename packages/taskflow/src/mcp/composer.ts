@@ -14,6 +14,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 import { resolveProjectRoot, resolvePackageAsset } from "../core/paths.js";
+import { DEFAULT_BODY_LIMIT } from "../core/http-util.js";
 import {
   mergedModuleRegistry,
   mergedComposedAgents,
@@ -164,8 +165,9 @@ function getDefinition(kind: Kind, id: string): ToolResult {
       : kind === "agent"
         ? mergedComposedAgents()
         : mergedProjects();
+  // hasOwn: a plain-object registry would resolve `constructor` & co.
+  if (!Object.hasOwn(registry, id)) return fail(`unknown ${kind} '${id}'`);
   const def = (registry as Record<string, unknown>)[id];
-  if (!def) return fail(`unknown ${kind} '${id}'`);
   const root = resolveProjectRoot();
   return ok({
     kind,
@@ -190,9 +192,18 @@ function getDefinition(kind: Kind, id: string): ToolResult {
 
 // --- create / update ----------------------------------------------------------
 
+/** Same cap as the HTTP body (256 KB) so both transports accept the same defs. */
+function tooLarge(def: unknown): ToolResult | null {
+  return JSON.stringify(def).length > DEFAULT_BODY_LIMIT
+    ? fail(`definition too large (max ${DEFAULT_BODY_LIMIT / 1024} KB)`)
+    : null;
+}
+
 function createDefinition(kind: Kind, def: unknown): ToolResult {
+  const big = tooLarge(def);
+  if (big) return big;
   const storageKind = kindFromTarget(kind);
-  const user = loadRegistriesForWrite(storageKind);
+  const user = loadRegistriesForWrite(storageKind, "POST");
   return fromDefResult(writeDefinition(storageKind, def, user, { method: "POST" }));
 }
 
@@ -207,8 +218,10 @@ function updateDefinition(kind: Kind, def: unknown, revision?: string): ToolResu
       `'${flowId}' is a built-in flow — refused over MCP; edit it in the dashboard if you really must`,
     );
   }
+  const big = tooLarge(def);
+  if (big) return big;
   const storageKind = kindFromTarget(kind);
-  const user = loadRegistriesForWrite(storageKind);
+  const user = loadRegistriesForWrite(storageKind, "PUT");
   return fromDefResult(
     writeDefinition(storageKind, def, user, {
       method: "PUT",
@@ -226,7 +239,7 @@ const DEF_SHAPE_HELP = {
     "An agent object: { id, title, description?, modules: string[], command?, subagents? }. `subagents` is a list of subagent-module ids the agent fans out to (orchestrator pattern). id must start with 'custom:' or match a shipped agent id.",
   flow: "A flow object: { id, title, agents: string[], flow: edges[], install?, statuses?, entryAgents? }. id must start with 'custom:'.",
   chain:
-    "A chain object (flow of flows): { id, title, description?, flows: string[], links: { from, on, to, mode?: 'auto'|'gated', when? }[] }. A link leaves a TERMINAL status `on` of flow `from` and enters flow `to` (which needs an entry agent); mode defaults to 'gated'; `when` is one line (max 200 chars). Flows are not modified, so one flow can sit in many chains. No install step. id must start with 'custom:'.",
+    "A chain object (flow of flows): { id, title, description?, flows: string[], links: { from, on, to, mode?: 'auto'|'gated', when? }[] }. A link leaves a TERMINAL status `on` of flow `from` and enters flow `to` (which needs an entry agent); mode defaults to 'gated'; `when` is one line (max 200 chars, no control characters); title max 200, description max 2000. Flows are not modified, so one flow can sit in many chains. No install step. id must start with 'custom:'.",
 } as const;
 
 /** Build the composer MCP server with all ~12 tools registered. */
@@ -283,7 +296,10 @@ export function createComposerServer(): McpServer {
     server.registerTool(
       `update_${kind}`,
       {
-        description: `Update an existing ${kind} (custom def in place, or eject/override a built-in). ${DEF_SHAPE_HELP[kind]} Locked modules${kind === "flow" ? " and built-in flows" : ""} are refused. Pass revision (from get) for optimistic-concurrency safety.`,
+        description:
+          kind === "chain"
+            ? `Update an existing custom chain in place (chains have no built-ins). ${DEF_SHAPE_HELP.chain} Fails (404) for an unknown id, (400) on a schema/reference error. Pass revision (from get) for optimistic-concurrency safety.`
+            : `Update an existing ${kind} (custom def in place, or eject/override a built-in). ${DEF_SHAPE_HELP[kind]} Locked modules${kind === "flow" ? " and built-in flows" : ""} are refused. Pass revision (from get) for optimistic-concurrency safety.`,
         inputSchema: { def: z.record(z.string(), z.unknown()), revision: z.string().optional() },
       },
       async ({ def, revision }) => guard(() => updateDefinition(kind, def, revision)),
@@ -301,7 +317,7 @@ export function createComposerServer(): McpServer {
       guard(() => {
         const storageKind = kindFromTarget(kind);
         return fromDefResult(
-          removeDefinition(storageKind, id, loadRegistriesForWrite(storageKind)),
+          removeDefinition(storageKind, id, loadRegistriesForWrite(storageKind, "DELETE")),
         );
       }),
   );

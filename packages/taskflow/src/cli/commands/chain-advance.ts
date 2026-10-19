@@ -15,6 +15,7 @@ export type ChainAdvanceFailure =
   | "not-found"
   | "no-chain"
   | "unknown-chain"
+  | "unknown-flow"
   | "not-terminal"
   | "no-link"
   | "ambiguous"
@@ -33,7 +34,9 @@ export interface ChainAdvanceResult {
 }
 
 function describe(links: ChainLink[]): string {
-  return links.map((l) => `${l.to}${l.when ? ` (when: ${l.when})` : ""}`).join(", ");
+  return links
+    .map((l) => `${l.to}${l.when ? ` (when: ${JSON.stringify(l.when)})` : ""}`)
+    .join(", ");
 }
 
 /** Shared by the CLI and (N269) the dashboard endpoint. */
@@ -71,6 +74,13 @@ export function chainAdvanceTask(
   }
 
   const from = task.flowId;
+  if (!Object.hasOwn(flows, from)) {
+    return {
+      ok: false,
+      error: "unknown-flow",
+      message: `${id} is in flow '${from}', which no longer exists — restore it or rebind the task.`,
+    };
+  }
   if (!isTerminalOf(flows[from], task.status)) {
     return {
       ok: false,

@@ -8,19 +8,23 @@ import { setStatus, type StatusFlow } from "../../core/set-status.js";
 import { now } from "../../core/storage.js";
 import { mergedChains, mergedProjects } from "../../agents/user-registry.js";
 import { chainEntryCommand, chainLinksFrom } from "../../core/chain.js";
+import type { Project } from "../../agents/project.js";
 
-function resolveFlow(task: Task): StatusFlow | undefined {
+/** The merged flows, or undefined (with a warning) when user space is malformed. */
+function loadFlows(task: Task): Record<string, Project> | undefined {
   try {
-    return mergedProjects()[task.flowId ?? "default"];
+    return mergedProjects();
   } catch (err) {
-    // Never block the lifecycle on a malformed custom-flow file — fall back to
-    // the canonical universe. Surface the degradation so it isn't silent.
     console.error(
       `warning: could not load flows (${(err as Error).message}); ` +
         `validating ${task.id} against the canonical status set.`,
     );
     return undefined;
   }
+}
+
+function resolveFlow(task: Task, flows = loadFlows(task)): StatusFlow | undefined {
+  return flows?.[task.flowId ?? "default"];
 }
 
 /**
@@ -31,8 +35,9 @@ function resolveFlow(task: Task): StatusFlow | undefined {
  * `task.status = X; task.statusHistory.push(...)`.
  */
 export function writeStatus(task: Task, target: string, by: string): void {
-  setStatus(task, target, { by, at: now() }, resolveFlow(task));
-  printChainHint(task);
+  const flows = loadFlows(task);
+  setStatus(task, target, { by, at: now() }, resolveFlow(task, flows));
+  printChainHint(task, flows);
 }
 
 /**
@@ -40,24 +45,40 @@ export function writeStatus(task: Task, target: string, by: string): void {
  * gets one `chain next:` line per link on stderr (stdout JSON stays parseable).
  * The handover is resolved here, at run time, so a flow reused in many chains
  * needs no prompt wiring. Best-effort: a broken chain file only warns.
+ *
+ * The lines print on `setImmediate`, i.e. only after the calling command has
+ * saved the shard and returned: every caller saves synchronously right after
+ * `writeStatus`, and a failed save exits the CLI (run().catch → exit / crash)
+ * before the check phase, so an unsaved status never prints a hint.
  */
-function printChainHint(task: Task): void {
+function printChainHint(task: Task, flows: Record<string, Project> | undefined): void {
   if (!task.chainId) return;
+  if (!flows) {
+    console.error(`warning: no chain hint for ${task.id} (flows could not be loaded).`);
+    return;
+  }
+  let lines: string[];
   try {
-    const flows = mergedProjects();
     const chain = mergedChains(undefined, flows)[task.chainId];
-    if (!chain) return;
-    for (const link of chainLinksFrom(chain, task.flowId, task.status)) {
-      const entry = chainEntryCommand(flows[link.to]);
-      const when = link.when ? ` — when: ${link.when}` : "";
+    if (!chain) {
       console.error(
-        `chain next: flow ${link.to} — run \`insight-flow chain-advance --id ${task.id} --to ${link.to}\`` +
-          ` then \`${entry?.command ?? "(no entry agent)"}\` (mode: ${link.mode})${when}`,
+        `warning: ${task.id} is bound to unknown chain '${task.chainId}'; no chain hint.`,
       );
+      return;
     }
+    lines = chainLinksFrom(chain, task.flowId, task.status).map((link) => {
+      const entry = chainEntryCommand(flows[link.to]);
+      const when = link.when ? ` — when: ${JSON.stringify(link.when)}` : "";
+      return (
+        `chain next: flow ${link.to} — run \`insight-flow chain-advance --id ${task.id} --to ${link.to}\`` +
+        ` then \`${entry?.command ?? "(no entry agent)"}\` (mode: ${link.mode})${when}`
+      );
+    });
   } catch (err) {
     console.error(`warning: could not load chains (${(err as Error).message}); no chain hint.`);
+    return;
   }
+  if (lines.length) setImmediate(() => lines.forEach((line) => console.error(line)));
 }
 
 /**

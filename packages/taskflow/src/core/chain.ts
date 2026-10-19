@@ -35,7 +35,8 @@ export function chainEntryCommand(
  */
 export function chainReferenceError(chain: Chain, flows: Record<string, ChainFlow>): string | null {
   for (const id of chain.flows) {
-    if (!flows[id]) return `references unknown flow '${id}'`;
+    // hasOwn: a plain-object registry would resolve `constructor` & co.
+    if (!Object.hasOwn(flows, id)) return `references unknown flow '${id}'`;
   }
   for (const link of chain.links) {
     const label = `link ${link.from} (${link.on}) → ${link.to}`;

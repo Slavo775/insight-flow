@@ -5,7 +5,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
@@ -776,6 +776,24 @@ test("chains CRUD: validation, GET list, flow delete/edit guarded by chains", as
       listed.chains.map((c) => [c.id, c.links[0].mode]),
       [["custom:ship", "gated"]],
     );
+
+    // duplicate id → 409
+    r = await api("/api/chains", "POST", CHAIN);
+    assert.equal(r.status, 409);
+    assert.match((await r.json()).error, /already exists/);
+
+    // dashboard flow picker keeps a chained task inside its chain → 400 outside-chain
+    const created = spawnSync(
+      process.execPath,
+      [CLI, "create", "--title", "T", "--chain", "custom:ship"],
+      { cwd: dir, env: { ...process.env, HOME: dir }, encoding: "utf-8" },
+    );
+    assert.equal(created.status, 0, created.stderr);
+    r = await api("/api/task-flow", "POST", { id: "N00", flow: "composer-authoring" });
+    assert.equal(r.status, 400);
+    assert.equal((await r.json()).error, "outside-chain");
+    r = await api("/api/task-flow", "POST", { id: "N00", flow: "custom:beta" });
+    assert.equal(r.status, 200);
 
     // the chained flow: delete → 409, dropping its entry agent → 400
     r = await api("/api/projects/custom:beta", "DELETE");

@@ -721,20 +721,23 @@ export const ChainLinkSchema = z.object({
   to: z.string().min(1),
   mode: z.enum(["auto", "gated"]).default("gated"),
   // Single line: the status writer prints it inside a `chain next:` line that
-  // agents read line by line — a newline could forge a second (auto) handover.
+  // agents read line by line — a line break (incl. U+2028/U+2029/NEL) or a
+  // control/format char (ANSI escapes, bidi overrides) could forge or hide text.
   when: z
     .string()
     .min(1)
     .max(200)
-    .refine((s) => !/[\r\n]/.test(s), { message: "when must be a single line" })
+    .refine((s) => !/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u.test(s), {
+      message: "when must be a single line without control characters",
+    })
     .optional(),
 });
 
 export const ChainSchema = z
   .object({
     id: DefinitionIdSchema,
-    title: z.string().min(1),
-    description: z.string().optional(),
+    title: z.string().min(1).max(200),
+    description: z.string().max(2000).optional(),
     // Ordered; flows[0] is the entry flow a newly bound task starts in.
     flows: z.array(z.string().min(1)).min(1),
     links: z.array(ChainLinkSchema).default([]),

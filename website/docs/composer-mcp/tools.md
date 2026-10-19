@@ -52,7 +52,7 @@ A **chain** links existing flows into a flow of flows:
 `{ id, title, flows: string[], links: { from, on, to, mode?, when? }[] }`. Each
 link leaves a **terminal** status `on` of flow `from` and enters flow `to`, which
 must have an entry agent. `mode` is `gated` (default) or `auto`; `when` is one
-line of at most 200 characters. See [Chains](../cli/git-and-flow.md) for how a
+line of at most 200 characters, with no control characters. See [Chains](../cli/git-and-flow.md) for how a
 task moves along a chain at run time.
 
 ### `update_module(def, revision?)` · `update_agent(def, revision?)` · `update_flow(def, revision?)` · `update_chain(def, revision?)`

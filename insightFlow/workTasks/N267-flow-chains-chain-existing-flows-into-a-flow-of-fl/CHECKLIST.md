@@ -47,3 +47,14 @@
 - [x] Cheap Round 1 test asks: non-zero exit asserted for unknown `set-chain` and bad `chain-advance --to`; a chained task at a non-terminal prints no hint
 - [x] Gates: typecheck ✓, eslint ✓ (changed files), tests 386/387 — the one failure is the timing test `log-event exits within 250ms` under full-suite load; it passes alone (15/15 in the timing files)
 
+## Round 3 non-blocking fixes
+
+- [x] Prototype-key ids miss everywhere (`Object.hasOwn`, null-prototype chain map) + tests
+- [x] `when`: no control/format chars or line/paragraph separators; printed quoted + tests
+- [x] `set-flow` fails closed when the chain can't be read; one flows load + test
+- [x] Conventions flow-guard wording; analyst intent names chains; authoring files regenerated
+- [x] Tests: `update_chain` (ok / stale 409 / 404), malformed chain file, HTTP dup 409, dashboard `outside-chain` 400
+- [x] `update_chain` description; MCP 256 KB cap; chain `title`/`description` caps
+- [x] Docs: `git-and-flow.md`, README, `tools.md`
+- [x] `chain-advance` unknown-flow; `writeStatus` one flows load; dangling-chain warning; hint after save; flow writes warn when the chain guard is skipped; broken chain deletable
+

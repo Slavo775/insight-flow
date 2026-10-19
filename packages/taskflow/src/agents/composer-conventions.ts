@@ -92,9 +92,9 @@ Template: \`get({ kind: "flow", id: "default" })\` or \`composer-authoring\`.`,
 
 Shape: \`{ id, title, description?, flows: string[], links: { from, on, to, mode?: "auto"|"gated", when? }[] }\`.
 - \`flows\` — existing flow ids; the **first** is where a new task starts (\`insight-flow create --chain <id>\`).
-- \`links\` — \`from\`/\`to\` are in \`flows\`; \`on\` must be a **terminal** status of \`from\` (\`terminal: true\`); \`to\` must have an entry agent. \`mode\` defaults to \`gated\`. \`when\` is one line (max 200 chars); give it when one terminal has several links.
+- \`links\` — \`from\`/\`to\` are in \`flows\`; \`on\` must be a **terminal** status of \`from\` (\`terminal: true\`); \`to\` must have an entry agent. \`mode\` defaults to \`gated\`. \`when\` is one line (max 200 chars, no control characters); give it when one terminal has several links.
 - No install step and no flow changes. At run time, a status write that reaches a linked terminal prints a \`chain next:\` line; \`insight-flow chain-advance --id <task>\` moves the task into the next flow at \`ready\`.
-- Editing or deleting a flow is refused while a chain still needs it.
+- Deleting a flow that a chain names is refused; a flow edit that removes a linked terminal status or the entry agent of a linked-to flow is refused. Other flow edits (title, agents, new statuses, …) are fine.
 
 Template: \`list({ kind: "chain" })\` then \`get\` one; check a flow's terminals with \`get({ kind: "flow", id })\`.`,
 };

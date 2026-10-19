@@ -638,7 +638,7 @@ Example — run a script when any task starts and send a desktop notification wh
 
 ### Flow chains
 
-A chain (`insightFlow/chains/<name>.json`) links existing flows so one task can go through several of them: `{ id: "custom:…", title, flows: [entry, …], links: [{ from, on, to, mode?, when? }] }`. A link leaves a **terminal** status `on` of flow `from` and enters flow `to` at `ready`; `mode` is `gated` (default) or `auto`, like agent handovers. Flows are not modified, so one flow can be reused in many chains. Bind with `create --chain` / `set-chain`; when a chained task reaches a linked terminal, the CLI prints `chain next:` lines on stderr and `chain-advance` moves the task (folder and history kept). Chains are read/written over `/api/chains`. See the docs page *CLI → Git & Flow → Chains*.
+A chain (`insightFlow/chains/<name>.json`) links existing flows so one task can go through several of them: `{ id: "custom:…", title, flows: [entry, …], links: [{ from, on, to, mode?, when? }] }`. A link leaves a **terminal** status `on` of flow `from` and enters flow `to` at `ready`; `mode` is `gated` (default) or `auto`, like agent handovers; the optional `when` is one line (≤200 chars, no control characters). Flows are not modified, so one flow can be reused in many chains. Bind with `create --chain` / `set-chain` (a chained task's `set-flow` stays inside its chain); when a chained task reaches a linked terminal, the CLI prints `chain next:` lines on stderr and `chain-advance` moves the task (folder and history kept). Chains are read/written over `/api/chains`. See the docs page *CLI → Git & Flow → Chains*.
 
 ### Integration artifacts (composer modules)
 

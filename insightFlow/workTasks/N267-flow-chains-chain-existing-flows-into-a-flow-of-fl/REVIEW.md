@@ -155,3 +155,26 @@ Ordered by value. Items 1–4 are one-liners worth a quick follow-up (or N268's 
 - No `agents.extend.task-review` command is configured, so this review lives in REVIEW.md only; nothing was posted on PR #174.
 - Follow-ups remain N268 (Chains page + editor) and N269 (task-detail chain bar, picker, gated Continue). Items 1–5 above are good candidates for a small hygiene commit on this branch or N268.
 - After merge, reinstall the global binary (`pnpm pack:taskflow && npm i -g packages/taskflow/insight-flow-*.tgz`) so agents and the composer MCP see `set-chain`, `chain-advance` and `create_chain`.
+
+### Fix notes — Round 3 non-blocking (task-review-fix)
+
+The human asked to fix all non-blocking items. The tracker allows a fix round only after `fix-needed`, so the status stays `approved` and the work is recorded here.
+
+1. **Prototype-key ids** — fixed. `chainReferenceError` uses `Object.hasOwn`; `mergedChains()` returns a null-prototype map, so every `[chainId]` lookup (`create --chain`, `set-chain`, `set-flow`, `chain-advance`, hint, MCP `get`) misses `constructor` & co.; `removeDefinition` and MCP `get` use `Object.hasOwn`. Tests: CLI (`create --chain constructor` → not found, no orphan folder; `set-chain --chain toString` → unknown), MCP (`get`, `create_chain` with `flows: ["constructor"]`, `delete` of flow `constructor` → refused, never "reverted").
+2. **`when` separators** — fixed. Refine is now `!/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u` (CR/LF, U+2028/U+2029, NEL, VT/FF, ESC, bidi overrides, zero-width). `when` prints JSON-quoted in the hint and in `chain-advance` candidates. Test covers each class.
+3. **`set-flow` degraded state** — fixed, fail closed: a chained task whose chain can't be read is refused (`chain-unreadable`, message points to `set-chain --chain none`). Flows are loaded once. Test with a malformed chain file.
+4. **Conventions flow-guard wording** — fixed: delete refused when a chain names the flow; an edit only when it removes a linked terminal or a linked-to entry agent.
+5. **Analyst intent** — fixed: "a whole flow, a chain of flows, a single agent, or a single module". `.claude/commands/task-authoring-analyze.md` regenerated.
+6. **Test gaps** — closed: MCP `update_chain` (success with revision, stale 409, unknown 404); malformed chain file (chain create fails, flow update succeeds with a `warning`, the broken chain can be deleted); HTTP `POST /api/chains` dup → 409; dashboard `POST /api/task-flow` outside the chain → 400 `outside-chain`.
+7. **`update_chain` tool text** — fixed: chain-specific description (no built-ins, 404/400 cases).
+8. **MCP body cap** — fixed: MCP create/update refuse defs over the HTTP limit (`DEFAULT_BODY_LIMIT`, 256 KB); `ChainSchema` caps `title` at 200 and `description` at 2000. Test.
+9. **Docs** — fixed: `git-and-flow.md` (when limits, quoted hint example, flow guard, `set-flow` row), README chain section, `tools.md`.
+10. Round 1 carry-overs:
+    - `chain-advance` unknown flow → new `unknown-flow` error ("which no longer exists"). Test.
+    - `writeStatus` loads flows once (status validation + hint); `setTaskFlow` loads flows once.
+    - Dangling binding → `warning: Nxx is bound to unknown chain '…'; no chain hint.` Test.
+    - Hint after save → the `chain next:` lines print on `setImmediate`, after the caller's synchronous `saveShard`; a failed save exits first. Test: read-only shard → `merge` fails in `saveShard`, no hint (verified it fails at the save, not earlier).
+    - Lenient loader → flow writes with unreadable chains still proceed but return `warning: chains could not be loaded (…); chain guard skipped`; a chain DELETE works on a broken chain file. Chain create/update stay strict.
+
+Gates: typecheck ✓, eslint ✓, `flow-chains` + `custom-defs-api` 37/37. Full suite 386–389/391 on two runs under load average ~10; the failures are only the CLI-spawn tests with a hard 250–500 ms timeout (`log-activity`, `log-event`, `notify`), which pass alone (13/13), and whose code this round did not touch; the CLI starts in ~130 ms.
+

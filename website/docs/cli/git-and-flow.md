@@ -28,7 +28,7 @@ driven by the [`/task-git`](../agents/task-git.md) agent.
 | Command | Purpose |
 |---------|---------|
 | `advance` | Advance a task along its flow via an agent's transition. Flags: `--id`, `--agent`. |
-| `set-flow` | Reassign a task to a different flow. Flags: `--id`, `--flow`. |
+| `set-flow` | Reassign a task to a different flow. Flags: `--id`, `--flow`. A chained task can only move to a flow of its chain (clear the chain first with `set-chain --chain none`). |
 | `set-default-flow` | Make a flow the default for new tasks. Flag: `--flow`. |
 | `set-chain` | Bind a task to a chain of flows, or clear it with `none` (only while `ready`). Flags: `--id`, `--chain`. |
 | `chain-advance` | At a terminal status, move a chained task into the next flow of its chain at `ready`. Flags: `--id`, `--to` (needed when several links leave that terminal), `--by`. |
@@ -57,10 +57,19 @@ same flow can be used in many chains. A chain lives in
 - A link leaves a **terminal** status (`on`) of flow `from` and enters flow `to`
   at `ready`. Flow `to` must have an entry agent.
 - `mode` is `gated` (default) or `auto`, the same as agent handovers; `when`
-  explains when to take the link if several leave the same terminal.
+  explains when to take the link if several leave the same terminal. `when` is
+  one line of at most 200 characters, with no control characters, because it is
+  printed inside the `chain next:` line (quoted).
+- Deleting a flow that a chain names is refused; so is a flow edit that removes
+  a linked terminal status or the entry agent of a linked-to flow.
 
 When a chained task reaches a terminal with links, the status command prints one
-`chain next:` line per link on stderr. The agent follows it like a handover:
+`chain next:` line per link on stderr, after the new status is saved:
+
+```text
+chain next: flow custom:deploy-beta — run `insight-flow chain-advance --id N42 --to custom:deploy-beta` then `/task-git` (mode: gated)
+```
+ The agent follows it like a handover:
 `gated` waits for your go-ahead, `auto` continues. `chain-advance` then moves the
 task, keeps its folder and history, and prints the next flow's entry command.
 
