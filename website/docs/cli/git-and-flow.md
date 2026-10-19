@@ -84,9 +84,15 @@ insight-flow push      --id N42 --message "feat: add auth" --branch feat/N42-aut
 insight-flow mr-update --id N42 --url https://github.com/owner/repo/pull/123
 insight-flow merge     --id N42
 insight-flow done      --id N42
+```
 
-insight-flow create --title "Add auth" --chain custom:feature-to-beta
-insight-flow chain-advance --id N42 --to custom:deploy-beta
+With a chain, run `chain-advance` while the task is at the linked terminal
+(here `merged`), before `done`:
+
+```bash
+insight-flow create --title "Add auth" --chain custom:feature-to-beta   # prints the new id, e.g. N43
+# … the task goes through custom:prepare and default until `merge` prints `chain next:` …
+insight-flow chain-advance --id N43 --to custom:deploy-beta
 ```
 
 See [Transitions & agents](../flow/transitions.md) for how these commands map to

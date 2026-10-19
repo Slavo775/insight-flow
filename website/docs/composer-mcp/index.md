@@ -19,7 +19,8 @@ insight-flow setup.
 
 Concretely, the server exposes insight-flow's composer registry — modules,
 agents, and flows, both built-in **and** custom, plus custom chains of flows — so an MCP client can list,
-author, edit, install, uninstall, and delete definitions as tool calls: the same
+author, edit, install, uninstall, and delete definitions as tool calls (chains
+have no install step — they take effect once saved): the same
 operations the [dashboard](../dashboard/index.md) offers, but programmatic and
 agent-callable. Because the tools are kind-parameterized, this includes the
 [`subagent` module kind](../concepts/modules.md) — you can author native

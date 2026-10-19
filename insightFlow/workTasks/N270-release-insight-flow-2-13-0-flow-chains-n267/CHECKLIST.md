@@ -20,6 +20,17 @@
 - [x] (optional) root `CLAUDE.md` subcommand list: `set-chain`, `chain-advance` (also `advance`, `set-flow`)
 - [x] Extra: `composer-mcp/index.md` registry sentence and the `mcp` CLI help line mention chains
 
+### Docs gaps — re-check 2 (each must be closed)
+
+- [x] `cli/git-and-flow.md` Example block (~l.82–90): put the chain commands in their own block; `chain-advance` runs while the task is at `merged` (before `done`); `create` makes a new id, not N42
+- [x] `guides/troubleshooting.md` (~l.153–154): `set-chain <chainId>` and `chain-advance` fail, but `set-chain --chain none` still works (the recovery step `set-flow` suggests)
+- [x] `guides/troubleshooting.md` heading / first bullet (~l.148): name both error texts — `Cannot load chains: …` (`create --chain`) and `Invalid user-space definition <file>: …` (`set-chain`, `chain-advance`, MCP `list`/`get`)
+- [x] `guides/troubleshooting.md` (~l.164–166): deleting a broken chain by id works only if the file is named after the id (`insightFlow/chains/<id without custom:>.json`); otherwise delete the file by hand
+- [x] `dashboard/views.md` (~l.66–68) + `flow/index.md` (~l.15–17): a chained task can only move to a flow of its chain
+- [x] `flow/statuses.md` (~l.47–49): the task moves only when `chain-advance` runs (a `gated` link waits for a human) — not automatically
+- [x] `composer-mcp/index.md` (~l.21–23): chains have no install step
+- [x] (optional nits) troubleshooting: the broken-chain warning prints on every status write of a chained task; `authoring/index.md` intro (~l.8–11, 19) names chains; `concepts/index.md` l.47 "one flow at a time"; README l.208 "a task whose flow is not in the chain moves…"
+
 ### Release steps
 
 - [ ] Docs commit pushed to `feat/N267-flow-chains` (PR #174)

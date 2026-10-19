@@ -205,7 +205,7 @@ insight-flow merge --id N00
 insight-flow done --id N00
 
 # Flow chains (flow → flow, see "Flow chains" below)
-insight-flow set-chain --id N00 --chain <chainId|none>   # bind/clear (ready-only); a flow not in the chain moves to the chain's first flow
+insight-flow set-chain --id N00 --chain <chainId|none>   # bind/clear (ready-only); a task whose flow is not in the chain moves to the chain's first flow
 insight-flow chain-advance --id N00 [--to <flowId>] [--by <agent>]   # at a terminal: next flow, status ready
 
 # Incidents

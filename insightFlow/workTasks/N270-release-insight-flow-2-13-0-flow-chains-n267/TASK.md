@@ -16,6 +16,10 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 - **Intent: feature → 2.13.0 (minor).** Commits: `feat(flows)` + `fix(flows)` + 2 × `chore(tracker)`; no `!` / `BREAKING CHANGE`. All schema changes are optional fields or new kinds; the public barrel only grows; existing CLI commands behave the same for tasks without a chain. Small behaviour changes for existing users: the composer MCP now caps create/update bodies at 256 KB (same as HTTP); MCP `get` of a prototype-key id (`constructor`) now says "unknown"; the authoring prompts mention chains (after re-install); one new AGENT_PROTOCOL rule, inert without chains. **Downgrade note:** a ≤2.12.0 binary that rewrites a shard drops `chainId` and history `flowId` (non-strict schema strips unknown keys).
 - **Docs: NOT complete.** See the checklist "Docs gaps" — one wrong statement, several pages that list all commands / explain concepts were not updated. CHANGELOG is release-please managed (entry is created on the release PR) — no manual edit.
 
+### Re-check (2026-10-19, after docs commit `85a779f`)
+
+**Verdict: NOT ready — small docs fixes only.** Tests **391/391**, typecheck clean, `pnpm --dir website build` OK with no link/anchor warnings. Intent unchanged: feature → **2.13.0**, no breaking change (`85a779f` changes only help text in code). All 13 first-round docs gaps are closed. The re-audit found factual slips in the new and existing text — listed in CHECKLIST "Docs gaps — re-check 2". The worst: the CLI example runs `chain-advance` after `done`, where the example chain has no link, so the command fails.
+
 ## Goal
 
 1. Close every docs gap from the release check (Docusaurus + README + CLI help text), on the feature branch `feat/N267-flow-chains` so they ship in PR #174.
@@ -57,6 +61,8 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 - After publish: `npm view insight-flow version` → `2.13.0`; tag `v2.13.0` exists.
 
 ## Notes
+
+- **Follow-up (outside this release):** the authoring install agent prompt (`packages/taskflow/src/agents/modules/roles/authoring.json`, `authoring-install/identity` + `composer-install-checklist`) says it installs "flows, agents, and modules" and never says a chain needs no install step; an authored chain could reach `install({kind:"chain"})`, which the MCP rejects. Prompt change → needs its own task on the default flow (ask the human before creating it).
 
 - Feature PR: **#174** (`feat/N267-flow-chains`). Release is driven by release-please (`release-please-config.json`, node, `packages/taskflow`); merging #174 to `main` makes it open the 2.13.0 release PR; merging that tags + triggers npm publish (npm-publish environment needs approval — see the release-publish workflow).
 - **Decision needed (not a release blocker):** a chain link into the `default` flow prints "then `/task-analyze`" — the first of `default`'s `entryAgents` (`["task-analyze", "taskmaster"]`). For a task that already has a spec, `/task-implement` is likely the right next step. Options: document it, add an optional `entry` field on a chain link, or pick a better default. Ask the human; do not change code in this release task.

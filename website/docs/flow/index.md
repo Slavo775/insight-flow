@@ -12,7 +12,9 @@ ships a built-in flow named **`default`** that covers the full path from a fresh
 task to a merged, done change, plus side-paths for post-approval changes and
 production incidents.
 
-You can reassign a task to another flow (`insight-flow set-flow`) or make a
+You can reassign a task to another flow (`insight-flow set-flow`; a task in a
+[chain](../cli/git-and-flow.md#chains-flow--flow) can only move to a flow of its
+chain) or make a
 different flow the default for new tasks (`insight-flow set-default-flow`), but the
 `default` flow is what you get out of the box.
 

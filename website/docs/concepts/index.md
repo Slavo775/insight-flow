@@ -44,9 +44,11 @@ Module  ──▶  Agent  ──▶  Flow
   `edges` between them, the things they `install`, the `statuses` work moves
   through, and the `entryAgents` that can start work. The shipped default flow
   is the canonical task lifecycle.
-- A **task** is bound to exactly one flow. `Task.flowId` (`"default"` or
+- A **task** is bound to one flow at a time. `Task.flowId` (`"default"` or
   `"custom:<slug>"`) records which flow governs it, and the task moves through
-  that flow's statuses as agents hand off to one another.
+  that flow's statuses as agents hand off to one another. A
+  [chain](../cli/git-and-flow.md#chains-flow--flow) can move it on to the next
+  flow at a terminal status.
 
 ## How a task binds to a flow
 
