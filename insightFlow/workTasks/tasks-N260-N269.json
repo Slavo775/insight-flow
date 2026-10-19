@@ -541,7 +541,7 @@
       "title": "Authoring prompt cookbook — copy-paste analyze prompts for flow/agent/module",
       "type": "feat",
       "priority": "medium",
-      "status": "implemented",
+      "status": "fix-needed",
       "folder": "insightFlow/workTasks/N266-authoring-prompt-cookbook-copy-paste-analyze-promp",
       "createdAt": "2026-07-30T16:01:56.824Z",
       "statusHistory": [
@@ -564,6 +564,21 @@
           "status": "implemented",
           "at": "2026-10-19T21:15:00.159Z",
           "by": "task-implement"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-10-19T21:15:42.132Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-10-19T21:16:54.686Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-10-19T21:20:44.119Z",
+          "by": "task-review"
         }
       ],
       "implementation": {
@@ -578,8 +593,8 @@
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
-      "reviewCount": 0,
-      "lastReviewVerdict": null,
+      "reviewCount": 1,
+      "lastReviewVerdict": "fix-needed",
       "openIncidentCount": 0,
       "committedAt": null,
       "totalDurationMinutes": null,
@@ -589,8 +604,14 @@
         "prompts",
         "dx"
       ],
-      "pushes": [],
-      "branch": null,
+      "pushes": [
+        {
+          "at": "2026-10-19T21:15:42.131Z",
+          "commitHash": "6b59d3c",
+          "commitMessage": "docs(authoring): add prompt cookbook for analyze prompts (N266)"
+        }
+      ],
+      "branch": "feat/N266-authoring-prompt-cookbook",
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
