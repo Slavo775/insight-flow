@@ -48,7 +48,7 @@ import {
 import { resolveProjectRoot } from "../../core/paths.js";
 import { writeServerPortPointer, clearServerPortPointer } from "../../core/global-config.js";
 import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
-import { loadUserRegistries } from "../../agents/user-registry.js";
+import { loadUserRegistries, mergedChains } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
 
@@ -1233,6 +1233,17 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         statuses: p.statuses,
       }));
       sendJson(res, 200, { projects });
+      return;
+    }
+
+    // N267 — chains (flow-of-flows). A broken chain file degrades to an empty
+    // list with the error surfaced, never a dead endpoint.
+    if (url.pathname === "/api/chains" && (req.method ?? "GET") === "GET") {
+      try {
+        sendJson(res, 200, { chains: Object.values(mergedChains()) });
+      } catch (err) {
+        sendJson(res, 200, { chains: [], userSpaceError: (err as Error).message });
+      }
       return;
     }
 

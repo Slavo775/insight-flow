@@ -26,6 +26,8 @@ export const StatusHistoryEntrySchema = z.object({
   status: z.string(),
   at: z.string(),
   by: z.string(),
+  // N267 — set on the entry written when a chain moves the task into a new flow.
+  flowId: z.string().optional(),
 });
 
 export const ReviewFixSchema = z.object({
@@ -133,6 +135,8 @@ export const TaskSchema = z.object({
   // N116 — the project flow that governs this task ("default" or "custom:<slug>").
   // Legacy tasks without it read back as "default" — zero behavior change.
   flowId: z.string().default("default"),
+  // N267 — the chain (flow-of-flows) this task follows; absent = no chain.
+  chainId: z.string().optional(),
 });
 
 export const ShardFileSchema = z.object({
@@ -703,6 +707,63 @@ export const ProjectSchema = z
       seen.add(key);
     });
   });
+
+// N267 — a chain: a flow-of-flows. Nodes are existing flow ids (unmodified, so
+// one flow can sit in many chains); a link leaves a TERMINAL status of flow
+// `from` and enters flow `to` at `ready`. `mode`/`when` mirror edge handovers
+// (N147/N189). Resolved at run time by the CLI (`chain-advance` + the status
+// writer's hint) — nothing is baked into prompts, so chains need no install.
+// Cross-registry checks (known flows, terminal `on`, entry agent on `to`) run
+// at load against the merged flows (`chainReferenceError`).
+export const ChainLinkSchema = z.object({
+  from: z.string().min(1),
+  on: z.string().min(1),
+  to: z.string().min(1),
+  mode: z.enum(["auto", "gated"]).default("gated"),
+  // Single line: the status writer prints it inside a `chain next:` line that
+  // agents read line by line — a newline could forge a second (auto) handover.
+  when: z
+    .string()
+    .min(1)
+    .max(200)
+    .refine((s) => !/[\r\n]/.test(s), { message: "when must be a single line" })
+    .optional(),
+});
+
+export const ChainSchema = z
+  .object({
+    id: DefinitionIdSchema,
+    title: z.string().min(1),
+    description: z.string().optional(),
+    // Ordered; flows[0] is the entry flow a newly bound task starts in.
+    flows: z.array(z.string().min(1)).min(1),
+    links: z.array(ChainLinkSchema).default([]),
+  })
+  .superRefine((chain, ctx) => {
+    const seen = new Set<string>();
+    chain.links.forEach((link, index) => {
+      for (const end of ["from", "to"] as const) {
+        if (!chain.flows.includes(link[end])) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["links", index, end],
+            message: `link ${end} '${link[end]}' is not one of the chain's flows`,
+          });
+        }
+      }
+      const key = `${link.from}|${link.on}|${link.to}`;
+      if (seen.has(key)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["links", index],
+          message: `duplicate chain link ${link.from} (${link.on}) → ${link.to}`,
+        });
+      }
+      seen.add(key);
+    });
+  });
+export type ChainLink = z.infer<typeof ChainLinkSchema>;
+export type Chain = z.infer<typeof ChainSchema>;
 
 export class TaskflowValidationError extends Error {
   readonly file: string;

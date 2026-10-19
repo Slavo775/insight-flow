@@ -107,6 +107,7 @@ export {
   mergedModuleRegistry,
   mergedComposedAgents,
   mergedProjects,
+  mergedChains,
   userSpaceRoot,
   UserRegistryError,
   CUSTOM_ID_PREFIX,
@@ -157,9 +158,19 @@ export {
   AgentModuleSchema,
   ComposedAgentSchema,
   ProjectSchema,
+  ChainSchema,
+  ChainLinkSchema,
   deriveCommandName,
   RESERVED_COMMAND_NAMES,
 } from "./core/schema/index.js";
+export type { Chain, ChainLink } from "./core/schema/index.js";
+export {
+  chainLinksFrom,
+  chainEntryCommand,
+  chainReferenceError,
+  isTerminalOf,
+} from "./core/chain.js";
+export type { ChainFlow } from "./core/chain.js";
 export {
   composeAgent,
   composeAgentById,

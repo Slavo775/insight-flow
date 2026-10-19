@@ -1,9 +1,9 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { getWorkDir, resolveId } from "../../core/storage.js";
-import { mergedProjects } from "../../agents/user-registry.js";
+import { mergedChains, mergedProjects } from "../../agents/user-registry.js";
 
-export type SetFlowFailure = "not-found" | "locked" | "unknown-flow";
+export type SetFlowFailure = "not-found" | "locked" | "unknown-flow" | "outside-chain";
 
 export interface SetFlowResult {
   ok: boolean;
@@ -53,6 +53,22 @@ export function setTaskFlow(
       ok: false,
       error: "unknown-flow",
       message: `unknown flow "${flow}" (expected "default" or an existing custom flow).`,
+    };
+  }
+
+  // N267 — a chained task stays inside its chain (same rule as create/set-chain).
+  // Best-effort: an unreadable chain can't be checked, so it doesn't block.
+  let chain;
+  try {
+    chain = task.chainId ? mergedChains()[task.chainId] : undefined;
+  } catch {
+    chain = undefined;
+  }
+  if (chain && !chain.flows.includes(flow)) {
+    return {
+      ok: false,
+      error: "outside-chain",
+      message: `flow "${flow}" is not part of chain "${chain.id}" — clear the chain first (set-chain --id ${id} --chain none).`,
     };
   }
 

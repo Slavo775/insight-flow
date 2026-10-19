@@ -6,8 +6,10 @@ sidebar_position: 2
 
 # Composer MCP — tool reference
 
-All tools take a `kind` of `module`, `agent`, or `flow` (except the per-kind
-`create_*` / `update_*` tools, which fix the kind in the tool name). A tool that
+All tools take a `kind` of `module`, `agent`, `flow`, or `chain` (except the
+per-kind `create_*` / `update_*` tools, which fix the kind in the tool name).
+`install` / `uninstall` take only `module`, `agent`, or `flow`: a chain has no
+install step. A tool that
 fails returns an error result whose text is the structured reason
 (`{ "ok": false, "error": "…" }`), mirroring the dashboard's HTTP status codes.
 
@@ -34,19 +36,26 @@ token back to `update_*` for optimistic-concurrency safety.
 Return the authoritative **how-to-author** reference: the cross-cutting rules
 (`custom:` ids, the locked tier, the agent baseline, the handover / single-token
 model, and the **reuse-first decision rule**) plus the exact `create_*` shape and
-fields for a kind. Pass `kind` = `module` | `agent` | `flow`, or omit for all
+fields for a kind. Pass `kind` = `module` | `agent` | `flow` | `chain`, or omit for all
 kinds. Read it before `create_*` / `update_*`; pair it with `get` on an existing
 definition as a working template.
 
 ## Authoring
 
-### `create_module(def)` · `create_agent(def)` · `create_flow(def)`
+### `create_module(def)` · `create_agent(def)` · `create_flow(def)` · `create_chain(def)`
 
 Create a new **custom** definition. `def` is the full object; its `id` must start
 with `custom:`. The def is schema- and reference-validated before any write —
 a bad shape returns `400`, a duplicate id returns `409`.
 
-### `update_module(def, revision?)` · `update_agent(def, revision?)` · `update_flow(def, revision?)`
+A **chain** links existing flows into a flow of flows:
+`{ id, title, flows: string[], links: { from, on, to, mode?, when? }[] }`. Each
+link leaves a **terminal** status `on` of flow `from` and enters flow `to`, which
+must have an entry agent. `mode` is `gated` (default) or `auto`; `when` is one
+line of at most 200 characters. See [Chains](../cli/git-and-flow.md) for how a
+task moves along a chain at run time.
+
+### `update_module(def, revision?)` · `update_agent(def, revision?)` · `update_flow(def, revision?)` · `update_chain(def, revision?)`
 
 Update an existing definition:
 
@@ -57,6 +66,8 @@ Update an existing definition:
   **variant** instead, so shipped defaults stay read-only and upgradable.
 - **Locked module** → refused.
 - **The `default` flow** → refused over MCP (use the dashboard).
+- **A flow a chain uses** → refused when the edit would break the chain (for
+  example, it drops a terminal status a link starts from).
 
 Pass `revision` (from `get`) to be rejected with `409` if the stored definition
 changed since you read it.

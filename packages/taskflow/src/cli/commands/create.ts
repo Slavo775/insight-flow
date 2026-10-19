@@ -6,7 +6,8 @@ import { getWorkDir, now } from "../../core/storage.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 import { resolvePackageAsset } from "../../core/paths.js";
 import { renderTemplate } from "../../core/spec.js";
-import { mergedProjects } from "../../agents/user-registry.js";
+import { mergedChains, mergedProjects } from "../../agents/user-registry.js";
+import type { Chain } from "../../core/schema/index.js";
 
 /**
  * N116/N123 — resolve the flow a new task binds to. Precedence: explicit
@@ -112,12 +113,34 @@ function scaffoldTaskDocs(
   return { taskMdCreated, checklistMdCreated, analysisMdCreated };
 }
 
+/** N267 — the `--chain` a new task binds to; exits on a bad chain or a `--flow` outside it. */
+function resolveChain(chainId: string, flow?: string): Chain {
+  let chain: Chain | undefined;
+  try {
+    chain = mergedChains()[chainId];
+  } catch (err) {
+    console.error(`Cannot load chains: ${(err as Error).message}`);
+    process.exit(1);
+  }
+  if (!chain) {
+    console.error(`Chain "${chainId}" not found.`);
+    process.exit(1);
+  }
+  if (flow && !chain.flows.includes(flow)) {
+    console.error(`Flow "${flow}" is not part of chain "${chainId}" (${chain.flows.join(", ")}).`);
+    process.exit(1);
+  }
+  return chain;
+}
+
 export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: ParsedArgs): void {
   const title = opts.title as string;
   if (!title) {
     console.error("--title is required");
     process.exit(1);
   }
+  // Resolved before anything is written so a bad --chain leaves no folder behind.
+  const chain = opts.chain ? resolveChain(opts.chain as string, opts.flow as string) : undefined;
 
   const id = `N${String(master.meta.nextId).padStart(2, "0")}`;
   const num = master.meta.nextId;
@@ -144,7 +167,8 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
   const flowId = resolveFlowId(
     config,
     taskType,
-    opts.flow as string | undefined,
+    // N267 — a chained task starts in the chain's entry flow unless --flow picks another.
+    (opts.flow as string | undefined) ?? chain?.flows[0],
     opts.agent as string | undefined,
     opts.by as string | undefined,
   );
@@ -156,6 +180,7 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
     priority: (opts.priority as string) || "medium",
     status: "ready",
     flowId,
+    ...(chain ? { chainId: chain.id } : {}),
     folder,
     createdAt: now(),
     statusHistory: [{ status: "ready", at: now(), by: (opts.by as string) || "taskmaster" }],
@@ -206,6 +231,7 @@ export function cmdCreate(config: TaskflowConfig, master: MasterFile, opts: Pars
       action: "created",
       id,
       flowId,
+      ...(chain ? { chainId: chain.id } : {}),
       folder: task.folder,
       taskMd: scaffold.taskMdCreated ? `${task.folder}/TASK.md` : null,
       checklistMd: scaffold.checklistMdCreated ? `${task.folder}/CHECKLIST.md` : null,

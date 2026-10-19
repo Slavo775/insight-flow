@@ -6,7 +6,8 @@
 import type { Task } from "../../core/types.js";
 import { setStatus, type StatusFlow } from "../../core/set-status.js";
 import { now } from "../../core/storage.js";
-import { mergedProjects } from "../../agents/user-registry.js";
+import { mergedChains, mergedProjects } from "../../agents/user-registry.js";
+import { chainEntryCommand, chainLinksFrom } from "../../core/chain.js";
 
 function resolveFlow(task: Task): StatusFlow | undefined {
   try {
@@ -31,6 +32,32 @@ function resolveFlow(task: Task): StatusFlow | undefined {
  */
 export function writeStatus(task: Task, target: string, by: string): void {
   setStatus(task, target, { by, at: now() }, resolveFlow(task));
+  printChainHint(task);
+}
+
+/**
+ * N267 — a chained task that just reached a terminal with outgoing chain links
+ * gets one `chain next:` line per link on stderr (stdout JSON stays parseable).
+ * The handover is resolved here, at run time, so a flow reused in many chains
+ * needs no prompt wiring. Best-effort: a broken chain file only warns.
+ */
+function printChainHint(task: Task): void {
+  if (!task.chainId) return;
+  try {
+    const flows = mergedProjects();
+    const chain = mergedChains(undefined, flows)[task.chainId];
+    if (!chain) return;
+    for (const link of chainLinksFrom(chain, task.flowId, task.status)) {
+      const entry = chainEntryCommand(flows[link.to]);
+      const when = link.when ? ` — when: ${link.when}` : "";
+      console.error(
+        `chain next: flow ${link.to} — run \`insight-flow chain-advance --id ${task.id} --to ${link.to}\`` +
+          ` then \`${entry?.command ?? "(no entry agent)"}\` (mode: ${link.mode})${when}`,
+      );
+    }
+  } catch (err) {
+    console.error(`warning: could not load chains (${(err as Error).message}); no chain hint.`);
+  }
 }
 
 /**
