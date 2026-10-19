@@ -12,8 +12,10 @@ know about each other. insight-flow models handovers as **data** — declaration
 that the composer renders into an agent's "## Handover" prompt section — so the
 chain is described, audited, and edited without touching agent logic.
 
-There are two places a handover can be declared, and both render through the same
-section.
+Inside a flow, there are two places a handover can be declared, and both render
+through the same section. A third kind, the
+[chain handover](#chain-handovers-flow--flow), runs between whole flows and is
+resolved at run time instead.
 
 ## Module-level handovers
 
@@ -92,6 +94,28 @@ prompt — nothing in the system auto-runs commands, and `auto` never bypasses
 permissions or consent. The flow diagram stays non-binding; the agent's
 handovers win.
 
+## Chain handovers (flow → flow)
+
+A [chain](../cli/git-and-flow.md#chains-flow--flow) (N267) links whole flows, so
+one task can go through several of them (for example prepare → implement →
+deploy-beta). Each chain link is a handover **between flows**: it leaves a
+terminal status of one flow and enters the next flow at `ready`.
+
+Unlike module and edge handovers, chain handovers are **not** rendered into
+prompts at install time. They are resolved at **run time**: when a chained task
+reaches a linked terminal, the lifecycle command (`merge`, `done`, `advance`,
+`review-end`, …) prints a `chain next:` line on stderr after it saves the status.
+A rule in `AGENT_PROTOCOL.md` (HANDOVER DISCIPLINE, "Chain handover (flow →
+flow)") tells the agent to follow that line by its mode, with the same meaning as
+above:
+
+- **`gated`** _(default)_ — wait for an explicit human go-ahead.
+- **`auto`** — run the printed `insight-flow chain-advance …`, then the printed
+  command.
+
+`chain-advance` moves the task into the next flow at `ready` and keeps its folder
+and history.
+
 ## The canonical lifecycle chain
 
 The shipped handover modules
@@ -134,3 +158,5 @@ to `task-implement` (gated).
   kinds.
 - [Default flow](../built-ins/default-flow.md) — the shipped edges and handovers.
 - [Default Flow](../flow/index.md) — transitions in the dashboard.
+- [CLI → Chains](../cli/git-and-flow.md#chains-flow--flow) — the chain file,
+  `set-chain`, and `chain-advance`.

@@ -145,6 +145,26 @@ rm ~/.insight-flow/master.lock
 insight-flow master --port 6100
 ```
 
+## Chain commands fail with `Cannot load chains: …`
+
+If a file in `insightFlow/chains/` has malformed JSON or is not a valid
+[chain](../cli/git-and-flow.md#chains-flow--flow), every chain feature stops:
+
+- `create --chain` fails with `Cannot load chains: …`; `set-chain` and
+  `chain-advance` fail too.
+- Lifecycle commands (`merge`, `done`, `advance`, …) still save the status, but
+  print `warning: could not load chains (…); no chain hint.` instead of the
+  `chain next:` line.
+- `set-flow` on a chained task is refused (`cannot check chain …`).
+- `GET /api/chains` returns `{ chains: [], userSpaceError }`.
+- Flow edits still save, but return a `warning` that the chain guard was skipped.
+
+Tasks without a chain are never blocked.
+
+**Fix:** correct the file, or delete it. Deleting works even when the file is
+broken — remove the file, call `DELETE /api/chains/<id>`, or use the composer MCP
+`delete({ kind: "chain", id })`.
+
 ## See also
 
 - [Configuration](../configuration.md) — every `taskflow.config.json` key and the

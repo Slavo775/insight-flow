@@ -205,8 +205,8 @@ insight-flow merge --id N00
 insight-flow done --id N00
 
 # Flow chains (flow → flow, see "Flow chains" below)
-insight-flow set-chain --id N00 --chain <chainId|none>   # bind/clear (ready-only)
-insight-flow chain-advance --id N00 [--to <flowId>]      # at a terminal: next flow, status ready
+insight-flow set-chain --id N00 --chain <chainId|none>   # bind/clear (ready-only); a flow not in the chain moves to the chain's first flow
+insight-flow chain-advance --id N00 [--to <flowId>] [--by <agent>]   # at a terminal: next flow, status ready
 
 # Incidents
 insight-flow incident-create --id N03 --title "..." --severity critical|high|medium|low
@@ -648,7 +648,7 @@ Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and 
 
 ### Composer MCP
 
-**The composer MCP server is how an AI assistant helps you set up and customize insight-flow itself** — building and wiring your modules, agents, and flows by asking in plain language instead of clicking through the dashboard. `insight-flow mcp` runs it over stdio, exposing the module/agent/flow registry as [Model Context Protocol](https://modelcontextprotocol.io) tools (`list`, `get`, `create_*`, `update_*`, `install`, `uninstall`, `delete`), so an MCP client like Claude Code can manage your composer definitions programmatically with the same validation, locked/eject tiers, and reference-safe install/uninstall as the dashboard. Register it in `.mcp.json`:
+**The composer MCP server is how an AI assistant helps you set up and customize insight-flow itself** — building and wiring your modules, agents, and flows by asking in plain language instead of clicking through the dashboard. `insight-flow mcp` runs it over stdio, exposing the module/agent/flow/chain registry as [Model Context Protocol](https://modelcontextprotocol.io) tools (`list`, `get`, `describe`, `create_*`, `update_*`, `install`, `uninstall`, `delete`; chains have no install step), so an MCP client like Claude Code can manage your composer definitions programmatically with the same validation, locked/eject tiers, and reference-safe install/uninstall as the dashboard. Register it in `.mcp.json`:
 
 ```jsonc
 {

@@ -106,7 +106,7 @@ function printHelp(): void {
     init [--force] [--examples] [--editor claude|cursor|all]  Initialize insight-flow in current project (--force overwrites existing files; --examples adds commented config examples; --editor picks scaffolding targets, default auto-detect)
     ui [--port 6006]                      Launch dashboard server
     master [--port 6100]                  Launch the multi-project overview server (folded in; formerly insight-flow-master)
-    mcp                                   Run the composer MCP server over stdio (list/create/edit/install/uninstall/delete modules·agents·flows). Register in .mcp.json as { "command": "insight-flow", "args": ["mcp"] }
+    mcp                                   Run the composer MCP server over stdio (list/create/edit/install/uninstall/delete modules·agents·flows; chains: no install). Register in .mcp.json as { "command": "insight-flow", "args": ["mcp"] }
 
     create --title "..." [--type feat] [--priority high] [--tags a,b] [--with-analysis] [--chain <chainId>]
     status --id Nxx --status <status> [--by agent]
@@ -135,7 +135,7 @@ function printHelp(): void {
     set-default-flow --flow <flowId>     Make a flow the binding default for new tasks (N167)
     advance --id Nxx --agent <agentId>   Advance via the agent's flow transition (N133)
     set-chain --id Nxx --chain <chainId|none>   Bind/clear a task's chain of flows (ready-only; N267)
-    chain-advance --id Nxx [--to <flowId>]      At a terminal status, move a chained task into the next flow at 'ready' (N267)
+    chain-advance --id Nxx [--to <flowId>] [--by <agent>]   At a terminal status, move a chained task into the next flow at 'ready' (N267)
     merge --id Nxx
     done --id Nxx
 

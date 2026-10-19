@@ -16,8 +16,8 @@ worked example: **authoring a custom module**. It assumes the flow is installed
 /task-authoring-analyze "I want a module that adds our team's PR checklist to the git agent"
 ```
 
-The **analyst** works a fixed method — **intent** (a whole flow, one agent, or one
-module) → **goal** → design **top-down** (flow → agents → modules) → **reuse** →
+The **analyst** works a fixed method — **intent** (a whole flow, a chain of flows,
+one agent, or one module) → **goal** → design **top-down** (flow → agents → modules) → **reuse** →
 **impact** → **MCP discovery** — and fans out to the read-only per-kind analyst
 subagents, which inventory the existing registry (via the composer MCP `list`/`get`)
 to answer: *does something already do this?* If the design needs an MCP server, it

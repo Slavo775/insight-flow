@@ -11,7 +11,8 @@ driven by the [`/task-git`](../agents/task-git.md) agent.
 
 :::note 🤖 Agent-driven
 `/task-git` runs the push/PR/merge commands for you. The flow-control commands
-(`set-flow`, `set-default-flow`) are the ones you're more likely to run yourself.
+(`set-flow`, `set-default-flow`, `set-chain`) are the ones you're more likely to
+run yourself.
 :::
 
 ## Git & merge
@@ -30,7 +31,7 @@ driven by the [`/task-git`](../agents/task-git.md) agent.
 | `advance` | Advance a task along its flow via an agent's transition. Flags: `--id`, `--agent`. |
 | `set-flow` | Reassign a task to a different flow. Flags: `--id`, `--flow`. A chained task can only move to a flow of its chain (clear the chain first with `set-chain --chain none`). |
 | `set-default-flow` | Make a flow the default for new tasks. Flag: `--flow`. |
-| `set-chain` | Bind a task to a chain of flows, or clear it with `none` (only while `ready`). Flags: `--id`, `--chain`. |
+| `set-chain` | Bind a task to a chain of flows, or clear it with `none` (only while `ready`). If the task's flow is not in the chain, the task moves to the chain's first flow. Flags: `--id`, `--chain`. |
 | `chain-advance` | At a terminal status, move a chained task into the next flow of its chain at `ready`. Flags: `--id`, `--to` (needed when several links leave that terminal), `--by`. |
 
 ## Chains (flow → flow)
@@ -63,13 +64,16 @@ same flow can be used in many chains. A chain lives in
 - Deleting a flow that a chain names is refused; so is a flow edit that removes
   a linked terminal status or the entry agent of a linked-to flow.
 
-When a chained task reaches a terminal with links, the status command prints one
-`chain next:` line per link on stderr, after the new status is saved:
+When a chained task reaches a terminal with links, the lifecycle command that got
+it there (`merge`, `done`, `advance`, `review-end`, …) prints one `chain next:`
+line per link on stderr, after the new status is saved. The raw `status` override
+does not print it.
 
 ```text
 chain next: flow custom:deploy-beta — run `insight-flow chain-advance --id N42 --to custom:deploy-beta` then `/task-git` (mode: gated)
 ```
- The agent follows it like a handover:
+
+The agent follows it like a handover:
 `gated` waits for your go-ahead, `auto` continues. `chain-advance` then moves the
 task, keeps its folder and history, and prints the next flow's entry command.
 

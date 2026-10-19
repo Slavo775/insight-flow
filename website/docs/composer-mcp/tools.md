@@ -49,11 +49,19 @@ with `custom:`. The def is schema- and reference-validated before any write —
 a bad shape returns `400`, a duplicate id returns `409`.
 
 A **chain** links existing flows into a flow of flows:
-`{ id, title, flows: string[], links: { from, on, to, mode?, when? }[] }`. Each
-link leaves a **terminal** status `on` of flow `from` and enters flow `to`, which
-must have an entry agent. `mode` is `gated` (default) or `auto`; `when` is one
-line of at most 200 characters, with no control characters. See [Chains](../cli/git-and-flow.md) for how a
-task moves along a chain at run time.
+`{ id, title, description?, flows: string[], links: { from, on, to, mode?, when? }[] }`.
+`title` is at most 200 characters and `description` at most 2000. `flows` needs at
+least one flow; `flows[0]` is the entry flow. Each link's `from` and `to` must be
+in `flows`. A link leaves a **terminal** status `on` of flow `from` and enters
+flow `to`, which must have an entry agent. Two links with the same `from` / `on` /
+`to` are rejected. `mode` is `gated` (default) or `auto`; `when` is one line of at
+most 200 characters, with no control characters. Chain ids must start with
+`custom:` — there are no built-in chains. See
+[Chains](../cli/git-and-flow.md#chains-flow--flow) for how a task moves along a
+chain at run time.
+
+In `list` and `get`, a chain entry has `source: "custom"` and no `installed` or
+`locked` flag; `list` items also carry `flows` and `linkCount`.
 
 ### `update_module(def, revision?)` · `update_agent(def, revision?)` · `update_flow(def, revision?)` · `update_chain(def, revision?)`
 

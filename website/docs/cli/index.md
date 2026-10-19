@@ -39,7 +39,7 @@ Commands are grouped by what they do — each group has its own page:
 | **[Implementation](./implementation.md)** | `implement-start`, `implement-end` |
 | **[Review & Fixes](./review-and-fixes.md)** | `review-start/-end`, `fix-start/-end` |
 | **[Change requests](./change-requests.md)** | `change-request`, `change-start/-end`, `next-change` |
-| **[Git & Flow](./git-and-flow.md)** | `push`, `mr-update`, `merge`, `done`, `advance`, `set-flow`, `set-default-flow` |
+| **[Git & Flow](./git-and-flow.md)** | `push`, `mr-update`, `merge`, `done`, `advance`, `set-flow`, `set-default-flow`, `set-chain`, `chain-advance` |
 | **[Incidents](./incidents.md)** | `incident-create/-status/-resolve/-list` |
 | **[Config & Migration](./config-and-migration.md)** | `migrate`, `migrate-reviews`, `migrate-layout`, `prompt-build` |
 | **[Events & Hooks](./events-and-hooks.md)** | `log-event`, `log-activity`, `notify`, `install-*`, `migrate-hooks`, `hook` |
