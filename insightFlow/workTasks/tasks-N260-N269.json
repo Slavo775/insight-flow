@@ -585,7 +585,7 @@
       "title": "Flow chains: chain existing flows into a flow-of-flows (core + CLI)",
       "type": "feat",
       "priority": "high",
-      "status": "fixed",
+      "status": "pushed",
       "folder": "insightFlow/workTasks/N267-flow-chains-chain-existing-flows-into-a-flow-of-fl",
       "createdAt": "2026-10-19T14:09:14.109Z",
       "statusHistory": [
@@ -633,6 +633,11 @@
           "status": "fixed",
           "at": "2026-10-19T17:13:33.580Z",
           "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-10-19T17:16:13.517Z",
+          "by": "task-git"
         }
       ],
       "implementation": {
@@ -673,9 +678,15 @@
         "core",
         "composer"
       ],
-      "pushes": [],
-      "branch": null,
-      "mrUrl": null,
+      "pushes": [
+        {
+          "at": "2026-10-19T17:16:13.516Z",
+          "commitHash": "54834d9",
+          "commitMessage": "feat(flows): flow chains — link whole flows into a flow-of-flows (N267)"
+        }
+      ],
+      "branch": "feat/N267-flow-chains",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/174",
       "mergedAt": null,
       "flowId": "default"
     },
