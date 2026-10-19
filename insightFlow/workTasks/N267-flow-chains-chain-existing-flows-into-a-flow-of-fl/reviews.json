@@ -37,6 +37,15 @@
         "comment": "Fixed blockers 1–3: single-line when (max 200); set-flow keeps chained task in its chain; composer MCP + authoring prompts know chains (create_chain/update_chain, describe, list/get/delete), shared loadRegistriesForWrite also guards MCP flow edits.",
         "by": "task-review-fix"
       }
+    },
+    {
+      "startedAt": "2026-10-19T17:20:15.854Z",
+      "endedAt": "2026-10-19T17:30:39.482Z",
+      "verdict": "approved",
+      "comment": "Round 3: all 3 blockers fixed and tested; 387/387 on a fresh build; MCP update_flow chain guard closed as a bonus. 10 non-blocking items (prototype-key ids, wider when separators, silent set-flow degrade, two prompt wordings, test gaps) — none changes the verdict.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
     }
   ]
 }

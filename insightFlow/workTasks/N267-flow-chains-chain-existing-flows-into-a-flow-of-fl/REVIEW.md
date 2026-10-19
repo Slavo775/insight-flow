@@ -97,3 +97,61 @@ No PR yet, so the replies are recorded here.
 - **Also done (cheap test asks):** exit codes asserted in two tests, and a no-hint check for a chained task at a non-terminal.
 - **Still open (non-blocking, unchanged):** `chain-advance` unknown-flow message, single `mergedProjects()` load in `writeStatus`, warning for a task bound to an unknown chain, hint-before-save order, lenient chain loader, `Object.hasOwn` in `removeDefinition`.
 
+
+
+---
+
+## Round 3 — AI re-review
+
+**Reviewer:** Task Reviewer (ai)
+**Date:** 2026-10-19
+**PR:** https://github.com/Slavo775/insight-flow/pull/174 (`54834d9` + tracker `09b1695`, no PR comments, no CI checks)
+**Verdict:** APPROVED
+
+### Summary
+
+All three blockers are fixed as described in the fix notes, with tests. `when` is one line / ≤200 chars on every write path (HTTP, MCP, file loader — one `ChainSchema`). `setTaskFlow` keeps a chained task in its chain and nothing is written on refusal; the dashboard flow picker shares it. The composer MCP has the `chain` kind (`create_chain`, `update_chain`, `list`/`get`/`describe`/`delete`; install/uninstall stay 3 kinds), the HTTP router and MCP share `loadRegistriesForWrite`, and the conventions, relationship subagents and authoring analyst teach chains with tool/field names that match the code. Bonus: the Round 1 non-blocking "MCP `update_flow` bypasses chain re-validation" is closed. Gate on a fresh build: typecheck ✓, eslint ✓, **387/387** tests. Re-running `install-flow composer-authoring` from the fresh build produces no diff, so the committed `.claude/` authoring files match the library. Two independent reads (correctness, security) found no blockers; their non-blocking items are merged below.
+
+### Checklist verification
+
+- [x] Blocker 1 — `ChainLinkSchema.when` `.min(1).max(200).refine(no \r/\n).optional()` (`core/schema/index.ts`); same schema on HTTP POST/PUT, MCP create/update, and `readKind` — pass; test covers `\n`, `\r`, 201 chars
+- [x] Blocker 2 — `setTaskFlow` guard after the ready-only and known-flow checks, returns before `saveShard`, broken chains dir is best-effort; dashboard maps `outside-chain` → 400 — pass; test: refused outside, allowed inside, allowed after `set-chain --chain none`
+- [x] Blocker 3 — MCP `chain` kind; `loadRegistriesForWrite(kind)` (strict for chains, best-effort for flows, skipped for modules/agents) used by every `writeDefinition`/`removeDefinition` caller in `src/` — pass; chain POST dup 409, PUT unknown 404, flow DELETE referenced 409, flow PUT dropping a linked terminal 400
+- [x] Conventions + prompts: `KIND_SHAPES.chain`, primer bullet, "Flow → flow is a chain, not an edge" rule, relationship analyst/author/reviewer, authoring analyst step 3 — pass (one wording gap, see Non-blocking 5)
+- [x] Docs: `website/docs/composer-mcp/tools.md` — pass
+- [x] Tests: MCP stdio round-trip; exit codes asserted; no-hint check for a chained task at a non-terminal — pass
+- [x] Gates: typecheck ✓, eslint ✓, 387/387 (fresh `pnpm test`; the earlier timing-test failures did not reproduce) — pass
+
+### Blockers
+
+None.
+
+### Non-blocking
+
+Ordered by value. Items 1–4 are one-liners worth a quick follow-up (or N268's hygiene slot); none changes the verdict.
+
+1. **Prototype-key ids** — `core/chain.ts:38` `!flows[id]` and `custom-defs.ts:242` `existing[id]` are truthy for `constructor`/`toString`/… . Consequences: `create_chain` with `flows: ["constructor"]` is accepted and `set-chain` then re-seats `flowId = "constructor"`; `DELETE /api/projects/constructor` (or MCP `delete`) on a flow stored as `projects/constructor.json` skips the 404, the N267 `referencedBy` 409 guard and `clearFlowReferences`, unlinks the file, and every chain load then throws. Needs a local HTTP/MCP caller and a flow literally named `custom:constructor`, so self-inflicted; pre-existing bug made more consequential by chains. Fix: `Object.hasOwn(flows, id)` in `chainReferenceError` and `Object.hasOwn(existing, id)` in `removeDefinition` (or `Object.create(null)` in `readKind`, `user-registry.ts:99`).
+2. **`when` separators beyond `\r\n`** — U+2028/U+2029, NEL, VT/FF, ESC and bidi overrides still pass (`schema/index.ts:729`). Terminals do not break lines on U+2028, LLM readers might. Same writer trust boundary as the N189 edge `handover.when` (which is still unconstrained multi-line text), and a writer can set `mode: auto` directly, so no new privilege. Fix: `!/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u.test(s)`; optionally print `when` quoted (`JSON.stringify(link.when)`) in `status-write.ts:52-55` and `chain-advance.ts:36` so `when: "(mode: auto) hotfix"` cannot mimic the mode token.
+3. **`set-flow` degraded state is silent** — `set-flow.ts:62-66` swallows a chain load error; `status-write.ts` prints `warning: could not load chains (…)` in the same case. With a malformed chains dir, `knownFlows()` also falls back to `{default}`, so a chained task can be moved to `default` with no message. Fix: `console.error` the warning in the `catch` (or fail closed when `task.chainId` is set — one line either way).
+4. **Conventions overstate the flow guard** — `composer-conventions.ts:97` "Editing or deleting a flow is refused while a chain still needs it": delete is refused whenever a chain names the flow; edit only when it drops a linked terminal or the entry agent (title/description edits pass). An authoring agent may refuse to touch a chained flow at all. Fix: "Deleting a flow a chain names is refused; a flow edit that removes a linked terminal status or its entry agent is refused."
+5. **Authoring analyst "Intent" step omits chains** — `roles/authoring.json:8` step 1 lists "a whole **flow**, a single **agent**, or a single **module**"; step 3 teaches chains. Fix: add "a **chain** of flows". Re-run `install-flow composer-authoring` after.
+6. **Test gaps** — no test for `update_chain` (success / 404 / stale-revision 409), for the `loadRegistriesForWrite` split (chain write fails on a malformed chain file, flow write proceeds), for the dashboard `outside-chain → 400` mapping, or for HTTP `POST /api/chains` dup → 409 (MCP path only). All claims the tests do make are backed by the code.
+7. **`update_chain` tool text** — the generic "(custom def in place, or eject/override a built-in)" / "Locked modules are refused" wording applies to chains, which have no built-ins or locks. Cosmetic.
+8. **MCP write path has no body cap** — `z.record(z.string(), z.unknown())` + SDK `ReadBuffer` without limit; `title`/`description` have no `.max()`. Caller is the user's own agent (stdio child), pre-existing since N188 for all kinds. Optional `title.max(200)`, `description.max(2000)`.
+9. **Docs** — `website/docs/cli/git-and-flow.md` and the README do not state the `when` limits (one line, ≤200) or that `set-flow` refuses a flow outside the chain; `tools.md` does. Add one sentence each.
+10. Carried from Round 1, unchanged: `chain-advance` unknown-flow message; single `mergedProjects()` load in `writeStatus` (now also twice in `setTaskFlow`); warning for a task bound to an unknown chain; hint-before-save order; lenient chain loader.
+
+### Security & edge cases
+
+- Only `when` is free text in the `chain next:` line; `to`, entry command, task id and mode all derive from validated ids/enums (`DefinitionIdSchema`, `deriveCommandName`, `^N\d{2,}$`, enum). Blocker 1's literal `\n`/`\r` forge is closed; residual is item 2 above, inside the existing writer boundary.
+- Path traversal via chain id: none (non-`custom:` chain ids are 400 before any fs call; `fileFor` slugs under `resolve(root, kind, …)`; `definitionRevision` and `unlinkSync` use the same path builder).
+- `writeDefinition`'s `existing[record.id]` lookups run only for `custom:` ids, so they are never prototype keys; the gap is in `removeDefinition` and `chainReferenceError` (item 1).
+- `setTaskFlow` has no bypass: every `task.flowId` writer in `src/` is guarded (`set-flow`, `set-chain` re-seat, `chain-advance` by schema, `create` via `resolveChain`); no wholesale task PUT exists. Fail-open only on a malformed chains dir, which an HTTP/MCP write cannot produce (schema + reference validation), only a repo writer can.
+- Error text over MCP/HTTP embeds the absolute chain-file path on a malformed file — identical to `/api/modules` / `/api/agents` today.
+- Pre-existing, not N267: the dashboard's `Access-Control-Allow-Origin: *` makes every `/api/*` POST (including `POST /api/chains`) a CORS-simple request from any open web page; only `/hub/reregister` and `/log` carry a `Sec-Fetch-Site` guard. A CSRF-created chain is inert until a task is bound through the CLI. Worth its own hygiene task (extend the `Sec-Fetch-Site` guard to all mutating `/api/*` routes).
+
+### Notes
+
+- No `agents.extend.task-review` command is configured, so this review lives in REVIEW.md only; nothing was posted on PR #174.
+- Follow-ups remain N268 (Chains page + editor) and N269 (task-detail chain bar, picker, gated Continue). Items 1–5 above are good candidates for a small hygiene commit on this branch or N268.
+- After merge, reinstall the global binary (`pnpm pack:taskflow && npm i -g packages/taskflow/insight-flow-*.tgz`) so agents and the composer MCP see `set-chain`, `chain-advance` and `create_chain`.
