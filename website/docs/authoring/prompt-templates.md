@@ -136,7 +136,7 @@ Handovers:
   - Entry: <the agent a person starts with>
   - on <status> → <next agent> (auto|gated) — when: <reason>
   - on <status> → <next agent> (auto|gated) — when: <reason>
-  - Finish: on <status> → done (auto|gated)
+  - Finish: on <status> → done (or a finish agent)
 Reuse: <existing flows, agents, or modules that might fit>; must not change <built-in flows or shared agents>
 Opt-ins: activity engine — <yes / no>; harness — <Claude / Cursor / both>
 ```
@@ -154,7 +154,7 @@ Handovers:
   - Entry: draft-agent
   - on drafted → check-agent (auto) — when: a draft is ready to check
   - on check-failed → draft-agent (gated) — when: the problems need a person to look first
-  - Finish: on checked → done (gated) — when: a person approves the draft
+  - Finish: on checked → done
 Reuse: the built-in review agent may fit as check-agent — make a custom variant if it needs changes.
 Opt-ins: activity engine — yes; harness — both.
 ```
