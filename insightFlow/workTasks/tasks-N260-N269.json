@@ -541,7 +541,7 @@
       "title": "Authoring prompt cookbook — copy-paste analyze prompts for flow/agent/module",
       "type": "feat",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N266-authoring-prompt-cookbook-copy-paste-analyze-promp",
       "createdAt": "2026-07-30T16:01:56.824Z",
       "statusHistory": [
@@ -554,12 +554,27 @@
           "status": "ready",
           "at": "2026-07-30T16:03:04.291Z",
           "by": "custom:taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-19T21:13:02.966Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-19T21:15:00.159Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-10-19T21:13:02.981Z",
+        "completedAt": "2026-10-19T21:15:00.168Z",
+        "filesChanged": [
+          "website/docs/authoring/prompt-templates.md",
+          "website/docs/authoring/index.md",
+          "website/docs/authoring/walkthrough.md",
+          "website/docs/authoring/agents-and-subagents.md"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
