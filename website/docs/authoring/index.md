@@ -9,17 +9,19 @@ sidebar_position: 1
 insight-flow ships a second built-in flow — **Composer authoring**
 (`composer-authoring`) — a guided lifecycle for building your **own** custom
 [modules](../concepts/modules.md), [agents](../concepts/agents.md), and
-[flows](../concepts/flows.md). It's the composer model
+[flows](../concepts/flows.md), and [chains](../cli/git-and-flow.md#chains-flow--flow)
+of flows. It's the composer model
 ([Composer MCP](../composer-mcp/index.md)) wrapped in the same analyze → review →
 ship discipline as the default task flow, with specialist
 [subagents](../subagents/index.md) doing the heavy lifting.
 
 ## What you get
 
-- **A guided path** from "I want a module/agent/flow that does X" to an installed,
+- **A guided path** from "I want a module/agent/flow/chain that does X" to an installed,
   reviewed definition — without hand-writing JSON or memorising the schema.
 - **A clear design method.** The analyst works top-down through a fixed method —
-  **intent** (a whole flow, one agent, or one module) → **goal** → design
+  **intent** (a whole flow, a chain of flows, one agent, or one module) →
+  **goal** → design
   **flow → agents → modules** → **reuse** → **impact** → **MCP discovery** — so
   the design is deliberate before anything is built.
 - **Reuse over duplication.** Every request is first checked against the existing

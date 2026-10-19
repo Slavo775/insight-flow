@@ -22,6 +22,8 @@ import { cmdSetFlow } from "./commands/set-flow.js";
 import { cmdRename } from "./commands/rename.js";
 import { cmdSetDefaultFlow } from "./commands/set-default-flow.js";
 import { cmdAdvance } from "./commands/advance.js";
+import { cmdSetChain } from "./commands/set-chain.js";
+import { cmdChainAdvance } from "./commands/chain-advance.js";
 import {
   cmdCurrent,
   cmdList,
@@ -104,9 +106,9 @@ function printHelp(): void {
     init [--force] [--examples] [--editor claude|cursor|all]  Initialize insight-flow in current project (--force overwrites existing files; --examples adds commented config examples; --editor picks scaffolding targets, default auto-detect)
     ui [--port 6006]                      Launch dashboard server
     master [--port 6100]                  Launch the multi-project overview server (folded in; formerly insight-flow-master)
-    mcp                                   Run the composer MCP server over stdio (list/create/edit/install/uninstall/delete modules·agents·flows). Register in .mcp.json as { "command": "insight-flow", "args": ["mcp"] }
+    mcp                                   Run the composer MCP server over stdio (list/create/edit/install/uninstall/delete modules·agents·flows; chains: no install). Register in .mcp.json as { "command": "insight-flow", "args": ["mcp"] }
 
-    create --title "..." [--type feat] [--priority high] [--tags a,b] [--with-analysis]
+    create --title "..." [--type feat] [--priority high] [--tags a,b] [--with-analysis] [--chain <chainId>]
     status --id Nxx --status <status> [--by agent]
     list [--status ready]
     current
@@ -132,6 +134,8 @@ function printHelp(): void {
     rename --id Nxx [--title "..."] [--type t] [--priority p]   Update a task's title/type/priority (N170)
     set-default-flow --flow <flowId>     Make a flow the binding default for new tasks (N167)
     advance --id Nxx --agent <agentId>   Advance via the agent's flow transition (N133)
+    set-chain --id Nxx --chain <chainId|none>   Bind/clear a task's chain of flows (ready-only; N267)
+    chain-advance --id Nxx [--to <flowId>] [--by <agent>]   At a terminal status, move a chained task into the next flow at 'ready' (N267)
     merge --id Nxx
     done --id Nxx
 
@@ -408,6 +412,12 @@ async function run(): Promise<void> {
         break;
       case "advance":
         cmdAdvance(config, master, opts);
+        break;
+      case "set-chain":
+        cmdSetChain(config, master, opts);
+        break;
+      case "chain-advance":
+        cmdChainAdvance(config, master, opts);
         break;
       case "merge":
         cmdMerge(config, master, opts);

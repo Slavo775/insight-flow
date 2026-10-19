@@ -18,8 +18,9 @@ composer directly. It's the conversational, agent-driven way to manage your
 insight-flow setup.
 
 Concretely, the server exposes insight-flow's composer registry — modules,
-agents, and flows, both built-in **and** custom — so an MCP client can list,
-author, edit, install, uninstall, and delete definitions as tool calls: the same
+agents, and flows, both built-in **and** custom, plus custom chains of flows — so an MCP client can list,
+author, edit, install, uninstall, and delete definitions as tool calls (chains
+have no install step — they take effect once saved): the same
 operations the [dashboard](../dashboard/index.md) offers, but programmatic and
 agent-callable. Because the tools are kind-parameterized, this includes the
 [`subagent` module kind](../concepts/modules.md) — you can author native
@@ -75,8 +76,8 @@ registers the `composer` server for you. You can also add it to any custom flow'
 
 > **Composer authoring flow.** insight-flow ships a second built-in flow whose
 > agents (analyze → create → implement → review → fix → human-review → test →
-> install) author and install custom modules/agents/flows through these MCP
-> tools, fanning out to per-kind subagents (analyst / author / reviewer ×
+> install) author and install custom modules/agents/flows, and author chains,
+> through these MCP tools, fanning out to per-kind subagents (analyst / author / reviewer ×
 > module / agent / flow / relationship). Because the MCP is **stdio**, there's no
 > server to manage — the harness spawns it per session; if the tools are missing,
 > the fix is registering `mcp-composer`, not launching anything. See

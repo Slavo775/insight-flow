@@ -145,6 +145,31 @@ rm ~/.insight-flow/master.lock
 insight-flow master --port 6100
 ```
 
+## Chain commands fail with `Cannot load chains: …` or `Invalid user-space definition …`
+
+If a file in `insightFlow/chains/` has malformed JSON or is not a valid
+[chain](../cli/git-and-flow.md#chains-flow--flow), every chain feature stops:
+
+- `create --chain` fails with `Cannot load chains: …`.
+- `set-chain --chain <chainId>`, `chain-advance`, and the composer MCP
+  `list` / `get` for chains fail with
+  `Invalid user-space definition <file>: …`.
+  `set-chain --chain none` still works, so you can clear a task's chain.
+- Lifecycle commands (`merge`, `done`, `advance`, …) still save the status, but
+  for a chained task they print
+  `warning: could not load chains (…); no chain hint.` on every status write,
+  instead of the `chain next:` line.
+- `set-flow` on a chained task is refused (`cannot check chain …`).
+- `GET /api/chains` returns `{ chains: [], userSpaceError }`.
+- Flow edits still save, but return a `warning` that the chain guard was skipped.
+
+Tasks without a chain are never blocked.
+
+**Fix:** correct the file, or delete it. To delete a broken chain by id
+(`DELETE /api/chains/<id>` or the composer MCP `delete({ kind: "chain", id })`),
+the file must be named after the id: `insightFlow/chains/<id without custom:>.json`.
+Otherwise, delete the file by hand.
+
 ## See also
 
 - [Configuration](../configuration.md) — every `taskflow.config.json` key and the

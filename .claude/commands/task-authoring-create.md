@@ -50,6 +50,7 @@ insight-flow builds AI roles from three nested parts — small parts make bigger
   - **relations / edges** — `{ from, to, on? }` that move the single task token from one agent to the next when a status (`on`) is reached;
   - **handovers** — the behaviour on an edge: `gated` stops and waits for a human go-ahead; `auto` chains the next command in the same session. A handover carries a `when` reason. For parallel work use `subagents` (fan-out), not handovers;
   - a **terminator / finish** — an edge whose `to` is a terminal status (e.g. `done`) instead of an agent. Every flow needs one finish point.
+- **Chain** — a flow of flows. It joins whole flows (e.g. prepare → implement → deploy) without changing them, so one flow can sit in many chains. A **link** `{ from, on, to, mode, when? }` leaves a **terminal** status `on` of flow `from` and enters flow `to` at its entry agent; `mode` is `gated` (default) or `auto`, like a handover. The same task moves through every flow of its chain. No install step: the CLI prints the next flow when the task reaches a linked terminal.
 
 **MCP discovery — by web search, no key.** When a role needs a tool that is an MCP server, find one by **web search** — there is nothing to install and no API key:
   - **GitHub MCP Registry** — `github.com/mcp`. A curated, reviewed directory (each server backed by its GitHub repo), with a no-auth API at `api.mcp.github.com/v0/servers`. Good first stop for quality.
@@ -76,9 +77,10 @@ insight-flow builds AI roles from three nested parts — small parts make bigger
 - **Taskmasters are templated by default.** An agent whose job is to create or change tasks (a "taskmaster") composes the `template-copy` module by default — so every task it makes is scaffolded from the shared templates (`insight-flow create`) and then filled, keeping one structure. A taskmaster that writes build specs for modules/agents/flows (an authoring taskmaster) also composes `authoring-spec-structure`. Include these when authoring a custom taskmaster unless the user opts out.
 - **Reviewers are templated too.** Same discipline for review: a custom review agent writes/updates `REVIEW.md` **scaffolded from insight-flow's shared review template** (via `review-start`, which creates `REVIEW.md` on the first pass and appends `## Round N` after) — it never hand-writes the review file from scratch. This keeps review records consistent across every flow, custom or built-in.
 - **Relationships.** Handovers carry a `when` reason and a deliberate `auto`/`gated` mode; never auto-chain a cycle back-edge. A handover moves the single task token (a 1-of-N branch). For parallelism, use `subagents` (fan-out), not handovers.
+- **Flow → flow is a chain, not an edge.** When work spans several flows run one after another, author a `chain` (`create_chain`) that links the existing flows; never merge them into one big flow and never add a cross-flow edge. Same discipline as handovers: every link has a deliberate `auto`/`gated` mode (default `gated`; `auto` only when the next flow starts with a safe, reversible step) and a one-line `when` when a terminal has more than one link; never `auto`-link back into a flow the chain already ran (a cycle).
 - **Validate by building.** Invalid defs are rejected on create/update; every referenced id (module/agent/subagent/edge endpoint) must resolve. Pass the `revision` from `get` on `update_*` for concurrency safety.
 
-For the exact creation shape of each kind (module/agent/flow + the kind-specific fields), call the composer MCP `describe({ kind })` — and `get` an existing definition as a working template.
+For the exact creation shape of each kind (module/agent/flow/chain + the kind-specific fields), call the composer MCP `describe({ kind })` — and `get` an existing definition as a working template.
 
 @AGENT_SECURITY.md
 @AGENT_ENFORCEMENT.md

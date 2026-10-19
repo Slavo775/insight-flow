@@ -5,7 +5,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
@@ -733,5 +733,78 @@ test("flow install writes artifacts and is idempotent", async () => {
       (await api("/api/install", "POST", { kind: "flow", id: "custom:ghost" })).status,
       404,
     );
+  });
+});
+
+// N267 — chains over the same CRUD: create/list/delete, terminal-only links,
+// a chained flow can't be deleted or lose the terminal a chain links from.
+test("chains CRUD: validation, GET list, flow delete/edit guarded by chains", async () => {
+  await withServer(async (dir) => {
+    const BETA = {
+      id: "custom:beta",
+      title: "Beta",
+      agents: ["task-git"],
+      entryAgents: ["task-git"],
+      statuses: [
+        { id: "ready", title: "ready" },
+        { id: "deployed", title: "deployed", terminal: true },
+      ],
+      flow: [],
+      install: [],
+    };
+    const CHAIN = {
+      id: "custom:ship",
+      title: "Ship",
+      flows: ["default", "custom:beta"],
+      links: [{ from: "default", on: "merged", to: "custom:beta" }],
+    };
+    assert.equal((await api("/api/projects", "POST", BETA)).status, 201);
+
+    // non-terminal `on` → 400
+    let r = await api("/api/chains", "POST", {
+      ...CHAIN,
+      links: [{ from: "default", on: "ready", to: "custom:beta" }],
+    });
+    assert.equal(r.status, 400);
+    assert.match((await r.json()).error, /not a terminal status/);
+
+    // valid → 201, file in user space, listed by GET
+    assert.equal((await api("/api/chains", "POST", CHAIN)).status, 201);
+    assert.ok(existsSync(join(dir, "insightFlow/chains/ship.json")));
+    const listed = await (await api("/api/chains", "GET")).json();
+    assert.deepEqual(
+      listed.chains.map((c) => [c.id, c.links[0].mode]),
+      [["custom:ship", "gated"]],
+    );
+
+    // duplicate id → 409
+    r = await api("/api/chains", "POST", CHAIN);
+    assert.equal(r.status, 409);
+    assert.match((await r.json()).error, /already exists/);
+
+    // dashboard flow picker keeps a chained task inside its chain → 400 outside-chain
+    const created = spawnSync(
+      process.execPath,
+      [CLI, "create", "--title", "T", "--chain", "custom:ship"],
+      { cwd: dir, env: { ...process.env, HOME: dir }, encoding: "utf-8" },
+    );
+    assert.equal(created.status, 0, created.stderr);
+    r = await api("/api/task-flow", "POST", { id: "N00", flow: "composer-authoring" });
+    assert.equal(r.status, 400);
+    assert.equal((await r.json()).error, "outside-chain");
+    r = await api("/api/task-flow", "POST", { id: "N00", flow: "custom:beta" });
+    assert.equal(r.status, 200);
+
+    // the chained flow: delete → 409, dropping its entry agent → 400
+    r = await api("/api/projects/custom:beta", "DELETE");
+    assert.equal(r.status, 409);
+    assert.deepEqual((await r.json()).referencedBy, ["custom:ship"]);
+    r = await api("/api/projects/custom:beta", "PUT", { ...BETA, entryAgents: [] });
+    assert.equal(r.status, 400);
+    assert.match((await r.json()).error, /update breaks 'custom:ship'/);
+
+    // unwind
+    assert.equal((await api("/api/chains/custom:ship", "DELETE")).status, 200);
+    assert.equal((await api("/api/projects/custom:beta", "DELETE")).status, 200);
   });
 });

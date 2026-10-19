@@ -1,5 +1,5 @@
-// N103 — CRUD for user-space custom definitions (modules / agents / projects).
-// Writes land only under insightFlow/{modules,agents,projects}; built-ins are
+// N103 — CRUD for user-space custom definitions (modules / agents / projects;
+// N267 — chains). Writes land only under insightFlow/<kind>/; built-ins are
 // untouchable (403). Every write is Zod-validated and referentially checked
 // against the prospective merged registries *before* touching disk (400 with
 // field issues); deletes refuse while the target is referenced (409 listing
@@ -16,7 +16,14 @@ import {
 import { resolve } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { ZodError } from "zod";
-import { AgentModuleSchema, ComposedAgentSchema, ProjectSchema } from "../../core/schema/index.js";
+import {
+  AgentModuleSchema,
+  ChainSchema,
+  ComposedAgentSchema,
+  ProjectSchema,
+  type Chain,
+} from "../../core/schema/index.js";
+import { chainReferenceError } from "../../core/chain.js";
 import { sendJson, readBody as readBodyRaw } from "../../core/http-util.js";
 import {
   COMPOSED_AGENTS,
@@ -32,17 +39,19 @@ import {
   isLockedModuleId,
   isModuleEditLocked,
   loadUserRegistries,
+  mergedChains,
   userSpaceRoot,
   type UserRegistries,
 } from "../../agents/user-registry.js";
 
-type Kind = "modules" | "agents" | "projects";
-const KINDS: readonly Kind[] = ["modules", "agents", "projects"];
+type Kind = "modules" | "agents" | "projects" | "chains";
+const KINDS: readonly Kind[] = ["modules", "agents", "projects", "chains"];
 
 const SCHEMAS = {
   modules: AgentModuleSchema,
   agents: ComposedAgentSchema,
   projects: ProjectSchema,
+  chains: ChainSchema,
 } as const;
 
 function fileFor(root: string, kind: Kind, id: string): string {
@@ -71,17 +80,23 @@ export function definitionRevision(
 function builtinIds(kind: Kind): Set<string> {
   if (kind === "modules") return new Set(Object.keys(MODULE_REGISTRY));
   if (kind === "agents") return new Set(Object.keys(COMPOSED_AGENTS));
+  if (kind === "chains") return new Set(); // N267 — no shipped chains
   return new Set(Object.keys(BUILTIN_PROJECTS));
 }
 
 /** Referential checks against the prospective registries (current + change). */
 export function validateReferences(
   kind: Kind,
-  record: AgentModule | ComposedAgent | Project,
+  record: AgentModule | ComposedAgent | Project | Chain,
   user: UserRegistries,
 ): string | null {
   const modules: Record<string, AgentModule> = { ...MODULE_REGISTRY, ...user.modules };
   const agents: Record<string, ComposedAgent> = { ...COMPOSED_AGENTS, ...user.agents };
+
+  // N267 — a chain's flows/links must resolve against the merged flows.
+  if (kind === "chains") {
+    return chainReferenceError(record as Chain, { ...BUILTIN_PROJECTS, ...user.projects });
+  }
 
   if (kind === "modules") {
     modules[record.id] = record as AgentModule;
@@ -152,6 +167,11 @@ function referencingIds(kind: Kind, id: string, user: UserRegistries): string[] 
     for (const project of Object.values(user.projects)) {
       if (project.agents.includes(id)) refs.push(project.id);
     }
+  } else if (kind === "projects") {
+    // N267 — a chain that names the flow keeps it from being deleted.
+    for (const chain of Object.values(user.chains ?? {})) {
+      if (chain.flows.includes(id)) refs.push(chain.id);
+    }
   }
   return refs;
 }
@@ -202,6 +222,19 @@ export interface DefResult {
 }
 
 /**
+ * N267 — the registries a write validates against. `chainsError` is set when
+ * the chains could not be loaded best-effort (a flow write still proceeds, but
+ * its chain guard is skipped and the success response says so).
+ */
+export type WriteRegistries = UserRegistries & { chainsError?: string };
+
+function chainGuardWarning(kind: Kind, user: WriteRegistries): { warning?: string } {
+  return kind === "projects" && user.chainsError
+    ? { warning: `chains could not be loaded (${user.chainsError}); chain guard skipped` }
+    : {};
+}
+
+/**
  * Delete a custom definition or revert a built-in override. Locked ids refuse
  * (403); a custom delete refuses while still referenced (409). Performs the
  * unlink + flow-reference cleanup; the caller is responsible for any
@@ -210,16 +243,21 @@ export interface DefResult {
 export function removeDefinition(
   kind: Kind,
   id: string,
-  user: UserRegistries,
+  user: WriteRegistries,
   root: string = userSpaceRoot(),
 ): DefResult {
-  const existing = user[kind] as Record<string, { id: string }>;
+  const existing = (user[kind] ?? {}) as Record<string, { id: string }>;
   // N119/N120 — locked ids are read-only (never deletable/revertable).
   if (kind === "modules" && isLockedModuleId(id)) {
     return { status: 403, body: { ok: false, error: `'${id}' is locked (read-only)` } };
   }
   const isCustom = id.startsWith(CUSTOM_ID_PREFIX);
-  if (!existing[id]) {
+  // N267 — chains that failed to load (malformed file) can still be deleted by
+  // id: nothing references a chain, and deleting the broken file is the fix.
+  const brokenChain =
+    kind === "chains" && isCustom && !!user.chainsError && existsSync(fileFor(root, kind, id));
+  // hasOwn: a plain-object registry would resolve `constructor` & co.
+  if (!Object.hasOwn(existing, id) && !brokenChain) {
     // No user-space file. Custom → genuinely unknown (404). Built-in → there's
     // no override to revert and you can't delete a shipped definition (403).
     return {
@@ -252,7 +290,13 @@ export function removeDefinition(
     }
   }
   // Custom → deleted; built-in → reverted to the shipped definition.
-  return { status: 200, body: isCustom ? { ok: true, deleted: id } : { ok: true, reverted: id } };
+  return {
+    status: 200,
+    body: {
+      ...(isCustom ? { ok: true, deleted: id } : { ok: true, reverted: id }),
+      ...chainGuardWarning(kind, user),
+    },
+  };
 }
 
 /**
@@ -265,12 +309,12 @@ export function removeDefinition(
 export function writeDefinition(
   kind: Kind,
   parsed: unknown,
-  user: UserRegistries,
+  user: WriteRegistries,
   opts: { method: "POST" | "PUT"; revision?: string | null; pathId?: string | null; root?: string },
 ): DefResult {
   const { method, revision, pathId } = opts;
   const root = opts.root ?? userSpaceRoot();
-  const existing = user[kind] as Record<string, { id: string }>;
+  const existing = (user[kind] ?? {}) as Record<string, { id: string }>;
 
   const result = SCHEMAS[kind].safeParse(parsed);
   if (!result.success) {
@@ -358,13 +402,10 @@ export function writeDefinition(
     modules: { ...user.modules },
     agents: { ...user.agents },
     projects: { ...user.projects },
+    chains: { ...user.chains },
   };
   (prospective[kind] as Record<string, unknown>)[record.id] = record;
-  const refError = validateReferences(
-    kind,
-    record as AgentModule | ComposedAgent | Project,
-    prospective,
-  );
+  const refError = validateReferences(kind, record, prospective);
   if (refError) {
     return { status: 400, body: { ok: false, error: refError } };
   }
@@ -383,6 +424,13 @@ export function writeDefinition(
         return { status: 400, body: { ok: false, error: `update breaks '${project.id}': ${err}` } };
       }
     }
+    // N267 — e.g. a flow edit that drops a terminal a chain links from.
+    for (const chain of Object.values(prospective.chains ?? {})) {
+      const err = validateReferences("chains", chain, prospective);
+      if (err) {
+        return { status: 400, body: { ok: false, error: `update breaks '${chain.id}': ${err}` } };
+      }
+    }
   }
 
   try {
@@ -397,16 +445,44 @@ export function writeDefinition(
     }
     return { status: 500, body: { ok: false, error: (err as Error).message } };
   }
-  return { status: method === "POST" ? 201 : 200, body: { ok: true, id: record.id } };
+  return {
+    status: method === "POST" ? 201 : 200,
+    body: { ok: true, id: record.id, ...chainGuardWarning(kind, user) },
+  };
 }
 
-/** Resolve `module|agent|flow` (MCP/CLI vocabulary) to the storage Kind. */
-export function kindFromTarget(target: "module" | "agent" | "flow"): Kind {
+/**
+ * The user registries a write of `kind` validates against. N267 — chains load
+ * apart (a bad chain file must not block flow edits): chain create/update needs
+ * them strictly (throws); flow writes and chain deletes load them best-effort
+ * and record `chainsError` (flow writes then warn that the chain guard was
+ * skipped; a chain delete can remove the broken file). Shared by the HTTP
+ * router and the composer MCP.
+ */
+export function loadRegistriesForWrite(
+  kind: Kind,
+  method: "POST" | "PUT" | "DELETE",
+): WriteRegistries {
+  const user: WriteRegistries = loadUserRegistries();
+  if (kind === "chains" || kind === "projects") {
+    try {
+      user.chains = mergedChains(undefined, { ...BUILTIN_PROJECTS, ...user.projects });
+    } catch (err) {
+      if (kind === "chains" && method !== "DELETE") throw err;
+      user.chainsError = (err as Error).message;
+    }
+  }
+  return user;
+}
+
+/** Resolve `module|agent|flow|chain` (MCP/CLI vocabulary) to the storage Kind. */
+export function kindFromTarget(target: "module" | "agent" | "flow" | "chain"): Kind {
+  if (target === "chain") return "chains";
   return target === "module" ? "modules" : target === "agent" ? "agents" : "projects";
 }
 
 /**
- * Router hook: handles POST/PUT/DELETE on /api/{modules,agents,projects}[/:id].
+ * Router hook: handles POST/PUT/DELETE on /api/{modules,agents,projects,chains}[/:id].
  * Returns true when the request was handled (caller stops routing).
  */
 export function handleCustomDefsRequest(
@@ -415,7 +491,7 @@ export function handleCustomDefsRequest(
   url: URL,
   onChanged?: () => void,
 ): boolean {
-  const match = url.pathname.match(/^\/api\/(modules|agents|projects)(?:\/(.+))?$/);
+  const match = url.pathname.match(/^\/api\/(modules|agents|projects|chains)(?:\/(.+))?$/);
   if (!match) return false;
   const method = req.method ?? "GET";
   if (method === "GET") return false; // read endpoints stay in index.ts
@@ -429,9 +505,9 @@ export function handleCustomDefsRequest(
     return true;
   }
 
-  let user: UserRegistries;
+  let user: WriteRegistries;
   try {
-    user = loadUserRegistries();
+    user = loadRegistriesForWrite(kind, method);
   } catch (err) {
     sendJson(res, 500, { ok: false, error: `user space is unreadable: ${(err as Error).message}` });
     return true;

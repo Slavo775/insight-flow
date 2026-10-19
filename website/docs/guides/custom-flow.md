@@ -93,6 +93,10 @@ The task's `flowId` reads `custom:hotfix`. You can also reassign a single
 insight-flow set-flow --id Nxx --flow custom:hotfix
 ```
 
+A task bound to a [chain](../cli/git-and-flow.md#chains-flow--flow) can only move
+to a flow of its chain. To leave the chain, clear it first with
+`insight-flow set-chain --id Nxx --chain none`.
+
 The dashboard's flow map renders the lifecycle with the task's current state
 highlighted.
 

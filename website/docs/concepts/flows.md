@@ -7,7 +7,8 @@ sidebar_position: 4
 # Flows & the lifecycle
 
 A **flow** is the top tier of the model: it takes a set of [agents](./agents.md)
-and wires them into a lifecycle. Where an agent is a list of modules, a flow is a
+and wires them into a lifecycle (a [chain](../cli/git-and-flow.md#chains-flow--flow)
+can then link whole flows, without changing them). Where an agent is a list of modules, a flow is a
 project definition — validated by `ProjectSchema` in
 `packages/taskflow/src/core/schema/index.ts`. A flow has five parts:
 
@@ -56,6 +57,16 @@ agent stamps `--by <agent-id>` onto its `create` call, which binds the new task
 to that agent's flow. Legacy tasks with no `flowId` read back as `"default"` —
 zero behavior change. Once bound, the flow's statuses and edges govern how that
 task travels.
+
+A task can also be bound to a [chain](../cli/git-and-flow.md#chains-flow--flow)
+of flows (N267) with `create --chain <id>`, or later with `set-chain` while it is
+`ready`. For a new task the full order is: `--flow` (must be one of the chain's
+flows) > the chain's first flow > `--agent` / entry agent > `flows.byType` >
+`flows.defaultFlow`. Later, at a linked terminal status, `chain-advance` changes
+`Task.flowId` to the next flow. Two optional fields record this:
+`Task.chainId` (absent = no chain, the old behaviour) and
+`statusHistory[].flowId` (set on the history entry `chain-advance` writes when
+the task enters a new flow).
 
 ## The default lifecycle
 

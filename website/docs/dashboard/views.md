@@ -64,8 +64,8 @@ The page gathers everything about the task in one place:
   as the task progressed.
 - **Lifecycle position** — a map of where the task sits in its flow, with
   suggested next agents (each chip copies the agent's slash command). While the
-  task is still `ready` you can reassign it to a different flow; once work
-  starts, the flow locks.
+  task is still `ready` you can reassign it to a different flow (a chained task
+  only to a flow of its chain); once work starts, the flow locks.
 
 ---
 

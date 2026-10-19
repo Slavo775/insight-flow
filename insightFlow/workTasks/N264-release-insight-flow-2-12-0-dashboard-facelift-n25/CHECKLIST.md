@@ -7,11 +7,11 @@
 
 ## Release steps
 
-- [ ] Rebuild + re-run the suite on `main` → `pnpm --dir packages/taskflow test` is green (374/374)
-- [ ] `npx tsc --noEmit` (packages/taskflow) passes; `pnpm --dir packages/taskflow run build` passes
-- [ ] Commit the fixes to `main` (conventional: `test:` for the test fix, `docs:` for the label) and push
-- [ ] Publish 2.12.0 by merging release-please PR **#172** (`chore(main): release 2.12.0`) — tags `v2.12.0` and triggers the npm-publish workflow (env approval required)
-- [ ] Verify `v2.12.0` published to npm; confirm the tag
+- [x] Rebuild + re-run the suite on `main` → `pnpm --dir packages/taskflow test` green (374/374) — re-check on `869bde4`
+- [x] `npx tsc --noEmit` (packages/taskflow) passes; `pnpm --dir packages/taskflow run build` passes
+- [x] Fixes committed + merged to `main` — via PR **#173** (`869bde4`), alongside the N265 Status-Transitions fidelity fix
+- [x] **Published (human-approved).** Merged release-please PR **#172** (`6fe34db`); `v2.12.0` tag + GitHub release created; npm-publish env approved; publish workflow (`30347257998`) succeeded
+- [x] Verified: `npm view insight-flow version` → **2.12.0** (`latest`); tag `v2.12.0` present
 
 ## Quality gates
 
@@ -22,6 +22,10 @@
 
 ## Verification
 
-- [ ] Suite green on main after the test fix
-- [ ] release-please PR #172 merged → `v2.12.0` tag created + npm publish succeeds
-- [ ] Docs label reads "Status Transitions"
+- [x] Suite green on main after the test fix (374/374, re-check on `869bde4`)
+- [x] release-please PR #172 merged → `v2.12.0` tag created + npm publish succeeded (2.12.0 = `latest`)
+- [x] Docs label reads "Status Transitions"
+
+## Also in this release (landed after the first check)
+
+- N265 — Status Transitions pane design fidelity (PR #173, merged). Internal dashboard UI only; still feature/2.12.0, no breaking change. Tasks in 2.12.0: **N258–N265** (all done).

@@ -26,6 +26,7 @@ A handover names the next agent to run. Your `## Handover` section may list seve
 - **`gated` needs an explicit go-ahead.** Do not chain a `gated` handover until the human explicitly approves it. Answering an unrelated question is not approval; silence is not approval. If no go-ahead comes, stop without chaining.
 - **No auto-chaining a cycle.** Never `auto`-invoke an agent that has already run for this task in the current session (e.g. the review ↔ review-fix loop). Treat such a back-edge as `gated` and ask first.
 - The flow diagram is descriptive: when it disagrees with your `## Handover` section, your section wins.
+- **Chain handover (flow → flow).** When a CLI status write prints `chain next:` lines (stderr), treat each one as a handover with its stated mode: `gated` = stop and get an explicit human go-ahead; `auto` = run the printed `insight-flow chain-advance …`, then the printed command. Pick the one line that matches its `when`; never fan out. The rules above (consent, no auto-chaining a cycle) apply unchanged. The flow lock does not block this — a chain moves the task only at a terminal status.
 
 ---
 

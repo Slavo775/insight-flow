@@ -19,7 +19,7 @@ or script something.
 
 | Command | Purpose |
 |---------|---------|
-| `create` | Create a new task. Flags: `--title`, `--type feat\|fix\|rework`, `--priority high\|medium\|low`, `--tags a,b`, `--with-analysis`. |
+| `create` | Create a new task. Flags: `--title`, `--type feat\|fix\|rework`, `--priority high\|medium\|low`, `--tags a,b`, `--with-analysis`, `--chain <chainId>` (the task starts in the chain's first flow; a `--flow` you pass must be one of the chain's flows). |
 | `rename` | Update task metadata. Flags: `--id`, `--title`, `--type`, `--priority`. |
 | `status` | Set a task's status directly. Flags: `--id`, `--status`, `--by`. |
 

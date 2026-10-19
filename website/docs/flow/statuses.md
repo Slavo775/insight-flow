@@ -44,7 +44,11 @@ Used when a human requests changes **after** a task is delivered:
 end of the flow. Every other status is "active" and has at least one outgoing
 transition (see [Transitions & agents](./transitions.md)). A custom flow marks its
 own end states with the `terminal` flag on a status (see below) — terminal is a
-property of a status, not a separate kind of thing.
+property of a status, not a separate kind of thing. A
+[chain](../cli/git-and-flow.md#chains-flow--flow) can link a terminal status to
+the next flow. The task moves only when `insight-flow chain-advance` runs (a
+`gated` link waits for a human go-ahead); it then leaves this flow and starts the
+next one at `ready`.
 
 ## Custom statuses & state aliases
 

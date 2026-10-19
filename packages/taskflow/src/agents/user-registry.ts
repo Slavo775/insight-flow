@@ -7,7 +7,14 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ZodError, type z } from "zod";
-import { AgentModuleSchema, ComposedAgentSchema, ProjectSchema } from "../core/schema/index.js";
+import {
+  AgentModuleSchema,
+  ChainSchema,
+  ComposedAgentSchema,
+  ProjectSchema,
+  type Chain,
+} from "../core/schema/index.js";
+import { chainReferenceError } from "../core/chain.js";
 import { resolveProjectRoot } from "../core/paths.js";
 import {
   COMPOSED_AGENTS,
@@ -19,7 +26,7 @@ import {
 import { BUILTIN_PROJECTS, type Project } from "./project.js";
 
 export const CUSTOM_ID_PREFIX = "custom:";
-export const USER_SPACE_DIRS = ["modules", "agents", "projects"] as const;
+export const USER_SPACE_DIRS = ["modules", "agents", "projects", "chains"] as const;
 
 /**
  * N119 — the LOCKED tier: shipped definitions that may NOT be ejected/overridden
@@ -72,6 +79,8 @@ export interface UserRegistries {
   modules: Record<string, AgentModule>;
   agents: Record<string, ComposedAgent>;
   projects: Record<string, Project>;
+  /** N267 — filled only by callers that load chains (`mergedChains`). */
+  chains?: Record<string, Chain>;
 }
 
 export class UserRegistryError extends Error {
@@ -235,4 +244,28 @@ export function mergedComposedAgents(projectDir?: string): Record<string, Compos
 export function mergedProjects(projectDir?: string): Record<string, Project> {
   // N194 — all built-in flows (default + authoring), then user-space projects.
   return { ...BUILTIN_PROJECTS, ...loadUserRegistries(projectDir).projects };
+}
+
+/**
+ * N267 — user-space chains (`insightFlow/chains/`). Loaded apart from
+ * `loadUserRegistries` so a bad chain file never breaks flows, agents or
+ * modules. No built-in chains, so every id must be `custom:`. Each chain is
+ * checked against the merged flows; a broken one throws UserRegistryError.
+ */
+export function mergedChains(
+  projectDir: string = resolveProjectRoot(),
+  flows: Record<string, Project> = mergedProjects(projectDir),
+): Record<string, Chain> {
+  const { items, files } = readKind(
+    resolve(userSpaceRoot(projectDir), "chains"),
+    ChainSchema,
+    new Set<string>(),
+  );
+  for (const chain of Object.values(items)) {
+    const error = chainReferenceError(chain, flows);
+    if (error) throw new UserRegistryError(files[chain.id], error);
+  }
+  // Null prototype: callers look chains up by a task's `chainId` / a CLI arg,
+  // so `constructor` & co. must miss instead of hitting Object.prototype.
+  return Object.assign(Object.create(null) as Record<string, Chain>, items);
 }

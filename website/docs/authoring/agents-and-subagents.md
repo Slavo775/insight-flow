@@ -61,7 +61,9 @@ The four **concerns**:
   (section/include/mcp-server/hook/skill/bundle/status-transition/handover/subagent).
 - **agent** — a composed [agent](../concepts/agents.md) (modules + subagents + command).
 - **flow** — a [flow](../concepts/flows.md) (agents + edges + statuses + install).
-- **relationship** — [handovers](../concepts/handover.md) + flow edges between agents.
+- **relationship** — [handovers](../concepts/handover.md) + flow edges between
+  agents + [flow chains](../cli/git-and-flow.md#chains-flow--flow) between flows
+  (`create_chain`/`update_chain`).
 
 ## The reuse-first rule
 

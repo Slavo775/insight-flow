@@ -393,7 +393,7 @@
       "title": "Release insight-flow 2.12.0 — dashboard facelift (N258–N263)",
       "type": "chore",
       "priority": "high",
-      "status": "release-fixed",
+      "status": "done",
       "folder": "insightFlow/workTasks/N264-release-insight-flow-2-12-0-dashboard-facelift-n25",
       "createdAt": "2026-07-27T13:20:06.476Z",
       "statusHistory": [
@@ -416,6 +416,26 @@
           "status": "release-fixed",
           "at": "2026-07-27T13:42:53.794Z",
           "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-07-28T08:25:53.708Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "ready-to-release",
+          "at": "2026-07-28T08:26:49.860Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "released",
+          "at": "2026-07-28T09:38:17.322Z",
+          "by": "custom:task-release-plan"
+        },
+        {
+          "status": "done",
+          "at": "2026-07-28T12:17:13.435Z",
+          "by": "custom:task-release-rollout"
         }
       ],
       "implementation": {
@@ -514,6 +534,258 @@
       "branch": null,
       "mrUrl": "https://github.com/Slavo775/insight-flow/pull/173",
       "mergedAt": "2026-07-28T06:10:01.190Z",
+      "flowId": "default"
+    },
+    {
+      "id": "N266",
+      "title": "Authoring prompt cookbook — copy-paste analyze prompts for flow/agent/module",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N266-authoring-prompt-cookbook-copy-paste-analyze-promp",
+      "createdAt": "2026-07-30T16:01:56.824Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-07-30T16:01:56.824Z",
+          "by": "custom:taskmaster"
+        },
+        {
+          "status": "ready",
+          "at": "2026-07-30T16:03:04.291Z",
+          "by": "custom:taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "docs",
+        "authoring",
+        "prompts",
+        "dx"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N267",
+      "title": "Flow chains: chain existing flows into a flow-of-flows (core + CLI)",
+      "type": "feat",
+      "priority": "high",
+      "status": "approved",
+      "folder": "insightFlow/workTasks/N267-flow-chains-chain-existing-flows-into-a-flow-of-fl",
+      "createdAt": "2026-10-19T14:09:14.109Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T14:09:14.110Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-19T14:19:50.398Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-19T14:30:06.645Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-10-19T14:30:38.197Z",
+          "by": "task-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-10-19T14:39:25.168Z",
+          "by": "task-review"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-10-19T17:05:04.821Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fix-needed",
+          "at": "2026-10-19T17:05:19.481Z",
+          "by": "task-human-review"
+        },
+        {
+          "status": "fixing",
+          "at": "2026-10-19T17:07:35.482Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "fixed",
+          "at": "2026-10-19T17:13:33.580Z",
+          "by": "task-review-fix"
+        },
+        {
+          "status": "pushed",
+          "at": "2026-10-19T17:16:13.517Z",
+          "by": "task-git"
+        },
+        {
+          "status": "reviewing",
+          "at": "2026-10-19T17:20:15.847Z",
+          "by": "task-review"
+        },
+        {
+          "status": "approved",
+          "at": "2026-10-19T17:30:39.490Z",
+          "by": "task-review"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-10-19T19:11:03.863Z",
+          "by": "custom:task-release-check"
+        },
+        {
+          "status": "approved",
+          "at": "2026-10-19T19:12:33.929Z",
+          "by": "custom:task-release-plan"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-10-19T14:19:50.402Z",
+        "completedAt": "2026-10-19T14:30:06.649Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/chain.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/core/types.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/src/cli/commands/create.ts",
+          "packages/taskflow/src/cli/commands/set-chain.ts",
+          "packages/taskflow/src/cli/commands/chain-advance.ts",
+          "packages/taskflow/src/cli/commands/status-write.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/index.ts",
+          "AGENT_PROTOCOL.md",
+          "packages/taskflow/templates/roles/AGENT_PROTOCOL.md",
+          "packages/taskflow/README.md",
+          "website/docs/cli/git-and-flow.md",
+          "packages/taskflow/test/flow-chains.test.mjs",
+          "packages/taskflow/test/custom-defs-api.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 3,
+      "lastReviewVerdict": "approved",
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "flows",
+        "chains",
+        "cli",
+        "core",
+        "composer"
+      ],
+      "pushes": [
+        {
+          "at": "2026-10-19T17:16:13.516Z",
+          "commitHash": "54834d9",
+          "commitMessage": "feat(flows): flow chains — link whole flows into a flow-of-flows (N267)"
+        }
+      ],
+      "branch": "feat/N267-flow-chains",
+      "mrUrl": "https://github.com/Slavo775/insight-flow/pull/174",
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N268",
+      "title": "Chains page: list + editor for flow-of-flows in the dashboard",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N268-chains-page-list-editor-for-flow-of-flows-in-the-d",
+      "createdAt": "2026-10-19T14:11:37.573Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T14:11:37.574Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "flows",
+        "chains",
+        "dashboard",
+        "ui"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N269",
+      "title": "Task detail: chain bar, chain picker, gated Continue to next flow",
+      "type": "feat",
+      "priority": "medium",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N269-task-detail-chain-bar-chain-picker-gated-continue-",
+      "createdAt": "2026-10-19T14:11:37.742Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T14:11:37.743Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "flows",
+        "chains",
+        "dashboard",
+        "ui"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
       "flowId": "default"
     }
   ]

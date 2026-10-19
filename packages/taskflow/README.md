@@ -181,7 +181,7 @@ insight-flow list [--status ready]              # List tasks (optionally filtere
 insight-flow stats                              # Aggregate stats
 
 # Task lifecycle
-insight-flow create --title "..." --type feat|fix|rework [--priority high] [--tags a,b]
+insight-flow create --title "..." --type feat|fix|rework [--priority high] [--tags a,b] [--chain <chainId>]
 insight-flow status --id N00 --status <status> [--by agent-name]
 
 insight-flow implement-start --id N00
@@ -203,6 +203,10 @@ insight-flow push --id N00 --commit abc123 --message "..." [--branch name]
 insight-flow mr-update --id N00 --url "https://..."
 insight-flow merge --id N00
 insight-flow done --id N00
+
+# Flow chains (flow → flow, see "Flow chains" below)
+insight-flow set-chain --id N00 --chain <chainId|none>   # bind/clear (ready-only); a task whose flow is not in the chain moves to the chain's first flow
+insight-flow chain-advance --id N00 [--to <flowId>] [--by <agent>]   # at a terminal: next flow, status ready
 
 # Incidents
 insight-flow incident-create --id N03 --title "..." --severity critical|high|medium|low
@@ -632,6 +636,10 @@ Example — run a script when any task starts and send a desktop notification wh
 
 `src/agents/project/default.json` is the atomic-design top tier: which agents the project uses, how work flows between them (edges triggered by real task statuses — validated, so a status rename fails tests instead of silently outdating the diagram), and what gets installed globally (module/bundle ids, e.g. the `activity` telemetry bundle). Browse it at `/project` in the dashboard. **Descriptive for now**: the flow visualizes the lifecycle; behavior is still enforced by the status machine, the `next*` pickers, and the role prompts. A later iteration flips it prescriptive.
 
+### Flow chains
+
+A chain (`insightFlow/chains/<name>.json`) links existing flows so one task can go through several of them: `{ id: "custom:…", title, flows: [entry, …], links: [{ from, on, to, mode?, when? }] }`. A link leaves a **terminal** status `on` of flow `from` and enters flow `to` at `ready`; `mode` is `gated` (default) or `auto`, like agent handovers; the optional `when` is one line (≤200 chars, no control characters). Flows are not modified, so one flow can be reused in many chains. Bind with `create --chain` / `set-chain` (a chained task's `set-flow` stays inside its chain); when a chained task reaches a linked terminal, the CLI prints `chain next:` lines on stderr and `chain-advance` moves the task (folder and history kept). Chains are read/written over `/api/chains`. See the docs page *CLI → Git & Flow → Chains*.
+
 ### Integration artifacts (composer modules)
 
 Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and `skill` modules are emitted by `insight-flow prompt-build --compose --apply` into `.mcp.json`, `.claude/settings.json`, and `.claude/skills/` respectively. Managed entries are tracked per agent in `.claude/taskflow-managed.json` — re-applies replace cleanly, removing a module removes its artifact, and hooks you wrote yourself are never touched. Note: the first managed write normalizes the touched JSON file to 2-space formatting (content and key order are preserved). Use `--def <file.json>` to compose a project-local agent definition that adopts integration modules.
@@ -640,7 +648,7 @@ Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and 
 
 ### Composer MCP
 
-**The composer MCP server is how an AI assistant helps you set up and customize insight-flow itself** — building and wiring your modules, agents, and flows by asking in plain language instead of clicking through the dashboard. `insight-flow mcp` runs it over stdio, exposing the module/agent/flow registry as [Model Context Protocol](https://modelcontextprotocol.io) tools (`list`, `get`, `create_*`, `update_*`, `install`, `uninstall`, `delete`), so an MCP client like Claude Code can manage your composer definitions programmatically with the same validation, locked/eject tiers, and reference-safe install/uninstall as the dashboard. Register it in `.mcp.json`:
+**The composer MCP server is how an AI assistant helps you set up and customize insight-flow itself** — building and wiring your modules, agents, and flows by asking in plain language instead of clicking through the dashboard. `insight-flow mcp` runs it over stdio, exposing the module/agent/flow/chain registry as [Model Context Protocol](https://modelcontextprotocol.io) tools (`list`, `get`, `describe`, `create_*`, `update_*`, `install`, `uninstall`, `delete`; chains have no install step), so an MCP client like Claude Code can manage your composer definitions programmatically with the same validation, locked/eject tiers, and reference-safe install/uninstall as the dashboard. Register it in `.mcp.json`:
 
 ```jsonc
 {

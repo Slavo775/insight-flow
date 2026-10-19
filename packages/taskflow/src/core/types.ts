@@ -19,6 +19,8 @@ export interface StatusHistoryEntry {
   status: string;
   at: string;
   by: string;
+  /** N267 — set when a chain moved the task into this flow. */
+  flowId?: string;
 }
 
 export interface ReviewFix {
@@ -113,6 +115,8 @@ export interface Task {
   mergedAt: string | null;
   /** N116 — the project flow that governs this task ("default" or "custom:<slug>"). */
   flowId: string;
+  /** N267 — the chain (flow-of-flows) this task follows; absent = no chain. */
+  chainId?: string;
 }
 
 export interface ReviewsFile {

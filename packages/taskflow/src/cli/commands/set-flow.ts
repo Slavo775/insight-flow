@@ -1,24 +1,21 @@
 import type { MasterFile, TaskflowConfig, ParsedArgs } from "../../core/types.js";
 import { jsonFileStorage } from "../../core/storage-port.js";
 import { getWorkDir, resolveId } from "../../core/storage.js";
-import { mergedProjects } from "../../agents/user-registry.js";
+import { mergedChains, mergedProjects } from "../../agents/user-registry.js";
+import type { Project } from "../../agents/project.js";
 
-export type SetFlowFailure = "not-found" | "locked" | "unknown-flow";
+export type SetFlowFailure =
+  | "not-found"
+  | "locked"
+  | "unknown-flow"
+  | "outside-chain"
+  | "chain-unreadable";
 
 export interface SetFlowResult {
   ok: boolean;
   error?: SetFlowFailure;
   message?: string;
   flowId?: string;
-}
-
-/** Flow ids that exist: "default" plus any custom project flows (N108). */
-function knownFlows(): Set<string> {
-  try {
-    return new Set(Object.keys(mergedProjects()));
-  } catch {
-    return new Set(["default"]); // malformed user space — only the shipped flow is safe
-  }
 }
 
 /**
@@ -48,11 +45,44 @@ export function setTaskFlow(
       message: `cannot change flow: ${id} is "${task.status}" — the flow locks once work starts (ready only).`,
     };
   }
-  if (!knownFlows().has(flow)) {
+  // One registry read for both checks. Flow ids that exist: "default" plus any
+  // custom project flows (N108); a malformed user space leaves only the shipped flow.
+  let flows: Record<string, Project> | undefined;
+  try {
+    flows = mergedProjects();
+  } catch {
+    flows = undefined;
+  }
+  if (flows ? !Object.hasOwn(flows, flow) : flow !== "default") {
     return {
       ok: false,
       error: "unknown-flow",
       message: `unknown flow "${flow}" (expected "default" or an existing custom flow).`,
+    };
+  }
+
+  // N267 — a chained task stays inside its chain (same rule as create/set-chain).
+  // Fails closed: if the chain can't be read, the guard can't run, so refuse
+  // rather than move the task out silently. A chain that no longer exists
+  // (dangling binding) has nothing to guard.
+  let chain;
+  if (task.chainId) {
+    try {
+      if (!flows) throw new Error("flows could not be loaded");
+      chain = mergedChains(undefined, flows)[task.chainId];
+    } catch (err) {
+      return {
+        ok: false,
+        error: "chain-unreadable",
+        message: `cannot check chain "${task.chainId}" (${(err as Error).message}) — fix it, or clear the chain first (set-chain --id ${id} --chain none).`,
+      };
+    }
+  }
+  if (chain && !chain.flows.includes(flow)) {
+    return {
+      ok: false,
+      error: "outside-chain",
+      message: `flow "${flow}" is not part of chain "${chain.id}" — clear the chain first (set-chain --id ${id} --chain none).`,
     };
   }
 

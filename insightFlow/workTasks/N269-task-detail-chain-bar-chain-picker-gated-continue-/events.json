@@ -1,0 +1,39 @@
+{
+  "taskId": "N269",
+  "events": [
+    {
+      "type": "done",
+      "taskId": "N269",
+      "timestamp": "2026-10-19T14:12:47.236Z",
+      "source": "agent"
+    },
+    {
+      "id": "evt_1792419569296_3eda",
+      "type": "agent-active",
+      "source": "hook",
+      "hookName": "UserPromptSubmit",
+      "timestamp": "2026-10-19T14:19:29.296Z",
+      "sessionId": "8fc0d5a0-1e9a-4e99-af6d-d70b708439c4",
+      "taskId": "N269",
+      "payload": {}
+    },
+    {
+      "id": "evt_1792419578323_4983",
+      "type": "tool-requested",
+      "source": "hook",
+      "hookName": "PreToolUse",
+      "timestamp": "2026-10-19T14:19:38.323Z",
+      "sessionId": "8fc0d5a0-1e9a-4e99-af6d-d70b708439c4",
+      "taskId": "N269",
+      "payload": {
+        "tool_name": "Bash"
+      }
+    },
+    {
+      "type": "start",
+      "taskId": "N269",
+      "timestamp": "2026-10-19T14:19:38.908Z",
+      "source": "agent"
+    }
+  ]
+}

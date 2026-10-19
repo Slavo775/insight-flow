@@ -44,9 +44,11 @@ Module  ──▶  Agent  ──▶  Flow
   `edges` between them, the things they `install`, the `statuses` work moves
   through, and the `entryAgents` that can start work. The shipped default flow
   is the canonical task lifecycle.
-- A **task** is bound to exactly one flow. `Task.flowId` (`"default"` or
+- A **task** is bound to one flow at a time. `Task.flowId` (`"default"` or
   `"custom:<slug>"`) records which flow governs it, and the task moves through
-  that flow's statuses as agents hand off to one another.
+  that flow's statuses as agents hand off to one another. A
+  [chain](../cli/git-and-flow.md#chains-flow--flow) can move it on to the next
+  flow at a terminal status.
 
 ## How a task binds to a flow
 
@@ -54,7 +56,10 @@ When a new task is created, insight-flow resolves its flow from the project's
 [`flows` config](../configuration.md#flows--task--flow-binding): it looks up the
 task's type in `flows.byType`, falls back to `flows.defaultFlow`, and stamps the
 result onto `Task.flowId`. Legacy tasks with no `flowId` read back as
-`"default"` — zero behavior change. Once bound, the flow's status set and its
+`"default"` — zero behavior change. A task can also be bound to a
+[chain](../cli/git-and-flow.md#chains-flow--flow) — a flow of flows — with
+`create --chain <id>`: it starts in the chain's first flow, and at a linked
+terminal status `chain-advance` moves it into the next flow. Once bound, the flow's status set and its
 [handovers](./handover.md) describe how that task should travel from `ready` to
 a terminal state.
 
@@ -67,7 +72,8 @@ a terminal state.
 - **[Flows & the lifecycle](./flows.md)** — agents, edges, install, statuses,
   entry agents, and how `Task.flowId` binds.
 - **[The handover system](./handover.md)** — module-level vs flow-edge
-  handovers, the canonical lifecycle chain, and auto vs gated.
+  handovers, chain handovers between flows, the canonical lifecycle chain, and
+  auto vs gated.
 
 ## See also
 
