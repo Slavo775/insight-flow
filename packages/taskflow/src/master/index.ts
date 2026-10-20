@@ -121,7 +121,7 @@ async function handshakeRegistered(
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 1500);
-        await fetch(`http://localhost:${p.port}/hub/reregister`, {
+        await fetch(`http://127.0.0.1:${p.port}/hub/reregister`, {
           method: "POST",
           signal: ctrl.signal,
         });

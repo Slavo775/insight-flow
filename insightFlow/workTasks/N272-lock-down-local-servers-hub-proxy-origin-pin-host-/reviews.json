@@ -1,0 +1,27 @@
+{
+  "taskId": "N272",
+  "reviews": [
+    {
+      "startedAt": "2026-10-20T09:59:07.438Z",
+      "endedAt": "2026-10-20T12:05:13.502Z",
+      "verdict": "fix-needed",
+      "comment": "REQUEST CHANGES: (1) X-Forwarded-Host is honored from ANY loopback peer and overwrites Host BEFORE the Host check — the user's own browser is a loopback peer, so a DNS-rebinding page can set X-Forwarded-Host: localhost and read every GET route incl. /sse; check the real Host first, then validate the forwarded host too. (2) findFreePort still binds all interfaces while dashboards bind 127.0.0.1 (checklist claimed otherwise) — on macOS the probe reports held ports as free.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-10-20T12:31:09.446Z",
+        "endedAt": "2026-10-20T12:37:57.412Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/core/http-util.ts",
+          "packages/taskflow/test/server-trust.test.mjs"
+        ],
+        "comment": "Fixed blockers 1-2 (X-Forwarded-Host rebinding + findFreePort bind) and non-blocking #1-#5; 4 regression tests added, 11/11 green",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

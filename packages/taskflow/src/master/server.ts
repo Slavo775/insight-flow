@@ -35,8 +35,10 @@ import {
   MIME_HTML,
   isLoopbackHost,
   isLoopbackUrl,
+  isHostTrusted,
   isTrustedLocalRequest,
   isTrustedActionRequest,
+  isTopLevelNavigation,
   listenHost,
 } from "../core/http-util.js";
 
@@ -391,15 +393,19 @@ function stripHopByHop<T extends Record<string, unknown>>(headers: T): T {
 
 /** N218 — the preferred port if the OS has it free, else the next free one.
  *  Avoids spawning a dashboard onto a port an unrelated app already holds.
- *  Binds with NO host — the same all-interfaces (dual-stack) bind the dashboard
- *  itself uses — so a port that's busy on IPv6 isn't wrongly seen as free. */
+ *  N272 fix (review blocker 2): probe on the SAME host the spawned dashboard
+ *  binds (`listenHost()` — 127.0.0.1 by default). A wildcard probe would, on
+ *  macOS/BSD with SO_REUSEADDR, report a port already held by a 127.0.0.1-bound
+ *  listener as free, so the spawned `ui --port p` then hits EADDRINUSE. */
 async function findFreePort(preferred: number): Promise<number> {
+  const host = listenHost();
   const isFree = (p: number): Promise<boolean> =>
     new Promise((res) => {
       const srv = netCreateServer();
       srv.once("error", () => res(false));
       srv.once("listening", () => srv.close(() => res(true)));
-      srv.listen(p);
+      if (host) srv.listen(p, host);
+      else srv.listen(p);
     });
   let p = preferred;
   for (let i = 0; i < 50; i++) {
@@ -784,9 +790,13 @@ export async function startMasterServer(
         // task-flow, …) through the proxy. The dashboard also re-checks via the
         // forwarded Host (see proxyToProject).
         const pmethod = req.method ?? "GET";
+        // N272 fix (review #4): a GET is OK if it is same-origin, OR a top-level
+        // navigation to a trusted Host (clicking a `/project/<id>/` deep link from
+        // another site is a read the other site can't observe — don't 403 it).
+        // Non-GET still needs the full peer-checked action gate.
         const proxyOk =
           pmethod === "GET" || pmethod === "HEAD"
-            ? isTrustedLocalRequest(req)
+            ? isTrustedLocalRequest(req) || (isHostTrusted(req) && isTopLevelNavigation(req))
             : isTrustedActionRequest(req);
         if (!proxyOk) {
           sendJson(res, 403, { error: "forbidden" });
@@ -825,6 +835,13 @@ export async function startMasterServer(
       // and any bookmarks keep working after the rename.
       const legacyMatch = /^\/p\/([^/]+)(\/.*)?$/.exec(url.pathname);
       if (legacyMatch) {
+        // N272 fix (review #2): gate this like /project/* so a rebinding/cross-
+        // site page cannot follow the 301 and learn the registry-uuid→projectId
+        // mapping from the Location. A real bookmark/deep link is a navigation.
+        if (!(isTrustedLocalRequest(req) || (isHostTrusted(req) && isTopLevelNavigation(req)))) {
+          sendJson(res, 403, { error: "forbidden" });
+          return;
+        }
         const pid = decodeURIComponent(legacyMatch[1]);
         const restPath = legacyMatch[2] ?? "/";
         // Never redirect (or reveal) control-plane routes — mirror the /project/

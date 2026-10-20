@@ -197,6 +197,23 @@ export function isTrustedActionRequest(req: IncomingMessage): boolean {
   return trustedHostSet().has(headerHost(req.headers.host));
 }
 
+/**
+ * N272 — a top-level browser navigation (a clicked link / opened URL / bookmark),
+ * not a fetch/XHR. Safe to serve cross-site: the response renders in the user's
+ * own tab under OUR origin and the originating site cannot read it, so a deep
+ * link from a README/Slack/GitHub should not 403. The DNS-rebinding defense is
+ * still the caller's `Host` check (`isHostTrusted`); this only relaxes the
+ * `Sec-Fetch-Site` same-origin requirement, and only for a GET/HEAD whose
+ * `Sec-Fetch-Dest` is `document` (or `Sec-Fetch-Mode` is `navigate`).
+ */
+export function isTopLevelNavigation(req: IncomingMessage): boolean {
+  const method = req.method ?? "GET";
+  if (method !== "GET" && method !== "HEAD") return false;
+  return (
+    req.headers["sec-fetch-dest"] === "document" || req.headers["sec-fetch-mode"] === "navigate"
+  );
+}
+
 /** N272 — the host both servers bind to. Loopback-only by default; all
  *  interfaces only when the user opted into LAN access via
  *  `INSIGHT_FLOW_TRUSTED_HOSTS`. `undefined` ⇒ Node's default (all interfaces). */

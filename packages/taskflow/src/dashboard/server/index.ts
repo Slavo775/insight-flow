@@ -14,6 +14,9 @@ import {
   isHostTrusted,
   isLoopbackPeer,
   isTrustedLocalRequest,
+  isTrustedHost,
+  headerHost,
+  trustedHostSet,
   listenHost,
 } from "../../core/http-util.js";
 
@@ -361,7 +364,9 @@ function findMasterBin(): string | null {
 }
 
 async function waitForMaster(port: number): Promise<boolean> {
-  const url = `http://localhost:${port}/overview`;
+  // N272 — 127.0.0.1, not `localhost`: the master binds loopback IPv4 by default,
+  // and `localhost` can resolve to ::1 first (older Node) → ECONNREFUSED here.
+  const url = `http://127.0.0.1:${port}/overview`;
   for (let i = 0; i < 10; i++) {
     await new Promise<void>((r) => setTimeout(r, 300));
     try {
@@ -842,13 +847,23 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     //    Sec-Fetch), else 403 — defeats CSRF. A cross-site POST, incl. a
     //    text/plain "simple request", always carries a foreign Origin, so this
     //    closes the hook-install chain without needing a Content-Type check.
-    const fwdHost = req.headers["x-forwarded-host"];
-    if (typeof fwdHost === "string" && fwdHost && isLoopbackPeer(req)) {
-      req.headers.host = fwdHost;
-    }
+    // N272 fix (review blocker 1): validate the REAL peer Host FIRST — a browser
+    // page (a loopback peer) that rebinds a hostname to 127.0.0.1 could otherwise
+    // send `X-Forwarded-Host: localhost` and overwrite its own untrusted Host
+    // before this check, re-opening the read side of the gate. Only AFTER the
+    // real Host passes do we honor a forwarded host, and only one that is itself
+    // trusted (the hub forwards the browser's already-validated Host).
     if (!isHostTrusted(req)) {
       sendJson(res, 421, { error: "untrusted host" });
       return;
+    }
+    const fwdHost = req.headers["x-forwarded-host"];
+    if (typeof fwdHost === "string" && fwdHost && isLoopbackPeer(req)) {
+      if (!isTrustedHost(headerHost(fwdHost), trustedHostSet())) {
+        sendJson(res, 421, { error: "untrusted host" });
+        return;
+      }
+      req.headers.host = fwdHost;
     }
     const method = req.method ?? "GET";
     if (
@@ -994,7 +1009,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       // N274 (A78) — masterUrl comes from config; only embed an http(s) origin,
       // escaped, so a cloned `master.url` can't break out of the attribute and
       // inject markup. frame-src is scoped to that same origin.
-      const safeMaster = /^https?:\/\//i.test(masterUrl) ? masterUrl : "http://127.0.0.1:6100";
+      // N272 — browser-facing default is `localhost:6100` (not the 127.0.0.1 used
+      // for server-to-server registration) so the embedded overview shares the
+      // hub's own origin — SW/Notification state is per-origin, else it double-
+      // notifies. An explicit `master.url` is respected for both.
+      const masterBrowserUrl = config.master?.url ?? "http://localhost:6100";
+      const safeMaster = /^https?:\/\//i.test(masterBrowserUrl)
+        ? masterBrowserUrl
+        : "http://localhost:6100";
       const masterOrigin = new URL(safeMaster).origin;
       const iframeHtml =
         '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
@@ -1026,9 +1048,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     if (url.pathname.startsWith("/api/work-tasks/")) {
       const fileName = url.pathname.replace("/api/work-tasks/", "");
       // N272 — only `*.json` files directly in workDir. The old `..`/`/` denylist
-      // missed Windows drive-relative names (`C:x`), symlinks, and non-JSON files
-      // at the workDir root. Allow a safe JSON basename, then confirm the resolved
-      // path stays inside workDir (same guard as /api/task-doc).
+      // missed Windows drive-relative names (`C:x`) and non-JSON files at the
+      // workDir root. Allow a safe JSON basename, then confirm the resolved path
+      // stays inside workDir (same guard as /api/task-doc). (No realpath, so a
+      // symlink inside the user's own workDir is not resolved — not a concern:
+      // only the user controls workDir.)
       if (!/^[\w.-]+\.json$/.test(fileName)) {
         sendJson(res, 400, { error: "Invalid filename" });
         return;

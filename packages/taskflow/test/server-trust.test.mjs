@@ -107,6 +107,19 @@ test("dashboard: loopback GET is served, foreign Host is 421 (DNS rebinding)", a
   });
 });
 
+test("dashboard: X-Forwarded-Host cannot override a foreign Host (rebinding bypass)", async () => {
+  await withDashboard(async () => {
+    // Review blocker 1: a rebinding page (a loopback peer) sends a trusted
+    // forwarded host to overwrite its own untrusted Host BEFORE the gate. The
+    // real Host must be validated first → still 421.
+    const bypass = await rawGet(DASH_PORT, "/api/work-tasks/tasks-N00-N09.json", {
+      Host: "evil.example",
+      "X-Forwarded-Host": "localhost",
+    });
+    assert.equal(bypass, 421, "foreign Host + forged X-Forwarded-Host → 421");
+  });
+});
+
 test("dashboard: no Access-Control-Allow-Origin on reads", async () => {
   await withDashboard(async () => {
     const res = await fetch(D("/api/work-tasks/tasks-N00-N09.json"));
@@ -197,6 +210,55 @@ test("hub: /events refuses a cross-origin reader", async () => {
   try {
     const status = await rawGet(port, "/events", { Origin: "https://evil.example" });
     assert.equal(status, 403, "cross-origin EventSource → 403");
+  } finally {
+    await close();
+  }
+});
+
+test("hub: /project/* — cross-site fetch is 403 but a navigation is allowed (N272 #4)", async () => {
+  const port = 7040 + Math.floor(Math.random() * 100);
+  const base = `http://127.0.0.1:${port}`;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    await fetch(base + "/api/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ projectId: "navproj", label: "navproj", url: "http://127.0.0.1:9" }),
+    });
+    // A cross-site fetch (CORS mode) must not reach the proxy → 403.
+    const asFetch = await rawGet(port, "/project/navproj/", {
+      "Sec-Fetch-Site": "cross-site",
+      "Sec-Fetch-Mode": "cors",
+    });
+    assert.equal(asFetch, 403, "cross-site fetch → 403");
+    // A top-level navigation (clicked deep link) is a read the other site can't
+    // observe → must NOT 403 (the dead upstream yields 502/504, not 403).
+    const asNav = await rawGet(port, "/project/navproj/", {
+      "Sec-Fetch-Site": "cross-site",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Dest": "document",
+    });
+    assert.notEqual(asNav, 403, "cross-site navigation must not 403");
+  } finally {
+    await close();
+  }
+});
+
+test("hub: legacy /p/* redirect is gated against a cross-site fetch (N272 #2)", async () => {
+  const port = 7140 + Math.floor(Math.random() * 100);
+  const base = `http://127.0.0.1:${port}`;
+  const { close } = await startMasterServer({ port, standalone: false });
+  try {
+    await fetch(base + "/api/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ projectId: "legproj", label: "legproj", url: "http://127.0.0.1:9" }),
+    });
+    const leak = await rawGet(port, "/p/legproj/", {
+      "Sec-Fetch-Site": "cross-site",
+      "Sec-Fetch-Mode": "cors",
+    });
+    assert.equal(leak, 403, "cross-site fetch to /p/* → 403 (no 301 Location leak)");
   } finally {
     await close();
   }
