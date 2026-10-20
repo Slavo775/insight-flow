@@ -5,7 +5,16 @@ import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
 import { SseTransport, type Transport } from "../../core/transport.js";
-import { sendJson, readBody, serveStaticFile, MIME } from "../../core/http-util.js";
+import {
+  sendJson,
+  readBody,
+  serveStaticFile,
+  MIME,
+  isHostTrusted,
+  isLoopbackPeer,
+  isTrustedLocalRequest,
+  listenHost,
+} from "../../core/http-util.js";
 import type { TaskflowConfig, HookEventInput, ActivityEvent } from "../../core/types.js";
 import { getWorkDir, setDefaultFlow } from "../../core/config.js";
 import { claudeStatusFromProjectStatus } from "../../core/activity-status.js";
@@ -542,7 +551,7 @@ async function setupMasterIntegration(
   const masterCfg = config.master;
   if (masterCfg?.standalone) return null;
 
-  const masterUrl = masterCfg?.url ?? "http://localhost:6100";
+  const masterUrl = masterCfg?.url ?? "http://127.0.0.1:6100";
   const masterPort = masterCfg?.port ?? 6100;
   const startLocally = masterCfg?.startMasterLocally !== false;
 
@@ -568,7 +577,12 @@ async function setupMasterIntegration(
 
   // Register with master (N214 — send our project path so the hub can reconcile
   // a seeded/bulk-ui entry by path, and receive our per-project token).
-  const projectUrl = `http://localhost:${serverPort}`;
+  // N272 — advertise 127.0.0.1 (not `localhost`): the master reaches this URL
+  // server-to-server, and with the server bound to 127.0.0.1 a `localhost` that
+  // resolves to ::1 first could fail to connect on older Node. The dashboard is
+  // only ever reached directly by the master on the same machine, so an explicit
+  // loopback IPv4 host is always correct.
+  const projectUrl = `http://127.0.0.1:${serverPort}`;
   let projectPath: string | undefined;
   try {
     projectPath = resolveProjectRoot();
@@ -744,7 +758,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     }
   }
 
-  const masterUrl = config.master?.url ?? "http://localhost:6100";
+  const masterUrl = config.master?.url ?? "http://127.0.0.1:6100";
 
   // Master integration — runs async, non-blocking
   let pushToMaster: (() => void) | null = null;
@@ -757,12 +771,45 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   function dispatch(req: IncomingMessage, res: ServerResponse): void {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);
 
+    // N272 — trust gate (the same check the hub uses, from core/http-util). Runs
+    // before everything, incl. the SSE handoff, so no route is reachable
+    // cross-origin or from the LAN by default.
+    //  - Behind the hub proxy the real peer is the hub's loopback socket and the
+    //    browser's Host was rewritten, so honor the hub's `X-Forwarded-Host` —
+    //    but only from a loopback peer, so a direct LAN caller can't forge it.
+    //  - Every request: the (effective) Host must be loopback/allowlisted, else
+    //    421 — defeats DNS rebinding.
+    //  - Non-GET: also require same-origin (no foreign Origin, no cross-site
+    //    Sec-Fetch), else 403 — defeats CSRF. A cross-site POST, incl. a
+    //    text/plain "simple request", always carries a foreign Origin, so this
+    //    closes the hook-install chain without needing a Content-Type check.
+    const fwdHost = req.headers["x-forwarded-host"];
+    if (typeof fwdHost === "string" && fwdHost && isLoopbackPeer(req)) {
+      req.headers.host = fwdHost;
+    }
+    if (!isHostTrusted(req)) {
+      sendJson(res, 421, { error: "untrusted host" });
+      return;
+    }
+    const method = req.method ?? "GET";
+    if (
+      method !== "GET" &&
+      method !== "HEAD" &&
+      method !== "OPTIONS" &&
+      !isTrustedLocalRequest(req)
+    ) {
+      sendJson(res, 403, { error: "forbidden" });
+      return;
+    }
+
     // N83: native SSE stream (replaced socket.io). Hand matching requests off
     // to the transport, which takes over the response and keeps it open.
     if (transport.handleRequest(req, res)) return;
 
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+    // N272 — removed `Access-Control-Allow-Origin: *` / `-Allow-Methods`: the SPA
+    // is same-origin and the hub proxies same-origin, so nothing legitimately
+    // reads the dashboard cross-origin. Keeping ACAO would let any website read
+    // every task shard, doc and the activity SSE stream.
 
     // N214/N218 — GET /health: liveness + identity, always readable (localhost).
     // The master's startup handshake probes this WITHOUT our token (a fresh
@@ -914,11 +961,19 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     if (url.pathname.startsWith("/api/work-tasks/")) {
       const fileName = url.pathname.replace("/api/work-tasks/", "");
-      if (fileName.includes("..") || fileName.includes("/")) {
+      // N272 — only `*.json` files directly in workDir. The old `..`/`/` denylist
+      // missed Windows drive-relative names (`C:x`), symlinks, and non-JSON files
+      // at the workDir root. Allow a safe JSON basename, then confirm the resolved
+      // path stays inside workDir (same guard as /api/task-doc).
+      if (!/^[\w.-]+\.json$/.test(fileName)) {
         sendJson(res, 400, { error: "Invalid filename" });
         return;
       }
       const filePath = resolve(workDir, fileName);
+      if (!filePath.startsWith(resolve(workDir) + sep)) {
+        sendJson(res, 400, { error: "Invalid filename" });
+        return;
+      }
       if (!existsSync(filePath)) {
         sendJson(res, 404, { error: "File not found" });
         return;
@@ -943,13 +998,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    if (url.pathname === "/api/config") {
-      // TaskflowConfig has no sensitive fields; if a secret key is ever added,
-      // filter it here before serialising rather than relying on CORS alone.
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify(config, null, 2));
-      return;
-    }
+    // N272 — `/api/config` removed: it returned the whole TaskflowConfig, which
+    // can include `observability.langfuse.secretKey` and the `events.hooks` shell
+    // commands. No caller in src/ or test/ used it (the /config HTML page is
+    // server-rendered). If a client ever needs config, add a field-filtered route.
 
     // N172 — undo an install overwrite: restore a `.mcp.json` server entry to its
     // prior config. POST { name, config }.
@@ -1664,7 +1716,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   // started us on an assigned port. Keyed by project root; cleared on shutdown.
   const portPointerRoot = resolveProjectRoot();
 
-  server.listen(serverPort, () => {
+  // N272 — bind loopback only (127.0.0.1) by default; all interfaces only when
+  // the user opted into LAN access via INSIGHT_FLOW_TRUSTED_HOSTS. A browser
+  // reaching `http://localhost:<port>` still connects via happy-eyeballs.
+  const bindHost = listenHost();
+  const onListen = (): void => {
     writeServerPortPointer(portPointerRoot, serverPort);
     const engineStatus = configEnabled ? "Activity engine ON" : "Activity engine OFF";
     console.log("\n  Taskflow Dashboard\n");
@@ -1701,7 +1757,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             : "xdg-open";
       exec(openCmd + " http://localhost:" + serverPort);
     }
-  });
+  };
+  if (bindHost) server.listen(serverPort, bindHost, onListen);
+  else server.listen(serverPort, onListen);
 
   let shuttingDown = false;
   const shutdown = (): void => {
