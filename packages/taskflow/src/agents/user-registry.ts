@@ -173,10 +173,30 @@ export function loadUserRegistries(projectDir: string = resolveProjectRoot()): U
     new Set(Object.keys(COMPOSED_AGENTS)),
   );
   for (const def of Object.values(agents)) {
+    let resolved;
     try {
-      resolveModules(def, mergedModules); // dangling refs + bundle cycles throw
+      resolved = resolveModules(def, mergedModules); // dangling refs + bundle cycles throw
     } catch (err) {
       throw new UserRegistryError(agentFiles[def.id], (err as Error).message);
+    }
+    // N273 (A18) — an override of a built-in agent must retain every LOCKED
+    // baseline module (security/enforcement/protocol) the built-in carried.
+    // Without this, a repo-shipped `insightFlow/agents/<built-in>.json` could
+    // shadow a shipped agent and strip its prompt-injection guardrails, since
+    // locks apply to module ids, not to agent composition.
+    const builtin = COMPOSED_AGENTS[def.id];
+    if (builtin) {
+      const have = new Set(resolved.map((m) => m.id));
+      const requiredLocked = resolveModules(builtin, MODULE_REGISTRY)
+        .map((m) => m.id)
+        .filter((id) => LOCKED_MODULE_IDS.has(id));
+      const missing = requiredLocked.filter((id) => !have.has(id));
+      if (missing.length) {
+        throw new UserRegistryError(
+          agentFiles[def.id],
+          `override of built-in agent '${def.id}' drops locked baseline module(s): ${missing.join(", ")} — overrides must keep the security/enforcement/protocol baseline`,
+        );
+      }
     }
     // N191 — declared subagents must resolve to `subagent`-kind modules.
     for (const id of def.subagents ?? []) {

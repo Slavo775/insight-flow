@@ -28,11 +28,14 @@ import { installedBuckets, InstallConflictError } from "../agents/emit.js";
 import {
   executeInstall,
   executeUninstall,
+  installPlan,
+  requiredInputs,
   targetBucketId,
   NotInstallableError,
   UnknownTargetError,
   type InstallTarget,
 } from "../agents/flow-install.js";
+import { readSecrets } from "../core/secrets.js";
 import {
   writeDefinition,
   removeDefinition,
@@ -288,7 +291,7 @@ export function createComposerServer(): McpServer {
     server.registerTool(
       `create_${kind}`,
       {
-        description: `Create a new custom ${kind}. ${DEF_SHAPE_HELP[kind]} Fails (400) on a schema/reference error, (409) if the id already exists.`,
+        description: `Create a NEW custom ${kind}; its id MUST start with 'custom:'. To edit or eject a built-in, use update_${kind} instead (create rejects a built-in id). ${DEF_SHAPE_HELP[kind]} Fails (400) on a schema/reference error, (409) if the id already exists.`,
         inputSchema: { def: z.record(z.string(), z.unknown()) },
       },
       async ({ def }) => guard(() => createDefinition(kind, def)),
@@ -315,6 +318,18 @@ export function createComposerServer(): McpServer {
     },
     async ({ kind, id }) =>
       guard(() => {
+        // N273 (A53b) — a still-installed definition's emitted artifacts (hooks,
+        // .mcp.json entries, commands) would be orphaned if the definition itself
+        // is deleted, since the id then vanishes from list/get. Refuse and point
+        // at uninstall. Chains have no install step, so they're exempt.
+        if (
+          kind !== "chain" &&
+          installedBuckets(resolveProjectRoot()).has(targetBucketId({ kind, id }))
+        ) {
+          return fail(`'${id}' is installed — uninstall it first, then delete`, {
+            code: "installed",
+          });
+        }
         const storageKind = kindFromTarget(kind);
         return fromDefResult(
           removeDefinition(storageKind, id, loadRegistriesForWrite(storageKind, "DELETE")),
@@ -326,17 +341,47 @@ export function createComposerServer(): McpServer {
     "install",
     {
       description:
-        "Install a flow/agent/module: emit its artifacts (MCP servers → .mcp.json, hooks, skills, commands) under the target's manifest bucket. Set force:true to overwrite a conflicting .mcp.json entry (the prior value is snapshotted for uninstall-undo).",
+        "Install a flow/agent/module: emit its artifacts under the target's manifest bucket. " +
+        "SECURITY: a target that emits a HOOK or an MCP SERVER writes a shell command / server " +
+        "into .claude/settings.json / .mcp.json that RUNS in the user's future Claude sessions. " +
+        "For such targets this tool first returns { needsConfirm:true, plan } and writes NOTHING; " +
+        "re-call with confirm:true (after a human has seen the plan) to apply. Provide any required " +
+        "${VAR} inputs via `values` (or they must already be stored); missing ones are reported. " +
+        "force:true overwrites a conflicting .mcp.json entry (snapshotted for uninstall-undo).",
       inputSchema: {
         kind: installKindSchema,
         id: z.string().min(1),
         force: z.boolean().optional(),
+        confirm: z.boolean().optional(),
+        values: z.record(z.string(), z.string()).optional(),
       },
     },
-    async ({ kind, id, force }) =>
+    async ({ kind, id, force, confirm, values }) =>
       guard(() => {
         const target: InstallTarget = { kind, id };
-        const reports = executeInstall(target, resolveProjectRoot(), { force });
+        const root = resolveProjectRoot();
+        const plan = installPlan(target); // throws Unknown/NotInstallable
+        const writesExecutable = plan.some((s) => s.kind === "hook" || s.kind === "mcp");
+
+        // N273 (A53a) — refuse rather than writing a literal `${VAR}` that would
+        // leave the installed MCP server silently broken.
+        const stored = readSecrets(root);
+        const provided = values ?? {};
+        const missing = requiredInputs(target)
+          .map((i) => i.name)
+          .filter((name) => provided[name] === undefined && stored[name] === undefined);
+        if (missing.length) {
+          return fail(`missing required inputs: ${missing.join(", ")}`, { missingInputs: missing });
+        }
+
+        // N273 (A14) — human-confirm gate for executable artifacts. The dashboard
+        // path shows these in the InstallModal; over MCP there is no UI, so a
+        // prompt-injected agent must not be able to persist a hook silently.
+        if (writesExecutable && confirm !== true) {
+          return ok({ needsConfirm: true, kind, id, plan });
+        }
+
+        const reports = executeInstall(target, root, { force, values: provided });
         return ok({ ok: true, kind, id, reports });
       }),
   );
@@ -351,8 +396,13 @@ export function createComposerServer(): McpServer {
     async ({ kind, id }) =>
       guard(() => {
         const target: InstallTarget = { kind, id };
-        const reports = executeUninstall(target, resolveProjectRoot());
-        return ok({ ok: true, kind, id, reports });
+        const root = resolveProjectRoot();
+        // N273 (A53c) — don't claim success for a target that was never installed.
+        if (!installedBuckets(root).has(targetBucketId(target))) {
+          return ok({ ok: true, kind, id, installed: false, reports: [] });
+        }
+        const reports = executeUninstall(target, root);
+        return ok({ ok: true, kind, id, installed: true, reports });
       }),
   );
 

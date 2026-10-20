@@ -3,7 +3,7 @@
 // re-prompt. The file holds real secrets, so it MUST be gitignored — and so must
 // `.mcp.json`, which now receives substituted secret values. `ensureGitignored`
 // guards both.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 /** Project-local, gitignored secrets file. */
@@ -21,13 +21,35 @@ export function readSecrets(projectRoot: string): Record<string, string> {
   }
 }
 
-/** Merge `values` into the stored secrets (last-writer-wins) and persist. */
+/**
+ * Merge `values` into the stored secrets (last-writer-wins) and persist. N273 —
+ * written atomically (temp + rename, mode 0600) so other local users can't read
+ * the keys and a crash mid-write can't truncate the file; and if an existing
+ * secrets file fails to parse we THROW rather than silently merging onto `{}`
+ * (which would wipe every other stored secret).
+ */
 export function writeSecrets(projectRoot: string, values: Record<string, string>): void {
   if (!Object.keys(values).length) return;
   const path = join(projectRoot, SECRETS_PATH);
-  const merged = { ...readSecrets(projectRoot), ...values };
+  let current: Record<string, string> = {};
+  if (existsSync(path)) {
+    try {
+      const parsed = JSON.parse(readFileSync(path, "utf-8")) as unknown;
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("not a JSON object");
+      }
+      current = parsed as Record<string, string>;
+    } catch (err) {
+      throw new Error(
+        `refusing to overwrite a corrupt secrets file (${SECRETS_PATH}): ${(err as Error).message}`,
+      );
+    }
+  }
+  const merged = { ...current, ...values };
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(merged, null, 2) + "\n", "utf-8");
+  const tmp = path + ".tmp-" + process.pid;
+  writeFileSync(tmp, JSON.stringify(merged, null, 2) + "\n", { encoding: "utf-8", mode: 0o600 });
+  renameSync(tmp, path);
 }
 
 /**

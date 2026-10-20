@@ -345,7 +345,13 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
   z.object({
     ...agentModuleBase,
     kind: z.literal("include"),
-    ref: z.string().min(1),
+    // N273 — a safe filename only (no path separators, no `..`): the ref becomes
+    // `@<ref>` in a prompt and is resolved against the roles dir, so an
+    // unrestricted string like `../../.env` could pull an arbitrary file into an
+    // agent prompt. Every shipped include is an `AGENT_*.md` basename.
+    ref: z
+      .string()
+      .regex(/^[A-Za-z0-9_.-]+\.md$/, "ref must be a plain *.md filename (no path separators)"),
   }),
   // MCP-server module: merged into the project's .mcp.json under
   // `mcpServers[name]`, deduped by name (same-name different-config errors).

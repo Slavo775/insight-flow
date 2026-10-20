@@ -1150,10 +1150,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             if (v !== undefined) values[inp.name] = v;
             if (submitted[inp.name] !== undefined) toPersist[inp.name] = submitted[inp.name];
           }
-          if (Object.keys(toPersist).length) {
-            writeSecrets(projectRoot, toPersist);
-            ensureGitignored(projectRoot);
-          }
+          // N273 (A36) — the submitted secrets are persisted AFTER a successful
+          // apply (see below), not here, so a failed/conflicting install never
+          // writes the user's keys to disk.
           secretValues = [
             ...required.filter((i) => i.secret).map((i) => values[i.name]),
             ...Object.values(stored),
@@ -1190,6 +1189,12 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             { INSIGHT_FLOW_BIN: "insight-flow", ...values },
             { force: parsed.force === true },
           );
+          // N273 (A36) — apply succeeded: now persist the submitted secrets
+          // (gitignored) so a re-install doesn't re-prompt.
+          if (Object.keys(toPersist).length) {
+            writeSecrets(projectRoot, toPersist);
+            ensureGitignored(projectRoot);
+          }
           for (const r of reports) {
             transport.emit("install-progress", {
               phase: "step",

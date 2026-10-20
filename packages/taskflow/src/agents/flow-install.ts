@@ -11,7 +11,8 @@ import {
 import { applyArtifacts, uninstallTarget, type EmitReport } from "./emit.js";
 import { mergedComposedAgents, mergedModuleRegistry, mergedProjects } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
-import { readSecrets } from "../core/secrets.js";
+import { readSecrets, ensureGitignored } from "../core/secrets.js";
+import { execFileSync } from "node:child_process";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
 import {
   scanPlaceholders,
@@ -328,6 +329,25 @@ export function executeInstall(
 ): EmitReport[] {
   const art = targetArtifacts(t); // throws Unknown/NotInstallable
   const values = resolveInstallValues(art, projectRoot, opts.values ?? {});
+  // N273 (A15) — when a secret `${VAR}` is substituted into an MCP server config,
+  // that plaintext value lands in `.mcp.json`. Previously only the dashboard path
+  // gitignored it; the CLI / init / MCP paths did not. Ensure it here so every
+  // caller is covered, and warn if `.mcp.json` is already git-tracked (gitignore
+  // can't help then — the next `git add -A` would commit the key).
+  if (art.mcpServers.length > 0 && Object.keys(values).length > 0) {
+    ensureGitignored(projectRoot);
+    try {
+      execFileSync("git", ["-C", projectRoot, "ls-files", "--error-unmatch", ".mcp.json"], {
+        stdio: "ignore",
+      });
+      console.warn(
+        "[insight-flow] WARNING: .mcp.json is git-tracked but now holds substituted secrets — " +
+          "untrack it (git rm --cached .mcp.json) so the next commit does not leak keys.",
+      );
+    } catch {
+      /* not tracked (or not a git repo) — gitignore covers it */
+    }
+  }
   return applyArtifacts(
     art,
     projectRoot,

@@ -188,7 +188,7 @@
       "title": "Install trust boundary — MCP install confirm, include.ref guard, .mcp.json secrets, locked agent baseline",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N273-install-trust-boundary-mcp-install-confirm-include",
       "createdAt": "2026-10-19T22:32:52.120Z",
       "statusHistory": [
@@ -196,12 +196,30 @@
           "status": "ready",
           "at": "2026-10-19T22:32:52.120Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-20T08:03:59.278Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-20T08:13:35.666Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-10-20T08:03:59.285Z",
+        "completedAt": "2026-10-20T08:13:35.670Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/secrets.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/mcp/composer.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/install-trust.test.mjs"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
