@@ -110,3 +110,8 @@ the `v2.0.0` tag as the baseline and opens normal Release PRs for `2.0.1` / `2.1
   runs typecheck + lint + tests on every PR — make it a **required** status check
   in branch protection, and restrict the `npm-publish` environment to `main` +
   `v*` tags.
+- The publish ref guard (`release-publish.yml`) only checks the tag **name**
+  (`v<version>`); tags are mutable, so a collaborator could force-push a `v*` tag
+  onto an arbitrary commit. The real gate is the **required reviewer on the
+  `npm-publish` environment** — keep at least one reviewer configured there; the
+  `v*` environment policy alone does not authorise a publish.

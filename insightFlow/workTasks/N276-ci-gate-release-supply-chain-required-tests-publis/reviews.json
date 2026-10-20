@@ -1,0 +1,27 @@
+{
+  "taskId": "N276",
+  "reviews": [
+    {
+      "startedAt": "2026-10-20T09:59:08.314Z",
+      "endedAt": "2026-10-20T12:07:49.502Z",
+      "verdict": "fix-needed",
+      "comment": "REQUEST CHANGES: pnpm-lock.yaml was rewritten by local pnpm 12.11.2 into a two-document YAML stream (pnpm-12 self-management doc at line 1, real lockfile at line 158); the 10.12.4 pinned in all three workflows parses a single document and will refuse it under --frozen-lockfile — ci, publish and docs all go red (the exact A68 failure). Regenerate with the pinned pnpm and prove both frozen installs locally. Everything else verified (tag format, guard, pack gate, perms, dist externals, mp3 sizes 26400/78576).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-10-20T12:24:02.902Z",
+        "endedAt": "2026-10-20T12:30:01.041Z",
+        "status": "fixed",
+        "filesChanged": [
+          ".github/workflows/ci.yml",
+          ".github/workflows/release-publish.yml",
+          ".github/workflows/docs.yml",
+          "pnpm-workspace.yaml",
+          "RELEASING.md"
+        ],
+        "comment": "Fixed blocker 1 (pinned CI pnpm to writer 12.11.2 + workspace build allowlist/strictDepBuilds:false; both frozen installs + build proven green) and non-blocking #1,#2,#3,#5,#9",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
