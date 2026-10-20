@@ -75,3 +75,5 @@ Source: `N271/AUDIT.md` **A43, A44, A45, A47, A48**.
 - Detail and evidence: `N271/AUDIT.md` A43–A45, A47, A48. The trigger for A47 is an agent-target install of a built-in, or a custom flow with handover edges from a built-in source, not `installFlow("default")`.
 - **Depends on N273, N275 and N280** (all edit `emit.ts`, `init/` or the hook installers).
 - Recommended run: `/task-analyze N281` → `/task-implement N281`.
+
+- **From N275 review (A49):** custom-flow/agent install must also emit **`.cursor/skills`** (and remove them on uninstall), mirroring `.claude/commands`. N275 deferred this (it lives in `emit.ts` `applyCommands`, N281's area). Add a test: installing a custom flow with Cursor selected writes `.cursor/skills/<name>/SKILL.md`; uninstall removes it.

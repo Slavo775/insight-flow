@@ -231,12 +231,22 @@ async function run(): Promise<void> {
     // N213 — --register-hub / --no-register-hub force the hub opt-in
     // non-interactively; omit to be prompted (default No).
     const registerHub = opts["register-hub"] ? true : opts["no-register-hub"] ? false : undefined;
-    await initProject(process.cwd(), !!opts.force, {
+    const initResult = await initProject(process.cwd(), !!opts.force, {
       examples: !!opts.examples,
       yes: yesFlag,
       editor,
       registerHub,
     });
+    // N275 blocker 2 — report kept (differing) command/role files on the CLI path
+    // too (previously only the hub endpoint surfaced them), so a consumer knows a
+    // customized command was preserved and can re-init with --force to upgrade it.
+    if (initResult.conflicts.length) {
+      console.log(
+        `\n[init] ${initResult.conflicts.length} existing file(s) kept (differ from insight-flow's output):`,
+      );
+      for (const c of initResult.conflicts) console.log(`  - ${c}`);
+      console.log("  Re-run with --force to overwrite them (this also replaces your role edits).");
+    }
   } else if (command === "master") {
     const port = opts.port ? parseInt(opts.port as string, 10) : undefined;
     await runMaster(port);

@@ -185,7 +185,9 @@ export async function initProject(
   // 3. Build the canonical skill set + the context shared by every provider.
   const agentsConfig = config.agents;
   const customAgents = agentsConfig?.custom ?? [];
-  const skills = buildSkillList(customAgents);
+  // N275 blocker 3 — pass rolesDir so built-in command bodies point at the role
+  // files init actually writes (a custom rolesDir otherwise left agents role-less).
+  const skills = buildSkillList(customAgents, config.rolesDir ?? ".claude/roles");
   const providerCtx: ProviderContext = { cwd, config, skills, customAgents, force, conflicts };
 
   // 4. Claude-specific role infrastructure: role templates, agent extensions,

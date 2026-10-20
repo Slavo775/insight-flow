@@ -1,0 +1,27 @@
+{
+  "taskId": "N275",
+  "reviews": [
+    {
+      "startedAt": "2026-10-20T09:59:08.066Z",
+      "endedAt": "2026-10-20T12:02:14.874Z",
+      "verdict": "fix-needed",
+      "comment": "REQUEST CHANGES: (1) Cursor include inliner path traversal — regex allows ../ and resolvePackageAsset is a bare resolve; repo-controlled agents.custom text can inline any .md on disk (one-regex fix). (2) Legacy stubs never upgraded and CLI discards initProject conflicts — existing consumers don't get the new commands (stub-hash list + print conflicts). (3) Command bodies hardcode .claude/roles/ ignoring config.rolesDir — custom rolesDir leaves the agent with no role (3-line fix).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-10-20T12:57:39.725Z",
+        "endedAt": "2026-10-20T13:06:59.630Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/init/providers/skills.ts",
+          "packages/taskflow/src/agents/init/providers/claude.ts",
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/cli/cli.ts",
+          "packages/taskflow/test/consumer-roles.test.mjs"
+        ],
+        "comment": "Fixed blockers 1-3 (Cursor traversal, legacy-stub upgrade + CLI report, rolesDir) and non-blocking #1,#3,#4,#5,#7; 3 regression tests, 82 init/compose tests green",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
