@@ -40,7 +40,9 @@ function makeProject(extraConfig = {}) {
 function cli(dir, args) {
   return spawnSync(process.execPath, [CLI, ...args], {
     cwd: dir,
-    env: { ...process.env, HOME: dir, INSIGHT_FLOW_NO_OPEN: "1" },
+    // USERPROFILE too so the trusted-hooks store (homedir()/.insight-flow) is
+    // isolated on Windows as well as POSIX.
+    env: { ...process.env, HOME: dir, USERPROFILE: dir, INSIGHT_FLOW_NO_OPEN: "1" },
     encoding: "utf-8",
   });
 }
@@ -50,9 +52,23 @@ test("config: a path outside the project root is rejected", () => {
   assert.throws(() => resolveConfig(dir), /must stay inside the project/);
 });
 
-test("config: master.url must be http(s)", () => {
+test("config: master.url must be a valid http(s) URL", () => {
   const dir = makeProject({ master: { url: "javascript:alert(1)" } });
-  assert.throws(() => resolveConfig(dir), /master\.url must be an http\(s\) URL/);
+  assert.throws(() => resolveConfig(dir), /master\.url must be a valid http\(s\) URL/);
+});
+
+test("init: a cloned config with an off-root rolesDir fails before writing (blocker 1)", () => {
+  // N274 review blocker 1: `init` reads the config directly, so the confinement
+  // must run on this path too — a cloned `rolesDir: "../../.claude/commands"`
+  // must abort init, not write role files outside the repo.
+  const dir = makeProject({ rolesDir: "../../.claude/commands" });
+  const res = cli(dir, ["init", "--yes"]);
+  assert.notEqual(res.status, 0, "init exits non-zero on an off-root rolesDir");
+  assert.match(
+    (res.stderr || "") + (res.stdout || ""),
+    /must stay inside the project/,
+    "init reports the confinement error",
+  );
 });
 
 test("langfuse: a config host is ignored when the keys come from the environment", () => {
@@ -119,9 +135,13 @@ test("events.hooks run only after trust-hooks approves them", async () => {
     return existsSync(marker) === want;
   };
 
-  // Untrusted: the hook must NOT run.
+  // Untrusted: the hook must NOT run. Wait a beat so a regression that DOES
+  // spawn it has time to write the marker, then assert it is still absent
+  // (an immediate `existsSync===false` check would pass even against a slow
+  // spawn — review #6).
   cli(dir, ["log-event", "start"]);
-  assert.equal(await waitMarker(false), true, "untrusted hook did not run");
+  await new Promise((r) => setTimeout(r, 700));
+  assert.equal(existsSync(marker), false, "untrusted hook did not run");
 
   // Approve, then it runs.
   const t = cli(dir, ["trust-hooks", "--yes"]);

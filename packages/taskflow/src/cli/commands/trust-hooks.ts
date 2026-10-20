@@ -24,7 +24,11 @@ export function cmdTrustHooks(config: TaskflowConfig, opts: ParsedArgs): void {
 
   console.log("These shell commands will run on the matching lifecycle events:\n");
   for (const [event, cmds] of entries) {
-    for (const cmd of cmds) console.log(`  [${event}] ${cmd}`);
+    // N274 (review blocker 2) — JSON.stringify escapes control chars (\r, \n,
+    // \u001b) so a committed hook can't spoof the terminal review and get the
+    // human to approve a command they didn't actually see. The hash still covers
+    // the raw string, so nothing else changes.
+    for (const cmd of cmds) console.log(`  [${event}] ${JSON.stringify(cmd)}`);
   }
 
   if (opts.yes) {

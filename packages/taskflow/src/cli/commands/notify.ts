@@ -23,7 +23,10 @@ function fireNotification(title: string, message: string): void {
       const child = execFile("osascript", ["-e", script]);
       child.unref();
     } else if (platform === "linux") {
-      const child = execFile("notify-send", [title, message]);
+      // N274 — `--` so a title/message starting with `-` is not read as an
+      // option (e.g. a project name like `--icon=…`). No exec risk (execFile,
+      // not a shell), just correctness.
+      const child = execFile("notify-send", ["--", title, message]);
       child.unref();
     } else if (platform === "win32") {
       // N274 (A34) — pass the title/message via environment variables and read

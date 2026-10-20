@@ -1,7 +1,8 @@
-import { readFileSync, existsSync, writeFileSync } from "node:fs";
-import { resolve, basename, sep } from "node:path";
+import { readFileSync, existsSync, writeFileSync, realpathSync } from "node:fs";
+import { resolve, basename, dirname, sep } from "node:path";
 import type { Task, TaskflowConfig, ActivityEngineConfig, NotificationsConfig } from "./types.js";
 import { resolveProjectRoot, resolveFlowRoot, DEFAULT_WORK_DIR } from "./paths.js";
+import { TaskflowValidationError } from "./schema/index.js";
 
 const CONFIG_FILENAME = "taskflow.config.json";
 
@@ -50,6 +51,72 @@ const DEFAULTS: TaskflowConfig = {
   },
 };
 
+/** realpath, or the input unchanged if it cannot be resolved (never throws). */
+function safeRealpath(p: string): string {
+  try {
+    return realpathSync(p);
+  } catch {
+    return p;
+  }
+}
+
+/** The deepest ancestor of `p` (incl. `p`) that exists on disk. Used so a path
+ *  that does not exist yet (e.g. a rolesDir init is about to create) can still be
+ *  realpath-checked via its nearest existing parent. */
+function deepestExisting(p: string): string {
+  let cur = p;
+  while (cur !== dirname(cur) && !existsSync(cur)) cur = dirname(cur);
+  return cur;
+}
+
+/**
+ * N274 (A33) — confine user-supplied paths to the project root and require a
+ * valid http(s) `master.url`. A cloned repo's `taskflow.config.json` must not
+ * point `rolesDir` (written + patched by prompt-build), `workDir`, or the
+ * activity log outside the project. Exported so `init` (which reads the config
+ * directly, not via `resolveConfig`) runs the exact same check (review blocker 1).
+ * Throws `TaskflowValidationError` → a clean CLI message, not a stack trace.
+ */
+export function assertConfinedPaths(userConfig: Partial<TaskflowConfig>, anchor: string): void {
+  // Normalize so the comparison is correct even when the project root is the
+  // filesystem root (`anchor + sep` would be "//").
+  const base = anchor.endsWith(sep) ? anchor.slice(0, -1) || sep : anchor;
+  const prefix = base === sep ? sep : base + sep;
+  const realBase = safeRealpath(base);
+  const realPrefix = realBase === sep ? sep : realBase + sep;
+
+  const assertInside = (value: string | undefined, key: string): void => {
+    if (value === undefined) return;
+    const resolved = resolve(base, value);
+    if (resolved !== base && !resolved.startsWith(prefix)) {
+      throw new TaskflowValidationError(
+        CONFIG_FILENAME,
+        `${key} must stay inside the project (got "${value}")`,
+      );
+    }
+    // Also defeat a committed symlink (git checks symlinks out by default): the
+    // deepest existing ancestor's realpath must still be inside the project.
+    const realResolved = safeRealpath(deepestExisting(resolved));
+    if (realResolved !== realBase && !realResolved.startsWith(realPrefix)) {
+      throw new TaskflowValidationError(
+        CONFIG_FILENAME,
+        `${key} resolves outside the project via a symlink (got "${value}")`,
+      );
+    }
+  };
+  assertInside(userConfig.workDir, "workDir");
+  assertInside(userConfig.rolesDir, "rolesDir");
+  assertInside(userConfig.activityEngine?.logFile, "activityEngine.logFile");
+
+  const masterUrl = userConfig.master?.url;
+  if (masterUrl !== undefined && (!/^https?:\/\//i.test(masterUrl) || !URL.canParse(masterUrl))) {
+    throw new TaskflowValidationError(
+      CONFIG_FILENAME,
+      `master.url must be a valid http(s) URL (got "${masterUrl}")`,
+    );
+  }
+}
+
 export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
   const projectRoot = safeResolveProjectRoot(cwd);
   const anchor = projectRoot ?? cwd;
@@ -78,23 +145,7 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
     }
   }
 
-  // N274 (A33) — confine user-supplied paths to the project root and require an
-  // http(s) master.url. A cloned repo's config must not point rolesDir (written
-  // + patched by prompt-build), workDir, or the activity log outside the project.
-  const assertInside = (value: string | undefined, key: string): void => {
-    if (value === undefined) return;
-    const resolved = resolve(anchor, value);
-    if (resolved !== anchor && !resolved.startsWith(anchor + sep)) {
-      throw new Error(`taskflow.config.json: ${key} must stay inside the project (got "${value}")`);
-    }
-  };
-  assertInside(userConfig.workDir, "workDir");
-  assertInside(userConfig.rolesDir, "rolesDir");
-  assertInside(userConfig.activityEngine?.logFile, "activityEngine.logFile");
-  const masterUrl = userConfig.master?.url;
-  if (masterUrl !== undefined && !/^https?:\/\//i.test(masterUrl)) {
-    throw new Error(`taskflow.config.json: master.url must be an http(s) URL (got "${masterUrl}")`);
-  }
+  assertConfinedPaths(userConfig, anchor);
 
   return {
     ...DEFAULTS,

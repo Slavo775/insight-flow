@@ -41,6 +41,7 @@ function htmlHeaders(frameSrc?: string): Record<string, string> {
     "font-src 'self' data:",
     "object-src 'none'",
     "base-uri 'self'",
+    "form-action 'self'",
     "frame-ancestors 'self'",
     `frame-src ${frameSrc ?? "'none'"}`,
   ].join("; ");

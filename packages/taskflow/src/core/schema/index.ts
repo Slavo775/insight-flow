@@ -780,7 +780,18 @@ export class TaskflowValidationError extends Error {
   readonly expected: string;
   readonly received: string;
 
-  constructor(file: string, error: ZodError) {
+  constructor(file: string, error: ZodError | string) {
+    // N274 — allow a plain message (non-Zod config checks, e.g. path confinement)
+    // so these surface as a clean `error: …` line via cli.ts, not a stack trace.
+    if (typeof error === "string") {
+      super(`Taskflow validation error in ${file}: ${error}`);
+      this.name = "TaskflowValidationError";
+      this.file = file;
+      this.issuePath = "(root)";
+      this.expected = "valid value";
+      this.received = "invalid";
+      return;
+    }
     const issue = error.issues[0];
     const issuePath = issue?.path.join(".") || "(root)";
     const expected = issue && "expected" in issue ? String(issue.expected) : "valid value";

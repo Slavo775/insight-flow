@@ -16,7 +16,9 @@ const STORE = resolve(homedir(), ".insight-flow", "trusted-hooks.json");
 
 export type HooksMap = Record<string, string[]>;
 
-/** A stable sha256 of a project's events.hooks map (key/array order independent). */
+/** A stable sha256 of a project's events.hooks map. Event keys are sorted (order
+ *  independent), but command order WITHIN an event is significant — reordering
+ *  commands changes the hash and requires re-approval (the safer behaviour). */
 export function hooksHash(hooks: HooksMap): string {
   const stable: HooksMap = {};
   for (const k of Object.keys(hooks).sort()) stable[k] = [...(hooks[k] ?? [])];
