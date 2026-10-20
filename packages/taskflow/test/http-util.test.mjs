@@ -81,8 +81,10 @@ test("readBody caps by BYTES, not UTF-16 units (N284 A62)", async () => {
     destroyed = true;
   };
   const res = mockRes();
-  const p = readBody(req, res, 4); // 4-byte cap
-  req.emit("data", Buffer.from("Ľubomír", "utf-8")); // 8 bytes > 4
+  // #2 — discriminating: "Ľubomír" is 7 CHARS but 9 BYTES, and the cap is 8. The
+  // old char-based cap (7 ≤ 8) would NOT 413; the byte cap (9 > 8) must.
+  const p = readBody(req, res, 8); // 8-byte cap
+  req.emit("data", Buffer.from("Ľubomír", "utf-8")); // 7 chars / 9 bytes > 8
   const result = await p;
   assert.equal(result, null, "over-cap body resolves null");
   assert.equal(res.status, 413, "over-cap sends 413");

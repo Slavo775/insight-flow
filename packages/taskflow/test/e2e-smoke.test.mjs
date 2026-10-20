@@ -99,7 +99,7 @@ async function readSse(url, timeoutMs = 3000) {
   return text;
 }
 
-test("ui server boots and answers /, /api/work-tasks, /api/activity", async () => {
+test("ui server boots and answers /, /api/work-tasks, and 404s the removed /api/activity", async () => {
   const dir = makeProject();
   const port = 6800 + Math.floor(Math.random() * 1000);
   const base = "http://localhost:" + port;

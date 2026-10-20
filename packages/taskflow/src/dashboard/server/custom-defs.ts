@@ -209,6 +209,10 @@ function readBody(
     try {
       onJson(parsed);
     } catch (err) {
+      // N284 (#3) — the spec asked for server-side logging on the 500 path. This
+      // route carries definitions (never ${VAR} secrets), so err.message is an
+      // fs/transport message, safe to log on this gated local server.
+      console.error("[custom-defs] handler failed:", err);
       if (!res.headersSent) {
         sendJson(res, 500, {
           ok: false,
@@ -410,6 +414,10 @@ export function writeDefinition(
   // built-in PUT (eject/override) is always allowed — create-or-update the override.
   // N111 — optimistic-concurrency floor: a PUT carrying the revision it loaded
   // gets rejected when the stored file has changed since.
+  // N284 (A63, #1) — check-then-write is not atomic ACROSS processes (the MCP
+  // server and the dashboard can both write): there is a tiny window between
+  // reading the revision and the write below. Accepted for a single-user local
+  // tool. In-process it is safe: POST creates with O_EXCL, PUT writes tmp+rename.
   if (method === "PUT" && typeof revision === "string" && revision.length > 0) {
     const current = definitionRevision(kind, record.id, root);
     if (current && current !== revision) {
@@ -563,7 +571,14 @@ export function handleCustomDefsRequest(
       return true;
     }
     const result = removeDefinition(kind, pathId, user, root);
-    if (result.status < 300) onChanged?.();
+    // N284 (#5) — a notify (transport.emit) failure must not turn a successful
+    // write/delete into a 500; the def is already persisted.
+    if (result.status < 300)
+      try {
+        onChanged?.();
+      } catch (e) {
+        console.error("[custom-defs] onChanged notify failed:", e);
+      }
     sendJson(res, result.status, result.body);
     return true;
   }
@@ -575,7 +590,14 @@ export function handleCustomDefsRequest(
       revision: typeof sentRevision === "string" ? sentRevision : null,
       pathId,
     });
-    if (result.status < 300) onChanged?.();
+    // N284 (#5) — a notify (transport.emit) failure must not turn a successful
+    // write/delete into a 500; the def is already persisted.
+    if (result.status < 300)
+      try {
+        onChanged?.();
+      } catch (e) {
+        console.error("[custom-defs] onChanged notify failed:", e);
+      }
     sendJson(res, result.status, result.body);
   });
   return true;
