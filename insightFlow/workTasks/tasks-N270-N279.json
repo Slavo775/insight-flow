@@ -9,7 +9,7 @@
       "title": "Release insight-flow 2.13.0 — flow chains (N267)",
       "type": "chore",
       "priority": "high",
-      "status": "release-fixed",
+      "status": "release-checked",
       "folder": "insightFlow/workTasks/N270-release-insight-flow-2-13-0-flow-chains-n267",
       "createdAt": "2026-10-19T19:11:41.610Z",
       "statusHistory": [
@@ -47,6 +47,11 @@
           "status": "release-fixed",
           "at": "2026-10-19T20:53:15.996Z",
           "by": "custom:task-release-fix"
+        },
+        {
+          "status": "release-checked",
+          "at": "2026-10-19T21:17:51.322Z",
+          "by": "custom:task-release-check"
         }
       ],
       "implementation": {
@@ -71,6 +76,381 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "custom:release-manager"
+    },
+    {
+      "id": "N271",
+      "title": "Full codebase audit — security, data safety, antipatterns, fragile code → fix tasks",
+      "type": "chore",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N271-full-codebase-audit-security-data-safety-antipatte",
+      "createdAt": "2026-10-19T21:47:39.112Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T21:47:39.113Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-19T21:50:47.615Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-19T22:43:46.029Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-10-19T21:50:47.622Z",
+        "completedAt": "2026-10-19T22:43:46.036Z",
+        "filesChanged": [
+          "insightFlow/workTasks/N271-full-codebase-audit-security-data-safety-antipatte/AUDIT.md",
+          "insightFlow/workTasks/N271-full-codebase-audit-security-data-safety-antipatte/AUDIT-SEED.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "audit",
+        "security",
+        "quality"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N272",
+      "title": "Lock down local servers — hub proxy origin pin, Host/Origin gate, no ACAO *, bind 127.0.0.1",
+      "type": "fix",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N272-lock-down-local-servers-hub-proxy-origin-pin-host-",
+      "createdAt": "2026-10-19T22:32:51.932Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:51.933Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-20T07:42:41.105Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-20T08:00:36.098Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-10-20T07:42:41.111Z",
+        "completedAt": "2026-10-20T08:00:36.105Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/http-util.ts",
+          "packages/taskflow/src/core/transport.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/server-trust.test.mjs"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "security",
+        "server",
+        "master",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N273",
+      "title": "Install trust boundary — MCP install confirm, include.ref guard, .mcp.json secrets, locked agent baseline",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N273-install-trust-boundary-mcp-install-confirm-include",
+      "createdAt": "2026-10-19T22:32:52.120Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:52.120Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "security",
+        "mcp",
+        "agents",
+        "install"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N274",
+      "title": "Untrusted config and task data never run code — events.hooks trust, confined paths, notify, mrUrl, CSP",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N274-untrusted-config-and-task-data-never-run-code-even",
+      "createdAt": "2026-10-19T22:32:52.314Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:52.314Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "security",
+        "cli",
+        "config",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N275",
+      "title": "Consumer prompts carry the real roles — @-include built-in commands, Cursor include inlining, one name per agent",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N275-consumer-prompts-carry-the-real-roles-include-buil",
+      "createdAt": "2026-10-19T22:32:52.529Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:52.529Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "security",
+        "init",
+        "agents",
+        "cursor"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N276",
+      "title": "CI gate + release supply chain — required tests, publish ref guard, pinned tooling, dep bumps, restore mp3s",
+      "type": "chore",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N276-ci-gate-release-supply-chain-required-tests-publis",
+      "createdAt": "2026-10-19T22:32:52.734Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:52.734Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "ci",
+        "release",
+        "deps",
+        "security"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N277",
+      "title": "Safe task storage — atomic writes, lock + mutateTask, no shard overwrite, keep unknown fields, config schema",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N277-safe-task-storage-atomic-writes-lock-mutatetask-no",
+      "createdAt": "2026-10-19T22:32:52.921Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:52.922Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "storage",
+        "core",
+        "data-integrity"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N278",
+      "title": "Strict CLI — strict parseArgs, --id required on writes, status transition table, friendly errors",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N278-strict-cli-strict-parseargs-id-required-on-writes-",
+      "createdAt": "2026-10-19T22:32:53.107Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:53.108Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "cli",
+        "core"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
+    },
+    {
+      "id": "N279",
+      "title": "Event and activity logs never lose data — append-only JSONL, project-root paths, offset reader, pruning",
+      "type": "fix",
+      "priority": "high",
+      "status": "ready",
+      "folder": "insightFlow/workTasks/N279-event-and-activity-logs-never-lose-data-append-onl",
+      "createdAt": "2026-10-19T22:32:53.314Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-19T22:32:53.315Z",
+          "by": "taskmaster"
+        }
+      ],
+      "implementation": {
+        "startedAt": null,
+        "completedAt": null,
+        "filesChanged": [],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "events",
+        "activity",
+        "hooks"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }
