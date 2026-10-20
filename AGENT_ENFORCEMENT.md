@@ -9,6 +9,5 @@ STRICT ENFORCEMENT — TASK FILE MUTATIONS
 
 TOKEN EFFICIENCY (applies to every role)
 
-- No subagents. Direct tool calls only.
 - Batch independent reads in one parallel round.
 - Read only what the task scope explicitly requires.

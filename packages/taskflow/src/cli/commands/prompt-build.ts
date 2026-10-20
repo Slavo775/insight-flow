@@ -32,7 +32,12 @@ export function buildEnforcementBlock(): string {
   lines.push("");
   lines.push("TOKEN EFFICIENCY (applies to every role)");
   lines.push("");
-  lines.push("- No subagents. Direct tool calls only.");
+  // N275 (A19) — "No subagents" was removed from the SHARED block: it
+  // contradicted the per-agent subagent section that compose.ts adds for agents
+  // that declare `subagents` (e.g. the reviewer / authoring agents), so one
+  // prompt told the agent both "no subagents" and "you may delegate". Agents
+  // that should stay direct (e.g. task-git) keep the line in their OWN
+  // token-efficiency module.
   lines.push("- Batch independent reads in one parallel round.");
   lines.push("- Read only what the task scope explicitly requires.");
 

@@ -296,7 +296,7 @@
       "title": "Consumer prompts carry the real roles — @-include built-in commands, Cursor include inlining, one name per agent",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N275-consumer-prompts-carry-the-real-roles-include-buil",
       "createdAt": "2026-10-19T22:32:52.529Z",
       "statusHistory": [
@@ -304,12 +304,34 @@
           "status": "ready",
           "at": "2026-10-19T22:32:52.529Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-20T08:39:54.983Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "ready",
+          "at": "2026-10-20T08:42:12.587Z",
+          "by": "manual"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-20T09:15:35.198Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-20T09:29:32.838Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-10-20T09:15:35.205Z",
+        "completedAt": "2026-10-20T09:29:32.844Z",
+        "filesChanged": [
+          "multiple"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
