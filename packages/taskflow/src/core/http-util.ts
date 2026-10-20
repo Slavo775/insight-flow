@@ -48,7 +48,11 @@ export function readBody(
   limit: number = DEFAULT_BODY_LIMIT,
 ): Promise<string | null> {
   return new Promise((resolve) => {
-    let body = "";
+    // N284 (A62) — collect raw Buffers and decode ONCE at the end. Decoding each
+    // chunk with `.toString()` corrupts a multibyte character split across two
+    // chunks (→ U+FFFD), and the old cap counted UTF-16 code units, not bytes.
+    const chunks: Buffer[] = [];
+    let size = 0;
     let done = false;
     const finish = (value: string | null): void => {
       if (done) return;
@@ -57,14 +61,16 @@ export function readBody(
     };
     req.on("data", (chunk: Buffer) => {
       if (done) return;
-      body += chunk.toString("utf-8");
-      if (body.length > limit) {
+      size += chunk.byteLength;
+      if (size > limit) {
         sendJson(res, 413, { ok: false, error: "payload too large" });
         req.destroy();
         finish(null);
+        return;
       }
+      chunks.push(chunk);
     });
-    req.on("end", () => finish(body));
+    req.on("end", () => finish(Buffer.concat(chunks).toString("utf-8")));
     req.on("error", () => finish(null));
   });
 }
@@ -75,7 +81,8 @@ export function escHtml(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;"); // N284 (A78) — the fifth significant char (single quote)
 }
 
 /**

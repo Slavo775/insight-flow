@@ -56,3 +56,35 @@ test("readBody 413s and resolves null when the body exceeds the cap", async () =
   assert.equal(res.status, 413);
   assert.equal(destroyed, true);
 });
+
+test("escHtml escapes the single quote too (N284 A78)", () => {
+  assert.equal(escHtml("it's a <'test'>"), "it&#39;s a &lt;&#39;test&#39;&gt;");
+});
+
+test("readBody decodes a multibyte char split across chunks (N284 A62)", async () => {
+  const req = new EventEmitter();
+  req.destroy = () => {};
+  const res = mockRes();
+  const p = readBody(req, res, 1024);
+  // "Ľ" is 2 UTF-8 bytes (0xC4 0xBD); split it across two data chunks.
+  const full = Buffer.from("Ľubomír", "utf-8");
+  req.emit("data", full.subarray(0, 1));
+  req.emit("data", full.subarray(1));
+  req.emit("end");
+  assert.equal(await p, "Ľubomír", "the split multibyte char is decoded, not corrupted");
+});
+
+test("readBody caps by BYTES, not UTF-16 units (N284 A62)", async () => {
+  const req = new EventEmitter();
+  let destroyed = false;
+  req.destroy = () => {
+    destroyed = true;
+  };
+  const res = mockRes();
+  const p = readBody(req, res, 4); // 4-byte cap
+  req.emit("data", Buffer.from("Ľubomír", "utf-8")); // 8 bytes > 4
+  const result = await p;
+  assert.equal(result, null, "over-cap body resolves null");
+  assert.equal(res.status, 413, "over-cap sends 413");
+  assert.ok(destroyed, "over-cap destroys the request");
+});

@@ -130,8 +130,15 @@ test("ui server boots and answers /, /api/work-tasks, /api/activity", async () =
     const badDoc = await fetch(base + "/api/task-doc?folder=workTasks&name=HACK");
     assert.equal(badDoc.status, 400, "/api/task-doc must reject non-whitelisted names");
 
+    // N284 (A64/A65) — /api/activity was removed (activity rides the SSE
+    // snapshot); an unknown /api/* path is now a JSON 404, not the SPA shell.
     const activity = await fetch(base + "/api/activity");
-    assert.equal(activity.status, 200, "/api/activity should answer 200");
+    assert.equal(activity.status, 404, "removed /api/activity → 404");
+    assert.match(
+      activity.headers.get("content-type") || "",
+      /application\/json/,
+      "unknown /api/* answers JSON, not the SPA HTML",
+    );
 
     // N83: the SSE stream must deliver the initial snapshot frame.
     const sseText = await readSse(base + "/sse", 3000);

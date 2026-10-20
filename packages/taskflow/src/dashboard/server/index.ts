@@ -1057,10 +1057,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    if (url.pathname === "/api/activity") {
-      sendJson(res, 200, activity.getRecentEvents());
-      return;
-    }
+    // N284 (A65) — `/api/activity` removed: it had no client caller (activity is
+    // delivered in the SSE snapshot's recentActivity). The /logs + status surfaces
+    // cover the rest.
 
     // N272 — `/api/config` removed: it returned the whole TaskflowConfig, which
     // can include `observability.langfuse.secretKey` and the `events.hooks` shell
@@ -1651,9 +1650,17 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    // N85 cutover: / (and any unmatched route) serves the React SPA shell from
-    // dist/dashboard. The client owns view state; all API/SSE/asset/config routes
-    // above return before reaching this fallthrough.
+    // N284 (A64) — an unknown /api/* path is a JSON 404, not the SPA shell. The
+    // old fallthrough returned 200 + HTML for a mistyped/removed API route, which
+    // a fetch client then tried to JSON.parse.
+    if (url.pathname.startsWith("/api/")) {
+      sendJson(res, 404, { error: "Not found" });
+      return;
+    }
+
+    // N85 cutover: / (and any unmatched NON-api route) serves the React SPA shell
+    // from dist/dashboard. The client owns view state; all API/SSE/asset/config
+    // routes above return before reaching this fallthrough.
     try {
       res.writeHead(200, htmlHeaders());
       res.end(readFileSync(resolve(DASHBOARD_DIR, "index.html"), "utf-8"));

@@ -173,7 +173,7 @@
       "title": "Dashboard server cleanup — readBody UTF-8 by bytes, consistent error codes, route table, dead routes",
       "type": "rework",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N284-dashboard-server-cleanup-readbody-utf-8-by-bytes-c",
       "createdAt": "2026-10-19T22:32:54.277Z",
       "statusHistory": [
@@ -181,12 +181,24 @@
           "status": "ready",
           "at": "2026-10-19T22:32:54.278Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-20T09:50:58.610Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-20T09:54:57.002Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-10-20T09:50:58.616Z",
+        "completedAt": "2026-10-20T09:54:57.010Z",
+        "filesChanged": [
+          "multiple"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

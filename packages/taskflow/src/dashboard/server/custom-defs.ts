@@ -183,10 +183,24 @@ function readBody(
 ): void {
   void readBodyRaw(req, res).then((body) => {
     if (body === null) return;
+    let parsed: unknown;
     try {
-      onJson(JSON.parse(body));
+      parsed = JSON.parse(body);
     } catch {
       sendJson(res, 400, { ok: false, error: "invalid JSON" });
+      return;
+    }
+    // N284 (A63) — a failure INSIDE the handler (e.g. EACCES writing the def) is
+    // a 500, not "invalid JSON" as the old single try/catch reported.
+    try {
+      onJson(parsed);
+    } catch (err) {
+      if (!res.headersSent) {
+        sendJson(res, 500, {
+          ok: false,
+          error: err instanceof Error ? err.message : "internal error",
+        });
+      }
     }
   });
 }
