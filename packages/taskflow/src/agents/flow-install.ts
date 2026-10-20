@@ -11,8 +11,7 @@ import {
 import { applyArtifacts, uninstallTarget, type EmitReport } from "./emit.js";
 import { mergedComposedAgents, mergedModuleRegistry, mergedProjects } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
-import { readSecrets, ensureGitignored } from "../core/secrets.js";
-import { execFileSync } from "node:child_process";
+import { readSecrets, ensureMcpGitignored } from "../core/secrets.js";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
 import {
   scanPlaceholders,
@@ -325,28 +324,22 @@ function resolveInstallValues(
 export function executeInstall(
   t: InstallTarget,
   projectRoot: string,
-  opts: { values?: Record<string, string>; force?: boolean } = {},
+  opts: { values?: Record<string, string>; force?: boolean; onWarn?: (msg: string) => void } = {},
 ): EmitReport[] {
   const art = targetArtifacts(t); // throws Unknown/NotInstallable
   const values = resolveInstallValues(art, projectRoot, opts.values ?? {});
   // N273 (A15) — when a secret `${VAR}` is substituted into an MCP server config,
-  // that plaintext value lands in `.mcp.json`. Previously only the dashboard path
-  // gitignored it; the CLI / init / MCP paths did not. Ensure it here so every
-  // caller is covered, and warn if `.mcp.json` is already git-tracked (gitignore
-  // can't help then — the next `git add -A` would commit the key).
-  if (art.mcpServers.length > 0 && Object.keys(values).length > 0) {
-    ensureGitignored(projectRoot);
-    try {
-      execFileSync("git", ["-C", projectRoot, "ls-files", "--error-unmatch", ".mcp.json"], {
-        stdio: "ignore",
-      });
-      console.warn(
-        "[insight-flow] WARNING: .mcp.json is git-tracked but now holds substituted secrets — " +
-          "untrack it (git rm --cached .mcp.json) so the next commit does not leak keys.",
-      );
-    } catch {
-      /* not tracked (or not a git repo) — gitignore covers it */
-    }
+  // that plaintext value lands in `.mcp.json`, so gitignore it. Review #6: trigger
+  // only when a resolved var is actually used by an MCP config (not a hook-only
+  // ${VAR}). The warning (if .mcp.json is already tracked) goes to onWarn — over
+  // MCP a console.warn is invisible — defaulting to console.warn for the CLI.
+  const warn = opts.onWarn ?? ((m: string) => console.warn(m));
+  const mcpUsesValue = art.mcpServers.some((m) =>
+    Object.keys(values).some((k) => JSON.stringify(m).includes("${" + k + "}")),
+  );
+  if (mcpUsesValue) {
+    const w = ensureMcpGitignored(projectRoot);
+    if (w) warn(w);
   }
   return applyArtifacts(
     art,

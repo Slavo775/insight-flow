@@ -35,7 +35,7 @@ import {
   UnknownTargetError,
   type InstallTarget,
 } from "../agents/flow-install.js";
-import { readSecrets } from "../core/secrets.js";
+import { readSecrets, scrubSecrets } from "../core/secrets.js";
 import {
   writeDefinition,
   removeDefinition,
@@ -235,14 +235,18 @@ function updateDefinition(kind: Kind, def: unknown, revision?: string): ToolResu
 
 // --- tool registration --------------------------------------------------------
 
+// N273 (A53d) — SHAPE only. The id rule differs per tool (create_* requires a
+// `custom:` id; update_* also accepts a built-in id to eject/override), so each
+// tool states its own rule in its description — leaving an id sentence here made
+// create_* contradict itself ("eject a built-in" while create rejects built-ins).
 const DEF_SHAPE_HELP = {
   module:
-    "A module object: { id, title, kind, ... } where kind is one of section|include|mcp-server|hook|skill|bundle|status-transition|handover|subagent. A 'subagent' carries { name, content, description?, tools?, model?, readonly?, background? } and installs to .claude/agents/<name>.md (read by Claude and Cursor). id must start with 'custom:' (to create) or match a shipped built-in id (to eject/override).",
+    "A module object: { id, title, kind, ... } where kind is one of section|include|mcp-server|hook|skill|bundle|status-transition|handover|subagent. A 'subagent' carries { name, content, description?, tools?, model?, readonly?, background? } and installs to .claude/agents/<name>.md (read by Claude and Cursor).",
   agent:
-    "An agent object: { id, title, description?, modules: string[], command?, subagents? }. `subagents` is a list of subagent-module ids the agent fans out to (orchestrator pattern). id must start with 'custom:' or match a shipped agent id.",
-  flow: "A flow object: { id, title, agents: string[], flow: edges[], install?, statuses?, entryAgents? }. id must start with 'custom:'.",
+    "An agent object: { id, title, description?, modules: string[], command?, subagents? }. `subagents` is a list of subagent-module ids the agent fans out to (orchestrator pattern).",
+  flow: "A flow object: { id, title, agents: string[], flow: edges[], install?, statuses?, entryAgents? }.",
   chain:
-    "A chain object (flow of flows): { id, title, description?, flows: string[], links: { from, on, to, mode?: 'auto'|'gated', when? }[] }. A link leaves a TERMINAL status `on` of flow `from` and enters flow `to` (which needs an entry agent); mode defaults to 'gated'; `when` is one line (max 200 chars, no control characters); title max 200, description max 2000. Flows are not modified, so one flow can sit in many chains. No install step. id must start with 'custom:'.",
+    "A chain object (flow of flows): { id, title, description?, flows: string[], links: { from, on, to, mode?: 'auto'|'gated', when? }[] }. A link leaves a TERMINAL status `on` of flow `from` and enters flow `to` (which needs an entry agent); mode defaults to 'gated'; `when` is one line (max 200 chars, no control characters); title max 200, description max 2000. Flows are not modified, so one flow can sit in many chains. No install step.",
 } as const;
 
 /** Build the composer MCP server with all ~12 tools registered. */
@@ -363,26 +367,52 @@ export function createComposerServer(): McpServer {
         const plan = installPlan(target); // throws Unknown/NotInstallable
         const writesExecutable = plan.some((s) => s.kind === "hook" || s.kind === "mcp");
 
-        // N273 (A53a) — refuse rather than writing a literal `${VAR}` that would
-        // leave the installed MCP server silently broken.
         const stored = readSecrets(root);
         const provided = values ?? {};
         const missing = requiredInputs(target)
           .map((i) => i.name)
           .filter((name) => provided[name] === undefined && stored[name] === undefined);
-        if (missing.length) {
-          return fail(`missing required inputs: ${missing.join(", ")}`, { missingInputs: missing });
-        }
 
         // N273 (A14) — human-confirm gate for executable artifacts. The dashboard
         // path shows these in the InstallModal; over MCP there is no UI, so a
         // prompt-injected agent must not be able to persist a hook silently.
+        // Review #8: the plan-only (call 1) response also reports missingInputs so
+        // the caller can gather them before confirming, rather than failing first.
         if (writesExecutable && confirm !== true) {
-          return ok({ needsConfirm: true, kind, id, plan });
+          return ok({ needsConfirm: true, kind, id, plan, missingInputs: missing });
         }
 
-        const reports = executeInstall(target, root, { force, values: provided });
-        return ok({ ok: true, kind, id, reports });
+        // N273 (A53a) — only when actually applying: refuse rather than writing a
+        // literal `${VAR}` that would leave the installed MCP server broken.
+        if (missing.length) {
+          return fail(`missing required inputs: ${missing.join(", ")}`, { missingInputs: missing });
+        }
+
+        try {
+          // N273 (review #3) — collect the "git-tracked .mcp.json" warning so it
+          // reaches the MCP client (a console.warn only hits the stdio server's
+          // stderr, which the agent never sees).
+          const warnings: string[] = [];
+          const reports = executeInstall(target, root, {
+            force,
+            values: provided,
+            onWarn: (m) => warnings.push(m),
+          });
+          return ok({ ok: true, kind, id, reports, ...(warnings.length ? { warnings } : {}) });
+        } catch (err) {
+          // N273 (review #2) — a conflict carries the installed/incoming configs,
+          // which may hold ${VAR}-resolved secret values; scrub before returning
+          // over MCP (the dashboard path already scrubs).
+          if (err instanceof InstallConflictError) {
+            return fail(err.message, {
+              conflict: scrubSecrets(err.conflict, [
+                ...Object.values(stored),
+                ...Object.values(provided),
+              ]),
+            });
+          }
+          throw err;
+        }
       }),
   );
 

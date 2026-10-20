@@ -92,7 +92,12 @@ import {
 } from "../../agents/emit.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 import { writeServerPortPointer, clearServerPortPointer } from "../../core/global-config.js";
-import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
+import {
+  readSecrets,
+  writeSecrets,
+  ensureMcpGitignored,
+  scrubSecrets,
+} from "../../core/secrets.js";
 import { loadUserRegistries, mergedChains } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
@@ -1277,11 +1282,25 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             { INSIGHT_FLOW_BIN: "insight-flow", ...values },
             { force: parsed.force === true },
           );
-          // N273 (A36) — apply succeeded: now persist the submitted secrets
-          // (gitignored) so a re-install doesn't re-prompt.
-          if (Object.keys(toPersist).length) {
-            writeSecrets(projectRoot, toPersist);
-            ensureGitignored(projectRoot);
+          // N273 (A36) — apply succeeded. Ensure .mcp.json is gitignored whenever
+          // a secret-substituted server was written — even a re-install that
+          // reused only stored secrets writes one (review #4) — then persist any
+          // newly-submitted secrets so a re-install doesn't re-prompt. A failure
+          // HERE must not report the already-applied install as failed (review
+          // #5): the artifacts are on disk, so surface a warning and keep 200.
+          let persistWarning: string | undefined;
+          try {
+            // Review #6 — only when an MCP config actually uses a resolved value.
+            const mcpUsesValue = artifacts.mcpServers.some((m) =>
+              Object.keys(values).some((k) => JSON.stringify(m).includes("${" + k + "}")),
+            );
+            if (mcpUsesValue) {
+              const w = ensureMcpGitignored(projectRoot);
+              if (w) persistWarning = w;
+            }
+            if (Object.keys(toPersist).length) writeSecrets(projectRoot, toPersist);
+          } catch (err) {
+            persistWarning = scrubSecrets((err as Error).message, secretValues);
           }
           for (const r of reports) {
             transport.emit("install-progress", {
@@ -1290,8 +1309,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
               action: r.action,
             });
           }
-          transport.emit("install-progress", { phase: "done", kind, id, reports });
-          sendJson(res, 200, { ok: true, kind, id, reports });
+          transport.emit("install-progress", {
+            phase: "done",
+            kind,
+            id,
+            reports,
+            warning: persistWarning,
+          });
+          sendJson(res, 200, { ok: true, kind, id, reports, warning: persistWarning });
         } catch (err) {
           if (err instanceof InstallConflictError) {
             transport.emit("install-progress", { phase: "failed", error: err.message });

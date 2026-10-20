@@ -75,6 +75,31 @@ export function isModuleEditLocked(
   return def.kind === "status-transition" || def.kind === "handover";
 }
 
+/**
+ * N273 (A18) — the LOCKED baseline module ids a built-in agent carries that an
+ * override is missing. Empty unless `def.id` names a built-in and its resolved
+ * modules drop one of the built-in's locked security/enforcement/protocol
+ * modules. Resolves the baseline against the shipped `MODULE_REGISTRY` so it is
+ * independent of the override's own (possibly tampered) module registry. Shared
+ * by the loader AND the write path (`validateReferences`) so the two cannot
+ * diverge — an accepted override that drops the baseline would brick user space.
+ */
+export function missingLockedBaseline(def: ComposedAgent, resolvedModuleIds: string[]): string[] {
+  const builtin = COMPOSED_AGENTS[def.id];
+  if (!builtin) return [];
+  const have = new Set(resolvedModuleIds);
+  return resolveModules(builtin, MODULE_REGISTRY)
+    .map((m) => m.id)
+    .filter((id) => LOCKED_MODULE_IDS.has(id) && !have.has(id));
+}
+
+/** The human-facing message for a dropped locked baseline (shared loader/write). */
+export function lockedBaselineError(agentId: string, missing: string[]): string {
+  return `override of built-in agent '${agentId}' drops locked baseline module(s): ${missing.join(
+    ", ",
+  )} — overrides must keep the security/enforcement/protocol baseline`;
+}
+
 export interface UserRegistries {
   modules: Record<string, AgentModule>;
   agents: Record<string, ComposedAgent>;
@@ -180,23 +205,15 @@ export function loadUserRegistries(projectDir: string = resolveProjectRoot()): U
       throw new UserRegistryError(agentFiles[def.id], (err as Error).message);
     }
     // N273 (A18) — an override of a built-in agent must retain every LOCKED
-    // baseline module (security/enforcement/protocol) the built-in carried.
-    // Without this, a repo-shipped `insightFlow/agents/<built-in>.json` could
-    // shadow a shipped agent and strip its prompt-injection guardrails, since
-    // locks apply to module ids, not to agent composition.
-    const builtin = COMPOSED_AGENTS[def.id];
-    if (builtin) {
-      const have = new Set(resolved.map((m) => m.id));
-      const requiredLocked = resolveModules(builtin, MODULE_REGISTRY)
-        .map((m) => m.id)
-        .filter((id) => LOCKED_MODULE_IDS.has(id));
-      const missing = requiredLocked.filter((id) => !have.has(id));
-      if (missing.length) {
-        throw new UserRegistryError(
-          agentFiles[def.id],
-          `override of built-in agent '${def.id}' drops locked baseline module(s): ${missing.join(", ")} — overrides must keep the security/enforcement/protocol baseline`,
-        );
-      }
+    // baseline module the built-in carried. Shared with the write path
+    // (custom-defs.validateReferences) so an override can never be WRITTEN
+    // without the baseline, not just never loaded (review blocker 1).
+    const missing = missingLockedBaseline(
+      def,
+      resolved.map((m) => m.id),
+    );
+    if (missing.length) {
+      throw new UserRegistryError(agentFiles[def.id], lockedBaselineError(def.id, missing));
     }
     // N191 — declared subagents must resolve to `subagent`-kind modules.
     for (const id of def.subagents ?? []) {

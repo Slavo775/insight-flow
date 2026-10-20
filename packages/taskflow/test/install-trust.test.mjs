@@ -14,12 +14,7 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import {
-  writeSecrets,
-  readSecrets,
-  AgentModuleSchema,
-  loadUserRegistries,
-} from "../dist/index.js";
+import { writeSecrets, readSecrets, AgentModuleSchema, loadUserRegistries } from "../dist/index.js";
 
 const CLI = resolve(dirname(fileURLToPath(import.meta.url)), "../dist/cli.js");
 
@@ -60,6 +55,22 @@ test("secrets: atomic 0600 write; a corrupt file is not wiped", () => {
   assert.equal(readFileSync(path, "utf-8"), "{ not json", "corrupt file left intact");
 });
 
+test("secrets: a corrupt-file error does not leak the file's contents (blocker 2)", () => {
+  const dir = makeProject();
+  const path = join(dir, ".insight-flow/secrets.local.json");
+  mkdirSync(dirname(path), { recursive: true });
+  // Invalid JSON (trailing comma) that holds a secret-looking value.
+  writeFileSync(path, '{"API_KEY":"sk-live-LEAKME", }', "utf-8");
+  let msg = "";
+  try {
+    writeSecrets(dir, { OTHER: "x" });
+  } catch (e) {
+    msg = e.message;
+  }
+  assert.match(msg, /corrupt/, "throws a corrupt-file error");
+  assert.doesNotMatch(msg, /sk-live-LEAKME/, "the secret value must NOT be in the error message");
+});
+
 test("schema: include.ref must be a plain *.md filename", () => {
   const good = AgentModuleSchema.safeParse({
     id: "custom:i",
@@ -70,7 +81,12 @@ test("schema: include.ref must be a plain *.md filename", () => {
   assert.equal(good.success, true, "AGENT_X.md accepted");
 
   for (const bad of ["../../.env", "a/b.md", "secrets", "AGENT_X.md/../x"]) {
-    const r = AgentModuleSchema.safeParse({ id: "custom:i", title: "I", kind: "include", ref: bad });
+    const r = AgentModuleSchema.safeParse({
+      id: "custom:i",
+      title: "I",
+      kind: "include",
+      ref: bad,
+    });
     assert.equal(r.success, false, `ref ${JSON.stringify(bad)} rejected`);
   }
 });
@@ -174,5 +190,40 @@ test("MCP uninstall: a never-installed target reports installed:false", async ()
   await withMcp(dir, async (call) => {
     const res = await call("uninstall", { kind: "module", id: "custom:never" });
     assert.equal(res.body.installed, false, "never-installed → installed:false");
+  });
+});
+
+test("MCP update_agent: overriding a built-in cannot drop the locked baseline (write path, blocker 1)", async () => {
+  const dir = makeProject();
+  await withMcp(dir, async (call) => {
+    // Eject the shipped task-implement agent, keeping only `security` (drops the
+    // enforcement/protocol baseline). The loader already refused this; now the
+    // WRITE path must too, else the accepted override bricks every later load.
+    const res = await call("update_agent", {
+      def: { id: "task-implement", title: "pwned", modules: ["security"] },
+    });
+    assert.equal(res.isError, true, "write path refuses the baseline-dropping override");
+    assert.match(res.body.error, /locked baseline/);
+  });
+});
+
+test("MCP install: a plan-only call reports missingInputs instead of failing (#8)", async () => {
+  const dir = makeProject();
+  await withMcp(dir, async (call) => {
+    await call("create_module", {
+      def: {
+        id: "custom:needskey2",
+        title: "Needs key",
+        kind: "mcp-server",
+        name: "needskey2",
+        config: { command: "srv", env: { TOKEN: "${NEEDED_KEY2}" } },
+      },
+    });
+    // No confirm, no values: must return the plan AND report the missing input,
+    // not fail — so the caller can gather it before confirming.
+    const res = await call("install", { kind: "module", id: "custom:needskey2" });
+    assert.equal(res.isError, false, "plan-only call does not fail");
+    assert.equal(res.body.needsConfirm, true, "hook/mcp target needs confirm");
+    assert.ok((res.body.missingInputs || []).includes("NEEDED_KEY2"), "missing input reported");
   });
 });

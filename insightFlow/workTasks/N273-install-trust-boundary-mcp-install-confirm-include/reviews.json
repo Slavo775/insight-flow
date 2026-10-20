@@ -1,0 +1,29 @@
+{
+  "taskId": "N273",
+  "reviews": [
+    {
+      "startedAt": "2026-10-20T09:59:07.639Z",
+      "endedAt": "2026-10-20T12:03:18.499Z",
+      "verdict": "fix-needed",
+      "comment": "REQUEST CHANGES: (1) A18 locked-baseline check is loader-only — PUT /api/agents and MCP update_agent still accept an override that drops it, after which every load throws and user space is bricked until the file is hand-deleted; mirror the check in validateReferences('agents'). (2) The corrupt-secrets error embeds V8's JSON.parse message, which quotes the file content — leaks secret values into the 500 body + SSE; use a fixed message.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-10-20T12:45:21.463Z",
+        "endedAt": "2026-10-20T12:56:59.651Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/agents/user-registry.ts",
+          "packages/taskflow/src/dashboard/server/custom-defs.ts",
+          "packages/taskflow/src/core/secrets.ts",
+          "packages/taskflow/src/mcp/composer.ts",
+          "packages/taskflow/src/agents/flow-install.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/test/install-trust.test.mjs"
+        ],
+        "comment": "Fixed blockers 1-2 (write-path baseline guard + corrupt-secrets leak) and non-blocking #2-#9,#11; 3 regression tests, 167 related tests green",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

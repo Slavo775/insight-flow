@@ -33,13 +33,17 @@ import {
   type ComposedAgent,
 } from "../../agents/compose.js";
 import { BUILTIN_PROJECTS, type Project } from "../../agents/project.js";
+import { installedBuckets } from "../../agents/emit.js";
+import { targetBucketId } from "../../agents/flow-install.js";
 import { clearFlowReferences } from "../../core/config.js";
 import {
   CUSTOM_ID_PREFIX,
   isLockedModuleId,
   isModuleEditLocked,
   loadUserRegistries,
+  lockedBaselineError,
   mergedChains,
+  missingLockedBaseline,
   userSpaceRoot,
   type UserRegistries,
 } from "../../agents/user-registry.js";
@@ -111,11 +115,21 @@ export function validateReferences(
   }
 
   if (kind === "agents") {
+    let resolvedAgent;
     try {
-      resolveModules(record as ComposedAgent, modules);
+      resolvedAgent = resolveModules(record as ComposedAgent, modules);
     } catch (err) {
       return (err as Error).message;
     }
+    // N273 (A18, review blocker 1) — same locked-baseline guard the loader runs,
+    // so an override that drops the security/enforcement/protocol baseline is
+    // rejected at WRITE time (PUT / update_agent) instead of bricking every
+    // later load.
+    const missing = missingLockedBaseline(
+      record as ComposedAgent,
+      resolvedAgent.map((m) => m.id),
+    );
+    if (missing.length) return lockedBaselineError((record as ComposedAgent).id, missing);
     // N191 — declared subagents must resolve to `subagent`-kind modules.
     for (const id of (record as ComposedAgent).subagents ?? []) {
       if (!modules[id]) return `subagents references unknown module '${id}'`;
@@ -530,6 +544,22 @@ export function handleCustomDefsRequest(
   if (method === "DELETE") {
     if (!pathId) {
       sendJson(res, 400, { ok: false, error: "id required" });
+      return true;
+    }
+    // N273 (A53b, review #9) — same guard as MCP delete: refuse deleting a
+    // still-installed module/agent, whose emitted artifacts (hooks, .mcp.json
+    // entries, commands) would otherwise be orphaned. Projects/chains have no
+    // install step.
+    const targetKind = kind === "modules" ? "module" : kind === "agents" ? "agent" : null;
+    if (
+      targetKind &&
+      installedBuckets(root).has(targetBucketId({ kind: targetKind, id: pathId }))
+    ) {
+      sendJson(res, 409, {
+        ok: false,
+        error: `'${pathId}' is installed — uninstall it first, then delete`,
+        code: "installed",
+      });
       return true;
     }
     const result = removeDefinition(kind, pathId, user, root);

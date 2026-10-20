@@ -4,6 +4,7 @@
 // `.mcp.json`, which now receives substituted secret values. `ensureGitignored`
 // guards both.
 import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 
 /** Project-local, gitignored secrets file. */
@@ -39,15 +40,18 @@ export function writeSecrets(projectRoot: string, values: Record<string, string>
         throw new Error("not a JSON object");
       }
       current = parsed as Record<string, string>;
-    } catch (err) {
+    } catch {
+      // N273 (review blocker 2) — do NOT embed the parse error: V8's JSON.parse
+      // message quotes the offending input, which would leak the file's secret
+      // values into the 500 body and the SSE install-progress broadcast.
       throw new Error(
-        `refusing to overwrite a corrupt secrets file (${SECRETS_PATH}): ${(err as Error).message}`,
+        `refusing to overwrite a corrupt secrets file (${SECRETS_PATH}) — fix or remove it by hand`,
       );
     }
   }
   const merged = { ...current, ...values };
   mkdirSync(dirname(path), { recursive: true });
-  const tmp = path + ".tmp-" + process.pid;
+  const tmp = `${path}.tmp-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   writeFileSync(tmp, JSON.stringify(merged, null, 2) + "\n", { encoding: "utf-8", mode: 0o600 });
   renameSync(tmp, path);
 }
@@ -69,6 +73,28 @@ export function ensureGitignored(
   const block = `${prefix}\n# insight-flow — local secrets + substituted .mcp.json (do not commit)\n${missing.join("\n")}\n`;
   writeFileSync(path, existing + block, "utf-8");
   return missing;
+}
+
+/**
+ * N273 (A15) — gitignore `.mcp.json` (it now receives substituted secret values)
+ * and return a warning string if it is ALREADY git-tracked (gitignore cannot
+ * help then — the next `git add -A` would commit the key), else null. Shared by
+ * every install path (CLI/init/MCP via executeInstall, and the dashboard) so the
+ * warning is not silently dropped on the dashboard path (review #3).
+ */
+export function ensureMcpGitignored(projectRoot: string): string | null {
+  ensureGitignored(projectRoot);
+  try {
+    execFileSync("git", ["-C", projectRoot, "ls-files", "--error-unmatch", ".mcp.json"], {
+      stdio: "ignore",
+    });
+    return (
+      "[insight-flow] WARNING: .mcp.json is git-tracked but now holds substituted secrets — " +
+      "untrack it (git rm --cached .mcp.json) so the next commit does not leak keys."
+    );
+  } catch {
+    return null; // not tracked (or not a git repo) — gitignore covers it
+  }
 }
 
 /** Strip the values of known secret inputs from an arbitrary object/string for safe logging. */
