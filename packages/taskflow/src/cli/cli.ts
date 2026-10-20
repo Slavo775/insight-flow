@@ -65,6 +65,7 @@ import { cmdInstallFlow } from "./commands/install-flow.js";
 import { cmdInstallLifecycleHooks } from "./commands/install-lifecycle-hooks.js";
 import { cmdMigrateHooks } from "./commands/migrate-hooks.js";
 import { cmdNotify } from "./commands/notify.js";
+import { cmdTrustHooks } from "./commands/trust-hooks.js";
 import { cmdLogActivity } from "./commands/log-activity.js";
 import { cmdLogEvent } from "./commands/log-event.js";
 import { cmdMcp } from "./commands/mcp.js";
@@ -158,6 +159,7 @@ function printHelp(): void {
     install-lifecycle-hooks [--bin <path>] Install lifecycle event hooks (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) into .claude/settings.json (idempotent)
     migrate-hooks [--bin <path>]          Refresh hook scripts after upgrading the package; bumps taskflow.config.json.hooksVersion (idempotent)
     notify "<message>" [--title <t>] [--project <p>]   Fire an OS notification (fire-and-forget; respects notifications.cli)
+    trust-hooks [--yes]                                 Review + approve this project's events.hooks shell commands (required before they run)
     log-activity "<message>"                            Emit free-form narrative to the activity feed (no-op when activityEngine.enabled is false)
     log-event <type> [--task Nxx] [--data <json>]       Emit a typed lifecycle event (mandatory: start|done; optional: active|idle|edit-start|edit-end|research-start|research-end|review-start|review-end|git-start|git-end)
     hook <ClaudeHookEventName> [--data <json>]          Sugar for log-event --source hook --hook-name <raw> (N68; accepts Stop|Notification|PreToolUse|PostToolUse|SessionStart|SessionEnd|UserPromptSubmit|SubagentStop|PermissionRequest)
@@ -274,6 +276,9 @@ async function run(): Promise<void> {
   } else if (command === "notify") {
     const config = resolveConfig();
     cmdNotify(config, opts);
+  } else if (command === "trust-hooks") {
+    const config = resolveConfig();
+    cmdTrustHooks(config, opts);
   } else if (command === "log-activity") {
     const config = resolveConfig();
     cmdLogActivity(config, opts);

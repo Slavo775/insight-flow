@@ -155,6 +155,16 @@ test("dashboard: non-json work-tasks name is rejected", async () => {
   });
 });
 
+test("dashboard: HTML responses carry a CSP (N274)", async () => {
+  await withDashboard(async () => {
+    const res = await fetch(D("/"));
+    const csp = res.headers.get("content-security-policy");
+    assert.ok(csp, "CSP header present on the SPA shell");
+    assert.match(csp, /img-src 'self' data:/, "img-src restricts remote images");
+    assert.equal(res.headers.get("x-content-type-options"), "nosniff");
+  });
+});
+
 // ---- master hub ----
 
 test("hub: proxy is pinned to the project origin (no //host:port escape)", async () => {

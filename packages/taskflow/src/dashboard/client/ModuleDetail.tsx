@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
+import { mdSanitizeSchema } from "./sanitize";
 import styled, { useTheme } from "styled-components";
 import { fetchIncludeDoc, type ModuleDto } from "./api.js";
 import { Button } from "./components/index.js";
@@ -173,7 +174,7 @@ function IncludePanels({ module }: { module: ModuleDto }) {
 function MarkdownBlock({ text }: { text: string }) {
   return (
     <div className="markdown-body">
-      <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+      <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[[rehypeSanitize, mdSanitizeSchema]]}>
         {text}
       </Markdown>
     </div>

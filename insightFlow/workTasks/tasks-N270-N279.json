@@ -245,7 +245,7 @@
       "title": "Untrusted config and task data never run code — events.hooks trust, confined paths, notify, mrUrl, CSP",
       "type": "fix",
       "priority": "high",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N274-untrusted-config-and-task-data-never-run-code-even",
       "createdAt": "2026-10-19T22:32:52.314Z",
       "statusHistory": [
@@ -253,12 +253,24 @@
           "status": "ready",
           "at": "2026-10-19T22:32:52.314Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-20T08:26:58.586Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-20T08:38:49.816Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-10-20T08:26:58.594Z",
+        "completedAt": "2026-10-20T08:38:49.826Z",
+        "filesChanged": [
+          "multiple"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],

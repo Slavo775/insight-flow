@@ -10,11 +10,43 @@ import {
   readBody,
   serveStaticFile,
   MIME,
+  escHtml,
   isHostTrusted,
   isLoopbackPeer,
   isTrustedLocalRequest,
   listenHost,
 } from "../../core/http-util.js";
+
+// N274 (A38) — security headers for every HTML response. CSP is defense-in-depth
+// behind the markdown sanitizer: `img-src 'self' data:` stops a remote-image
+// beacon from agent-written task docs, object/base/frame-ancestors curb
+// embedding + clickjacking.
+// ponytail: `'unsafe-inline'` for script/style — styled-components injects
+// <style> tags and the Vite bundle isn't nonce'd here; tighten with a nonce if a
+// stricter policy is ever needed.
+const HTML_SECURITY_HEADERS: Record<string, string> = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+};
+function htmlHeaders(frameSrc?: string): Record<string, string> {
+  const csp = [
+    "default-src 'self'",
+    "img-src 'self' data:",
+    "style-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'unsafe-inline'",
+    "connect-src 'self'",
+    "font-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'self'",
+    `frame-src ${frameSrc ?? "'none'"}`,
+  ].join("; ");
+  return {
+    "Content-Type": MIME[".html"],
+    "Content-Security-Policy": csp,
+    ...HTML_SECURITY_HEADERS,
+  };
+}
 import type { TaskflowConfig, HookEventInput, ActivityEvent } from "../../core/types.js";
 import { getWorkDir, setDefaultFlow } from "../../core/config.js";
 import { claudeStatusFromProjectStatus } from "../../core/activity-status.js";
@@ -915,7 +947,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     // /config — project config viewer
     if (url.pathname === "/config") {
-      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.writeHead(200, htmlHeaders());
       res.end(getConfigPageHtml(config));
       return;
     }
@@ -932,6 +964,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         ":root{--bg:#0a0a0a;--surface:#141414;--border:#262626;--text:#e5e5e5;--text-muted:#737373;--accent:#3b82f6}" +
         getNavCss() +
         ".top-nav{margin:0;top:0;}";
+      // N274 (A78) — masterUrl comes from config; only embed an http(s) origin,
+      // escaped, so a cloned `master.url` can't break out of the attribute and
+      // inject markup. frame-src is scoped to that same origin.
+      const safeMaster = /^https?:\/\//i.test(masterUrl) ? masterUrl : "http://127.0.0.1:6100";
+      const masterOrigin = new URL(safeMaster).origin;
       const iframeHtml =
         '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
@@ -941,10 +978,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         "</head><body>" +
         getNavHtml(config.projectName || "", "overview") +
         '<iframe src="' +
-        masterUrl +
+        escHtml(safeMaster) +
         '/overview" style="width:100%;height:calc(100vh - 48px);border:none;display:block"></iframe>' +
         "</body></html>";
-      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.writeHead(200, htmlHeaders(masterOrigin));
       res.end(iframeHtml);
       return;
     }
@@ -1591,7 +1628,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     // dist/dashboard. The client owns view state; all API/SSE/asset/config routes
     // above return before reaching this fallthrough.
     try {
-      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.writeHead(200, htmlHeaders());
       res.end(readFileSync(resolve(DASHBOARD_DIR, "index.html"), "utf-8"));
     } catch {
       sendJson(res, 500, { error: "Dashboard build not found. Run `pnpm build`." });

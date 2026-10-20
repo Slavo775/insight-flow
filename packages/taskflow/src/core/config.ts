@@ -1,5 +1,5 @@
 import { readFileSync, existsSync, writeFileSync } from "node:fs";
-import { resolve, basename } from "node:path";
+import { resolve, basename, sep } from "node:path";
 import type { Task, TaskflowConfig, ActivityEngineConfig, NotificationsConfig } from "./types.js";
 import { resolveProjectRoot, resolveFlowRoot, DEFAULT_WORK_DIR } from "./paths.js";
 
@@ -76,6 +76,24 @@ export function resolveConfig(cwd: string = process.cwd()): TaskflowConfig {
         mergedAgentsGitPerms[flag] = false;
       }
     }
+  }
+
+  // N274 (A33) — confine user-supplied paths to the project root and require an
+  // http(s) master.url. A cloned repo's config must not point rolesDir (written
+  // + patched by prompt-build), workDir, or the activity log outside the project.
+  const assertInside = (value: string | undefined, key: string): void => {
+    if (value === undefined) return;
+    const resolved = resolve(anchor, value);
+    if (resolved !== anchor && !resolved.startsWith(anchor + sep)) {
+      throw new Error(`taskflow.config.json: ${key} must stay inside the project (got "${value}")`);
+    }
+  };
+  assertInside(userConfig.workDir, "workDir");
+  assertInside(userConfig.rolesDir, "rolesDir");
+  assertInside(userConfig.activityEngine?.logFile, "activityEngine.logFile");
+  const masterUrl = userConfig.master?.url;
+  if (masterUrl !== undefined && !/^https?:\/\//i.test(masterUrl)) {
+    throw new Error(`taskflow.config.json: master.url must be an http(s) URL (got "${masterUrl}")`);
   }
 
   return {
