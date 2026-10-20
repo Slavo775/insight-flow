@@ -69,6 +69,14 @@ test("npm pack --dry-run: tarball keeps its top-level roots and required dist en
     paths.some((p) => p.startsWith("dist/dashboard/assets/")),
     "tarball must ship the dashboard SPA assets (dist/dashboard/assets/*)",
   );
+  // N276 (A65) — binaries must be non-empty. Two 0-byte mp3s shipped in every
+  // release since 2.0.0; guard so an emptied binary fails the pack, not silently
+  // ships and plays nothing.
+  for (const f of entry.files) {
+    if (/\.(mp3|png|woff2?|ttf|ico)$/.test(f.path)) {
+      assert.ok(f.size > 0, `shipped binary '${f.path}' must be non-empty (was ${f.size} bytes)`);
+    }
+  }
 });
 
 test("bin: `insight-flow --help` exits 0 and enumerates the command surface", () => {

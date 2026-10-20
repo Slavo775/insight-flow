@@ -88,9 +88,25 @@ the `v2.0.0` tag as the baseline and opens normal Release PRs for `2.0.1` / `2.1
 
 ## Security notes (public repo)
 
-- `release-publish.yml` triggers **only** on `release: published` — never on
-  `pull_request` — so secrets / OIDC are never exposed to fork PRs.
+- `release-publish.yml` triggers on `release: published` **and**
+  `workflow_dispatch` (a manual fallback) — never on `pull_request`, so secrets /
+  OIDC are never exposed to fork PRs. The job's **Guard publish ref** step (N276)
+  refuses to publish unless the ref is the matching `v<version>` tag, or a manual
+  dispatch on `main` — so a dispatch from a feature branch cannot ship.
+- The publish job runs the test suite and a pack sanity check (required files
+  present, no zero-byte binaries) **before** `npm publish` (N276).
 - Workflows default to `permissions: contents: read`; jobs elevate only what they
-  need (`id-token: write` for OIDC, `contents: write` + `pull-requests: write`
-  for release-please).
-- All third-party actions are pinned to a commit SHA.
+  need (`id-token: write` for OIDC on the publish/deploy jobs, `contents: write` +
+  `pull-requests: write` for release-please). `docs.yml` grants `pages`/`id-token`
+  on its **deploy** job only, not to the dependency-installing build job (N276).
+- Third-party actions are pinned to a commit SHA in `ci.yml`, `docs.yml`,
+  `release-publish.yml` and `release-please.yml`.
+- `RELEASE_PLEASE_TOKEN` is a PAT/GitHub App token. A fine-grained PAT expires
+  within a year; `release-please.yml` fails loudly if the secret is empty, but
+  **set a calendar reminder to rotate it** — an expired token silently stops
+  release PRs from appearing.
+- Enable Dependabot alerts + security updates and secret scanning (step 3 above);
+  `.github/dependabot.yml` opens the update PRs once alerts are on. CI (`ci.yml`)
+  runs typecheck + lint + tests on every PR — make it a **required** status check
+  in branch protection, and restrict the `npm-publish` environment to `main` +
+  `v*` tags.
