@@ -223,6 +223,16 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
   if (platform === "darwin" || platform === "win32") {
     try {
       const w = watch(workDir, { recursive: true }, () => onChange());
+      // N282 (A50) — a watcher 'error' (EPERM/ENOSPC/EMFILE) must not crash the
+      // process; log once and drop the watcher.
+      w.on("error", (e) => {
+        console.error("[dashboard] file watcher error:", (e as Error).message);
+        try {
+          w.close();
+        } catch {
+          /* ignore */
+        }
+      });
       watchers.add(w);
       return {
         close: () => {
@@ -238,6 +248,14 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
   const rootWatcher = watch(workDir, { recursive: false }, () => {
     onChange();
     refreshSubdirs();
+  });
+  rootWatcher.on("error", (e) => {
+    console.error("[dashboard] root watcher error:", (e as Error).message);
+    try {
+      rootWatcher.close();
+    } catch {
+      /* ignore */
+    }
   });
   watchers.add(rootWatcher);
 
@@ -261,6 +279,15 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
       if (subdirWatchers.has(dir)) continue;
       try {
         const w = watch(dir, { recursive: false }, () => onChange());
+        w.on("error", () => {
+          try {
+            w.close();
+          } catch {
+            /* ignore */
+          }
+          subdirWatchers.delete(dir);
+          watchers.delete(w);
+        });
         subdirWatchers.set(dir, w);
         watchers.add(w);
       } catch {
@@ -1645,6 +1672,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   if (!serverErrorHandlersInstalled) {
     serverErrorHandlersInstalled = true;
     process.on("unhandledRejection", (reason) => {
+      // N282 (A50) — also print to stderr; forwarding to the hub is a no-op
+      // before registration, so without this the error was invisible.
+      console.error("[dashboard] unhandledRejection:", reason);
       forwardLogToMaster({
         type: "error",
         message: "unhandledRejection: " + String(reason instanceof Error ? reason.message : reason),
@@ -1655,6 +1685,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       });
     });
     process.on("uncaughtException", (err) => {
+      console.error("[dashboard] uncaughtException:", err);
       forwardLogToMaster({
         type: "error",
         message: "uncaughtException: " + err.message,
@@ -1800,6 +1831,16 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       exec(openCmd + " http://localhost:" + serverPort);
     }
   };
+  // N282 (A50) — a clear message + non-zero exit on a listen failure (e.g. the
+  // port is already held), instead of an unhandled 'error' that vanishes.
+  server.on("error", (err: NodeJS.ErrnoException) => {
+    console.error(
+      err.code === "EADDRINUSE"
+        ? `[dashboard] port ${serverPort} is already in use`
+        : `[dashboard] server error: ${err.message}`,
+    );
+    process.exit(1);
+  });
   if (bindHost) server.listen(serverPort, bindHost, onListen);
   else server.listen(serverPort, onListen);
 

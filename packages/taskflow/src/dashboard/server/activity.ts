@@ -61,6 +61,16 @@ export class ActivityEngine {
     this.watcher = watch(this.logPath, () => {
       this.readNewLines();
     });
+    // N282 (A50) — a watcher 'error' must not crash the process; the 500ms poll
+    // below keeps the feed alive if the watch drops.
+    this.watcher.on("error", () => {
+      try {
+        this.watcher?.close();
+      } catch {
+        /* ignore */
+      }
+      this.watcher = null;
+    });
 
     // Also poll every 500ms as a fallback (fs.watch can miss events)
     const poll = setInterval(() => {

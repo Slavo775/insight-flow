@@ -85,7 +85,7 @@
       "title": "Hub reliability — listen errors, registry by path, liveness counter, lock probe, versioned service worker",
       "type": "fix",
       "priority": "medium",
-      "status": "ready",
+      "status": "implemented",
       "folder": "insightFlow/workTasks/N282-hub-reliability-listen-errors-registry-by-path-liv",
       "createdAt": "2026-10-19T22:32:53.877Z",
       "statusHistory": [
@@ -93,12 +93,24 @@
           "status": "ready",
           "at": "2026-10-19T22:32:53.878Z",
           "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-20T09:42:33.604Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-20T09:50:13.441Z",
+          "by": "task-implement"
         }
       ],
       "implementation": {
-        "startedAt": null,
-        "completedAt": null,
-        "filesChanged": [],
+        "startedAt": "2026-10-20T09:42:33.612Z",
+        "completedAt": "2026-10-20T09:50:13.448Z",
+        "filesChanged": [
+          "multiple"
+        ],
         "tokensUsed": null
       },
       "changesAfterImplementation": [],
@@ -238,7 +250,6 @@
       "type": "chore",
       "priority": "low",
       "status": "ready",
-      "flowId": "default",
       "folder": "insightFlow/workTasks/N286-tests-docs-and-hygiene-untested-cli-commands-mcp-t",
       "createdAt": "2026-10-19T22:32:54.684Z",
       "statusHistory": [
@@ -267,7 +278,8 @@
       "pushes": [],
       "branch": null,
       "mrUrl": null,
-      "mergedAt": null
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

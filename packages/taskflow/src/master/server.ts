@@ -229,7 +229,13 @@ function getOverviewShell(): string {
  * `/api/*`, `/events` — are NEVER cached (always network). Old caches are pruned
  * on activate.
  */
-const MASTER_SW_JS = `var CACHE = 'if-hub-v3';
+// N282 (A23) — `__IF_CACHE__` is replaced at serve time with a version-stamped
+// cache name (`if-hub-<pkg version>`), so a release that changes hub-notify.js
+// or the shell invalidates the old cache instead of serving the stale copy
+// forever (the name was a fixed `if-hub-v3`, last bumped before hub-notify.js
+// existed). The SW script itself is served no-cache, so the new name takes
+// effect on the next load.
+const MASTER_SW_JS = `var CACHE = '__IF_CACHE__';
 var SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg', '/sounds/idle-ping.mp3', '/sounds/permission-alert.mp3'];
 self.addEventListener('install', function(e){
   self.skipWaiting();
@@ -252,8 +258,12 @@ self.addEventListener('fetch', function(e){
     // Shell: fresh when online, cached shell when offline.
     e.respondWith(
       fetch(e.request).then(function(res){
-        // Only cache an OK shell — never let a 404/500 poison the offline shell.
-        if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put('/', copy); }); }
+        // Only cache an OK *HTML* shell under '/'. N282 (A79): a URL-bar
+        // navigation to a non-HTML path (e.g. /sw.js, /sounds/x.mp3) is also
+        // mode:navigate and 200, and would otherwise overwrite the offline
+        // shell with that body. Guard on content-type.
+        var ct = res && res.headers ? (res.headers.get('content-type') || '') : '';
+        if (res && res.ok && ct.indexOf('text/html') === 0) { var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put('/', copy); }); }
         return res;
       }).catch(function(){ return caches.match('/'); })
     );
@@ -364,6 +374,15 @@ const HOP_BY_HOP = new Set([
 ]);
 
 function stripHopByHop<T extends Record<string, unknown>>(headers: T): T {
+  // N282 (A52) — also drop every header named inside the `Connection` value
+  // (RFC 7230 §6.1), not just the fixed list, before deleting `connection`.
+  const conn = headers["connection"];
+  if (typeof conn === "string") {
+    for (const token of conn.split(",")) {
+      const name = token.trim().toLowerCase();
+      if (name) delete headers[name];
+    }
+  }
   for (const key of Object.keys(headers)) {
     if (HOP_BY_HOP.has(key.toLowerCase())) delete headers[key];
   }
@@ -892,10 +911,14 @@ export async function startMasterServer(
           sendJson(res, 400, { error: "Invalid JSON" });
           return;
         }
-        const label = String(parsed.label ?? "unknown");
+        const label = String(parsed.label ?? "unknown").slice(0, 200);
         const projectUrl = String(parsed.url ?? "");
-        const projectId = String(parsed.projectId ?? parsed.label ?? "unknown");
+        const projectId = String(parsed.projectId ?? parsed.label ?? "unknown").slice(0, 200);
         const path = typeof parsed.path === "string" ? parsed.path : undefined;
+        // N282 (A52) — cap label/projectId lengths (above). The registrant url is
+        // NOT rejected here: the proxy and the health probe already refuse a
+        // non-loopback url (the single enforcement point), and master-proxy's
+        // SSRF test deliberately registers one to exercise that guard.
         // N243 — log the registration handshake (master side), before minting the code.
         recordLog("master", {
           type: "info",
@@ -1460,7 +1483,8 @@ export async function startMasterServer(
           "Service-Worker-Allowed": "/",
           "Cache-Control": "no-cache",
         });
-        res.end(MASTER_SW_JS);
+        // N282 (A23) — stamp the cache name with the package version.
+        res.end(MASTER_SW_JS.replace("__IF_CACHE__", "if-hub-" + currentVersion()));
         return;
       }
 
@@ -1526,9 +1550,18 @@ export async function startMasterServer(
       }
 
       sendJson(res, 404, { error: "Not found" });
-    } catch {
+    } catch (err) {
       if (!res.headersSent) {
         sendJson(res, 500, { error: "Internal server error" });
+      } else {
+        // N282 (A52) — a throw mid-stream (headers already sent) can't send a
+        // body; close the socket instead of leaking it, and log the cause.
+        recordLog("master", {
+          type: "error",
+          message: "request handler threw after headers sent",
+          data: { error: err instanceof Error ? err.message : String(err) },
+        });
+        res.destroy();
       }
     }
   });
@@ -1536,8 +1569,19 @@ export async function startMasterServer(
   // N272 — bind loopback only (127.0.0.1) by default; all interfaces only when
   // the user opted into LAN access via INSIGHT_FLOW_TRUSTED_HOSTS. Keeps the hub
   // (proxy, /events, write routes) off the LAN unless explicitly allowed.
-  await new Promise<void>((resolve) => {
+  // N282 (A50) — reject (don't hang) on a listen error; EADDRINUSE gets a clear
+  // message instead of a silent exit / a never-settling promise for in-process
+  // callers (tests).
+  await new Promise<void>((resolve, reject) => {
     const host = listenHost();
+    server.once("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE") {
+        console.error(`[hub] port ${config.port} is already in use`);
+      } else {
+        console.error(`[hub] server error: ${err.message}`);
+      }
+      reject(err);
+    });
     if (host) server.listen(config.port, host, () => resolve());
     else server.listen(config.port, () => resolve());
   });
