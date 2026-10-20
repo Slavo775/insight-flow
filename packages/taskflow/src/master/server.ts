@@ -1501,7 +1501,9 @@ export async function startMasterServer(
           "Cache-Control": "no-cache",
         });
         // N282 (A23) — stamp the cache name with the package version.
-        res.end(MASTER_SW_JS.replace("__IF_CACHE__", "if-hub-" + currentVersion()));
+        // N282 (#5) — a replacer FUNCTION so `$`-patterns in the version (however
+        // unlikely from package.json) are never interpreted as replacement specials.
+        res.end(MASTER_SW_JS.replace("__IF_CACHE__", () => "if-hub-" + currentVersion()));
         return;
       }
 
@@ -1591,16 +1593,28 @@ export async function startMasterServer(
   // callers (tests).
   await new Promise<void>((resolve, reject) => {
     const host = listenHost();
-    server.once("error", (err: NodeJS.ErrnoException) => {
+    const onBindError = (err: NodeJS.ErrnoException) => {
       if (err.code === "EADDRINUSE") {
         console.error(`[hub] port ${config.port} is already in use`);
       } else {
         console.error(`[hub] server error: ${err.message}`);
       }
       reject(err);
-    });
-    if (host) server.listen(config.port, host, () => resolve());
-    else server.listen(config.port, () => resolve());
+    };
+    server.once("error", onBindError);
+    const onListen = () => {
+      // N282 (#3) — once bound, swap the bind-time reject handler for a
+      // persistent logger. A post-listen accept error (e.g. EMFILE) would
+      // otherwise hit the settled promise (no-op) and the next one would be an
+      // unhandled `error` → uncaughtException → exit.
+      server.off("error", onBindError);
+      server.on("error", (err: NodeJS.ErrnoException) =>
+        console.error(`[hub] server error: ${err.message}`),
+      );
+      resolve();
+    };
+    if (host) server.listen(config.port, host, onListen);
+    else server.listen(config.port, onListen);
   });
 
   return {

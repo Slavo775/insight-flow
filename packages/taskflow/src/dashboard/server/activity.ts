@@ -58,18 +58,20 @@ export class ActivityEngine {
     }
 
     // Start watching the log file
-    this.watcher = watch(this.logPath, () => {
+    const w = watch(this.logPath, () => {
       this.readNewLines();
     });
+    this.watcher = w;
     // N282 (A50) — a watcher 'error' must not crash the process; the 500ms poll
-    // below keeps the feed alive if the watch drops.
-    this.watcher.on("error", () => {
+    // below keeps the feed alive if the watch drops. (#7) Close the captured
+    // instance and only clear the field if it still points at this watcher.
+    w.on("error", () => {
       try {
-        this.watcher?.close();
+        w.close();
       } catch {
         /* ignore */
       }
-      this.watcher = null;
+      if (this.watcher === w) this.watcher = null;
     });
 
     // Also poll every 500ms as a fallback (fs.watch can miss events)

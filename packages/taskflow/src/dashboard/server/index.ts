@@ -235,7 +235,13 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
       // N282 (A50) — a watcher 'error' (EPERM/ENOSPC/EMFILE) must not crash the
       // process; log once and drop the watcher.
       w.on("error", (e) => {
-        console.error("[dashboard] file watcher error:", (e as Error).message);
+        // #1 — the recursive watcher has no polling fallback, so live file-change
+        // SSE stops until restart; say so rather than fail silently.
+        console.error(
+          "[dashboard] file watcher error:",
+          (e as Error).message,
+          "— restart the dashboard to resume live updates",
+        );
         try {
           w.close();
         } catch {
@@ -259,7 +265,11 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
     refreshSubdirs();
   });
   rootWatcher.on("error", (e) => {
-    console.error("[dashboard] root watcher error:", (e as Error).message);
+    console.error(
+      "[dashboard] root watcher error:",
+      (e as Error).message,
+      "— restart the dashboard to resume live updates",
+    );
     try {
       rootWatcher.close();
     } catch {
@@ -1888,15 +1898,18 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       exec(openCmd + " http://localhost:" + serverPort);
     }
   };
-  // N282 (A50) — a clear message + non-zero exit on a listen failure (e.g. the
+  // N282 (A50) — a clear message + non-zero exit on a BIND failure (e.g. the
   // port is already held), instead of an unhandled 'error' that vanishes.
+  // (#4) A post-listen accept error (EMFILE/ENFILE on accept) is logged, not
+  // fatal — only a pre-listen failure exits.
   server.on("error", (err: NodeJS.ErrnoException) => {
+    const bindFailed = !server.listening;
     console.error(
       err.code === "EADDRINUSE"
         ? `[dashboard] port ${serverPort} is already in use`
         : `[dashboard] server error: ${err.message}`,
     );
-    process.exit(1);
+    if (bindFailed) process.exit(1);
   });
   if (bindHost) server.listen(serverPort, bindHost, onListen);
   else server.listen(serverPort, onListen);

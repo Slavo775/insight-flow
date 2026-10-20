@@ -3,8 +3,8 @@
 ## Done criteria
 
 - [x] Both servers handle `listen` errors: master rejects the start promise + stderr message; dashboard `server.on("error")` prints + exits 1; both process handlers now `console.error` to stderr (A50)
-- [ ] DEFERRED: the dashboard starts the activity engine / hub integration only after `listen` succeeds — a start-order refactor; deferred with the A51 cluster below (A50)
-- [x] Every `fs.watch` has an `'error'` handler that closes it (dashboard recursive/root/subdir watchers + the activity-engine watcher; the 500 ms poll keeps the feed alive) (A50)
+- [ ] DEFERRED: the dashboard starts the activity engine / hub integration only after `listen` succeeds — a small start-order move (`activity.start()`, the seed loop and `setupMasterIntegration` into `onListen`), NOT coupled to the A51 registry cluster; tolerable today because the EADDRINUSE `error` fires on nextTick so `process.exit(1)` lands before the register fetch (A50)
+- [x] Every `fs.watch` has an `'error'` handler (dashboard recursive/root/subdir + the activity-engine watcher). The subdir watcher re-arms via `refreshSubdirs` and the activity feed survives via the 500 ms poll; the recursive and root watchers close for good and now log "restart the dashboard to resume live updates" (no re-arm) (A50)
 - [ ] DEFERRED: registry reconciles by path / duplicate names get distinct ids+tokens (A51a) — invasive registry refactor; `registry.upsert` is keyed on projectId across master-liveness's 20+ tests, so this needs its own task to avoid a risky broad change
 - [ ] DEFERRED: per-id liveness stream counter (A51b) — pairs with the registry refactor above
 - [ ] DEFERRED: port reservation for in-flight starts (A51c)

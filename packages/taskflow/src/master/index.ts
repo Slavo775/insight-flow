@@ -68,7 +68,11 @@ export async function runMaster(portOverride?: number): Promise<void> {
     for (const p of hubProjects) registry.seed(p.label, p.label, p.path);
   }
 
-  const { close } = await startMasterServer(config);
+  // N282 (review blocker 1) — on a bind failure startMasterServer prints the
+  // reason and rejects, but the `unhandledRejection` handler above only logs it
+  // and nothing holds the event loop, so the CLI would exit 0 ("success") on a
+  // busy port. Catch → exit non-zero so a script / the hub auto-start can tell.
+  const { close } = await startMasterServer(config).catch((): never => process.exit(1));
 
   // N218 — reverse handshake: the master (fresh start / restart) probes each
   // registered project's /health at its known port and marks the reachable ones
