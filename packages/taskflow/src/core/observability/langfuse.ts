@@ -184,7 +184,15 @@ export function resolveLangfuseCreds(config: TaskflowConfig): LangfuseCreds | nu
   const lf = parsed.success ? parsed.data.langfuse : undefined;
   const publicKey = lf?.publicKey || process.env.LANGFUSE_PUBLIC_KEY;
   const secretKey = lf?.secretKey || process.env.LANGFUSE_SECRET_KEY;
-  const baseUrl = lf?.host || process.env.LANGFUSE_HOST || process.env.LANGFUSE_BASEURL;
+  const envHost = process.env.LANGFUSE_HOST || process.env.LANGFUSE_BASEURL;
+  // N274 (A33) — never pair a config-supplied host with env-supplied keys: a
+  // cloned repo could set `observability.langfuse.host` to an attacker URL and,
+  // with the developer's LANGFUSE_* env vars present, exfiltrate the key + task
+  // data on every export. The config host is honored ONLY when BOTH keys also
+  // come from the config (same trust source); otherwise the host must come from
+  // the environment.
+  const keysFromConfig = Boolean(lf?.publicKey && lf?.secretKey);
+  const baseUrl = keysFromConfig ? lf?.host || envHost : envHost;
   if (!publicKey || !secretKey) return null;
   return { publicKey, secretKey, baseUrl };
 }

@@ -6,7 +6,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync, chmodSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -297,7 +297,10 @@ test("projects list and ?id= lookup", async () => {
   await withServer(async () => {
     let list = await (await api("/api/projects", "GET")).json();
     // N194 — two built-in flows now ship: `default` + `composer-authoring`.
-    const builtinIds = list.projects.filter((p) => p.source === "builtin").map((p) => p.id).sort();
+    const builtinIds = list.projects
+      .filter((p) => p.source === "builtin")
+      .map((p) => p.id)
+      .sort();
     assert.deepEqual(builtinIds, ["composer-authoring", "default"]);
     assert.ok(list.projects.find((p) => p.id === "default" && p.source === "builtin"));
 
@@ -703,10 +706,7 @@ test("flow install plan lists artifacts from agents + install (deduped)", async 
       assert.match(s.target, /\.mcp\.json|\.claude\//);
     }
     // unknown flow → 404
-    assert.equal(
-      (await api("/api/install-plan?kind=flow&id=custom%3Aghost", "GET")).status,
-      404,
-    );
+    assert.equal((await api("/api/install-plan?kind=flow&id=custom%3Aghost", "GET")).status, 404);
   });
 });
 
@@ -806,5 +806,36 @@ test("chains CRUD: validation, GET list, flow delete/edit guarded by chains", as
     // unwind
     assert.equal((await api("/api/chains/custom:ship", "DELETE")).status, 200);
     assert.equal((await api("/api/projects/custom:beta", "DELETE")).status, 200);
+  });
+});
+
+test("N284 (A63): invalid JSON → 400; a handler write failure → 500 (not conflated)", async () => {
+  await withServer(async (dir) => {
+    // Parse error → 400 "invalid JSON" (the parse half of the split).
+    const bad = await fetch(`http://127.0.0.1:${PORT}/api/modules`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{ not json",
+    });
+    assert.equal(bad.status, 400, "invalid JSON body → 400");
+    assert.match((await bad.json()).error, /invalid JSON/);
+
+    // Handler failure → 500 (NOT 400). Force an EACCES by making the user-space
+    // modules dir read-only, then creating a new module. Skipped when the write
+    // still succeeds (e.g. running as root, which bypasses perms).
+    assert.ok((await api("/api/modules", "POST", MODULE)).status < 300, "seed one module");
+    const modDir = resolve(dir, "insightFlow/modules");
+    chmodSync(modDir, 0o555);
+    try {
+      const r = await api("/api/modules", "POST", { ...MODULE, id: "custom:greeting2" });
+      if (r.status === 200) {
+        console.log("  (skipped 500 assertion — the read-only dir did not block the write)");
+      } else {
+        assert.equal(r.status, 500, "a write failure is a 500, not a 400");
+        assert.doesNotMatch((await r.json()).error, /invalid JSON/, "not reported as invalid JSON");
+      }
+    } finally {
+      chmodSync(modDir, 0o755); // restore so cleanup can remove the dir
+    }
   });
 });

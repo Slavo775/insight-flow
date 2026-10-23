@@ -55,11 +55,12 @@ export class SseTransport implements Transport {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (req.method !== "GET" || url.pathname !== this.path) return false;
 
+    // N272 — no `Access-Control-Allow-Origin`: the stream is same-origin (the
+    // SPA, or the hub proxy) and must not be readable cross-origin by a website.
     res.writeHead(200, {
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
-      "Access-Control-Allow-Origin": "*",
       "X-Accel-Buffering": "no",
     });
     res.write("retry: 1000\n\n");

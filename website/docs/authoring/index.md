@@ -108,5 +108,7 @@ Open a fresh session so the subagents load, then start with
 
 - [Walkthrough](./walkthrough.md) — install → analyze → … → install, with a
   worked example (author a custom module).
+- [Prompt cookbook](./prompt-templates.md) — copy-paste analyze prompts for a
+  module, an agent, or a flow (with handovers).
 - [Agents & subagents reference](./agents-and-subagents.md) — what each agent and
   subagent does (and doesn't).

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
+import { mdSanitizeSchema } from "./sanitize";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { readingTheme } from "./theme.js";
@@ -75,10 +76,14 @@ function Info({ task }: { task: Task }) {
       </dd>
       <dt>PR</dt>
       <dd>
-        {task.mrUrl ? (
+        {task.mrUrl && /^https?:\/\//i.test(task.mrUrl) ? (
+          // N274 (A39) — only render http(s) as a clickable link; anything else
+          // (e.g. a `javascript:` value written into the task) shows as text.
           <a href={task.mrUrl} target="_blank" rel="noopener noreferrer">
             {task.mrUrl}
           </a>
+        ) : task.mrUrl ? (
+          <span>{task.mrUrl}</span>
         ) : (
           <span className="muted">—</span>
         )}
@@ -302,7 +307,7 @@ function DocViewer({ folder }: { folder: string }) {
         <div className="empty">Failed to load {active}.md.</div>
       ) : (
         <div className="markdown-body">
-          <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+          <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[[rehypeSanitize, mdSanitizeSchema]]}>
             {content || ""}
           </Markdown>
         </div>

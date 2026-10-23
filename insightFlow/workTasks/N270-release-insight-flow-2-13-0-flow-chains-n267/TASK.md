@@ -20,6 +20,14 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 
 **Verdict: NOT ready — small docs fixes only.** Tests **391/391**, typecheck clean, `pnpm --dir website build` OK with no link/anchor warnings. Intent unchanged: feature → **2.13.0**, no breaking change (`85a779f` changes only help text in code). All 13 first-round docs gaps are closed. The re-audit found factual slips in the new and existing text — listed in CHECKLIST "Docs gaps — re-check 2". The worst: the CLI example runs `chain-advance` after `done`, where the example chain has no link, so the command fails.
 
+### Re-check 3 (2026-10-24 — combined scope: + audit fixes N271–N284)
+
+**Verdict: NOT ready — one docs blocker (audit fixes); no code or test blockers.** Human confirmed the scope: 2.13.0 now ships flow-chains (N267) **and** the audit security/reliability fixes (N271–N284) together, from branch `chore/N271-audit-fixes` (PR **#175**, stacked on `feat/N267-flow-chains` / PR #174). Re-check on the combined branch:
+
+- **Tests: PASS.** Build + typecheck clean, **430/430** pass, no flakes.
+- **Intent: feature → 2.13.0 (minor).** Still minor — the only `feat` is flow-chains; all 14 audit fixes are `fix`, no `!` / `BREAKING CHANGE`. But the audit fixes add user-observable behaviour changes that need an "upgrade notes" section (see CHECKLIST "Release notes — behaviour changes"), and a human call on whether the three "previously-valid config now fails" items (trust-hooks gate, config confinement, override-baseline refusal) warrant a major — strictly by the commit markers they do not.
+- **Docs: NOT complete — 1 blocker + 1 nice-to-have (audit fixes).** Flow-chains docs stay complete (re-check 2 example confirmed fixed); LAN/trust-hosts/127.0.0.1/X-Forwarded-Host docs complete. New gaps: `insight-flow trust-hooks` is undocumented and the `events.hooks` docs describe pre-N274 behaviour; the composer MCP `install` confirm-gate signature is stale. See CHECKLIST "Docs gaps — audit fixes".
+
 ## Goal
 
 1. Close every docs gap from the release check (Docusaurus + README + CLI help text), on the feature branch `feat/N267-flow-chains` so they ship in PR #174.
@@ -27,6 +35,8 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 3. Merge PR #174 into `main` (squash; title `feat(flows): …` keeps the minor bump) → release-please opens the 2.13.0 release PR.
 4. Merge the release PR (human-approved) → tag `v2.13.0` + npm publish (npm-publish env approval).
 5. Roll out: reinstall the global binary; record N267 merged + done on `main`.
+
+**Combined scope (2026-10-24):** the audit-fix docs gaps (trust-hooks + composer install) are fixed on `chore/N271-audit-fixes` (PR #175) so they ship with the fixes; flow-chains docs already shipped on PR #174. Merge order follows the stack — #174 to `main` first, then retarget #175 to `main` — before the release-please 2.13.0 PR is cut. The merge agent owns that sequencing.
 
 ## Scope
 
@@ -59,6 +69,21 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 - `node packages/taskflow/dist/cli.js help | grep chain-advance` shows `[--by <agent>]` after a build.
 - Release check re-run → docs auditor reports complete → `ready-to-release`.
 - After publish: `npm view insight-flow version` → `2.13.0`; tag `v2.13.0` exists.
+
+## Release notes (draft — for the 2.13.0 release PR body, from task-release-fix 2026-10-24)
+
+### Upgrade notes / behaviour changes
+
+- **`events.hooks` now require approval.** Configured hook commands no longer run automatically — review and approve them per project with `insight-flow trust-hooks --yes`. Any edit to the hook set invalidates approval and must be re-approved; until then the commands are skipped and a stderr notice is printed.
+- **Config paths are confined to the project root and `master.url` must be `http(s)`.** Off-root paths or a non-`http(s)` `master.url` now abort config load and `insight-flow init` instead of being silently accepted.
+- **A built-in agent override can no longer drop the locked baseline.** An override that would strip the locked security / enforcement / protocol modules is refused at write time.
+- **Composer `install` is now two-step for executable targets.** A target that emits a hook or MCP server returns `{ needsConfirm: true, … }` and writes nothing until you re-call with `confirm: true` after a human has seen the plan.
+- **Dashboard hardening.** Request bodies are now capped by byte size, and an unknown `/api/*` route returns a JSON `404` (previously it served the `200` SPA shell).
+- **`mr-update` accepts only `http(s)` URLs.** Other schemes are rejected.
+- **`insight-flow master` exits non-zero on a busy port** instead of appearing to start.
+- **The hub service-worker cache is version-stamped**, so a release invalidates the previously cached asset rather than serving a stale one.
+
+> Human sign-off still open: whether the first three items (trust-hooks gate, config confinement, override-baseline refusal) warrant a **major**. By the commit markers they do not → ship as **2.13.0**.
 
 ## Notes
 

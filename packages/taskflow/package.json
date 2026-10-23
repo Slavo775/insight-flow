@@ -19,6 +19,7 @@
     "schema",
     "templates",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
@@ -35,21 +36,30 @@
     "test": "pnpm run build && pnpm run test:node",
     "test:node": "node --test --test-concurrency=1 test/*.test.mjs",
     "sync-roles": "node scripts/sync-role-templates.mjs",
-    "prepublishOnly": "npm run sync-roles && npm run build && npm run typecheck"
+    "prepublishOnly": "npm run sync-roles && npm run typecheck"
   },
   "devDependencies": {
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "@xyflow/react": "^12.11.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.6.0",
     "prettier": "^3.8.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^9.1.0",
+    "react-router-dom": "^6.30.6",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "styled-components": "^6.4.2",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.60.1",
-    "vite": "^5.4.21"
+    "vite": "^5.4.21",
+    "zustand": "^5.0.14"
   },
   "engines": {
     "node": ">=18"
@@ -86,16 +96,7 @@
     }
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "@xyflow/react": "^12.11.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-markdown": "^9.1.0",
-    "react-router-dom": "^6.30.4",
-    "rehype-sanitize": "^6.0.0",
-    "remark-gfm": "^4.0.1",
-    "styled-components": "^6.4.2",
-    "zod": "^4.4.3",
-    "zustand": "^5.0.14"
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^4.4.3"
   }
 }

@@ -219,6 +219,7 @@ insight-flow migrate                            # Migrate from a legacy tracker.
 insight-flow migrate-layout [--dry-run] [--fix-strays]  # Move workTasks/ + .events into the consolidated insightFlow/ root (idempotent)
 insight-flow migrate-reviews                    # Split inline reviews/incidents into per-task side files (run once after upgrade)
 insight-flow migrate-hooks [--bin <path>]       # Refresh hook scripts after upgrading the package (idempotent)
+insight-flow trust-hooks [--yes] [--force]      # Review & approve this project's events.hooks; --yes approves, --force re-reviews
 insight-flow prompt-build                       # Preview AGENT_ENFORCEMENT.md block (dry run)
 insight-flow prompt-build --apply               # Write AGENT_ENFORCEMENT.md + patch role files
 insight-flow update                             # Update the global install (npm i -g insight-flow@latest), then list hub projects to bump
@@ -631,6 +632,8 @@ Example — run a script when any task starts and send a desktop notification wh
   }
 }
 ```
+
+Because these are arbitrary shell commands committed with the repo, they will **not fire** until a human reviews and approves them with `insight-flow trust-hooks --yes`. Any edit to `events.hooks` invalidates the approval and must be re-approved. Until approved, insight-flow skips the commands and prints a stderr notice.
 
 ### Project layer (agents · flow · install)
 

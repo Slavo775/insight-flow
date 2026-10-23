@@ -23,6 +23,7 @@ import { EVENT_TYPES, CLAUDE_HOOK_EVENT_TYPES } from "../../core/types.js";
 import { EventsFileSchema } from "../../core/schema/index.js";
 import { getWorkDir, getEventsDir, getMasterPath } from "../../core/config.js";
 import { resolveProjectRoot } from "../../core/paths.js";
+import { isHooksTrusted } from "../../core/trusted-hooks.js";
 import { readServerPortPointer } from "../../core/global-config.js";
 
 const INSIGHT_FLOW_DIR = resolve(homedir(), ".insight-flow");
@@ -71,7 +72,14 @@ function appendToActivityLog(config: TaskflowConfig, entry: Record<string, unkno
 }
 
 function getSessionId(opts: ParsedArgs): string | null {
-  return (opts["session-id"] as string | undefined) ?? process.env["CLAUDE_SESSION_ID"] ?? null;
+  const raw =
+    (opts["session-id"] as string | undefined) ?? process.env["CLAUDE_SESSION_ID"] ?? null;
+  // N274 (A81) — the session id is spliced into `~/.insight-flow/session-<id>.active`
+  // and `events-<id>.jsonl` paths. It comes from an editor (Claude Code / Cursor),
+  // so allow only a safe token; anything with `/`, `..` or odd characters is
+  // dropped (treated as "no session") rather than escaping the directory.
+  if (raw && /^[A-Za-z0-9_-]{1,128}$/.test(raw)) return raw;
+  return null;
 }
 
 /**
@@ -331,15 +339,32 @@ export function cmdLogEvent(config: TaskflowConfig, opts: ParsedArgs): void {
   // Print to stdout
   process.stdout.write(JSON.stringify({ event: eventType, taskId: taskId ?? null, ts }) + "\n");
 
-  // Fire configured hooks (detached, fire-and-forget)
+  // Fire configured hooks (detached, fire-and-forget) — N274 (A13): only when
+  // the human has approved this project's exact hook set via `trust-hooks`. A
+  // cloned repo's committed `events.hooks` therefore cannot run shell commands
+  // until the user has seen and approved them.
   const hooks = config.events?.hooks?.[eventType as (typeof EVENT_TYPES)[number]];
   if (hooks?.length) {
-    for (const cmd of hooks) {
-      try {
-        const child = spawn("sh", ["-c", cmd], { detached: true, stdio: "ignore" });
-        child.unref();
-      } catch {
-        // fire-and-forget
+    const allHooks = (config.events?.hooks ?? {}) as Record<string, string[]>;
+    let root: string | null = null;
+    try {
+      root = resolveProjectRoot();
+    } catch {
+      root = null;
+    }
+    if (!root || !isHooksTrusted(root, allHooks)) {
+      process.stderr.write(
+        "insight-flow: events.hooks are not trusted for this project — " +
+          "run `insight-flow trust-hooks` to review and approve them\n",
+      );
+    } else {
+      for (const cmd of hooks) {
+        try {
+          const child = spawn("sh", ["-c", cmd], { detached: true, stdio: "ignore" });
+          child.unref();
+        } catch {
+          // fire-and-forget
+        }
       }
     }
   }

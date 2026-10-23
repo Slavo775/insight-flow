@@ -165,6 +165,12 @@ stays inert. Keep secrets in env so they never land in committed config — see
 `events.hooks` maps an event type (e.g. `done`) to an array of commands. Use it
 to fan task lifecycle events out to your own tooling.
 
+These commands are arbitrary shell and the config is committed, so they **do not
+run until a human approves them** with `insight-flow trust-hooks` (see
+[Events & Hooks](./cli/events-and-hooks.md)). Any edit to `events.hooks`
+invalidates the approval and must be re-approved. Until then the commands are
+skipped and insight-flow prints a stderr notice.
+
 ---
 
 ## `flows` — task → flow binding

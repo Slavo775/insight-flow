@@ -89,13 +89,26 @@ remove its emitted artifacts instead, use `uninstall`.
 
 ## Install / uninstall
 
-### `install(kind, id, force?)`
+### `install(kind, id, force?, confirm?, values?)`
 
 Emit the target's artifacts into the project: MCP servers → `.mcp.json`, hooks →
 `.claude/settings.json`, skills/commands → `.claude/`. Set `force: true` to
 overwrite a conflicting `.mcp.json` entry — the prior value is snapshotted so a
 later `uninstall` can restore it. Without `force`, a genuine conflict returns the
 installed-vs-incoming diff.
+
+**Two-step confirm for executable artifacts.** A target whose plan emits a **hook**
+or an **MCP server** persists a shell command / server into `.claude/settings.json`
+or `.mcp.json` that will run in the user's *future* Claude sessions. For such
+targets `install` first returns `{ needsConfirm: true, kind, id, plan, missingInputs }`
+and writes **nothing**; re-call with `confirm: true` — after a human has seen the
+plan — to actually apply it. This stops a prompt-injected agent from silently
+persisting a shell hook or MCP server. Targets that emit no hook / MCP server
+(e.g. skills, commands) apply directly, no confirm needed.
+
+Pass `values` to supply any `${VAR}` inputs the plan needs (or store them
+beforehand); inputs still missing come back in `missingInputs` so you can gather
+them before confirming.
 
 ### `uninstall(kind, id)`
 

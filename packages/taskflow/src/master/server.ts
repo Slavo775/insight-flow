@@ -27,7 +27,20 @@ import { resolvePackageAsset } from "../core/paths.js";
 import { appendLog, readMerged, countByLevel } from "../core/log-store.js";
 import { LogInputSchema } from "../core/schema/index.js";
 import { SseTransport } from "../core/transport.js";
-import { sendJson, readBody, escHtml, serveStaticFile, MIME_HTML } from "../core/http-util.js";
+import {
+  sendJson,
+  readBody,
+  escHtml,
+  serveStaticFile,
+  MIME_HTML,
+  isLoopbackHost,
+  isLoopbackUrl,
+  isHostTrusted,
+  isTrustedLocalRequest,
+  isTrustedActionRequest,
+  isTopLevelNavigation,
+  listenHost,
+} from "../core/http-util.js";
 
 /**
  * N242 — the shared debug-log write path. Resolves the project from the log key
@@ -218,7 +231,13 @@ function getOverviewShell(): string {
  * `/api/*`, `/events` — are NEVER cached (always network). Old caches are pruned
  * on activate.
  */
-const MASTER_SW_JS = `var CACHE = 'if-hub-v3';
+// N282 (A23) — `__IF_CACHE__` is replaced at serve time with a version-stamped
+// cache name (`if-hub-<pkg version>`), so a release that changes hub-notify.js
+// or the shell invalidates the old cache instead of serving the stale copy
+// forever (the name was a fixed `if-hub-v3`, last bumped before hub-notify.js
+// existed). The SW script itself is served no-cache, so the new name takes
+// effect on the next load.
+const MASTER_SW_JS = `var CACHE = '__IF_CACHE__';
 var SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-maskable.svg', '/sounds/idle-ping.mp3', '/sounds/permission-alert.mp3'];
 self.addEventListener('install', function(e){
   self.skipWaiting();
@@ -241,8 +260,12 @@ self.addEventListener('fetch', function(e){
     // Shell: fresh when online, cached shell when offline.
     e.respondWith(
       fetch(e.request).then(function(res){
-        // Only cache an OK shell — never let a 404/500 poison the offline shell.
-        if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put('/', copy); }); }
+        // Only cache an OK *HTML* shell under '/'. N282 (A79): a URL-bar
+        // navigation to a non-HTML path (e.g. /sw.js, /sounds/x.mp3) is also
+        // mode:navigate and 200, and would otherwise overwrite the offline
+        // shell with that body. Guard on content-type.
+        var ct = res && res.headers ? (res.headers.get('content-type') || '') : '';
+        if (res && res.ok && ct.indexOf('text/html') === 0) { var copy = res.clone(); caches.open(CACHE).then(function(c){ c.put('/', copy); }); }
         return res;
       }).catch(function(){ return caches.match('/'); })
     );
@@ -333,123 +356,12 @@ const ICON_MASKABLE_SVG =
   '<circle cx="336" cy="352" r="44" fill="#a855f7"/>' +
   "</g></svg>";
 
-/**
- * N212 — a project dashboard always runs locally, so the proxy only ever targets
- * loopback. Refusing anything else keeps the master (which binds all interfaces
- * and whose `/api/register` is open) from being turned into an SSRF / open proxy
- * to arbitrary registrant-supplied URLs.
- */
-const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
-
-/** True if the host is loopback. Shared by the proxy (N212) and the health
- *  probe (N214) so a registrant-controlled url can never point either at a
- *  non-local host (SSRF / open-proxy). */
-function isLoopbackHost(hostname: string): boolean {
-  return LOOPBACK_HOSTS.has(hostname);
-}
-function isLoopbackUrl(u: string): boolean {
-  try {
-    return isLoopbackHost(new URL(u).hostname);
-  } catch {
-    return false;
-  }
-}
-
-/** The hostname of a `Host` (host:port) or `Origin` (scheme://host:port) header
- *  value, or "" if unparseable. */
-function headerHost(value: string | undefined): string {
-  if (!value) return "";
-  try {
-    return new URL(value.includes("://") ? value : "http://" + value).hostname;
-  } catch {
-    return "";
-  }
-}
-
-/**
- * N223 — extra hosts the user has *explicitly* allowlisted for the hub
- * control-plane (their LAN IP / hostname), so the installable PWA works over the
- * LAN / on mobile. Read from `INSIGHT_FLOW_TRUSTED_HOSTS` (comma-separated, each
- * a bare host or `host:port`, IP or hostname), normalized to a hostname via
- * `headerHost`. Parsed per-request (cheap; gated endpoints are user-frequency)
- * so it stays honest under tests that set/restore the env. Empty/unset ⇒ empty
- * set ⇒ localhost-only, exactly as before N223.
- */
-function trustedHostSet(): Set<string> {
-  const set = new Set<string>();
-  const raw = process.env.INSIGHT_FLOW_TRUSTED_HOSTS;
-  if (!raw) return set;
-  for (const part of raw.split(",")) {
-    const h = headerHost(part.trim());
-    if (h) set.add(h);
-  }
-  return set;
-}
-
-/** True if the host is loopback OR an explicitly-allowlisted trusted host (N223).
- *  Loopback is always trusted regardless of the env. */
-function isTrustedHost(hostname: string, trusted: Set<string>): boolean {
-  return isLoopbackHost(hostname) || trusted.has(hostname);
-}
-
-/**
- * N221 review-fix — is this a trusted, same-machine same-origin request to a
- * sensitive local endpoint (folder listing / project creation / start)? The
- * server binds all interfaces and sets `Access-Control-Allow-Origin: *`, so a
- * loopback `remoteAddress` alone does NOT keep a remote website out. A request
- * is trusted only if:
- *   - its `Host` header host is loopback (or an N223-allowlisted host) — this
- *     defeats **DNS rebinding**, where the socket lands on 127.0.0.1 but the
- *     browser sends the attacker's hostname in `Host`;
- *   - it carries no cross-origin `Origin` (a cross-origin browser fetch sends an
- *     `Origin` whose host is not loopback/allowlisted); and
- *   - its `Sec-Fetch-Site`, if present, is `same-origin`/`none` (not cross-site).
- * The hub page itself sends a loopback (or allowlisted) Host + same-origin
- * Origin, so it passes. N223: the allowlist only *widens* the trusted host set
- * to hosts the user named — a cross-origin attacker's Origin is still rejected,
- * and a rebound request still carries the attacker's own hostname (not the
- * allowlisted LAN IP), so neither CSRF nor DNS rebinding is reopened.
- */
-function isTrustedLocalRequest(req: IncomingMessage): boolean {
-  const trusted = trustedHostSet();
-  if (!isTrustedHost(headerHost(req.headers.host), trusted)) return false;
-  const origin = req.headers.origin;
-  if (origin && !isTrustedHost(headerHost(origin), trusted)) return false;
-  const site = req.headers["sec-fetch-site"];
-  if (site && site !== "same-origin" && site !== "none") return false;
-  return true;
-}
-
-/** Socket peer addresses that count as the local machine. Distinct from
- *  `LOOPBACK_HOSTS` (which are `Host`-header hostnames a client can forge):
- *  `req.socket.remoteAddress` is the real TCP peer and cannot be spoofed over
- *  the network. */
-const LOOPBACK_PEERS = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
-
-/**
- * N223 review-fix (round 2) — the gate for the LAN-reachable **write/exec**
- * endpoints (`/api/fs/list`, `/api/projects/create`, `/api/hub/projects/:id/start`).
- * `isTrustedLocalRequest` is decided purely from headers, so a non-browser LAN
- * client (curl / script) could forge `Host: 127.0.0.1` (no Origin, no
- * Sec-Fetch-Site) and pass it — that would make these filesystem-write / exec
- * endpoints reachable from the network even with the env **unset**. So we keep a
- * peer-IP defense-in-depth on top of the header trust check:
- *   - the Host/Origin/Sec-Fetch checks must pass (defeats browser DNS-rebinding + CSRF);
- *   - a **loopback socket peer** is always allowed (the local machine);
- *   - a **non-loopback peer** is allowed ONLY when the request targets a host the
- *     user *explicitly* allowlisted (`INSIGHT_FLOW_TRUSTED_HOSTS`) — the loopback
- *     shortcut in `isTrustedHost` does NOT count here, so a forged loopback `Host`
- *     from the LAN is rejected.
- * Env unset ⇒ empty allowlist ⇒ every non-loopback peer is rejected ⇒ genuinely
- * localhost-only for all client types, exactly as before N223. Env set ⇒ a real
- * allowlisted LAN host (the PWA on a phone) passes — the accepted N223 trust boundary.
- */
-export function isTrustedActionRequest(req: IncomingMessage): boolean {
-  if (!isTrustedLocalRequest(req)) return false;
-  const remote = req.socket.remoteAddress ?? "";
-  if (LOOPBACK_PEERS.has(remote)) return true;
-  return trustedHostSet().has(headerHost(req.headers.host));
-}
+// N272 — the localhost trust helpers (loopback/host checks, the N223
+// `INSIGHT_FLOW_TRUSTED_HOSTS` allowlist, and the request gates) now live in
+// `core/http-util.ts` so the dashboard server applies the identical gate. They
+// are imported at the top of this file. `isTrustedActionRequest` is re-exported
+// to keep the public API (`index.ts` → tests) unchanged.
+export { isTrustedActionRequest };
 
 /** Hop-by-hop headers must not be forwarded by a proxy (RFC 7230 §6.1). */
 const HOP_BY_HOP = new Set([
@@ -464,6 +376,15 @@ const HOP_BY_HOP = new Set([
 ]);
 
 function stripHopByHop<T extends Record<string, unknown>>(headers: T): T {
+  // N282 (A52) — also drop every header named inside the `Connection` value
+  // (RFC 7230 §6.1), not just the fixed list, before deleting `connection`.
+  const conn = headers["connection"];
+  if (typeof conn === "string") {
+    for (const token of conn.split(",")) {
+      const name = token.trim().toLowerCase();
+      if (name) delete headers[name];
+    }
+  }
   for (const key of Object.keys(headers)) {
     if (HOP_BY_HOP.has(key.toLowerCase())) delete headers[key];
   }
@@ -472,15 +393,19 @@ function stripHopByHop<T extends Record<string, unknown>>(headers: T): T {
 
 /** N218 — the preferred port if the OS has it free, else the next free one.
  *  Avoids spawning a dashboard onto a port an unrelated app already holds.
- *  Binds with NO host — the same all-interfaces (dual-stack) bind the dashboard
- *  itself uses — so a port that's busy on IPv6 isn't wrongly seen as free. */
+ *  N272 fix (review blocker 2): probe on the SAME host the spawned dashboard
+ *  binds (`listenHost()` — 127.0.0.1 by default). A wildcard probe would, on
+ *  macOS/BSD with SO_REUSEADDR, report a port already held by a 127.0.0.1-bound
+ *  listener as free, so the spawned `ui --port p` then hits EADDRINUSE. */
 async function findFreePort(preferred: number): Promise<number> {
+  const host = listenHost();
   const isFree = (p: number): Promise<boolean> =>
     new Promise((res) => {
       const srv = netCreateServer();
       srv.once("error", () => res(false));
       srv.once("listening", () => srv.close(() => res(true)));
-      srv.listen(p);
+      if (host) srv.listen(p, host);
+      else srv.listen(p);
     });
   let p = preferred;
   for (let i = 0; i < 50; i++) {
@@ -565,18 +490,29 @@ function proxyToProject(
   onUpstreamFail?: (reason: "timeout" | "error") => void,
 ): void {
   let target: URL;
+  let base: URL;
   try {
-    target = new URL(rest || "/", targetBase);
+    base = new URL(targetBase);
+    target = new URL(rest || "/", base);
   } catch {
     sendJson(res, 502, { error: "bad proxy target" });
     return;
   }
-  // SSRF guard: only ever proxy to a local dashboard (see LOOPBACK_HOSTS note).
-  if (!isLoopbackHost(target.hostname)) {
-    sendJson(res, 403, { error: "proxy target must be loopback" });
+  // N272 — pin the proxy to the registered project's exact origin. `rest` comes
+  // from the client (`/project/<id>/<rest>`); a `rest` starting `//host:port/…`
+  // (or `\\…`) is a protocol-relative URL that `new URL(rest, base)` resolves to
+  // ANY host:port — incl. the hub itself — turning this into an open proxy that
+  // bypasses every gate. The old loopback-only check still passed that, so also
+  // require the resolved origin to equal the project's. (The loopback check is
+  // kept too, since `targetBase` itself is always a registered loopback url.)
+  if (target.origin !== base.origin || !isLoopbackHost(target.hostname)) {
+    sendJson(res, 403, { error: "proxy target must be the project origin" });
     return;
   }
   const headers = stripHopByHop({ ...req.headers });
+  // N272 — preserve the caller's original Host for the dashboard's own Host gate
+  // before dropping it (the upstream request defaults Host to the target).
+  if (req.headers.host) headers["x-forwarded-host"] = req.headers.host;
   delete headers.host; // let the request default to the target host
   delete headers["accept-encoding"]; // avoid compressed bodies we might rewrite
 
@@ -813,10 +749,10 @@ export async function startMasterServer(
 
   server.on("request", async (req, res) => {
     try {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
+      // N272 — no `Access-Control-Allow-Origin`: the hub is same-origin (its own
+      // page + hub-notify) and the project proxy serves same-origin assets, so
+      // nothing legitimately reads the hub cross-origin. A stray preflight still
+      // gets a 204 (and, lacking ACAO, the browser then blocks the real request).
       if (req.method === "OPTIONS") {
         res.writeHead(204);
         res.end();
@@ -843,6 +779,27 @@ export async function startMasterServer(
         // socket, defeating the gate. They are never meant for a browser.
         if (restPath === "/hub" || restPath.startsWith("/hub/")) {
           sendJson(res, 404, { error: "Not found" });
+          return;
+        }
+        // N272 — gate the proxy itself. It forwards to the project's loopback
+        // dashboard from the hub's own loopback socket, so the dashboard sees a
+        // loopback peer and can't distinguish a LAN/cross-site caller. Apply the
+        // hub's own trust check here: reads need a trusted local request, writes
+        // need the peer-checked action gate. Without this, `//host` aside, any
+        // LAN peer or rebinding page reaches every project write route (install,
+        // task-flow, …) through the proxy. The dashboard also re-checks via the
+        // forwarded Host (see proxyToProject).
+        const pmethod = req.method ?? "GET";
+        // N272 fix (review #4): a GET is OK if it is same-origin, OR a top-level
+        // navigation to a trusted Host (clicking a `/project/<id>/` deep link from
+        // another site is a read the other site can't observe — don't 403 it).
+        // Non-GET still needs the full peer-checked action gate.
+        const proxyOk =
+          pmethod === "GET" || pmethod === "HEAD"
+            ? isTrustedLocalRequest(req) || (isHostTrusted(req) && isTopLevelNavigation(req))
+            : isTrustedActionRequest(req);
+        if (!proxyOk) {
+          sendJson(res, 403, { error: "forbidden" });
           return;
         }
         const entry = registry.getByProjectId(pid) ?? registry.getById(pid);
@@ -878,6 +835,13 @@ export async function startMasterServer(
       // and any bookmarks keep working after the rename.
       const legacyMatch = /^\/p\/([^/]+)(\/.*)?$/.exec(url.pathname);
       if (legacyMatch) {
+        // N272 fix (review #2): gate this like /project/* so a rebinding/cross-
+        // site page cannot follow the 301 and learn the registry-uuid→projectId
+        // mapping from the Location. A real bookmark/deep link is a navigation.
+        if (!(isTrustedLocalRequest(req) || (isHostTrusted(req) && isTopLevelNavigation(req)))) {
+          sendJson(res, 403, { error: "forbidden" });
+          return;
+        }
         const pid = decodeURIComponent(legacyMatch[1]);
         const restPath = legacyMatch[2] ?? "/";
         // Never redirect (or reveal) control-plane routes — mirror the /project/
@@ -905,8 +869,9 @@ export async function startMasterServer(
       if (req.method === "GET" && url.pathname === "/api/version") {
         // Same-origin only — the hub client fetches this same-origin; gating
         // keeps a cross-origin page from reading the installed version (matches
-        // the other /api reads). N251.
-        if (!isTrustedLocalRequest(req)) {
+        // the other /api reads). N251. N272 — peer-checked action gate so a LAN
+        // curl forging `Host: localhost` is rejected (env unset ⇒ localhost-only).
+        if (!isTrustedActionRequest(req)) {
           res.writeHead(403);
           res.end();
           return;
@@ -921,6 +886,14 @@ export async function startMasterServer(
       }
 
       // GET /events — SSE stream for overview clients (N83 → N254: shared SseTransport).
+      // N272 — gate before handing off: the stream leaks every project's id,
+      // label, current task and status, so a website must not be able to open
+      // `new EventSource("http://localhost:6100/events")`. Same-origin hub page
+      // and hub-notify pass; a cross-origin / rebinding request is refused.
+      if (req.method === "GET" && url.pathname === "/events" && !isTrustedLocalRequest(req)) {
+        sendJson(res, 403, { error: "forbidden" });
+        return;
+      }
       if (transport.handleRequest(req, res)) return;
 
       // POST /api/register
@@ -955,10 +928,14 @@ export async function startMasterServer(
           sendJson(res, 400, { error: "Invalid JSON" });
           return;
         }
-        const label = String(parsed.label ?? "unknown");
+        const label = String(parsed.label ?? "unknown").slice(0, 200);
         const projectUrl = String(parsed.url ?? "");
-        const projectId = String(parsed.projectId ?? parsed.label ?? "unknown");
+        const projectId = String(parsed.projectId ?? parsed.label ?? "unknown").slice(0, 200);
         const path = typeof parsed.path === "string" ? parsed.path : undefined;
+        // N282 (A52) — cap label/projectId lengths (above). The registrant url is
+        // NOT rejected here: the proxy and the health probe already refuse a
+        // non-loopback url (the single enforcement point), and master-proxy's
+        // SSRF test deliberately registers one to exercise that guard.
         // N243 — log the registration handshake (master side), before minting the code.
         recordLog("master", {
           type: "info",
@@ -1016,7 +993,8 @@ export async function startMasterServer(
       // (Under /api/ so it doesn't collide with the /logs page shell — N244.)
       // ?project=<name>|master|all (default all) &type=error|warning|info &page= &pageSize=
       if (req.method === "GET" && url.pathname === "/api/logs") {
-        if (!isTrustedLocalRequest(req)) {
+        // N272 — debug logs expose absolute project paths + stacks; peer-checked.
+        if (!isTrustedActionRequest(req)) {
           sendJson(res, 403, { error: "request refused" });
           return;
         }
@@ -1120,6 +1098,13 @@ export async function startMasterServer(
       // GET /api/activity/:projectId — last 3 activity events for a project
       const activityMatch = /^\/api\/activity\/([^/]+)$/.exec(url.pathname);
       if (req.method === "GET" && activityMatch) {
+        // N272 — gate: this returns a project's recent activity (task titles,
+        // tool lines) keyed by the UUID that `/events` used to leak. Trusted
+        // local reads only.
+        if (!isTrustedLocalRequest(req)) {
+          sendJson(res, 403, { error: "forbidden" });
+          return;
+        }
         const id = activityMatch[1];
         const entry = registry.getById(id);
         if (!entry) {
@@ -1327,9 +1312,9 @@ export async function startMasterServer(
       // N214 — GET /api/hub/projects — the registered projects + live status
       // (id, label, url, online, lastSeenAt). Consumed by the switcher (N215).
       if (req.method === "GET" && url.pathname === "/api/hub/projects") {
-        // N221 review-fix — same-origin only; ACAO:* would otherwise let any
-        // website read the project list (names + activity state).
-        if (!isTrustedLocalRequest(req)) {
+        // N221 review-fix — same-origin only; a cross-origin page must not read
+        // the project list (names + activity state). N272 — peer-checked.
+        if (!isTrustedActionRequest(req)) {
           sendJson(res, 403, { error: "request refused" });
           return;
         }
@@ -1380,8 +1365,8 @@ export async function startMasterServer(
       // refresh) — there is no background timer.
       if (req.method === "POST" && url.pathname === "/api/hub/refresh") {
         // N221 review-fix — same-origin only, so a website can't trigger the
-        // health-probe sweep / read the returned list.
-        if (!isTrustedLocalRequest(req)) {
+        // health-probe sweep / read the returned list. N272 — peer-checked.
+        if (!isTrustedActionRequest(req)) {
           sendJson(res, 403, { error: "request refused" });
           return;
         }
@@ -1515,7 +1500,10 @@ export async function startMasterServer(
           "Service-Worker-Allowed": "/",
           "Cache-Control": "no-cache",
         });
-        res.end(MASTER_SW_JS);
+        // N282 (A23) — stamp the cache name with the package version.
+        // N282 (#5) — a replacer FUNCTION so `$`-patterns in the version (however
+        // unlikely from package.json) are never interpreted as replacement specials.
+        res.end(MASTER_SW_JS.replace("__IF_CACHE__", () => "if-hub-" + currentVersion()));
         return;
       }
 
@@ -1581,15 +1569,52 @@ export async function startMasterServer(
       }
 
       sendJson(res, 404, { error: "Not found" });
-    } catch {
+    } catch (err) {
       if (!res.headersSent) {
         sendJson(res, 500, { error: "Internal server error" });
+      } else {
+        // N282 (A52) — a throw mid-stream (headers already sent) can't send a
+        // body; close the socket instead of leaking it, and log the cause.
+        recordLog("master", {
+          type: "error",
+          message: "request handler threw after headers sent",
+          data: { error: err instanceof Error ? err.message : String(err) },
+        });
+        res.destroy();
       }
     }
   });
 
-  await new Promise<void>((resolve) => {
-    server.listen(config.port, () => resolve());
+  // N272 — bind loopback only (127.0.0.1) by default; all interfaces only when
+  // the user opted into LAN access via INSIGHT_FLOW_TRUSTED_HOSTS. Keeps the hub
+  // (proxy, /events, write routes) off the LAN unless explicitly allowed.
+  // N282 (A50) — reject (don't hang) on a listen error; EADDRINUSE gets a clear
+  // message instead of a silent exit / a never-settling promise for in-process
+  // callers (tests).
+  await new Promise<void>((resolve, reject) => {
+    const host = listenHost();
+    const onBindError = (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE") {
+        console.error(`[hub] port ${config.port} is already in use`);
+      } else {
+        console.error(`[hub] server error: ${err.message}`);
+      }
+      reject(err);
+    };
+    server.once("error", onBindError);
+    const onListen = () => {
+      // N282 (#3) — once bound, swap the bind-time reject handler for a
+      // persistent logger. A post-listen accept error (e.g. EMFILE) would
+      // otherwise hit the settled promise (no-op) and the next one would be an
+      // unhandled `error` → uncaughtException → exit.
+      server.off("error", onBindError);
+      server.on("error", (err: NodeJS.ErrnoException) =>
+        console.error(`[hub] server error: ${err.message}`),
+      );
+      resolve();
+    };
+    if (host) server.listen(config.port, host, onListen);
+    else server.listen(config.port, onListen);
   });
 
   return {

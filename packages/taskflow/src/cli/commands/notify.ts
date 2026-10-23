@@ -23,18 +23,28 @@ function fireNotification(title: string, message: string): void {
       const child = execFile("osascript", ["-e", script]);
       child.unref();
     } else if (platform === "linux") {
-      const child = execFile("notify-send", [title, message]);
+      // N274 — `--` so a title/message starting with `-` is not read as an
+      // option (e.g. a project name like `--icon=…`). No exec risk (execFile,
+      // not a shell), just correctness.
+      const child = execFile("notify-send", ["--", title, message]);
       child.unref();
     } else if (platform === "win32") {
+      // N274 (A34) — pass the title/message via environment variables and read
+      // them with $env: inside PowerShell. Interpolating them into the -Command
+      // string was injectable: PowerShell expands `$(...)` even inside a
+      // double-quoted literal and `\"` is not a PS escape, so a title/status like
+      // `$(Start-Process calc)` would execute. Env vars are never re-parsed.
       const ps =
         `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType=WindowsRuntime] | Out-Null; ` +
         `$t = [Windows.UI.Notifications.ToastTemplateType]::ToastText02; ` +
         `$x = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($t); ` +
-        `$x.GetElementsByTagName('text')[0].AppendChild($x.CreateTextNode(${JSON.stringify(title)})) | Out-Null; ` +
-        `$x.GetElementsByTagName('text')[1].AppendChild($x.CreateTextNode(${JSON.stringify(message)})) | Out-Null; ` +
+        `$x.GetElementsByTagName('text')[0].AppendChild($x.CreateTextNode($env:IF_NOTIFY_TITLE)) | Out-Null; ` +
+        `$x.GetElementsByTagName('text')[1].AppendChild($x.CreateTextNode($env:IF_NOTIFY_MESSAGE)) | Out-Null; ` +
         `$n = [Windows.UI.Notifications.ToastNotification]::new($x); ` +
         `[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('insight-flow').Show($n)`;
-      const child = execFile("powershell", ["-NoProfile", "-Command", ps]);
+      const child = execFile("powershell", ["-NoProfile", "-Command", ps], {
+        env: { ...process.env, IF_NOTIFY_TITLE: title, IF_NOTIFY_MESSAGE: message },
+      });
       child.unref();
     }
   } catch {

@@ -1,0 +1,27 @@
+{
+  "taskId": "N282",
+  "reviews": [
+    {
+      "startedAt": "2026-10-20T09:59:08.517Z",
+      "endedAt": "2026-10-20T12:05:13.675Z",
+      "verdict": "fix-needed",
+      "comment": "REQUEST CHANGES: the master CLI exits 0 on a busy port — startMasterServer's rejection is swallowed by the master's own unhandledRejection handler and nothing holds the event loop; one-line fix (exit 1 in the catch) + a CLI exit-code test. Delivered parts correct; A51 deferral justified.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-10-20T13:07:40.741Z",
+        "endedAt": "2026-10-20T13:11:50.785Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/master/index.ts",
+          "packages/taskflow/src/master/server.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/dashboard/server/activity.ts",
+          "packages/taskflow/test/hub-reliability.test.mjs"
+        ],
+        "comment": "Fixed blocker 1 (master CLI exits non-zero on busy port) and non-blocking #1-#5,#7; CLI exit-code test added; A51 cluster remains for its own task",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}

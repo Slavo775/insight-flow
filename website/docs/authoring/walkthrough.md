@@ -16,6 +16,9 @@ worked example: **authoring a custom module**. It assumes the flow is installed
 /task-authoring-analyze "I want a module that adds our team's PR checklist to the git agent"
 ```
 
+For a fuller request, start from a template in the
+[prompt cookbook](./prompt-templates.md).
+
 The **analyst** works a fixed method — **intent** (a whole flow, a chain of flows,
 one agent, or one module) → **goal** → design **top-down** (flow → agents → modules) → **reuse** →
 **impact** → **MCP discovery** — and fans out to the read-only per-kind analyst

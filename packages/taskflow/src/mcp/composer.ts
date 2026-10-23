@@ -28,11 +28,14 @@ import { installedBuckets, InstallConflictError } from "../agents/emit.js";
 import {
   executeInstall,
   executeUninstall,
+  installPlan,
+  requiredInputs,
   targetBucketId,
   NotInstallableError,
   UnknownTargetError,
   type InstallTarget,
 } from "../agents/flow-install.js";
+import { readSecrets, scrubSecrets } from "../core/secrets.js";
 import {
   writeDefinition,
   removeDefinition,
@@ -232,14 +235,18 @@ function updateDefinition(kind: Kind, def: unknown, revision?: string): ToolResu
 
 // --- tool registration --------------------------------------------------------
 
+// N273 (A53d) — SHAPE only. The id rule differs per tool (create_* requires a
+// `custom:` id; update_* also accepts a built-in id to eject/override), so each
+// tool states its own rule in its description — leaving an id sentence here made
+// create_* contradict itself ("eject a built-in" while create rejects built-ins).
 const DEF_SHAPE_HELP = {
   module:
-    "A module object: { id, title, kind, ... } where kind is one of section|include|mcp-server|hook|skill|bundle|status-transition|handover|subagent. A 'subagent' carries { name, content, description?, tools?, model?, readonly?, background? } and installs to .claude/agents/<name>.md (read by Claude and Cursor). id must start with 'custom:' (to create) or match a shipped built-in id (to eject/override).",
+    "A module object: { id, title, kind, ... } where kind is one of section|include|mcp-server|hook|skill|bundle|status-transition|handover|subagent. A 'subagent' carries { name, content, description?, tools?, model?, readonly?, background? } and installs to .claude/agents/<name>.md (read by Claude and Cursor).",
   agent:
-    "An agent object: { id, title, description?, modules: string[], command?, subagents? }. `subagents` is a list of subagent-module ids the agent fans out to (orchestrator pattern). id must start with 'custom:' or match a shipped agent id.",
-  flow: "A flow object: { id, title, agents: string[], flow: edges[], install?, statuses?, entryAgents? }. id must start with 'custom:'.",
+    "An agent object: { id, title, description?, modules: string[], command?, subagents? }. `subagents` is a list of subagent-module ids the agent fans out to (orchestrator pattern).",
+  flow: "A flow object: { id, title, agents: string[], flow: edges[], install?, statuses?, entryAgents? }.",
   chain:
-    "A chain object (flow of flows): { id, title, description?, flows: string[], links: { from, on, to, mode?: 'auto'|'gated', when? }[] }. A link leaves a TERMINAL status `on` of flow `from` and enters flow `to` (which needs an entry agent); mode defaults to 'gated'; `when` is one line (max 200 chars, no control characters); title max 200, description max 2000. Flows are not modified, so one flow can sit in many chains. No install step. id must start with 'custom:'.",
+    "A chain object (flow of flows): { id, title, description?, flows: string[], links: { from, on, to, mode?: 'auto'|'gated', when? }[] }. A link leaves a TERMINAL status `on` of flow `from` and enters flow `to` (which needs an entry agent); mode defaults to 'gated'; `when` is one line (max 200 chars, no control characters); title max 200, description max 2000. Flows are not modified, so one flow can sit in many chains. No install step.",
 } as const;
 
 /** Build the composer MCP server with all ~12 tools registered. */
@@ -288,7 +295,7 @@ export function createComposerServer(): McpServer {
     server.registerTool(
       `create_${kind}`,
       {
-        description: `Create a new custom ${kind}. ${DEF_SHAPE_HELP[kind]} Fails (400) on a schema/reference error, (409) if the id already exists.`,
+        description: `Create a NEW custom ${kind}; its id MUST start with 'custom:'. To edit or eject a built-in, use update_${kind} instead (create rejects a built-in id). ${DEF_SHAPE_HELP[kind]} Fails (400) on a schema/reference error, (409) if the id already exists.`,
         inputSchema: { def: z.record(z.string(), z.unknown()) },
       },
       async ({ def }) => guard(() => createDefinition(kind, def)),
@@ -315,6 +322,18 @@ export function createComposerServer(): McpServer {
     },
     async ({ kind, id }) =>
       guard(() => {
+        // N273 (A53b) — a still-installed definition's emitted artifacts (hooks,
+        // .mcp.json entries, commands) would be orphaned if the definition itself
+        // is deleted, since the id then vanishes from list/get. Refuse and point
+        // at uninstall. Chains have no install step, so they're exempt.
+        if (
+          kind !== "chain" &&
+          installedBuckets(resolveProjectRoot()).has(targetBucketId({ kind, id }))
+        ) {
+          return fail(`'${id}' is installed — uninstall it first, then delete`, {
+            code: "installed",
+          });
+        }
         const storageKind = kindFromTarget(kind);
         return fromDefResult(
           removeDefinition(storageKind, id, loadRegistriesForWrite(storageKind, "DELETE")),
@@ -326,18 +345,74 @@ export function createComposerServer(): McpServer {
     "install",
     {
       description:
-        "Install a flow/agent/module: emit its artifacts (MCP servers → .mcp.json, hooks, skills, commands) under the target's manifest bucket. Set force:true to overwrite a conflicting .mcp.json entry (the prior value is snapshotted for uninstall-undo).",
+        "Install a flow/agent/module: emit its artifacts under the target's manifest bucket. " +
+        "SECURITY: a target that emits a HOOK or an MCP SERVER writes a shell command / server " +
+        "into .claude/settings.json / .mcp.json that RUNS in the user's future Claude sessions. " +
+        "For such targets this tool first returns { needsConfirm:true, plan } and writes NOTHING; " +
+        "re-call with confirm:true (after a human has seen the plan) to apply. Provide any required " +
+        "${VAR} inputs via `values` (or they must already be stored); missing ones are reported. " +
+        "force:true overwrites a conflicting .mcp.json entry (snapshotted for uninstall-undo).",
       inputSchema: {
         kind: installKindSchema,
         id: z.string().min(1),
         force: z.boolean().optional(),
+        confirm: z.boolean().optional(),
+        values: z.record(z.string(), z.string()).optional(),
       },
     },
-    async ({ kind, id, force }) =>
+    async ({ kind, id, force, confirm, values }) =>
       guard(() => {
         const target: InstallTarget = { kind, id };
-        const reports = executeInstall(target, resolveProjectRoot(), { force });
-        return ok({ ok: true, kind, id, reports });
+        const root = resolveProjectRoot();
+        const plan = installPlan(target); // throws Unknown/NotInstallable
+        const writesExecutable = plan.some((s) => s.kind === "hook" || s.kind === "mcp");
+
+        const stored = readSecrets(root);
+        const provided = values ?? {};
+        const missing = requiredInputs(target)
+          .map((i) => i.name)
+          .filter((name) => provided[name] === undefined && stored[name] === undefined);
+
+        // N273 (A14) — human-confirm gate for executable artifacts. The dashboard
+        // path shows these in the InstallModal; over MCP there is no UI, so a
+        // prompt-injected agent must not be able to persist a hook silently.
+        // Review #8: the plan-only (call 1) response also reports missingInputs so
+        // the caller can gather them before confirming, rather than failing first.
+        if (writesExecutable && confirm !== true) {
+          return ok({ needsConfirm: true, kind, id, plan, missingInputs: missing });
+        }
+
+        // N273 (A53a) — only when actually applying: refuse rather than writing a
+        // literal `${VAR}` that would leave the installed MCP server broken.
+        if (missing.length) {
+          return fail(`missing required inputs: ${missing.join(", ")}`, { missingInputs: missing });
+        }
+
+        try {
+          // N273 (review #3) — collect the "git-tracked .mcp.json" warning so it
+          // reaches the MCP client (a console.warn only hits the stdio server's
+          // stderr, which the agent never sees).
+          const warnings: string[] = [];
+          const reports = executeInstall(target, root, {
+            force,
+            values: provided,
+            onWarn: (m) => warnings.push(m),
+          });
+          return ok({ ok: true, kind, id, reports, ...(warnings.length ? { warnings } : {}) });
+        } catch (err) {
+          // N273 (review #2) — a conflict carries the installed/incoming configs,
+          // which may hold ${VAR}-resolved secret values; scrub before returning
+          // over MCP (the dashboard path already scrubs).
+          if (err instanceof InstallConflictError) {
+            return fail(err.message, {
+              conflict: scrubSecrets(err.conflict, [
+                ...Object.values(stored),
+                ...Object.values(provided),
+              ]),
+            });
+          }
+          throw err;
+        }
       }),
   );
 
@@ -351,8 +426,13 @@ export function createComposerServer(): McpServer {
     async ({ kind, id }) =>
       guard(() => {
         const target: InstallTarget = { kind, id };
-        const reports = executeUninstall(target, resolveProjectRoot());
-        return ok({ ok: true, kind, id, reports });
+        const root = resolveProjectRoot();
+        // N273 (A53c) — don't claim success for a target that was never installed.
+        if (!installedBuckets(root).has(targetBucketId(target))) {
+          return ok({ ok: true, kind, id, installed: false, reports: [] });
+        }
+        const reports = executeUninstall(target, root);
+        return ok({ ok: true, kind, id, installed: true, reports });
       }),
   );
 

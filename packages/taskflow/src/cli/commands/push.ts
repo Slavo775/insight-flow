@@ -50,7 +50,15 @@ export function cmdMrUpdate(config: TaskflowConfig, master: MasterFile, opts: Pa
     process.exit(1);
   }
 
-  task.mrUrl = opts.url as string;
+  // N274 (A39) — only accept an http(s) URL. The dashboard renders mrUrl as a
+  // link; a `javascript:`/`data:` value would otherwise be stored and surfaced.
+  const url = opts.url as string;
+  if (!/^https?:\/\//i.test(url)) {
+    console.error("--url must be an http(s) URL");
+    process.exit(1);
+  }
+
+  task.mrUrl = url;
   jsonFileStorage.saveShard(getWorkDir(config), shardFile, shard);
   console.log(JSON.stringify({ action: "mr-updated", id, mrUrl: opts.url }));
 }

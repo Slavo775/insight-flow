@@ -11,7 +11,7 @@ import {
 import { applyArtifacts, uninstallTarget, type EmitReport } from "./emit.js";
 import { mergedComposedAgents, mergedModuleRegistry, mergedProjects } from "./user-registry.js";
 import { deriveCommandName } from "../core/schema/index.js";
-import { readSecrets } from "../core/secrets.js";
+import { readSecrets, ensureMcpGitignored } from "../core/secrets.js";
 import { resolveTrigger, type AgentHandover } from "../core/flow-status.js";
 import {
   scanPlaceholders,
@@ -324,10 +324,23 @@ function resolveInstallValues(
 export function executeInstall(
   t: InstallTarget,
   projectRoot: string,
-  opts: { values?: Record<string, string>; force?: boolean } = {},
+  opts: { values?: Record<string, string>; force?: boolean; onWarn?: (msg: string) => void } = {},
 ): EmitReport[] {
   const art = targetArtifacts(t); // throws Unknown/NotInstallable
   const values = resolveInstallValues(art, projectRoot, opts.values ?? {});
+  // N273 (A15) — when a secret `${VAR}` is substituted into an MCP server config,
+  // that plaintext value lands in `.mcp.json`, so gitignore it. Review #6: trigger
+  // only when a resolved var is actually used by an MCP config (not a hook-only
+  // ${VAR}). The warning (if .mcp.json is already tracked) goes to onWarn — over
+  // MCP a console.warn is invisible — defaulting to console.warn for the CLI.
+  const warn = opts.onWarn ?? ((m: string) => console.warn(m));
+  const mcpUsesValue = art.mcpServers.some((m) =>
+    Object.keys(values).some((k) => JSON.stringify(m).includes("${" + k + "}")),
+  );
+  if (mcpUsesValue) {
+    const w = ensureMcpGitignored(projectRoot);
+    if (w) warn(w);
+  }
   return applyArtifacts(
     art,
     projectRoot,

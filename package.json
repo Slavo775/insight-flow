@@ -15,9 +15,12 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "packages/taskflow/src/**/*.ts": [
+    "packages/taskflow/src/**/*.{ts,tsx}": [
       "pnpm --dir packages/taskflow exec prettier --write",
       "pnpm --dir packages/taskflow exec eslint --fix"
+    ],
+    "packages/taskflow/test/**/*.mjs": [
+      "pnpm --dir packages/taskflow exec prettier --write"
     ]
   },
   "devDependencies": {

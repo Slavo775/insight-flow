@@ -10,6 +10,7 @@ import { createInterface } from "node:readline";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import type { TaskflowConfig } from "../../core/types.js";
+import { assertConfinedPaths } from "../../core/config.js";
 import { findHubProjectByPath, upsertHubProject, assignHubPort } from "../../core/global-config.js";
 import { resolvePackageAsset, resolveFlowRoot } from "../../core/paths.js";
 import { applyAgentExtensions } from "../agents.js";
@@ -128,6 +129,13 @@ export async function initProject(
     );
   }
 
+  // N274 (review blocker 1) — init reads the config directly (not via
+  // resolveConfig), so run the SAME path confinement here BEFORE any role/flow
+  // files are written. A cloned config with `rolesDir: "../../.claude/commands"`
+  // (or a symlinked / off-root workDir / activity log) must fail init, not write
+  // attacker-controlled prompts outside the repo.
+  assertConfinedPaths(config, cwd);
+
   // Resolve which editor providers to scaffold. Precedence (N78):
   // --editor flag → config.editor → auto-detect (.claude/.cursor) → claude.
   const editorChoice = options.editor ?? config.editor;
@@ -177,7 +185,9 @@ export async function initProject(
   // 3. Build the canonical skill set + the context shared by every provider.
   const agentsConfig = config.agents;
   const customAgents = agentsConfig?.custom ?? [];
-  const skills = buildSkillList(customAgents);
+  // N275 blocker 3 — pass rolesDir so built-in command bodies point at the role
+  // files init actually writes (a custom rolesDir otherwise left agents role-less).
+  const skills = buildSkillList(customAgents, config.rolesDir ?? ".claude/roles");
   const providerCtx: ProviderContext = { cwd, config, skills, customAgents, force, conflicts };
 
   // 4. Claude-specific role infrastructure: role templates, agent extensions,

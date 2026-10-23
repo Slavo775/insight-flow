@@ -1,0 +1,14 @@
+{
+  "taskId": "N284",
+  "reviews": [
+    {
+      "startedAt": "2026-10-20T09:59:08.749Z",
+      "endedAt": "2026-10-20T11:59:39.892Z",
+      "verdict": "approved",
+      "comment": "APPROVED. No correctness/security defect. 4 small non-blocking follow-ups: code comment for the revision assumption, a discriminating byte-cap test (limit 8 or '€'/limit 2), console.error on the 500 path, a test for the 400/500 split.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

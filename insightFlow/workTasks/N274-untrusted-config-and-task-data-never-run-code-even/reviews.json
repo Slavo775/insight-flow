@@ -1,0 +1,30 @@
+{
+  "taskId": "N274",
+  "reviews": [
+    {
+      "startedAt": "2026-10-20T09:59:07.844Z",
+      "endedAt": "2026-10-20T12:06:10.813Z",
+      "verdict": "fix-needed",
+      "comment": "REQUEST CHANGES: (1) init reads the raw config and uses rolesDir/workDir without resolveConfig, so the new path confinement never runs on the init path — a cloned config with rolesDir '../../.claude/commands' + agents.extend writes attacker text outside the repo; export assertConfinedPaths and call it from init. (2) trust-hooks prints raw command strings — control chars (\\r, ESC) can spoof the terminal review; print JSON.stringify(cmd).",
+      "type": "ai",
+      "by": "task-review",
+      "fix": {
+        "startedAt": "2026-10-20T12:38:56.640Z",
+        "endedAt": "2026-10-20T12:44:28.745Z",
+        "status": "fixed",
+        "filesChanged": [
+          "packages/taskflow/src/core/config.ts",
+          "packages/taskflow/src/core/schema/index.ts",
+          "packages/taskflow/src/agents/init/index.ts",
+          "packages/taskflow/src/cli/commands/trust-hooks.ts",
+          "packages/taskflow/src/core/trusted-hooks.ts",
+          "packages/taskflow/src/dashboard/server/index.ts",
+          "packages/taskflow/src/cli/commands/notify.ts",
+          "packages/taskflow/test/config-trust.test.mjs"
+        ],
+        "comment": "Fixed blockers 1-2 (init confinement + spoofable trust-hooks print) and non-blocking #1-#6,#8,#10",
+        "by": "task-review-fix"
+      }
+    }
+  ]
+}
