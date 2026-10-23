@@ -42,7 +42,7 @@ Commands are grouped by what they do — each group has its own page:
 | **[Git & Flow](./git-and-flow.md)** | `push`, `mr-update`, `merge`, `done`, `advance`, `set-flow`, `set-default-flow`, `set-chain`, `chain-advance` |
 | **[Incidents](./incidents.md)** | `incident-create/-status/-resolve/-list` |
 | **[Config & Migration](./config-and-migration.md)** | `migrate`, `migrate-reviews`, `migrate-layout`, `prompt-build` |
-| **[Events & Hooks](./events-and-hooks.md)** | `log-event`, `log-activity`, `notify`, `install-*`, `migrate-hooks`, `hook` |
+| **[Events & Hooks](./events-and-hooks.md)** | `log-event`, `log-activity`, `notify`, `install-*`, `migrate-hooks`, `trust-hooks`, `hook` |
 
 :::note Stay accurate
 This reference is hand-curated from the command definitions in

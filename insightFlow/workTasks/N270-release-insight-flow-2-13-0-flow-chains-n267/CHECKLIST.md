@@ -31,9 +31,28 @@
 - [x] `composer-mcp/index.md` (~l.21–23): chains have no install step
 - [x] (optional nits) troubleshooting: the broken-chain warning prints on every status write of a chained task; `authoring/index.md` intro (~l.8–11, 19) names chains; `concepts/index.md` l.47 "one flow at a time"; README l.208 "a task whose flow is not in the chain moves…"
 
+### Docs gaps — audit fixes (N271–N284), combined-scope re-check (2026-10-24)
+
+**BLOCKER — `trust-hooks` undocumented + `events.hooks` docs describe pre-N274 behaviour.** Configured `events.hooks` shell commands no longer run on `insight-flow log-event` until the human approves the exact hook set via `insight-flow trust-hooks --yes`; the docs still tell users to configure hooks with no mention of the gate, so their hooks silently never fire. Close all four:
+
+- [x] `website/docs/configuration.md` (~l.163-166): the `events.hooks` row/prose must state the commands require `insight-flow trust-hooks` approval first, and re-approval when the hook set changes
+- [x] `packages/taskflow/README.md`: fix the `events.hooks` description + example (~l.619-637) to note the trust gate; add `trust-hooks` to the command-reference block (~l.170-228)
+- [x] `website/docs/cli/events-and-hooks.md`: add `trust-hooks` to the Hooks table and document the gate alongside `events.hooks` (new "## Trusting `events.hooks`" section)
+- [x] `website/docs/cli/index.md` (~l.45): add `trust-hooks` to the Events & Hooks command summary
+
+**NICE-TO-HAVE — composer MCP `install` confirm gate is stale:**
+
+- [x] `website/docs/composer-mcp/tools.md` (~l.92): document the two-step signature — hook / mcp-server targets return `{ needsConfirm, plan }` and write nothing unless re-called with `confirm:true` (verified against composer.ts; include.ref/uninstall claims omitted as unverified)
+
+### Release notes — behaviour changes (upgrade notes, required)
+
+- [x] Draft an "Upgrade notes / behaviour changes" section covering: trust-hooks gate (N274); config path confinement + required http(s) `master.url` (N274); built-in override may not drop the locked baseline (N273); composer `install` two-step confirm (N273); dashboard body cap by bytes + JSON 404 on unknown `/api/*` (N284); `mr-update` http(s)-only (N274); `master` exits non-zero on a busy port (N282); versioned hub service-worker cache (N282) — drafted in TASK.md "Release notes (draft)"
+- [ ] Human sign-off: do the three "previously-valid config now fails" items (trust-hooks gate, config confinement, override-baseline refusal) warrant a MAJOR? (by commit markers → no; ship **2.13.0**)
+
 ### Release steps
 
 - [ ] Docs commit pushed to `feat/N267-flow-chains` (PR #174)
+- [ ] Audit-fix docs (trust-hooks + composer install) committed to `chore/N271-audit-fixes` (PR #175)
 - [ ] Release check re-run → docs complete → `ready-to-release`
 - [ ] PR #174 merged to `main` (squash, `feat(flows): …` title) → release-please opens the 2.13.0 release PR
 - [ ] Release PR merged (human-approved) → tag `v2.13.0`, npm publish approved + succeeded
