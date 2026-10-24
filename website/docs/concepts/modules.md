@@ -26,7 +26,7 @@ The discriminated union has **eight** `kind`s:
 | `kind`              | What it is                                                              |
 | ------------------- | ----------------------------------------------------------------------- |
 | `section`           | An optional heading + a pre-formatted body of prompt text.              |
-| `include`           | A verbatim `@<ref>` reference line (e.g. `@AGENT_ENFORCEMENT.md`).      |
+| `include`           | A verbatim `@<ref>` reference line (e.g. `@AGENT_ENFORCEMENT.md`); `ref` is a plain `*.md` filename, no path. |
 | `mcp-server`        | An MCP server merged into the project's `.mcp.json`.                    |
 | `hook`              | A Claude Code settings hook (optionally shipping its own script).       |
 | `skill`             | A skill written to `.claude/skills/<name>/SKILL.md`.                    |
@@ -47,8 +47,10 @@ These render into the composed role Markdown as a pure sequence of blocks.
   preceding heading), or both. Bodies are emitted exactly as authored so the
   generated files can be byte-exact.
 - **`include`** — emits a single `@<ref>` line. This is how shared protocol
-  files like `@AGENT_ENFORCEMENT.md` get pulled into a role. Consecutive
-  `include` modules group together without blank lines.
+  files like `@AGENT_ENFORCEMENT.md` get pulled into a role. The `ref` must be a
+  plain `*.md` filename (letters, digits, `_`, `.`, `-`) with no directory path,
+  so `docs/RULES.md` or `../.env` is rejected. Consecutive `include` modules group
+  together without blank lines.
 
 Everything the agent _says_ comes from these two kinds.
 

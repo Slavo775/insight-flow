@@ -74,6 +74,9 @@ Update an existing definition:
   **variant** instead, so shipped defaults stay read-only and upgradable.
 - **Locked module** → refused.
 - **The `default` flow** → refused over MCP (use the dashboard).
+- **Built-in agent override** → must keep the agent's locked baseline modules
+  (`security`, `enforcement`, `protocol`). An override that drops any of them is
+  refused with `400`.
 - **A flow a chain uses** → refused when the edit would break the chain (for
   example, it drops a terminal status a link starts from).
 
@@ -86,6 +89,11 @@ Remove a **custom definition** (or revert a built-in override). Reference-safe:
 refused with `409` (and the referencing ids) while another definition still
 references it; locked modules are refused. This removes the *definition* — to
 remove its emitted artifacts instead, use `uninstall`.
+
+A module, agent, or flow that is still **installed** is refused (code
+`installed`): `uninstall` it first, then `delete`. This keeps its hooks and
+`.mcp.json` entries from being left behind with no definition. Chains have no
+install step, so this check does not apply to them.
 
 ## Install / uninstall
 
@@ -108,13 +116,17 @@ persisting a shell hook or MCP server. Targets that emit no hook / MCP server
 
 Pass `values` to supply any `${VAR}` inputs the plan needs (or store them
 beforehand); inputs still missing come back in `missingInputs` so you can gather
-them before confirming.
+them before confirming. An install that would apply with inputs still missing
+fails (with `missingInputs`) instead of writing a literal `${VAR}`.
 
 ### `uninstall(kind, id)`
 
 Remove the target's emitted artifacts, **reference-safe**: an artifact still
 owned by another install target is retained; an `.mcp.json` entry that this
 target overwrote is restored to its snapshot. The definition itself is kept.
+
+The result carries `installed`: `true` when artifacts were removed, `false` (with
+empty `reports`) when the target was not installed — nothing is changed then.
 
 ## Worked example
 
@@ -125,7 +137,15 @@ list({ "kind": "flow" })
 // author a module, then install it
 create_module({ "def": { "id": "custom:my-linter", "title": "My linter MCP",
   "kind": "mcp-server", "name": "my-linter", "config": { "command": "my-linter", "args": ["--stdio"] } } })
+
+// it emits an MCP server, so the first call only returns the plan (nothing is written)
 install({ "kind": "module", "id": "custom:my-linter" })
+// → { "needsConfirm": true, "kind": "module", "id": "custom:my-linter",
+//     "plan": [{ "kind": "mcp", "key": "my-linter", "label": "MCP server: my-linter", "target": ".mcp.json" }],
+//     "missingInputs": [] }
+
+// a human checks the plan, then apply it
+install({ "kind": "module", "id": "custom:my-linter", "confirm": true })
 
 // later, back it out cleanly
 uninstall({ "kind": "module", "id": "custom:my-linter" })

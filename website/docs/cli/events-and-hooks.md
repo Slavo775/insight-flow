@@ -43,6 +43,9 @@ someone else's commands. They **only run once a human has approved them**:
   trusted for this project. Add `--force` to re-review an already-approved set.
 - Approval is keyed by project root and a hash of the hooks map, so **any edit to
   `events.hooks` invalidates it** and the set must be approved again.
+- Approval is stored per user, in `~/.insight-flow/trusted-hooks.json` — it is
+  not committed. Each teammate and each CI machine must approve once, and moving
+  the project folder clears the approval.
 
 While a project's hook set is untrusted, lifecycle events still fire but the
 configured commands are skipped and insight-flow prints to stderr:

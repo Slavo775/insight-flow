@@ -35,10 +35,10 @@ This page does **not** document CLI flags (per-invocation overrides like
 
 | Key | Type | Default | Controls |
 |-----|------|---------|----------|
-| `workDir` | `string` | `"workTasks"` | Directory holding `master.json` + task shards + task folders. |
+| `workDir` | `string` | `"workTasks"` | Directory holding `master.json` + task shards + task folders. Must stay inside the project (see below). |
 | `shardSize` | `number` | `10` | How many tasks go in each shard file (`tasks-N00-N09.json`, …). |
 | `projectName` | `string` | inferred | Human-readable project label in dashboards / master overview. |
-| `rolesDir` | `string` | `".claude/roles"` | Where agent role Markdown files are scaffolded and read from. |
+| `rolesDir` | `string` | `".claude/roles"` | Where agent role Markdown files are scaffolded and read from. Must stay inside the project (see below). |
 | `editor` | `"claude" \| "cursor" \| "all"` | _(auto-detect)_ | Which harness(es) `init` / `bulk-init` scaffold. |
 | `hooksVersion` | `number` | _(unset)_ | Marker for the bundled hook-script generation; managed by the CLI. |
 
@@ -53,6 +53,16 @@ explicitly to `init`, it is persisted here.
 **`hooksVersion`** — written/bumped by the CLI when bundled hooks change. The CLI
 compares it against the installed package and warns when you should run
 `insight-flow migrate-hooks`. You normally don't edit this by hand.
+
+:::note Paths must stay inside the project
+`workDir`, `rolesDir`, and `activityEngine.logFile` are resolved against the
+project root and must stay inside it. A value that points outside — an absolute
+path elsewhere, a `../` path, or a path that leaves the project through a
+symlink — is rejected. When the check fails, `init` and every command that loads
+the config stop with an error (for example
+`workDir must stay inside the project`). This keeps a cloned repo's config from
+making insight-flow write files outside the repo.
+:::
 
 :::warning Changing `workDir`
 `workDir` is the address of your entire task store. Repointing it after tasks
@@ -91,7 +101,7 @@ master server port under [`master`](#master--multi-project-overview).
 | Key | Type | Default | Controls |
 |-----|------|---------|----------|
 | `activityEngine.enabled` | `boolean` | `true` | Master switch for activity logging + the dashboard activity panel. **New projects are initialised with it on** (`insight-flow init` writes `true`). |
-| `activityEngine.logFile` | `string` | `".taskflow-activity.jsonl"` | JSONL file (relative to `workDir`) events are appended to. |
+| `activityEngine.logFile` | `string` | `".taskflow-activity.jsonl"` | JSONL file (relative to the project root) events are appended to. Must stay inside the project (see [top-level keys](#top-level-keys)). |
 | `activityEngine.maxEvents` | `number` | `200` | How many recent events are kept in memory / served to the panel. |
 | `activityEngine.phaseMarkers` | `boolean` | `true` | Whether status-transition markers are recorded. |
 | `activityEngine.hookEnrichment` | `boolean` | `true` | Enrich events with Claude Code / Cursor hook data. |
@@ -124,13 +134,20 @@ The master server is the cross-project overview that `insight-flow master` runs
 
 | Key | Type | Default | Controls |
 |-----|------|---------|----------|
-| `master.url` | `string` | `"http://localhost:6100"` | URL the dashboard links/iframes to for the overview. |
+| `master.url` | `string` | `"http://localhost:6100"` | URL the dashboard registers with and iframes for the overview. Must be a valid `http://` or `https://` URL — anything else stops the CLI with an error. |
 | `master.port` | `number` | `6100` | Port the master server listens on. |
 | `master.standalone` | `boolean` | `false` | Run the master server independently. |
 | `master.startMasterLocally` | `boolean` | _(unset)_ | Auto-start the master server alongside the dashboard. |
 
-Changing `url` / `port` only takes effect on next start. If you point `url` at a
-remote master, the dashboard embeds that instead of the local one.
+Changing `url` / `port` only takes effect on next start.
+
+:::warning The master must run on the same machine
+A master on another machine does not work. The master binds `127.0.0.1` by
+default, and its `/api/register` endpoint accepts only loopback callers — even
+when `INSIGHT_FLOW_TRUSTED_HOSTS` is set. A dashboard on a different machine
+cannot register, so its overview stays disabled. Use `url` only to point at a
+local master (for example on a different port).
+:::
 
 ---
 
@@ -142,15 +159,23 @@ no-op and the optional `langfuse` SDK is never loaded — non-users pay nothing.
 | Key | Type | Default | Controls |
 |-----|------|---------|----------|
 | `observability.langfuse.enabled` | `boolean` | `false` | Turns the Langfuse exporter on. |
-| `observability.langfuse.host` | `string` | _(env / SDK default)_ | Langfuse API host. |
+| `observability.langfuse.host` | `string` | _(env / SDK default)_ | Langfuse API host. Used **only** when `publicKey` and `secretKey` are also set in config. |
 | `observability.langfuse.publicKey` | `string` | _(env)_ | Langfuse public key. |
 | `observability.langfuse.secretKey` | `string` | _(env)_ | Langfuse secret key. |
 
-**Credential resolution is config-first, env-fallback:** `publicKey` /
-`secretKey` / `host` are read from config if present, otherwise from
-`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST` (then
-`LANGFUSE_BASEURL`). If neither config nor env supplies both keys, the exporter
-stays inert. Keep secrets in env so they never land in committed config — see
+**Keys are config-first, env-fallback:** `publicKey` / `secretKey` are read
+from config if present, otherwise from `LANGFUSE_PUBLIC_KEY` /
+`LANGFUSE_SECRET_KEY`. If neither config nor env supplies both keys, the
+exporter stays inert.
+
+**The host follows the keys.** `host` from config is used only when **both**
+keys also come from config. In every other case the config `host` is ignored,
+and the host comes from `LANGFUSE_HOST` (then `LANGFUSE_BASEURL`), or the SDK
+default if neither is set. This stops a cloned repo from sending your env keys
+(and task data) to a host it chose. If you self-host Langfuse and keep the keys
+in env, set `LANGFUSE_HOST` in env too.
+
+Keep secrets in env so they never land in committed config — see
 [environment variables](#environment-variables).
 
 ---
@@ -286,8 +311,9 @@ edit these by hand.
 |----------|--------|
 | `LANGFUSE_PUBLIC_KEY` | Langfuse public key (fallback for `observability.langfuse.publicKey`). |
 | `LANGFUSE_SECRET_KEY` | Langfuse secret key (fallback for `observability.langfuse.secretKey`). |
-| `LANGFUSE_HOST` | Langfuse API host (fallback for `observability.langfuse.host`). |
+| `LANGFUSE_HOST` | Langfuse API host. Used unless both keys **and** `observability.langfuse.host` are set in config (then the config host wins). |
 | `LANGFUSE_BASEURL` | Alternate Langfuse host, used only if `LANGFUSE_HOST` is unset. |
+| `INSIGHT_FLOW_TRUSTED_HOSTS` | Comma-separated extra hosts to trust, each a bare host or `host:port` (e.g. `192.168.0.77,myhub.local`; write IPv6 in brackets, like `[fe80::1]`). When set, the dashboard and the master bind **all network interfaces** instead of `127.0.0.1`, and also accept requests whose `Host` is one of these hosts. Unset means localhost-only. Use it only on a network you trust — see [Master server](./built-ins/master-server.md). |
 | `INSIGHT_FLOW_NO_OPEN` | Set to `"1"` to stop the dashboard from auto-opening a browser on start. |
 | `CLAUDE_SESSION_ID` | Claude Code session id used to tag events when `--session-id` isn't passed. |
 
@@ -344,7 +370,7 @@ defaults above. Do not commit real Langfuse secrets — prefer env vars.
   "observability": {
     "langfuse": {
       "enabled": false,
-      "host": "https://cloud.langfuse.com"
+      "host": "https://cloud.langfuse.com" // used only if publicKey + secretKey are also set here
     }
   },
 

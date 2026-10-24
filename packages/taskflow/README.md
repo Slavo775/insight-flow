@@ -319,7 +319,7 @@ The block below shows every supported key with its default. Strip the `//` comme
   "observability": {
     "langfuse": {
       "enabled": false,            // master switch — absent/false = no-op, SDK never loaded
-      "host": "http://localhost:3000", // self-hosted or cloud Langfuse base URL
+      "host": "http://localhost:3000", // used ONLY if both keys below are also set here; with env keys, set LANGFUSE_HOST
       "publicKey": "pk-lf-...",    // prefer env LANGFUSE_PUBLIC_KEY (never commit keys)
       "secretKey": "sk-lf-..."     // prefer env LANGFUSE_SECRET_KEY (never commit keys)
     }
@@ -340,11 +340,13 @@ The block below shows every supported key with its default. Strip the `//` comme
 
 | Key | Default | Purpose |
 |-----|---------|---------|
-| `workDir` | `"workTasks"` | Directory (relative to project root) where task JSON shards live. |
+| `workDir` | `"workTasks"` | Directory (relative to project root) where task JSON shards live. Must stay inside the project. |
 | `shardSize` | `10` | Tasks per shard file. Affects new shard rollovers only, not existing files. |
 | `projectName` | inferred from `package.json` | Shown in the dashboard header. |
-| `rolesDir` | `".claude/roles"` | Where role spec markdown templates are copied on `init`. |
+| `rolesDir` | `".claude/roles"` | Where role spec markdown templates are copied on `init`. Must stay inside the project. |
 | `server.port` | `6006` | HTTP/WebSocket port the dashboard listens on. |
+
+`workDir`, `rolesDir`, and `activityEngine.logFile` must resolve inside the project root. A value that points outside — an absolute path elsewhere, a `../` path, or a path that leaves the project through a symlink — makes `init` and every command that loads the config stop with an error. This keeps a cloned repo's config from making insight-flow write files outside the repo.
 
 ### Activity engine
 
@@ -353,7 +355,7 @@ Controls the live activity panel in the dashboard. The panel shows what Claude C
 | Key | Default | Purpose |
 |-----|---------|---------|
 | `activityEngine.enabled` | `true` | Enable the activity panel. Set to `false` to hide it entirely. |
-| `activityEngine.logFile` | `".taskflow-activity.jsonl"` | Ephemeral JSONL log written by the PostToolUse hook. Gitignored automatically. |
+| `activityEngine.logFile` | `".taskflow-activity.jsonl"` | Ephemeral JSONL log written by the PostToolUse hook. Gitignored automatically. Must stay inside the project. |
 | `activityEngine.maxEvents` | `200` | Ring-buffer size for the in-memory activity feed. Older events are dropped. |
 | `activityEngine.phaseMarkers` | `true` | Emit phase-boundary events (`edit-start`, `edit-end`, `review-start`, etc.) into the feed. |
 | `activityEngine.hookEnrichment` | `true` | Enrich events with tool name and file context from Claude Code hook payloads. |
@@ -374,7 +376,7 @@ Off by default. When enabled, insight-flow exports its existing lifecycle signal
 | Key | Default | Purpose |
 |-----|---------|---------|
 | `observability.langfuse.enabled` | `false` | Master switch. When absent or `false` the exporter is a no-op and the Langfuse SDK is **never imported** — non-users pay nothing. |
-| `observability.langfuse.host` | env `LANGFUSE_HOST` | Base URL of your Langfuse instance (self-hosted or cloud). |
+| `observability.langfuse.host` | env `LANGFUSE_HOST` | Base URL of your Langfuse instance (self-hosted or cloud). Used **only** when `publicKey` and `secretKey` are also set in config. |
 | `observability.langfuse.publicKey` | env `LANGFUSE_PUBLIC_KEY` | Public API key. **Prefer the env var** — never commit keys. |
 | `observability.langfuse.secretKey` | env `LANGFUSE_SECRET_KEY` | Secret API key. **Prefer the env var** — never commit keys. |
 
@@ -387,7 +389,8 @@ npm install langfuse        # or: pnpm add langfuse
 Notes:
 
 - **Lazy + fail-open.** The SDK is dynamically imported only when enabled and credentialed. If it isn't installed, or a key is missing, or an export call fails, insight-flow logs a single warning and continues — the task lifecycle is never blocked.
-- **Credentials resolve config-first, then env** (`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST`). Keep keys in the environment, not in committed config.
+- **Keys resolve config-first, then env** (`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY`). Keep keys in the environment, not in committed config.
+- **The host follows the keys.** The config `host` is used only when both keys are also in config. Otherwise it is ignored, and the host comes from `LANGFUSE_HOST` (then `LANGFUSE_BASEURL`) or the SDK default. This stops a cloned repo from sending your env keys to a host it chose. Self-hosting with keys in env? Set `LANGFUSE_HOST` in env.
 - Wired from the lifecycle commands (`implement-end`, `review-end`, `fix-end`, `change-end`, `merge`, `done`) and from the dashboard's `/log/events` ingestion. Traces upsert by task id, so re-exporting at each boundary refines a single trace rather than duplicating it.
 
 The N157 exporter above traces the **task lifecycle**. To instrument **your application's own LLM calls** with Langfuse, use the official, self-updating Langfuse Claude Code plugin (`/plugin marketplace add langfuse/skills` → `/plugin install langfuse`). insight-flow ships a small opt-in pointer skill module — `langfuse/setup-skill` (installs as the `langfuse-setup` skill) — that documents both halves. It lives in the module registry but is **not** in any default flow, so it never installs automatically; add it to a flow when you want it.
@@ -606,7 +609,7 @@ These keys are only needed for the multi-project overview feature. See [Multi-pr
 
 | Key | Default | Purpose |
 |-----|---------|---------|
-| `master.url` | `undefined` | URL of the master server this project reports to (e.g. `"http://localhost:6100"`). |
+| `master.url` | `undefined` | URL of the master server this project reports to (e.g. `"http://localhost:6100"`). Must be a valid `http://` or `https://` URL, or the CLI stops with an error. The master must run on the same machine (see [Remote master](#remote-master-not-supported)). |
 | `master.port` | `6100` | Port the master server listens on when started locally. |
 | `master.standalone` | `false` | Run this project's server as the master (single-project mode with master features). |
 | `master.startMasterLocally` | `false` | Auto-start the master server process when the project dashboard launches. |
@@ -955,14 +958,16 @@ open http://localhost:6100/overview
 open http://localhost:6006/overview
 ```
 
-### Remote master
+### Remote master (not supported)
 
-Set `startMasterLocally: false` in `taskflow.config.json` to point at a master running on another machine:
+A master on another machine does not work. The master binds `127.0.0.1` by default, and its `/api/register` endpoint accepts only loopback callers — even when `INSIGHT_FLOW_TRUSTED_HOSTS` is set. A dashboard on a different machine cannot register: it logs `Could not register with master at <url> — overview disabled`. Keep the master on the same machine as your projects.
+
+You can still set `startMasterLocally: false` and point `master.url` at a local master you start yourself (for example `insight-flow master --port 6200`):
 
 ```jsonc
 {
   "master": {
-    "url": "http://my-server:6100",
+    "url": "http://localhost:6200",
     "startMasterLocally": false
   }
 }

@@ -159,7 +159,7 @@ function printHelp(): void {
     install-lifecycle-hooks [--bin <path>] Install lifecycle event hooks (SessionStart, UserPromptSubmit, Stop, PreToolUse, PostToolUse, PermissionRequest) into .claude/settings.json (idempotent)
     migrate-hooks [--bin <path>]          Refresh hook scripts after upgrading the package; bumps taskflow.config.json.hooksVersion (idempotent)
     notify "<message>" [--title <t>] [--project <p>]   Fire an OS notification (fire-and-forget; respects notifications.cli)
-    trust-hooks [--yes]                                 Review + approve this project's events.hooks shell commands (required before they run)
+    trust-hooks [--yes] [--force]                       Review + approve this project's events.hooks shell commands (required before they run)
     log-activity "<message>"                            Emit free-form narrative to the activity feed (no-op when activityEngine.enabled is false)
     log-event <type> [--task Nxx] [--data <json>]       Emit a typed lifecycle event (mandatory: start|done; optional: active|idle|edit-start|edit-end|research-start|research-end|review-start|review-end|git-start|git-end)
     hook <ClaudeHookEventName> [--data <json>]          Sugar for log-event --source hook --hook-name <raw> (N68; accepts Stop|Notification|PreToolUse|PostToolUse|SessionStart|SessionEnd|UserPromptSubmit|SubagentStop|PermissionRequest)

@@ -92,7 +92,12 @@ subagents, the **composer MCP** (`mcp-composer`), and the **activity engine**:
 ```text
 # from the dashboard (Flows → Composer authoring → Install), or over the MCP:
 install(kind="flow", id="composer-authoring")
+# → returns { needsConfirm: true, plan } and writes nothing; after you check the plan:
+install(kind="flow", id="composer-authoring", confirm=true)
 ```
+
+Over the MCP this takes two calls: the flow emits hooks and an MCP server, so the
+first call only shows the plan (see [Composer MCP → Safety](../composer-mcp/index.md#safety)).
 
 That emits, into your project:
 

@@ -28,6 +28,16 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 - **Intent: feature → 2.13.0 (minor).** Still minor — the only `feat` is flow-chains; all 14 audit fixes are `fix`, no `!` / `BREAKING CHANGE`. But the audit fixes add user-observable behaviour changes that need an "upgrade notes" section (see CHECKLIST "Release notes — behaviour changes"), and a human call on whether the three "previously-valid config now fails" items (trust-hooks gate, config confinement, override-baseline refusal) warrant a major — strictly by the commit markers they do not.
 - **Docs: NOT complete — 1 blocker + 1 nice-to-have (audit fixes).** Flow-chains docs stay complete (re-check 2 example confirmed fixed); LAN/trust-hosts/127.0.0.1/X-Forwarded-Host docs complete. New gaps: `insight-flow trust-hooks` is undocumented and the `events.hooks` docs describe pre-N274 behaviour; the composer MCP `install` confirm-gate signature is stale. See CHECKLIST "Docs gaps — audit fixes".
 
+### Re-check 4 (2026-10-24 — combined branch `chore/N271-audit-fixes` @ `ed7c116`)
+
+**Verdict: NOT ready — 4 docs blockers; no code or test blockers.** The range also carries N266 (authoring prompt cookbook, `6b59d3c` + fix `30277e0`) through the stack.
+
+- **Tests: PASS.** Build, typecheck, lint (0 errors, 2 unused-disable warnings in `FlowEditor.tsx`) clean; **430/430**; HEAD unchanged during the run.
+- **Intent: feature → 2.13.0.** No `!` / `BREAKING CHANGE`. Two documented setups now fail **silently** — `events.hooks` (trust gate) and a config-set Langfuse `host` — so strict SemVer would say major; the intent detector recommends 2.13.0 (every change is a security fix with a one-step way back) with loud "action required" upgrade notes. Human call (CHECKLIST "Decision").
+- **Docs: NOT complete — 4 blockers + ~14 non-blocking.** The earlier "LAN/trust-hosts docs complete" claim was wrong: the N272 trust boundary (loopback bind, `INSIGHT_FLOW_TRUSTED_HOSTS`, CORS removed, 421/403, `/api/config` + `/api/activity` removed) is missing from the release notes and `master-server.md`; the composer MCP page still says "no per-call human gate"; the Langfuse host change is undocumented. Earlier gaps stay closed; flow-chains and N266 docs are correct. See CHECKLIST "Docs gaps — re-check 4".
+- **N266 review state:** last verdict `fix-needed`; the fix (`30277e0`) was pushed but never re-reviewed, and N266 has no PR of its own. Human call.
+- **Merge hints (for task-release-merge):** before retargeting #175 to `main`, `git rebase --onto origin/main a4c0eaa chore/N271-audit-fixes` (else all 26 commits reappear and tracker shards may conflict). After merge, add a release-please `BEGIN_COMMIT_OVERRIDE` block to #175 so the changelog lists trust-hooks, the install confirm, the Langfuse change and N266 separately instead of one "Bug Fixes" line.
+
 ## Goal
 
 1. Close every docs gap from the release check (Docusaurus + README + CLI help text), on the feature branch `feat/N267-flow-chains` so they ship in PR #174.
@@ -74,18 +84,29 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 
 ### Upgrade notes / behaviour changes
 
-- **`events.hooks` now require approval.** Configured hook commands no longer run automatically — review and approve them per project with `insight-flow trust-hooks --yes`. Any edit to the hook set invalidates approval and must be re-approved; until then the commands are skipped and a stderr notice is printed.
-- **Config paths are confined to the project root and `master.url` must be `http(s)`.** Off-root paths or a non-`http(s)` `master.url` now abort config load and `insight-flow init` instead of being silently accepted.
-- **A built-in agent override can no longer drop the locked baseline.** An override that would strip the locked security / enforcement / protocol modules is refused at write time.
-- **Composer `install` is now two-step for executable targets.** A target that emits a hook or MCP server returns `{ needsConfirm: true, … }` and writes nothing until you re-call with `confirm: true` after a human has seen the plan.
+**Action required** — these can stop a working setup (the first three fail silently):
+
+- **`events.hooks` now require approval.** Configured hook commands no longer run automatically — review and approve them per project with `insight-flow trust-hooks --yes`. Any edit to the hook set invalidates approval and must be re-approved; until then the commands are skipped and a stderr notice is printed. Approval is stored per user (`~/.insight-flow/trusted-hooks.json`) and keyed by the project's absolute path, so each teammate and each CI machine approves once, and moving the project folder clears it.
+- **Langfuse: a config `host` is used only with config keys.** `observability.langfuse.host` from `taskflow.config.json` is now honoured only when both `publicKey` and `secretKey` also come from the config. With keys in env, the host comes from `LANGFUSE_HOST` (or `LANGFUSE_BASEURL`), else the SDK default — so a self-hosted setup with keys in env must set `LANGFUSE_HOST`, or traces go to Langfuse cloud.
+- **The dashboard and the hub listen on `127.0.0.1` only.** Before, they listened on all interfaces and sent `Access-Control-Allow-Origin: *`. Now LAN / phone access (for the hub **and** a per-project dashboard) needs `INSIGHT_FLOW_TRUSTED_HOSTS` (comma-separated host or `host:port`), which also restores the all-interfaces bind. An untrusted `Host` gets `421`, a cross-site write gets `403`, and CORS `*` is gone, so cross-origin browser clients stop working. The dashboard endpoints `/api/config` (it leaked secrets) and `/api/activity` (activity arrives in the SSE snapshot) are removed.
+- **Config paths are confined to the project root and `master.url` must be `http(s)`.** `workDir`, `rolesDir` and `activityEngine.logFile` must resolve inside the project — an absolute path, `../`, or a symlink pointing outside is rejected. Off-root paths or a non-`http(s)` `master.url` now abort every command and `insight-flow init` with a clean error instead of being silently accepted.
+- **A built-in agent override can no longer drop the locked baseline.** An override that would strip the locked security / enforcement / protocol modules is refused at write time, and an existing override file that already drops them now fails to load (which stops the whole user space from loading until it is fixed).
+- **`include.ref` must be a plain `*.md` filename.** A module whose `include` ref has a path (e.g. `docs/x.md` or `../x.md`) now fails validation.
+- **Re-run `insight-flow init` to get full role prompts in the Claude commands.** Old stub commands that insight-flow wrote are upgraded automatically; commands you customised are kept and listed. Existing Cursor skills are replaced only with `init --force` (which also overwrites edited role files).
+
+**Other changes:**
+
+- **Composer `install` is now two-step for executable targets.** A target that emits a hook or MCP server returns `{ needsConfirm: true, … }` and writes nothing until you re-call with `confirm: true` after a human has seen the plan. `install` also fails when required `${VAR}` inputs are missing, and `delete` refuses a definition that is still installed.
 - **Dashboard hardening.** Request bodies are now capped by byte size, and an unknown `/api/*` route returns a JSON `404` (previously it served the `200` SPA shell).
 - **`mr-update` accepts only `http(s)` URLs.** Other schemes are rejected.
 - **`insight-flow master` exits non-zero on a busy port** instead of appearing to start.
 - **The hub service-worker cache is version-stamped**, so a release invalidates the previously cached asset rather than serving a stale one.
 
-> Human sign-off still open: whether the first three items (trust-hooks gate, config confinement, override-baseline refusal) warrant a **major**. By the commit markers they do not → ship as **2.13.0**.
+> Human sign-off still open: whether the "action required" items — above all the two silent ones (`events.hooks`, Langfuse host) — warrant a **major**. By the commit markers they do not → ship as **2.13.0** (recommended by the intent check, with this section in the release notes).
 
 ## Notes
+
+- **Found during re-check 4 fixes, left alone (older docs/code slips, not caused by this release):** composer MCP refuses **every** built-in flow on `update`, but `composer-mcp/index.md` + `tools.md` name only `default` (`composer.ts:219`); `concepts/modules.md` says "eight kinds" but lists nine; `guides/custom-module.md` kinds table lacks `subagent`; README / `configuration.md` describe `master.standalone` wrongly (it disables master integration, `dashboard/server/index.ts:632`) and give `startMasterLocally` the wrong default (effectively `true`, `:636`); `master-server.md` endpoints table lacks `POST /log`, `GET /api/logs`, `/logs`, `/assets/*`; code comment `master/server.ts:230-231` lists only `/p/*` as never cached. Lint: 2 unused `eslint-disable` in `FlowEditor.tsx`. The authoring install prompt never mentions `needsConfirm` (prompt change → own task). Each needs a normal task — ask the human before creating any.
 
 - **Follow-up (outside this release):** the authoring install agent prompt (`packages/taskflow/src/agents/modules/roles/authoring.json`, `authoring-install/identity` + `composer-install-checklist`) says it installs "flows, agents, and modules" and never says a chain needs no install step; an authored chain could reach `install({kind:"chain"})`, which the MCP rejects. Prompt change → needs its own task on the default flow (ask the human before creating it).
 

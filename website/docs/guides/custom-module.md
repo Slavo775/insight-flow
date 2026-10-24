@@ -24,6 +24,9 @@ Every module declares a `kind`. The authorable kinds are:
 | `skill`      | A `.claude/skills/<name>/SKILL.md` file.                    |
 | `bundle`     | A list of other module ids, expanded in place.              |
 
+For an `include`, the `ref` must be a plain `*.md` filename with no directory
+path (`AGENT_SECURITY.md` is fine; `docs/RULES.md` and `../.env` are rejected).
+
 Only `mcp-server`, `hook`, `skill`, and `bundle` emit installable artifacts;
 `section` and `include` are pure prompt text. (`status-transition` and
 `handover` are behavior-as-data and are typically authored on a flow's edges, not

@@ -49,10 +49,41 @@
 - [x] Draft an "Upgrade notes / behaviour changes" section covering: trust-hooks gate (N274); config path confinement + required http(s) `master.url` (N274); built-in override may not drop the locked baseline (N273); composer `install` two-step confirm (N273); dashboard body cap by bytes + JSON 404 on unknown `/api/*` (N284); `mr-update` http(s)-only (N274); `master` exits non-zero on a busy port (N282); versioned hub service-worker cache (N282) — drafted in TASK.md "Release notes (draft)"
 - [ ] Human sign-off: do the three "previously-valid config now fails" items (trust-hooks gate, config confinement, override-baseline refusal) warrant a MAJOR? (by commit markers → no; ship **2.13.0**)
 
+### Docs gaps — re-check 4 (combined branch @ `ed7c116`)
+
+**Blockers (each must be closed):**
+
+- [x] B1 — Release notes (TASK.md): add the N272 trust boundary — dashboard + hub bind `127.0.0.1` unless `INSIGHT_FLOW_TRUSTED_HOSTS` is set; CORS `*` removed; untrusted Host → `421`, cross-site write → `403`; dashboard `/api/config` + `/api/activity` removed
+- [x] B2 — `built-ins/master-server.md`: fix the security model (l.267, l.275-287, endpoints table l.327-340, phone claim l.306-307) + the same phone/`insight-flow ui` gap in `guides/multi-project-master.md` (~l.102-110)
+- [x] B3 — `composer-mcp/index.md` l.93: drop "no per-call human gate"; Safety list adds the install confirm step, `delete` refusing an installed definition, and the override baseline rule
+- [x] B4 — Langfuse host (N274): config `host` is used only when both keys also come from config — fix `configuration.md` (~l.145-152, l.289), `guides/observability.md` (~l.36-43), README (~l.377, l.390); add a release-notes bullet
+
+**Non-blocking (close what is verifiable; leave a note for any skipped):**
+
+- [x] N1 — Release notes accuracy: baseline-dropping override also fails to *load*; `include.ref` must be a plain `*.md` filename; N275 re-run `init` (stubs upgraded, customised kept + listed, Cursor skills need `init --force`); name the confined keys + symlinks
+- [x] N2 — Config reference states the new rejects (`configuration.md` ~l.38, 41, 94, 127; README ~l.343, 346, 356, 609)
+- [x] N3 — Install examples that now return `needsConfirm` (`composer-mcp/tools.md` ~l.126-128, `composer-mcp/index.md` ~l.68, `authoring/index.md` ~l.94)
+- [x] N4 — `composer-mcp/tools.md`: `delete` refuses an installed def; `uninstall` returns `installed: false` when nothing was installed; `update_*` baseline rule
+- [x] N5 — `include.ref` rule in `concepts/modules.md` (~l.29, 49) + `guides/custom-module.md` (~l.21)
+- [x] N6 — `cli/events-and-hooks.md`: approval is per user (`~/.insight-flow/trusted-hooks.json`) — each teammate / CI machine approves; moving the folder clears it
+- [x] N7 — CLI help `cli.ts` ~l.162: `trust-hooks [--yes] [--force]`
+- [x] N8 — `cli/git-and-flow.md` l.23: `mr-update --url` accepts only http(s)
+- [x] N9 — `configuration.md` env-var table: add `INSIGHT_FLOW_TRUSTED_HOSTS`
+- [x] N10 — Root `CLAUDE.md`: add `trust-hooks`; drop the removed `/api/activity`
+- [x] N11 — `guides/cursor.md` ~l.41: existing skills need `init --force` to pick up the new ones
+- [x] N12 — `master-server.md`: busy port → `[hub] port N is already in use`, exit 1; service-worker cache `if-hub-<version>`, old caches removed
+- [x] N13 — Remote master (README ~l.958-969, `configuration.md` ~l.132-133): a remote hub cannot register projects
+- [x] N14 — (optional) troubleshooting: "events.hooks don't run", "421 / can't reach the dashboard from another device", "config error: … must stay inside the project"
+
+### Decision (human) — re-check 4
+
+- [ ] Version: 2.13.0 (recommended, with "action required" notes) or 3.0.0 (`events.hooks` + Langfuse host fail silently)
+- [ ] N266 rides in this release with a pushed-but-not-re-reviewed fix — re-review first, or accept
+
 ### Release steps
 
-- [ ] Docs commit pushed to `feat/N267-flow-chains` (PR #174)
-- [ ] Audit-fix docs (trust-hooks + composer install) committed to `chore/N271-audit-fixes` (PR #175)
+- [x] Docs commit pushed to `feat/N267-flow-chains` (PR #174)
+- [x] Audit-fix docs (trust-hooks + composer install) committed to `chore/N271-audit-fixes` (PR #175) — `ed7c116`
 - [ ] Release check re-run → docs complete → `ready-to-release`
 - [ ] PR #174 merged to `main` (squash, `feat(flows): …` title) → release-please opens the 2.13.0 release PR
 - [ ] Release PR merged (human-approved) → tag `v2.13.0`, npm publish approved + succeeded

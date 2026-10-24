@@ -29,6 +29,29 @@ start.
 
 See [CLI → Events & hooks](../cli/events-and-hooks.md) for what the hooks emit.
 
+## `events.hooks` commands don't run
+
+Shell commands in `events.hooks` (in `taskflow.config.json`) run only after you
+approve them. Until then, each matching event skips them and prints this on
+stderr:
+
+```text
+insight-flow: events.hooks are not trusted for this project — run `insight-flow trust-hooks` to review and approve them
+```
+
+Approval is per user and per project. It is stored in
+`~/.insight-flow/trusted-hooks.json`. Any edit to `events.hooks` needs a new
+approval.
+
+**Fix:** review the commands, then approve them:
+
+```bash
+insight-flow trust-hooks          # lists the commands; exits non-zero without --yes
+insight-flow trust-hooks --yes    # records your approval
+```
+
+See [CLI → Events & hooks](../cli/events-and-hooks.md).
+
 ## Port already in use
 
 insight-flow runs two servers on fixed default ports:
@@ -37,7 +60,9 @@ insight-flow runs two servers on fixed default ports:
 - the **multi-project master** on `6100` (`insight-flow master`, which
   `insight-flow ui` auto-starts).
 
-If another process holds a port, override it:
+When the master's port is taken, `insight-flow master` prints
+`[hub] port <port> is already in use` and exits with code 1. If another process
+holds a port, override it:
 
 ```bash
 insight-flow ui --port 6007        # dashboard on a different port
@@ -49,8 +74,8 @@ You can also set the dashboard port permanently via `server.port` in
 
 ## Dashboard looks stale or shows "This page crashed"
 
-The dashboard is server-rendered HTML with a live Socket.IO connection; a stale
-tab can drift out of sync after a redeploy or a long sleep.
+The dashboard is a React app that gets live updates over a Server-Sent Events
+(SSE) stream; a stale tab can drift out of sync after a redeploy or a long sleep.
 
 **Fix:** hard-refresh the browser (Cmd+Shift+R on macOS, Ctrl+Shift+R on
 Windows/Linux). If that doesn't clear it, stop and restart `insight-flow ui`.
@@ -144,6 +169,44 @@ lock and start again:
 rm ~/.insight-flow/master.lock
 insight-flow master --port 6100
 ```
+
+## Can't reach the dashboard or hub from another device (or you get `421`)
+
+By default the dashboard and the hub listen on `127.0.0.1` only, so another
+device can't connect. A dashboard also answers **`421 untrusted host`** when the request's
+host is not loopback or allowlisted. This happens when you open a project
+through the hub from your phone, but the dashboard was started without the
+allowlist.
+
+**Fix:** set `INSIGHT_FLOW_TRUSTED_HOSTS` to the machine's LAN address. It is a
+comma-separated list of IPs or host names (a `:port` is ignored; write IPv6
+addresses in brackets, like `[fe80::1]`). When it is set, the server listens on
+all interfaces. Set it for every server you start yourself:
+
+```bash
+INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow master
+INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow ui
+```
+
+Dashboards that the hub starts inherit the variable. Only use this on a network
+you trust — see [Master hub → Security](../built-ins/master-server.md#security--lanmobile).
+
+## Config error: `… must stay inside the project`
+
+insight-flow refuses a `taskflow.config.json` whose paths point outside the
+project. Three keys are checked: `workDir`, `rolesDir`, and
+`activityEngine.logFile`. Each must resolve inside the project root, and a
+symlink that leads outside the project is refused too. The command stops with
+an error like:
+
+```text
+error: Taskflow validation error in taskflow.config.json: workDir must stay inside the project (got "../shared")
+error: Taskflow validation error in taskflow.config.json: workDir resolves outside the project via a symlink (got "tasks")
+```
+
+**Fix:** point the key at a path inside the project (relative paths resolve from
+the project root), or remove the symlink. The same check also requires
+`master.url` to be a valid `http(s)` URL.
 
 ## Chain commands fail with `Cannot load chains: …` or `Invalid user-space definition …`
 

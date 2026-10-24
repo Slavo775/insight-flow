@@ -33,14 +33,20 @@ Turn the exporter on in `taskflow.config.json`:
 
 ## 2. Provide credentials
 
-Credentials resolve **config-first, then environment** — read from config if
+The keys resolve **config-first, then environment** — read from config if
 present, otherwise from environment variables:
 
-| Config key                         | Environment fallback                     |
-| ---------------------------------- | ---------------------------------------- |
-| `observability.langfuse.publicKey` | `LANGFUSE_PUBLIC_KEY`                    |
-| `observability.langfuse.secretKey` | `LANGFUSE_SECRET_KEY`                    |
-| `observability.langfuse.host`      | `LANGFUSE_HOST`, then `LANGFUSE_BASEURL` |
+| Config key                         | Environment fallback  |
+| ---------------------------------- | --------------------- |
+| `observability.langfuse.publicKey` | `LANGFUSE_PUBLIC_KEY` |
+| `observability.langfuse.secretKey` | `LANGFUSE_SECRET_KEY` |
+
+**The host follows the keys.** `observability.langfuse.host` is used only when
+**both** keys also come from config. Otherwise the config `host` is ignored and
+the host comes from `LANGFUSE_HOST`, then `LANGFUSE_BASEURL`, then the SDK
+default. This stops a cloned repo from sending your env keys to a host it chose.
+So if you self-host Langfuse and keep the keys in env, set `LANGFUSE_HOST` in env
+as well.
 
 **Keep secrets in the environment, not in committed config.** Set the keys via
 your shell or secret manager and leave the config block at just `enabled: true`:
@@ -48,7 +54,7 @@ your shell or secret manager and leave the config block at just `enabled: true`:
 ```bash
 export LANGFUSE_PUBLIC_KEY="pk-lf-…"
 export LANGFUSE_SECRET_KEY="sk-lf-…"
-export LANGFUSE_HOST="https://cloud.langfuse.com"   # optional; omit for the SDK default
+export LANGFUSE_HOST="https://cloud.langfuse.com"   # set this for self-hosted; omit for the SDK default
 ```
 
 If neither config nor environment supplies **both** a public and a secret key,
