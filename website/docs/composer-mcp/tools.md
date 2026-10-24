@@ -119,13 +119,18 @@ beforehand); inputs still missing come back in `missingInputs` so you can gather
 them before confirming. An install that would apply with inputs still missing
 fails (with `missingInputs`) instead of writing a literal `${VAR}`.
 
+When a secret value is filled into an MCP server config, `install` also adds
+`.mcp.json` to `.gitignore`. If `.mcp.json` is already tracked by git, the result
+carries a `warnings` array that says so.
+
 ### `uninstall(kind, id)`
 
 Remove the target's emitted artifacts, **reference-safe**: an artifact still
 owned by another install target is retained; an `.mcp.json` entry that this
 target overwrote is restored to its snapshot. The definition itself is kept.
 
-The result carries `installed`: `true` when artifacts were removed, `false` (with
+The result carries `installed`: `true` when the target was installed (its
+artifacts are removed, or retained when another target still owns them), `false` (with
 empty `reports`) when the target was not installed — nothing is changed then.
 
 ## Worked example

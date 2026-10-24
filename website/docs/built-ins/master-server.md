@@ -318,6 +318,11 @@ INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow master --port 6100
 # then, on the phone (same Wi-Fi):  http://192.168.0.77:6100/overview
 ```
 
+If a hub is already running (for example one that `insight-flow ui` started
+for you), this command only prints "already running" and the variable has no
+effect. Stop that hub first — its pid is in `~/.insight-flow/master.lock` — then
+start it again with the variable.
+
 The startup log prints a `LAN:` line for each allowlisted host. With this set,
 **New project** and **Refresh** work from the phone. **Start** and **Open** work
 for dashboards that the hub starts, because they inherit the variable.
@@ -350,8 +355,8 @@ unknown path returns `404`.
 
 | Method | Path | Purpose | Guard |
 | --- | --- | --- | --- |
-| any | `/project/<projectId>/*` | Reverse-proxy a running dashboard | `GET`/`HEAD`: trusted-local or a top-level navigation; other methods: trusted-action (403 otherwise). Proxy target must be loopback; `/hub/*` blocked |
-| `GET` | `/p/<id>/*` | 301-redirect to `/project/…` (`no-store`) | trusted-local or a top-level navigation (403 otherwise) |
+| any | `/project/<projectId>/*` | Reverse-proxy a running dashboard | `GET`/`HEAD`: trusted-local or a top-level navigation to a trusted Host; other methods: trusted-action (403 otherwise). Proxy target must be loopback; `/hub/*` blocked |
+| `GET` | `/p/<id>/*` | 301-redirect to `/project/…` (`no-store`) | trusted-local or a top-level navigation to a trusted Host (403 otherwise) |
 | `GET` | `/events` | Overview SSE (`project-update` frames) | trusted-local (403 otherwise) |
 | `POST` | `/api/register` | Dashboard self-register → `{ id, token }` | loopback-only + trusted-local |
 | `POST` | `/api/projects/:id/update` | Push a project's full state | per-project token |

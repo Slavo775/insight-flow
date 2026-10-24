@@ -75,6 +75,20 @@
 - [x] N13 — Remote master (README ~l.958-969, `configuration.md` ~l.132-133): a remote hub cannot register projects
 - [x] N14 — (optional) troubleshooting: "events.hooks don't run", "421 / can't reach the dashboard from another device", "config error: … must stay inside the project"
 
+### Docs gaps — re-check 5 (`bf4af8e`)
+
+- [x] G1 (blocker) — `packages/taskflow/README.md` ~l.667: drop "Tools run autonomously"; `install` of a hook / MCP-server target returns `{ needsConfirm, plan }` and writes nothing until re-called with `confirm: true`
+- [x] G2 — Release notes: only the dashboard answers `421` for an untrusted Host; the hub answers `403` on its guarded routes
+- [x] G6 — Release notes + docs: markdown views drop `<img>` and HTML responses carry a CSP (`img-src 'self' data:`), so images in task docs no longer show; install gitignores `.mcp.json` when a secret is substituted into an MCP config (warns if tracked) and the MCP `install` result may carry `warnings` (`composer-mcp/tools.md`, `guides/install-engine.md`)
+- [x] R1 — Release notes: a path-style `include.ref` also stops the whole user space from loading (same effect as the baseline override)
+- [x] G3 — `built-ins/master-server.md` endpoints table: "top-level navigation **to a trusted Host**"
+- [x] G4 — `guides/cursor.md`: `--force` overwrites role files only when Claude is also scaffolded
+- [x] G5 — README ~l.56: re-running `init` upgrades insight-flow's own old command stubs and lists customised files it kept
+- [x] G7 — Phone setup (`multi-project-master.md`, `master-server.md`, `troubleshooting.md`): stop an already-running hub first, else the env var has no effect
+- [x] G8 — `composer-mcp/tools.md` `uninstall`: `installed: true` means the target was installed (artifacts removed or retained)
+- [x] G9 — README Events: hook approval is per user
+- [x] G10 — Root `README.md` ~l.250: mention the install confirm step
+
 ### Decision (human) — re-check 4
 
 - [ ] Version: 2.13.0 (recommended, with "action required" notes) or 3.0.0 (`events.hooks` + Langfuse host fail silently)

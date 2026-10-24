@@ -108,6 +108,11 @@ INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow master --port 6100
 # on the phone (same Wi-Fi): http://192.168.0.77:6100/overview  → then "Install app"
 ```
 
+If a hub is already running (for example one that `insight-flow ui` started
+for you), this command only prints "already running" and the variable has no
+effect. Stop that hub first — its pid is in `~/.insight-flow/master.lock` — then
+start it again with the variable.
+
 The hub prints a `LAN:` URL for each allowlisted host on startup.
 
 Dashboards that the hub starts (**`Start →`**) inherit the variable, so they open

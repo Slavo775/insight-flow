@@ -50,6 +50,9 @@ default** — masked in the UI and kept out of logs.
   disk.
 - New values are persisted to a gitignored secrets file so a re-install doesn't
   re-prompt.
+- When a value is filled into an MCP server config, the plain value lands in
+  `.mcp.json`, so install adds `.mcp.json` to `.gitignore` — and warns if the
+  file is already tracked by git.
 - Runtime/build placeholders (`${CLAUDE_PROJECT_DIR}`, `${ARGUMENTS}`,
   `${INSIGHT_FLOW_BIN}`) are **never** treated as inputs — they're left literal.
 

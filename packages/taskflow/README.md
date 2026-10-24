@@ -53,7 +53,7 @@ insight-flow init --editor all      # both
 
 For **Cursor**, each skill is written as `.cursor/skills/<name>/SKILL.md` (invokable as `/<name>` in Cursor's agent chat) and the insight-flow context block is written to the root `AGENTS.md` — the cross-agent rules file Cursor reads. The skill prompts come from the same canonical source as the Claude commands. `--editor cursor` also installs `.cursor/hooks.json` + thin hook scripts so Cursor's lifecycle events (`stop`, `preToolUse`, …) stream into the dashboard — tagged with a `cursor` provider badge — and fire the same OS/browser notifications as Claude. **Done** uses `POST /api/agent-done` (direct browser toast). **Permission required** uses `POST /api/agent-permission` (same pattern) when approval gates fire on `beforeShellExecution` (sensitive shell, e.g. `git push`), `preToolUse` (Shell-like tools), or `beforeMCPExecution` (all MCP). Gates return `{"permission":"ask"}` — never auto-deny. Caveats: Cursor cloud agents don't fire session/prompt-lifecycle hooks (live feed is partial there); Cursor has no native `PermissionRequest` event (unlike Claude), so matchers are insight-flow-defined and tunable in `.cursor/hooks/insight-flow-approval.sh`.
 
-Re-running `init` on an existing project is safe — it skips files that already exist, updates the `insight-flow` section of `CLAUDE.md` / `AGENTS.md`, and always regenerates `AGENT_ENFORCEMENT.md` from the current config.
+Re-running `init` on an existing project is safe — it skips files that already exist (except insight-flow's own old command stubs, which it upgrades; customised files it keeps are listed), updates the `insight-flow` section of `CLAUDE.md` / `AGENTS.md`, and always regenerates `AGENT_ENFORCEMENT.md` from the current config.
 
 ### 3. What init creates
 
@@ -636,7 +636,7 @@ Example — run a script when any task starts and send a desktop notification wh
 }
 ```
 
-Because these are arbitrary shell commands committed with the repo, they will **not fire** until a human reviews and approves them with `insight-flow trust-hooks --yes`. Any edit to `events.hooks` invalidates the approval and must be re-approved. Until approved, insight-flow skips the commands and prints a stderr notice.
+Because these are arbitrary shell commands committed with the repo, they will **not fire** until a human reviews and approves them with `insight-flow trust-hooks --yes`. Any edit to `events.hooks` invalidates the approval and must be re-approved. Approval is stored per user (`~/.insight-flow/trusted-hooks.json`), so each teammate and CI machine approves once. Until approved, insight-flow skips the commands and prints a stderr notice.
 
 ### Project layer (agents · flow · install)
 
@@ -664,7 +664,7 @@ Composed agents can contribute more than prompt text: `mcp-server`, `hook`, and 
 }
 ```
 
-The built-in `mcp-composer` module writes exactly that entry — install it (or add it to a flow's `install` list) instead of hand-editing `.mcp.json`. Tools run autonomously; locked modules and the default flow are refused, and uninstall/delete stay reference-safe. Full tool reference: the [Composer MCP docs](https://slavo775.github.io/insight-flow/docs/composer-mcp/).
+The built-in `mcp-composer` module writes exactly that entry — install it (or add it to a flow's `install` list) instead of hand-editing `.mcp.json`. Most tools run without a per-call gate; `install` of a target that emits a hook or MCP server returns `{ needsConfirm, plan }` and writes nothing until it is called again with `confirm: true`. Locked modules and the default flow are refused, and uninstall/delete stay reference-safe. Full tool reference: the [Composer MCP docs](https://slavo775.github.io/insight-flow/docs/composer-mcp/).
 
 ### Finding MCP servers when authoring
 

@@ -188,6 +188,9 @@ INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow master
 INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow ui
 ```
 
+If a hub is already running (for example one that `insight-flow ui` started), the
+`master` command only prints "already running" and the variable has no effect —
+stop that hub first (see [The master server won't start](#the-master-server-wont-start)).
 Dashboards that the hub starts inherit the variable. Only use this on a network
 you trust — see [Master hub → Security](../built-ins/master-server.md#security--lanmobile).
 
