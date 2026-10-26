@@ -74,6 +74,9 @@ Update an existing definition:
   **variant** instead, so shipped defaults stay read-only and upgradable.
 - **Locked module** → refused.
 - **The `default` flow** → refused over MCP (use the dashboard).
+- **Built-in agent override** → must keep the agent's locked baseline modules
+  (`security`, `enforcement`, `protocol`). An override that drops any of them is
+  refused with `400`.
 - **A flow a chain uses** → refused when the edit would break the chain (for
   example, it drops a terminal status a link starts from).
 
@@ -87,9 +90,14 @@ refused with `409` (and the referencing ids) while another definition still
 references it; locked modules are refused. This removes the *definition* — to
 remove its emitted artifacts instead, use `uninstall`.
 
+A module, agent, or flow that is still **installed** is refused (code
+`installed`): `uninstall` it first, then `delete`. This keeps its hooks and
+`.mcp.json` entries from being left behind with no definition. Chains have no
+install step, so this check does not apply to them.
+
 ## Install / uninstall
 
-### `install(kind, id, force?)`
+### `install(kind, id, force?, confirm?, values?)`
 
 Emit the target's artifacts into the project: MCP servers → `.mcp.json`, hooks →
 `.claude/settings.json`, skills/commands → `.claude/`. Set `force: true` to
@@ -97,11 +105,34 @@ overwrite a conflicting `.mcp.json` entry — the prior value is snapshotted so 
 later `uninstall` can restore it. Without `force`, a genuine conflict returns the
 installed-vs-incoming diff.
 
+**Two-step confirm for executable artifacts.** A target whose plan emits a **hook**
+or an **MCP server** persists a shell command / server into `.claude/settings.json`
+or `.mcp.json` that will run in the user's *future* Claude sessions. For such
+targets `install` first returns `{ needsConfirm: true, kind, id, plan, missingInputs }`
+and writes **nothing**; re-call with `confirm: true` — after a human has seen the
+plan — to actually apply it. This stops a prompt-injected agent from silently
+persisting a shell hook or MCP server. Targets that emit no hook / MCP server
+(e.g. skills, commands) apply directly, no confirm needed.
+
+Pass `values` to supply any `${VAR}` inputs the plan needs (or store them
+beforehand); inputs still missing come back in `missingInputs` so you can gather
+them before confirming. An install that would apply with inputs still missing
+fails (with `missingInputs`) instead of writing a literal `${VAR}`.
+
+When a filled `${VAR}` value (secret or not) is used in an MCP server config,
+`install` also adds `.mcp.json` and `.insight-flow/secrets.local.json` to
+`.gitignore`. If `.mcp.json` is already tracked by git, the result carries a
+`warnings` array that says so.
+
 ### `uninstall(kind, id)`
 
 Remove the target's emitted artifacts, **reference-safe**: an artifact still
 owned by another install target is retained; an `.mcp.json` entry that this
 target overwrote is restored to its snapshot. The definition itself is kept.
+
+The result carries `installed`: `true` when the target was installed (its
+artifacts are removed, or retained when another target still owns them), `false` (with
+empty `reports`) when the target was not installed — nothing is changed then.
 
 ## Worked example
 
@@ -112,7 +143,15 @@ list({ "kind": "flow" })
 // author a module, then install it
 create_module({ "def": { "id": "custom:my-linter", "title": "My linter MCP",
   "kind": "mcp-server", "name": "my-linter", "config": { "command": "my-linter", "args": ["--stdio"] } } })
+
+// it emits an MCP server, so the first call only returns the plan (nothing is written)
 install({ "kind": "module", "id": "custom:my-linter" })
+// → { "needsConfirm": true, "kind": "module", "id": "custom:my-linter",
+//     "plan": [{ "kind": "mcp", "key": "my-linter", "label": "MCP server: my-linter", "target": ".mcp.json" }],
+//     "missingInputs": [] }
+
+// a human checks the plan, then apply it
+install({ "kind": "module", "id": "custom:my-linter", "confirm": true })
 
 // later, back it out cleanly
 uninstall({ "kind": "module", "id": "custom:my-linter" })

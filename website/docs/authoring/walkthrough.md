@@ -16,6 +16,9 @@ worked example: **authoring a custom module**. It assumes the flow is installed
 /task-authoring-analyze "I want a module that adds our team's PR checklist to the git agent"
 ```
 
+For a fuller request, start from a template in the
+[prompt cookbook](./prompt-templates.md).
+
 The **analyst** works a fixed method — **intent** (a whole flow, a chain of flows,
 one agent, or one module) → **goal** → design **top-down** (flow → agents → modules) → **reuse** →
 **impact** → **MCP discovery** — and fans out to the read-only per-kind analyst
@@ -117,7 +120,8 @@ if validation fails it **rolls back** (uninstall) and hands back to the implemen
 (`fix-needed`); if a fix would touch a setting unrelated to your task (e.g.
 overwrite an existing `.mcp.json` entry), it **stops for your approval** first; a
 missing `${VAR}` secret is reported so you can add it (install UI or
-`.insight-flow/secrets.local.json`) and retry.
+`.insight-flow/secrets.local.json`) and retry (if you create that file by hand,
+make sure `.insight-flow/secrets.local.json` is in `.gitignore`).
 
 ---
 

@@ -5,7 +5,52 @@ import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { exec, spawn } from "node:child_process";
 import { SseTransport, type Transport } from "../../core/transport.js";
-import { sendJson, readBody, serveStaticFile, MIME } from "../../core/http-util.js";
+import {
+  sendJson,
+  readBody,
+  serveStaticFile,
+  MIME,
+  escHtml,
+  isHostTrusted,
+  isLoopbackPeer,
+  isTrustedLocalRequest,
+  isTrustedHost,
+  headerHost,
+  trustedHostSet,
+  listenHost,
+} from "../../core/http-util.js";
+
+// N274 (A38) — security headers for every HTML response. CSP is defense-in-depth
+// behind the markdown sanitizer: `img-src 'self' data:` stops a remote-image
+// beacon from agent-written task docs, object/base/frame-ancestors curb
+// embedding + clickjacking.
+// ponytail: `'unsafe-inline'` for script/style — styled-components injects
+// <style> tags and the Vite bundle isn't nonce'd here; tighten with a nonce if a
+// stricter policy is ever needed.
+const HTML_SECURITY_HEADERS: Record<string, string> = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+};
+function htmlHeaders(frameSrc?: string): Record<string, string> {
+  const csp = [
+    "default-src 'self'",
+    "img-src 'self' data:",
+    "style-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'unsafe-inline'",
+    "connect-src 'self'",
+    "font-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'self'",
+    `frame-src ${frameSrc ?? "'none'"}`,
+  ].join("; ");
+  return {
+    "Content-Type": MIME[".html"],
+    "Content-Security-Policy": csp,
+    ...HTML_SECURITY_HEADERS,
+  };
+}
 import type { TaskflowConfig, HookEventInput, ActivityEvent } from "../../core/types.js";
 import { getWorkDir, setDefaultFlow } from "../../core/config.js";
 import { claudeStatusFromProjectStatus } from "../../core/activity-status.js";
@@ -47,7 +92,12 @@ import {
 } from "../../agents/emit.js";
 import { resolveProjectRoot } from "../../core/paths.js";
 import { writeServerPortPointer, clearServerPortPointer } from "../../core/global-config.js";
-import { readSecrets, writeSecrets, ensureGitignored, scrubSecrets } from "../../core/secrets.js";
+import {
+  readSecrets,
+  writeSecrets,
+  ensureMcpGitignored,
+  scrubSecrets,
+} from "../../core/secrets.js";
 import { loadUserRegistries, mergedChains } from "../../agents/user-registry.js";
 import { definitionRevision, handleCustomDefsRequest } from "./custom-defs.js";
 import type { Project } from "../../agents/project.js";
@@ -182,6 +232,22 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
   if (platform === "darwin" || platform === "win32") {
     try {
       const w = watch(workDir, { recursive: true }, () => onChange());
+      // N282 (A50) — a watcher 'error' (EPERM/ENOSPC/EMFILE) must not crash the
+      // process; log once and drop the watcher.
+      w.on("error", (e) => {
+        // #1 — the recursive watcher has no polling fallback, so live file-change
+        // SSE stops until restart; say so rather than fail silently.
+        console.error(
+          "[dashboard] file watcher error:",
+          (e as Error).message,
+          "— restart the dashboard to resume live updates",
+        );
+        try {
+          w.close();
+        } catch {
+          /* ignore */
+        }
+      });
       watchers.add(w);
       return {
         close: () => {
@@ -197,6 +263,18 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
   const rootWatcher = watch(workDir, { recursive: false }, () => {
     onChange();
     refreshSubdirs();
+  });
+  rootWatcher.on("error", (e) => {
+    console.error(
+      "[dashboard] root watcher error:",
+      (e as Error).message,
+      "— restart the dashboard to resume live updates",
+    );
+    try {
+      rootWatcher.close();
+    } catch {
+      /* ignore */
+    }
   });
   watchers.add(rootWatcher);
 
@@ -220,6 +298,15 @@ function watchWorkDir(workDir: string, onChange: () => void): WatchSession {
       if (subdirWatchers.has(dir)) continue;
       try {
         const w = watch(dir, { recursive: false }, () => onChange());
+        w.on("error", () => {
+          try {
+            w.close();
+          } catch {
+            /* ignore */
+          }
+          subdirWatchers.delete(dir);
+          watchers.delete(w);
+        });
         subdirWatchers.set(dir, w);
         watchers.add(w);
       } catch {
@@ -293,7 +380,9 @@ function findMasterBin(): string | null {
 }
 
 async function waitForMaster(port: number): Promise<boolean> {
-  const url = `http://localhost:${port}/overview`;
+  // N272 — 127.0.0.1, not `localhost`: the master binds loopback IPv4 by default,
+  // and `localhost` can resolve to ::1 first (older Node) → ECONNREFUSED here.
+  const url = `http://127.0.0.1:${port}/overview`;
   for (let i = 0; i < 10; i++) {
     await new Promise<void>((r) => setTimeout(r, 300));
     try {
@@ -542,7 +631,7 @@ async function setupMasterIntegration(
   const masterCfg = config.master;
   if (masterCfg?.standalone) return null;
 
-  const masterUrl = masterCfg?.url ?? "http://localhost:6100";
+  const masterUrl = masterCfg?.url ?? "http://127.0.0.1:6100";
   const masterPort = masterCfg?.port ?? 6100;
   const startLocally = masterCfg?.startMasterLocally !== false;
 
@@ -568,7 +657,12 @@ async function setupMasterIntegration(
 
   // Register with master (N214 — send our project path so the hub can reconcile
   // a seeded/bulk-ui entry by path, and receive our per-project token).
-  const projectUrl = `http://localhost:${serverPort}`;
+  // N272 — advertise 127.0.0.1 (not `localhost`): the master reaches this URL
+  // server-to-server, and with the server bound to 127.0.0.1 a `localhost` that
+  // resolves to ::1 first could fail to connect on older Node. The dashboard is
+  // only ever reached directly by the master on the same machine, so an explicit
+  // loopback IPv4 host is always correct.
+  const projectUrl = `http://127.0.0.1:${serverPort}`;
   let projectPath: string | undefined;
   try {
     projectPath = resolveProjectRoot();
@@ -744,7 +838,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
     }
   }
 
-  const masterUrl = config.master?.url ?? "http://localhost:6100";
+  const masterUrl = config.master?.url ?? "http://127.0.0.1:6100";
 
   // Master integration — runs async, non-blocking
   let pushToMaster: (() => void) | null = null;
@@ -757,12 +851,55 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   function dispatch(req: IncomingMessage, res: ServerResponse): void {
     const url = new URL(req.url || "/", "http://localhost:" + serverPort);
 
+    // N272 — trust gate (the same check the hub uses, from core/http-util). Runs
+    // before everything, incl. the SSE handoff, so no route is reachable
+    // cross-origin or from the LAN by default.
+    //  - Behind the hub proxy the real peer is the hub's loopback socket and the
+    //    browser's Host was rewritten, so honor the hub's `X-Forwarded-Host` —
+    //    but only from a loopback peer, so a direct LAN caller can't forge it.
+    //  - Every request: the (effective) Host must be loopback/allowlisted, else
+    //    421 — defeats DNS rebinding.
+    //  - Non-GET: also require same-origin (no foreign Origin, no cross-site
+    //    Sec-Fetch), else 403 — defeats CSRF. A cross-site POST, incl. a
+    //    text/plain "simple request", always carries a foreign Origin, so this
+    //    closes the hook-install chain without needing a Content-Type check.
+    // N272 fix (review blocker 1): validate the REAL peer Host FIRST — a browser
+    // page (a loopback peer) that rebinds a hostname to 127.0.0.1 could otherwise
+    // send `X-Forwarded-Host: localhost` and overwrite its own untrusted Host
+    // before this check, re-opening the read side of the gate. Only AFTER the
+    // real Host passes do we honor a forwarded host, and only one that is itself
+    // trusted (the hub forwards the browser's already-validated Host).
+    if (!isHostTrusted(req)) {
+      sendJson(res, 421, { error: "untrusted host" });
+      return;
+    }
+    const fwdHost = req.headers["x-forwarded-host"];
+    if (typeof fwdHost === "string" && fwdHost && isLoopbackPeer(req)) {
+      if (!isTrustedHost(headerHost(fwdHost), trustedHostSet())) {
+        sendJson(res, 421, { error: "untrusted host" });
+        return;
+      }
+      req.headers.host = fwdHost;
+    }
+    const method = req.method ?? "GET";
+    if (
+      method !== "GET" &&
+      method !== "HEAD" &&
+      method !== "OPTIONS" &&
+      !isTrustedLocalRequest(req)
+    ) {
+      sendJson(res, 403, { error: "forbidden" });
+      return;
+    }
+
     // N83: native SSE stream (replaced socket.io). Hand matching requests off
     // to the transport, which takes over the response and keeps it open.
     if (transport.handleRequest(req, res)) return;
 
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+    // N272 — removed `Access-Control-Allow-Origin: *` / `-Allow-Methods`: the SPA
+    // is same-origin and the hub proxies same-origin, so nothing legitimately
+    // reads the dashboard cross-origin. Keeping ACAO would let any website read
+    // every task shard, doc and the activity SSE stream.
 
     // N214/N218 — GET /health: liveness + identity, always readable (localhost).
     // The master's startup handshake probes this WITHOUT our token (a fresh
@@ -868,7 +1005,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     // /config — project config viewer
     if (url.pathname === "/config") {
-      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.writeHead(200, htmlHeaders());
       res.end(getConfigPageHtml(config));
       return;
     }
@@ -885,6 +1022,18 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         ":root{--bg:#0a0a0a;--surface:#141414;--border:#262626;--text:#e5e5e5;--text-muted:#737373;--accent:#3b82f6}" +
         getNavCss() +
         ".top-nav{margin:0;top:0;}";
+      // N274 (A78) — masterUrl comes from config; only embed an http(s) origin,
+      // escaped, so a cloned `master.url` can't break out of the attribute and
+      // inject markup. frame-src is scoped to that same origin.
+      // N272 — browser-facing default is `localhost:6100` (not the 127.0.0.1 used
+      // for server-to-server registration) so the embedded overview shares the
+      // hub's own origin — SW/Notification state is per-origin, else it double-
+      // notifies. An explicit `master.url` is respected for both.
+      const masterBrowserUrl = config.master?.url ?? "http://localhost:6100";
+      const safeMaster = /^https?:\/\//i.test(masterBrowserUrl)
+        ? masterBrowserUrl
+        : "http://localhost:6100";
+      const masterOrigin = new URL(safeMaster).origin;
       const iframeHtml =
         '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
@@ -894,10 +1043,10 @@ export function startServer(config: TaskflowConfig, port?: number): void {
         "</head><body>" +
         getNavHtml(config.projectName || "", "overview") +
         '<iframe src="' +
-        masterUrl +
+        escHtml(safeMaster) +
         '/overview" style="width:100%;height:calc(100vh - 48px);border:none;display:block"></iframe>' +
         "</body></html>";
-      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.writeHead(200, htmlHeaders(masterOrigin));
       res.end(iframeHtml);
       return;
     }
@@ -914,11 +1063,21 @@ export function startServer(config: TaskflowConfig, port?: number): void {
 
     if (url.pathname.startsWith("/api/work-tasks/")) {
       const fileName = url.pathname.replace("/api/work-tasks/", "");
-      if (fileName.includes("..") || fileName.includes("/")) {
+      // N272 — only `*.json` files directly in workDir. The old `..`/`/` denylist
+      // missed Windows drive-relative names (`C:x`) and non-JSON files at the
+      // workDir root. Allow a safe JSON basename, then confirm the resolved path
+      // stays inside workDir (same guard as /api/task-doc). (No realpath, so a
+      // symlink inside the user's own workDir is not resolved — not a concern:
+      // only the user controls workDir.)
+      if (!/^[\w.-]+\.json$/.test(fileName)) {
         sendJson(res, 400, { error: "Invalid filename" });
         return;
       }
       const filePath = resolve(workDir, fileName);
+      if (!filePath.startsWith(resolve(workDir) + sep)) {
+        sendJson(res, 400, { error: "Invalid filename" });
+        return;
+      }
       if (!existsSync(filePath)) {
         sendJson(res, 404, { error: "File not found" });
         return;
@@ -938,18 +1097,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    if (url.pathname === "/api/activity") {
-      sendJson(res, 200, activity.getRecentEvents());
-      return;
-    }
+    // N284 (A65) — `/api/activity` removed: it had no client caller (activity is
+    // delivered in the SSE snapshot's recentActivity). The /logs + status surfaces
+    // cover the rest.
 
-    if (url.pathname === "/api/config") {
-      // TaskflowConfig has no sensitive fields; if a secret key is ever added,
-      // filter it here before serialising rather than relying on CORS alone.
-      res.writeHead(200, { "Content-Type": MIME[".json"] });
-      res.end(JSON.stringify(config, null, 2));
-      return;
-    }
+    // N272 — `/api/config` removed: it returned the whole TaskflowConfig, which
+    // can include `observability.langfuse.secretKey` and the `events.hooks` shell
+    // commands. No caller in src/ or test/ used it (the /config HTML page is
+    // server-rendered). If a client ever needs config, add a field-filtered route.
 
     // N172 — undo an install overwrite: restore a `.mcp.json` server entry to its
     // prior config. POST { name, config }.
@@ -1098,10 +1253,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             if (v !== undefined) values[inp.name] = v;
             if (submitted[inp.name] !== undefined) toPersist[inp.name] = submitted[inp.name];
           }
-          if (Object.keys(toPersist).length) {
-            writeSecrets(projectRoot, toPersist);
-            ensureGitignored(projectRoot);
-          }
+          // N273 (A36) — the submitted secrets are persisted AFTER a successful
+          // apply (see below), not here, so a failed/conflicting install never
+          // writes the user's keys to disk.
           secretValues = [
             ...required.filter((i) => i.secret).map((i) => values[i.name]),
             ...Object.values(stored),
@@ -1138,6 +1292,26 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             { INSIGHT_FLOW_BIN: "insight-flow", ...values },
             { force: parsed.force === true },
           );
+          // N273 (A36) — apply succeeded. Ensure .mcp.json is gitignored whenever
+          // a secret-substituted server was written — even a re-install that
+          // reused only stored secrets writes one (review #4) — then persist any
+          // newly-submitted secrets so a re-install doesn't re-prompt. A failure
+          // HERE must not report the already-applied install as failed (review
+          // #5): the artifacts are on disk, so surface a warning and keep 200.
+          let persistWarning: string | undefined;
+          try {
+            // Review #6 — only when an MCP config actually uses a resolved value.
+            const mcpUsesValue = artifacts.mcpServers.some((m) =>
+              Object.keys(values).some((k) => JSON.stringify(m).includes("${" + k + "}")),
+            );
+            if (mcpUsesValue) {
+              const w = ensureMcpGitignored(projectRoot);
+              if (w) persistWarning = w;
+            }
+            if (Object.keys(toPersist).length) writeSecrets(projectRoot, toPersist);
+          } catch (err) {
+            persistWarning = scrubSecrets((err as Error).message, secretValues);
+          }
           for (const r of reports) {
             transport.emit("install-progress", {
               phase: "step",
@@ -1145,8 +1319,14 @@ export function startServer(config: TaskflowConfig, port?: number): void {
               action: r.action,
             });
           }
-          transport.emit("install-progress", { phase: "done", kind, id, reports });
-          sendJson(res, 200, { ok: true, kind, id, reports });
+          transport.emit("install-progress", {
+            phase: "done",
+            kind,
+            id,
+            reports,
+            warning: persistWarning,
+          });
+          sendJson(res, 200, { ok: true, kind, id, reports, warning: persistWarning });
         } catch (err) {
           if (err instanceof InstallConflictError) {
             transport.emit("install-progress", { phase: "failed", error: err.message });
@@ -1530,11 +1710,19 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       return;
     }
 
-    // N85 cutover: / (and any unmatched route) serves the React SPA shell from
-    // dist/dashboard. The client owns view state; all API/SSE/asset/config routes
-    // above return before reaching this fallthrough.
+    // N284 (A64) — an unknown /api/* path is a JSON 404, not the SPA shell. The
+    // old fallthrough returned 200 + HTML for a mistyped/removed API route, which
+    // a fetch client then tried to JSON.parse.
+    if (url.pathname.startsWith("/api/")) {
+      sendJson(res, 404, { error: "Not found" });
+      return;
+    }
+
+    // N85 cutover: / (and any unmatched NON-api route) serves the React SPA shell
+    // from dist/dashboard. The client owns view state; all API/SSE/asset/config
+    // routes above return before reaching this fallthrough.
     try {
-      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      res.writeHead(200, htmlHeaders());
       res.end(readFileSync(resolve(DASHBOARD_DIR, "index.html"), "utf-8"));
     } catch {
       sendJson(res, 500, { error: "Dashboard build not found. Run `pnpm build`." });
@@ -1551,6 +1739,9 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   if (!serverErrorHandlersInstalled) {
     serverErrorHandlersInstalled = true;
     process.on("unhandledRejection", (reason) => {
+      // N282 (A50) — also print to stderr; forwarding to the hub is a no-op
+      // before registration, so without this the error was invisible.
+      console.error("[dashboard] unhandledRejection:", reason);
       forwardLogToMaster({
         type: "error",
         message: "unhandledRejection: " + String(reason instanceof Error ? reason.message : reason),
@@ -1561,6 +1752,7 @@ export function startServer(config: TaskflowConfig, port?: number): void {
       });
     });
     process.on("uncaughtException", (err) => {
+      console.error("[dashboard] uncaughtException:", err);
       forwardLogToMaster({
         type: "error",
         message: "uncaughtException: " + err.message,
@@ -1664,7 +1856,11 @@ export function startServer(config: TaskflowConfig, port?: number): void {
   // started us on an assigned port. Keyed by project root; cleared on shutdown.
   const portPointerRoot = resolveProjectRoot();
 
-  server.listen(serverPort, () => {
+  // N272 — bind loopback only (127.0.0.1) by default; all interfaces only when
+  // the user opted into LAN access via INSIGHT_FLOW_TRUSTED_HOSTS. A browser
+  // reaching `http://localhost:<port>` still connects via happy-eyeballs.
+  const bindHost = listenHost();
+  const onListen = (): void => {
     writeServerPortPointer(portPointerRoot, serverPort);
     const engineStatus = configEnabled ? "Activity engine ON" : "Activity engine OFF";
     console.log("\n  Taskflow Dashboard\n");
@@ -1701,7 +1897,22 @@ export function startServer(config: TaskflowConfig, port?: number): void {
             : "xdg-open";
       exec(openCmd + " http://localhost:" + serverPort);
     }
+  };
+  // N282 (A50) — a clear message + non-zero exit on a BIND failure (e.g. the
+  // port is already held), instead of an unhandled 'error' that vanishes.
+  // (#4) A post-listen accept error (EMFILE/ENFILE on accept) is logged, not
+  // fatal — only a pre-listen failure exits.
+  server.on("error", (err: NodeJS.ErrnoException) => {
+    const bindFailed = !server.listening;
+    console.error(
+      err.code === "EADDRINUSE"
+        ? `[dashboard] port ${serverPort} is already in use`
+        : `[dashboard] server error: ${err.message}`,
+    );
+    if (bindFailed) process.exit(1);
   });
+  if (bindHost) server.listen(serverPort, bindHost, onListen);
+  else server.listen(serverPort, onListen);
 
   let shuttingDown = false;
   const shutdown = (): void => {

@@ -99,7 +99,8 @@ for "Install app"). Installed, it's one icon that switches between all your
 projects, with **desktop/OS notifications** when a task changes status or Claude
 finishes / needs permission — even while backgrounded.
 
-To reach it from your phone or another device on the LAN, allowlist the machine's
+By default the hub and the dashboards listen on `127.0.0.1` only. To reach the
+hub from your phone or another device on the LAN, allowlist the machine's
 address:
 
 ```bash
@@ -107,7 +108,22 @@ INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow master --port 6100
 # on the phone (same Wi-Fi): http://192.168.0.77:6100/overview  → then "Install app"
 ```
 
+If a hub is already running (for example one that `insight-flow ui` started
+for you), this command only prints "already running" and the variable has no
+effect. Stop that hub first — its pid is in `~/.insight-flow/master.lock` — then
+start it again with the variable.
+
 The hub prints a `LAN:` URL for each allowlisted host on startup.
+
+Dashboards that the hub starts (**`Start →`**) inherit the variable, so they open
+fine on the phone. A dashboard you started yourself with `insight-flow ui`, in a
+shell **without** the variable, answers **`421`** when you open it through the
+hub from the phone. Start that one with the same variable, or stop it and use
+**`Start →`** in the hub:
+
+```bash
+INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow ui
+```
 
 :::warning Trust boundary
 `INSIGHT_FLOW_TRUSTED_HOSTS` means "trust this network." With it set, **any device

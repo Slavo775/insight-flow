@@ -81,8 +81,14 @@ test("init scaffolds slash commands for composer custom agents", () => {
 
   run(dir, ["init", "--editor", "claude", "-y"]);
 
-  const cmd = join(dir, ".claude/commands/greeter.md");
-  assert.ok(existsSync(cmd), "/greeter command scaffolded for the composer custom agent");
+  // N275 (A49) — the command name now matches the installer's deriveCommandName
+  // (`task-<tail>`), so init and `install` no longer scaffold two commands.
+  const cmd = join(dir, ".claude/commands/task-greeter.md");
+  assert.ok(existsSync(cmd), "/task-greeter command scaffolded for the composer custom agent");
+  assert.ok(
+    !existsSync(join(dir, ".claude/commands/greeter.md")),
+    "the old un-prefixed /greeter name is no longer scaffolded",
+  );
   const body = readFileSync(cmd, "utf-8");
   assert.match(body, /@AGENT_SECURITY\.md/, "composed body includes the agent's module");
   assert.match(body, /\$ARGUMENTS/, "command accepts arguments");

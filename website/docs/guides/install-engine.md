@@ -48,8 +48,27 @@ default** — masked in the UI and kept out of logs.
 
 - Submitted values are substituted into the resolved config that's written to
   disk.
-- New values are persisted to a gitignored secrets file so a re-install doesn't
-  re-prompt.
+- New values are saved to `.insight-flow/secrets.local.json` so a re-install
+  doesn't re-prompt. Saving adds that file to `.gitignore` first.
+- If any filled value (secret or not, typed now or reused from the secrets file)
+  is used in an MCP server config, the plain value lands in `.mcp.json`. So
+  install also adds `.mcp.json` to `.gitignore` (only the lines that are
+  missing).
+- `.gitignore` can't help if `.mcp.json` is already tracked by git. The CLI
+  (`insight-flow install-flow`) prints a warning for this, and the composer MCP
+  `install` tool returns it in `warnings`, but the dashboard modal does not show
+  it yet. So after a dashboard install, check:
+
+  ```bash
+  git ls-files .mcp.json
+  ```
+
+  If this prints `.mcp.json`, the file is tracked. Untrack it so your next commit
+  doesn't leak the value:
+
+  ```bash
+  git rm --cached .mcp.json
+  ```
 - Runtime/build placeholders (`${CLAUDE_PROJECT_DIR}`, `${ARGUMENTS}`,
   `${INSIGHT_FLOW_BIN}`) are **never** treated as inputs — they're left literal.
 

@@ -20,7 +20,7 @@ run yourself.
 | Command | Purpose |
 |---------|---------|
 | `push` | Push to the task's branch and update the tracker. Flags: `--id`, `--commit`, `--message`, `--branch`. |
-| `mr-update` | Record the PR/MR URL on the task. Flags: `--id`, `--url`. |
+| `mr-update` | Record the PR/MR URL on the task. Flags: `--id`, `--url` (must be an `http(s)` URL). |
 | `merge` | Merge the branch to the main line. Flag: `--id`. |
 | `done` | Mark the task complete. Flag: `--id`. |
 

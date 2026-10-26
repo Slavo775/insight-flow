@@ -1,0 +1,14 @@
+{
+  "taskId": "N287",
+  "reviews": [
+    {
+      "startedAt": "2026-10-26T13:45:20.962Z",
+      "endedAt": "2026-10-26T13:53:31.523Z",
+      "verdict": "approved",
+      "comment": "Fix correct and minimal: writeSecrets gitignores the store for every caller, fails closed, MCP path unchanged; test covers the regression. Non-blocking hardening + pre-existing HIGH leaks via .claude/settings.json and taskflow-managed.json listed for follow-up tasks.",
+      "type": "ai",
+      "by": "task-review",
+      "fix": null
+    }
+  ]
+}

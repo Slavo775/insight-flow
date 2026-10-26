@@ -45,8 +45,10 @@ You rarely start it by hand:
 
 The hub is single-instance: its lock lives at `~/.insight-flow/master.lock`, and
 a second `insight-flow master` prints "already running on port … (pid …)" and
-exits. On start it logs the `Overview:` URL, one `LAN:` URL per trusted host (see
-below), the mode, and the lock path.
+exits. If another program holds the port, it prints
+`[hub] port <port> is already in use` and exits with code `1`. On start it logs
+the `Overview:` URL, one `LAN:` URL per trusted host (see below), the mode, and
+the lock path.
 
 ---
 
@@ -207,7 +209,9 @@ Because the hub is a single origin, it's an installable **Progressive Web App**:
 - **`GET /sw.js`** — a service worker (root scope) that precaches an offline
   shell (`/`, the manifest, icons, and the notification sounds), serves
   navigations network-first with a cached fallback, and **never** caches
-  `/project/*`, `/p/*`, `/api/*`, or `/events`.
+  `/project/*`, `/p/*`, `/api/*`, or `/events`. The cache is named
+  `if-hub-<version>` (the installed insight-flow version), so a new release
+  starts a fresh cache; older caches are deleted when the new worker activates.
 - **`GET /hub-notify.js`** — a shared notification client injected into the
   overview **and** every proxied project page. It registers the service worker,
   requests notification permission once, holds the `/events` stream, and fires a
@@ -264,7 +268,7 @@ via its own `taskflow.config.json` `master` key (`url`, `port`, `standalone`,
 
 | Var | Default | Controls |
 | --- | --- | --- |
-| `INSIGHT_FLOW_TRUSTED_HOSTS` | *(unset)* | Comma-separated hosts allowed to reach the control-plane over the LAN (see below). |
+| `INSIGHT_FLOW_TRUSTED_HOSTS` | *(unset)* | Comma-separated hosts (IPs or host names; a `:port` is ignored) allowed to reach the hub over the LAN. When set, the hub **and** the project dashboards bind all interfaces instead of `127.0.0.1`, and both trust these hosts (see below). |
 | `INSIGHT_FLOW_BROWSE_ROOT` | home folder | Ceiling for the New-project folder browser. |
 | `INSIGHT_FLOW_CONFIG_DIR` | `~/.insight-flow` | Overrides where `hub.json` / port pointers live (power users / tests). |
 
@@ -272,19 +276,30 @@ via its own `taskflow.config.json` `master` key (`url`, `port`, `standalone`,
 
 ## Security & LAN/mobile
 
-The hub binds **all interfaces** and sets `Access-Control-Allow-Origin: *`, so a
-loopback source address alone is not enough to keep a remote page out. Its
-control-plane is protected by header + peer checks:
+The hub and every project dashboard bind **`127.0.0.1` only** by default. They
+bind all interfaces only when `INSIGHT_FLOW_TRUSTED_HOSTS` is set. Neither sends
+`Access-Control-Allow-Origin`, so a page on another site cannot read their
+responses. A web page in your own browser can still reach a loopback port, so
+the hub's control-plane is also protected by header + peer checks:
 
 - **`isTrustedLocalRequest`** — a request passes only if its `Host` (and any
   `Origin`) is loopback (or an allowlisted host), and its `Sec-Fetch-Site`, if
   present, is `same-origin`/`none`. This defeats **DNS rebinding** and **CSRF**.
-  It guards the read endpoints (`/api/hub/projects`, `/api/hub/refresh`).
-- **`isTrustedActionRequest`** — the write/exec endpoints (`/api/fs/list`,
-  `/api/projects/create`, `/api/hub/projects/:id/start`) add a **peer-IP**
-  defense: a non-loopback client is accepted **only** when it targets an
-  explicitly allowlisted host — a forged loopback `Host` from the LAN is
-  rejected.
+  It guards `/events`, `/api/activity/:projectId`, `/p/<id>/*`, and `GET` on
+  `/project/<id>/*`. For `/project/*` and `/p/*`, a top-level navigation (a
+  clicked link or a bookmark) to a trusted `Host` also passes, so deep links
+  work.
+- **`isTrustedActionRequest`** — adds a **peer-IP** defense: a non-loopback
+  client is accepted **only** when it targets an explicitly allowlisted host — a
+  forged loopback `Host` from the LAN is rejected. It guards the write/exec
+  endpoints (`/api/fs/list`, `/api/projects/create`,
+  `/api/hub/projects/:id/start`, and non-`GET` requests to `/project/<id>/*`)
+  and the hub reads `/api/hub/projects`, `/api/hub/refresh`, and `/api/version`.
+- **Dashboards check `Host` too** — a project dashboard answers
+  **`421 untrusted host`** when the `Host` is not loopback or allowlisted. Behind
+  the hub, it checks the browser's original host, which the hub sends in
+  `X-Forwarded-Host`. A non-`GET` request must also pass `isTrustedLocalRequest`
+  (`403` otherwise).
 - **`/api/register` stays loopback-only** (dashboards always register from the
   same machine) — it is *not* widened by the allowlist.
 - **Token privacy** — the client-facing project list strips each project's token,
@@ -303,8 +318,24 @@ INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow master --port 6100
 # then, on the phone (same Wi-Fi):  http://192.168.0.77:6100/overview
 ```
 
+If a hub is already running (for example one that `insight-flow ui` started
+for you), this command only prints "already running" and the variable has no
+effect. Stop that hub first — its pid is in `~/.insight-flow/master.lock` — then
+start it again with the variable.
+
 The startup log prints a `LAN:` line for each allowlisted host. With this set,
-**Open / Start / New project / Refresh** all work from the phone.
+**New project** and **Refresh** work from the phone. **Start** and **Open** work
+for dashboards that the hub starts, because they inherit the variable.
+
+A dashboard you started yourself with `insight-flow ui`, in a shell **without**
+`INSIGHT_FLOW_TRUSTED_HOSTS`, does not trust the phone's host. The hub forwards
+that host in `X-Forwarded-Host`, so the dashboard answers **`421`** and **Open**
+fails on the phone. Start that dashboard with the same variable, or stop it and
+use **Start →** in the hub:
+
+```bash
+INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow ui
+```
 
 :::warning Trust boundary
 `INSIGHT_FLOW_TRUSTED_HOSTS` is an explicit "trust this network" switch. With it
@@ -324,19 +355,19 @@ unknown path returns `404`.
 
 | Method | Path | Purpose | Guard |
 | --- | --- | --- | --- |
-| `GET` | `/project/<projectId>/*` | Reverse-proxy a running dashboard | proxy target must be loopback; `/hub/*` blocked |
-| `GET` | `/p/<id>/*` | 301-redirect to `/project/…` (`no-store`) | — |
-| `GET` | `/events` | Overview SSE (`project-update` frames) | — |
-| `POST` | `/api/register` | Dashboard self-register → `{ id, token }` | loopback-only + trusted |
+| any | `/project/<projectId>/*` | Reverse-proxy a running dashboard | `GET`/`HEAD`: trusted-local or a top-level navigation to a trusted Host; other methods: trusted-action (403 otherwise). Proxy target must be loopback; `/hub/*` blocked |
+| `GET` | `/p/<id>/*` | 301-redirect to `/project/…` (`no-store`) | trusted-local or a top-level navigation to a trusted Host (403 otherwise) |
+| `GET` | `/events` | Overview SSE (`project-update` frames) | trusted-local (403 otherwise) |
+| `POST` | `/api/register` | Dashboard self-register → `{ id, token }` | loopback-only + trusted-local |
 | `POST` | `/api/projects/:id/update` | Push a project's full state | per-project token |
 | `POST` | `/api/projects/:id/status` | Push `claudeStatus` | per-project token |
-| `GET` | `/api/activity/:projectId` | Last 3 activity events | — |
+| `GET` | `/api/activity/:projectId` | Last 3 activity events | trusted-local (403 otherwise) |
 | `GET` | `/api/fs/list?dir=` | New-project folder browser (response includes `hasGit` for the listed dir) | trusted-action |
 | `POST` | `/api/projects/create` | Init + register a project — accepts optional `location: "in-folder" \| "subfolder"` (default `"in-folder"`, in-place) and `gitIgnore: "shared" \| "local"`; re-initing an already-initialized folder returns **409 "already initialized"** | trusted-action |
-| `GET` | `/api/version` | Update check → `{ current, latest, updateAvailable }` (`current` = hub version, `latest` = npm `latest` dist-tag cached ~12h / `null` on failure, `updateAvailable` = `latest > current`) | trusted (403 otherwise) |
-| `GET` | `/api/hub/projects` | Project list (client-safe views) | trusted |
+| `GET` | `/api/version` | Update check → `{ current, latest, updateAvailable }` (`current` = hub version, `latest` = npm `latest` dist-tag cached ~12h / `null` on failure, `updateAvailable` = `latest > current`) | trusted-action (403 otherwise) |
+| `GET` | `/api/hub/projects` | Project list (client-safe views) | trusted-action |
 | `GET` | `/api/hub/live?id&token` | Liveness stream | per-project token |
-| `POST` | `/api/hub/refresh` | On-demand health probe | trusted |
+| `POST` | `/api/hub/refresh` | On-demand health probe | trusted-action |
 | `POST` | `/api/hub/projects/:id/start` | Spawn a stopped dashboard | trusted-action |
 | `GET` | `/manifest.webmanifest`, `/icon*.svg` | PWA manifest + icons | — |
 | `GET` | `/sw.js`, `/hub-notify.js` | Service worker + notify client | — |

@@ -33,13 +33,17 @@ import {
   type ComposedAgent,
 } from "../../agents/compose.js";
 import { BUILTIN_PROJECTS, type Project } from "../../agents/project.js";
+import { installedBuckets } from "../../agents/emit.js";
+import { targetBucketId } from "../../agents/flow-install.js";
 import { clearFlowReferences } from "../../core/config.js";
 import {
   CUSTOM_ID_PREFIX,
   isLockedModuleId,
   isModuleEditLocked,
   loadUserRegistries,
+  lockedBaselineError,
   mergedChains,
+  missingLockedBaseline,
   userSpaceRoot,
   type UserRegistries,
 } from "../../agents/user-registry.js";
@@ -111,11 +115,21 @@ export function validateReferences(
   }
 
   if (kind === "agents") {
+    let resolvedAgent;
     try {
-      resolveModules(record as ComposedAgent, modules);
+      resolvedAgent = resolveModules(record as ComposedAgent, modules);
     } catch (err) {
       return (err as Error).message;
     }
+    // N273 (A18, review blocker 1) — same locked-baseline guard the loader runs,
+    // so an override that drops the security/enforcement/protocol baseline is
+    // rejected at WRITE time (PUT / update_agent) instead of bricking every
+    // later load.
+    const missing = missingLockedBaseline(
+      record as ComposedAgent,
+      resolvedAgent.map((m) => m.id),
+    );
+    if (missing.length) return lockedBaselineError((record as ComposedAgent).id, missing);
     // N191 — declared subagents must resolve to `subagent`-kind modules.
     for (const id of (record as ComposedAgent).subagents ?? []) {
       if (!modules[id]) return `subagents references unknown module '${id}'`;
@@ -183,10 +197,28 @@ function readBody(
 ): void {
   void readBodyRaw(req, res).then((body) => {
     if (body === null) return;
+    let parsed: unknown;
     try {
-      onJson(JSON.parse(body));
+      parsed = JSON.parse(body);
     } catch {
       sendJson(res, 400, { ok: false, error: "invalid JSON" });
+      return;
+    }
+    // N284 (A63) — a failure INSIDE the handler (e.g. EACCES writing the def) is
+    // a 500, not "invalid JSON" as the old single try/catch reported.
+    try {
+      onJson(parsed);
+    } catch (err) {
+      // N284 (#3) — the spec asked for server-side logging on the 500 path. This
+      // route carries definitions (never ${VAR} secrets), so err.message is an
+      // fs/transport message, safe to log on this gated local server.
+      console.error("[custom-defs] handler failed:", err);
+      if (!res.headersSent) {
+        sendJson(res, 500, {
+          ok: false,
+          error: err instanceof Error ? err.message : "internal error",
+        });
+      }
     }
   });
 }
@@ -382,6 +414,10 @@ export function writeDefinition(
   // built-in PUT (eject/override) is always allowed — create-or-update the override.
   // N111 — optimistic-concurrency floor: a PUT carrying the revision it loaded
   // gets rejected when the stored file has changed since.
+  // N284 (A63, #1) — check-then-write is not atomic ACROSS processes (the MCP
+  // server and the dashboard can both write): there is a tiny window between
+  // reading the revision and the write below. Accepted for a single-user local
+  // tool. In-process it is safe: POST creates with O_EXCL, PUT writes tmp+rename.
   if (method === "PUT" && typeof revision === "string" && revision.length > 0) {
     const current = definitionRevision(kind, record.id, root);
     if (current && current !== revision) {
@@ -518,8 +554,31 @@ export function handleCustomDefsRequest(
       sendJson(res, 400, { ok: false, error: "id required" });
       return true;
     }
+    // N273 (A53b, review #9) — same guard as MCP delete: refuse deleting a
+    // still-installed module/agent, whose emitted artifacts (hooks, .mcp.json
+    // entries, commands) would otherwise be orphaned. Projects/chains have no
+    // install step.
+    const targetKind = kind === "modules" ? "module" : kind === "agents" ? "agent" : null;
+    if (
+      targetKind &&
+      installedBuckets(root).has(targetBucketId({ kind: targetKind, id: pathId }))
+    ) {
+      sendJson(res, 409, {
+        ok: false,
+        error: `'${pathId}' is installed — uninstall it first, then delete`,
+        code: "installed",
+      });
+      return true;
+    }
     const result = removeDefinition(kind, pathId, user, root);
-    if (result.status < 300) onChanged?.();
+    // N284 (#5) — a notify (transport.emit) failure must not turn a successful
+    // write/delete into a 500; the def is already persisted.
+    if (result.status < 300)
+      try {
+        onChanged?.();
+      } catch (e) {
+        console.error("[custom-defs] onChanged notify failed:", e);
+      }
     sendJson(res, result.status, result.body);
     return true;
   }
@@ -531,7 +590,14 @@ export function handleCustomDefsRequest(
       revision: typeof sentRevision === "string" ? sentRevision : null,
       pathId,
     });
-    if (result.status < 300) onChanged?.();
+    // N284 (#5) — a notify (transport.emit) failure must not turn a successful
+    // write/delete into a 500; the def is already persisted.
+    if (result.status < 300)
+      try {
+        onChanged?.();
+      } catch (e) {
+        console.error("[custom-defs] onChanged notify failed:", e);
+      }
     sendJson(res, result.status, result.body);
   });
   return true;

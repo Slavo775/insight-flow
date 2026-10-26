@@ -1,0 +1,40 @@
+name: ci
+
+# N276 (A20) — the test/lint/typecheck gate that was missing. Runs on every PR
+# and push to main; make it a REQUIRED status check in branch protection so a
+# red build can't merge (human step — see RELEASING.md).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: typecheck · lint · test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 12.11.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter insight-flow...
+      - name: Role templates are in sync with the canonical root files
+        run: |
+          node packages/taskflow/scripts/sync-role-templates.mjs
+          test -z "$(git status --porcelain -- packages/taskflow/templates/roles)" \
+            || { echo "templates/roles drifted — run scripts/sync-role-templates.mjs"; git status --porcelain -- packages/taskflow/templates/roles; exit 1; }
+      - run: pnpm --dir packages/taskflow run typecheck
+      - run: pnpm --dir packages/taskflow run lint
+      - run: pnpm --dir packages/taskflow test

@@ -2,3 +2,13 @@ packages:
   - 'packages/*'
   - 'playground'
   - 'website'
+
+# Build scripts allowed to run on install. esbuild links its platform binary
+# (it also ships one via its @esbuild/<platform> optional dep, so the build
+# works even when the script is skipped); core-js only prints a funding banner.
+onlyBuiltDependencies:
+  - esbuild
+  - core-js
+# pnpm 12 ERRORS ("ERR_PNPM_IGNORED_BUILDS") on install when any other dep has a
+# build script it did not run. We do not want CI to fail on that — warn instead.
+strictDepBuilds: false

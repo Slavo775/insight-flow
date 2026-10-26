@@ -31,11 +31,93 @@
 - [x] `composer-mcp/index.md` (~l.21–23): chains have no install step
 - [x] (optional nits) troubleshooting: the broken-chain warning prints on every status write of a chained task; `authoring/index.md` intro (~l.8–11, 19) names chains; `concepts/index.md` l.47 "one flow at a time"; README l.208 "a task whose flow is not in the chain moves…"
 
+### Docs gaps — audit fixes (N271–N284), combined-scope re-check (2026-10-24)
+
+**BLOCKER — `trust-hooks` undocumented + `events.hooks` docs describe pre-N274 behaviour.** Configured `events.hooks` shell commands no longer run on `insight-flow log-event` until the human approves the exact hook set via `insight-flow trust-hooks --yes`; the docs still tell users to configure hooks with no mention of the gate, so their hooks silently never fire. Close all four:
+
+- [x] `website/docs/configuration.md` (~l.163-166): the `events.hooks` row/prose must state the commands require `insight-flow trust-hooks` approval first, and re-approval when the hook set changes
+- [x] `packages/taskflow/README.md`: fix the `events.hooks` description + example (~l.619-637) to note the trust gate; add `trust-hooks` to the command-reference block (~l.170-228)
+- [x] `website/docs/cli/events-and-hooks.md`: add `trust-hooks` to the Hooks table and document the gate alongside `events.hooks` (new "## Trusting `events.hooks`" section)
+- [x] `website/docs/cli/index.md` (~l.45): add `trust-hooks` to the Events & Hooks command summary
+
+**NICE-TO-HAVE — composer MCP `install` confirm gate is stale:**
+
+- [x] `website/docs/composer-mcp/tools.md` (~l.92): document the two-step signature — hook / mcp-server targets return `{ needsConfirm, plan }` and write nothing unless re-called with `confirm:true` (verified against composer.ts; include.ref/uninstall claims omitted as unverified)
+
+### Release notes — behaviour changes (upgrade notes, required)
+
+- [x] Draft an "Upgrade notes / behaviour changes" section covering: trust-hooks gate (N274); config path confinement + required http(s) `master.url` (N274); built-in override may not drop the locked baseline (N273); composer `install` two-step confirm (N273); dashboard body cap by bytes + JSON 404 on unknown `/api/*` (N284); `mr-update` http(s)-only (N274); `master` exits non-zero on a busy port (N282); versioned hub service-worker cache (N282) — drafted in TASK.md "Release notes (draft)"
+- [x] Human sign-off: do the three "previously-valid config now fails" items (trust-hooks gate, config confinement, override-baseline refusal) warrant a MAJOR? (by commit markers → no; ship **2.13.0**) — human: **2.13.0** (2026-10-26)
+
+### Docs gaps — re-check 4 (combined branch @ `ed7c116`)
+
+**Blockers (each must be closed):**
+
+- [x] B1 — Release notes (TASK.md): add the N272 trust boundary — dashboard + hub bind `127.0.0.1` unless `INSIGHT_FLOW_TRUSTED_HOSTS` is set; CORS `*` removed; untrusted Host → `421`, cross-site write → `403`; dashboard `/api/config` + `/api/activity` removed
+- [x] B2 — `built-ins/master-server.md`: fix the security model (l.267, l.275-287, endpoints table l.327-340, phone claim l.306-307) + the same phone/`insight-flow ui` gap in `guides/multi-project-master.md` (~l.102-110)
+- [x] B3 — `composer-mcp/index.md` l.93: drop "no per-call human gate"; Safety list adds the install confirm step, `delete` refusing an installed definition, and the override baseline rule
+- [x] B4 — Langfuse host (N274): config `host` is used only when both keys also come from config — fix `configuration.md` (~l.145-152, l.289), `guides/observability.md` (~l.36-43), README (~l.377, l.390); add a release-notes bullet
+
+**Non-blocking (close what is verifiable; leave a note for any skipped):**
+
+- [x] N1 — Release notes accuracy: baseline-dropping override also fails to *load*; `include.ref` must be a plain `*.md` filename; N275 re-run `init` (stubs upgraded, customised kept + listed, Cursor skills need `init --force`); name the confined keys + symlinks
+- [x] N2 — Config reference states the new rejects (`configuration.md` ~l.38, 41, 94, 127; README ~l.343, 346, 356, 609)
+- [x] N3 — Install examples that now return `needsConfirm` (`composer-mcp/tools.md` ~l.126-128, `composer-mcp/index.md` ~l.68, `authoring/index.md` ~l.94)
+- [x] N4 — `composer-mcp/tools.md`: `delete` refuses an installed def; `uninstall` returns `installed: false` when nothing was installed; `update_*` baseline rule
+- [x] N5 — `include.ref` rule in `concepts/modules.md` (~l.29, 49) + `guides/custom-module.md` (~l.21)
+- [x] N6 — `cli/events-and-hooks.md`: approval is per user (`~/.insight-flow/trusted-hooks.json`) — each teammate / CI machine approves; moving the folder clears it
+- [x] N7 — CLI help `cli.ts` ~l.162: `trust-hooks [--yes] [--force]`
+- [x] N8 — `cli/git-and-flow.md` l.23: `mr-update --url` accepts only http(s)
+- [x] N9 — `configuration.md` env-var table: add `INSIGHT_FLOW_TRUSTED_HOSTS`
+- [x] N10 — Root `CLAUDE.md`: add `trust-hooks`; drop the removed `/api/activity`
+- [x] N11 — `guides/cursor.md` ~l.41: existing skills need `init --force` to pick up the new ones
+- [x] N12 — `master-server.md`: busy port → `[hub] port N is already in use`, exit 1; service-worker cache `if-hub-<version>`, old caches removed
+- [x] N13 — Remote master (README ~l.958-969, `configuration.md` ~l.132-133): a remote hub cannot register projects
+- [x] N14 — (optional) troubleshooting: "events.hooks don't run", "421 / can't reach the dashboard from another device", "config error: … must stay inside the project"
+
+### Docs gaps — re-check 5 (`bf4af8e`)
+
+- [x] G1 (blocker) — `packages/taskflow/README.md` ~l.667: drop "Tools run autonomously"; `install` of a hook / MCP-server target returns `{ needsConfirm, plan }` and writes nothing until re-called with `confirm: true`
+- [x] G2 — Release notes: only the dashboard answers `421` for an untrusted Host; the hub answers `403` on its guarded routes
+- [x] G6 — Release notes + docs: markdown views drop `<img>` and HTML responses carry a CSP (`img-src 'self' data:`), so images in task docs no longer show; install gitignores `.mcp.json` when a secret is substituted into an MCP config (warns if tracked) and the MCP `install` result may carry `warnings` (`composer-mcp/tools.md`, `guides/install-engine.md`)
+- [x] R1 — Release notes: a path-style `include.ref` also stops the whole user space from loading (same effect as the baseline override)
+- [x] G3 — `built-ins/master-server.md` endpoints table: "top-level navigation **to a trusted Host**"
+- [x] G4 — `guides/cursor.md`: `--force` overwrites role files only when Claude is also scaffolded
+- [x] G5 — README ~l.56: re-running `init` upgrades insight-flow's own old command stubs and lists customised files it kept
+- [x] G7 — Phone setup (`multi-project-master.md`, `master-server.md`, `troubleshooting.md`): stop an already-running hub first, else the env var has no effect
+- [x] G8 — `composer-mcp/tools.md` `uninstall`: `installed: true` means the target was installed (artifacts removed or retained)
+- [x] G9 — README Events: hook approval is per user
+- [x] G10 — Root `README.md` ~l.250: mention the install confirm step
+
+### Docs gaps — re-check 6 (`5e915a0`)
+
+- [x] H1 (blocker) — `guides/install-engine.md` ~l.53-55 + release notes: the `.mcp.json`-tracked warning is printed by the CLI and returned by MCP in `warnings`, but the dashboard install modal does not show it yet — tell users to check with `git ls-files .mcp.json`
+- [x] H2 — Release notes "Other changes": `init` writes a custom agent's command as `/task-<name>` (was `/<name>`); the old file stays on disk and is no longer updated
+- [x] H3 — Release notes "Other changes": hub notification sounds work again (were empty files in 2.12.0)
+- [x] H4 — Release notes + `guides/install-engine.md` wording: the gitignore step runs when any filled `${VAR}` is used in an MCP config (not only secrets) and also covers `.insight-flow/secrets.local.json`
+- [x] H5 — `guides/cursor.md` ~l.44-46: `init --force` also rewrites `.cursor/hooks.json` and the `.cursor/hooks/insight-flow-*.sh` scripts
+- [x] H6 — `guides/troubleshooting.md` ~l.191-193: "stop that hub first" → `kill <pid>` (pid from `~/.insight-flow/master.lock`)
+- [x] H7 — `packages/taskflow/README.md` ~l.56: "customised **command** files it keeps are listed"
+
+### Docs gaps — re-check 7 (`969fb1d`)
+
+- [x] I1 — `composer-mcp/tools.md` ~l.122-124: "When a secret value is filled into an MCP server config…" → the step runs when any filled `${VAR}` value (secret or not) is used in an MCP config, and adds both `.mcp.json` and `.insight-flow/secrets.local.json` to `.gitignore` (code: `flow-install.ts:337-343`)
+- [x] I2 — `authoring/walkthrough.md` ~l.121-123: if you create `.insight-flow/secrets.local.json` by hand, make sure it is in `.gitignore`
+- [x] I3 — Release notes (TASK.md "Install can edit `.gitignore`" bullet): drop the internal "(N287)" — the regression never shipped
+
+### Decision (human) — re-check 4
+
+- [x] Version: 2.13.0 (recommended, with "action required" notes) or 3.0.0 (`events.hooks` + Langfuse host fail silently) — human: **2.13.0** (2026-10-26)
+- [x] N266 rides in this release with a pushed-but-not-re-reviewed fix — re-review first, or accept — human: **accept as is** (2026-10-26)
+- [x] Secrets-file gitignore regression (N273, hook-only inputs — see TASK.md Notes): fix before 2.13.0 via a normal task, or ship with the documented workaround — human: fix first → N287
+
 ### Release steps
 
-- [ ] Docs commit pushed to `feat/N267-flow-chains` (PR #174)
+- [x] Docs commit pushed to `feat/N267-flow-chains` (PR #174)
+- [x] Audit-fix docs (trust-hooks + composer install) committed to `chore/N271-audit-fixes` (PR #175) — `ed7c116`
 - [ ] Release check re-run → docs complete → `ready-to-release`
 - [ ] PR #174 merged to `main` (squash, `feat(flows): …` title) → release-please opens the 2.13.0 release PR
+- [ ] PR #175: push `chore/N271-audit-fixes`; after #174 merges, `git rebase --onto origin/main a4c0eaa chore/N271-audit-fixes`, retarget #175 to `main`, squash-merge (add the `BEGIN_COMMIT_OVERRIDE` block) — before the 2.13.0 release PR is merged
 - [ ] Release PR merged (human-approved) → tag `v2.13.0`, npm publish approved + succeeded
 - [ ] Rollout: global binary reinstalled; N267 recorded `merged` + `done` on `main`
 

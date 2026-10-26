@@ -1,7 +1,7 @@
 ---
 title: Agents & subagents
 sidebar_label: Agents & subagents
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Agents & subagents reference

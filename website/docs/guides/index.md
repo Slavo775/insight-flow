@@ -49,7 +49,8 @@ problem.
   hooks, and `AGENTS.md`, read the `cursor` provider badge, and understand the
   cloud-agent / approval-gate caveats.
 - [Set up observability (Langfuse)](./observability.md) — opt into Langfuse
-  tracing, resolve credentials config-first then env, and see what gets traced.
+  tracing, resolve keys config-first then env (the host follows the keys), and
+  see what gets traced.
 
 ## In the meantime
 

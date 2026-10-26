@@ -66,7 +66,12 @@ hand-editing `.mcp.json` you can let insight-flow wire itself up:
 ```bash
 # from the dashboard, or over the composer MCP itself:
 #   install(kind="module", id="mcp-composer")
+#   → returns { needsConfirm: true, plan } and writes nothing; after a human checks the plan:
+#   install(kind="module", id="mcp-composer", confirm=true)
 ```
+
+Over MCP this takes two calls, because the module writes an MCP server into
+`.mcp.json` (see [Safety](#safety)).
 
 The `mcp-composer` module ships built-in. It's not in the **default** flow (so a
 normal project doesn't get it automatically), but the built-in **Composer
@@ -90,9 +95,17 @@ registers the `composer` server for you. You can also add it to any custom flow'
 
 ## Safety
 
-The tools run **autonomously** — there is no per-call human gate. The guardrails
-that bound them are the same ones the rest of insight-flow enforces:
+Most tools run **without a per-call human gate**. The one exception is `install`
+of a target that emits a hook or an MCP server: it needs a second call with
+`confirm: true` after a human has seen the plan. The guardrails that bound the
+tools:
 
+- **Install confirm for hooks and MCP servers** — when a target's plan emits a
+  hook or an MCP server, `install` writes **nothing** and returns
+  `{ needsConfirm: true, kind, id, plan, missingInputs }`. Call it again with
+  `confirm: true` to apply it. This stops a prompt-injected agent from quietly
+  adding a shell hook or MCP server that runs in future sessions. Targets with no
+  hook or MCP server (only skills, commands, or subagents) install in one call.
 - **Locked modules** (`security`, `enforcement`, `protocol`, and every
   `status-transition` / `handover` module) are read-only — `update` and `delete`
   refuse them.
@@ -103,5 +116,11 @@ that bound them are the same ones the rest of insight-flow enforces:
   pre-install snapshot rather than deleted.
 - **Delete is reference-safe** — a definition still referenced by another
   definition is refused (with the referencing ids).
+- **Delete refuses an installed definition** — while a module, agent, or flow is
+  still installed, `delete` fails with code `installed`. `uninstall` it first, so
+  its hooks and `.mcp.json` entries are not left behind.
+- **Overrides keep the locked baseline** — an override of a built-in agent cannot
+  drop its `security`, `enforcement`, or `protocol` modules. `update_agent`
+  refuses it, and an existing override file that drops them fails to load.
 
 See the [tool reference](./tools.md) for every tool and its inputs.

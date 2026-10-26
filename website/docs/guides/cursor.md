@@ -39,7 +39,13 @@ defaults to Claude Code. You can also pin the target with `"editor": "cursor"` i
   Claude.
 
 Re-running `init` is safe: it skips files that already exist and refreshes the
-`insight-flow` section of `AGENTS.md`.
+`insight-flow` section of `AGENTS.md`. Because existing skills are skipped, run
+`insight-flow init --force` after an upgrade to get the new skill bodies (from
+2.13.0 they inline the security / enforcement / protocol rules). `--force` also
+overwrites skills you edited, `.cursor/hooks.json`, and the
+`.cursor/hooks/insight-flow-*.sh` scripts (and, when Claude is scaffolded too,
+its role files and commands). `hooks.json` is rewritten whole, so any custom
+hook entries you added to it are lost — back it up and add them again after.
 
 ## 2. The `cursor` provider badge
 

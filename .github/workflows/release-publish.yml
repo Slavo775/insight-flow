@@ -37,25 +37,51 @@ jobs:
       contents: read
       id-token: write # required for OIDC trusted publishing + provenance
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
-          version: 10.12.4
+          version: 12.11.2
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: pnpm
+      # N276 (A22) — refuse to publish from anything but the matching version
+      # tag, or a manual dispatch on main. Without this, a workflow_dispatch from
+      # any feature branch would publish unreviewed code to npm `latest`.
+      - name: Guard publish ref
+        run: |
+          VERSION=$(node -p "require('./packages/taskflow/package.json').version")
+          if [ "$GITHUB_REF" = "refs/tags/v$VERSION" ]; then
+            echo "publishing from release tag v$VERSION"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            echo "manual dispatch from main for v$VERSION"
+          else
+            echo "refusing to publish from $GITHUB_REF (expected refs/tags/v$VERSION or a workflow_dispatch on main)"
+            exit 1
+          fi
       # Trusted Publishing (OIDC) requires npm >= 11.5.1; Node 20 ships npm 10.
-      # Pin to the 11.x line: npm@latest is now v12, whose engine requires
-      # Node >= 22.22 and so aborts with EBADENGINE on this Node 20 runner.
-      # npm 11.x needs Node ^20.17.0 (compatible) and still satisfies OIDC.
+      # Pin an EXACT 11.x: npm@latest is v12 (needs Node >= 22.22 → EBADENGINE on
+      # this Node 20 runner). 11.5.1 satisfies OIDC and runs on Node 20.
       - name: Upgrade npm for OIDC trusted publishing
-        run: npm install -g "npm@^11.5.1"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Pack sanity check (LICENSE present in tarball)
+        run: npm install -g npm@11.5.1
+      - run: pnpm install --frozen-lockfile --filter insight-flow...
+      - run: pnpm --dir packages/taskflow build
+      # N276 (A20) — the tests gate the publish (nothing else runs them in CI yet;
+      # ci.yml covers PRs, this covers the release artifact itself).
+      - run: pnpm --dir packages/taskflow run test:node
+      # N276 (A65) — verify the tarball has the required files AND no zero-byte
+      # binaries (the old `grep LICENSE` gate let two empty mp3s ship since 2.0.0).
+      - name: Pack sanity check
         working-directory: packages/taskflow
-        run: npm pack --dry-run 2>&1 | grep -q "LICENSE" || { echo "LICENSE missing from package tarball"; exit 1; }
+        run: |
+          npm pack --dry-run --json --ignore-scripts > /tmp/pack.json
+          node -e '
+            const files = require("/tmp/pack.json")[0].files.map((f) => ({ p: f.path, s: f.size }));
+            const need = ["LICENSE", "README.md", "dist/cli.js", "dist/index.js", "dist/dashboard/index.html", "dist/sounds/idle-ping.mp3", "dist/sounds/permission-alert.mp3", "templates/roles/TASK_IMPLEMENTER_ROLE.md", "schema/task.schema.json"];
+            for (const n of need) if (!files.some((f) => f.p === n)) { console.error("missing " + n); process.exit(1); }
+            for (const f of files) if (/\.(mp3|png|woff2?|ttf|ico|wasm)$/.test(f.p) && f.s === 0) { console.error("empty binary " + f.p); process.exit(1); }
+            console.log("pack ok: " + files.length + " files");
+          '
       - name: Publish to npm (OIDC + provenance)
         working-directory: packages/taskflow
         run: npm publish --provenance --access public

@@ -92,7 +92,12 @@ subagents, the **composer MCP** (`mcp-composer`), and the **activity engine**:
 ```text
 # from the dashboard (Flows → Composer authoring → Install), or over the MCP:
 install(kind="flow", id="composer-authoring")
+# → returns { needsConfirm: true, plan } and writes nothing; after you check the plan:
+install(kind="flow", id="composer-authoring", confirm=true)
 ```
+
+Over the MCP this takes two calls: the flow emits hooks and an MCP server, so the
+first call only shows the plan (see [Composer MCP → Safety](../composer-mcp/index.md#safety)).
 
 That emits, into your project:
 
@@ -108,5 +113,7 @@ Open a fresh session so the subagents load, then start with
 
 - [Walkthrough](./walkthrough.md) — install → analyze → … → install, with a
   worked example (author a custom module).
+- [Prompt cookbook](./prompt-templates.md) — copy-paste analyze prompts for a
+  module, an agent, or a flow (with handovers).
 - [Agents & subagents reference](./agents-and-subagents.md) — what each agent and
   subagent does (and doesn't).

@@ -345,7 +345,13 @@ export const AgentModuleSchema = z.discriminatedUnion("kind", [
   z.object({
     ...agentModuleBase,
     kind: z.literal("include"),
-    ref: z.string().min(1),
+    // N273 — a safe filename only (no path separators, no `..`): the ref becomes
+    // `@<ref>` in a prompt and is resolved against the roles dir, so an
+    // unrestricted string like `../../.env` could pull an arbitrary file into an
+    // agent prompt. Every shipped include is an `AGENT_*.md` basename.
+    ref: z
+      .string()
+      .regex(/^[A-Za-z0-9_.-]+\.md$/, "ref must be a plain *.md filename (no path separators)"),
   }),
   // MCP-server module: merged into the project's .mcp.json under
   // `mcpServers[name]`, deduped by name (same-name different-config errors).
@@ -774,7 +780,18 @@ export class TaskflowValidationError extends Error {
   readonly expected: string;
   readonly received: string;
 
-  constructor(file: string, error: ZodError) {
+  constructor(file: string, error: ZodError | string) {
+    // N274 — allow a plain message (non-Zod config checks, e.g. path confinement)
+    // so these surface as a clean `error: …` line via cli.ts, not a stack trace.
+    if (typeof error === "string") {
+      super(`Taskflow validation error in ${file}: ${error}`);
+      this.name = "TaskflowValidationError";
+      this.file = file;
+      this.issuePath = "(root)";
+      this.expected = "valid value";
+      this.received = "invalid";
+      return;
+    }
     const issue = error.issues[0];
     const issuePath = issue?.path.join(".") || "(root)";
     const expected = issue && "expected" in issue ? String(issue.expected) : "valid value";
