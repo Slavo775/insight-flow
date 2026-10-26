@@ -103,7 +103,7 @@
 
 - [ ] Version: 2.13.0 (recommended, with "action required" notes) or 3.0.0 (`events.hooks` + Langfuse host fail silently)
 - [ ] N266 rides in this release with a pushed-but-not-re-reviewed fix — re-review first, or accept
-- [ ] Secrets-file gitignore regression (N273, hook-only inputs — see TASK.md Notes): fix before 2.13.0 via a normal task, or ship with the documented workaround
+- [x] Secrets-file gitignore regression (N273, hook-only inputs — see TASK.md Notes): fix before 2.13.0 via a normal task, or ship with the documented workaround — human: fix first → N287
 
 ### Release steps
 

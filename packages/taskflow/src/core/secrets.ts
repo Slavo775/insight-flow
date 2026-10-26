@@ -31,6 +31,9 @@ export function readSecrets(projectRoot: string): Record<string, string> {
  */
 export function writeSecrets(projectRoot: string, values: Record<string, string>): void {
   if (!Object.keys(values).length) return;
+  // N287 — gitignore the store before a secret lands in it, for every caller
+  // (a hook-only input never reaches the MCP-only ensureMcpGitignored path).
+  ensureGitignored(projectRoot, [SECRETS_PATH]);
   const path = join(projectRoot, SECRETS_PATH);
   let current: Record<string, string> = {};
   if (existsSync(path)) {

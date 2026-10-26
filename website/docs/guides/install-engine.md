@@ -49,13 +49,11 @@ default** — masked in the UI and kept out of logs.
 - Submitted values are substituted into the resolved config that's written to
   disk.
 - New values are saved to `.insight-flow/secrets.local.json` so a re-install
-  doesn't re-prompt.
+  doesn't re-prompt. Saving adds that file to `.gitignore` first.
 - If any filled value (secret or not, typed now or reused from the secrets file)
   is used in an MCP server config, the plain value lands in `.mcp.json`. So
-  install adds `.mcp.json` and `.insight-flow/secrets.local.json` to
-  `.gitignore` (only the lines that are missing). If your values are used only in
-  hook commands, this step does not run — add the secrets file to `.gitignore`
-  yourself.
+  install also adds `.mcp.json` to `.gitignore` (only the lines that are
+  missing).
 - `.gitignore` can't help if `.mcp.json` is already tracked by git. The CLI
   (`insight-flow install-flow`) prints a warning for this, and the composer MCP
   `install` tool returns it in `warnings`, but the dashboard modal does not show

@@ -322,6 +322,59 @@
       "mrUrl": null,
       "mergedAt": null,
       "flowId": "default"
+    },
+    {
+      "id": "N287",
+      "title": "Secrets file not gitignored for hook-only install inputs (N273 regression)",
+      "type": "fix",
+      "priority": "high",
+      "status": "implemented",
+      "folder": "insightFlow/workTasks/N287-secrets-file-not-gitignored-for-hook-only-install-",
+      "createdAt": "2026-10-26T13:34:12.050Z",
+      "statusHistory": [
+        {
+          "status": "ready",
+          "at": "2026-10-26T13:34:12.050Z",
+          "by": "taskmaster"
+        },
+        {
+          "status": "in-progress",
+          "at": "2026-10-26T13:35:01.289Z",
+          "by": "task-implement"
+        },
+        {
+          "status": "implemented",
+          "at": "2026-10-26T13:45:01.904Z",
+          "by": "task-implement"
+        }
+      ],
+      "implementation": {
+        "startedAt": "2026-10-26T13:35:01.302Z",
+        "completedAt": "2026-10-26T13:45:01.913Z",
+        "filesChanged": [
+          "packages/taskflow/src/core/secrets.ts",
+          "packages/taskflow/test/inputs.test.mjs",
+          "website/docs/guides/install-engine.md"
+        ],
+        "tokensUsed": null
+      },
+      "changesAfterImplementation": [],
+      "reviewCount": 0,
+      "lastReviewVerdict": null,
+      "openIncidentCount": 0,
+      "committedAt": null,
+      "totalDurationMinutes": null,
+      "tags": [
+        "security",
+        "install",
+        "secrets",
+        "dashboard"
+      ],
+      "pushes": [],
+      "branch": null,
+      "mrUrl": null,
+      "mergedAt": null,
+      "flowId": "default"
     }
   ]
 }

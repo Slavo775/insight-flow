@@ -48,10 +48,15 @@ test("substituteVars resolves provided vars and leaves unknown placeholders lite
 });
 
 test("resolveInputs: implicit secret-by-default + metadata override", () => {
-  const inputs = resolveInputs(["CONTEXT7_API_KEY", "REGION"], [
-    { name: "REGION", title: "AWS region", secret: false },
-  ]);
-  assert.deepEqual(inputs[0], { name: "CONTEXT7_API_KEY", title: "CONTEXT7_API_KEY", secret: true });
+  const inputs = resolveInputs(
+    ["CONTEXT7_API_KEY", "REGION"],
+    [{ name: "REGION", title: "AWS region", secret: false }],
+  );
+  assert.deepEqual(inputs[0], {
+    name: "CONTEXT7_API_KEY",
+    title: "CONTEXT7_API_KEY",
+    secret: true,
+  });
   assert.deepEqual(inputs[1], { name: "REGION", title: "AWS region", secret: false });
 });
 
@@ -60,6 +65,19 @@ test("secrets store: write/read roundtrip + merge", () => {
   writeSecrets(dir, { A: "1" });
   writeSecrets(dir, { B: "2" });
   assert.deepEqual(readSecrets(dir), { A: "1", B: "2" });
+});
+
+test("N287 — writeSecrets gitignores the secrets file (hook-only inputs too)", () => {
+  const dir = tmp();
+  writeSecrets(dir, {});
+  assert.throws(() => readFileSync(join(dir, ".gitignore"), "utf-8"), "no values → no .gitignore");
+  writeSecrets(dir, { TOKEN: "x" });
+  writeSecrets(dir, { OTHER: "y" });
+  const giLines = readFileSync(join(dir, ".gitignore"), "utf-8")
+    .split("\n")
+    .map((l) => l.trim());
+  assert.equal(giLines.filter((l) => l === ".insight-flow/secrets.local.json").length, 1);
+  assert.ok(!giLines.includes(".mcp.json"), ".mcp.json stays MCP-only (ensureMcpGitignored)");
 });
 
 test("ensureGitignored adds patterns once (idempotent)", () => {
@@ -71,11 +89,7 @@ test("ensureGitignored adds patterns once (idempotent)", () => {
   const giLines = readFileSync(join(dir, ".gitignore"), "utf-8")
     .split("\n")
     .map((l) => l.trim());
-  assert.equal(
-    giLines.filter((l) => l === ".mcp.json").length,
-    1,
-    ".mcp.json listed exactly once",
-  );
+  assert.equal(giLines.filter((l) => l === ".mcp.json").length, 1, ".mcp.json listed exactly once");
 });
 
 test("scrubSecrets masks known secret values in nested structures", () => {
