@@ -42,6 +42,10 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 
 **Verdict: NOT ready — 1 small docs blocker.** Tests **430/430**, build + typecheck + lint clean (same 2 lint warnings). Intent unchanged: **2.13.0** (`bf4af8e` is docs + one help-text line). All 18 re-check-4 gaps closed and every new claim verified; docs build clean from an archive copy. Left: the package README (npm page) still says "Tools run autonomously" (same claim B3 fixed on the site), plus release-notes accuracy items and one-line nits — see CHECKLIST "Docs gaps — re-check 5".
 
+### Re-check 6 (2026-10-24 — `chore/N271-audit-fixes` @ `5e915a0`, local)
+
+**Verdict: NOT ready — 1 small docs blocker.** Tests **430/430**, build + typecheck + lint clean. Intent unchanged: **2.13.0** (`5e915a0` is docs + tracker only). All 11 re-check-5 items closed and verified; docs build clean. Left: `guides/install-engine.md` (and the release notes) say install warns when `.mcp.json` is already git-tracked — true for the CLI and MCP, but the dashboard install modal drops that warning (server sends it on `/api/install` + the SSE `done` frame; `dashboard/client/api.ts:339` and `InstallModal.tsx:335-340` ignore it). Plus release-notes additions and one-line nits — see CHECKLIST "Docs gaps — re-check 6". Code follow-up (not this release): show the warning in the dashboard modal.
+
 ## Goal
 
 1. Close every docs gap from the release check (Docusaurus + README + CLI help text), on the feature branch `feat/N267-flow-chains` so they ship in PR #174.
@@ -101,7 +105,9 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 **Other changes:**
 
 - **Images in task docs no longer show in the dashboard.** The markdown views (task docs, module bodies) drop `<img>`, and HTML responses carry a CSP with `img-src 'self' data:`, so an agent-written doc cannot beacon to a remote host.
-- **Install can edit `.gitignore`.** When a secret `${VAR}` is filled into an MCP server config, install adds `.mcp.json` to `.gitignore` and warns if it is already tracked; over MCP the warning comes back in a `warnings` array.
+- **Install can edit `.gitignore`.** When a filled `${VAR}` value (a secret or any other input) is used in an MCP server config, install adds `.mcp.json` and `.insight-flow/secrets.local.json` to `.gitignore`. If `.mcp.json` is already tracked by git, the CLI prints a warning and the composer MCP returns it in a `warnings` array. The dashboard install modal does **not** show this warning, so after a dashboard install run `git ls-files .mcp.json` — any output means the file is tracked; untrack it with `git rm --cached .mcp.json`.
+- **`init` now names a composer custom agent's command `/task-<name>`.** For a custom agent in `insightFlow/agents/`, `insight-flow init` writes the command as `/task-<name>` (the same name `install` uses) instead of `/<name>`. A name that already starts with `task` keeps its name. The old `/<name>` file (`.claude/commands/<name>.md`, `.cursor/skills/<name>/`) is not deleted: it stays on disk and is no longer updated, so you can delete it.
+- **The hub plays its real notification sounds.** `sounds/idle-ping.mp3` and `sounds/permission-alert.mp3` were empty (0-byte) files in 2.12.0 (and every release since 2.0.0), so the hub fell back to a synthesized beep. The real files are restored.
 - **Composer `install` is now two-step for executable targets.** A target that emits a hook or MCP server returns `{ needsConfirm: true, … }` and writes nothing until you re-call with `confirm: true` after a human has seen the plan. `install` also fails when required `${VAR}` inputs are missing, and `delete` refuses a definition that is still installed.
 - **Dashboard hardening.** Request bodies are now capped by byte size, and an unknown `/api/*` route returns a JSON `404` (previously it served the `200` SPA shell).
 - **`mr-update` accepts only `http(s)` URLs.** Other schemes are rejected.
@@ -111,6 +117,10 @@ Release flow chains (N267) as **insight-flow 2.13.0**. The feature is on branch 
 > Human sign-off still open: whether the "action required" items — above all the two silent ones (`events.hooks`, Langfuse host) — warrant a **major**. By the commit markers they do not → ship as **2.13.0** (recommended by the intent check, with this section in the release notes).
 
 ## Notes
+
+- **Security regression found during re-check 6 fixes (code, NOT fixed here):** in 2.12.0 the dashboard install always ran `writeSecrets` then `ensureGitignored`, so `.insight-flow/secrets.local.json` was always gitignored. Since N273 (review #6) the gitignore step runs only when an MCP config uses a filled value (`dashboard/server/index.ts` ~l.1304-1311), so a value used **only in a hook** is saved to an un-ignored secrets file that a `git add -A` can commit. Only custom modules with hook-only `inputs` are affected (no built-in module has `inputs`). One-line fix: gitignore the secrets file whenever `writeSecrets` runs. Docs (`guides/install-engine.md`) now describe the workaround. Needs a normal task (default flow) — human decision whether it blocks 2.13.0.
+- **To check (possible code issue):** `init` writes composer custom-agent commands with `overwrite: true` (`agents/init/providers/skills.ts` ~l.168) under the same `/task-<name>` that `install` writes and tracks in its manifest, so re-running `init` overwrites an install-written command.
+- **Code follow-up:** the dashboard install modal drops the server's `warning` (`dashboard/client/api.ts` ~l.339, `components/InstallModal.tsx` ~l.335-340) — tracked-`.mcp.json` and persist errors are never shown.
 
 - **Found during re-check 4 fixes, left alone (older docs/code slips, not caused by this release):** composer MCP refuses **every** built-in flow on `update`, but `composer-mcp/index.md` + `tools.md` name only `default` (`composer.ts:219`); `concepts/modules.md` says "eight kinds" but lists nine; `guides/custom-module.md` kinds table lacks `subagent`; README / `configuration.md` describe `master.standalone` wrongly (it disables master integration, `dashboard/server/index.ts:632`) and give `startMasterLocally` the wrong default (effectively `true`, `:636`); `master-server.md` endpoints table lacks `POST /log`, `GET /api/logs`, `/logs`, `/assets/*`; code comment `master/server.ts:230-231` lists only `/p/*` as never cached. Lint: 2 unused `eslint-disable` in `FlowEditor.tsx`. The authoring install prompt never mentions `needsConfirm` (prompt change → own task). Each needs a normal task — ask the human before creating any.
 

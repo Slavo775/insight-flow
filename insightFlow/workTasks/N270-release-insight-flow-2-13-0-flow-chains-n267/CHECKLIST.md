@@ -89,10 +89,21 @@
 - [x] G9 — README Events: hook approval is per user
 - [x] G10 — Root `README.md` ~l.250: mention the install confirm step
 
+### Docs gaps — re-check 6 (`5e915a0`)
+
+- [x] H1 (blocker) — `guides/install-engine.md` ~l.53-55 + release notes: the `.mcp.json`-tracked warning is printed by the CLI and returned by MCP in `warnings`, but the dashboard install modal does not show it yet — tell users to check with `git ls-files .mcp.json`
+- [x] H2 — Release notes "Other changes": `init` writes a custom agent's command as `/task-<name>` (was `/<name>`); the old file stays on disk and is no longer updated
+- [x] H3 — Release notes "Other changes": hub notification sounds work again (were empty files in 2.12.0)
+- [x] H4 — Release notes + `guides/install-engine.md` wording: the gitignore step runs when any filled `${VAR}` is used in an MCP config (not only secrets) and also covers `.insight-flow/secrets.local.json`
+- [x] H5 — `guides/cursor.md` ~l.44-46: `init --force` also rewrites `.cursor/hooks.json` and the `.cursor/hooks/insight-flow-*.sh` scripts
+- [x] H6 — `guides/troubleshooting.md` ~l.191-193: "stop that hub first" → `kill <pid>` (pid from `~/.insight-flow/master.lock`)
+- [x] H7 — `packages/taskflow/README.md` ~l.56: "customised **command** files it keeps are listed"
+
 ### Decision (human) — re-check 4
 
 - [ ] Version: 2.13.0 (recommended, with "action required" notes) or 3.0.0 (`events.hooks` + Langfuse host fail silently)
 - [ ] N266 rides in this release with a pushed-but-not-re-reviewed fix — re-review first, or accept
+- [ ] Secrets-file gitignore regression (N273, hook-only inputs — see TASK.md Notes): fix before 2.13.0 via a normal task, or ship with the documented workaround
 
 ### Release steps
 

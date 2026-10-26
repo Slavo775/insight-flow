@@ -162,8 +162,19 @@ cat ~/.insight-flow/master.lock     # shows {"pid":…, "port":…, "startedAt":
 ps -p <pid>                         # is that pid still running?
 ```
 
-If the process is gone (or it's a master you mean to replace), remove the stale
-lock and start again:
+If that pid is a running master you mean to replace, stop it first. `kill` sends
+SIGTERM, and the master removes its own lock when it gets SIGTERM:
+
+```bash
+kill <pid>
+insight-flow master --port 6100
+```
+
+Don't just delete the lock of a live master — the old master keeps running and
+holds its port.
+
+If the process is gone (or the pid now belongs to another program), remove the
+stale lock and start again:
 
 ```bash
 rm ~/.insight-flow/master.lock
@@ -189,8 +200,11 @@ INSIGHT_FLOW_TRUSTED_HOSTS=192.168.0.77 insight-flow ui
 ```
 
 If a hub is already running (for example one that `insight-flow ui` started), the
-`master` command only prints "already running" and the variable has no effect —
-stop that hub first (see [The master server won't start](#the-master-server-wont-start)).
+`master` command only prints "already running" and the variable has no effect.
+Stop that hub first: run `kill <pid>`, with the `pid` from
+`~/.insight-flow/master.lock` (the hub removes its lock when it stops). Then start
+it again with the variable set (see also
+[The master server won't start](#the-master-server-wont-start)).
 Dashboards that the hub starts inherit the variable. Only use this on a network
 you trust — see [Master hub → Security](../built-ins/master-server.md#security--lanmobile).
 
