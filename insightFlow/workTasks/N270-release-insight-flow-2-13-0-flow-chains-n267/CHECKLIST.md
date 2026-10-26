@@ -47,7 +47,7 @@
 ### Release notes — behaviour changes (upgrade notes, required)
 
 - [x] Draft an "Upgrade notes / behaviour changes" section covering: trust-hooks gate (N274); config path confinement + required http(s) `master.url` (N274); built-in override may not drop the locked baseline (N273); composer `install` two-step confirm (N273); dashboard body cap by bytes + JSON 404 on unknown `/api/*` (N284); `mr-update` http(s)-only (N274); `master` exits non-zero on a busy port (N282); versioned hub service-worker cache (N282) — drafted in TASK.md "Release notes (draft)"
-- [ ] Human sign-off: do the three "previously-valid config now fails" items (trust-hooks gate, config confinement, override-baseline refusal) warrant a MAJOR? (by commit markers → no; ship **2.13.0**)
+- [x] Human sign-off: do the three "previously-valid config now fails" items (trust-hooks gate, config confinement, override-baseline refusal) warrant a MAJOR? (by commit markers → no; ship **2.13.0**) — human: **2.13.0** (2026-10-26)
 
 ### Docs gaps — re-check 4 (combined branch @ `ed7c116`)
 
@@ -99,10 +99,16 @@
 - [x] H6 — `guides/troubleshooting.md` ~l.191-193: "stop that hub first" → `kill <pid>` (pid from `~/.insight-flow/master.lock`)
 - [x] H7 — `packages/taskflow/README.md` ~l.56: "customised **command** files it keeps are listed"
 
+### Docs gaps — re-check 7 (`969fb1d`)
+
+- [x] I1 — `composer-mcp/tools.md` ~l.122-124: "When a secret value is filled into an MCP server config…" → the step runs when any filled `${VAR}` value (secret or not) is used in an MCP config, and adds both `.mcp.json` and `.insight-flow/secrets.local.json` to `.gitignore` (code: `flow-install.ts:337-343`)
+- [x] I2 — `authoring/walkthrough.md` ~l.121-123: if you create `.insight-flow/secrets.local.json` by hand, make sure it is in `.gitignore`
+- [x] I3 — Release notes (TASK.md "Install can edit `.gitignore`" bullet): drop the internal "(N287)" — the regression never shipped
+
 ### Decision (human) — re-check 4
 
-- [ ] Version: 2.13.0 (recommended, with "action required" notes) or 3.0.0 (`events.hooks` + Langfuse host fail silently)
-- [ ] N266 rides in this release with a pushed-but-not-re-reviewed fix — re-review first, or accept
+- [x] Version: 2.13.0 (recommended, with "action required" notes) or 3.0.0 (`events.hooks` + Langfuse host fail silently) — human: **2.13.0** (2026-10-26)
+- [x] N266 rides in this release with a pushed-but-not-re-reviewed fix — re-review first, or accept — human: **accept as is** (2026-10-26)
 - [x] Secrets-file gitignore regression (N273, hook-only inputs — see TASK.md Notes): fix before 2.13.0 via a normal task, or ship with the documented workaround — human: fix first → N287
 
 ### Release steps
@@ -111,6 +117,7 @@
 - [x] Audit-fix docs (trust-hooks + composer install) committed to `chore/N271-audit-fixes` (PR #175) — `ed7c116`
 - [ ] Release check re-run → docs complete → `ready-to-release`
 - [ ] PR #174 merged to `main` (squash, `feat(flows): …` title) → release-please opens the 2.13.0 release PR
+- [ ] PR #175: push `chore/N271-audit-fixes`; after #174 merges, `git rebase --onto origin/main a4c0eaa chore/N271-audit-fixes`, retarget #175 to `main`, squash-merge (add the `BEGIN_COMMIT_OVERRIDE` block) — before the 2.13.0 release PR is merged
 - [ ] Release PR merged (human-approved) → tag `v2.13.0`, npm publish approved + succeeded
 - [ ] Rollout: global binary reinstalled; N267 recorded `merged` + `done` on `main`
 

@@ -120,7 +120,8 @@ if validation fails it **rolls back** (uninstall) and hands back to the implemen
 (`fix-needed`); if a fix would touch a setting unrelated to your task (e.g.
 overwrite an existing `.mcp.json` entry), it **stops for your approval** first; a
 missing `${VAR}` secret is reported so you can add it (install UI or
-`.insight-flow/secrets.local.json`) and retry.
+`.insight-flow/secrets.local.json`) and retry (if you create that file by hand,
+make sure `.insight-flow/secrets.local.json` is in `.gitignore`).
 
 ---
 

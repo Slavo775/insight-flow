@@ -119,9 +119,10 @@ beforehand); inputs still missing come back in `missingInputs` so you can gather
 them before confirming. An install that would apply with inputs still missing
 fails (with `missingInputs`) instead of writing a literal `${VAR}`.
 
-When a secret value is filled into an MCP server config, `install` also adds
-`.mcp.json` to `.gitignore`. If `.mcp.json` is already tracked by git, the result
-carries a `warnings` array that says so.
+When a filled `${VAR}` value (secret or not) is used in an MCP server config,
+`install` also adds `.mcp.json` and `.insight-flow/secrets.local.json` to
+`.gitignore`. If `.mcp.json` is already tracked by git, the result carries a
+`warnings` array that says so.
 
 ### `uninstall(kind, id)`
 
